@@ -12,6 +12,7 @@ class Jogador:
     nome: str
     nivel: int
     tipo: Literal["fixo", "avulso"] = "avulso"
+    posicao: Literal["linha", "goleiro"] = "linha"
     presente: bool = False
     id: Optional[str] = None
     criado_em: Optional[str] = None
@@ -24,6 +25,8 @@ class Jogador:
             raise ValueError("Nível inválido: deve estar entre 1 e 10")
         if self.tipo not in ["fixo", "avulso"]:
             raise ValueError("Tipo deve ser 'fixo' ou 'avulso'")
+        if self.posicao not in ["linha", "goleiro"]:
+            raise ValueError("Posição deve ser 'linha' ou 'goleiro'")
         
         if self.id is None:
             import uuid

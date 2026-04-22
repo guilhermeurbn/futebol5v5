@@ -35,7 +35,8 @@ def criar_jogador_api():
         jogador = jogador_service.criar(
             nome=dados.get('nome'),
             nivel=int(dados.get('nivel', 5)),
-            tipo=dados.get('tipo', 'avulso')
+            tipo=dados.get('tipo', 'avulso'),
+            posicao=dados.get('posicao', 'linha')
         )
         return jsonify({
             'sucesso': True,
@@ -55,8 +56,9 @@ def adicionar_jogador():
         nome = request.form.get('nome', '').strip()
         nivel = int(request.form.get('nivel', 5))
         tipo = request.form.get('tipo', 'avulso')
+        posicao = request.form.get('posicao', 'linha')
         
-        jogador_service.criar(nome, nivel, tipo)
+        jogador_service.criar(nome, nivel, tipo, posicao)
         return redirect(url_for('jogador.index'))
     except ValueError as e:
         return f"Erro: {str(e)}", 400
@@ -174,7 +176,7 @@ def sortear():
     presentes = jogador_service.listar_presentes()
     
     try:
-        times, somas = BalanceadorTimes.sortear_multiplos_times(presentes)
+        times, somas = BalanceadorTimes.sortear_multiplos_times_com_goleiros(presentes)
         num_times = len(times)
         diferenca = BalanceadorTimes.calcular_diferenca_multiplos(somas)
         melhor_time = BalanceadorTimes.obter_melhor_time(somas)
@@ -202,7 +204,7 @@ def sortear_api():
     """API: Sorteia times"""
     try:
         presentes = jogador_service.listar_presentes()
-        times, somas = BalanceadorTimes.sortear_multiplos_times(presentes)
+        times, somas = BalanceadorTimes.sortear_multiplos_times_com_goleiros(presentes)
         diferenca = BalanceadorTimes.calcular_diferenca_multiplos(somas)
         melhor_time = BalanceadorTimes.obter_melhor_time(somas)
         

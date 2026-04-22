@@ -118,6 +118,65 @@
             font-weight: 600;
         }
 
+        /* Goleiro Section */
+        .goleiro-section {
+            padding: 1rem;
+            background: rgba(34, 197, 94, 0.08);
+            border-top: 2px solid rgba(34, 197, 94, 0.3);
+            border-bottom: 2px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .goleiro-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--success);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.75rem;
+        }
+
+        .goleiro-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: rgba(34, 197, 94, 0.1);
+            border-radius: 4px;
+            border-left: 3px solid var(--success);
+            transition: all 0.2s ease;
+        }
+
+        .goleiro-item:hover {
+            background: rgba(34, 197, 94, 0.15);
+            border-left-color: var(--primary);
+        }
+
+        .goleiro-name {
+            font-weight: 600;
+            color: var(--success);
+        }
+
+        .goleiro-level {
+            background: var(--success);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* Linha Title */
+        .linha-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -199,13 +258,29 @@
             <section class="section">
                 <div class="times-container num-{{ num_times }}">
                     {% for time in times %}
+                        {% set goleiro = time[0] if time[0].posicao == 'goleiro' else (time[1] if time[1]|default and time[1].posicao == 'goleiro' else none) %}
+                        {% set linha = [j for j in time if j.posicao == 'linha'] %}
                         <div class="team {% if melhor_time == 'Time ' + loop.index|string %}melhor{% endif %}">
                             <div class="team-header">
                                 <h2 class="team-title">⚽ Time {{ loop.index }}</h2>
                                 <div class="team-score">{{ somas[loop.index0] }} pts</div>
                             </div>
+                            
+                            <!-- Goleiro -->
+                            {% if goleiro %}
+                                <div class="goleiro-section">
+                                    <div class="goleiro-title">🧤 Goleiro</div>
+                                    <div class="goleiro-item">
+                                        <span class="goleiro-name">{{ goleiro.nome }}</span>
+                                        <span class="goleiro-level">Nível {{ goleiro.nivel }}</span>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Jogadores de Linha -->
                             <div class="players-list">
-                                {% for jogador in time %}
+                                <div class="linha-title">Linha</div>
+                                {% for jogador in linha %}
                                     <div class="player-item">
                                         <span class="player-name">{{ loop.index }}. {{ jogador.nome }}</span>
                                         <span class="player-level">Nível {{ jogador.nivel }}</span>

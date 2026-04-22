@@ -48,7 +48,7 @@ class JogadorService:
         jogadores = self.listar()
         return next((j for j in jogadores if j.id == jogador_id), None)
     
-    def criar(self, nome: str, nivel: int, tipo: str = "avulso") -> Jogador:
+    def criar(self, nome: str, nivel: int, tipo: str = "avulso", posicao: str = "linha") -> Jogador:
         """
         Cria um novo jogador
         
@@ -56,11 +56,12 @@ class JogadorService:
             nome: Nome do jogador
             nivel: Nível de habilidade (1-10)
             tipo: 'fixo' ou 'avulso'
+            posicao: 'linha' ou 'goleiro'
             
         Returns:
             Jogador criado
         """
-        jogador = Jogador(nome=nome.strip(), nivel=nivel, tipo=tipo)
+        jogador = Jogador(nome=nome.strip(), nivel=nivel, tipo=tipo, posicao=posicao)
         dados = self._carregar_raw()
         dados.append(jogador.para_dict())
         self._salvar(dados)
