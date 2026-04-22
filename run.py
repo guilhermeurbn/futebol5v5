@@ -18,7 +18,7 @@ BOLD = '\033[1m'
 
 def print_header():
     """Exibe header"""
-    print(f"\n{BOLD}{AZUL}⚽ Balanceador de Times 5v5{RESET}")
+    print(f"\n{BOLD}{AZUL}⚽ NaTrave - Gerador de Times Equilibrados{RESET}")
     print(f"{AZUL}{'='*50}{RESET}\n")
 
 

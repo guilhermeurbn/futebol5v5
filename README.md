@@ -1,4 +1,4 @@
-# ⚽ Balanceador de Times 5v5
+# ⚽ NaTrave - Gerador de Times Equilibrados
 
 Um aplicativo web profissional para organizar, cadastrar jogadores e balancear times de futebol de forma equilibrada.
 
@@ -242,6 +242,8 @@ pytest tests/
 Este projeto é código aberto e disponível sob licença MIT.
 
 ## 👤 Autor
+
+**Guilherme Urbano**
 
 Desenvolvido com ❤️ para o futebol
 

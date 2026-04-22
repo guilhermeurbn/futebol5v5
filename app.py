@@ -1,5 +1,5 @@
 """
-Aplicação Flask - Balanceador de Times 5v5
+Aplicação Flask - NaTrave - Gerador de Times Equilibrados
 """
 import os
 import logging
