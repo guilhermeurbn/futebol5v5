@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚽ Balanceador de Times 5v5</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>⚽ Balanceador de Times 5v5</h1>
+                <p class="subtitle">Organize e equilibre seus times de futebol</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            {% if erro %}
+                <div class="alert alert-warning">
+                    <strong>⚠️ Aviso:</strong> {{ erro }}
+                </div>
+            {% endif %}
+
+            <!-- Form Section -->
+            <section class="section">
+                <h2 class="section-title">✏️ Adicionar Jogador</h2>
+                <form action="{{ url_for('jogador.adicionar_jogador') }}" method="post" class="form">
+                    <div class="form-group">
+                        <label for="nome" class="form-label">Nome do Jogador</label>
+                        <input 
+                            type="text" 
+                            id="nome"
+                            name="nome" 
+                            class="form-input"
+                            placeholder="Digite o nome do jogador"
+                            required
+                            minlength="2"
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="nivel" class="form-label">Nível (1-10)</label>
+                        <div class="level-selector">
+                            <div class="level-buttons">
+                                <button type="button" class="level-btn" data-nivel="1">1</button>
+                                <button type="button" class="level-btn" data-nivel="2">2</button>
+                                <button type="button" class="level-btn" data-nivel="3">3</button>
+                                <button type="button" class="level-btn" data-nivel="4">4</button>
+                                <button type="button" class="level-btn" data-nivel="5" data-active>5</button>
+                                <button type="button" class="level-btn" data-nivel="6">6</button>
+                                <button type="button" class="level-btn" data-nivel="7">7</button>
+                                <button type="button" class="level-btn" data-nivel="8">8</button>
+                                <button type="button" class="level-btn" data-nivel="9">9</button>
+                                <button type="button" class="level-btn" data-nivel="10">10</button>
+                            </div>
+                            <input 
+                                type="number" 
+                                id="nivel"
+                                name="nivel" 
+                                min="1" 
+                                max="10"
+                                value="5"
+                                class="level-input"
+                            >
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tipo" class="form-label">Tipo de Jogador</label>
+                        <div class="tipo-selector">
+                            <label class="tipo-option">
+                                <input type="radio" name="tipo" value="fixo" class="tipo-radio">
+                                <span class="tipo-label">⭐ Fixo (joga sempre)</span>
+                            </label>
+                            <label class="tipo-option">
+                                <input type="radio" name="tipo" value="avulso" class="tipo-radio" checked>
+                                <span class="tipo-label">👤 Avulso (esporádico)</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <script>
+                        const nivelBtns = document.querySelectorAll('.level-btn');
+                        const nivelInput = document.getElementById('nivel');
+                        
+                        // Função para atualizar botão ativo
+                        function atualizarBotaoAtivo(nivel) {
+                            nivelBtns.forEach(btn => {
+                                if (btn.getAttribute('data-nivel') === String(nivel)) {
+                                    btn.setAttribute('data-active', '');
+                                } else {
+                                    btn.removeAttribute('data-active');
+                                }
+                            });
+                        }
+                        
+                        // Atualizar quando clicar nos botões
+                        nivelBtns.forEach(btn => {
+                            btn.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                const nivel = btn.getAttribute('data-nivel');
+                                nivelInput.value = nivel;
+                                atualizarBotaoAtivo(nivel);
+                            });
+                        });
+                        
+                        // Atualizar quando digitar no input
+                        nivelInput.addEventListener('input', () => {
+                            let nivel = parseInt(nivelInput.value);
+                            
+                            // Validar range
+                            if (isNaN(nivel) || nivel < 1) {
+                                nivel = 1;
+                            } else if (nivel > 10) {
+                                nivel = 10;
+                            }
+                            
+                            nivelInput.value = nivel;
+                            atualizarBotaoAtivo(nivel);
+                        });
+                        
+                        // Inicializar botão ativo ao carregar
+                        atualizarBotaoAtivo(nivelInput.value);
+                    </script>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <span>➕ Adicionar Jogador</span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- Players Section -->
+            <section class="section">
+                <div class="section-header">
+                    <h2 class="section-title">👥 Jogadores Cadastrados</h2>
+                    <span class="badge badge-primary">{{ total_jogadores }} jogadores</span>
+                </div>
+
+                {% if jogadores %}
+                    <div class="players-grid">
+                        {% for jogador in jogadores %}
+                            <div class="player-card">
+                                <div class="player-header">
+                                    <div>
+                                        <h3 class="player-name">{{ jogador.nome }}</h3>
+                                        <span class="player-tipo">{% if jogador.tipo == 'fixo' %}⭐ Fixo{% else %}👤 Avulso{% endif %}</span>
+                                    </div>
+                                    <span class="player-level-badge" data-nivel="{{ jogador.nivel }}">
+                                        Nível {{ jogador.nivel }}
+                                    </span>
+                                </div>
+                                <div class="player-level-bar">
+                                    <div class="player-level-fill" style="width: {{ (jogador.nivel / 10) * 100 }}%"></div>
+                                </div>
+                                <div class="player-actions">
+                                    <a href="{{ url_for('jogador.deletar_jogador_form', jogador_id=jogador.id) }}" class="btn btn-small btn-danger" onclick="return confirm('Tem certeza que deseja deletar?')">
+                                        🗑️ Deletar
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="actions-section">
+                        {% if total_jogadores >= 10 %}
+                            <a href="{{ url_for('jogador.selecionar_jogadores') }}" class="btn btn-large btn-primary">
+                                👥 Selecionar Jogadores para o Jogo
+                            </a>
+                        {% else %}
+                            <button class="btn btn-large btn-primary" disabled>
+                                👥 Selecionar Jogadores (faltam {{ 10 - total_jogadores }} jogadores)
+                            </button>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">👥</div>
+                        <p>Nenhum jogador cadastrado ainda</p>
+                        <p class="empty-hint">Adicione jogadores acima para começar</p>
+                    </div>
+                {% endif %}
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>⚽ Balanceador de Times 5v5 • Desenvolvido com ❤️</p>
+        </footer>
+    </div>
+</body>
+</html>

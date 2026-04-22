@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚽ Selecionar Jogadores - Balanceador 5v5</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <a href="{{ url_for('jogador.index') }}" class="back-link">← Voltar</a>
+                <h1>⚽ Selecionar Jogadores</h1>
+                <p class="subtitle">Escolha quem está presente para o jogo de hoje</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Estatísticas -->
+            <section class="section">
+                <div class="selection-stats">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Disponível</div>
+                        <div class="stat-value">{{ total_jogadores }}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Selecionados</div>
+                        <div class="stat-value" id="contador">{{ total_presentes }}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Necessários</div>
+                        <div class="stat-value" id="necessarios">10, 15 ou 20</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Botões de Quantidade -->
+            <section class="section">
+                <h2 class="section-title">📊 Quantos Jogadores?</h2>
+                <div class="quantity-buttons">
+                    <button class="qty-btn" onclick="selecionarQuantidade(10)" data-qty="10">
+                        <span class="qty-icon">🔟</span>
+                        <span class="qty-text">10 Jogadores</span>
+                        <span class="qty-desc">5v5</span>
+                    </button>
+                    <button class="qty-btn" onclick="selecionarQuantidade(15)" data-qty="15">
+                        <span class="qty-icon">1️⃣5️⃣</span>
+                        <span class="qty-text">15 Jogadores</span>
+                        <span class="qty-desc">5v5 + 5 banco</span>
+                    </button>
+                    <button class="qty-btn" onclick="selecionarQuantidade(20)" data-qty="20">
+                        <span class="qty-icon">2️⃣0️⃣</span>
+                        <span class="qty-text">20 Jogadores</span>
+                        <span class="qty-desc">5v5 + 10 banco</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Abas -->
+            <section class="section">
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="mudarAba('fixos')">
+                        ⭐ Fixos ({{ fixos|length }})
+                    </button>
+                    <button class="tab-btn" onclick="mudarAba('avulsos')">
+                        👤 Avulsos ({{ avulsos|length }})
+                    </button>
+                    <button class="tab-btn" onclick="mudarAba('todos')">
+                        👥 Todos ({{ total_jogadores }})
+                    </button>
+                </div>
+
+                <!-- Conteúdo das Abas -->
+                <div id="fixos" class="tab-content active">
+                    <h3 class="tab-title">⭐ Jogadores Fixos</h3>
+                    <div class="jogadores-lista">
+                        {% if fixos %}
+                            {% for jogador in fixos %}
+                                <div class="jogador-item">
+                                    <input 
+                                        type="checkbox" 
+                                        id="jogador_{{ jogador.id }}"
+                                        class="jogador-checkbox"
+                                        data-id="{{ jogador.id }}"
+                                        data-nome="{{ jogador.nome }}"
+                                        onchange="atualizarContador()"
+                                        {% if jogador.presente %}checked{% endif %}
+                                    >
+                                    <label for="jogador_{{ jogador.id }}" class="jogador-label">
+                                        <span class="jogador-info">
+                                            <span class="jogador-nome">{{ jogador.nome }}</span>
+                                            <span class="jogador-nivel">Nível {{ jogador.nivel }}</span>
+                                        </span>
+                                        <span class="jogador-check"></span>
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-state">
+                                <p>Nenhum jogador fixo cadastrado</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div id="avulsos" class="tab-content">
+                    <h3 class="tab-title">👤 Jogadores Avulsos</h3>
+                    <div class="jogadores-lista">
+                        {% if avulsos %}
+                            {% for jogador in avulsos %}
+                                <div class="jogador-item">
+                                    <input 
+                                        type="checkbox" 
+                                        id="jogador_{{ jogador.id }}"
+                                        class="jogador-checkbox"
+                                        data-id="{{ jogador.id }}"
+                                        data-nome="{{ jogador.nome }}"
+                                        onchange="atualizarContador()"
+                                        {% if jogador.presente %}checked{% endif %}
+                                    >
+                                    <label for="jogador_{{ jogador.id }}" class="jogador-label">
+                                        <span class="jogador-info">
+                                            <span class="jogador-nome">{{ jogador.nome }}</span>
+                                            <span class="jogador-nivel">Nível {{ jogador.nivel }}</span>
+                                        </span>
+                                        <span class="jogador-check"></span>
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-state">
+                                <p>Nenhum jogador avulso cadastrado</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div id="todos" class="tab-content">
+                    <h3 class="tab-title">👥 Todos os Jogadores</h3>
+                    <div class="jogadores-lista">
+                        {% for jogador in todos_jogadores %}
+                            <div class="jogador-item">
+                                <input 
+                                    type="checkbox" 
+                                    id="jogador_{{ jogador.id }}"
+                                    class="jogador-checkbox"
+                                    data-id="{{ jogador.id }}"
+                                    data-nome="{{ jogador.nome }}"
+                                    onchange="atualizarContador()"
+                                    {% if jogador.presente %}checked{% endif %}
+                                >
+                                <label for="jogador_{{ jogador.id }}" class="jogador-label">
+                                    <span class="jogador-tipo">{% if jogador.tipo == 'fixo' %}⭐{% else %}👤{% endif %}</span>
+                                    <span class="jogador-info">
+                                        <span class="jogador-nome">{{ jogador.nome }}</span>
+                                        <span class="jogador-nivel">Nível {{ jogador.nivel }}</span>
+                                    </span>
+                                    <span class="jogador-check"></span>
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ações -->
+            <section class="section">
+                <div class="actions-section">
+                    <button class="btn btn-secondary" onclick="limparSelecao()">
+                        🗑️ Limpar Seleção
+                    </button>
+                    <button class="btn btn-primary" id="btnSortear" onclick="confirmarSelecao()" disabled>
+                        ✓ Selecionar e Sortear Times
+                    </button>
+                </div>
+                <div id="mensagemErro" class="alert alert-danger" style="display: none; margin-top: 1rem;"></div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>⚽ Balanceador de Times 5v5 • Desenvolvido com ❤️</p>
+        </footer>
+    </div>
+
+    <script>
+        const QUANTIDADES_VALIDAS = [10, 15, 20];
+        let quantidadeSelecionada = null;
+
+        // Atualizar contador de selecionados
+        function atualizarContador() {
+            const checkboxes = document.querySelectorAll('.jogador-checkbox:checked');
+            const contador = checkboxes.length;
+            document.getElementById('contador').textContent = contador;
+            
+            // Verificar se pode sortear
+            const btnSortear = document.getElementById('btnSortear');
+            if (quantidadeSelecionada && contador === quantidadeSelecionada) {
+                btnSortear.disabled = false;
+                btnSortear.style.opacity = '1';
+            } else {
+                btnSortear.disabled = true;
+                btnSortear.style.opacity = '0.5';
+            }
+        }
+
+        // Selecionar quantidade
+        function selecionarQuantidade(quantidade) {
+            // Se já selecionou, desseleciona
+            if (quantidadeSelecionada === quantidade) {
+                quantidadeSelecionada = null;
+                // Desseleciona todos
+                document.querySelectorAll('.jogador-checkbox').forEach(cb => cb.checked = false);
+                // Remove destaque dos botões
+                document.querySelectorAll('.qty-btn').forEach(btn => btn.classList.remove('active'));
+            } else {
+                quantidadeSelecionada = quantidade;
+                // Marca o botão como ativo
+                document.querySelectorAll('.qty-btn').forEach(btn => {
+                    if (btn.getAttribute('data-qty') === String(quantidade)) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+                // Desseleciona todos primeiro
+                document.querySelectorAll('.jogador-checkbox').forEach(cb => cb.checked = false);
+            }
+            
+            document.getElementById('necessarios').textContent = quantidadeSelecionada ? `${quantidadeSelecionada} jogadores` : '10, 15 ou 20';
+            atualizarContador();
+        }
+
+        // Mudar aba
+        function mudarAba(abaNome) {
+            // Esconder todas as abas
+            document.querySelectorAll('.tab-content').forEach(aba => {
+                aba.classList.remove('active');
+            });
+            
+            // Desmarcar todos os botões
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Mostrar aba selecionada
+            document.getElementById(abaNome).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Limpar seleção
+        function limparSelecao() {
+            if (confirm('Tem certeza que deseja limpar a seleção?')) {
+                fetch('/api/presenca/limpar', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.sucesso) {
+                        document.querySelectorAll('.jogador-checkbox').forEach(cb => cb.checked = false);
+                        quantidadeSelecionada = null;
+                        document.querySelectorAll('.qty-btn').forEach(btn => btn.classList.remove('active'));
+                        atualizarContador();
+                    }
+                });
+            }
+        }
+
+        // Confirmar seleção e sortear
+        function confirmarSelecao() {
+            const checkboxes = document.querySelectorAll('.jogador-checkbox:checked');
+            const ids = Array.from(checkboxes).map(cb => cb.getAttribute('data-id'));
+            const msgErro = document.getElementById('mensagemErro');
+            
+            if (ids.length !== quantidadeSelecionada) {
+                msgErro.textContent = `❌ Selecione exatamente ${quantidadeSelecionada} jogadores`;
+                msgErro.style.display = 'block';
+                return;
+            }
+            
+            msgErro.style.display = 'none';
+            
+            fetch('/api/presenca', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({jogador_ids: ids})
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.sucesso) {
+                    // Redirecionar para sortear
+                    window.location.href = '/sortear';
+                } else {
+                    msgErro.textContent = `❌ ${data.erro}`;
+                    msgErro.style.display = 'block';
+                }
+            })
+            .catch(err => {
+                msgErro.textContent = '❌ Erro ao processar seleção';
+                msgErro.style.display = 'block';
+            });
+        }
+
+        // Inicializar
+        atualizarContador();
+    </script>
+</body>
+</html>

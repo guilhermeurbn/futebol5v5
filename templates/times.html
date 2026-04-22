@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚽ Times - Balanceador 5v5</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .times-container {
+            display: grid;
+            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .times-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Grid específico para número de times */
+        .times-container.num-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .times-container.num-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .times-container.num-4 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        @media (max-width: 1024px) {
+            .times-container.num-4 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .team {
+            background: var(--card-bg);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .team:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .team.melhor {
+            border-color: var(--success);
+            background: rgba(34, 197, 94, 0.05);
+        }
+
+        .team-header {
+            background: linear-gradient(135deg, var(--primary) 0%, #0052a3 100%);
+            color: white;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .team-title {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .team-score {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .players-list {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .player-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 4px;
+            border-left: 3px solid var(--primary);
+            transition: all 0.2s ease;
+        }
+
+        .player-item:hover {
+            background: rgba(0, 102, 204, 0.05);
+            border-left-color: var(--success);
+        }
+
+        .player-name {
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .player-level {
+            background: var(--primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .stat-card.destaque {
+            border-left-color: var(--success);
+        }
+
+        .stat-card.destaque .stat-value {
+            color: var(--success);
+        }
+
+        .actions-section {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <a href="{{ url_for('jogador.selecionar_jogadores') }}" class="back-link">← Voltar</a>
+                <h1>⚽ Resultado do Sorteio</h1>
+                <p class="subtitle">{{ num_times }} times de 5 jogadores • {{ jogadores|length }} jogadores totais</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Stats -->
+            <section class="section">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Diferença Máxima</div>
+                        <div class="stat-value">{{ diferenca }}</div>
+                    </div>
+                    <div class="stat-card destaque">
+                        <div class="stat-label">Melhor Time</div>
+                        <div class="stat-value">{{ melhor_time }}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Número de Times</div>
+                        <div class="stat-value">{{ num_times }}</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Times Section -->
+            <section class="section">
+                <div class="times-container num-{{ num_times }}">
+                    {% for time in times %}
+                        <div class="team {% if melhor_time == 'Time ' + loop.index|string %}melhor{% endif %}">
+                            <div class="team-header">
+                                <h2 class="team-title">⚽ Time {{ loop.index }}</h2>
+                                <div class="team-score">{{ somas[loop.index0] }} pts</div>
+                            </div>
+                            <div class="players-list">
+                                {% for jogador in time %}
+                                    <div class="player-item">
+                                        <span class="player-name">{{ loop.index }}. {{ jogador.nome }}</span>
+                                        <span class="player-level">Nível {{ jogador.nivel }}</span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- Actions -->
+            <section class="section">
+                <div class="actions-section">
+                    <a href="{{ url_for('jogador.selecionar_jogadores') }}" class="btn btn-primary">
+                        ← Voltar para Seleção
+                    </a>
+                    <a href="{{ url_for('jogador.sortear') }}" class="btn btn-success">
+                        🎲 Novo Sorteio
+                    </a>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>⚽ Balanceador de Times 5v5 • Desenvolvido com ❤️</p>
+        </footer>
+    </div>
+</body>
+</html>
