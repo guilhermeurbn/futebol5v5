@@ -5,8 +5,11 @@
 {% block content %}
 <div class="container" style="max-width: 1200px;">
     <div class="header">
-        <h1>⭐ Times Favoritos</h1>
-        <p class="subtitle">Salve e reaproveite seus melhores times</p>
+        <div class="header-content">
+            {% set brand_title = 'Times Favoritos' %}
+            {% set brand_subtitle = 'Salve e reaproveite seus melhores times' %}
+            {% include '_brand_header.html' %}
+        </div>
     </div>
 
     <!-- Stats Cards -->

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚽ Resultado - NaTrave</title>
+    <title>NaTrave | Resultado do Sorteio</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
         .times-container {
@@ -39,26 +39,28 @@
         }
 
         .team {
-            background: var(--card-bg);
-            border: 2px solid var(--primary);
+            background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
+            border: 2px solid rgba(124, 58, 237, 0.4);
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            color: white;
         }
 
         .team:hover {
             transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 8px 24px rgba(124, 58, 237, 0.4);
+            border-color: rgba(124, 58, 237, 0.6);
         }
 
         .team.melhor {
-            border-color: var(--success);
-            background: rgba(34, 197, 94, 0.05);
+            border-color: var(--accent);
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(6, 182, 212, 0.05) 100%);
         }
 
         .team-header {
-            background: linear-gradient(135deg, var(--primary) 0%, #0052a3 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             color: white;
             padding: 1.5rem;
             display: flex;
@@ -93,20 +95,21 @@
             justify-content: space-between;
             align-items: center;
             padding: 0.75rem;
-            background: rgba(0, 0, 0, 0.02);
+            background: rgba(124, 58, 237, 0.15);
             border-radius: 4px;
-            border-left: 3px solid var(--primary);
+            border-left: 3px solid var(--secondary);
             transition: all 0.2s ease;
+            color: white;
         }
 
         .player-item:hover {
-            background: rgba(0, 102, 204, 0.05);
-            border-left-color: var(--success);
+            background: rgba(236, 72, 153, 0.25);
+            border-left-color: var(--accent);
         }
 
         .player-name {
             font-weight: 500;
-            color: var(--text);
+            color: white;
         }
 
         .player-level {
@@ -121,15 +124,15 @@
         /* Goleiro Section */
         .goleiro-section {
             padding: 1rem;
-            background: rgba(34, 197, 94, 0.08);
-            border-top: 2px solid rgba(34, 197, 94, 0.3);
-            border-bottom: 2px solid rgba(34, 197, 94, 0.3);
+            background: rgba(236, 72, 153, 0.1);
+            border-top: 2px solid rgba(236, 72, 153, 0.3);
+            border-bottom: 2px solid rgba(236, 72, 153, 0.3);
         }
 
         .goleiro-title {
             font-size: 0.85rem;
             font-weight: 600;
-            color: var(--success);
+            color: var(--secondary);
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 0.75rem;
@@ -140,24 +143,25 @@
             justify-content: space-between;
             align-items: center;
             padding: 0.75rem;
-            background: rgba(34, 197, 94, 0.1);
+            background: rgba(236, 72, 153, 0.15);
             border-radius: 4px;
-            border-left: 3px solid var(--success);
+            border-left: 3px solid var(--secondary);
             transition: all 0.2s ease;
+            color: white;
         }
 
         .goleiro-item:hover {
-            background: rgba(34, 197, 94, 0.15);
-            border-left-color: var(--primary);
+            background: rgba(236, 72, 153, 0.25);
+            border-left-color: var(--accent);
         }
 
         .goleiro-name {
             font-weight: 600;
-            color: var(--success);
+            color: var(--secondary);
         }
 
         .goleiro-level {
-            background: var(--success);
+            background: var(--secondary);
             color: white;
             padding: 0.25rem 0.75rem;
             border-radius: 12px;
@@ -185,17 +189,18 @@
         }
 
         .stat-card {
-            background: var(--card-bg);
+            background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
             padding: 1.5rem;
             border-radius: 8px;
             border-left: 4px solid var(--primary);
             text-align: center;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(124, 58, 237, 0.25);
         }
 
         .stat-label {
             font-size: 0.9rem;
-            color: var(--text-secondary);
+            color: rgba(255, 255, 255, 0.75);
             margin-bottom: 0.5rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -229,8 +234,9 @@
         <header class="header">
             <div class="header-content">
                 <a href="{{ url_for('jogador.selecionar_jogadores') }}" class="back-link">← Voltar</a>
-                <h1>⚽ Resultado do Sorteio</h1>
-                <p class="subtitle">{{ num_times }} times de 5 jogadores • {{ jogadores|length }} jogadores totais</p>
+                {% set brand_title = 'Resultado do Sorteio' %}
+                {% set brand_subtitle = num_times ~ ' times de 5 jogadores • ' ~ (jogadores|length) ~ ' jogadores totais' %}
+                {% include '_brand_header.html' %}
             </div>
         </header>
 
@@ -333,8 +339,11 @@
                     <a href="{{ url_for('jogador.export_sorteio_csv') }}" class="btn btn-primary" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
                         📥 CSV
                     </a>
-                    <a href="{{ url_for('jogador.export_sorteio_txt') }}" class="btn btn-primary" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
-                        📄 TXT
+                    <button id="btn-copiar-txt" class="btn btn-primary" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); cursor: pointer;">
+                        📄 Copiar TXT
+                    </button>
+                    <a href="{{ url_for('jogador.export_sorteio_pdf') }}" class="btn btn-primary" style="background: linear-gradient(135deg, #ff8c42 0%, #ffb347 100%);">
+                        🧾 PDF
                     </a>
                 </div>
             </section>
@@ -486,5 +495,149 @@
             });
         });
     });
+    
+    // QR Code Modal
+    function mostrarModalQRCode() {
+        const sorteio_id = parseInt(document.querySelector('[data-sorteio-id]')?.dataset.sorteioId || {{ sorteio_id }});
+        
+        fetch(`/api/qrcode/link-compartilhamento/${sorteio_id}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.sucesso) {
+                    mostrarQRCode(data.qr_code, data.url);
+                } else {
+                    alert('❌ Erro ao gerar QR Code: ' + data.erro);
+                }
+            })
+            .catch(err => {
+                console.error('Erro:', err);
+                alert('❌ Erro ao gerar QR Code');
+            });
+    }
+    
+    function mostrarQRCode(qr_b64, url_compartilhamento) {
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        `;
+        
+        const conteudo = document.createElement('div');
+        conteudo.style.cssText = `
+            background: #1a1a2e;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        `;
+        
+        conteudo.innerHTML = `
+            <h2 style="margin-top: 0; margin-bottom: 20px; color: white;">📱 QR Code de Compartilhamento</h2>
+            
+            <img src="${qr_b64}" style="width: 250px; height: 250px; margin-bottom: 20px; border: 3px solid #7c3aed; border-radius: 8px;" />
+            
+            <div style="background: rgba(124, 58, 237, 0.12); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid rgba(124, 58, 237, 0.3);">
+                <div style="font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 10px;">Link de Compartilhamento</div>
+                <input type="text" value="${url_compartilhamento}" readonly style="width: 100%; padding: 10px; background: rgba(15,15,30,0.9); border: 1px solid #7c3aed; color: white; border-radius: 6px; font-size: 12px; text-align: center;" id="input-url" />
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <button onclick="copiarURL()" style="padding: 10px; background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                    📋 Copiar Link
+                </button>
+                <button onclick="fecharModal()" style="padding: 10px; background: rgba(255,255,255,0.18); color: white; border: 1px solid rgba(255,255,255,0.25); border-radius: 6px; cursor: pointer; font-weight: bold;">
+                    ✕ Fechar
+                </button>
+            </div>
+            
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.15); font-size: 12px; color: rgba(255,255,255,0.7);">
+                <p style="margin: 5px 0;">Compartilhe o link ou QR Code com amigos para visualizar o sorteio</p>
+            </div>
+        `;
+        
+        modal.appendChild(conteudo);
+        document.body.appendChild(modal);
+        
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) fecharModal();
+        });
+        
+        window.fecharModal = function() {
+            modal.remove();
+        };
+    }
+    
+    function copiarURL() {
+        const input = document.getElementById('input-url');
+        input.select();
+        document.execCommand('copy');
+        alert('✅ Link copiado para a área de transferência!');
+    }
+    
+    // Adicionar listener ao botão QR Code
+    const btnQRCode = document.getElementById('btn-qrcode');
+    if (btnQRCode) {
+        btnQRCode.addEventListener('click', mostrarModalQRCode);
+    }
+
+    // Copiar resultado em TXT para colar no WhatsApp
+    const btnCopiarTxt = document.getElementById('btn-copiar-txt');
+    if (btnCopiarTxt) {
+        btnCopiarTxt.addEventListener('click', async function() {
+            const textoOriginal = this.textContent;
+            this.disabled = true;
+            this.textContent = '⏳ Copiando...';
+
+            try {
+                const response = await fetch('/api/export/sorteio/txt');
+                const data = await response.json();
+
+                if (!response.ok || !data.sucesso || !data.conteudo) {
+                    throw new Error(data.erro || 'Não foi possível gerar o texto do sorteio');
+                }
+
+                try {
+                    await navigator.clipboard.writeText(data.conteudo);
+                } catch (_) {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = data.conteudo;
+                    textarea.style.position = 'fixed';
+                    textarea.style.opacity = '0';
+                    document.body.appendChild(textarea);
+                    textarea.focus();
+                    textarea.select();
+                    const copiou = document.execCommand('copy');
+                    document.body.removeChild(textarea);
+
+                    if (!copiou) {
+                        throw new Error('Copiar para área de transferência não suportado neste navegador');
+                    }
+                }
+
+                this.textContent = '✅ Copiado';
+                alert('✅ Resultado copiado! Agora é só colar no WhatsApp.');
+            } catch (erro) {
+                console.error(erro);
+                alert('❌ ' + erro.message);
+                this.textContent = textoOriginal;
+                this.disabled = false;
+                return;
+            }
+
+            setTimeout(() => {
+                this.textContent = textoOriginal;
+                this.disabled = false;
+            }, 1500);
+        });
+    }
     </script>
 

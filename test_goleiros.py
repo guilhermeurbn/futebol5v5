@@ -106,7 +106,10 @@ def test_sorteio_com_goleiros():
     jogadores = criar_jogadores_teste()
     
     try:
-        times, somas = BalanceadorTimes.sortear_multiplos_times_com_goleiros(jogadores)
+        times, somas, tem_aviso, aviso_msg = BalanceadorTimes.sortear_multiplos_times_com_goleiros(jogadores)
+
+        if tem_aviso and aviso_msg:
+            print(f"\n⚠️ Aviso: {aviso_msg}")
         
         print(f"\n✅ {len(times)} times criados")
         

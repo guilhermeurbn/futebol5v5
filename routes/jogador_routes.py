@@ -1,7 +1,7 @@
 """
 Rotas de Jogadores
 """
-from flask import Blueprint, request, render_template, redirect, url_for, jsonify, session, send_file
+from flask import Blueprint, request, render_template, redirect, url_for, jsonify, session, send_file, Response
 from services.jogador_service import JogadorService
 from services.balanceamento import BalanceadorTimes
 from services.historico_service import HistoricoService
@@ -11,6 +11,8 @@ from services.partida_service import PartidaService
 from services.favorito_service import FavoritoService
 from services.undoredo_service import UndoRedoService
 from services.qrcode_service import QRCodeService
+from services.sugestoes_service import SugestoesService
+from services.ranking_service import RankingService
 import io
 
 jogador_bp = Blueprint('jogador', __name__)
@@ -22,6 +24,77 @@ partida_service = PartidaService()
 favorito_service = FavoritoService()
 undoredo_service = UndoRedoService()
 qrcode_service = QRCodeService()
+sugestoes_service = SugestoesService()
+ranking_service = RankingService()
+
+
+def _montar_sorteio_exportacao(sorteio_id, times, somas, diferenca, melhor_time, tem_aviso, aviso_msg):
+    """Monta um payload serializável para exportação do último sorteio."""
+    times_json = []
+    for idx, time in enumerate(times):
+        times_json.append({
+            'numero': idx + 1,
+            'jogadores': [j.para_dict() for j in time],
+            'soma': somas[idx]
+        })
+
+    return {
+        'sorteio_id': sorteio_id,
+        'times': times_json,
+        'num_times': len(times),
+        'somas': somas,
+        'diferenca': diferenca,
+        'melhor_time': melhor_time,
+        'tem_aviso': tem_aviso,
+        'aviso_msg': aviso_msg
+    }
+
+
+def _salvar_ultimo_sorteio_sessao(payload):
+    session['ultimo_sorteio'] = payload
+    session.modified = True
+
+
+def _assinatura_times_obj(times):
+    """Cria assinatura estável de composição dos times a partir de objetos Jogador."""
+    times_assinatura = []
+    for time in times:
+        nomes = sorted(getattr(j, 'nome', str(j)).strip().lower() for j in time)
+        times_assinatura.append('|'.join(nomes))
+    return '||'.join(sorted(times_assinatura))
+
+
+def _assinatura_times_json(times_json):
+    """Cria assinatura estável de composição dos times a partir de JSON serializado."""
+    times_assinatura = []
+    for time in times_json:
+        jogadores = time.get('jogadores', [])
+        nomes = sorted(str(j.get('nome', '')).strip().lower() for j in jogadores)
+        times_assinatura.append('|'.join(nomes))
+    return '||'.join(sorted(times_assinatura))
+
+
+def _sortear_diferente_do_anterior(presentes, tentativas_max=8):
+    """Tenta gerar um sorteio diferente do último salvo no stack de undo/redo."""
+    sorteio_anterior = undoredo_service.obter_atual()
+    assinatura_anterior = None
+    if sorteio_anterior:
+        assinatura_anterior = _assinatura_times_json(sorteio_anterior.get('times', []))
+    elif 'ultimo_sorteio' in session:
+        assinatura_anterior = _assinatura_times_json(session.get('ultimo_sorteio', {}).get('times', []))
+
+    resultado = None
+    for _ in range(max(1, tentativas_max)):
+        candidato = BalanceadorTimes.sortear_multiplos_times_com_goleiros(presentes)
+        if not assinatura_anterior:
+            return candidato
+
+        assinatura_candidato = _assinatura_times_obj(candidato[0])
+        resultado = candidato
+        if assinatura_candidato != assinatura_anterior:
+            return candidato
+
+    return resultado
 
 
 @jogador_bp.route('/')
@@ -191,7 +264,7 @@ def sortear():
     presentes = jogador_service.listar_presentes()
     
     try:
-        times, somas, tem_aviso, aviso_msg = BalanceadorTimes.sortear_multiplos_times_com_goleiros(presentes)
+        times, somas, tem_aviso, aviso_msg = _sortear_diferente_do_anterior(presentes)
         num_times = len(times)
         diferenca = BalanceadorTimes.calcular_diferenca_multiplos(somas)
         melhor_time = BalanceadorTimes.obter_melhor_time(somas)
@@ -199,6 +272,22 @@ def sortear():
         # Registrar no histórico
         sorteio = historico_service.adicionar_sorteio(times, somas, num_times, diferenca)
         sorteio_id = sorteio.get('id')
+
+        # Salvar para download/exportação
+        sorteio_data = _montar_sorteio_exportacao(
+            sorteio_id,
+            times,
+            somas,
+            diferenca,
+            melhor_time,
+            tem_aviso,
+            aviso_msg
+        )
+
+        _salvar_ultimo_sorteio_sessao(sorteio_data)
+
+        # Adicionar à pilha de undo/redo também no fluxo de página
+        undoredo_service.adicionar_sorteio(sorteio_data)
         
         return render_template(
             'times.html',
@@ -226,39 +315,33 @@ def sortear_api():
     """API: Sorteia times"""
     try:
         presentes = jogador_service.listar_presentes()
-        times, somas, tem_aviso, aviso_msg = BalanceadorTimes.sortear_multiplos_times_com_goleiros(presentes)
+        times, somas, tem_aviso, aviso_msg = _sortear_diferente_do_anterior(presentes)
         diferenca = BalanceadorTimes.calcular_diferenca_multiplos(somas)
         melhor_time = BalanceadorTimes.obter_melhor_time(somas)
         
         # Registrar no histórico
         sorteio = historico_service.adicionar_sorteio(times, somas, len(times), diferenca)
-        
-        # Formatar times para JSON
-        times_json = []
-        for idx, time in enumerate(times):
-            times_json.append({
-                'numero': idx + 1,
-                'jogadores': [j.para_dict() for j in time],
-                'soma': somas[idx]
-            })
-        
+
+        sorteio_data = _montar_sorteio_exportacao(
+            sorteio.get('id'),
+            times,
+            somas,
+            diferenca,
+            melhor_time,
+            tem_aviso,
+            aviso_msg
+        )
+
+        # Salvar para download/exportação
+        _salvar_ultimo_sorteio_sessao(sorteio_data)
+
         # Adicionar à pilha de undo/redo
-        sorteio_data = {
-            'sorteio_id': sorteio.get('id'),
-            'times': times_json,
-            'num_times': len(times),
-            'somas': somas,
-            'diferenca': diferenca,
-            'melhor_time': melhor_time,
-            'tem_aviso': tem_aviso,
-            'aviso_msg': aviso_msg
-        }
         undoredo_service.adicionar_sorteio(sorteio_data)
         
         return jsonify({
             'sucesso': True,
             'sorteio_id': sorteio.get('id'),
-            'times': times_json,
+            'times': sorteio_data['times'],
             'num_times': len(times),
             'diferenca': diferenca,
             'melhor_time': melhor_time,
@@ -321,6 +404,7 @@ def api_estatisticas():
 
 
 @jogador_bp.route('/estatisticas')
+@jogador_bp.route('/stats')
 def estatisticas():
     """Página com estatísticas gerais"""
     stats = historico_service.obter_estatisticas()
@@ -455,45 +539,86 @@ def export_sorteio_csv():
     
     sorteio_data = session['ultimo_sorteio']
     
-    # Converter dados de volta para objetos Jogador
     times_json = sorteio_data.get('times', [])
+    times = [time.get('jogadores', []) for time in times_json]
     somas = sorteio_data.get('somas', [])
     diferenca = sorteio_data.get('diferenca', 0)
     
     csv_content = export_service.exportar_sorteio_csv(
-        times_json, somas, diferenca
+        times, somas, diferenca
     )
     
     return send_file(
         io.BytesIO(csv_content.encode('utf-8')),
         mimetype='text/csv',
         as_attachment=True,
-        download_name=f'sorteio_{sorteio_data.get("id")}.csv'
+        download_name=f'sorteio_{sorteio_data.get("sorteio_id", sorteio_data.get("id", "resultado"))}.csv'
     )
 
 
 @jogador_bp.route('/export/sorteio/txt', methods=['GET'])
 def export_sorteio_txt():
-    """Exporta o último sorteio em texto simples"""
+    """Retorna o último sorteio em texto simples (sem download forçado)"""
     if 'ultimo_sorteio' not in session:
         return jsonify({'erro': 'Nenhum sorteio realizado'}), 400
     
     sorteio_data = session['ultimo_sorteio']
     
-    # Converter dados
     times_json = sorteio_data.get('times', [])
+    times = [time.get('jogadores', []) for time in times_json]
     somas = sorteio_data.get('somas', [])
     diferenca = sorteio_data.get('diferenca', 0)
     
     txt_content = export_service.exportar_sorteio_texto(
-        times_json, somas, diferenca
+        times, somas, diferenca
     )
-    
+
+    return Response(txt_content, mimetype='text/plain; charset=utf-8')
+
+
+@jogador_bp.route('/api/export/sorteio/txt', methods=['GET'])
+def api_export_sorteio_txt():
+    """API para copiar o texto do último sorteio"""
+    if 'ultimo_sorteio' not in session:
+        return jsonify({'sucesso': False, 'erro': 'Nenhum sorteio realizado'}), 400
+
+    sorteio_data = session['ultimo_sorteio']
+    times_json = sorteio_data.get('times', [])
+    times = [time.get('jogadores', []) for time in times_json]
+    somas = sorteio_data.get('somas', [])
+    diferenca = sorteio_data.get('diferenca', 0)
+
+    txt_content = export_service.exportar_sorteio_texto(
+        times, somas, diferenca
+    )
+
+    return jsonify({'sucesso': True, 'conteudo': txt_content})
+
+
+@jogador_bp.route('/export/sorteio/pdf', methods=['GET'])
+def export_sorteio_pdf():
+    """Exporta o último sorteio em PDF"""
+    if 'ultimo_sorteio' not in session:
+        return jsonify({'erro': 'Nenhum sorteio realizado'}), 400
+
+    sorteio_data = session['ultimo_sorteio']
+    times_json = sorteio_data.get('times', [])
+    times = [time.get('jogadores', []) for time in times_json]
+    somas = sorteio_data.get('somas', [])
+    diferenca = sorteio_data.get('diferenca', 0)
+
+    pdf_bytes = export_service.exportar_sorteio_pdf(
+        times,
+        somas,
+        diferenca,
+        sorteio_id=sorteio_data.get('sorteio_id', sorteio_data.get('id'))
+    )
+
     return send_file(
-        io.BytesIO(txt_content.encode('utf-8')),
-        mimetype='text/plain',
+        io.BytesIO(pdf_bytes),
+        mimetype='application/pdf',
         as_attachment=True,
-        download_name=f'sorteio_{sorteio_data.get("id")}.txt'
+        download_name=f'sorteio_{sorteio_data.get("sorteio_id", sorteio_data.get("id", "resultado"))}.pdf'
     )
 
 
@@ -909,6 +1034,162 @@ def api_link_compartilhamento(sorteio_id):
             'sorteio_id': sorteio_id,
             'url': url_compartilhamento,
             'qr_code': f'data:image/png;base64,{qr_b64}'
+        })
+    except Exception as e:
+        return jsonify({'sucesso': False, 'erro': str(e)}), 500
+
+
+# ===== SUGESTÕES INTELIGENTES =====
+@jogador_bp.route('/api/sugestoes/nivel', methods=['POST'])
+def api_sugestoes_nivel():
+    """API: Sugestões por nível"""
+    try:
+        dados = request.get_json()
+        selecionados = dados.get('selecionados', [])
+        todos = jogador_service.listar_para_dict()
+        
+        sugestoes = sugestoes_service.obter_sugestoes_nivel(selecionados, todos, 5)
+        
+        return jsonify({
+            'sucesso': True,
+            'sugestoes': sugestoes,
+            'categoria': 'Sugestões por Nível'
+        })
+    except Exception as e:
+        return jsonify({'sucesso': False, 'erro': str(e)}), 500
+
+
+@jogador_bp.route('/api/sugestoes/diversidade', methods=['POST'])
+def api_sugestoes_diversidade():
+    """API: Sugestões por diversidade"""
+    try:
+        dados = request.get_json()
+        selecionados = dados.get('selecionados', [])
+        todos = jogador_service.listar_para_dict()
+        
+        sugestoes = sugestoes_service.obter_sugestoes_diversidade(selecionados, todos, 5)
+        
+        return jsonify({
+            'sucesso': True,
+            'sugestoes': sugestoes,
+            'categoria': 'Menos Utilizados'
+        })
+    except Exception as e:
+        return jsonify({'sucesso': False, 'erro': str(e)}), 500
+
+
+@jogador_bp.route('/api/sugestoes/vencedores', methods=['POST'])
+def api_sugestoes_vencedores():
+    """API: Sugestões por jogadores vencedores"""
+    try:
+        dados = request.get_json()
+        selecionados = dados.get('selecionados', [])
+        todos = jogador_service.listar_para_dict()
+        
+        sugestoes = sugestoes_service.obter_sugestoes_vencedoras(selecionados, todos, 5)
+        
+        return jsonify({
+            'sucesso': True,
+            'sugestoes': sugestoes,
+            'categoria': 'Jogadores Vencedores'
+        })
+    except Exception as e:
+        return jsonify({'sucesso': False, 'erro': str(e)}), 500
+
+
+@jogador_bp.route('/api/sugestoes/duplas', methods=['POST'])
+def api_sugestoes_duplas():
+    """API: Sugestões por duplas vencedoras"""
+    try:
+        dados = request.get_json()
+        selecionados = dados.get('selecionados', [])
+        todos = jogador_service.listar_para_dict()
+        
+        sugestoes = sugestoes_service.obter_sugestoes_melhores_duplas(selecionados, todos, 5)
+        
+        return jsonify({
+            'sucesso': True,
+            'sugestoes': sugestoes,
+            'categoria': 'Duplas Vencedoras'
+        })
+    except Exception as e:
+        return jsonify({'sucesso': False, 'erro': str(e)}), 500
+
+
+@jogador_bp.route('/api/sugestoes/combinadas', methods=['POST'])
+def api_sugestoes_combinadas():
+    """API: Sugestões combinadas (todas as estratégias)"""
+    try:
+        dados = request.get_json()
+        selecionados = dados.get('selecionados', [])
+        todos = jogador_service.listar_para_dict()
+        
+        sugestoes = sugestoes_service.obter_sugestoes_combinadas(selecionados, todos, 3)
+        
+        return jsonify({
+            'sucesso': True,
+            'sugestoes': sugestoes
+        })
+    except Exception as e:
+        return jsonify({'sucesso': False, 'erro': str(e)}), 500
+
+
+# ===== RANKING DE TIMES =====
+@jogador_bp.route('/ranking')
+def pagina_ranking():
+    """Página de ranking de times"""
+    ranking_geral = ranking_service.calcular_ranking_geral(20)
+    ranking_mes = ranking_service.calcular_ranking_periodo(30, 10)
+    stats = ranking_service.obter_estatisticas_ranking()
+    
+    return render_template(
+        'ranking.html',
+        ranking_geral=ranking_geral,
+        ranking_mes=ranking_mes,
+        stats=stats
+    )
+
+
+@jogador_bp.route('/api/ranking/geral')
+def api_ranking_geral():
+    """API: Ranking geral de times"""
+    try:
+        limite = request.args.get('limite', 20, type=int)
+        ranking = ranking_service.calcular_ranking_geral(limite)
+        
+        return jsonify({
+            'sucesso': True,
+            'ranking': ranking
+        })
+    except Exception as e:
+        return jsonify({'sucesso': False, 'erro': str(e)}), 500
+
+
+@jogador_bp.route('/api/ranking/periodo/<int:dias>')
+def api_ranking_periodo(dias):
+    """API: Ranking de um período específico"""
+    try:
+        limite = request.args.get('limite', 20, type=int)
+        ranking = ranking_service.calcular_ranking_periodo(dias, limite)
+        
+        return jsonify({
+            'sucesso': True,
+            'ranking': ranking,
+            'periodo_dias': dias
+        })
+    except Exception as e:
+        return jsonify({'sucesso': False, 'erro': str(e)}), 500
+
+
+@jogador_bp.route('/api/ranking/stats')
+def api_ranking_stats():
+    """API: Estatísticas do ranking"""
+    try:
+        stats = ranking_service.obter_estatisticas_ranking()
+        
+        return jsonify({
+            'sucesso': True,
+            'stats': stats
         })
     except Exception as e:
         return jsonify({'sucesso': False, 'erro': str(e)}), 500

@@ -1,0 +1,29 @@
+<div class="brand-header">
+    <div class="logo-header">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:1" />
+                    <stop offset="55%" style="stop-color:#ec4899;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:1" />
+                </linearGradient>
+                <filter id="logoShadow">
+                    <feDropShadow dx="0" dy="6" stdDeviation="8" flood-opacity="0.35"/>
+                </filter>
+            </defs>
+            <rect x="7" y="7" width="86" height="86" rx="26" fill="url(#logoGradient)" filter="url(#logoShadow)"/>
+            <circle cx="50" cy="42" r="24" fill="rgba(255,255,255,0.12)"/>
+            <circle cx="50" cy="42" r="18" fill="none" stroke="rgba(255,255,255,0.65)" stroke-width="2.5"/>
+            <path d="M35 58V30l15 15 15-15v28" fill="none" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="29" y="63" width="42" height="13" rx="6.5" fill="rgba(255,255,255,0.22)"/>
+            <text x="50" y="72" font-size="12" font-weight="700" fill="white" text-anchor="middle" dominant-baseline="middle" font-family="Arial">5v5</text>
+        </svg>
+    </div>
+    <div class="header-text">
+        <h1>{{ brand_title|default('NaTrave') }}</h1>
+        {% if brand_tagline is defined and brand_tagline %}
+            <div class="brand-tagline">{{ brand_tagline }}</div>
+        {% endif %}
+        <p class="subtitle">{{ brand_subtitle|default('Organize e equilibre seus times de futebol') }}</p>
+    </div>
+</div>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⭐ Combos Vencedores - NaTrave</title>
+    <title>NaTrave | Combos Vencedores</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
         .combo-card {
@@ -162,8 +162,9 @@
         <header class="header">
             <div class="header-content">
                 <a href="{{ url_for('jogador.index') }}" class="back-link">← Voltar</a>
-                <h1>⭐ Combos Vencedores</h1>
-                <p class="subtitle">Melhores duplas e grupos que conquistaram vitórias</p>
+                {% set brand_title = 'Combos Vencedores' %}
+                {% set brand_subtitle = 'Melhores duplas e grupos que conquistaram vitórias' %}
+                {% include '_brand_header.html' %}
             </div>
         </header>
 
