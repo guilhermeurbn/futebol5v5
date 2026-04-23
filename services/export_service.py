@@ -7,9 +7,43 @@ from datetime import datetime
 from typing import List, Dict
 from models.jogadores import Jogador
 
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import mm
+from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+
 
 class ExportService:
     """Serviço para exportar dados em diferentes formatos"""
+
+    @staticmethod
+    def _normalizar_jogador(jogador):
+        if isinstance(jogador, Jogador):
+            return jogador
+
+        if isinstance(jogador, dict):
+            return Jogador.do_dict(jogador)
+
+        nome = getattr(jogador, 'nome', str(jogador))
+        nivel = getattr(jogador, 'nivel', 0)
+        tipo = getattr(jogador, 'tipo', 'avulso')
+        posicao = getattr(jogador, 'posicao', 'linha')
+        jogador_id = getattr(jogador, 'id', None)
+        criado_em = getattr(jogador, 'criado_em', None)
+
+        return Jogador(
+            nome=nome,
+            nivel=nivel,
+            tipo=tipo,
+            posicao=posicao,
+            id=jogador_id,
+            criado_em=criado_em
+        )
+
+    @classmethod
+    def _normalizar_time(cls, time):
+        return [cls._normalizar_jogador(jogador) for jogador in time]
     
     @staticmethod
     def exportar_sorteio_csv(times: List[List[Jogador]], somas: List[int], diferenca: int) -> str:
@@ -33,6 +67,7 @@ class ExportService:
         
         # Times
         for idx, (time, soma) in enumerate(zip(times, somas), 1):
+            time = ExportService._normalizar_time(time)
             writer.writerow([f'TIME {idx} ({soma} pts)', ''])
             writer.writerow(['Nome', 'Nível', 'Tipo', 'Posição'])
             
@@ -116,6 +151,7 @@ class ExportService:
         linhas.append("")
         
         for idx, (time, soma) in enumerate(zip(times, somas), 1):
+            time = ExportService._normalizar_time(time)
             linhas.append(f"⚽ TIME {idx} ({soma} pts)")
             linhas.append("-" * 40)
             
@@ -134,6 +170,120 @@ class ExportService:
         linhas.append("Gerado por NaTrave - https://github.com/guilhermeurbn/futebol5v5")
         
         return "\n".join(linhas)
+
+    @staticmethod
+    def exportar_sorteio_pdf(times: List[List[Jogador]], somas: List[int], diferenca: int, sorteio_id=None) -> bytes:
+        """Exporta um sorteio em PDF."""
+        buffer = io.BytesIO()
+        documento = SimpleDocTemplate(
+            buffer,
+            pagesize=A4,
+            rightMargin=18 * mm,
+            leftMargin=18 * mm,
+            topMargin=18 * mm,
+            bottomMargin=18 * mm,
+            title=f'Sorteio {sorteio_id or "NaTrave"}'
+        )
+
+        estilos = getSampleStyleSheet()
+        estilos.add(ParagraphStyle(
+            name='TituloNaTrave',
+            parent=estilos['Title'],
+            fontName='Helvetica-Bold',
+            fontSize=20,
+            leading=24,
+            textColor=colors.HexColor('#f8f9ff'),
+            spaceAfter=10,
+        ))
+        estilos.add(ParagraphStyle(
+            name='SubtituloNaTrave',
+            parent=estilos['BodyText'],
+            fontName='Helvetica',
+            fontSize=10,
+            leading=13,
+            textColor=colors.HexColor('#9fb2d7'),
+            spaceAfter=8,
+        ))
+        estilos.add(ParagraphStyle(
+            name='TimeTitulo',
+            parent=estilos['Heading2'],
+            fontName='Helvetica-Bold',
+            fontSize=12,
+            leading=14,
+            textColor=colors.HexColor('#f8f9ff'),
+            spaceBefore=8,
+            spaceAfter=6,
+        ))
+
+        elementos = []
+        data_hora = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+        elementos.append(Paragraph('Resultado do Sorteio - NaTrave', estilos['TituloNaTrave']))
+        if sorteio_id is not None:
+            elementos.append(Paragraph(f'Sorteio #{sorteio_id} • Gerado em {data_hora}', estilos['SubtituloNaTrave']))
+        else:
+            elementos.append(Paragraph(f'Gerado em {data_hora}', estilos['SubtituloNaTrave']))
+        elementos.append(Spacer(1, 4 * mm))
+
+        resumo = [
+            ['Times', str(len(times))],
+            ['Jogadores', str(sum(len(ExportService._normalizar_time(time)) for time in times))],
+            ['Diferença máxima', f'{diferenca} pts'],
+        ]
+        tabela_resumo = Table(resumo, colWidths=[55 * mm, 45 * mm])
+        tabela_resumo.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#152036')),
+            ('TEXTCOLOR', (0, 0), (-1, -1), colors.white),
+            ('BOX', (0, 0), (-1, -1), 0.8, colors.HexColor('#31405f')),
+            ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#31405f')),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('LEADING', (0, 0), (-1, -1), 13),
+            ('LEFTPADDING', (0, 0), (-1, -1), 8),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+            ('TOPPADDING', (0, 0), (-1, -1), 6),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ]))
+        elementos.append(tabela_resumo)
+        elementos.append(Spacer(1, 6 * mm))
+
+        for idx, (time, soma) in enumerate(zip(times, somas), 1):
+            time = ExportService._normalizar_time(time)
+            elementos.append(Paragraph(f'Time {idx} - {soma} pts', estilos['TimeTitulo']))
+
+            linhas = [['Nome', 'Nível', 'Tipo', 'Posição']]
+            for jogador in time:
+                linhas.append([
+                    jogador.nome,
+                    str(jogador.nivel),
+                    'Fixo' if jogador.tipo == 'fixo' else 'Avulso',
+                    'Goleiro' if jogador.posicao == 'goleiro' else 'Linha'
+                ])
+
+            tabela_time = Table(linhas, colWidths=[72 * mm, 20 * mm, 25 * mm, 25 * mm], repeatRows=1)
+            tabela_time.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2d3a58')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#101828')),
+                ('TEXTCOLOR', (0, 1), (-1, -1), colors.HexColor('#dfe7ff')),
+                ('BOX', (0, 0), (-1, -1), 0.7, colors.HexColor('#31405f')),
+                ('INNERGRID', (0, 0), (-1, -1), 0.45, colors.HexColor('#31405f')),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('LEADING', (0, 0), (-1, -1), 11),
+                ('LEFTPADDING', (0, 0), (-1, -1), 6),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+                ('TOPPADDING', (0, 0), (-1, -1), 5),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+            ]))
+            elementos.append(tabela_time)
+            elementos.append(Spacer(1, 5 * mm))
+
+        elementos.append(Paragraph('Gerado por NaTrave', estilos['SubtituloNaTrave']))
+        documento.build(elementos)
+        pdf_bytes = buffer.getvalue()
+        buffer.close()
+        return pdf_bytes
     
     @staticmethod
     def exportar_estatisticas_csv(stats: Dict) -> str:

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚽ NaTrave - Detalhes do Sorteio</title>
+    <title>NaTrave | Detalhes do Sorteio</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -11,8 +11,9 @@
         <!-- Header -->
         <header class="header">
             <div class="header-content">
-                <h1>⚽ NaTrave</h1>
-                <p class="subtitle">Detalhes do Sorteio #{{ sorteio.id }}</p>
+                {% set brand_title = 'NaTrave' %}
+                {% set brand_subtitle = 'Detalhes do Sorteio #' ~ sorteio.id %}
+                {% include '_brand_header.html' %}
             </div>
         </header>
 

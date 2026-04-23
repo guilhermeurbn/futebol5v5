@@ -1,0 +1,76 @@
+{
+  "name": "NaTrave - App de Sorteio de Times",
+  "short_name": "NaTrave",
+  "description": "Aplicação profissional para sorteio balanceado de times em partidas de futebol 5v5",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#1f2937",
+  "theme_color": "#7c3aed",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><defs><linearGradient id='g1' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%237c3aed;stop-opacity:1' /><stop offset='55%' style='stop-color:%23ec4899;stop-opacity:1' /><stop offset='100%' style='stop-color:%2306b6d4;stop-opacity:1' /></linearGradient><filter id='s1'><feDropShadow dx='0' dy='8' stdDeviation='10' flood-opacity='0.35'/></filter></defs><rect fill='url(%23g1)' width='192' height='192' rx='48'/><circle cx='96' cy='88' r='48' fill='rgba(255,255,255,0.12)' filter='url(%23s1)'/><circle cx='96' cy='88' r='36' fill='none' stroke='rgba(255,255,255,0.65)' stroke-width='4'/><path d='M72 112V64l24 24 24-24v48' fill='none' stroke='white' stroke-width='10' stroke-linecap='round' stroke-linejoin='round'/><rect x='62' y='122' width='68' height='18' rx='9' fill='rgba(255,255,255,0.22)'/><text x='96' y='136' dominant-baseline='middle' text-anchor='middle' font-size='17' font-weight='700' fill='white' font-family='Arial'>5v5</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='g2' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%237c3aed;stop-opacity:1' /><stop offset='55%' style='stop-color:%23ec4899;stop-opacity:1' /><stop offset='100%' style='stop-color:%2306b6d4;stop-opacity:1' /></linearGradient><filter id='s2'><feDropShadow dx='0' dy='18' stdDeviation='22' flood-opacity='0.35'/></filter></defs><rect fill='url(%23g2)' width='512' height='512' rx='128'/><circle cx='256' cy='238' r='124' fill='rgba(255,255,255,0.12)' filter='url(%23s2)'/><circle cx='256' cy='238' r='92' fill='none' stroke='rgba(255,255,255,0.65)' stroke-width='8'/><path d='M194 290V170l62 62 62-62v120' fill='none' stroke='white' stroke-width='28' stroke-linecap='round' stroke-linejoin='round'/><rect x='178' y='336' width='156' height='40' rx='20' fill='rgba(255,255,255,0.22)'/><text x='256' y='365' dominant-baseline='middle' text-anchor='middle' font-size='38' font-weight='700' fill='white' font-family='Arial'>5v5</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["sports", "utilities"],
+  "screenshots": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720'><defs><linearGradient id='g3' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%237c3aed;stop-opacity:1' /><stop offset='50%' style='stop-color:%23ec4899;stop-opacity:1' /><stop offset='100%' style='stop-color:%2306b6d4;stop-opacity:1' /></linearGradient></defs><rect fill='%231f2937' width='540' height='720'/><rect fill='url(%23g3)' width='540' height='200'/><text x='270' y='90' dominant-baseline='middle' text-anchor='middle' font-size='56' font-weight='bold' fill='white' font-family='Arial'>NaTrave</text><text x='270' y='135' dominant-baseline='middle' text-anchor='middle' font-size='18' fill='rgba(255,255,255,0.9)' font-family='Arial' letter-spacing='2'>SORTEIO 5V5</text><circle cx='270' cy='425' r='120' fill='rgba(255,255,255,0.12)'/><circle cx='270' cy='425' r='88' fill='none' stroke='rgba(255,255,255,0.6)' stroke-width='8'/><path d='M214 482V368l56 56 56-56v114' fill='none' stroke='white' stroke-width='24' stroke-linecap='round' stroke-linejoin='round'/><rect x='158' y='590' width='224' height='58' rx='29' fill='url(%23g3)' opacity='0.9'/><text x='270' y='626' dominant-baseline='middle' text-anchor='middle' font-size='26' font-weight='700' fill='white' font-family='Arial'>Equilíbrio e estilo</text></svg>",
+      "sizes": "540x720",
+      "type": "image/svg+xml",
+      "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Novo Sorteio",
+      "short_name": "Sorteio",
+      "description": "Criar um novo sorteio de times",
+      "url": "/sortear",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><defs><linearGradient id='s1' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%237c3aed;stop-opacity:1' /><stop offset='55%' style='stop-color:%23ec4899;stop-opacity:1' /><stop offset='100%' style='stop-color:%2306b6d4;stop-opacity:1' /></linearGradient></defs><rect fill='url(%23s1)' width='96' height='96' rx='20'/><circle cx='48' cy='40' r='24' fill='rgba(255,255,255,0.12)'/><path d='M34 54V30l14 14 14-14v24' fill='none' stroke='white' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/><rect x='28' y='60' width='40' height='12' rx='6' fill='rgba(255,255,255,0.22)'/><text x='48' y='69' dominant-baseline='middle' text-anchor='middle' font-size='12' font-weight='700' fill='white' font-family='Arial'>5v5</text></svg>",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "Histórico",
+      "short_name": "Histórico",
+      "description": "Ver histórico de sorteios",
+      "url": "/historico",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><defs><linearGradient id='s2' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%23ec4899;stop-opacity:1' /><stop offset='100%' style='stop-color:%2306b6d4;stop-opacity:1' /></linearGradient></defs><rect fill='url(%23s2)' width='96' height='96' rx='20'/><circle cx='48' cy='40' r='24' fill='rgba(255,255,255,0.12)'/><path d='M34 54V30l14 14 14-14v24' fill='none' stroke='white' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/><rect x='28' y='60' width='40' height='12' rx='6' fill='rgba(255,255,255,0.22)'/><text x='48' y='69' dominant-baseline='middle' text-anchor='middle' font-size='12' font-weight='700' fill='white' font-family='Arial'>5v5</text></svg>",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "Estatísticas",
+      "short_name": "Stats",
+      "description": "Ver estatísticas dos jogadores",
+      "url": "/stats",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><defs><linearGradient id='s3' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%2306b6d4;stop-opacity:1' /><stop offset='100%' style='stop-color:%237c3aed;stop-opacity:1' /></linearGradient></defs><rect fill='url(%23s3)' width='96' height='96' rx='20'/><circle cx='48' cy='40' r='24' fill='rgba(255,255,255,0.12)'/><path d='M34 54V30l14 14 14-14v24' fill='none' stroke='white' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/><rect x='28' y='60' width='40' height='12' rx='6' fill='rgba(255,255,255,0.22)'/><text x='48' y='69' dominant-baseline='middle' text-anchor='middle' font-size='12' font-weight='700' fill='white' font-family='Arial'>5v5</text></svg>",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false
+}

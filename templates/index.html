@@ -3,6 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#7c3aed">
+    <meta name="description" content="NaTrave - Aplicação profissional para sorteio balanceado de times em partidas de futebol 5v5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="NaTrave">
+    <link rel="manifest" href="/manifest.json">
     <title>⚽ NaTrave - Gerador de Times</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
@@ -11,8 +17,31 @@
         <!-- Header -->
         <header class="header">
             <div class="header-content">
-                <h1>⚽ NaTrave</h1>
-                <p class="subtitle">Organize e equilibre seus times de futebol</p>
+                <div class="logo-header">
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="NaTrave">
+                        <defs>
+                            <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:1" />
+                                <stop offset="55%" style="stop-color:#ec4899;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:1" />
+                            </linearGradient>
+                            <filter id="logoShadow">
+                                <feDropShadow dx="0" dy="6" stdDeviation="8" flood-opacity="0.35"/>
+                            </filter>
+                        </defs>
+                        <rect x="7" y="7" width="86" height="86" rx="26" fill="url(#logoGradient)" filter="url(#logoShadow)"/>
+                        <circle cx="50" cy="42" r="24" fill="rgba(255,255,255,0.12)"/>
+                        <circle cx="50" cy="42" r="18" fill="none" stroke="rgba(255,255,255,0.65)" stroke-width="2.5"/>
+                        <path d="M35 58V30l15 15 15-15v28" fill="none" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                        <rect x="29" y="63" width="42" height="13" rx="6.5" fill="rgba(255,255,255,0.22)"/>
+                        <text x="50" y="72" font-size="12" font-weight="700" fill="white" text-anchor="middle" dominant-baseline="middle" font-family="Arial">5v5</text>
+                    </svg>
+                </div>
+                <div class="header-text">
+                    <h1>NaTrave</h1>
+                    <div class="brand-tagline">Sorteio de times com equilíbrio e estilo</div>
+                    <p class="subtitle">Organize e equilibre seus times de futebol</p>
+                </div>
             </div>
         </header>
 
@@ -29,6 +58,7 @@
                 <a href="{{ url_for('jogador.charts') }}" class="nav-tab">📈 Gráficos</a>
                 <a href="{{ url_for('jogador.campeonato_page') }}" class="nav-tab">🏆 Campeonato</a>
                 <a href="{{ url_for('jogador.listar_favoritos_page') }}" class="nav-tab">⭐ Favoritos</a>
+                <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">🏅 Ranking</a>
             </div>
 
             {% if erro %}
@@ -180,13 +210,13 @@
                     </div>
 
                     <!-- Advanced Filters -->
-                    <div style="background: var(--card-bg); padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid var(--border);">
-                        <h3 style="margin: 0 0 1rem 0; font-size: 0.95rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">⚙️ Filtros Avançados</h3>
+                    <div style="background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%); padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid rgba(124, 58, 237, 0.3); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);">
+                        <h3 style="margin: 0 0 1rem 0; font-size: 0.95rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #ffffff;">⚙️ Filtros Avançados</h3>
                         
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
                             <!-- Filtro por Nível -->
                             <div>
-                                <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;">
+                                <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; color: rgba(255,255,255,0.9);">
                                     📊 Nível
                                 </label>
                                 <div style="display: flex; gap: 0.5rem;">
@@ -198,7 +228,7 @@
                                         value="1"
                                         placeholder="Min"
                                         class="filter-input"
-                                        style="width: 50%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px; background: var(--input-bg); color: var(--text);"
+                                        style="width: 50%; padding: 0.5rem; border: 1px solid rgba(124, 58, 237, 0.45); border-radius: 8px; background: rgba(124, 58, 237, 0.15); color: #ffffff;"
                                     >
                                     <input 
                                         type="number" 
@@ -208,17 +238,17 @@
                                         value="10"
                                         placeholder="Max"
                                         class="filter-input"
-                                        style="width: 50%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px; background: var(--input-bg); color: var(--text);"
+                                        style="width: 50%; padding: 0.5rem; border: 1px solid rgba(124, 58, 237, 0.45); border-radius: 8px; background: rgba(124, 58, 237, 0.15); color: #ffffff;"
                                     >
                                 </div>
                             </div>
 
                             <!-- Filtro por Tipo -->
                             <div>
-                                <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;">
+                                <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; color: rgba(255,255,255,0.9);">
                                     👤 Tipo
                                 </label>
-                                <select id="tipoFilter" class="filter-input" style="padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px; background: var(--input-bg); color: var(--text); width: 100%;">
+                                <select id="tipoFilter" class="filter-input" style="padding: 0.5rem; border: 1px solid rgba(124, 58, 237, 0.45); border-radius: 8px; background: rgba(124, 58, 237, 0.15); color: #ffffff; width: 100%;">
                                     <option value="">Todos</option>
                                     <option value="fixo">⭐ Fixo</option>
                                     <option value="avulso">👤 Avulso</option>
@@ -227,10 +257,10 @@
 
                             <!-- Filtro por Posição -->
                             <div>
-                                <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;">
+                                <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; color: rgba(255,255,255,0.9);">
                                     ⚽ Posição
                                 </label>
-                                <select id="posicaoFilter" class="filter-input" style="padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px; background: var(--input-bg); color: var(--text); width: 100%;">
+                                <select id="posicaoFilter" class="filter-input" style="padding: 0.5rem; border: 1px solid rgba(124, 58, 237, 0.45); border-radius: 8px; background: rgba(124, 58, 237, 0.15); color: #ffffff; width: 100%;">
                                     <option value="">Todos</option>
                                     <option value="linha">⚽ Linha</option>
                                     <option value="goleiro">🧤 Goleiro</option>
@@ -440,6 +470,56 @@
                 fecharModalDelete();
             }
         });
+    </script>
+
+    <!-- Service Worker Registration for PWA -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/service-worker.js')
+                    .then(registration => {
+                        console.log('[PWA] Service Worker registrado com sucesso:', registration);
+                        
+                        // Verificar se há update disponível
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'activated') {
+                                    console.log('[PWA] Nova versão disponível!');
+                                    // Notificar usuário
+                                    if (confirm('📦 Nova versão da app disponível!\n\nDeseja atualizar agora?')) {
+                                        newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch(error => {
+                        console.error('[PWA] Erro ao registrar Service Worker:', error);
+                    });
+            });
+            
+            // Escutar mensagens do service worker
+            navigator.serviceWorker.addEventListener('message', event => {
+                if (event.data.type === 'CACHE_UPDATED') {
+                    console.log('[PWA] Cache atualizado');
+                }
+            });
+            
+            // Detectar mudanças de conexão
+            window.addEventListener('online', () => {
+                console.log('[PWA] Conexão restaurada!');
+                document.body.style.opacity = '1';
+            });
+            
+            window.addEventListener('offline', () => {
+                console.log('[PWA] Modo offline ativado');
+                document.body.style.opacity = '0.8';
+            });
+        } else {
+            console.warn('[PWA] Service Workers não suportado neste navegador');
+        }
     </script>
 </body>
 </html>

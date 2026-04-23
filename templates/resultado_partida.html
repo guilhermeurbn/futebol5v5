@@ -5,8 +5,11 @@
 {% block content %}
 <div class="container" style="max-width: 900px;">
     <div class="header">
-        <h1>⚽ Registrar Resultado da Partida</h1>
-        <p class="subtitle">Sorteio #{{ sorteio_id }}</p>
+        <div class="header-content">
+            {% set brand_title = 'Registrar Resultado da Partida' %}
+            {% set brand_subtitle = 'Sorteio #' ~ sorteio_id %}
+            {% include '_brand_header.html' %}
+        </div>
     </div>
 
     <!-- Teams Grid -->

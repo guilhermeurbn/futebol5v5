@@ -43,6 +43,10 @@ class JogadorService:
         dados = self._carregar_raw()
         return [Jogador.do_dict(item) for item in dados]
     
+    def listar_para_dict(self) -> List[dict]:
+        """Lista todos os jogadores como dicionários"""
+        return self._carregar_raw()
+    
     def obter_por_id(self, jogador_id: str) -> Optional[Jogador]:
         """Obtém um jogador por ID"""
         jogadores = self.listar()
