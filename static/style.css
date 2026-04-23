@@ -110,6 +110,26 @@ body {
     flex: 1;
 }
 
+.auth-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    align-items: flex-end;
+}
+
+.auth-user {
+    font-size: 0.85rem;
+    font-weight: 600;
+    opacity: 0.95;
+}
+
+.auth-links {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
 .brand-tagline {
     display: inline-flex;
     align-items: center;

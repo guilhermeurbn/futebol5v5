@@ -330,9 +330,11 @@
                     <a href="{{ url_for('jogador.sortear') }}" class="btn btn-success">
                         🎲 Novo Sorteio
                     </a>
+                    {% if auth_user.role == 'admin' %}
                     <a href="{{ url_for('jogador.resultado_partida_page', sorteio_id=sorteio_id) }}" class="btn btn-primary" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
                         🏆 Resultado
                     </a>
+                    {% endif %}
                     <button id="btn-qrcode" class="btn btn-primary" style="background: linear-gradient(135deg, #ffa502 0%, #ffc107 100%); cursor: pointer;">
                         📱 QR Code
                     </button>

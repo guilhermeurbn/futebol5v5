@@ -17,31 +17,10 @@
         <!-- Header -->
         <header class="header">
             <div class="header-content">
-                <div class="logo-header">
-                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="NaTrave">
-                        <defs>
-                            <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:1" />
-                                <stop offset="55%" style="stop-color:#ec4899;stop-opacity:1" />
-                                <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:1" />
-                            </linearGradient>
-                            <filter id="logoShadow">
-                                <feDropShadow dx="0" dy="6" stdDeviation="8" flood-opacity="0.35"/>
-                            </filter>
-                        </defs>
-                        <rect x="7" y="7" width="86" height="86" rx="26" fill="url(#logoGradient)" filter="url(#logoShadow)"/>
-                        <circle cx="50" cy="42" r="24" fill="rgba(255,255,255,0.12)"/>
-                        <circle cx="50" cy="42" r="18" fill="none" stroke="rgba(255,255,255,0.65)" stroke-width="2.5"/>
-                        <path d="M35 58V30l15 15 15-15v28" fill="none" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-                        <rect x="29" y="63" width="42" height="13" rx="6.5" fill="rgba(255,255,255,0.22)"/>
-                        <text x="50" y="72" font-size="12" font-weight="700" fill="white" text-anchor="middle" dominant-baseline="middle" font-family="Arial">5v5</text>
-                    </svg>
-                </div>
-                <div class="header-text">
-                    <h1>NaTrave</h1>
-                    <div class="brand-tagline">Sorteio de times com equilíbrio e estilo</div>
-                    <p class="subtitle">Organize e equilibre seus times de futebol</p>
-                </div>
+                {% set brand_title = 'NaTrave' %}
+                {% set brand_tagline = 'Sorteio de times com equilíbrio e estilo' %}
+                {% set brand_subtitle = 'Organize e equilibre seus times de futebol' %}
+                {% include '_brand_header.html' %}
             </div>
         </header>
 
@@ -68,6 +47,7 @@
             {% endif %}
 
             <!-- Form Section -->
+            {% if auth_user.role == 'admin' %}
             <section class="section">
                 <h2 class="section-title">✏️ Adicionar Jogador</h2>
                 <form action="{{ url_for('jogador.adicionar_jogador') }}" method="post" class="form">
@@ -188,6 +168,7 @@
                     </button>
                 </form>
             </section>
+            {% endif %}
 
             <!-- Players Section -->
             <section class="section">
@@ -300,9 +281,11 @@
                                     <div class="player-level-fill" style="width: {{ (jogador.nivel / 10) * 100 }}%"></div>
                                 </div>
                                 <div class="player-actions">
+                                    {% if auth_user.role == 'admin' %}
                                     <button class="btn btn-small btn-danger" onclick="abrirModalDelete('{{ jogador.id }}', '{{ jogador.nome }}')">
                                         🗑️ Deletar
                                     </button>
+                                    {% endif %}
                                 </div>
                             </div>
                         {% endfor %}
@@ -310,6 +293,7 @@
 
                     <!-- Actions -->
                     <div class="actions-section">
+                        {% if auth_user.role == 'admin' %}
                         {% if total_jogadores >= 10 %}
                             <a href="{{ url_for('jogador.selecionar_jogadores') }}" class="btn btn-large btn-primary">
                                 👥 Selecionar Jogadores para o Jogo
@@ -317,6 +301,11 @@
                         {% else %}
                             <button class="btn btn-large btn-primary" disabled>
                                 👥 Selecionar Jogadores (faltam {{ 10 - total_jogadores }} jogadores)
+                            </button>
+                        {% endif %}
+                        {% else %}
+                            <button class="btn btn-large btn-secondary" disabled>
+                                👀 Modo somente leitura para usuário comum
                             </button>
                         {% endif %}
                     </div>
@@ -331,6 +320,7 @@
         </main>
 
         <!-- Modal Delete -->
+        {% if auth_user.role == 'admin' %}
         <div id="deleteModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -351,6 +341,7 @@
                 </div>
             </div>
         </div>
+        {% endif %}
 
         <!-- Footer -->
         <footer class="footer">
@@ -436,40 +427,42 @@
             });
         }
 
-        // ===== MODAL DELETE =====
-        let playerToDelete = null;
+        {% if auth_user.role == 'admin' %}
+            // ===== MODAL DELETE =====
+            let playerToDelete = null;
 
-        function abrirModalDelete(playerId, playerName) {
-            playerToDelete = playerId;
-            document.getElementById('playerNameToDelete').textContent = playerName;
-            document.getElementById('deleteModal').classList.add('active');
-        }
-
-        function fecharModalDelete() {
-            document.getElementById('deleteModal').classList.remove('active');
-            playerToDelete = null;
-        }
-
-        function confirmarDelete() {
-            if (playerToDelete) {
-                // Redirecionar para delete
-                window.location.href = `/delete/${playerToDelete}`;
+            function abrirModalDelete(playerId, playerName) {
+                playerToDelete = playerId;
+                document.getElementById('playerNameToDelete').textContent = playerName;
+                document.getElementById('deleteModal').classList.add('active');
             }
-        }
 
-        // Fechar modal ao clicar fora
-        document.getElementById('deleteModal')?.addEventListener('click', (e) => {
-            if (e.target.id === 'deleteModal') {
-                fecharModalDelete();
+            function fecharModalDelete() {
+                document.getElementById('deleteModal').classList.remove('active');
+                playerToDelete = null;
             }
-        });
 
-        // Fechar modal com ESC
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                fecharModalDelete();
+            function confirmarDelete() {
+                if (playerToDelete) {
+                    // Redirecionar para delete
+                    window.location.href = `/delete/${playerToDelete}`;
+                }
             }
-        });
+
+            // Fechar modal ao clicar fora
+            document.getElementById('deleteModal')?.addEventListener('click', (e) => {
+                if (e.target.id === 'deleteModal') {
+                    fecharModalDelete();
+                }
+            });
+
+            // Fechar modal com ESC
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    fecharModalDelete();
+                }
+            });
+        {% endif %}
     </script>
 
     <!-- Service Worker Registration for PWA -->

@@ -2,6 +2,7 @@
 Rotas de Jogadores
 """
 from flask import Blueprint, request, render_template, redirect, url_for, jsonify, session, send_file, Response
+from functools import wraps
 from services.jogador_service import JogadorService
 from services.balanceamento import BalanceadorTimes
 from services.historico_service import HistoricoService
@@ -13,7 +14,9 @@ from services.undoredo_service import UndoRedoService
 from services.qrcode_service import QRCodeService
 from services.sugestoes_service import SugestoesService
 from services.ranking_service import RankingService
+from services.auth_service import AuthService
 import io
+import random
 
 jogador_bp = Blueprint('jogador', __name__)
 jogador_service = JogadorService()
@@ -26,6 +29,120 @@ undoredo_service = UndoRedoService()
 qrcode_service = QRCodeService()
 sugestoes_service = SugestoesService()
 ranking_service = RankingService()
+auth_service = AuthService()
+
+
+def _is_admin():
+    return session.get('role') in ['super_admin', 'admin']
+
+
+def _jogadores_visiveis():
+    if _is_admin():
+        return jogador_service.listar()
+    return jogador_service.listar_por_usuario(session.get('user_id'))
+
+
+def _jogadores_visiveis_dict():
+    if _is_admin():
+        return jogador_service.listar_para_dict()
+    return jogador_service.listar_dict_por_usuario(session.get('user_id'))
+
+
+def _usuario_logado():
+    return {
+        'id': session.get('user_id'),
+        'username': session.get('username'),
+        'nome': session.get('nome'),
+        'role': session.get('role', 'usuario'),
+        'autenticado': bool(session.get('user_id'))
+    }
+
+
+def _resposta_nao_autenticado():
+    if request.path.startswith('/api/'):
+        return jsonify({'sucesso': False, 'erro': 'Autenticacao obrigatoria'}), 401
+    return redirect(url_for('jogador.login_page'))
+
+
+def _resposta_sem_permissao():
+    if request.path.startswith('/api/'):
+        return jsonify({'sucesso': False, 'erro': 'Acesso restrito ao administrador'}), 403
+    return redirect(url_for('jogador.index'))
+
+
+def _resposta_somente_leitura():
+    if request.path.startswith('/api/'):
+        return jsonify({'sucesso': False, 'erro': 'Usuario com acesso somente leitura'}), 403
+    return redirect(url_for('jogador.index'))
+
+
+def login_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if not session.get('user_id'):
+            return _resposta_nao_autenticado()
+        return f(*args, **kwargs)
+    return wrapper
+
+
+def admin_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if not session.get('user_id'):
+            return _resposta_nao_autenticado()
+        if not _is_admin():
+            return _resposta_sem_permissao()
+        return f(*args, **kwargs)
+    return wrapper
+
+
+@jogador_bp.app_context_processor
+def inject_auth_user():
+    return {'auth_user': _usuario_logado()}
+
+
+@jogador_bp.before_request
+def proteger_rotas():
+    liberadas = {
+        'jogador.login_page',
+        'jogador.login_submit',
+        'jogador.cadastro_page',
+        'jogador.cadastro_submit',
+        'jogador.compartilhado_page',
+    }
+
+    if request.endpoint in liberadas:
+        return None
+
+    if not request.endpoint:
+        return None
+
+    if request.endpoint.startswith('static'):
+        return None
+
+    if not session.get('user_id'):
+        return _resposta_nao_autenticado()
+
+    if not _is_admin():
+        permitidas_escrita_usuario = {
+            'jogador.logout',
+            'jogador.perfil_alterar_senha',
+        }
+
+        bloqueadas_leitura_usuario = {
+            'jogador.selecionar_jogadores',
+            'jogador.sortear',
+            'jogador.sortear_api',
+            'jogador.resultado_partida_page',
+        }
+
+        if request.endpoint in bloqueadas_leitura_usuario:
+            return _resposta_somente_leitura()
+
+        if request.method in {'POST', 'PUT', 'PATCH', 'DELETE'} and request.endpoint not in permitidas_escrita_usuario:
+            return _resposta_somente_leitura()
+
+    return None
 
 
 def _montar_sorteio_exportacao(sorteio_id, times, somas, diferenca, melhor_time, tem_aviso, aviso_msg):
@@ -74,33 +191,249 @@ def _assinatura_times_json(times_json):
     return '||'.join(sorted(times_assinatura))
 
 
+def _assinaturas_recentes_stack(limite=5):
+    """Retorna assinaturas dos sorteios mais recentes da pilha de undo/redo."""
+    pilha, indice_atual = undoredo_service.obter_historico()
+    if not pilha or indice_atual < 0:
+        return set()
+
+    inicio = max(0, indice_atual - (limite - 1))
+    recentes = pilha[inicio:indice_atual + 1]
+    assinaturas = set()
+    for item in recentes:
+        assinatura = _assinatura_times_json(item.get('times', []))
+        if assinatura:
+            assinaturas.add(assinatura)
+    return assinaturas
+
+
+def _forcar_variacao_times(times, assinaturas_bloqueadas):
+    """Força uma variação simples trocando jogadores entre times quando necessário."""
+    if len(times) < 2:
+        return None
+
+    base_times = [time[:] for time in times]
+    tentativas = 50
+    for _ in range(tentativas):
+        i, j = random.sample(range(len(base_times)), 2)
+        if not base_times[i] or not base_times[j]:
+            continue
+
+        idx_i = random.randrange(len(base_times[i]))
+        idx_j = random.randrange(len(base_times[j]))
+
+        novo = [time[:] for time in base_times]
+        novo[i][idx_i], novo[j][idx_j] = novo[j][idx_j], novo[i][idx_i]
+
+        assinatura_nova = _assinatura_times_obj(novo)
+        if assinatura_nova not in assinaturas_bloqueadas:
+            return novo
+
+    return None
+
+
 def _sortear_diferente_do_anterior(presentes, tentativas_max=8):
-    """Tenta gerar um sorteio diferente do último salvo no stack de undo/redo."""
-    sorteio_anterior = undoredo_service.obter_atual()
-    assinatura_anterior = None
-    if sorteio_anterior:
-        assinatura_anterior = _assinatura_times_json(sorteio_anterior.get('times', []))
-    elif 'ultimo_sorteio' in session:
-        assinatura_anterior = _assinatura_times_json(session.get('ultimo_sorteio', {}).get('times', []))
+    """Tenta gerar um sorteio diferente dos mais recentes para evitar repetição."""
+    assinaturas_bloqueadas = _assinaturas_recentes_stack(limite=5)
+    if 'ultimo_sorteio' in session:
+        assinatura_sessao = _assinatura_times_json(session.get('ultimo_sorteio', {}).get('times', []))
+        if assinatura_sessao:
+            assinaturas_bloqueadas.add(assinatura_sessao)
+
+    tentativas_max = max(10, tentativas_max)
 
     resultado = None
     for _ in range(max(1, tentativas_max)):
         candidato = BalanceadorTimes.sortear_multiplos_times_com_goleiros(presentes)
-        if not assinatura_anterior:
-            return candidato
-
         assinatura_candidato = _assinatura_times_obj(candidato[0])
         resultado = candidato
-        if assinatura_candidato != assinatura_anterior:
+
+        if not assinaturas_bloqueadas:
             return candidato
 
+        if assinatura_candidato not in assinaturas_bloqueadas:
+            return candidato
+
+    # Fallback: força uma variação para o usuário não receber exatamente a mesma composição
+    if resultado:
+        variacao = _forcar_variacao_times(resultado[0], assinaturas_bloqueadas)
+        if variacao:
+            somas = [sum(j.nivel for j in time) for time in variacao]
+            return variacao, somas, resultado[2], resultado[3]
+
     return resultado
+
+
+@jogador_bp.route('/login', methods=['GET'])
+def login_page():
+    if session.get('user_id'):
+        return redirect(url_for('jogador.index'))
+    return render_template('login.html')
+
+
+@jogador_bp.route('/cadastro', methods=['GET'])
+def cadastro_page():
+    if session.get('user_id'):
+        return redirect(url_for('jogador.index'))
+    return render_template('cadastro.html')
+
+
+@jogador_bp.route('/cadastro', methods=['POST'])
+def cadastro_submit():
+    nome = request.form.get('nome', '').strip()
+    username = request.form.get('username', '').strip()
+    senha = request.form.get('password', '')
+    confirmar = request.form.get('confirmar_password', '')
+    nivel = request.form.get('nivel', '5')
+    tipo = request.form.get('tipo', 'avulso')
+    posicao = request.form.get('posicao', 'linha')
+
+    if senha != confirmar:
+        return render_template('cadastro.html', erro='A confirmacao de senha nao confere'), 400
+
+    try:
+        usuario = auth_service.criar_usuario(
+            username=username,
+            nome=nome,
+            password=senha,
+            role='usuario'
+        )
+
+        # Cada usuário novo já nasce com seu próprio jogador
+        jogador_service.criar(
+            nome=nome,
+            nivel=int(nivel),
+            tipo=tipo,
+            posicao=posicao,
+            owner_user_id=usuario.get('id')
+        )
+
+        return render_template(
+            'login.html',
+            sucesso='Cadastro realizado com sucesso! Entre com seu usuario e senha.'
+        )
+    except ValueError as e:
+        return render_template('cadastro.html', erro=str(e)), 400
+
+
+@jogador_bp.route('/login', methods=['POST'])
+def login_submit():
+    username = request.form.get('username', '').strip()
+    password = request.form.get('password', '')
+    usuario = auth_service.autenticar(username, password)
+
+    if not usuario:
+        return render_template('login.html', erro='Usuario ou senha invalidos'), 401
+
+    session['user_id'] = usuario['id']
+    session['username'] = usuario['username']
+    session['nome'] = usuario['nome']
+    session['role'] = usuario['role']
+    session.modified = True
+    return redirect(url_for('jogador.index'))
+
+
+@jogador_bp.route('/logout', methods=['POST'])
+@login_required
+def logout():
+    session.clear()
+    return redirect(url_for('jogador.login_page'))
+
+
+@jogador_bp.route('/perfil', methods=['GET'])
+@login_required
+def perfil_page():
+    jogador_proprio = None
+    if not _is_admin():
+        meus = jogador_service.listar_por_usuario(session.get('user_id'))
+        jogador_proprio = meus[0] if meus else None
+    return render_template('perfil.html', usuario=_usuario_logado(), jogador_proprio=jogador_proprio)
+
+
+@jogador_bp.route('/perfil/senha', methods=['POST'])
+@login_required
+def perfil_alterar_senha():
+    senha_atual = request.form.get('senha_atual', '')
+    nova_senha = request.form.get('nova_senha', '')
+    confirmar_senha = request.form.get('confirmar_senha', '')
+
+    if nova_senha != confirmar_senha:
+        return render_template(
+            'perfil.html',
+            usuario=_usuario_logado(),
+            erro_senha='A confirmacao de senha nao confere'
+        ), 400
+
+    try:
+        auth_service.alterar_senha(
+            user_id=session.get('user_id'),
+            senha_atual=senha_atual,
+            nova_senha=nova_senha
+        )
+        return render_template(
+            'perfil.html',
+            usuario=_usuario_logado(),
+            jogador_proprio=(jogador_service.listar_por_usuario(session.get('user_id')) or [None])[0],
+            sucesso_senha='Senha alterada com sucesso!'
+        )
+    except ValueError as e:
+        return render_template(
+            'perfil.html',
+            usuario=_usuario_logado(),
+            jogador_proprio=(jogador_service.listar_por_usuario(session.get('user_id')) or [None])[0],
+            erro_senha=str(e)
+        ), 400
+
+
+@jogador_bp.route('/admin', methods=['GET'])
+@admin_required
+def admin_page():
+    usuarios = auth_service.listar_usuarios()
+    return render_template(
+        'admin.html',
+        usuarios=usuarios,
+        sucesso=request.args.get('sucesso', ''),
+        erro=request.args.get('erro', '')
+    )
+
+
+@jogador_bp.route('/admin/usuarios', methods=['POST'])
+@admin_required
+def admin_criar_usuario():
+    try:
+        username = request.form.get('username', '')
+        nome = request.form.get('nome', '')
+        password = request.form.get('password', '')
+        role = request.form.get('role', 'usuario')
+        auth_service.criar_usuario(username=username, nome=nome, password=password, role=role)
+        return redirect(url_for('jogador.admin_page', sucesso='Usuario criado com sucesso'))
+    except ValueError as e:
+        usuarios = auth_service.listar_usuarios()
+        return render_template('admin.html', usuarios=usuarios, erro=str(e)), 400
+
+
+@jogador_bp.route('/admin/usuarios/<user_id>/ativo', methods=['POST'])
+@admin_required
+def admin_alterar_ativo_usuario(user_id):
+    acao = request.form.get('acao', '').strip().lower()
+    ativo = acao == 'ativar'
+
+    try:
+        auth_service.definir_ativo(
+            user_id=user_id,
+            ativo=ativo,
+            executor_id=session.get('user_id')
+        )
+        mensagem = 'Usuario ativado com sucesso' if ativo else 'Usuario desativado com sucesso'
+        return redirect(url_for('jogador.admin_page', sucesso=mensagem))
+    except ValueError as e:
+        return redirect(url_for('jogador.admin_page', erro=str(e)))
 
 
 @jogador_bp.route('/')
 def index():
     """Página inicial com lista de jogadores"""
-    jogadores = jogador_service.listar()
+    jogadores = _jogadores_visiveis()
     return render_template(
         'index.html',
         jogadores=jogadores,
@@ -111,11 +444,12 @@ def index():
 @jogador_bp.route('/api/jogadores', methods=['GET'])
 def listar_jogadores_api():
     """API: Lista todos os jogadores"""
-    jogadores = jogador_service.listar()
+    jogadores = _jogadores_visiveis()
     return jsonify([j.para_dict() for j in jogadores])
 
 
 @jogador_bp.route('/api/jogadores', methods=['POST'])
+@admin_required
 def criar_jogador_api():
     """API: Cria novo jogador"""
     try:
@@ -138,6 +472,7 @@ def criar_jogador_api():
 
 
 @jogador_bp.route('/add', methods=['POST'])
+@admin_required
 def adicionar_jogador():
     """Formulário: Adiciona novo jogador"""
     try:
@@ -157,13 +492,14 @@ def adicionar_jogador():
 @jogador_bp.route('/api/jogadores/<jogador_id>', methods=['GET'])
 def obter_jogador(jogador_id):
     """API: Obtém jogador por ID"""
-    jogador = jogador_service.obter_por_id(jogador_id)
+    jogador = jogador_service.obter_por_id(jogador_id, None if _is_admin() else session.get('user_id'))
     if not jogador:
         return jsonify({'erro': 'Jogador não encontrado'}), 404
     return jsonify(jogador.para_dict())
 
 
 @jogador_bp.route('/api/jogadores/<jogador_id>', methods=['PUT'])
+@admin_required
 def atualizar_jogador(jogador_id):
     """API: Atualiza jogador"""
     try:
@@ -187,6 +523,7 @@ def atualizar_jogador(jogador_id):
 
 
 @jogador_bp.route('/api/jogadores/<jogador_id>', methods=['DELETE'])
+@admin_required
 def deletar_jogador(jogador_id):
     """API: Deleta jogador"""
     sucesso = jogador_service.deletar(jogador_id)
@@ -196,6 +533,7 @@ def deletar_jogador(jogador_id):
 
 
 @jogador_bp.route('/delete/<jogador_id>')
+@admin_required
 def deletar_jogador_form(jogador_id):
     """Formulário: Deleta jogador"""
     jogador_service.deletar(jogador_id)
@@ -666,6 +1004,7 @@ def api_export_sorteio_data():
 # ============================================================
 
 @jogador_bp.route('/resultado_partida/<int:sorteio_id>')
+@admin_required
 def resultado_partida_page(sorteio_id):
     """Página para registrar resultado de uma partida"""
     sorteio = historico_service.obter_sorteio(sorteio_id)
@@ -681,6 +1020,7 @@ def resultado_partida_page(sorteio_id):
 
 
 @jogador_bp.route('/api/partida/registrar', methods=['POST'])
+@admin_required
 def registrar_resultado_partida():
     """API: Registra resultado de uma partida"""
     try:

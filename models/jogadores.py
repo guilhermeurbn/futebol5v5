@@ -16,6 +16,7 @@ class Jogador:
     presente: bool = False
     id: Optional[str] = None
     criado_em: Optional[str] = None
+    owner_user_id: Optional[str] = None
     
     def __post_init__(self):
         """Validação pós-inicialização"""

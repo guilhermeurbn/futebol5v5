@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1100px;">
+    <header class="header">
+        <div class="header-content">
+            {% set brand_title = 'Painel Admin' %}
+            {% set brand_subtitle = 'Gestão de usuários e permissões' %}
+            {% include '_brand_header.html' %}
+        </div>
+    </header>
+
+    <main class="main">
+        {% if sucesso %}
+            <div class="alert alert-success"><strong>✅</strong> {{ sucesso }}</div>
+        {% endif %}
+        {% if erro %}
+            <div class="alert alert-warning"><strong>⚠️</strong> {{ erro }}</div>
+        {% endif %}
+
+        <section class="section">
+            <h2 class="section-title">➕ Criar Usuário</h2>
+            <form method="post" action="{{ url_for('jogador.admin_criar_usuario') }}" class="form" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;">
+                <input class="form-input" name="nome" placeholder="Nome" required>
+                <input class="form-input" name="username" placeholder="Username" required>
+                <input class="form-input" name="password" type="password" placeholder="Senha" required>
+                <select class="form-input" name="role">
+                    <option value="super_admin">super_admin</option>
+                    <option value="usuario">usuario</option>
+                    <option value="admin">admin</option>
+                </select>
+                <button class="btn btn-primary" type="submit">Criar</button>
+            </form>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">📋 Usuários</h2>
+            <div style="overflow-x: auto;">
+                <table style="width:100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="text-align:left; border-bottom: 1px solid rgba(255,255,255,0.2);">
+                            <th style="padding:10px;">Nome</th>
+                            <th style="padding:10px;">Username</th>
+                            <th style="padding:10px;">Role</th>
+                            <th style="padding:10px;">Ativo</th>
+                            <th style="padding:10px;">Criado em</th>
+                            <th style="padding:10px;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in usuarios %}
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <td style="padding:10px;">{{ u.nome }}</td>
+                            <td style="padding:10px;">{{ u.username }}</td>
+                            <td style="padding:10px;">{{ u.role }}</td>
+                            <td style="padding:10px;">{{ 'sim' if u.ativo else 'não' }}</td>
+                            <td style="padding:10px;">{{ u.criado_em }}</td>
+                            <td style="padding:10px;">
+                                <form method="post" action="{{ url_for('jogador.admin_alterar_ativo_usuario', user_id=u.id) }}" style="display:inline;">
+                                    {% if u.ativo %}
+                                        <input type="hidden" name="acao" value="desativar">
+                                        <button class="btn btn-danger" type="submit" {% if u.id == auth_user.id %}disabled title="Não pode desativar seu próprio usuário"{% endif %}>Desativar</button>
+                                    {% else %}
+                                        <input type="hidden" name="acao" value="ativar">
+                                        <button class="btn btn-success" type="submit">Ativar</button>
+                                    {% endif %}
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+{% endblock %}

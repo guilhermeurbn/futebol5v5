@@ -42,17 +42,38 @@ class JogadorService:
         """Lista todos os jogadores"""
         dados = self._carregar_raw()
         return [Jogador.do_dict(item) for item in dados]
+
+    def listar_por_usuario(self, user_id: str) -> List[Jogador]:
+        """Lista apenas jogadores vinculados ao usuário."""
+        if not user_id:
+            return []
+        return [j for j in self.listar() if j.owner_user_id == user_id]
     
     def listar_para_dict(self) -> List[dict]:
         """Lista todos os jogadores como dicionários"""
         return self._carregar_raw()
+
+    def listar_dict_por_usuario(self, user_id: str) -> List[dict]:
+        """Lista jogadores em dict de um usuário específico."""
+        if not user_id:
+            return []
+        return [j for j in self._carregar_raw() if j.get("owner_user_id") == user_id]
     
-    def obter_por_id(self, jogador_id: str) -> Optional[Jogador]:
+    def obter_por_id(self, jogador_id: str, user_id: Optional[str] = None) -> Optional[Jogador]:
         """Obtém um jogador por ID"""
         jogadores = self.listar()
+        if user_id:
+            return next((j for j in jogadores if j.id == jogador_id and j.owner_user_id == user_id), None)
         return next((j for j in jogadores if j.id == jogador_id), None)
     
-    def criar(self, nome: str, nivel: int, tipo: str = "avulso", posicao: str = "linha") -> Jogador:
+    def criar(
+        self,
+        nome: str,
+        nivel: int,
+        tipo: str = "avulso",
+        posicao: str = "linha",
+        owner_user_id: Optional[str] = None
+    ) -> Jogador:
         """
         Cria um novo jogador
         
@@ -65,7 +86,13 @@ class JogadorService:
         Returns:
             Jogador criado
         """
-        jogador = Jogador(nome=nome.strip(), nivel=nivel, tipo=tipo, posicao=posicao)
+        jogador = Jogador(
+            nome=nome.strip(),
+            nivel=nivel,
+            tipo=tipo,
+            posicao=posicao,
+            owner_user_id=owner_user_id
+        )
         dados = self._carregar_raw()
         dados.append(jogador.para_dict())
         self._salvar(dados)
@@ -90,8 +117,12 @@ class JogadorService:
         jogador_atualizado = Jogador(
             nome=nome.strip(),
             nivel=nivel,
+            tipo=jogador_existente.tipo,
+            posicao=jogador_existente.posicao,
+            presente=jogador_existente.presente,
             id=jogador_id,
-            criado_em=jogador_existente.criado_em
+            criado_em=jogador_existente.criado_em,
+            owner_user_id=jogador_existente.owner_user_id
         )
         
         dados = self._carregar_raw()

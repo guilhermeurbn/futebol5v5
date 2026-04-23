@@ -17117,5 +17117,4098 @@
       31,
       30
     ]
+  },
+  {
+    "id": 136,
+    "data": "2026-04-23T13:44:51.468949",
+    "num_times": 2,
+    "total_jogadores": 10,
+    "times": [
+      {
+        "numero": 1,
+        "jogadores": [
+          {
+            "nome": "Carlos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "9fab9719-120b-4f02-8d47-26cc7481d36d",
+            "criado_em": "2026-04-22T21:36:12.347238"
+          },
+          {
+            "nome": "Guilherme",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+            "criado_em": "2026-04-22T18:55:23.743500"
+          },
+          {
+            "nome": "Rennan",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "0808f78e-8374-4e61-b91e-8285d46e25f1",
+            "criado_em": "2026-04-22T18:55:16.048468"
+          },
+          {
+            "nome": "Carlos atacante",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "cfd8baf3-9a1d-4252-ab2f-6bee4cdd539e",
+            "criado_em": "2026-04-22T18:56:46.608563"
+          },
+          {
+            "nome": "andre balada",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "e74e72bd-3946-474d-b031-409d375d5b2c",
+            "criado_em": "2026-04-22T18:57:50.066716"
+          }
+        ],
+        "soma": 31
+      },
+      {
+        "numero": 2,
+        "jogadores": [
+          {
+            "nome": "bacatela",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "1980f054-1821-430b-bf31-c78a02512392",
+            "criado_em": "2026-04-22T21:37:26.763418"
+          },
+          {
+            "nome": "edmo",
+            "nivel": 7,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "8b4f4b94-fdbe-44b0-9dde-c1eb4d12af01",
+            "criado_em": "2026-04-22T18:57:13.991758"
+          },
+          {
+            "nome": "Lucas Teixeira",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "c6d43df2-ac9b-45be-98c6-84d618c63f87",
+            "criado_em": "2026-04-22T18:58:09.439405"
+          },
+          {
+            "nome": "Alex",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "d9035cd3-6c4d-4e74-93e4-da1bc93cb090",
+            "criado_em": "2026-04-22T18:57:04.938713"
+          },
+          {
+            "nome": "netao",
+            "nivel": 5,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "790b5dd7-664e-469f-99a9-0db00a8eee2c",
+            "criado_em": "2026-04-22T18:57:21.889450"
+          }
+        ],
+        "soma": 30
+      }
+    ],
+    "diferenca": 1,
+    "pontuacoes": [
+      31,
+      30
+    ]
+  },
+  {
+    "id": 137,
+    "data": "2026-04-23T13:49:56.242208",
+    "num_times": 2,
+    "total_jogadores": 10,
+    "times": [
+      {
+        "numero": 1,
+        "jogadores": [
+          {
+            "nome": "Marquinhos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "6ef2af1a-c51e-4bd8-bf21-897fea708b56",
+            "criado_em": "2026-04-22T21:36:04.445170"
+          },
+          {
+            "nome": "Lucas ramos",
+            "nivel": 8,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "4d254123-e08d-4317-9598-9911781ae5ae",
+            "criado_em": "2026-04-22T18:58:20.030398"
+          },
+          {
+            "nome": "Lucas Teixeira",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "c6d43df2-ac9b-45be-98c6-84d618c63f87",
+            "criado_em": "2026-04-22T18:58:09.439405"
+          },
+          {
+            "nome": "luan",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f92bb3d2-1a74-436b-8edf-8a94a285580d",
+            "criado_em": "2026-04-23T00:39:05.519874"
+          },
+          {
+            "nome": "netao",
+            "nivel": 5,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "790b5dd7-664e-469f-99a9-0db00a8eee2c",
+            "criado_em": "2026-04-22T18:57:21.889450"
+          }
+        ],
+        "soma": 34
+      },
+      {
+        "numero": 2,
+        "jogadores": [
+          {
+            "nome": "bacatela",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "1980f054-1821-430b-bf31-c78a02512392",
+            "criado_em": "2026-04-22T21:37:26.763418"
+          },
+          {
+            "nome": "Guilherme",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+            "criado_em": "2026-04-22T18:55:23.743500"
+          },
+          {
+            "nome": "ramon",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f6e4f187-f9f4-44e3-ad57-57fb9c5eabe0",
+            "criado_em": "2026-04-22T18:57:32.391392"
+          },
+          {
+            "nome": "Rennan",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "0808f78e-8374-4e61-b91e-8285d46e25f1",
+            "criado_em": "2026-04-22T18:55:16.048468"
+          },
+          {
+            "nome": "Carlos atacante",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "cfd8baf3-9a1d-4252-ab2f-6bee4cdd539e",
+            "criado_em": "2026-04-22T18:56:46.608563"
+          }
+        ],
+        "soma": 32
+      }
+    ],
+    "diferenca": 2,
+    "pontuacoes": [
+      34,
+      32
+    ]
+  },
+  {
+    "id": 138,
+    "data": "2026-04-23T13:50:05.142020",
+    "num_times": 2,
+    "total_jogadores": 10,
+    "times": [
+      {
+        "numero": 1,
+        "jogadores": [
+          {
+            "nome": "Marquinhos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "6ef2af1a-c51e-4bd8-bf21-897fea708b56",
+            "criado_em": "2026-04-22T21:36:04.445170"
+          },
+          {
+            "nome": "Lucas ramos",
+            "nivel": 8,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "4d254123-e08d-4317-9598-9911781ae5ae",
+            "criado_em": "2026-04-22T18:58:20.030398"
+          },
+          {
+            "nome": "Lucas Teixeira",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "c6d43df2-ac9b-45be-98c6-84d618c63f87",
+            "criado_em": "2026-04-22T18:58:09.439405"
+          },
+          {
+            "nome": "luan",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f92bb3d2-1a74-436b-8edf-8a94a285580d",
+            "criado_em": "2026-04-23T00:39:05.519874"
+          },
+          {
+            "nome": "netao",
+            "nivel": 5,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "790b5dd7-664e-469f-99a9-0db00a8eee2c",
+            "criado_em": "2026-04-22T18:57:21.889450"
+          }
+        ],
+        "soma": 34
+      },
+      {
+        "numero": 2,
+        "jogadores": [
+          {
+            "nome": "bacatela",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "1980f054-1821-430b-bf31-c78a02512392",
+            "criado_em": "2026-04-22T21:37:26.763418"
+          },
+          {
+            "nome": "Guilherme",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+            "criado_em": "2026-04-22T18:55:23.743500"
+          },
+          {
+            "nome": "ramon",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f6e4f187-f9f4-44e3-ad57-57fb9c5eabe0",
+            "criado_em": "2026-04-22T18:57:32.391392"
+          },
+          {
+            "nome": "Rennan",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "0808f78e-8374-4e61-b91e-8285d46e25f1",
+            "criado_em": "2026-04-22T18:55:16.048468"
+          },
+          {
+            "nome": "Carlos atacante",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "cfd8baf3-9a1d-4252-ab2f-6bee4cdd539e",
+            "criado_em": "2026-04-22T18:56:46.608563"
+          }
+        ],
+        "soma": 32
+      }
+    ],
+    "diferenca": 2,
+    "pontuacoes": [
+      34,
+      32
+    ]
+  },
+  {
+    "id": 139,
+    "data": "2026-04-23T13:52:40.347491",
+    "num_times": 2,
+    "total_jogadores": 10,
+    "times": [
+      {
+        "numero": 1,
+        "jogadores": [
+          {
+            "nome": "Marquinhos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "6ef2af1a-c51e-4bd8-bf21-897fea708b56",
+            "criado_em": "2026-04-22T21:36:04.445170"
+          },
+          {
+            "nome": "Lucas ramos",
+            "nivel": 8,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "4d254123-e08d-4317-9598-9911781ae5ae",
+            "criado_em": "2026-04-22T18:58:20.030398"
+          },
+          {
+            "nome": "Lucas Teixeira",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "c6d43df2-ac9b-45be-98c6-84d618c63f87",
+            "criado_em": "2026-04-22T18:58:09.439405"
+          },
+          {
+            "nome": "luan",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f92bb3d2-1a74-436b-8edf-8a94a285580d",
+            "criado_em": "2026-04-23T00:39:05.519874"
+          },
+          {
+            "nome": "netao",
+            "nivel": 5,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "790b5dd7-664e-469f-99a9-0db00a8eee2c",
+            "criado_em": "2026-04-22T18:57:21.889450"
+          }
+        ],
+        "soma": 34
+      },
+      {
+        "numero": 2,
+        "jogadores": [
+          {
+            "nome": "bacatela",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "1980f054-1821-430b-bf31-c78a02512392",
+            "criado_em": "2026-04-22T21:37:26.763418"
+          },
+          {
+            "nome": "Guilherme",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+            "criado_em": "2026-04-22T18:55:23.743500"
+          },
+          {
+            "nome": "ramon",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f6e4f187-f9f4-44e3-ad57-57fb9c5eabe0",
+            "criado_em": "2026-04-22T18:57:32.391392"
+          },
+          {
+            "nome": "Rennan",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "0808f78e-8374-4e61-b91e-8285d46e25f1",
+            "criado_em": "2026-04-22T18:55:16.048468"
+          },
+          {
+            "nome": "Carlos atacante",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "cfd8baf3-9a1d-4252-ab2f-6bee4cdd539e",
+            "criado_em": "2026-04-22T18:56:46.608563"
+          }
+        ],
+        "soma": 32
+      }
+    ],
+    "diferenca": 2,
+    "pontuacoes": [
+      34,
+      32
+    ]
+  },
+  {
+    "id": 140,
+    "data": "2026-04-23T13:54:33.979882",
+    "num_times": 2,
+    "total_jogadores": 10,
+    "times": [
+      {
+        "numero": 1,
+        "jogadores": [
+          {
+            "nome": "Marquinhos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "6ef2af1a-c51e-4bd8-bf21-897fea708b56",
+            "criado_em": "2026-04-22T21:36:04.445170"
+          },
+          {
+            "nome": "Lucas ramos",
+            "nivel": 8,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "4d254123-e08d-4317-9598-9911781ae5ae",
+            "criado_em": "2026-04-22T18:58:20.030398"
+          },
+          {
+            "nome": "Lucas Teixeira",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "c6d43df2-ac9b-45be-98c6-84d618c63f87",
+            "criado_em": "2026-04-22T18:58:09.439405"
+          },
+          {
+            "nome": "luan",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f92bb3d2-1a74-436b-8edf-8a94a285580d",
+            "criado_em": "2026-04-23T00:39:05.519874"
+          },
+          {
+            "nome": "netao",
+            "nivel": 5,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "790b5dd7-664e-469f-99a9-0db00a8eee2c",
+            "criado_em": "2026-04-22T18:57:21.889450"
+          }
+        ],
+        "soma": 34
+      },
+      {
+        "numero": 2,
+        "jogadores": [
+          {
+            "nome": "bacatela",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "1980f054-1821-430b-bf31-c78a02512392",
+            "criado_em": "2026-04-22T21:37:26.763418"
+          },
+          {
+            "nome": "Guilherme",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+            "criado_em": "2026-04-22T18:55:23.743500"
+          },
+          {
+            "nome": "ramon",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f6e4f187-f9f4-44e3-ad57-57fb9c5eabe0",
+            "criado_em": "2026-04-22T18:57:32.391392"
+          },
+          {
+            "nome": "Rennan",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "0808f78e-8374-4e61-b91e-8285d46e25f1",
+            "criado_em": "2026-04-22T18:55:16.048468"
+          },
+          {
+            "nome": "Carlos atacante",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "cfd8baf3-9a1d-4252-ab2f-6bee4cdd539e",
+            "criado_em": "2026-04-22T18:56:46.608563"
+          }
+        ],
+        "soma": 32
+      }
+    ],
+    "diferenca": 2,
+    "pontuacoes": [
+      34,
+      32
+    ]
+  },
+  {
+    "id": 141,
+    "data": "2026-04-23T22:11:41.676671",
+    "num_times": 2,
+    "total_jogadores": 10,
+    "times": [
+      {
+        "numero": 1,
+        "jogadores": [
+          {
+            "nome": "Marquinhos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "6ef2af1a-c51e-4bd8-bf21-897fea708b56",
+            "criado_em": "2026-04-22T21:36:04.445170"
+          },
+          {
+            "nome": "Lucas ramos",
+            "nivel": 8,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "4d254123-e08d-4317-9598-9911781ae5ae",
+            "criado_em": "2026-04-22T18:58:20.030398"
+          },
+          {
+            "nome": "Lucas Teixeira",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "c6d43df2-ac9b-45be-98c6-84d618c63f87",
+            "criado_em": "2026-04-22T18:58:09.439405"
+          },
+          {
+            "nome": "luan",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f92bb3d2-1a74-436b-8edf-8a94a285580d",
+            "criado_em": "2026-04-23T00:39:05.519874"
+          },
+          {
+            "nome": "netao",
+            "nivel": 5,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "790b5dd7-664e-469f-99a9-0db00a8eee2c",
+            "criado_em": "2026-04-22T18:57:21.889450"
+          }
+        ],
+        "soma": 34
+      },
+      {
+        "numero": 2,
+        "jogadores": [
+          {
+            "nome": "bacatela",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "1980f054-1821-430b-bf31-c78a02512392",
+            "criado_em": "2026-04-22T21:37:26.763418"
+          },
+          {
+            "nome": "Guilherme",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+            "criado_em": "2026-04-22T18:55:23.743500"
+          },
+          {
+            "nome": "ramon",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f6e4f187-f9f4-44e3-ad57-57fb9c5eabe0",
+            "criado_em": "2026-04-22T18:57:32.391392"
+          },
+          {
+            "nome": "Rennan",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "0808f78e-8374-4e61-b91e-8285d46e25f1",
+            "criado_em": "2026-04-22T18:55:16.048468"
+          },
+          {
+            "nome": "Carlos atacante",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "cfd8baf3-9a1d-4252-ab2f-6bee4cdd539e",
+            "criado_em": "2026-04-22T18:56:46.608563"
+          }
+        ],
+        "soma": 32
+      }
+    ],
+    "diferenca": 2,
+    "pontuacoes": [
+      34,
+      32
+    ]
+  },
+  {
+    "id": 142,
+    "data": "2026-04-23T22:17:57.170143",
+    "num_times": 3,
+    "total_jogadores": 15,
+    "times": [
+      {
+        "numero": 1,
+        "jogadores": [
+          {
+            "nome": "Marquinhos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "6ef2af1a-c51e-4bd8-bf21-897fea708b56",
+            "criado_em": "2026-04-22T21:36:04.445170"
+          },
+          {
+            "nome": "luan",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f92bb3d2-1a74-436b-8edf-8a94a285580d",
+            "criado_em": "2026-04-23T00:39:05.519874"
+          },
+          {
+            "nome": "Guilherme",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+            "criado_em": "2026-04-22T18:55:23.743500"
+          },
+          {
+            "nome": "ramon",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f6e4f187-f9f4-44e3-ad57-57fb9c5eabe0",
+            "criado_em": "2026-04-22T18:57:32.391392"
+          },
+          {
+            "nome": "Carlos atacante",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "cfd8baf3-9a1d-4252-ab2f-6bee4cdd539e",
+            "criado_em": "2026-04-22T18:56:46.608563"
+          }
+        ],
+        "soma": 34
+      },
+      {
+        "numero": 2,
+        "jogadores": [
+          {
+            "nome": "Carlos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "9fab9719-120b-4f02-8d47-26cc7481d36d",
+            "criado_em": "2026-04-22T21:36:12.347238"
+          },
+          {
+            "nome": "Milena",
+            "nivel": 10,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "e46e8c8a-a3fa-42a6-9f47-7c10268ee9d4",
+            "criado_em": "2026-04-23T22:15:30.949079"
+          },
+          {
+            "nome": "Andrey",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "9781928f-5831-43f5-9441-5a1f004a51ec",
+            "criado_em": "2026-04-22T19:10:41.404878"
+          },
+          {
+            "nome": "Rennan",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "0808f78e-8374-4e61-b91e-8285d46e25f1",
+            "criado_em": "2026-04-22T18:55:16.048468"
+          },
+          {
+            "nome": "Alex",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "d9035cd3-6c4d-4e74-93e4-da1bc93cb090",
+            "criado_em": "2026-04-22T18:57:04.938713"
+          }
+        ],
+        "soma": 34
+      },
+      {
+        "numero": 3,
+        "jogadores": [
+          {
+            "nome": "bacatela",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "1980f054-1821-430b-bf31-c78a02512392",
+            "criado_em": "2026-04-22T21:37:26.763418"
+          },
+          {
+            "nome": "Lucas Teixeira",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "c6d43df2-ac9b-45be-98c6-84d618c63f87",
+            "criado_em": "2026-04-22T18:58:09.439405"
+          },
+          {
+            "nome": "edmo",
+            "nivel": 7,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "8b4f4b94-fdbe-44b0-9dde-c1eb4d12af01",
+            "criado_em": "2026-04-22T18:57:13.991758"
+          },
+          {
+            "nome": "Lucas ramos",
+            "nivel": 8,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "4d254123-e08d-4317-9598-9911781ae5ae",
+            "criado_em": "2026-04-22T18:58:20.030398"
+          },
+          {
+            "nome": "netao",
+            "nivel": 5,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "790b5dd7-664e-469f-99a9-0db00a8eee2c",
+            "criado_em": "2026-04-22T18:57:21.889450"
+          }
+        ],
+        "soma": 33
+      }
+    ],
+    "diferenca": 1,
+    "pontuacoes": [
+      34,
+      34,
+      33
+    ]
+  },
+  {
+    "id": 143,
+    "data": "2026-04-23T22:17:58.823898",
+    "num_times": 3,
+    "total_jogadores": 15,
+    "times": [
+      {
+        "numero": 1,
+        "jogadores": [
+          {
+            "nome": "Marquinhos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "6ef2af1a-c51e-4bd8-bf21-897fea708b56",
+            "criado_em": "2026-04-22T21:36:04.445170"
+          },
+          {
+            "nome": "Milena",
+            "nivel": 10,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "e46e8c8a-a3fa-42a6-9f47-7c10268ee9d4",
+            "criado_em": "2026-04-23T22:15:30.949079"
+          },
+          {
+            "nome": "Lucas Teixeira",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "c6d43df2-ac9b-45be-98c6-84d618c63f87",
+            "criado_em": "2026-04-22T18:58:09.439405"
+          },
+          {
+            "nome": "luan",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f92bb3d2-1a74-436b-8edf-8a94a285580d",
+            "criado_em": "2026-04-23T00:39:05.519874"
+          },
+          {
+            "nome": "netao",
+            "nivel": 5,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "790b5dd7-664e-469f-99a9-0db00a8eee2c",
+            "criado_em": "2026-04-22T18:57:21.889450"
+          }
+        ],
+        "soma": 36
+      },
+      {
+        "numero": 2,
+        "jogadores": [
+          {
+            "nome": "Carlos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "9fab9719-120b-4f02-8d47-26cc7481d36d",
+            "criado_em": "2026-04-22T21:36:12.347238"
+          },
+          {
+            "nome": "Lucas ramos",
+            "nivel": 8,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "4d254123-e08d-4317-9598-9911781ae5ae",
+            "criado_em": "2026-04-22T18:58:20.030398"
+          },
+          {
+            "nome": "ramon",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f6e4f187-f9f4-44e3-ad57-57fb9c5eabe0",
+            "criado_em": "2026-04-22T18:57:32.391392"
+          },
+          {
+            "nome": "Rennan",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "0808f78e-8374-4e61-b91e-8285d46e25f1",
+            "criado_em": "2026-04-22T18:55:16.048468"
+          },
+          {
+            "nome": "Guilherme",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+            "criado_em": "2026-04-22T18:55:23.743500"
+          }
+        ],
+        "soma": 35
+      },
+      {
+        "numero": 3,
+        "jogadores": [
+          {
+            "nome": "Alex",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "d9035cd3-6c4d-4e74-93e4-da1bc93cb090",
+            "criado_em": "2026-04-22T18:57:04.938713"
+          },
+          {
+            "nome": "edmo",
+            "nivel": 7,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "8b4f4b94-fdbe-44b0-9dde-c1eb4d12af01",
+            "criado_em": "2026-04-22T18:57:13.991758"
+          },
+          {
+            "nome": "Carlos atacante",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "cfd8baf3-9a1d-4252-ab2f-6bee4cdd539e",
+            "criado_em": "2026-04-22T18:56:46.608563"
+          },
+          {
+            "nome": "Andrey",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "9781928f-5831-43f5-9441-5a1f004a51ec",
+            "criado_em": "2026-04-22T19:10:41.404878"
+          },
+          {
+            "nome": "andre balada",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "e74e72bd-3946-474d-b031-409d375d5b2c",
+            "criado_em": "2026-04-22T18:57:50.066716"
+          }
+        ],
+        "soma": 29
+      }
+    ],
+    "diferenca": 7,
+    "pontuacoes": [
+      36,
+      35,
+      29
+    ]
+  },
+  {
+    "id": 144,
+    "data": "2026-04-23T22:36:51.664469",
+    "num_times": 2,
+    "total_jogadores": 10,
+    "times": [
+      {
+        "numero": 1,
+        "jogadores": [
+          {
+            "nome": "Carlos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "9fab9719-120b-4f02-8d47-26cc7481d36d",
+            "criado_em": "2026-04-22T21:36:12.347238"
+          },
+          {
+            "nome": "Lucas ramos",
+            "nivel": 8,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "4d254123-e08d-4317-9598-9911781ae5ae",
+            "criado_em": "2026-04-22T18:58:20.030398"
+          },
+          {
+            "nome": "Lucas Teixeira",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "c6d43df2-ac9b-45be-98c6-84d618c63f87",
+            "criado_em": "2026-04-22T18:58:09.439405"
+          },
+          {
+            "nome": "luan",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f92bb3d2-1a74-436b-8edf-8a94a285580d",
+            "criado_em": "2026-04-23T00:39:05.519874"
+          },
+          {
+            "nome": "netao",
+            "nivel": 5,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "790b5dd7-664e-469f-99a9-0db00a8eee2c",
+            "criado_em": "2026-04-22T18:57:21.889450"
+          }
+        ],
+        "soma": 34
+      },
+      {
+        "numero": 2,
+        "jogadores": [
+          {
+            "nome": "bacatela",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "1980f054-1821-430b-bf31-c78a02512392",
+            "criado_em": "2026-04-22T21:37:26.763418"
+          },
+          {
+            "nome": "Guilherme",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+            "criado_em": "2026-04-22T18:55:23.743500"
+          },
+          {
+            "nome": "ramon",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f6e4f187-f9f4-44e3-ad57-57fb9c5eabe0",
+            "criado_em": "2026-04-22T18:57:32.391392"
+          },
+          {
+            "nome": "Rennan",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "0808f78e-8374-4e61-b91e-8285d46e25f1",
+            "criado_em": "2026-04-22T18:55:16.048468"
+          },
+          {
+            "nome": "Carlos atacante",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "cfd8baf3-9a1d-4252-ab2f-6bee4cdd539e",
+            "criado_em": "2026-04-22T18:56:46.608563"
+          }
+        ],
+        "soma": 32
+      }
+    ],
+    "diferenca": 2,
+    "pontuacoes": [
+      34,
+      32
+    ]
+  },
+  {
+    "id": 145,
+    "data": "2026-04-23T22:38:48.250935",
+    "num_times": 3,
+    "total_jogadores": 15,
+    "times": [
+      {
+        "numero": 1,
+        "jogadores": [
+          {
+            "nome": "Marquinhos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "6ef2af1a-c51e-4bd8-bf21-897fea708b56",
+            "criado_em": "2026-04-22T21:36:04.445170"
+          },
+          {
+            "nome": "Lucas ramos",
+            "nivel": 8,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "4d254123-e08d-4317-9598-9911781ae5ae",
+            "criado_em": "2026-04-22T18:58:20.030398"
+          },
+          {
+            "nome": "luan",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f92bb3d2-1a74-436b-8edf-8a94a285580d",
+            "criado_em": "2026-04-23T00:39:05.519874"
+          },
+          {
+            "nome": "Rennan",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "0808f78e-8374-4e61-b91e-8285d46e25f1",
+            "criado_em": "2026-04-22T18:55:16.048468"
+          },
+          {
+            "nome": "andre balada",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "e74e72bd-3946-474d-b031-409d375d5b2c",
+            "criado_em": "2026-04-22T18:57:50.066716"
+          }
+        ],
+        "soma": 33
+      },
+      {
+        "numero": 2,
+        "jogadores": [
+          {
+            "nome": "Carlos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "9fab9719-120b-4f02-8d47-26cc7481d36d",
+            "criado_em": "2026-04-22T21:36:12.347238"
+          },
+          {
+            "nome": "Guilherme",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+            "criado_em": "2026-04-22T18:55:23.743500"
+          },
+          {
+            "nome": "Lucas Teixeira",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "c6d43df2-ac9b-45be-98c6-84d618c63f87",
+            "criado_em": "2026-04-22T18:58:09.439405"
+          },
+          {
+            "nome": "Carlos atacante",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "cfd8baf3-9a1d-4252-ab2f-6bee4cdd539e",
+            "criado_em": "2026-04-22T18:56:46.608563"
+          },
+          {
+            "nome": "netao",
+            "nivel": 5,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "790b5dd7-664e-469f-99a9-0db00a8eee2c",
+            "criado_em": "2026-04-22T18:57:21.889450"
+          }
+        ],
+        "soma": 32
+      },
+      {
+        "numero": 3,
+        "jogadores": [
+          {
+            "nome": "bacatela",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "1980f054-1821-430b-bf31-c78a02512392",
+            "criado_em": "2026-04-22T21:37:26.763418"
+          },
+          {
+            "nome": "edmo",
+            "nivel": 7,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "8b4f4b94-fdbe-44b0-9dde-c1eb4d12af01",
+            "criado_em": "2026-04-22T18:57:13.991758"
+          },
+          {
+            "nome": "ramon",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f6e4f187-f9f4-44e3-ad57-57fb9c5eabe0",
+            "criado_em": "2026-04-22T18:57:32.391392"
+          },
+          {
+            "nome": "Andrey",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "9781928f-5831-43f5-9441-5a1f004a51ec",
+            "criado_em": "2026-04-22T19:10:41.404878"
+          },
+          {
+            "nome": "Alex",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "d9035cd3-6c4d-4e74-93e4-da1bc93cb090",
+            "criado_em": "2026-04-22T18:57:04.938713"
+          }
+        ],
+        "soma": 31
+      }
+    ],
+    "diferenca": 2,
+    "pontuacoes": [
+      33,
+      32,
+      31
+    ]
+  },
+  {
+    "id": 146,
+    "data": "2026-04-23T22:38:48.297091",
+    "num_times": 3,
+    "total_jogadores": 15,
+    "times": [
+      {
+        "numero": 1,
+        "jogadores": [
+          {
+            "nome": "Marquinhos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "6ef2af1a-c51e-4bd8-bf21-897fea708b56",
+            "criado_em": "2026-04-22T21:36:04.445170"
+          },
+          {
+            "nome": "edmo",
+            "nivel": 7,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "8b4f4b94-fdbe-44b0-9dde-c1eb4d12af01",
+            "criado_em": "2026-04-22T18:57:13.991758"
+          },
+          {
+            "nome": "luan",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f92bb3d2-1a74-436b-8edf-8a94a285580d",
+            "criado_em": "2026-04-23T00:39:05.519874"
+          },
+          {
+            "nome": "Rennan",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "0808f78e-8374-4e61-b91e-8285d46e25f1",
+            "criado_em": "2026-04-22T18:55:16.048468"
+          },
+          {
+            "nome": "andre balada",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "e74e72bd-3946-474d-b031-409d375d5b2c",
+            "criado_em": "2026-04-22T18:57:50.066716"
+          }
+        ],
+        "soma": 32
+      },
+      {
+        "numero": 2,
+        "jogadores": [
+          {
+            "nome": "Carlos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "9fab9719-120b-4f02-8d47-26cc7481d36d",
+            "criado_em": "2026-04-22T21:36:12.347238"
+          },
+          {
+            "nome": "Guilherme",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+            "criado_em": "2026-04-22T18:55:23.743500"
+          },
+          {
+            "nome": "Lucas Teixeira",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "c6d43df2-ac9b-45be-98c6-84d618c63f87",
+            "criado_em": "2026-04-22T18:58:09.439405"
+          },
+          {
+            "nome": "Carlos atacante",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "cfd8baf3-9a1d-4252-ab2f-6bee4cdd539e",
+            "criado_em": "2026-04-22T18:56:46.608563"
+          },
+          {
+            "nome": "netao",
+            "nivel": 5,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "790b5dd7-664e-469f-99a9-0db00a8eee2c",
+            "criado_em": "2026-04-22T18:57:21.889450"
+          }
+        ],
+        "soma": 32
+      },
+      {
+        "numero": 3,
+        "jogadores": [
+          {
+            "nome": "bacatela",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "1980f054-1821-430b-bf31-c78a02512392",
+            "criado_em": "2026-04-22T21:37:26.763418"
+          },
+          {
+            "nome": "Lucas ramos",
+            "nivel": 8,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "4d254123-e08d-4317-9598-9911781ae5ae",
+            "criado_em": "2026-04-22T18:58:20.030398"
+          },
+          {
+            "nome": "ramon",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f6e4f187-f9f4-44e3-ad57-57fb9c5eabe0",
+            "criado_em": "2026-04-22T18:57:32.391392"
+          },
+          {
+            "nome": "Andrey",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "9781928f-5831-43f5-9441-5a1f004a51ec",
+            "criado_em": "2026-04-22T19:10:41.404878"
+          },
+          {
+            "nome": "Alex",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "d9035cd3-6c4d-4e74-93e4-da1bc93cb090",
+            "criado_em": "2026-04-22T18:57:04.938713"
+          }
+        ],
+        "soma": 32
+      }
+    ],
+    "diferenca": 0,
+    "pontuacoes": [
+      32,
+      32,
+      32
+    ]
+  },
+  {
+    "id": 147,
+    "data": "2026-04-23T22:38:48.342922",
+    "num_times": 3,
+    "total_jogadores": 15,
+    "times": [
+      {
+        "numero": 1,
+        "jogadores": [
+          {
+            "nome": "Marquinhos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "6ef2af1a-c51e-4bd8-bf21-897fea708b56",
+            "criado_em": "2026-04-22T21:36:04.445170"
+          },
+          {
+            "nome": "Lucas ramos",
+            "nivel": 8,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "4d254123-e08d-4317-9598-9911781ae5ae",
+            "criado_em": "2026-04-22T18:58:20.030398"
+          },
+          {
+            "nome": "luan",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f92bb3d2-1a74-436b-8edf-8a94a285580d",
+            "criado_em": "2026-04-23T00:39:05.519874"
+          },
+          {
+            "nome": "Rennan",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "0808f78e-8374-4e61-b91e-8285d46e25f1",
+            "criado_em": "2026-04-22T18:55:16.048468"
+          },
+          {
+            "nome": "edmo",
+            "nivel": 7,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "8b4f4b94-fdbe-44b0-9dde-c1eb4d12af01",
+            "criado_em": "2026-04-22T18:57:13.991758"
+          }
+        ],
+        "soma": 35
+      },
+      {
+        "numero": 2,
+        "jogadores": [
+          {
+            "nome": "Carlos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "9fab9719-120b-4f02-8d47-26cc7481d36d",
+            "criado_em": "2026-04-22T21:36:12.347238"
+          },
+          {
+            "nome": "Guilherme",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+            "criado_em": "2026-04-22T18:55:23.743500"
+          },
+          {
+            "nome": "Lucas Teixeira",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "c6d43df2-ac9b-45be-98c6-84d618c63f87",
+            "criado_em": "2026-04-22T18:58:09.439405"
+          },
+          {
+            "nome": "Carlos atacante",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "cfd8baf3-9a1d-4252-ab2f-6bee4cdd539e",
+            "criado_em": "2026-04-22T18:56:46.608563"
+          },
+          {
+            "nome": "netao",
+            "nivel": 5,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "790b5dd7-664e-469f-99a9-0db00a8eee2c",
+            "criado_em": "2026-04-22T18:57:21.889450"
+          }
+        ],
+        "soma": 32
+      },
+      {
+        "numero": 3,
+        "jogadores": [
+          {
+            "nome": "bacatela",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "1980f054-1821-430b-bf31-c78a02512392",
+            "criado_em": "2026-04-22T21:37:26.763418"
+          },
+          {
+            "nome": "andre balada",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "e74e72bd-3946-474d-b031-409d375d5b2c",
+            "criado_em": "2026-04-22T18:57:50.066716"
+          },
+          {
+            "nome": "ramon",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f6e4f187-f9f4-44e3-ad57-57fb9c5eabe0",
+            "criado_em": "2026-04-22T18:57:32.391392"
+          },
+          {
+            "nome": "Andrey",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "9781928f-5831-43f5-9441-5a1f004a51ec",
+            "criado_em": "2026-04-22T19:10:41.404878"
+          },
+          {
+            "nome": "Alex",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "d9035cd3-6c4d-4e74-93e4-da1bc93cb090",
+            "criado_em": "2026-04-22T18:57:04.938713"
+          }
+        ],
+        "soma": 29
+      }
+    ],
+    "diferenca": 6,
+    "pontuacoes": [
+      35,
+      32,
+      29
+    ]
+  },
+  {
+    "id": 148,
+    "data": "2026-04-23T22:38:48.389760",
+    "num_times": 3,
+    "total_jogadores": 15,
+    "times": [
+      {
+        "numero": 1,
+        "jogadores": [
+          {
+            "nome": "Marquinhos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "6ef2af1a-c51e-4bd8-bf21-897fea708b56",
+            "criado_em": "2026-04-22T21:36:04.445170"
+          },
+          {
+            "nome": "Lucas ramos",
+            "nivel": 8,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "4d254123-e08d-4317-9598-9911781ae5ae",
+            "criado_em": "2026-04-22T18:58:20.030398"
+          },
+          {
+            "nome": "luan",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f92bb3d2-1a74-436b-8edf-8a94a285580d",
+            "criado_em": "2026-04-23T00:39:05.519874"
+          },
+          {
+            "nome": "Rennan",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "0808f78e-8374-4e61-b91e-8285d46e25f1",
+            "criado_em": "2026-04-22T18:55:16.048468"
+          },
+          {
+            "nome": "Lucas Teixeira",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "c6d43df2-ac9b-45be-98c6-84d618c63f87",
+            "criado_em": "2026-04-22T18:58:09.439405"
+          }
+        ],
+        "soma": 35
+      },
+      {
+        "numero": 2,
+        "jogadores": [
+          {
+            "nome": "Carlos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "9fab9719-120b-4f02-8d47-26cc7481d36d",
+            "criado_em": "2026-04-22T21:36:12.347238"
+          },
+          {
+            "nome": "Guilherme",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+            "criado_em": "2026-04-22T18:55:23.743500"
+          },
+          {
+            "nome": "andre balada",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "e74e72bd-3946-474d-b031-409d375d5b2c",
+            "criado_em": "2026-04-22T18:57:50.066716"
+          },
+          {
+            "nome": "Carlos atacante",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "cfd8baf3-9a1d-4252-ab2f-6bee4cdd539e",
+            "criado_em": "2026-04-22T18:56:46.608563"
+          },
+          {
+            "nome": "netao",
+            "nivel": 5,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "790b5dd7-664e-469f-99a9-0db00a8eee2c",
+            "criado_em": "2026-04-22T18:57:21.889450"
+          }
+        ],
+        "soma": 30
+      },
+      {
+        "numero": 3,
+        "jogadores": [
+          {
+            "nome": "bacatela",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "1980f054-1821-430b-bf31-c78a02512392",
+            "criado_em": "2026-04-22T21:37:26.763418"
+          },
+          {
+            "nome": "edmo",
+            "nivel": 7,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "8b4f4b94-fdbe-44b0-9dde-c1eb4d12af01",
+            "criado_em": "2026-04-22T18:57:13.991758"
+          },
+          {
+            "nome": "ramon",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f6e4f187-f9f4-44e3-ad57-57fb9c5eabe0",
+            "criado_em": "2026-04-22T18:57:32.391392"
+          },
+          {
+            "nome": "Andrey",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "9781928f-5831-43f5-9441-5a1f004a51ec",
+            "criado_em": "2026-04-22T19:10:41.404878"
+          },
+          {
+            "nome": "Alex",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "d9035cd3-6c4d-4e74-93e4-da1bc93cb090",
+            "criado_em": "2026-04-22T18:57:04.938713"
+          }
+        ],
+        "soma": 31
+      }
+    ],
+    "diferenca": 5,
+    "pontuacoes": [
+      35,
+      30,
+      31
+    ]
+  },
+  {
+    "id": 149,
+    "data": "2026-04-23T22:38:48.435581",
+    "num_times": 3,
+    "total_jogadores": 15,
+    "times": [
+      {
+        "numero": 1,
+        "jogadores": [
+          {
+            "nome": "Marquinhos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "6ef2af1a-c51e-4bd8-bf21-897fea708b56",
+            "criado_em": "2026-04-22T21:36:04.445170"
+          },
+          {
+            "nome": "Lucas ramos",
+            "nivel": 8,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "4d254123-e08d-4317-9598-9911781ae5ae",
+            "criado_em": "2026-04-22T18:58:20.030398"
+          },
+          {
+            "nome": "netao",
+            "nivel": 5,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "790b5dd7-664e-469f-99a9-0db00a8eee2c",
+            "criado_em": "2026-04-22T18:57:21.889450"
+          },
+          {
+            "nome": "Rennan",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "0808f78e-8374-4e61-b91e-8285d46e25f1",
+            "criado_em": "2026-04-22T18:55:16.048468"
+          },
+          {
+            "nome": "andre balada",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "e74e72bd-3946-474d-b031-409d375d5b2c",
+            "criado_em": "2026-04-22T18:57:50.066716"
+          }
+        ],
+        "soma": 31
+      },
+      {
+        "numero": 2,
+        "jogadores": [
+          {
+            "nome": "Carlos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "9fab9719-120b-4f02-8d47-26cc7481d36d",
+            "criado_em": "2026-04-22T21:36:12.347238"
+          },
+          {
+            "nome": "Guilherme",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+            "criado_em": "2026-04-22T18:55:23.743500"
+          },
+          {
+            "nome": "Lucas Teixeira",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "c6d43df2-ac9b-45be-98c6-84d618c63f87",
+            "criado_em": "2026-04-22T18:58:09.439405"
+          },
+          {
+            "nome": "Carlos atacante",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "cfd8baf3-9a1d-4252-ab2f-6bee4cdd539e",
+            "criado_em": "2026-04-22T18:56:46.608563"
+          },
+          {
+            "nome": "luan",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f92bb3d2-1a74-436b-8edf-8a94a285580d",
+            "criado_em": "2026-04-23T00:39:05.519874"
+          }
+        ],
+        "soma": 34
+      },
+      {
+        "numero": 3,
+        "jogadores": [
+          {
+            "nome": "bacatela",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "1980f054-1821-430b-bf31-c78a02512392",
+            "criado_em": "2026-04-22T21:37:26.763418"
+          },
+          {
+            "nome": "edmo",
+            "nivel": 7,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "8b4f4b94-fdbe-44b0-9dde-c1eb4d12af01",
+            "criado_em": "2026-04-22T18:57:13.991758"
+          },
+          {
+            "nome": "ramon",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f6e4f187-f9f4-44e3-ad57-57fb9c5eabe0",
+            "criado_em": "2026-04-22T18:57:32.391392"
+          },
+          {
+            "nome": "Andrey",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "9781928f-5831-43f5-9441-5a1f004a51ec",
+            "criado_em": "2026-04-22T19:10:41.404878"
+          },
+          {
+            "nome": "Alex",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "d9035cd3-6c4d-4e74-93e4-da1bc93cb090",
+            "criado_em": "2026-04-22T18:57:04.938713"
+          }
+        ],
+        "soma": 31
+      }
+    ],
+    "diferenca": 3,
+    "pontuacoes": [
+      31,
+      34,
+      31
+    ]
+  },
+  {
+    "id": 150,
+    "data": "2026-04-23T22:38:48.482036",
+    "num_times": 3,
+    "total_jogadores": 15,
+    "times": [
+      {
+        "numero": 1,
+        "jogadores": [
+          {
+            "nome": "Alex",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "d9035cd3-6c4d-4e74-93e4-da1bc93cb090",
+            "criado_em": "2026-04-22T18:57:04.938713"
+          },
+          {
+            "nome": "Lucas ramos",
+            "nivel": 8,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "4d254123-e08d-4317-9598-9911781ae5ae",
+            "criado_em": "2026-04-22T18:58:20.030398"
+          },
+          {
+            "nome": "luan",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f92bb3d2-1a74-436b-8edf-8a94a285580d",
+            "criado_em": "2026-04-23T00:39:05.519874"
+          },
+          {
+            "nome": "Rennan",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "0808f78e-8374-4e61-b91e-8285d46e25f1",
+            "criado_em": "2026-04-22T18:55:16.048468"
+          },
+          {
+            "nome": "andre balada",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "e74e72bd-3946-474d-b031-409d375d5b2c",
+            "criado_em": "2026-04-22T18:57:50.066716"
+          }
+        ],
+        "soma": 31
+      },
+      {
+        "numero": 2,
+        "jogadores": [
+          {
+            "nome": "Carlos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "9fab9719-120b-4f02-8d47-26cc7481d36d",
+            "criado_em": "2026-04-22T21:36:12.347238"
+          },
+          {
+            "nome": "Guilherme",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+            "criado_em": "2026-04-22T18:55:23.743500"
+          },
+          {
+            "nome": "Lucas Teixeira",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "c6d43df2-ac9b-45be-98c6-84d618c63f87",
+            "criado_em": "2026-04-22T18:58:09.439405"
+          },
+          {
+            "nome": "Carlos atacante",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "cfd8baf3-9a1d-4252-ab2f-6bee4cdd539e",
+            "criado_em": "2026-04-22T18:56:46.608563"
+          },
+          {
+            "nome": "netao",
+            "nivel": 5,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "790b5dd7-664e-469f-99a9-0db00a8eee2c",
+            "criado_em": "2026-04-22T18:57:21.889450"
+          }
+        ],
+        "soma": 32
+      },
+      {
+        "numero": 3,
+        "jogadores": [
+          {
+            "nome": "bacatela",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "1980f054-1821-430b-bf31-c78a02512392",
+            "criado_em": "2026-04-22T21:37:26.763418"
+          },
+          {
+            "nome": "edmo",
+            "nivel": 7,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "8b4f4b94-fdbe-44b0-9dde-c1eb4d12af01",
+            "criado_em": "2026-04-22T18:57:13.991758"
+          },
+          {
+            "nome": "ramon",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f6e4f187-f9f4-44e3-ad57-57fb9c5eabe0",
+            "criado_em": "2026-04-22T18:57:32.391392"
+          },
+          {
+            "nome": "Andrey",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "9781928f-5831-43f5-9441-5a1f004a51ec",
+            "criado_em": "2026-04-22T19:10:41.404878"
+          },
+          {
+            "nome": "Marquinhos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "6ef2af1a-c51e-4bd8-bf21-897fea708b56",
+            "criado_em": "2026-04-22T21:36:04.445170"
+          }
+        ],
+        "soma": 33
+      }
+    ],
+    "diferenca": 2,
+    "pontuacoes": [
+      31,
+      32,
+      33
+    ]
+  },
+  {
+    "id": 151,
+    "data": "2026-04-23T22:39:51.536107",
+    "num_times": 3,
+    "total_jogadores": 15,
+    "times": [
+      {
+        "numero": 1,
+        "jogadores": [
+          {
+            "nome": "Marquinhos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "6ef2af1a-c51e-4bd8-bf21-897fea708b56",
+            "criado_em": "2026-04-22T21:36:04.445170"
+          },
+          {
+            "nome": "Lucas ramos",
+            "nivel": 8,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "4d254123-e08d-4317-9598-9911781ae5ae",
+            "criado_em": "2026-04-22T18:58:20.030398"
+          },
+          {
+            "nome": "luan",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f92bb3d2-1a74-436b-8edf-8a94a285580d",
+            "criado_em": "2026-04-23T00:39:05.519874"
+          },
+          {
+            "nome": "Rennan",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "0808f78e-8374-4e61-b91e-8285d46e25f1",
+            "criado_em": "2026-04-22T18:55:16.048468"
+          },
+          {
+            "nome": "andre balada",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "e74e72bd-3946-474d-b031-409d375d5b2c",
+            "criado_em": "2026-04-22T18:57:50.066716"
+          }
+        ],
+        "soma": 33
+      },
+      {
+        "numero": 2,
+        "jogadores": [
+          {
+            "nome": "Carlos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "9fab9719-120b-4f02-8d47-26cc7481d36d",
+            "criado_em": "2026-04-22T21:36:12.347238"
+          },
+          {
+            "nome": "Guilherme",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+            "criado_em": "2026-04-22T18:55:23.743500"
+          },
+          {
+            "nome": "Lucas Teixeira",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "c6d43df2-ac9b-45be-98c6-84d618c63f87",
+            "criado_em": "2026-04-22T18:58:09.439405"
+          },
+          {
+            "nome": "Carlos atacante",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "cfd8baf3-9a1d-4252-ab2f-6bee4cdd539e",
+            "criado_em": "2026-04-22T18:56:46.608563"
+          },
+          {
+            "nome": "netao",
+            "nivel": 5,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "790b5dd7-664e-469f-99a9-0db00a8eee2c",
+            "criado_em": "2026-04-22T18:57:21.889450"
+          }
+        ],
+        "soma": 32
+      },
+      {
+        "numero": 3,
+        "jogadores": [
+          {
+            "nome": "bacatela",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "1980f054-1821-430b-bf31-c78a02512392",
+            "criado_em": "2026-04-22T21:37:26.763418"
+          },
+          {
+            "nome": "edmo",
+            "nivel": 7,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "8b4f4b94-fdbe-44b0-9dde-c1eb4d12af01",
+            "criado_em": "2026-04-22T18:57:13.991758"
+          },
+          {
+            "nome": "ramon",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f6e4f187-f9f4-44e3-ad57-57fb9c5eabe0",
+            "criado_em": "2026-04-22T18:57:32.391392"
+          },
+          {
+            "nome": "Andrey",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "9781928f-5831-43f5-9441-5a1f004a51ec",
+            "criado_em": "2026-04-22T19:10:41.404878"
+          },
+          {
+            "nome": "Alex",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "d9035cd3-6c4d-4e74-93e4-da1bc93cb090",
+            "criado_em": "2026-04-22T18:57:04.938713"
+          }
+        ],
+        "soma": 31
+      }
+    ],
+    "diferenca": 2,
+    "pontuacoes": [
+      33,
+      32,
+      31
+    ]
+  },
+  {
+    "id": 152,
+    "data": "2026-04-23T22:40:53.904552",
+    "num_times": 3,
+    "total_jogadores": 15,
+    "times": [
+      {
+        "numero": 1,
+        "jogadores": [
+          {
+            "nome": "Marquinhos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "6ef2af1a-c51e-4bd8-bf21-897fea708b56",
+            "criado_em": "2026-04-22T21:36:04.445170"
+          },
+          {
+            "nome": "Lucas ramos",
+            "nivel": 8,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "4d254123-e08d-4317-9598-9911781ae5ae",
+            "criado_em": "2026-04-22T18:58:20.030398"
+          },
+          {
+            "nome": "luan",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f92bb3d2-1a74-436b-8edf-8a94a285580d",
+            "criado_em": "2026-04-23T00:39:05.519874"
+          },
+          {
+            "nome": "Rennan",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "0808f78e-8374-4e61-b91e-8285d46e25f1",
+            "criado_em": "2026-04-22T18:55:16.048468"
+          },
+          {
+            "nome": "andre balada",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "e74e72bd-3946-474d-b031-409d375d5b2c",
+            "criado_em": "2026-04-22T18:57:50.066716"
+          }
+        ],
+        "soma": 33
+      },
+      {
+        "numero": 2,
+        "jogadores": [
+          {
+            "nome": "Carlos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "9fab9719-120b-4f02-8d47-26cc7481d36d",
+            "criado_em": "2026-04-22T21:36:12.347238"
+          },
+          {
+            "nome": "Guilherme",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+            "criado_em": "2026-04-22T18:55:23.743500"
+          },
+          {
+            "nome": "Lucas Teixeira",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "c6d43df2-ac9b-45be-98c6-84d618c63f87",
+            "criado_em": "2026-04-22T18:58:09.439405"
+          },
+          {
+            "nome": "Alex",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "d9035cd3-6c4d-4e74-93e4-da1bc93cb090",
+            "criado_em": "2026-04-22T18:57:04.938713"
+          },
+          {
+            "nome": "netao",
+            "nivel": 5,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "790b5dd7-664e-469f-99a9-0db00a8eee2c",
+            "criado_em": "2026-04-22T18:57:21.889450"
+          }
+        ],
+        "soma": 31
+      },
+      {
+        "numero": 3,
+        "jogadores": [
+          {
+            "nome": "bacatela",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "1980f054-1821-430b-bf31-c78a02512392",
+            "criado_em": "2026-04-22T21:37:26.763418"
+          },
+          {
+            "nome": "edmo",
+            "nivel": 7,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "8b4f4b94-fdbe-44b0-9dde-c1eb4d12af01",
+            "criado_em": "2026-04-22T18:57:13.991758"
+          },
+          {
+            "nome": "ramon",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f6e4f187-f9f4-44e3-ad57-57fb9c5eabe0",
+            "criado_em": "2026-04-22T18:57:32.391392"
+          },
+          {
+            "nome": "Andrey",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "9781928f-5831-43f5-9441-5a1f004a51ec",
+            "criado_em": "2026-04-22T19:10:41.404878"
+          },
+          {
+            "nome": "Carlos atacante",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "cfd8baf3-9a1d-4252-ab2f-6bee4cdd539e",
+            "criado_em": "2026-04-22T18:56:46.608563"
+          }
+        ],
+        "soma": 32
+      }
+    ],
+    "diferenca": 2,
+    "pontuacoes": [
+      33,
+      31,
+      32
+    ]
+  },
+  {
+    "id": 153,
+    "data": "2026-04-23T22:40:58.107710",
+    "num_times": 3,
+    "total_jogadores": 15,
+    "times": [
+      {
+        "numero": 1,
+        "jogadores": [
+          {
+            "nome": "Marquinhos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "6ef2af1a-c51e-4bd8-bf21-897fea708b56",
+            "criado_em": "2026-04-22T21:36:04.445170"
+          },
+          {
+            "nome": "Lucas ramos",
+            "nivel": 8,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "4d254123-e08d-4317-9598-9911781ae5ae",
+            "criado_em": "2026-04-22T18:58:20.030398"
+          },
+          {
+            "nome": "luan",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f92bb3d2-1a74-436b-8edf-8a94a285580d",
+            "criado_em": "2026-04-23T00:39:05.519874"
+          },
+          {
+            "nome": "Rennan",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "0808f78e-8374-4e61-b91e-8285d46e25f1",
+            "criado_em": "2026-04-22T18:55:16.048468"
+          },
+          {
+            "nome": "edmo",
+            "nivel": 7,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "8b4f4b94-fdbe-44b0-9dde-c1eb4d12af01",
+            "criado_em": "2026-04-22T18:57:13.991758"
+          }
+        ],
+        "soma": 35
+      },
+      {
+        "numero": 2,
+        "jogadores": [
+          {
+            "nome": "Carlos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "9fab9719-120b-4f02-8d47-26cc7481d36d",
+            "criado_em": "2026-04-22T21:36:12.347238"
+          },
+          {
+            "nome": "Guilherme",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+            "criado_em": "2026-04-22T18:55:23.743500"
+          },
+          {
+            "nome": "Lucas Teixeira",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "c6d43df2-ac9b-45be-98c6-84d618c63f87",
+            "criado_em": "2026-04-22T18:58:09.439405"
+          },
+          {
+            "nome": "Carlos atacante",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "cfd8baf3-9a1d-4252-ab2f-6bee4cdd539e",
+            "criado_em": "2026-04-22T18:56:46.608563"
+          },
+          {
+            "nome": "netao",
+            "nivel": 5,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "790b5dd7-664e-469f-99a9-0db00a8eee2c",
+            "criado_em": "2026-04-22T18:57:21.889450"
+          }
+        ],
+        "soma": 32
+      },
+      {
+        "numero": 3,
+        "jogadores": [
+          {
+            "nome": "bacatela",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "1980f054-1821-430b-bf31-c78a02512392",
+            "criado_em": "2026-04-22T21:37:26.763418"
+          },
+          {
+            "nome": "andre balada",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "e74e72bd-3946-474d-b031-409d375d5b2c",
+            "criado_em": "2026-04-22T18:57:50.066716"
+          },
+          {
+            "nome": "ramon",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f6e4f187-f9f4-44e3-ad57-57fb9c5eabe0",
+            "criado_em": "2026-04-22T18:57:32.391392"
+          },
+          {
+            "nome": "Andrey",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "9781928f-5831-43f5-9441-5a1f004a51ec",
+            "criado_em": "2026-04-22T19:10:41.404878"
+          },
+          {
+            "nome": "Alex",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "d9035cd3-6c4d-4e74-93e4-da1bc93cb090",
+            "criado_em": "2026-04-22T18:57:04.938713"
+          }
+        ],
+        "soma": 29
+      }
+    ],
+    "diferenca": 6,
+    "pontuacoes": [
+      35,
+      32,
+      29
+    ]
+  },
+  {
+    "id": 154,
+    "data": "2026-04-23T22:41:03.270375",
+    "num_times": 3,
+    "total_jogadores": 15,
+    "times": [
+      {
+        "numero": 1,
+        "jogadores": [
+          {
+            "nome": "Marquinhos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "6ef2af1a-c51e-4bd8-bf21-897fea708b56",
+            "criado_em": "2026-04-22T21:36:04.445170"
+          },
+          {
+            "nome": "Lucas ramos",
+            "nivel": 8,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "4d254123-e08d-4317-9598-9911781ae5ae",
+            "criado_em": "2026-04-22T18:58:20.030398"
+          },
+          {
+            "nome": "ramon",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f6e4f187-f9f4-44e3-ad57-57fb9c5eabe0",
+            "criado_em": "2026-04-22T18:57:32.391392"
+          },
+          {
+            "nome": "Rennan",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "0808f78e-8374-4e61-b91e-8285d46e25f1",
+            "criado_em": "2026-04-22T18:55:16.048468"
+          },
+          {
+            "nome": "andre balada",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "e74e72bd-3946-474d-b031-409d375d5b2c",
+            "criado_em": "2026-04-22T18:57:50.066716"
+          }
+        ],
+        "soma": 33
+      },
+      {
+        "numero": 2,
+        "jogadores": [
+          {
+            "nome": "Carlos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "9fab9719-120b-4f02-8d47-26cc7481d36d",
+            "criado_em": "2026-04-22T21:36:12.347238"
+          },
+          {
+            "nome": "Guilherme",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+            "criado_em": "2026-04-22T18:55:23.743500"
+          },
+          {
+            "nome": "Lucas Teixeira",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "c6d43df2-ac9b-45be-98c6-84d618c63f87",
+            "criado_em": "2026-04-22T18:58:09.439405"
+          },
+          {
+            "nome": "Carlos atacante",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "cfd8baf3-9a1d-4252-ab2f-6bee4cdd539e",
+            "criado_em": "2026-04-22T18:56:46.608563"
+          },
+          {
+            "nome": "netao",
+            "nivel": 5,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "790b5dd7-664e-469f-99a9-0db00a8eee2c",
+            "criado_em": "2026-04-22T18:57:21.889450"
+          }
+        ],
+        "soma": 32
+      },
+      {
+        "numero": 3,
+        "jogadores": [
+          {
+            "nome": "bacatela",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "1980f054-1821-430b-bf31-c78a02512392",
+            "criado_em": "2026-04-22T21:37:26.763418"
+          },
+          {
+            "nome": "edmo",
+            "nivel": 7,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "8b4f4b94-fdbe-44b0-9dde-c1eb4d12af01",
+            "criado_em": "2026-04-22T18:57:13.991758"
+          },
+          {
+            "nome": "luan",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f92bb3d2-1a74-436b-8edf-8a94a285580d",
+            "criado_em": "2026-04-23T00:39:05.519874"
+          },
+          {
+            "nome": "Andrey",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "9781928f-5831-43f5-9441-5a1f004a51ec",
+            "criado_em": "2026-04-22T19:10:41.404878"
+          },
+          {
+            "nome": "Alex",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "d9035cd3-6c4d-4e74-93e4-da1bc93cb090",
+            "criado_em": "2026-04-22T18:57:04.938713"
+          }
+        ],
+        "soma": 31
+      }
+    ],
+    "diferenca": 2,
+    "pontuacoes": [
+      33,
+      32,
+      31
+    ]
+  },
+  {
+    "id": 155,
+    "data": "2026-04-23T22:41:06.985160",
+    "num_times": 3,
+    "total_jogadores": 15,
+    "times": [
+      {
+        "numero": 1,
+        "jogadores": [
+          {
+            "nome": "netao",
+            "nivel": 5,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "790b5dd7-664e-469f-99a9-0db00a8eee2c",
+            "criado_em": "2026-04-22T18:57:21.889450"
+          },
+          {
+            "nome": "Lucas ramos",
+            "nivel": 8,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "4d254123-e08d-4317-9598-9911781ae5ae",
+            "criado_em": "2026-04-22T18:58:20.030398"
+          },
+          {
+            "nome": "luan",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f92bb3d2-1a74-436b-8edf-8a94a285580d",
+            "criado_em": "2026-04-23T00:39:05.519874"
+          },
+          {
+            "nome": "Rennan",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "0808f78e-8374-4e61-b91e-8285d46e25f1",
+            "criado_em": "2026-04-22T18:55:16.048468"
+          },
+          {
+            "nome": "andre balada",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "e74e72bd-3946-474d-b031-409d375d5b2c",
+            "criado_em": "2026-04-22T18:57:50.066716"
+          }
+        ],
+        "soma": 31
+      },
+      {
+        "numero": 2,
+        "jogadores": [
+          {
+            "nome": "Carlos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "9fab9719-120b-4f02-8d47-26cc7481d36d",
+            "criado_em": "2026-04-22T21:36:12.347238"
+          },
+          {
+            "nome": "Guilherme",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+            "criado_em": "2026-04-22T18:55:23.743500"
+          },
+          {
+            "nome": "Lucas Teixeira",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "c6d43df2-ac9b-45be-98c6-84d618c63f87",
+            "criado_em": "2026-04-22T18:58:09.439405"
+          },
+          {
+            "nome": "Carlos atacante",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "cfd8baf3-9a1d-4252-ab2f-6bee4cdd539e",
+            "criado_em": "2026-04-22T18:56:46.608563"
+          },
+          {
+            "nome": "Marquinhos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "6ef2af1a-c51e-4bd8-bf21-897fea708b56",
+            "criado_em": "2026-04-22T21:36:04.445170"
+          }
+        ],
+        "soma": 34
+      },
+      {
+        "numero": 3,
+        "jogadores": [
+          {
+            "nome": "bacatela",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "1980f054-1821-430b-bf31-c78a02512392",
+            "criado_em": "2026-04-22T21:37:26.763418"
+          },
+          {
+            "nome": "edmo",
+            "nivel": 7,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "8b4f4b94-fdbe-44b0-9dde-c1eb4d12af01",
+            "criado_em": "2026-04-22T18:57:13.991758"
+          },
+          {
+            "nome": "ramon",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f6e4f187-f9f4-44e3-ad57-57fb9c5eabe0",
+            "criado_em": "2026-04-22T18:57:32.391392"
+          },
+          {
+            "nome": "Andrey",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "9781928f-5831-43f5-9441-5a1f004a51ec",
+            "criado_em": "2026-04-22T19:10:41.404878"
+          },
+          {
+            "nome": "Alex",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "d9035cd3-6c4d-4e74-93e4-da1bc93cb090",
+            "criado_em": "2026-04-22T18:57:04.938713"
+          }
+        ],
+        "soma": 31
+      }
+    ],
+    "diferenca": 3,
+    "pontuacoes": [
+      31,
+      34,
+      31
+    ]
+  },
+  {
+    "id": 156,
+    "data": "2026-04-23T22:41:17.129893",
+    "num_times": 3,
+    "total_jogadores": 15,
+    "times": [
+      {
+        "numero": 1,
+        "jogadores": [
+          {
+            "nome": "Marquinhos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "6ef2af1a-c51e-4bd8-bf21-897fea708b56",
+            "criado_em": "2026-04-22T21:36:04.445170"
+          },
+          {
+            "nome": "Lucas Teixeira",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "c6d43df2-ac9b-45be-98c6-84d618c63f87",
+            "criado_em": "2026-04-22T18:58:09.439405"
+          },
+          {
+            "nome": "luan",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f92bb3d2-1a74-436b-8edf-8a94a285580d",
+            "criado_em": "2026-04-23T00:39:05.519874"
+          },
+          {
+            "nome": "Rennan",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "0808f78e-8374-4e61-b91e-8285d46e25f1",
+            "criado_em": "2026-04-22T18:55:16.048468"
+          },
+          {
+            "nome": "andre balada",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "e74e72bd-3946-474d-b031-409d375d5b2c",
+            "criado_em": "2026-04-22T18:57:50.066716"
+          }
+        ],
+        "soma": 32
+      },
+      {
+        "numero": 2,
+        "jogadores": [
+          {
+            "nome": "Carlos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "9fab9719-120b-4f02-8d47-26cc7481d36d",
+            "criado_em": "2026-04-22T21:36:12.347238"
+          },
+          {
+            "nome": "Guilherme",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+            "criado_em": "2026-04-22T18:55:23.743500"
+          },
+          {
+            "nome": "Lucas ramos",
+            "nivel": 8,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "4d254123-e08d-4317-9598-9911781ae5ae",
+            "criado_em": "2026-04-22T18:58:20.030398"
+          },
+          {
+            "nome": "Carlos atacante",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "cfd8baf3-9a1d-4252-ab2f-6bee4cdd539e",
+            "criado_em": "2026-04-22T18:56:46.608563"
+          },
+          {
+            "nome": "netao",
+            "nivel": 5,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "790b5dd7-664e-469f-99a9-0db00a8eee2c",
+            "criado_em": "2026-04-22T18:57:21.889450"
+          }
+        ],
+        "soma": 33
+      },
+      {
+        "numero": 3,
+        "jogadores": [
+          {
+            "nome": "bacatela",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "1980f054-1821-430b-bf31-c78a02512392",
+            "criado_em": "2026-04-22T21:37:26.763418"
+          },
+          {
+            "nome": "edmo",
+            "nivel": 7,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "8b4f4b94-fdbe-44b0-9dde-c1eb4d12af01",
+            "criado_em": "2026-04-22T18:57:13.991758"
+          },
+          {
+            "nome": "ramon",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f6e4f187-f9f4-44e3-ad57-57fb9c5eabe0",
+            "criado_em": "2026-04-22T18:57:32.391392"
+          },
+          {
+            "nome": "Andrey",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "9781928f-5831-43f5-9441-5a1f004a51ec",
+            "criado_em": "2026-04-22T19:10:41.404878"
+          },
+          {
+            "nome": "Alex",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "d9035cd3-6c4d-4e74-93e4-da1bc93cb090",
+            "criado_em": "2026-04-22T18:57:04.938713"
+          }
+        ],
+        "soma": 31
+      }
+    ],
+    "diferenca": 2,
+    "pontuacoes": [
+      32,
+      33,
+      31
+    ]
+  },
+  {
+    "id": 157,
+    "data": "2026-04-23T22:41:28.286012",
+    "num_times": 3,
+    "total_jogadores": 15,
+    "times": [
+      {
+        "numero": 1,
+        "jogadores": [
+          {
+            "nome": "Marquinhos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "6ef2af1a-c51e-4bd8-bf21-897fea708b56",
+            "criado_em": "2026-04-22T21:36:04.445170"
+          },
+          {
+            "nome": "Lucas ramos",
+            "nivel": 8,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "4d254123-e08d-4317-9598-9911781ae5ae",
+            "criado_em": "2026-04-22T18:58:20.030398"
+          },
+          {
+            "nome": "luan",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f92bb3d2-1a74-436b-8edf-8a94a285580d",
+            "criado_em": "2026-04-23T00:39:05.519874"
+          },
+          {
+            "nome": "Rennan",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "0808f78e-8374-4e61-b91e-8285d46e25f1",
+            "criado_em": "2026-04-22T18:55:16.048468"
+          },
+          {
+            "nome": "andre balada",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "e74e72bd-3946-474d-b031-409d375d5b2c",
+            "criado_em": "2026-04-22T18:57:50.066716"
+          }
+        ],
+        "soma": 33
+      },
+      {
+        "numero": 2,
+        "jogadores": [
+          {
+            "nome": "Carlos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "9fab9719-120b-4f02-8d47-26cc7481d36d",
+            "criado_em": "2026-04-22T21:36:12.347238"
+          },
+          {
+            "nome": "Guilherme",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+            "criado_em": "2026-04-22T18:55:23.743500"
+          },
+          {
+            "nome": "Lucas Teixeira",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "c6d43df2-ac9b-45be-98c6-84d618c63f87",
+            "criado_em": "2026-04-22T18:58:09.439405"
+          },
+          {
+            "nome": "Carlos atacante",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "cfd8baf3-9a1d-4252-ab2f-6bee4cdd539e",
+            "criado_em": "2026-04-22T18:56:46.608563"
+          },
+          {
+            "nome": "netao",
+            "nivel": 5,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "790b5dd7-664e-469f-99a9-0db00a8eee2c",
+            "criado_em": "2026-04-22T18:57:21.889450"
+          }
+        ],
+        "soma": 32
+      },
+      {
+        "numero": 3,
+        "jogadores": [
+          {
+            "nome": "bacatela",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "1980f054-1821-430b-bf31-c78a02512392",
+            "criado_em": "2026-04-22T21:37:26.763418"
+          },
+          {
+            "nome": "edmo",
+            "nivel": 7,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "8b4f4b94-fdbe-44b0-9dde-c1eb4d12af01",
+            "criado_em": "2026-04-22T18:57:13.991758"
+          },
+          {
+            "nome": "ramon",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f6e4f187-f9f4-44e3-ad57-57fb9c5eabe0",
+            "criado_em": "2026-04-22T18:57:32.391392"
+          },
+          {
+            "nome": "Andrey",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "9781928f-5831-43f5-9441-5a1f004a51ec",
+            "criado_em": "2026-04-22T19:10:41.404878"
+          },
+          {
+            "nome": "Alex",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "d9035cd3-6c4d-4e74-93e4-da1bc93cb090",
+            "criado_em": "2026-04-22T18:57:04.938713"
+          }
+        ],
+        "soma": 31
+      }
+    ],
+    "diferenca": 2,
+    "pontuacoes": [
+      33,
+      32,
+      31
+    ]
+  },
+  {
+    "id": 158,
+    "data": "2026-04-23T22:47:21.608237",
+    "num_times": 3,
+    "total_jogadores": 15,
+    "times": [
+      {
+        "numero": 1,
+        "jogadores": [
+          {
+            "nome": "Marquinhos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "6ef2af1a-c51e-4bd8-bf21-897fea708b56",
+            "criado_em": "2026-04-22T21:36:04.445170"
+          },
+          {
+            "nome": "Lucas ramos",
+            "nivel": 8,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "4d254123-e08d-4317-9598-9911781ae5ae",
+            "criado_em": "2026-04-22T18:58:20.030398"
+          },
+          {
+            "nome": "luan",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f92bb3d2-1a74-436b-8edf-8a94a285580d",
+            "criado_em": "2026-04-23T00:39:05.519874"
+          },
+          {
+            "nome": "Rennan",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "0808f78e-8374-4e61-b91e-8285d46e25f1",
+            "criado_em": "2026-04-22T18:55:16.048468"
+          },
+          {
+            "nome": "andre balada",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "e74e72bd-3946-474d-b031-409d375d5b2c",
+            "criado_em": "2026-04-22T18:57:50.066716"
+          }
+        ],
+        "soma": 33
+      },
+      {
+        "numero": 2,
+        "jogadores": [
+          {
+            "nome": "Carlos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "9fab9719-120b-4f02-8d47-26cc7481d36d",
+            "criado_em": "2026-04-22T21:36:12.347238"
+          },
+          {
+            "nome": "Guilherme",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+            "criado_em": "2026-04-22T18:55:23.743500"
+          },
+          {
+            "nome": "Lucas Teixeira",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "c6d43df2-ac9b-45be-98c6-84d618c63f87",
+            "criado_em": "2026-04-22T18:58:09.439405"
+          },
+          {
+            "nome": "Alex",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "d9035cd3-6c4d-4e74-93e4-da1bc93cb090",
+            "criado_em": "2026-04-22T18:57:04.938713"
+          },
+          {
+            "nome": "netao",
+            "nivel": 5,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "790b5dd7-664e-469f-99a9-0db00a8eee2c",
+            "criado_em": "2026-04-22T18:57:21.889450"
+          }
+        ],
+        "soma": 31
+      },
+      {
+        "numero": 3,
+        "jogadores": [
+          {
+            "nome": "bacatela",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "1980f054-1821-430b-bf31-c78a02512392",
+            "criado_em": "2026-04-22T21:37:26.763418"
+          },
+          {
+            "nome": "edmo",
+            "nivel": 7,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "8b4f4b94-fdbe-44b0-9dde-c1eb4d12af01",
+            "criado_em": "2026-04-22T18:57:13.991758"
+          },
+          {
+            "nome": "ramon",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f6e4f187-f9f4-44e3-ad57-57fb9c5eabe0",
+            "criado_em": "2026-04-22T18:57:32.391392"
+          },
+          {
+            "nome": "Andrey",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "9781928f-5831-43f5-9441-5a1f004a51ec",
+            "criado_em": "2026-04-22T19:10:41.404878"
+          },
+          {
+            "nome": "Carlos atacante",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "cfd8baf3-9a1d-4252-ab2f-6bee4cdd539e",
+            "criado_em": "2026-04-22T18:56:46.608563"
+          }
+        ],
+        "soma": 32
+      }
+    ],
+    "diferenca": 2,
+    "pontuacoes": [
+      33,
+      31,
+      32
+    ]
+  },
+  {
+    "id": 159,
+    "data": "2026-04-23T22:48:37.002502",
+    "num_times": 3,
+    "total_jogadores": 15,
+    "times": [
+      {
+        "numero": 1,
+        "jogadores": [
+          {
+            "nome": "Marquinhos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "6ef2af1a-c51e-4bd8-bf21-897fea708b56",
+            "criado_em": "2026-04-22T21:36:04.445170"
+          },
+          {
+            "nome": "Lucas ramos",
+            "nivel": 8,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "4d254123-e08d-4317-9598-9911781ae5ae",
+            "criado_em": "2026-04-22T18:58:20.030398"
+          },
+          {
+            "nome": "luan",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f92bb3d2-1a74-436b-8edf-8a94a285580d",
+            "criado_em": "2026-04-23T00:39:05.519874"
+          },
+          {
+            "nome": "Guilherme",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+            "criado_em": "2026-04-22T18:55:23.743500"
+          },
+          {
+            "nome": "andre balada",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "e74e72bd-3946-474d-b031-409d375d5b2c",
+            "criado_em": "2026-04-22T18:57:50.066716"
+          }
+        ],
+        "soma": 34
+      },
+      {
+        "numero": 2,
+        "jogadores": [
+          {
+            "nome": "Carlos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "9fab9719-120b-4f02-8d47-26cc7481d36d",
+            "criado_em": "2026-04-22T21:36:12.347238"
+          },
+          {
+            "nome": "Rennan",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "0808f78e-8374-4e61-b91e-8285d46e25f1",
+            "criado_em": "2026-04-22T18:55:16.048468"
+          },
+          {
+            "nome": "Lucas Teixeira",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "c6d43df2-ac9b-45be-98c6-84d618c63f87",
+            "criado_em": "2026-04-22T18:58:09.439405"
+          },
+          {
+            "nome": "Carlos atacante",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "cfd8baf3-9a1d-4252-ab2f-6bee4cdd539e",
+            "criado_em": "2026-04-22T18:56:46.608563"
+          },
+          {
+            "nome": "netao",
+            "nivel": 5,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "790b5dd7-664e-469f-99a9-0db00a8eee2c",
+            "criado_em": "2026-04-22T18:57:21.889450"
+          }
+        ],
+        "soma": 31
+      },
+      {
+        "numero": 3,
+        "jogadores": [
+          {
+            "nome": "bacatela",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "1980f054-1821-430b-bf31-c78a02512392",
+            "criado_em": "2026-04-22T21:37:26.763418"
+          },
+          {
+            "nome": "edmo",
+            "nivel": 7,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "8b4f4b94-fdbe-44b0-9dde-c1eb4d12af01",
+            "criado_em": "2026-04-22T18:57:13.991758"
+          },
+          {
+            "nome": "ramon",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f6e4f187-f9f4-44e3-ad57-57fb9c5eabe0",
+            "criado_em": "2026-04-22T18:57:32.391392"
+          },
+          {
+            "nome": "Andrey",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "9781928f-5831-43f5-9441-5a1f004a51ec",
+            "criado_em": "2026-04-22T19:10:41.404878"
+          },
+          {
+            "nome": "Alex",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "d9035cd3-6c4d-4e74-93e4-da1bc93cb090",
+            "criado_em": "2026-04-22T18:57:04.938713"
+          }
+        ],
+        "soma": 31
+      }
+    ],
+    "diferenca": 3,
+    "pontuacoes": [
+      34,
+      31,
+      31
+    ]
+  },
+  {
+    "id": 160,
+    "data": "2026-04-23T22:48:38.141182",
+    "num_times": 3,
+    "total_jogadores": 15,
+    "times": [
+      {
+        "numero": 1,
+        "jogadores": [
+          {
+            "nome": "Marquinhos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "6ef2af1a-c51e-4bd8-bf21-897fea708b56",
+            "criado_em": "2026-04-22T21:36:04.445170"
+          },
+          {
+            "nome": "Lucas ramos",
+            "nivel": 8,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "4d254123-e08d-4317-9598-9911781ae5ae",
+            "criado_em": "2026-04-22T18:58:20.030398"
+          },
+          {
+            "nome": "luan",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f92bb3d2-1a74-436b-8edf-8a94a285580d",
+            "criado_em": "2026-04-23T00:39:05.519874"
+          },
+          {
+            "nome": "Rennan",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "0808f78e-8374-4e61-b91e-8285d46e25f1",
+            "criado_em": "2026-04-22T18:55:16.048468"
+          },
+          {
+            "nome": "andre balada",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "e74e72bd-3946-474d-b031-409d375d5b2c",
+            "criado_em": "2026-04-22T18:57:50.066716"
+          }
+        ],
+        "soma": 33
+      },
+      {
+        "numero": 2,
+        "jogadores": [
+          {
+            "nome": "Carlos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "9fab9719-120b-4f02-8d47-26cc7481d36d",
+            "criado_em": "2026-04-22T21:36:12.347238"
+          },
+          {
+            "nome": "bacatela",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "1980f054-1821-430b-bf31-c78a02512392",
+            "criado_em": "2026-04-22T21:37:26.763418"
+          },
+          {
+            "nome": "Lucas Teixeira",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "c6d43df2-ac9b-45be-98c6-84d618c63f87",
+            "criado_em": "2026-04-22T18:58:09.439405"
+          },
+          {
+            "nome": "Carlos atacante",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "cfd8baf3-9a1d-4252-ab2f-6bee4cdd539e",
+            "criado_em": "2026-04-22T18:56:46.608563"
+          },
+          {
+            "nome": "netao",
+            "nivel": 5,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "790b5dd7-664e-469f-99a9-0db00a8eee2c",
+            "criado_em": "2026-04-22T18:57:21.889450"
+          }
+        ],
+        "soma": 31
+      },
+      {
+        "numero": 3,
+        "jogadores": [
+          {
+            "nome": "Guilherme",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+            "criado_em": "2026-04-22T18:55:23.743500"
+          },
+          {
+            "nome": "edmo",
+            "nivel": 7,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "8b4f4b94-fdbe-44b0-9dde-c1eb4d12af01",
+            "criado_em": "2026-04-22T18:57:13.991758"
+          },
+          {
+            "nome": "ramon",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f6e4f187-f9f4-44e3-ad57-57fb9c5eabe0",
+            "criado_em": "2026-04-22T18:57:32.391392"
+          },
+          {
+            "nome": "Andrey",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "9781928f-5831-43f5-9441-5a1f004a51ec",
+            "criado_em": "2026-04-22T19:10:41.404878"
+          },
+          {
+            "nome": "Alex",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "d9035cd3-6c4d-4e74-93e4-da1bc93cb090",
+            "criado_em": "2026-04-22T18:57:04.938713"
+          }
+        ],
+        "soma": 32
+      }
+    ],
+    "diferenca": 2,
+    "pontuacoes": [
+      33,
+      31,
+      32
+    ]
+  },
+  {
+    "id": 161,
+    "data": "2026-04-23T22:48:39.534471",
+    "num_times": 3,
+    "total_jogadores": 15,
+    "times": [
+      {
+        "numero": 1,
+        "jogadores": [
+          {
+            "nome": "Marquinhos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "6ef2af1a-c51e-4bd8-bf21-897fea708b56",
+            "criado_em": "2026-04-22T21:36:04.445170"
+          },
+          {
+            "nome": "Lucas ramos",
+            "nivel": 8,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "4d254123-e08d-4317-9598-9911781ae5ae",
+            "criado_em": "2026-04-22T18:58:20.030398"
+          },
+          {
+            "nome": "luan",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f92bb3d2-1a74-436b-8edf-8a94a285580d",
+            "criado_em": "2026-04-23T00:39:05.519874"
+          },
+          {
+            "nome": "Rennan",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "0808f78e-8374-4e61-b91e-8285d46e25f1",
+            "criado_em": "2026-04-22T18:55:16.048468"
+          },
+          {
+            "nome": "andre balada",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "e74e72bd-3946-474d-b031-409d375d5b2c",
+            "criado_em": "2026-04-22T18:57:50.066716"
+          }
+        ],
+        "soma": 33
+      },
+      {
+        "numero": 2,
+        "jogadores": [
+          {
+            "nome": "Carlos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "9fab9719-120b-4f02-8d47-26cc7481d36d",
+            "criado_em": "2026-04-22T21:36:12.347238"
+          },
+          {
+            "nome": "Guilherme",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+            "criado_em": "2026-04-22T18:55:23.743500"
+          },
+          {
+            "nome": "Andrey",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "9781928f-5831-43f5-9441-5a1f004a51ec",
+            "criado_em": "2026-04-22T19:10:41.404878"
+          },
+          {
+            "nome": "Carlos atacante",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "cfd8baf3-9a1d-4252-ab2f-6bee4cdd539e",
+            "criado_em": "2026-04-22T18:56:46.608563"
+          },
+          {
+            "nome": "netao",
+            "nivel": 5,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "790b5dd7-664e-469f-99a9-0db00a8eee2c",
+            "criado_em": "2026-04-22T18:57:21.889450"
+          }
+        ],
+        "soma": 31
+      },
+      {
+        "numero": 3,
+        "jogadores": [
+          {
+            "nome": "bacatela",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "1980f054-1821-430b-bf31-c78a02512392",
+            "criado_em": "2026-04-22T21:37:26.763418"
+          },
+          {
+            "nome": "edmo",
+            "nivel": 7,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "8b4f4b94-fdbe-44b0-9dde-c1eb4d12af01",
+            "criado_em": "2026-04-22T18:57:13.991758"
+          },
+          {
+            "nome": "ramon",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f6e4f187-f9f4-44e3-ad57-57fb9c5eabe0",
+            "criado_em": "2026-04-22T18:57:32.391392"
+          },
+          {
+            "nome": "Lucas Teixeira",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "c6d43df2-ac9b-45be-98c6-84d618c63f87",
+            "criado_em": "2026-04-22T18:58:09.439405"
+          },
+          {
+            "nome": "Alex",
+            "nivel": 5,
+            "tipo": "avulso",
+            "posicao": "linha",
+            "presente": true,
+            "id": "d9035cd3-6c4d-4e74-93e4-da1bc93cb090",
+            "criado_em": "2026-04-22T18:57:04.938713"
+          }
+        ],
+        "soma": 32
+      }
+    ],
+    "diferenca": 2,
+    "pontuacoes": [
+      33,
+      31,
+      32
+    ]
+  },
+  {
+    "id": 162,
+    "data": "2026-04-23T22:56:33.921890",
+    "num_times": 2,
+    "total_jogadores": 10,
+    "times": [
+      {
+        "numero": 1,
+        "jogadores": [
+          {
+            "nome": "Marquinhos",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "goleiro",
+            "presente": true,
+            "id": "6ef2af1a-c51e-4bd8-bf21-897fea708b56",
+            "criado_em": "2026-04-22T21:36:04.445170"
+          },
+          {
+            "nome": "Guilherme",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+            "criado_em": "2026-04-22T18:55:23.743500"
+          },
+          {
+            "nome": "ramon",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f6e4f187-f9f4-44e3-ad57-57fb9c5eabe0",
+            "criado_em": "2026-04-22T18:57:32.391392"
+          },
+          {
+            "nome": "luan",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f92bb3d2-1a74-436b-8edf-8a94a285580d",
+            "criado_em": "2026-04-23T00:39:05.519874"
+          },
+          {
+            "nome": "Lucas ramos",
+            "nivel": 8,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "4d254123-e08d-4317-9598-9911781ae5ae",
+            "criado_em": "2026-04-22T18:58:20.030398"
+          }
+        ],
+        "soma": 36
+      },
+      {
+        "numero": 2,
+        "jogadores": [
+          {
+            "nome": "Lucas Teixeira",
+            "nivel": 7,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "c6d43df2-ac9b-45be-98c6-84d618c63f87",
+            "criado_em": "2026-04-22T18:58:09.439405"
+          },
+          {
+            "nome": "Andrey",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "9781928f-5831-43f5-9441-5a1f004a51ec",
+            "criado_em": "2026-04-22T19:10:41.404878"
+          },
+          {
+            "nome": "Rennan",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "0808f78e-8374-4e61-b91e-8285d46e25f1",
+            "criado_em": "2026-04-22T18:55:16.048468"
+          },
+          {
+            "nome": "Carlos atacante",
+            "nivel": 6,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "cfd8baf3-9a1d-4252-ab2f-6bee4cdd539e",
+            "criado_em": "2026-04-22T18:56:46.608563"
+          },
+          {
+            "nome": "netao",
+            "nivel": 5,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "790b5dd7-664e-469f-99a9-0db00a8eee2c",
+            "criado_em": "2026-04-22T18:57:21.889450"
+          }
+        ],
+        "soma": 30
+      }
+    ],
+    "diferenca": 6,
+    "pontuacoes": [
+      36,
+      30
+    ]
   }
 ]

@@ -1,0 +1,191 @@
+[
+  {
+    "id": "f58341a0-14ec-4076-9da5-931c866ebcac",
+    "username": "admin",
+    "nome": "Administrador",
+    "password_hash": "scrypt:32768:8:1$KW7dfg1kjyM0CaAz$f20ebd948a0a48efd8a29045c5fa054335e1a0db1ceaf44ae4264cf8d8c8730f2a568351758b2bc68607be214a421a9a9348373df0df2f1d3c62c05d91ae002e",
+    "role": "admin",
+    "criado_em": "2026-04-23T22:47:25.614906",
+    "ativo": true
+  },
+  {
+    "id": "1a1eb31f-2408-4d70-a57c-9804cd0d93ca",
+    "username": "araujo",
+    "nome": "milena",
+    "password_hash": "scrypt:32768:8:1$egl7Ikid564ch6aR$8ed9963c016e7b0f8e4b742cfece39a07796348ea4cb2ed770e288ac9f20ae6aea11e753487ed759861b8bc58f8d6414814793f07b7de0db99a73b241abda510",
+    "role": "usuario",
+    "criado_em": "2026-04-23T22:50:27.563137",
+    "ativo": true
+  },
+  {
+    "id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033",
+    "username": "guilherme",
+    "nome": "Guilherme",
+    "password_hash": "scrypt:32768:8:1$WjYKSu9QuQalpph2$74a27726f4db5eb5eae63f390f142152a9f48caa6d4cf5406a9c784ea3d8fec3a587aa338f3239d0943d21b99c349f379b912ee2f4ce919994c5b60bf7c0f957",
+    "role": "usuario",
+    "criado_em": "2026-04-23T22:51:39.113689",
+    "ativo": true
+  },
+  {
+    "id": "ca6b7b18-ff09-4dd8-82c0-93e3756ee3e2",
+    "username": "guiguiurbano",
+    "nome": "guilherme",
+    "password_hash": "scrypt:32768:8:1$r3ehNhjpUZC4jNCl$38ab92eb414e0b68f60857a7cda975f7dc929192682ed9bd773b5d282601ead7de1a6bbcb4ed37971b35f360d0e6f7d9e16909f331b7c96c634b07326276e355",
+    "role": "super_admin",
+    "criado_em": "2026-04-23T23:00:43.869355",
+    "ativo": true
+  },
+  {
+    "id": "16c35c1e-adcb-4473-8fcb-d87797c16cc3",
+    "username": "milena_fontana",
+    "nome": "milena",
+    "password_hash": "scrypt:32768:8:1$YPtaUDAo0SpFKy11$b77d501aee1984839f16872dfb0db5fea96ed871663a69eb6b8ae80d97cab41dac73ba28b0fa26e53c2dbb0c780e366b3d00810d353ac1cddcba0bc542ee7ed2",
+    "role": "usuario",
+    "criado_em": "2026-04-23T23:05:58.741067",
+    "ativo": true
+  },
+  {
+    "id": "e8358aa6-267e-4e2a-8f00-3eafdb697d0f",
+    "username": "superadmin",
+    "nome": "Super Administrador",
+    "password_hash": "scrypt:32768:8:1$3qE4lNR0azQbv1gk$92306666bc597438ee1b591e23b2c727b5a5d285c2ab33091461c01069311203c7cc1b7603dcbf21b38584fdce748427a5aa8359a6a7fb091d287b8648c4f1a6",
+    "role": "super_admin",
+    "criado_em": "2026-04-23T23:11:28.619507",
+    "ativo": true
+  },
+  {
+    "id": "b627d316-ae61-4b34-834f-8627fdb51240",
+    "username": "adminjogos",
+    "nome": "Admin de Jogos",
+    "password_hash": "scrypt:32768:8:1$XpJK4xZGfWukKOp3$386b79002d4ba1eef948737f7d2d549f383d1b497d12cb4c965957c97474ee2f03314c79f3ee82b7352b13f3b1e7959640ee3cf3552b5965957ae6c3d0068442",
+    "role": "admin",
+    "criado_em": "2026-04-23T23:11:28.691157",
+    "ativo": true
+  },
+  {
+    "id": "922542cb-0ce1-4752-9886-9fd5248d7f03",
+    "username": "rennan",
+    "nome": "Rennan",
+    "password_hash": "scrypt:32768:8:1$TyACBK62sFhzyfFH$00e12713f2fed0bba1ea2a65ff12dcfbbbf6c8eb004f58008c2c122c47b6c11a99b5ff18980475e1cc6bb6bfa7fc38a22d16cfd5c29ef6cb38b0ecd001e92caf",
+    "role": "usuario",
+    "criado_em": "2026-04-23T23:19:11.825907",
+    "ativo": true
+  },
+  {
+    "id": "709d90a0-60b7-4498-bc8b-757de4a21359",
+    "username": "carlos_atacante",
+    "nome": "Carlos atacante",
+    "password_hash": "scrypt:32768:8:1$kk6bkgQgDPjx1FFP$f3f0401de67e37c58794506255b2b092726c825168d0f45052aa6d2eab2cc7dd844780710b6c53c3b8c84be06d0e7b89ff4fed529f075278c5fcff25d62befb7",
+    "role": "usuario",
+    "criado_em": "2026-04-23T23:19:11.963994",
+    "ativo": true
+  },
+  {
+    "id": "6d4b7295-4e45-484a-b5f3-b89b1c144e80",
+    "username": "alex",
+    "nome": "Alex",
+    "password_hash": "scrypt:32768:8:1$iowEYmIgrTQy4oUD$a4de21da29313bd9790c9732e77170222a663ab42cc19ed29c7e2d1493a54d870b6aaeaad5cafe24a1a84983967571b0192e878101a88a7b954a50cd3c4cf30e",
+    "role": "usuario",
+    "criado_em": "2026-04-23T23:19:12.034291",
+    "ativo": true
+  },
+  {
+    "id": "108ca355-a810-454f-8281-d38effa904de",
+    "username": "edmo",
+    "nome": "edmo",
+    "password_hash": "scrypt:32768:8:1$RHYdCICBgZ5Yjc41$27465d62aafd68a7a01321356513922d4ac48358e58d440adf41460133cad7cfc46a3d28573edb37bd10e4dc85b2d8ade3233d6403540bd33f42241a1ae3f3ed",
+    "role": "usuario",
+    "criado_em": "2026-04-23T23:19:12.105113",
+    "ativo": true
+  },
+  {
+    "id": "b128d399-ef95-47df-ba62-d46c2339089d",
+    "username": "netao",
+    "nome": "netao",
+    "password_hash": "scrypt:32768:8:1$3pUnr92Vbo0Pl05d$69c14af760b4c7ba7466ffd7c4ddb4b13d5ab147e7870fce6dd7716634b8fcedf5bd692f4fe84abca91c7a7816ab862f9867f09bbde3473c29a2891ff379affb",
+    "role": "usuario",
+    "criado_em": "2026-04-23T23:19:12.174959",
+    "ativo": true
+  },
+  {
+    "id": "e2403749-1944-4719-bf4c-ff686fe0618e",
+    "username": "ramon",
+    "nome": "ramon",
+    "password_hash": "scrypt:32768:8:1$KUrt9bSOrIoFGS7h$5580c887d537620b3990ab9dbf27e2b74e51a5c0c43716dac0e553aa6aae19ad9780b4be28ec9e1e3d009f25d3e6bc625d661db1ca9f0dcf32bcf53bab26ac8e",
+    "role": "usuario",
+    "criado_em": "2026-04-23T23:19:12.244062",
+    "ativo": true
+  },
+  {
+    "id": "aa61dd5a-257e-45be-a230-f7e0472b37de",
+    "username": "andre_balada",
+    "nome": "andre balada",
+    "password_hash": "scrypt:32768:8:1$OjU4aZJRSN9zYtao$429855ca06341c8186161c131f098bbd22e2e456f7e63200e6ec2e2857f2378b3b72e0d8f12cf782d362bd71a0e5ab75ef58c00671b73db638d5e8973383cb2c",
+    "role": "usuario",
+    "criado_em": "2026-04-23T23:19:12.314600",
+    "ativo": true
+  },
+  {
+    "id": "0e116d68-e35c-4374-83c7-247388bda201",
+    "username": "lucas_teixeira",
+    "nome": "Lucas Teixeira",
+    "password_hash": "scrypt:32768:8:1$iF8Bn5D0bFDDyjLv$f2bed3bdbe2d42b3e3255ff11ad538b9ccb1deb20b3c156654fd2aa2c45ed4588cf633f9d7c2662c0a6dda715d9f043c88917b354637c07829ed8707ebd5cd02",
+    "role": "usuario",
+    "criado_em": "2026-04-23T23:19:12.384777",
+    "ativo": true
+  },
+  {
+    "id": "7dd9fe14-1c78-408f-8ddf-2103a9988072",
+    "username": "lucas_ramos",
+    "nome": "Lucas ramos",
+    "password_hash": "scrypt:32768:8:1$QjOU6EmWVPGoFQu3$aafcb49707017e489091515a64a3135794bfbf617f60435d0b8e76807793d957634bbd71dddc44cfeb4a6fc9a251e1e880f6639208d6ac54c0ef44fb8e60aa8f",
+    "role": "usuario",
+    "criado_em": "2026-04-23T23:19:12.455060",
+    "ativo": true
+  },
+  {
+    "id": "787773c6-b31f-4cab-807f-4e2fd938a609",
+    "username": "andrey",
+    "nome": "Andrey",
+    "password_hash": "scrypt:32768:8:1$Ed032PmJt8tlLzwS$a5356b140cde1d3fcf706124dd8496b6223afb53e2985049d6a628ac4a3250c0bc8beee7dad27b3916b7a5de9053f35263648f5348e8a256cf49fd9c6b203655",
+    "role": "usuario",
+    "criado_em": "2026-04-23T23:19:12.526132",
+    "ativo": true
+  },
+  {
+    "id": "f6624f6a-6998-4164-80a5-90018a3c5e99",
+    "username": "luan",
+    "nome": "luan",
+    "password_hash": "scrypt:32768:8:1$AL31DM8F23eqIHob$b5b22b0867c9e6ff192fc4397879ac94c6aa11293a17d62ea001105cab320da0749f154e2f36c11a73e46315c573094a5e4f0e6641b14adb63c77c048e882828",
+    "role": "usuario",
+    "criado_em": "2026-04-23T23:19:12.595998",
+    "ativo": true
+  },
+  {
+    "id": "ffa930b7-8e0d-48bc-ae5d-1ae6ad9e29ab",
+    "username": "marquinhos",
+    "nome": "Marquinhos",
+    "password_hash": "scrypt:32768:8:1$B1ikkx2xhX8Q4vDL$1b789e0900bb4bd6709c6ad3d333763bf09014ed6089e3e08ccdb1f664d3d6f3905bc89094cc694085aa78f41df27c6f3bca7155dc315941cf448e7f0413b177",
+    "role": "usuario",
+    "criado_em": "2026-04-23T23:19:12.665775",
+    "ativo": true
+  },
+  {
+    "id": "567184bd-1f6d-455e-bf28-29dcaf5c03a4",
+    "username": "carlos",
+    "nome": "Carlos",
+    "password_hash": "scrypt:32768:8:1$EnQC0ORchZCAJjbi$f9df002ce0bc1629c2e3fa52006e6b5f1c7c89953d1ac331255b44ae4d5892990dcd88c078d56372f0aaf2459b7173ff0992cbf70f2e688c1815676180fdd4aa",
+    "role": "usuario",
+    "criado_em": "2026-04-23T23:19:12.735752",
+    "ativo": true
+  },
+  {
+    "id": "cf358a50-e035-4292-8bf6-df5a877b1334",
+    "username": "bacatela",
+    "nome": "bacatela",
+    "password_hash": "scrypt:32768:8:1$hwN2amdayh6aRkSl$14cb186fb8dc024fc36182db2f9888e1023ec58c3a9101fba567cc6ae6d83eb5f65e5059dfc5ce429300ab92e0c085c482b5af4d626ec4c013a6686122fba336",
+    "role": "usuario",
+    "criado_em": "2026-04-23T23:19:12.808822",
+    "ativo": true
+  }
+]
