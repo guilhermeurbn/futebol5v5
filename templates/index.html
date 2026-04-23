@@ -18,6 +18,19 @@
 
         <!-- Main Content -->
         <main class="main">
+            <!-- Navigation Tabs -->
+            <div class="nav-tabs">
+                <a href="{{ url_for('jogador.index') }}" class="nav-tab active">👥 Jogadores</a>
+                <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
+                <a href="{{ url_for('jogador.estatisticas') }}" class="nav-tab">📊 Estatísticas</a>
+                <a href="{{ url_for('jogador.stats_players') }}" class="nav-tab">🏆 Stats</a>
+                <a href="{{ url_for('jogador.stats_times_page') }}" class="nav-tab">🎯 Times</a>
+                <a href="{{ url_for('jogador.stats_combos_page') }}" class="nav-tab">⭐ Combos</a>
+                <a href="{{ url_for('jogador.charts') }}" class="nav-tab">📈 Gráficos</a>
+                <a href="{{ url_for('jogador.campeonato_page') }}" class="nav-tab">🏆 Campeonato</a>
+                <a href="{{ url_for('jogador.listar_favoritos_page') }}" class="nav-tab">⭐ Favoritos</a>
+            </div>
+
             {% if erro %}
                 <div class="alert alert-warning">
                     <strong>⚠️ Aviso:</strong> {{ erro }}
@@ -154,13 +167,100 @@
                 </div>
 
                 {% if jogadores %}
-                    <div class="players-grid">
+                    <!-- Search Bar -->
+                    <div class="search-container">
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            class="search-input"
+                            placeholder="🔍 Buscar jogador pelo nome..."
+                            autocomplete="off"
+                        >
+                        <div id="searchResultsCount" class="search-results-count"></div>
+                    </div>
+
+                    <!-- Advanced Filters -->
+                    <div style="background: var(--card-bg); padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid var(--border);">
+                        <h3 style="margin: 0 0 1rem 0; font-size: 0.95rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">⚙️ Filtros Avançados</h3>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <!-- Filtro por Nível -->
+                            <div>
+                                <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;">
+                                    📊 Nível
+                                </label>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <input 
+                                        type="number" 
+                                        id="nivelMin"
+                                        min="1" 
+                                        max="10" 
+                                        value="1"
+                                        placeholder="Min"
+                                        class="filter-input"
+                                        style="width: 50%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px; background: var(--input-bg); color: var(--text);"
+                                    >
+                                    <input 
+                                        type="number" 
+                                        id="nivelMax"
+                                        min="1" 
+                                        max="10" 
+                                        value="10"
+                                        placeholder="Max"
+                                        class="filter-input"
+                                        style="width: 50%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px; background: var(--input-bg); color: var(--text);"
+                                    >
+                                </div>
+                            </div>
+
+                            <!-- Filtro por Tipo -->
+                            <div>
+                                <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;">
+                                    👤 Tipo
+                                </label>
+                                <select id="tipoFilter" class="filter-input" style="padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px; background: var(--input-bg); color: var(--text); width: 100%;">
+                                    <option value="">Todos</option>
+                                    <option value="fixo">⭐ Fixo</option>
+                                    <option value="avulso">👤 Avulso</option>
+                                </select>
+                            </div>
+
+                            <!-- Filtro por Posição -->
+                            <div>
+                                <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;">
+                                    ⚽ Posição
+                                </label>
+                                <select id="posicaoFilter" class="filter-input" style="padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px; background: var(--input-bg); color: var(--text); width: 100%;">
+                                    <option value="">Todos</option>
+                                    <option value="linha">⚽ Linha</option>
+                                    <option value="goleiro">🧤 Goleiro</option>
+                                </select>
+                            </div>
+
+                            <!-- Botão Limpar Filtros -->
+                            <div style="display: flex; align-items: flex-end;">
+                                <button 
+                                    id="clearFiltersBtn"
+                                    class="btn btn-secondary"
+                                    style="width: 100%;"
+                                    onclick="limparFiltros()"
+                                >
+                                    🔄 Limpar Filtros
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="players-grid" id="playersGrid">
                         {% for jogador in jogadores %}
-                            <div class="player-card">
+                            <div class="player-card" data-name="{{ jogador.nome|lower }}" data-player-id="{{ jogador.id }}">
                                 <div class="player-header">
                                     <div>
                                         <h3 class="player-name">{{ jogador.nome }}</h3>
-                                        <span class="player-tipo">{% if jogador.tipo == 'fixo' %}⭐ Fixo{% else %}👤 Avulso{% endif %}</span>
+                                        <span class="player-tipo">
+                                            {% if jogador.tipo == 'fixo' %}⭐ Fixo{% else %}👤 Avulso{% endif %}
+                                            {% if jogador.posicao == 'goleiro' %}🧤{% else %}⚽{% endif %}
+                                        </span>
                                     </div>
                                     <span class="player-level-badge" data-nivel="{{ jogador.nivel }}">
                                         Nível {{ jogador.nivel }}
@@ -170,9 +270,9 @@
                                     <div class="player-level-fill" style="width: {{ (jogador.nivel / 10) * 100 }}%"></div>
                                 </div>
                                 <div class="player-actions">
-                                    <a href="{{ url_for('jogador.deletar_jogador_form', jogador_id=jogador.id) }}" class="btn btn-small btn-danger" onclick="return confirm('Tem certeza que deseja deletar?')">
+                                    <button class="btn btn-small btn-danger" onclick="abrirModalDelete('{{ jogador.id }}', '{{ jogador.nome }}')">
                                         🗑️ Deletar
-                                    </a>
+                                    </button>
                                 </div>
                             </div>
                         {% endfor %}
@@ -200,10 +300,146 @@
             </section>
         </main>
 
+        <!-- Modal Delete -->
+        <div id="deleteModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>🗑️ Deletar Jogador</h2>
+                    <button class="modal-close" onclick="fecharModalDelete()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja deletar <strong id="playerNameToDelete">o jogador</strong>?</p>
+                    <p class="modal-warning">⚠️ Esta ação não pode ser desfeita</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="fecharModalDelete()">
+                        ❌ Cancelar
+                    </button>
+                    <button class="btn btn-danger" onclick="confirmarDelete()">
+                        🗑️ Sim, Deletar
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Footer -->
         <footer class="footer">
             <p>⚽ NaTrave • Desenvolvido por Guilherme Urbano com ❤️</p>
         </footer>
     </div>
+
+    <!-- Scripts -->
+    <script>
+        // ===== BUSCA DE JOGADORES =====
+        const searchInput = document.getElementById('searchInput');
+        const playersGrid = document.getElementById('playersGrid');
+        const playerCards = document.querySelectorAll('.player-card');
+        const searchResultsCount = document.getElementById('searchResultsCount');
+
+        // ===== FILTROS AVANÇADOS =====
+        const nivelMinInput = document.getElementById('nivelMin');
+        const nivelMaxInput = document.getElementById('nivelMax');
+        const tipoFilter = document.getElementById('tipoFilter');
+        const posicaoFilter = document.getElementById('posicaoFilter');
+
+        function aplicarFiltros() {
+            const searchTerm = (searchInput?.value || '').toLowerCase().trim();
+            const nivelMin = parseInt(nivelMinInput?.value || 1) || 1;
+            const nivelMax = parseInt(nivelMaxInput?.value || 10) || 10;
+            const tipoSelecionado = tipoFilter?.value || '';
+            const posicaoSelecionada = posicaoFilter?.value || '';
+
+            let visibleCount = 0;
+
+            playerCards.forEach(card => {
+                const playerName = card.getAttribute('data-name');
+                const playerNivel = parseInt(card.querySelector('[data-nivel]')?.getAttribute('data-nivel') || 5);
+                
+                // Extrair tipo e posição do HTML
+                const tipoHtml = card.querySelector('.player-tipo')?.textContent || '';
+                const playerTipo = tipoHtml.includes('Fixo') ? 'fixo' : 'avulso';
+                const playerPosicao = tipoHtml.includes('🧤') ? 'goleiro' : 'linha';
+
+                // Aplicar filtros
+                const matchesNome = playerName.includes(searchTerm);
+                const matchesNivel = playerNivel >= nivelMin && playerNivel <= nivelMax;
+                const matchesTipo = !tipoSelecionado || playerTipo === tipoSelecionado;
+                const matchesPosicao = !posicaoSelecionada || playerPosicao === posicaoSelecionada;
+
+                const matches = matchesNome && matchesNivel && matchesTipo && matchesPosicao;
+                
+                card.style.display = matches ? '' : 'none';
+                if (matches) visibleCount++;
+            });
+
+            // Atualizar contador
+            if (searchTerm || tipoSelecionado || posicaoSelecionada || nivelMin > 1 || nivelMax < 10) {
+                searchResultsCount.textContent = `${visibleCount} resultado${visibleCount !== 1 ? 's' : ''}`;
+                searchResultsCount.style.display = 'block';
+            } else {
+                searchResultsCount.style.display = 'none';
+            }
+        }
+
+        function limparFiltros() {
+            if (searchInput) searchInput.value = '';
+            if (nivelMinInput) nivelMinInput.value = '1';
+            if (nivelMaxInput) nivelMaxInput.value = '10';
+            if (tipoFilter) tipoFilter.value = '';
+            if (posicaoFilter) posicaoFilter.value = '';
+            aplicarFiltros();
+        }
+
+        // Event listeners para filtros
+        if (searchInput) searchInput.addEventListener('input', aplicarFiltros);
+        if (nivelMinInput) nivelMinInput.addEventListener('change', aplicarFiltros);
+        if (nivelMaxInput) nivelMaxInput.addEventListener('change', aplicarFiltros);
+        if (tipoFilter) tipoFilter.addEventListener('change', aplicarFiltros);
+        if (posicaoFilter) posicaoFilter.addEventListener('change', aplicarFiltros);
+
+        // Fechar ao focar
+        if (searchInput) {
+            searchInput.addEventListener('focus', () => {
+                if (!searchInput.value) {
+                    searchResultsCount.style.display = 'none';
+                }
+            });
+        }
+
+        // ===== MODAL DELETE =====
+        let playerToDelete = null;
+
+        function abrirModalDelete(playerId, playerName) {
+            playerToDelete = playerId;
+            document.getElementById('playerNameToDelete').textContent = playerName;
+            document.getElementById('deleteModal').classList.add('active');
+        }
+
+        function fecharModalDelete() {
+            document.getElementById('deleteModal').classList.remove('active');
+            playerToDelete = null;
+        }
+
+        function confirmarDelete() {
+            if (playerToDelete) {
+                // Redirecionar para delete
+                window.location.href = `/delete/${playerToDelete}`;
+            }
+        }
+
+        // Fechar modal ao clicar fora
+        document.getElementById('deleteModal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'deleteModal') {
+                fecharModalDelete();
+            }
+        });
+
+        // Fechar modal com ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                fecharModalDelete();
+            }
+        });
+    </script>
 </body>
 </html>

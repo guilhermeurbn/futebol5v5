@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚽ NaTrave - Detalhes do Sorteio</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>⚽ NaTrave</h1>
+                <p class="subtitle">Detalhes do Sorteio #{{ sorteio.id }}</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Navigation -->
+            <div class="nav-tabs">
+                <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
+                <a href="{{ url_for('jogador.historico') }}" class="nav-tab active">📜 Histórico</a>
+                <a href="{{ url_for('jogador.estatisticas') }}" class="nav-tab">📊 Estatísticas</a>
+            </div>
+
+            <!-- Info Section -->
+            <section class="section">
+                <div class="section-header">
+                    <h2 class="section-title">🎲 Sorteio #{{ sorteio.id }}</h2>
+                    <a href="{{ url_for('jogador.historico') }}" class="btn btn-secondary btn-small">← Voltar</a>
+                </div>
+
+                <div class="sorteio-info-grid">
+                    <div class="info-card">
+                        <div class="info-label">📅 Data e Hora</div>
+                        <div class="info-value">{{ sorteio.data[:10] }} às {{ sorteio.data[11:16] }}</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-label">👥 Total de Jogadores</div>
+                        <div class="info-value">{{ sorteio.total_jogadores }}</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-label">⚽ Número de Times</div>
+                        <div class="info-value">{{ sorteio.num_times }}</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-label">📊 Diferença de Pontos</div>
+                        <div class="info-value diff-{{ 'good' if sorteio.diferenca <= 1 else 'ok' if sorteio.diferenca <= 2 else 'bad' }}">
+                            {{ sorteio.diferenca }} pts
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Times Section -->
+            <section class="section">
+                <h2 class="section-title">⚽ Times</h2>
+
+                <div class="times-container num-{{ sorteio.num_times }}">
+                    {% for time in sorteio.times %}
+                        <div class="team">
+                            <div class="team-header">
+                                <h2 class="team-title">⚽ Time {{ time.numero }}</h2>
+                                <div class="team-score">{{ time.soma }} pts</div>
+                            </div>
+                            
+                            <div class="players-list">
+                                {% for jogador in time.jogadores %}
+                                    <div class="player-item">
+                                        <span class="player-name">
+                                            {% if jogador.posicao == 'goleiro' %}🧤{% else %}⚽{% endif %}
+                                            {{ jogador.nome }}
+                                        </span>
+                                        <span class="player-level">Nível {{ jogador.nivel }}</span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- Pontuações Section -->
+            <section class="section">
+                <h2 class="section-title">📈 Pontuações por Time</h2>
+
+                <div class="chart-container">
+                    <div class="chart">
+                        {% set max_soma = sorteio.pontuacoes|max %}
+                        {% for time in sorteio.times %}
+                            <div class="chart-bar">
+                                <div class="chart-label">Time {{ time.numero }}</div>
+                                <div class="chart-bar-container">
+                                    <div class="chart-bar-fill" style="width: {{ (time.soma / max_soma) * 100 }}%">
+                                        {{ time.soma }} pts
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>⚽ NaTrave • Desenvolvido por Guilherme Urbano com ❤️</p>
+        </footer>
+    </div>
+</body>
+</html>

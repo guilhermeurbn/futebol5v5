@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Campeonato - Ranking de Times{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1200px;">
+    <div class="header">
+        <h1>🏆 Campeonato - Ranking Geral</h1>
+        <p class="subtitle">{{ campeonato.total_partidas }} partida(s) registrada(s)</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 12px; color: white; text-align: center;">
+            <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">Total de Partidas</div>
+            <div style="font-size: 32px; font-weight: bold;">{{ campeonato.total_partidas }}</div>
+        </div>
+        
+        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 20px; border-radius: 12px; color: white; text-align: center;">
+            <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">Maior Placar</div>
+            {% if campeonato.maior_placar %}
+                <div style="font-size: 24px; font-weight: bold;">{{ campeonato.maior_placar.gols|join(' x ') }}</div>
+                <div style="font-size: 11px; opacity: 0.9; margin-top: 5px;">Diferença: {{ campeonato.maior_placar.diferenca }}</div>
+            {% else %}
+                <div style="font-size: 24px; font-weight: bold;">-</div>
+            {% endif %}
+        </div>
+
+        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); padding: 20px; border-radius: 12px; color: white; text-align: center;">
+            <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">Maior Diferença</div>
+            <div style="font-size: 32px; font-weight: bold;">{{ campeonato.maior_diferenca }}</div>
+            <div style="font-size: 11px; opacity: 0.9; margin-top: 5px;">pts</div>
+        </div>
+    </div>
+
+    <!-- Ranking de Times Vencedores -->
+    <div style="background: #2a2a3e; padding: 25px; border-radius: 12px; margin-bottom: 30px;">
+        <h2 style="margin-top: 0; margin-bottom: 20px;">🥇 Ranking de Times Vencedores</h2>
+        
+        {% if campeonato.times_vencedores %}
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                {% for time, vitorias in campeonato.times_vencedores|dictsort(by='value', reverse=true) %}
+                    {% if loop.index <= 3 %}
+                        {% set medals = ['🥇', '🥈', '🥉'] %}
+                        {% set medal = medals[loop.index - 1] %}
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px; text-align: center; border: 2px solid #667eea;">
+                            <div style="font-size: 36px; margin-bottom: 10px;">{{ medal }}</div>
+                            <div style="font-size: 20px; font-weight: bold; color: white; margin-bottom: 5px;">Time {{ time }}</div>
+                            <div style="font-size: 28px; font-weight: bold; color: #ffd700;">{{ vitorias }}</div>
+                            <div style="font-size: 12px; opacity: 0.8; color: white;">Vitória{{ 's' if vitorias != 1 else '' }}</div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <!-- Ranking Completo -->
+            {% if campeonato.times_vencedores|length > 3 %}
+                <div style="margin-top: 30px; padding-top: 30px; border-top: 1px solid #667eea;">
+                    <h3 style="margin-top: 0;">Ranking Completo</h3>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: rgba(102, 126, 234, 0.1); border-bottom: 2px solid #667eea;">
+                                <th style="padding: 12px; text-align: left;">#</th>
+                                <th style="padding: 12px; text-align: left;">Time</th>
+                                <th style="padding: 12px; text-align: center;">Vitórias</th>
+                                <th style="padding: 12px; text-align: center;">Taxa de Vitória</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for time, vitorias in campeonato.times_vencedores|dictsort(by='value', reverse=true) %}
+                                <tr style="border-bottom: 1px solid rgba(102, 126, 234, 0.2); transition: background 0.3s;">
+                                    <td style="padding: 12px; font-weight: bold;">{{ loop.index }}</td>
+                                    <td style="padding: 12px;">🏟️ Time {{ time }}</td>
+                                    <td style="padding: 12px; text-align: center; font-weight: bold; color: #ffd700;">{{ vitorias }}</td>
+                                    <td style="padding: 12px; text-align: center;">{{ ((vitorias / campeonato.total_partidas) * 100)|round(1) }}%</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        {% else %}
+            <div style="text-align: center; padding: 40px 20px; color: #999;">
+                <div style="font-size: 48px; margin-bottom: 15px;">🏟️</div>
+                <p style="font-size: 18px; margin: 0;">Nenhuma partida registrada ainda</p>
+                <p style="font-size: 14px; opacity: 0.7; margin: 5px 0 0 0;">Realize sorteios e registre os resultados</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Placar Geral por Time -->
+    <div style="background: #2a2a3e; padding: 25px; border-radius: 12px; margin-bottom: 30px;">
+        <h2 style="margin-top: 0; margin-bottom: 20px;">📊 Placar Geral - Vitórias x Derrotas</h2>
+        
+        {% if placar_geral %}
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                {% for time, stats in placar_geral|dictsort %}
+                    {% set total = stats.vitórias + stats.derrotas %}
+                    {% if total > 0 %}
+                        {% set taxa = (stats.vitórias / total * 100)|round(1) %}
+                    {% else %}
+                        {% set taxa = 0 %}
+                    {% endif %}
+                    <div style="background: rgba(102, 126, 234, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #667eea;">
+                        <div style="font-weight: bold; margin-bottom: 10px; font-size: 16px;">{{ time|upper }}</div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                            <div style="text-align: center; padding: 10px; background: rgba(76, 175, 80, 0.2); border-radius: 6px;">
+                                <div style="font-size: 12px; opacity: 0.7;">Vitórias</div>
+                                <div style="font-size: 24px; font-weight: bold; color: #4caf50;">{{ stats.vitórias }}</div>
+                            </div>
+                            <div style="text-align: center; padding: 10px; background: rgba(244, 67, 54, 0.2); border-radius: 6px;">
+                                <div style="font-size: 12px; opacity: 0.7;">Derrotas</div>
+                                <div style="font-size: 24px; font-weight: bold; color: #f44336;">{{ stats.derrotas }}</div>
+                            </div>
+                        </div>
+                        <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 4px; text-align: center; font-size: 12px;">
+                            Taxa: <strong style="color: #667eea;">{{ taxa }}%</strong>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 20px; color: #999;">
+                Nenhuma partida registrada ainda
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Últimas Partidas -->
+    {% if ultimas_partidas %}
+        <div style="background: #2a2a3e; padding: 25px; border-radius: 12px;">
+            <h2 style="margin-top: 0; margin-bottom: 20px;">📋 Últimas Partidas</h2>
+            
+            <div style="space-y: 10px;">
+                {% for partida in ultimas_partidas %}
+                    <div style="background: rgba(102, 126, 234, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #667eea; margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <div style="font-weight: bold;">Sorteio #{{ partida.sorteio_id }}</div>
+                            <div style="font-size: 12px; opacity: 0.7;">{{ partida.data|replace('T', ' ')|truncate(16) }}</div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 15px; align-items: center;">
+                            {% for gol in partida.gols_times %}
+                                {% if loop.index == partida.time_vencedor %}
+                                    <div style="text-align: {{ 'right' if loop.index > 1 else 'left' }}; padding: 10px; background: rgba(76, 175, 80, 0.2); border-radius: 6px; border: 2px solid #4caf50;">
+                                        <div style="font-size: 12px; opacity: 0.8;">Time {{ loop.index }} 🏆</div>
+                                        <div style="font-size: 24px; font-weight: bold; color: #4caf50;">{{ gol }}</div>
+                                    </div>
+                                {% else %}
+                                    <div style="text-align: {{ 'right' if loop.index > 1 else 'left' }}; padding: 10px; background: rgba(102, 126, 234, 0.1); border-radius: 6px;">
+                                        <div style="font-size: 12px; opacity: 0.8;">Time {{ loop.index }}</div>
+                                        <div style="font-size: 24px; font-weight: bold;">{{ gol }}</div>
+                                    </div>
+                                {% endif %}
+                                {% if not loop.last and loop.length > 1 and loop.index == 1 %}
+                                    <div style="text-align: center; font-size: 20px; font-weight: bold; color: #667eea;">x</div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        {% if partida.notas %}
+                            <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #667eea; font-size: 13px; opacity: 0.8;">
+                                📝 {{ partida.notas }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Back Button -->
+    <div style="margin-top: 30px; text-align: center;">
+        <a href="/" style="color: #667eea; text-decoration: none; font-size: 14px;">← Voltar para Home</a>
+    </div>
+</div>
+{% endblock %}

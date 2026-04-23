@@ -31,6 +31,9 @@ def criar_app(config_name: str = None) -> Flask:
     app = Flask(__name__)
     app.config.from_object(config_by_name.get(config_name, 'development'))
     
+    # Configurar secret key para sessions
+    app.secret_key = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
+    
     # Registrar blueprints
     app.register_blueprint(jogador_bp)
     

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Gráficos - NaTrave</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid var(--primary);
+        }
+
+        .chart-card h3 {
+            margin: 0 0 1.5rem 0;
+            font-size: 1.1rem;
+            color: var(--text);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 1rem;
+        }
+
+        .chart-full {
+            grid-column: 1 / -1;
+        }
+
+        .chart-container.large {
+            height: 400px;
+        }
+
+        .chart-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            flex: 1;
+            min-width: 100px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-container {
+                height: 250px;
+            }
+
+            .chart-container.large {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <a href="{{ url_for('jogador.index') }}" class="back-link">← Voltar</a>
+                <h1>📊 Análise de Dados</h1>
+                <p class="subtitle">Visualizações e gráficos do histórico de sorteios</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Navigation Tabs -->
+            <div class="nav-tabs">
+                <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
+                <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
+                <a href="{{ url_for('jogador.estatisticas') }}" class="nav-tab">📊 Estatísticas</a>
+                <a href="{{ url_for('jogador.stats_players') }}" class="nav-tab">🏆 Stats</a>
+                <a href="{{ url_for('jogador.stats_times_page') }}" class="nav-tab">🎯 Times</a>
+                <a href="{{ url_for('jogador.stats_combos_page') }}" class="nav-tab">⭐ Combos</a>
+            </div>
+
+            <!-- Gráficos -->
+            <section class="section">
+                <div class="charts-grid">
+                    <!-- Win Rate Top 5 -->
+                    <div class="chart-card">
+                        <h3>🏆 Win Rate - Top 5</h3>
+                        <div class="chart-container">
+                            <canvas id="winRateChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Sorteios ao Longo do Tempo -->
+                    <div class="chart-card">
+                        <h3>📈 Sorteios Acumulativos</h3>
+                        <div class="chart-container">
+                            <canvas id="sorteioCumulativeChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Diferença Máxima Over Time -->
+                    <div class="chart-card chart-full">
+                        <h3>⚖️ Qualidade de Balanceamento (Diferença Máxima)</h3>
+                        <div class="chart-container large">
+                            <canvas id="balanceamentoChart"></canvas>
+                        </div>
+                        <div class="chart-stats">
+                            <div class="stat-item">
+                                <div class="stat-value" id="melhorBalance">-</div>
+                                <div class="stat-label">Melhor</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="piorBalance">-</div>
+                                <div class="stat-label">Pior</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="mediaBalance">-</div>
+                                <div class="stat-label">Média</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Distribuição de Jogadores por Sorteio -->
+                    <div class="chart-card">
+                        <h3>👥 Distribuição de Jogadores</h3>
+                        <div class="chart-container">
+                            <canvas id="distribuicaoJogadoresChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Posição Média dos Top Jogadores -->
+                    <div class="chart-card">
+                        <h3>📊 Posição Média - Top Jogadores</h3>
+                        <div class="chart-container">
+                            <canvas id="posicaoMediaChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Frequência de Sorteios -->
+                    <div class="chart-card chart-full">
+                        <h3>📅 Sorteios por Dia (Últimas 30 tentativas)</h3>
+                        <div class="chart-container large">
+                            <canvas id="freqSorteiosChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Carregar dados
+        fetch('/api/stats/players')
+            .then(r => r.json())
+            .then(data => initCharts(data))
+            .catch(e => console.error('Erro ao carregar stats:', e));
+
+        async function initCharts(playersData) {
+            // Obter também dados gerais
+            const statsGeral = await fetch('/api/stats/geral').then(r => r.json());
+            const historico = await fetch('/api/historico').then(r => r.json()).catch(() => []);
+            
+            // 1. Win Rate Top 5
+            const topPlayers = Object.entries(playersData)
+                .sort((a, b) => (b[1].win_rate || 0) - (a[1].win_rate || 0))
+                .slice(0, 5);
+
+            const winRateCtx = document.getElementById('winRateChart').getContext('2d');
+            new Chart(winRateCtx, {
+                type: 'bar',
+                data: {
+                    labels: topPlayers.map(p => p[0]),
+                    datasets: [{
+                        label: 'Win Rate (%)',
+                        data: topPlayers.map(p => p[1].win_rate || 0),
+                        backgroundColor: 'rgba(34, 197, 94, 0.7)',
+                        borderColor: 'rgba(34, 197, 94, 1)',
+                        borderWidth: 2,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { max: 100 }
+                    }
+                }
+            });
+
+            // 2. Sorteios Acumulativos
+            const sorteioCumulativeCtx = document.getElementById('sorteioCumulativeChart').getContext('2d');
+            const sorteioCum = Array.from({length: historico.length}, (_, i) => i + 1);
+            new Chart(sorteioCumulativeCtx, {
+                type: 'line',
+                data: {
+                    labels: sorteioCum.map(i => `#${i}`),
+                    datasets: [{
+                        label: 'Sorteios Acumulativos',
+                        data: sorteioCum,
+                        borderColor: 'rgba(0, 102, 204, 1)',
+                        backgroundColor: 'rgba(0, 102, 204, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: true } }
+                }
+            });
+
+            // 3. Balanceamento Over Time
+            const balanceamentos = historico.map(s => s.diferenca || 0);
+            document.getElementById('melhorBalance').textContent = Math.min(...balanceamentos || [0]);
+            document.getElementById('piorBalance').textContent = Math.max(...balanceamentos || [0]);
+            document.getElementById('mediaBalance').textContent = 
+                (balanceamentos.reduce((a, b) => a + b, 0) / balanceamentos.length || 0).toFixed(1);
+
+            const balanceamentoCtx = document.getElementById('balanceamentoChart').getContext('2d');
+            new Chart(balanceamentoCtx, {
+                type: 'line',
+                data: {
+                    labels: balanceamentos.map((_, i) => `#${i + 1}`),
+                    datasets: [{
+                        label: 'Diferença Máxima (pts)',
+                        data: balanceamentos,
+                        borderColor: 'rgba(234, 179, 8, 1)',
+                        backgroundColor: 'rgba(234, 179, 8, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 3,
+                        pointBackgroundColor: 'rgba(234, 179, 8, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: true } }
+                }
+            });
+
+            // 4. Distribuição de Jogadores
+            const jogadoresCount = historico.map(s => s.total_jogadores || 0);
+            const jogadoresFreq = {};
+            jogadoresCount.forEach(c => {
+                jogadoresFreq[c] = (jogadoresFreq[c] || 0) + 1;
+            });
+
+            const distribuicaoCtx = document.getElementById('distribuicaoJogadoresChart').getContext('2d');
+            new Chart(distribuicaoCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(jogadoresFreq),
+                    datasets: [{
+                        data: Object.values(jogadoresFreq),
+                        backgroundColor: [
+                            'rgba(0, 102, 204, 0.7)',
+                            'rgba(34, 197, 94, 0.7)',
+                            'rgba(234, 179, 8, 0.7)',
+                            'rgba(220, 38, 38, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(0, 102, 204, 1)',
+                            'rgba(34, 197, 94, 1)',
+                            'rgba(234, 179, 8, 1)',
+                            'rgba(220, 38, 38, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            // 5. Posição Média
+            const posMedia = Object.entries(playersData)
+                .sort((a, b) => (a[1].posicao_media_ranking || 0) - (b[1].posicao_media_ranking || 0))
+                .slice(0, 5);
+
+            const posicaoCtx = document.getElementById('posicaoMediaChart').getContext('2d');
+            new Chart(posicaoCtx, {
+                type: 'bar',
+                data: {
+                    labels: posMedia.map(p => p[0]),
+                    datasets: [{
+                        label: 'Posição Média (≠ 1º)',
+                        data: posMedia.map(p => p[1].posicao_media_ranking || 0),
+                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 2,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // 6. Frequência de Sorteios
+            const freqCtx = document.getElementById('freqSorteiosChart').getContext('2d');
+            const sortData = historico.slice(-30).map((s, i) => ({
+                index: i + 1,
+                data: s.data
+            }));
+
+            new Chart(freqCtx, {
+                type: 'line',
+                data: {
+                    labels: sortData.map(s => `#${s.index}`),
+                    datasets: [{
+                        label: 'Sorteios',
+                        data: Array.from({length: sortData.length}, (_, i) => i + 1),
+                        borderColor: 'rgba(139, 92, 246, 1)',
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointBackgroundColor: 'rgba(139, 92, 246, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: true } }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}Registrar Resultado da Partida{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 900px;">
+    <div class="header">
+        <h1>⚽ Registrar Resultado da Partida</h1>
+        <p class="subtitle">Sorteio #{{ sorteio_id }}</p>
+    </div>
+
+    <!-- Teams Grid -->
+    <div class="teams-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
+        {% for time in sorteio.times %}
+        <div class="team-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 12px; color: white; cursor: pointer;" 
+             id="team-{{ loop.index }}" data-team="{{ loop.index }}">
+            <h2 style="margin: 0 0 15px 0;">TIME {{ loop.index }}</h2>
+            
+            <!-- Jogadores -->
+            <div style="margin-bottom: 15px; font-size: 14px; opacity: 0.9;">
+                {% set goleiros = time|selectattr('posicao', 'equalto', 'goleiro')|list %}
+                {% set linhas = time|selectattr('posicao', 'equalto', 'linha')|list %}
+                
+                {% if goleiros %}
+                    <div style="margin-bottom: 8px;">
+                        <strong>🧤 Goleiros:</strong>
+                        {% for j in goleiros %}
+                            <div>{{ j.nome }} (N{{ j.nivel }})</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                
+                {% if linhas %}
+                    <div>
+                        <strong>⚽ Linha:</strong>
+                        {% for j in linhas %}
+                            <div>{{ j.nome }} (N{{ j.nivel }})</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Pontuação -->
+            <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 15px;">
+                <div style="font-size: 12px; opacity: 0.8;">Pontuação Total</div>
+                <div style="font-size: 24px; font-weight: bold;">{{ sorteio.pontuacoes[loop.index0] }} pts</div>
+            </div>
+
+            <!-- Gols Input -->
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-size: 12px; margin-bottom: 5px;">Gols Marcados</label>
+                <input type="number" min="0" max="20" value="0" data-team="{{ loop.index }}" 
+                       class="gols-input" style="width: 100%; padding: 10px; border: none; border-radius: 6px; font-size: 16px; text-align: center;">
+            </div>
+
+            <!-- Vencedor Button -->
+            <button class="btn-vencedor" data-team="{{ loop.index }}" 
+                    style="width: 100%; padding: 12px; background: rgba(255,255,255,0.3); border: 2px solid white; color: white; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.3s;">
+                ✓ Vencedor
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Hidden Form -->
+    <form id="resultado-form" style="display: none;">
+        <input type="hidden" id="sorteio_id" value="{{ sorteio_id }}">
+        <input type="hidden" id="time_vencedor" value="">
+        <input type="hidden" id="gols_times" value="">
+    </form>
+
+    <!-- Notes Section -->
+    <div style="background: #2a2a3e; padding: 20px; border-radius: 12px; margin-bottom: 30px;">
+        <label style="display: block; margin-bottom: 10px; font-weight: bold;">📝 Notas sobre a Partida (Opcional)</label>
+        <textarea id="notas-input" placeholder="Gols em sequência, destaques, cartões, etc..." 
+                  style="width: 100%; padding: 12px; border: 1px solid #667eea; background: #1a1a2e; color: #fff; border-radius: 6px; font-size: 14px; resize: vertical; height: 100px;"></textarea>
+    </div>
+
+    <!-- Info Message -->
+    <div id="info-message" style="background: rgba(102, 126, 234, 0.1); padding: 15px; border-left: 4px solid #667eea; border-radius: 4px; margin-bottom: 30px; display: none;">
+        <div id="message-content" style="color: #667eea; font-size: 14px;"></div>
+    </div>
+
+    <!-- Submit Button -->
+    <button id="btn-registrar" style="width: 100%; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.3s;">
+        🏆 Registrar Resultado
+    </button>
+
+    <!-- Back Button -->
+    <div style="margin-top: 20px; text-align: center;">
+        <a href="/sorteio/{{ sorteio_id }}" style="color: #667eea; text-decoration: none; font-size: 14px;">← Voltar para Sorteio</a>
+    </div>
+</div>
+
+<style>
+    .team-card {
+        transition: all 0.3s ease;
+    }
+
+    .team-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+
+    .team-card.selected {
+        border: 3px solid #ffd700;
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    }
+
+    .btn-vencedor {
+        transition: all 0.3s;
+    }
+
+    .btn-vencedor:hover {
+        background: rgba(255,255,255,0.5);
+        transform: scale(1.05);
+    }
+
+    .team-card.selected .btn-vencedor {
+        background: #ffd700;
+        color: #764ba2;
+    }
+
+    #btn-registrar:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    }
+
+    #btn-registrar:active {
+        transform: translateY(0);
+    }
+</style>
+
+<script>
+let timeVencedorSelecionado = null;
+
+// Listeners para seleção de vencedor
+document.querySelectorAll('.btn-vencedor').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const team = parseInt(this.dataset.team);
+        
+        // Remover seleção anterior
+        document.querySelectorAll('.team-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        
+        // Adicionar seleção ao time clicado
+        document.getElementById(`team-${team}`).classList.add('selected');
+        timeVencedorSelecionado = team;
+        
+        // Mostrar mensagem
+        mostrarMensagem(`Time ${team} selecionado como vencedor`);
+    });
+});
+
+// Função para mostrar mensagem
+function mostrarMensagem(msg) {
+    const msgDiv = document.getElementById('info-message');
+    document.getElementById('message-content').textContent = msg;
+    msgDiv.style.display = 'block';
+}
+
+// Registrar resultado
+document.getElementById('btn-registrar').addEventListener('click', function() {
+    if (!timeVencedorSelecionado) {
+        alert('⚠️ Selecione o time vencedor!');
+        return;
+    }
+
+    // Coletar gols
+    const golsInputs = document.querySelectorAll('.gols-input');
+    const gols = Array.from(golsInputs).map(input => parseInt(input.value) || 0);
+    
+    const notas = document.getElementById('notas-input').value;
+
+    // Preparar dados
+    const dados = {
+        sorteio_id: parseInt(document.getElementById('sorteio_id').value),
+        time_vencedor: timeVencedorSelecionado,
+        gols_times: gols,
+        notas: notas
+    };
+
+    // Enviar
+    this.disabled = true;
+    this.textContent = 'Registrando... ⏳';
+    
+    fetch('/api/partida/registrar', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(dados)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.sucesso) {
+            mostrarMensagem('✅ Resultado registrado com sucesso!');
+            setTimeout(() => {
+                window.location.href = `/sorteio/{{ sorteio_id }}`;
+            }, 1500);
+        } else {
+            alert('❌ Erro: ' + data.erro);
+            this.disabled = false;
+            this.textContent = '🏆 Registrar Resultado';
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        alert('❌ Erro ao registrar resultado');
+        this.disabled = false;
+        this.textContent = '🏆 Registrar Resultado';
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚽ NaTrave - Histórico de Sorteios</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>⚽ NaTrave</h1>
+                <p class="subtitle">Histórico de Sorteios</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Navigation -->
+            <div class="nav-tabs">
+                <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
+                <a href="{{ url_for('jogador.historico') }}" class="nav-tab active">📜 Histórico</a>
+                <a href="{{ url_for('jogador.estatisticas') }}" class="nav-tab">📊 Estatísticas</a>
+            </div>
+
+            <!-- Histórico Section -->
+            <section class="section">
+                <h2 class="section-title">📜 Sorteios Realizados</h2>
+
+                {% if sorteios %}
+                    <div class="sorteios-list">
+                        {% for sorteio in sorteios %}
+                            <div class="sorteio-card">
+                                <div class="sorteio-header">
+                                    <div class="sorteio-info">
+                                        <h3 class="sorteio-title">🎲 Sorteio #{{ sorteio.id }}</h3>
+                                        <p class="sorteio-data">
+                                            📅 {{ sorteio.data[:10] }} às {{ sorteio.data[11:16] }}
+                                        </p>
+                                    </div>
+                                    <div class="sorteio-stats">
+                                        <span class="stat-badge">
+                                            👥 {{ sorteio.total_jogadores }} jogadores
+                                        </span>
+                                        <span class="stat-badge">
+                                            ⚽ {{ sorteio.num_times }} times
+                                        </span>
+                                        <span class="stat-badge diff-{{ 'good' if sorteio.diferenca <= 1 else 'ok' if sorteio.diferenca <= 2 else 'bad' }}">
+                                            📊 Diff: {{ sorteio.diferenca }} pts
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Times Preview -->
+                                <div class="sorteio-preview">
+                                    {% for time in sorteio.times %}
+                                        <div class="time-preview">
+                                            <strong>Time {{ time.numero }}</strong>
+                                            <span class="time-score">{{ time.soma }} pts</span>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                <div class="sorteio-actions">
+                                    <a href="{{ url_for('jogador.ver_sorteio', sorteio_id=sorteio.id) }}" class="btn btn-primary btn-small">
+                                        👁️ Ver Detalhes
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">📜</div>
+                        <p>Nenhum sorteio realizado ainda</p>
+                        <p class="empty-hint">Realize um sorteio para ver o histórico</p>
+                    </div>
+                {% endif %}
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>⚽ NaTrave • Desenvolvido por Guilherme Urbano com ❤️</p>
+        </footer>
+    </div>
+</body>
+</html>

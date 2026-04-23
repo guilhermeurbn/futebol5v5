@@ -236,6 +236,26 @@
 
         <!-- Main Content -->
         <main class="main">
+            <!-- Navigation Tabs -->
+            <div class="nav-tabs">
+                <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
+                <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
+                <a href="{{ url_for('jogador.estatisticas') }}" class="nav-tab">📊 Estatísticas</a>
+            </div>
+
+            <!-- Aviso de Múltiplos Goleiros -->
+            {% if tem_aviso %}
+            <section class="section">
+                <div style="background: rgba(234, 179, 8, 0.1); border: 2px solid #eab308; border-radius: 8px; padding: 1.5rem; display: flex; gap: 1rem; align-items: start;">
+                    <span style="font-size: 1.5rem; flex-shrink: 0;">⚠️</span>
+                    <div>
+                        <h3 style="margin: 0 0 0.5rem 0; color: #ca8a04;">Atenção!</h3>
+                        <p style="margin: 0; color: var(--text);">{{ aviso_msg }}</p>
+                    </div>
+                </div>
+            </section>
+            {% endif %}
+
             <!-- Stats -->
             <section class="section">
                 <div class="stats-grid">
@@ -258,31 +278,28 @@
             <section class="section">
                 <div class="times-container num-{{ num_times }}">
                     {% for time in times %}
-                        {% set goleiro = time[0] if time[0].posicao == 'goleiro' else (time[1] if time[1]|default and time[1].posicao == 'goleiro' else none) %}
-                        {% set linha = [j for j in time if j.posicao == 'linha'] %}
                         <div class="team {% if melhor_time == 'Time ' + loop.index|string %}melhor{% endif %}">
                             <div class="team-header">
                                 <h2 class="team-title">⚽ Time {{ loop.index }}</h2>
                                 <div class="team-score">{{ somas[loop.index0] }} pts</div>
                             </div>
                             
-                            <!-- Goleiro -->
-                            {% if goleiro %}
-                                <div class="goleiro-section">
-                                    <div class="goleiro-title">🧤 Goleiro</div>
-                                    <div class="goleiro-item">
-                                        <span class="goleiro-name">{{ goleiro.nome }}</span>
-                                        <span class="goleiro-level">Nível {{ goleiro.nivel }}</span>
-                                    </div>
-                                </div>
-                            {% endif %}
+                            <!-- Botão Favoritar -->
+                            <div style="padding: 10px; text-align: center; border-bottom: 1px solid rgba(102, 126, 234, 0.2);">
+                                <button class="btn-favoritar" data-time-num="{{ loop.index }}" data-pontuacao="{{ somas[loop.index0] }}" data-sorteio="{{ sorteio_id }}"
+                                        style="padding: 8px 15px; background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); color: #333; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; transition: all 0.3s;">
+                                    ⭐ Favoritar
+                                </button>
+                            </div>
                             
-                            <!-- Jogadores de Linha -->
+                            <!-- 5 Jogadores do Time -->
                             <div class="players-list">
-                                <div class="linha-title">Linha</div>
-                                {% for jogador in linha %}
+                                {% for jogador in time %}
                                     <div class="player-item">
-                                        <span class="player-name">{{ loop.index }}. {{ jogador.nome }}</span>
+                                        <span class="player-name">
+                                            {% if jogador.posicao == 'goleiro' %}🧤{% else %}⚽{% endif %}
+                                            {{ loop.index }}. {{ jogador.nome }}
+                                        </span>
                                         <span class="player-level">Nível {{ jogador.nivel }}</span>
                                     </div>
                                 {% endfor %}
@@ -294,12 +311,30 @@
 
             <!-- Actions -->
             <section class="section">
-                <div class="actions-section">
+                <div class="actions-section" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px;">
                     <a href="{{ url_for('jogador.selecionar_jogadores') }}" class="btn btn-primary">
-                        ← Voltar para Seleção
+                        ← Voltar
                     </a>
+                    <button id="btn-undo" class="btn btn-primary" style="background: linear-gradient(135deg, #fd7272 0%, #f5576c 100%); cursor: pointer;" disabled>
+                        ↶ Undo
+                    </button>
+                    <button id="btn-redo" class="btn btn-primary" style="background: linear-gradient(135deg, #54a0ff 0%, #5f27cd 100%); cursor: pointer;" disabled>
+                        ↷ Redo
+                    </button>
                     <a href="{{ url_for('jogador.sortear') }}" class="btn btn-success">
                         🎲 Novo Sorteio
+                    </a>
+                    <a href="{{ url_for('jogador.resultado_partida_page', sorteio_id=sorteio_id) }}" class="btn btn-primary" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        🏆 Resultado
+                    </a>
+                    <button id="btn-qrcode" class="btn btn-primary" style="background: linear-gradient(135deg, #ffa502 0%, #ffc107 100%); cursor: pointer;">
+                        📱 QR Code
+                    </button>
+                    <a href="{{ url_for('jogador.export_sorteio_csv') }}" class="btn btn-primary" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        📥 CSV
+                    </a>
+                    <a href="{{ url_for('jogador.export_sorteio_txt') }}" class="btn btn-primary" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                        📄 TXT
                     </a>
                 </div>
             </section>
@@ -310,5 +345,146 @@
             <p>⚽ NaTrave • Desenvolvido por Guilherme Urbano com ❤️</p>
         </footer>
     </div>
-</body>
-</html>
+
+    <script>
+    // Carregar status de undo/redo ao iniciar
+    function atualizarStatusUndoRedo() {
+        fetch('/api/sorteio/status')
+            .then(r => r.json())
+            .then(data => {
+                const btnUndo = document.getElementById('btn-undo');
+                const btnRedo = document.getElementById('btn-redo');
+                
+                if (data.status) {
+                    btnUndo.disabled = !data.status.pode_undo;
+                    btnRedo.disabled = !data.status.pode_redo;
+                    
+                    // Adicionar tooltip com informações
+                    btnUndo.title = data.status.pode_undo ? `Voltar para sorteio anterior (${data.status.sorteio_atual}/${data.status.total_sorteios})` : 'Sem sorteio anterior';
+                    btnRedo.title = data.status.pode_redo ? `Avançar para próximo sorteio (+${data.status.sorteios_apos})` : 'Sem sorteio posterior';
+                }
+            });
+    }
+    
+    // Botão Undo
+    document.getElementById('btn-undo').addEventListener('click', function() {
+        this.disabled = true;
+        this.textContent = '⏳ Undo...';
+        
+        fetch('/api/sorteio/undo', { method: 'POST' })
+            .then(r => r.json())
+            .then(data => {
+                if (data.sucesso) {
+                    alert(`✅ ${data.mensagem}`);
+                    // Recarregar página para mostrar novo sorteio
+                    setTimeout(() => location.reload(), 500);
+                } else {
+                    alert('❌ ' + data.erro);
+                    this.disabled = false;
+                    this.textContent = '↶ Undo';
+                    atualizarStatusUndoRedo();
+                }
+            })
+            .catch(err => {
+                console.error('Erro:', err);
+                alert('❌ Erro ao fazer undo');
+                this.disabled = false;
+                this.textContent = '↶ Undo';
+                atualizarStatusUndoRedo();
+            });
+    });
+    
+    // Botão Redo
+    document.getElementById('btn-redo').addEventListener('click', function() {
+        this.disabled = true;
+        this.textContent = '⏳ Redo...';
+        
+        fetch('/api/sorteio/redo', { method: 'POST' })
+            .then(r => r.json())
+            .then(data => {
+                if (data.sucesso) {
+                    alert(`✅ ${data.mensagem}`);
+                    // Recarregar página para mostrar novo sorteio
+                    setTimeout(() => location.reload(), 500);
+                } else {
+                    alert('❌ ' + data.erro);
+                    this.disabled = false;
+                    this.textContent = '↷ Redo';
+                    atualizarStatusUndoRedo();
+                }
+            })
+            .catch(err => {
+                console.error('Erro:', err);
+                alert('❌ Erro ao fazer redo');
+                this.disabled = false;
+                this.textContent = '↷ Redo';
+                atualizarStatusUndoRedo();
+            });
+    });
+    
+    // Inicializar status ao carregar
+    atualizarStatusUndoRedo();
+    
+    // Favoritar Times
+    document.querySelectorAll('.btn-favoritar').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const time_num = parseInt(this.dataset.timeNum);
+            const pontuacao = parseInt(this.dataset.pontuacao);
+            const sorteio_id = parseInt(this.dataset.sorteio);
+            
+            // Coletar jogadores do time
+            const time_card = this.closest('.team');
+            const jogadores = [];
+            
+            time_card.querySelectorAll('.player-item').forEach(item => {
+                const nome = item.querySelector('.player-name').textContent.trim().replace(/^[\d.]+ /, '').replace(/^[🧤⚽] /, '');
+                const nivel = parseInt(item.querySelector('.player-level').textContent.match(/\d+/)[0]);
+                const posicao = item.querySelector('.player-name').textContent.includes('🧤') ? 'goleiro' : 'linha';
+                const tipo = 'avulso'; // Assumir avulso por enquanto
+                
+                jogadores.push({ nome, nivel, posicao, tipo });
+            });
+            
+            // Pedir nome do favorito
+            const nome_padrao = `Time ${time_num} (${pontuacao} pts)`;
+            const nome_fav = prompt('Nome para este time favorito:', nome_padrao);
+            
+            if (nome_fav === null) return; // Cancelado
+            
+            // Enviar para API
+            this.disabled = true;
+            this.textContent = 'Salvando...';
+            
+            fetch('/api/favoritar-time', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sorteio_id: sorteio_id,
+                    time_numero: time_num,
+                    jogadores: jogadores,
+                    pontuacao: pontuacao,
+                    nome: nome_fav
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.sucesso) {
+                    alert('✅ Time favoritado com sucesso!');
+                    this.textContent = '✓ Favoritado';
+                    this.style.background = 'rgba(76, 175, 80, 0.5)';
+                } else {
+                    alert('❌ Erro: ' + data.erro);
+                    this.disabled = false;
+                    this.textContent = '⭐ Favoritar';
+                }
+            })
+            .catch(err => {
+                console.error('Erro:', err);
+                alert('❌ Erro ao favoritar time');
+                this.disabled = false;
+                this.textContent = '⭐ Favoritar';
+            });
+        });
+    });
+    </script>
+

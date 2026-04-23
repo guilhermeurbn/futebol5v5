@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Stats Jogadores - NaTrave</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .stats-table thead {
+            background: linear-gradient(135deg, var(--primary) 0%, #0052a3 100%);
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+
+        .stats-table th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        .stats-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stats-table tbody tr:hover {
+            background: rgba(0, 102, 204, 0.05);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .badge-success {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--success);
+        }
+
+        .badge-primary {
+            background: rgba(0, 102, 204, 0.2);
+            color: var(--primary);
+        }
+
+        .badge-warning {
+            background: rgba(234, 179, 8, 0.2);
+            color: #ca8a04;
+        }
+
+        .player-name {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .trophy {
+            font-size: 1.2rem;
+            margin-right: 0.5rem;
+        }
+
+        .ranking-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-weight: bold;
+            color: white;
+            margin-right: 0.5rem;
+        }
+
+        .ranking-1 {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+        }
+
+        .ranking-2 {
+            background: linear-gradient(135deg, #C0C0C0, #808080);
+        }
+
+        .ranking-3 {
+            background: linear-gradient(135deg, #CD7F32, #8B4513);
+        }
+
+        .ranking-other {
+            background: var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .stats-table {
+                font-size: 0.9rem;
+            }
+
+            .stats-table th,
+            .stats-table td {
+                padding: 0.75rem;
+            }
+
+            .badge {
+                padding: 0.2rem 0.5rem;
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <a href="{{ url_for('jogador.index') }}" class="back-link">← Voltar</a>
+                <h1>📊 Estatísticas de Jogadores</h1>
+                <p class="subtitle">Win rate, performance e histórico de cada jogador</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Navigation Tabs -->
+            <div class="nav-tabs">
+                <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
+                <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
+                <a href="{{ url_for('jogador.estatisticas') }}" class="nav-tab">📊 Estatísticas</a>
+                <a href="{{ url_for('jogador.stats_players') }}" class="nav-tab active">🏆 Stats Jogadores</a>
+                <a href="{{ url_for('jogador.stats_times_page') }}" class="nav-tab">🎯 Stats Times</a>
+                <a href="{{ url_for('jogador.stats_combos_page') }}" class="nav-tab">⭐ Combos</a>
+            </div>
+
+            <!-- Stats Jogadores -->
+            <section class="section">
+                <h2>🏆 Top Jogadores por Win Rate</h2>
+                
+                {% if stats %}
+                    <table class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>Ranking</th>
+                                <th>Jogador</th>
+                                <th>Sorteios</th>
+                                <th>Win Rate</th>
+                                <th>Vencedores</th>
+                                <th>Pont. Média</th>
+                                <th>Posição Média</th>
+                                <th>Melhor/Pior</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for jogador in stats[:20] %}
+                                <tr>
+                                    <td>
+                                        {% if loop.index <= 3 %}
+                                            <span class="ranking-badge ranking-{{ loop.index }}">{{ loop.index }}</span>
+                                        {% else %}
+                                            <span class="ranking-badge ranking-other">{{ loop.index }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="player-name">{{ jogador.nome }}</td>
+                                    <td>
+                                        <span class="badge badge-primary">{{ jogador.vezes_sorteado }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-success">{{ jogador.win_rate }}%</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-success">{{ jogador.times_vencedores }}</span>
+                                    </td>
+                                    <td><strong>{{ jogador.pontuacao_media }}</strong></td>
+                                    <td>{{ jogador.posicao_media_ranking }}º</td>
+                                    <td>{{ jogador.melhor_performance }}º / {{ jogador.pior_performance }}º</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div style="padding: 2rem; text-align: center; color: var(--text-secondary);">
+                        <p>📊 Nenhum sorteio realizado ainda</p>
+                    </div>
+                {% endif %}
+            </section>
+
+            <!-- Métricas Adicionais -->
+            {% if stats %}
+            <section class="section">
+                <h2>📈 Análise Detalhada</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                    {% for jogador in stats[:5] %}
+                        <div style="background: var(--card-bg); padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--primary);">
+                            <h3 style="margin: 0 0 1rem 0; font-size: 1.1rem;">{{ loop.index }}. {{ jogador.nome }}</h3>
+                            <div style="font-size: 0.9rem; line-height: 1.8;">
+                                <div><strong>Sorteios:</strong> {{ jogador.vezes_sorteado }}</div>
+                                <div><strong>Win Rate:</strong> <span style="color: var(--success); font-weight: bold;">{{ jogador.win_rate }}%</span></div>
+                                <div><strong>Pontuação Média:</strong> {{ jogador.pontuacao_media }}</div>
+                                <div><strong>Posição Média:</strong> {{ jogador.posicao_media_ranking }}º lugar</div>
+                                <div><strong>Times Diferentes:</strong> {{ jogador.times_diferentes }}</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+        </main>
+    </div>
+</body>
+</html>

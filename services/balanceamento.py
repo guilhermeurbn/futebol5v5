@@ -1,7 +1,12 @@
 """
 Serviço de Balanceamento de Times
+
+NOVO MODELO: Goleiros contam como jogadores normais (4 linha + 1 goleiro = 5 do time)
+- Time tem exatamente 5 jogadores
+- Pontuação é a soma de todos os 5 (linha + goleiro)
+- Simulated Annealing distribui todos os jogadores igualmente
 """
-from typing import Tuple, List, Dict
+from typing import Tuple, List
 from models.jogadores import Jogador
 import random
 import math
@@ -45,46 +50,6 @@ class BalanceadorTimes:
         return num_jogadores // BalanceadorTimes.TAMANHO_TIME
     
     @staticmethod
-    def separar_goleiros(jogadores: List[Jogador]) -> Tuple[List[Jogador], List[Jogador]]:
-        """
-        Separa jogadores de linha de goleiros
-        
-        Args:
-            jogadores: Lista de jogadores
-            
-        Returns:
-            Tupla (jogadores_linha, goleiros)
-        """
-        linha = [j for j in jogadores if j.posicao == "linha"]
-        goleiros = [j for j in jogadores if j.posicao == "goleiro"]
-        return linha, goleiros
-    
-    @staticmethod
-    def validar_jogadores_com_goleiros(jogadores: List[Jogador]) -> Tuple[bool, str]:
-        """
-        Valida jogadores considerando goleiros
-        
-        Args:
-            jogadores: Lista de jogadores
-            
-        Returns:
-            Tupla (válido, mensagem)
-        """
-        linha, goleiros = BalanceadorTimes.separar_goleiros(jogadores)
-        num_times = len(jogadores) // BalanceadorTimes.TAMANHO_TIME
-        
-        if len(jogadores) % BalanceadorTimes.TAMANHO_TIME != 0:
-            return False, f"Número de jogadores deve ser múltiplo de 5. Você tem {len(jogadores)}"
-        
-        if len(goleiros) < num_times:
-            return False, f"Precisa de ao menos {num_times} goleiros. Você tem {len(goleiros)}"
-        
-        if len(linha) < num_times * 4:
-            return False, f"Precisa de ao menos {num_times * 4} jogadores de linha. Você tem {len(linha)}"
-        
-        return True, ""
-    
-    @staticmethod
     def calcular_energia(times: List[List[Jogador]]) -> float:
         """
         Calcula a 'energia' de uma distribuição (quanto menos equilibrado, maior a energia)
@@ -101,17 +66,17 @@ class BalanceadorTimes:
         return max(somas) - min(somas)
     
     @staticmethod
-    def simulated_annealing(jogadores: List[Jogador], num_times: int, iteracoes: int = 1000) -> List[List[Jogador]]:
+    def simulated_annealing(jogadores: List[Jogador], num_times: int, iteracoes: int = 2000) -> List[List[Jogador]]:
         """
         Usa Simulated Annealing para distribuir jogadores de forma ótima
         
         Args:
-            jogadores: Lista de jogadores de linha (sem goleiros)
+            jogadores: Lista de TODOS os jogadores (linha + goleiros)
             num_times: Número de times
             iteracoes: Número máximo de iterações
             
         Returns:
-            Lista de times equilibrados
+            Lista de times equilibrados (cada time com 5 jogadores)
         """
         # Inicializar com distribuição aleatória
         random.shuffle(jogadores)
@@ -156,120 +121,160 @@ class BalanceadorTimes:
         return melhores_times
     
     @staticmethod
-    def sortear_multiplos_times(jogadores: List[Jogador]) -> Tuple[List[List[Jogador]], List[int]]:
+    def sortear_multiplos_times(jogadores: List[Jogador]) -> Tuple[List[List[Jogador]], List[int], bool, str]:
         """
-        Sorteia múltiplos times equilibrados por nível
-        
-        Algoritmo: Snake draft estendido - alternando entre times, começando pelos melhores
+        Sorteia múltiplos times equilibrados (alias para compatibilidade)
+        Goleiros agora contam como jogadores normais
         
         Args:
             jogadores: Lista de jogadores
             
         Returns:
-            Tupla (lista_de_times, lista_somas_niveis)
-            
-        Exemplo:
-            15 jogadores → [time1, time2, time3]
-            20 jogadores → [time1, time2, time3, time4]
+            Tupla (lista_de_times, lista_somas_niveis, tem_aviso, mensagem_aviso)
         """
+        return BalanceadorTimes.sortear_multiplos_times_com_goleiros(jogadores)
+    
+    @staticmethod
+    def sortear_multiplos_times_com_goleiros(jogadores: List[Jogador]) -> Tuple[List[List[Jogador]], List[int], bool, str]:
+        """
+        Sorteia múltiplos times com goleiros usando Simulated Annealing
+        
+        NOVO: Goleiros contam como jogadores normais!
+        REGRA: Cada time tem exatamente 5 jogadores
+               - Se goleiros <= times: máximo 1 por time
+               - Se goleiros > times: alguns times terão 2+ goleiros
+        
+        Exemplos:
+        - 3 goleiros + 7 linha (2 times): Time 1 = 2 goleiros + 3 linha, Time 2 = 1 goleiro + 4 linha
+        - 2 goleiros + 8 linha (2 times): Time 1 = 1 goleiro + 4 linha, Time 2 = 1 goleiro + 4 linha
+        - 1 goleiro + 9 linha (2 times): Time 1 = 1 goleiro + 4 linha, Time 2 = 0 goleiros + 5 linha
+        
+        Args:
+            jogadores: Lista de jogadores (linha + goleiros misturados)
+            
+        Returns:
+            Tupla (lista_de_times, lista_somas_totais, tem_aviso, mensagem_aviso)
+        """
+        # Validação básica
         valido, msg = BalanceadorTimes.validar_jogadores(jogadores)
         if not valido:
             raise ValueError(msg)
         
-        num_times = BalanceadorTimes.calcular_numero_times(len(jogadores))
+        # Separar goleiros e linha
+        linha = [j for j in jogadores if j.posicao == "linha"]
+        goleiros = [j for j in jogadores if j.posicao == "goleiro"]
         
-        # Inicializar times vazios
+        num_times = BalanceadorTimes.calcular_numero_times(len(jogadores))
+        tamanho_time = BalanceadorTimes.TAMANHO_TIME
+        
+        # Verificar se há mais goleiros que times
+        tem_aviso = len(goleiros) > num_times
+        aviso_msg = ""
+        
+        if tem_aviso:
+            excesso = len(goleiros) - num_times
+            aviso_msg = f"⚠️ {excesso} goleiro(s) a mais que time(s). Alguns times terão 2+ goleiros."
+        
+        # Ordenar por nível (decrescente)
+        linha_ordenada = sorted(linha, key=lambda x: x.nivel, reverse=True)
+        goleiros_ordenados = sorted(goleiros, key=lambda x: x.nivel, reverse=True)
+        
+        # 1. Distribuir goleiros round-robin entre times
         times = [[] for _ in range(num_times)]
-        somas = [0] * num_times
+        for idx, goleiro in enumerate(goleiros_ordenados):
+            times[idx % num_times].append(goleiro)
         
-        # Ordena por nível (decrescente)
-        jogadores_ordenados = sorted(jogadores, key=lambda x: x.nivel, reverse=True)
+        # 2. Calcular quantos linha cada time precisa para ficar com 5
+        linha_necessaria = [tamanho_time - len(times[i]) for i in range(num_times)]
         
-        # Snake draft: alternando entre times
-        for idx, jogador in enumerate(jogadores_ordenados):
-            # Usar mod para distribuir entre times
-            time_idx = idx % num_times
-            times[time_idx].append(jogador)
-            somas[time_idx] += jogador.nivel
+        # 3. Distribuir linha respeitando a necessidade de cada time (Snake draft)
+        linha_por_time = [[] for _ in range(num_times)]
+        idx_linha = 0
         
-        return times, somas
-    
-    @staticmethod
-    def sortear_multiplos_times_com_goleiros(jogadores: List[Jogador]) -> Tuple[List[List[Jogador]], List[int]]:
-        """
-        Sorteia múltiplos times com goleiros usando Simulated Annealing
-        
-        Cada time terá:
-        - 1 goleiro (não conta nas estatísticas)
-        - 4 jogadores de linha (usados no balanceamento)
-        
-        Args:
-            jogadores: Lista de jogadores (com goleiros e jogadores de linha)
+        # Snake draft: alternar direção
+        direction_asc = True
+        while idx_linha < len(linha_ordenada):
+            # Iterar sobre times
+            time_range = range(num_times) if direction_asc else range(num_times - 1, -1, -1)
             
-        Returns:
-            Tupla (lista_de_times, lista_somas_apenas_linha)
-        """
-        valido, msg = BalanceadorTimes.validar_jogadores_com_goleiros(jogadores)
-        if not valido:
-            raise ValueError(msg)
+            for time_idx in time_range:
+                if idx_linha < len(linha_ordenada) and len(linha_por_time[time_idx]) < linha_necessaria[time_idx]:
+                    linha_por_time[time_idx].append(linha_ordenada[idx_linha])
+                    idx_linha += 1
+            
+            # Reverter direção para próxima volta
+            direction_asc = not direction_asc
         
-        linha, goleiros = BalanceadorTimes.separar_goleiros(jogadores)
-        num_times = BalanceadorTimes.calcular_numero_times(len(jogadores))
+        # 4. Executar SA para balancear score entre times
+        energia_atual = BalanceadorTimes.calcular_energia(linha_por_time)
+        melhor_energia = energia_atual
+        melhores_times_linha = [time[:] for time in linha_por_time]
         
-        # Ordenar goleiros e jogadores de linha por nível (descendente)
-        goleiros_sorted = sorted(goleiros, key=lambda x: x.nivel, reverse=True)
+        temperatura = 100.0
+        temperatura_minima = 0.01
+        taxa_resfriamento = 0.99
+        iteracao = 0
+        max_iteracoes = 2000
         
-        # Usar Simulated Annealing para distribuir jogadores de linha de forma ótima
-        times_linha = BalanceadorTimes.simulated_annealing(linha, num_times, iteracoes=2000)
+        while temperatura > temperatura_minima and iteracao < max_iteracoes:
+            time1, time2 = random.sample(range(num_times), 2)
+            
+            if len(linha_por_time[time1]) > 0 and len(linha_por_time[time2]) > 0:
+                idx1 = random.randint(0, len(linha_por_time[time1]) - 1)
+                idx2 = random.randint(0, len(linha_por_time[time2]) - 1)
+                
+                # Fazer troca
+                linha_por_time[time1][idx1], linha_por_time[time2][idx2] = linha_por_time[time2][idx2], linha_por_time[time1][idx1]
+                
+                # Calcular nova energia
+                energia_nova = BalanceadorTimes.calcular_energia(linha_por_time)
+                
+                # Metropolis criterion
+                delta_energia = energia_nova - energia_atual
+                if delta_energia < 0 or random.random() < math.exp(-delta_energia / temperatura):
+                    energia_atual = energia_nova
+                    if energia_atual < melhor_energia:
+                        melhor_energia = energia_atual
+                        melhores_times_linha = [time[:] for time in linha_por_time]
+                else:
+                    # Desfazer troca
+                    linha_por_time[time1][idx1], linha_por_time[time2][idx2] = linha_por_time[time2][idx2], linha_por_time[time1][idx1]
+            
+            temperatura *= taxa_resfriamento
+            iteracao += 1
         
-        # Adicionar um goleiro por time (round-robin para balancear)
-        times_final = []
-        for idx, time_linha in enumerate(times_linha):
-            time_com_goleiro = [goleiros_sorted[idx % len(goleiros_sorted)]] + time_linha
-            times_final.append(time_com_goleiro)
+        # Usar melhor resultado
+        linha_por_time = melhores_times_linha
         
-        # Calcular somas (apenas jogadores de linha)
-        somas = [sum(j.nivel for j in time if j.posicao == "linha") for time in times_final]
+        # 5. Combinar: cada time = seus goleiros + sua linha
+        for idx, time in enumerate(times):
+            time.extend(linha_por_time[idx])
         
-        return times_final, somas
+        # Calcular somas (todos os jogadores contam)
+        somas = [sum(j.nivel for j in time) for time in times]
+        
+        return times, somas, tem_aviso, aviso_msg
     
     @staticmethod
     def sortear_times(jogadores: List[Jogador]) -> Tuple[List[Jogador], List[Jogador], int, int]:
         """
-        Sorteia times equilibrados por nível (compatibilidade com código anterior)
-        
-        Algoritmo: Snake draft - alternando entre times, começando pelos melhores
+        Sorteia 2 times equilibrados (deprecated - use sortear_multiplos_times_com_goleiros)
+        Goleiros contam como jogadores normais
         
         Args:
             jogadores: Lista de jogadores
             
         Returns:
-            Tupla (time1, time2, soma_nivel_time1, soma_nivel_time2)
+            Tupla (time1, time2, soma1, soma2)
         """
         try:
-            times, somas = BalanceadorTimes.sortear_multiplos_times(jogadores)
-            # Para compatibilidade, retornar apenas 2 times se houver
+            times, somas = BalanceadorTimes.sortear_multiplos_times_com_goleiros(jogadores)
             if len(times) >= 2:
                 return times[0], times[1], somas[0], somas[1]
             else:
                 return times[0], [], somas[0], 0
         except ValueError:
-            # Fallback para validação antiga
             raise
-    
-    @staticmethod
-    def calcular_diferenca(soma1: int, soma2: int) -> int:
-        """
-        Calcula diferença entre dois times
-        
-        Args:
-            soma1: Soma de nível time 1
-            soma2: Soma de nível time 2
-            
-        Returns:
-            Diferença absoluta
-        """
-        return abs(soma1 - soma2)
     
     @staticmethod
     def calcular_diferenca_multiplos(somas: List[int]) -> int:
@@ -285,6 +290,23 @@ class BalanceadorTimes:
         if not somas:
             return 0
         return max(somas) - min(somas)
+    
+    @staticmethod
+    def obter_melhor_time(somas: List[int]) -> str:
+        """
+        Retorna qual é o melhor time (maior pontuação)
+        
+        Args:
+            somas: Lista com soma de cada time
+            
+        Returns:
+            String com "Time X"
+        """
+        if not somas:
+            return ""
+        
+        idx_melhor = somas.index(max(somas))
+        return f"Time {idx_melhor + 1}"
     
     @staticmethod
     def obter_time_favorito(soma1: int, soma2: int) -> str:

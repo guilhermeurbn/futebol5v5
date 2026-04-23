@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚽ Stats Times - NaTrave</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .stats-table thead {
+            background: linear-gradient(135deg, var(--primary) 0%, #0052a3 100%);
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+
+        .stats-table th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        .stats-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stats-table tbody tr:hover {
+            background: rgba(0, 102, 204, 0.05);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .badge-success {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--success);
+        }
+
+        .badge-primary {
+            background: rgba(0, 102, 204, 0.2);
+            color: var(--primary);
+        }
+
+        .badge-warning {
+            background: rgba(234, 179, 8, 0.2);
+            color: #ca8a04;
+        }
+
+        .time-name {
+            font-weight: 600;
+            color: var(--text);
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .stats-table {
+                font-size: 0.9rem;
+            }
+
+            .stats-table th,
+            .stats-table td {
+                padding: 0.75rem;
+            }
+
+            .badge {
+                padding: 0.2rem 0.5rem;
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <a href="{{ url_for('jogador.index') }}" class="back-link">← Voltar</a>
+                <h1>⚽ Estatísticas de Times</h1>
+                <p class="subtitle">Performance histórica de cada posição de time</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Navigation Tabs -->
+            <div class="nav-tabs">
+                <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
+                <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
+                <a href="{{ url_for('jogador.estatisticas') }}" class="nav-tab">📊 Estatísticas</a>
+                <a href="{{ url_for('jogador.stats_players') }}" class="nav-tab">🏆 Stats Jogadores</a>
+                <a href="{{ url_for('jogador.stats_times_page') }}" class="nav-tab active">🎯 Stats Times</a>
+                <a href="{{ url_for('jogador.stats_combos_page') }}" class="nav-tab">⭐ Combos</a>
+            </div>
+
+            <!-- Stats Times -->
+            <section class="section">
+                <h2>🎯 Times Mais Vencedores</h2>
+                
+                {% if stats %}
+                    <table class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Criado</th>
+                                <th>Vencedores</th>
+                                <th>Win Rate</th>
+                                <th>Pontuação Média</th>
+                                <th>Melhor/Pior</th>
+                                <th>Jogadores Comuns</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for time in stats %}
+                                <tr>
+                                    <td class="time-name">{{ time.time_key }}</td>
+                                    <td>
+                                        <span class="badge badge-primary">{{ time.vezes_criado }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-success">{{ time.vezes_vencedor }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-success">{{ time.win_rate }}%</span>
+                                    </td>
+                                    <td><strong>{{ time.pontuacao_media }}</strong></td>
+                                    <td>{{ time.melhor_pontuacao }} / {{ time.pior_pontuacao }}</td>
+                                    <td>
+                                        <small>
+                                            {% for jogador in time.jogadores_comuns %}
+                                                {% if loop.index <= 2 %}
+                                                    <span style="display: inline-block; margin-right: 0.5rem;">{{ jogador.nome }}</span>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </small>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div style="padding: 2rem; text-align: center; color: var(--text-secondary);">
+                        <p>📊 Nenhum sorteio realizado ainda</p>
+                    </div>
+                {% endif %}
+            </section>
+
+            <!-- Análise de Composição -->
+            {% if stats %}
+            <section class="section">
+                <h2>👥 Análise de Composição</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+                    {% for time in stats[:6] %}
+                        <div style="background: var(--card-bg); padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--primary);">
+                            <h3 style="margin: 0 0 1rem 0; font-size: 1rem;">{{ time.time_key }}</h3>
+                            <div style="font-size: 0.9rem; line-height: 1.8;">
+                                <div><strong>Criado:</strong> {{ time.vezes_criado }} vezes</div>
+                                <div><strong>Vencedor:</strong> <span style="color: var(--success); font-weight: bold;">{{ time.vezes_vencedor }} vezes</span></div>
+                                <div><strong>Taxa:</strong> {{ time.win_rate }}%</div>
+                                <div><strong>Pontuação:</strong> {{ time.pontuacao_media }} (média)</div>
+                                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+                                    <strong>Jogadores Principais:</strong>
+                                    <ul style="margin: 0.5rem 0 0 0; padding-left: 1.5rem;">
+                                        {% for jogador in time.jogadores_comuns %}
+                                            <li>{{ jogador.nome }} ({{ jogador.vezes }}x)</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+        </main>
+    </div>
+</body>
+</html>

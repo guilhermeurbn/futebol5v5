@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Link Inválido{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 600px; margin: 100px auto; text-align: center;">
+    <div style="font-size: 64px; margin-bottom: 20px;">❌</div>
+    
+    <h1 style="margin-bottom: 10px;">Link de Compartilhamento Inválido</h1>
+    
+    <p style="color: #999; font-size: 16px; margin-bottom: 30px;">
+        {% if erro %}
+            {{ erro }}
+        {% else %}
+            O sorteio que você está tentando acessar não foi encontrado ou o link expirou.
+        {% endif %}
+    </p>
+
+    <div style="background: rgba(102, 126, 234, 0.1); border-left: 4px solid #667eea; padding: 20px; border-radius: 8px; margin-bottom: 30px; text-align: left;">
+        <h3 style="margin-top: 0;">O que pode ter acontecido?</h3>
+        <ul style="margin: 0; padding-left: 20px;">
+            <li>O link pode ter sido digitado incorretamente</li>
+            <li>O sorteio pode ter expirado ou sido deletado</li>
+            <li>O código QR pode estar corrompido</li>
+            <li>Você pode estar offline e tentar acessar um sorteio local</li>
+        </ul>
+    </div>
+
+    <a href="/" style="display: inline-block; padding: 12px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">
+        ← Voltar para Home
+    </a>
+
+    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #333; opacity: 0.7; font-size: 13px;">
+        <p>Se você tem um sorteio salvo em NaTrave, acesse a página de <strong>Histórico</strong> para visualizá-lo.</p>
+    </div>
+</div>
+{% endblock %}
