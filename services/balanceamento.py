@@ -16,6 +16,18 @@ class BalanceadorTimes:
     """Serviço para balancear times"""
     
     TAMANHO_TIME = 5  # 5 jogadores por time
+
+    @staticmethod
+    def separar_goleiros(jogadores: List[Jogador]) -> Tuple[List[Jogador], List[Jogador]]:
+        """Compatibilidade: separa jogadores de linha e goleiros."""
+        linha = [j for j in jogadores if j.posicao == "linha"]
+        goleiros = [j for j in jogadores if j.posicao == "goleiro"]
+        return linha, goleiros
+
+    @staticmethod
+    def validar_jogadores_com_goleiros(jogadores: List[Jogador]) -> Tuple[bool, str]:
+        """Compatibilidade: mantém assinatura antiga de validação com goleiros."""
+        return BalanceadorTimes.validar_jogadores(jogadores)
     
     @staticmethod
     def validar_jogadores(jogadores: List[Jogador]) -> Tuple[bool, str]:
@@ -78,7 +90,8 @@ class BalanceadorTimes:
         Returns:
             Lista de times equilibrados (cada time com 5 jogadores)
         """
-        # Inicializar com distribuição aleatória
+        # Inicializar com distribuição aleatória sem mutar a lista original
+        jogadores = jogadores[:]
         random.shuffle(jogadores)
         times = [[] for _ in range(num_times)]
         for idx, jogador in enumerate(jogadores):
@@ -121,7 +134,7 @@ class BalanceadorTimes:
         return melhores_times
     
     @staticmethod
-    def sortear_multiplos_times(jogadores: List[Jogador]) -> Tuple[List[List[Jogador]], List[int], bool, str]:
+    def sortear_multiplos_times(jogadores: List[Jogador]) -> Tuple[List[List[Jogador]], List[int]]:
         """
         Sorteia múltiplos times equilibrados (alias para compatibilidade)
         Goleiros agora contam como jogadores normais
@@ -130,9 +143,10 @@ class BalanceadorTimes:
             jogadores: Lista de jogadores
             
         Returns:
-            Tupla (lista_de_times, lista_somas_niveis, tem_aviso, mensagem_aviso)
+            Tupla (lista_de_times, lista_somas_niveis)
         """
-        return BalanceadorTimes.sortear_multiplos_times_com_goleiros(jogadores)
+        times, somas, _, _ = BalanceadorTimes.sortear_multiplos_times_com_goleiros(jogadores)
+        return times, somas
     
     @staticmethod
     def sortear_multiplos_times_com_goleiros(jogadores: List[Jogador]) -> Tuple[List[List[Jogador]], List[int], bool, str]:

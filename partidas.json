@@ -1,1 +1,25 @@
-[]
+[
+  {
+    "id": 1,
+    "sorteio_id": 94,
+    "data": "2026-04-23T11:01:41.739272",
+    "time_vencedor": 2,
+    "gols_times": [
+      10,
+      11
+    ],
+    "notas": "time 2 jogou melhor"
+  },
+  {
+    "id": 2,
+    "sorteio_id": 131,
+    "data": "2026-04-23T12:04:35.276230",
+    "time_vencedor": 3,
+    "gols_times": [
+      10,
+      9,
+      12
+    ],
+    "notas": "bom jogo"
+  }
+]

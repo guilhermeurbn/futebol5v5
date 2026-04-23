@@ -3,7 +3,7 @@ Aplicação Flask - NaTrave - Gerador de Times Equilibrados
 """
 import os
 import logging
-from flask import Flask
+from flask import Flask, send_file
 from config import config_by_name
 from routes.jogador_routes import jogador_bp
 
@@ -36,6 +36,15 @@ def criar_app(config_name: str = None) -> Flask:
     
     # Registrar blueprints
     app.register_blueprint(jogador_bp)
+    
+    # PWA - Servir manifest.json
+    @app.route('/manifest.json')
+    def serve_manifest():
+        """Servir manifest.json para PWA"""
+        return send_file(
+            os.path.join(os.path.dirname(__file__), 'manifest.json'),
+            mimetype='application/manifest+json'
+        )
     
     logger.info(f"Aplicação iniciada em modo: {config_name}")
     

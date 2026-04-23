@@ -5,8 +5,11 @@
 {% block content %}
 <div class="container" style="max-width: 1200px;">
     <div class="header">
-        <h1>⚽ Sorteio Compartilhado</h1>
-        <p class="subtitle">{{ sorteio.num_times }} times • {{ sorteio.times|length }} time(s) disponível(is)</p>
+        <div class="header-content">
+            {% set brand_title = 'Sorteio Compartilhado' %}
+            {% set brand_subtitle = sorteio.num_times ~ ' times • ' ~ (sorteio.times|length) ~ ' time(s) disponível(is)' %}
+            {% include '_brand_header.html' %}
+        </div>
     </div>
 
     <!-- Info Banner -->
