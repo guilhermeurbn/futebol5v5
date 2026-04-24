@@ -160,14 +160,5 @@
     "role": "admin",
     "criado_em": "2026-04-24T13:13:39.161415",
     "ativo": true
-  },
-  {
-    "id": "be5b79d9-36bd-4f75-85fc-0a13272ff651",
-    "username": "juiz",
-    "nome": "juiz",
-    "password_hash": "scrypt:32768:8:1$0Mw8iXkae3lE4sWL$5585716e9f4e7566fa363ebb1d0ebed550b511da95bd8d9e11bb0c5124159d9867635235e4d7dd70d4d6cae9fde599eb65f9f3e7bc9b4cb9fd2fe20656b749ed",
-    "role": "juiz",
-    "criado_em": "2026-04-24T13:17:26.672343",
-    "ativo": true
   }
 ]
