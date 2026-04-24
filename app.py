@@ -6,6 +6,7 @@ import logging
 from flask import Flask, send_file
 from config import config_by_name
 from routes.jogador_routes import jogador_bp
+from db import get_connection
 
 # Configuração de logging
 logging.basicConfig(
@@ -13,6 +14,7 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
 
 
 def criar_app(config_name: str = None) -> Flask:
@@ -63,3 +65,16 @@ app = criar_app()
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
     app.run(debug=app.config['DEBUG'], host='0.0.0.0', port=port)
+
+@app.route("/test-db")
+def test_db():
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("SELECT 1;")
+    result = cur.fetchone()
+
+    cur.close()
+    conn.close()
+
+    return str(result)
