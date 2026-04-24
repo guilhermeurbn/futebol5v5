@@ -32,8 +32,12 @@
     <div class="auth-actions">
         <div class="auth-user">{{ auth_user.nome }} ({{ auth_user.role }})</div>
         <div class="auth-links">
+            {% if auth_user.role == 'juiz' %}
+            <a class="btn btn-secondary" href="{{ url_for('jogador.jogar_page') }}">Jogar</a>
+            {% else %}
             <a class="btn btn-secondary" href="{{ url_for('jogador.perfil_page') }}">Perfil</a>
-            {% if auth_user.role == 'admin' %}
+            {% endif %}
+            {% if auth_user.role in ['admin', 'super_admin'] %}
             <a class="btn btn-warning" href="{{ url_for('jogador.admin_page') }}">Admin</a>
             {% endif %}
             <form method="post" action="{{ url_for('jogador.logout') }}" style="display:inline;">

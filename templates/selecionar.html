@@ -11,9 +11,17 @@
         <!-- Header -->
         <header class="header">
             <div class="header-content">
+                {% if not modo_juiz %}
                 <a href="{{ url_for('jogador.index') }}" class="back-link">← Voltar</a>
-                <h1>⚽ Selecionar Jogadores</h1>
-                <p class="subtitle">Escolha quem está presente para o jogo de hoje</p>
+                {% endif %}
+                <h1>{% if modo_juiz %}🎮 Jogar{% else %}⚽ Selecionar Jogadores{% endif %}</h1>
+                <p class="subtitle">
+                    {% if modo_juiz %}
+                    Selecione 10, 15 ou 20 jogadores para o sorteio
+                    {% else %}
+                    Escolha quem está presente para o jogo de hoje
+                    {% endif %}
+                </p>
             </div>
         </header>
 
@@ -176,7 +184,7 @@
                         💡 Sugestões
                     </button>
                     <button class="btn btn-primary" id="btnSortear" onclick="confirmarSelecao()" disabled>
-                        ✓ Selecionar e Sortear Times
+                        {% if modo_juiz %}🎲 Sortear Times{% else %}✓ Selecionar e Sortear Times{% endif %}
                     </button>
                 </div>
                 <div id="mensagemErro" class="alert alert-danger" style="display: none; margin-top: 1rem;"></div>

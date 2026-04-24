@@ -16,6 +16,7 @@ from services.sugestoes_service import SugestoesService
 from services.ranking_service import RankingService
 from services.auth_service import AuthService
 from services.votacao_service import VotacaoService
+from services.jogador_stats_service import JogadorStatsService
 import io
 import random
 
@@ -32,10 +33,15 @@ sugestoes_service = SugestoesService()
 ranking_service = RankingService()
 auth_service = AuthService()
 votacao_service = VotacaoService()
+jogador_stats_service = JogadorStatsService()
 
 
 def _is_admin():
     return session.get('role') in ['super_admin', 'admin']
+
+
+def _is_juiz():
+    return session.get('role') == 'juiz'
 
 
 def _jogadores_visiveis():
@@ -126,6 +132,27 @@ def proteger_rotas():
 
     if not session.get('user_id'):
         return _resposta_nao_autenticado()
+
+    if _is_juiz():
+        permitidas_juiz = {
+            'jogador.index',
+            'jogador.logout',
+            'jogador.jogar_page',
+            'jogador.selecionar_jogadores',
+            'jogador.atualizar_presenca',
+            'jogador.limpar_presenca',
+            'jogador.sortear',
+            'jogador.sortear_api',
+            'jogador.resultado_partida_page',
+            'jogador.registrar_resultado_partida',
+        }
+
+        if request.endpoint not in permitidas_juiz:
+            if request.path.startswith('/api/'):
+                return jsonify({'sucesso': False, 'erro': 'Acesso restrito ao juiz para o fluxo Jogar'}), 403
+            return redirect(url_for('jogador.jogar_page'))
+
+        return None
 
     if not _is_admin():
         permitidas_escrita_usuario = {
@@ -357,10 +384,28 @@ def logout():
 @login_required
 def perfil_page():
     jogador_proprio = None
-    if not _is_admin():
-        meus = jogador_service.listar_por_usuario(session.get('user_id'))
-        jogador_proprio = meus[0] if meus else None
-    return render_template('perfil.html', usuario=_usuario_logado(), jogador_proprio=jogador_proprio)
+    stats_jogador = None
+    
+    try:
+        if not _is_admin():
+            meus = jogador_service.listar_por_usuario(session.get('user_id'))
+            jogador_proprio = meus[0] if meus else None
+            
+            # Obter estatísticas do jogador
+            if jogador_proprio:
+                stats_jogador = jogador_stats_service.obter_stats_jogador(jogador_proprio.nome)
+    except Exception as e:
+        # Se houver erro ao obter stats, continuar sem eles
+        import sys
+        print(f"Erro ao obter stats do perfil: {str(e)}", file=sys.stderr)
+        stats_jogador = None
+    
+    return render_template(
+        'perfil.html',
+        usuario=_usuario_logado(),
+        jogador_proprio=jogador_proprio,
+        stats_jogador=stats_jogador
+    )
 
 
 @jogador_bp.route('/perfil/senha', methods=['POST'])
@@ -536,6 +581,26 @@ def admin_criar_usuario():
         return render_template('admin.html', usuarios=usuarios, erro=str(e)), 400
 
 
+@jogador_bp.route('/jogar', methods=['GET'])
+def jogar_page():
+    """Fluxo único do juiz: selecionar 10/15/20, sortear e iniciar votação."""
+    todos_jogadores = jogador_service.listar()
+    fixos = jogador_service.listar_por_tipo("fixo")
+    avulsos = jogador_service.listar_por_tipo("avulso")
+    presentes = jogador_service.listar_presentes()
+
+    return render_template(
+        'selecionar.html',
+        todos_jogadores=todos_jogadores,
+        fixos=fixos,
+        avulsos=avulsos,
+        presentes=presentes,
+        total_presentes=len(presentes),
+        total_jogadores=len(todos_jogadores),
+        modo_juiz=True
+    )
+
+
 @jogador_bp.route('/admin/usuarios/<user_id>/ativo', methods=['POST'])
 @admin_required
 def admin_alterar_ativo_usuario(user_id):
@@ -554,9 +619,26 @@ def admin_alterar_ativo_usuario(user_id):
         return redirect(url_for('jogador.admin_page', erro=str(e)))
 
 
+@jogador_bp.route('/admin/usuarios/<user_id>/deletar', methods=['POST'])
+@admin_required
+def admin_deletar_usuario(user_id):
+    """Deleta um usuário do sistema"""
+    try:
+        auth_service.deletar_usuario(
+            user_id=user_id,
+            executor_id=session.get('user_id')
+        )
+        return redirect(url_for('jogador.admin_page', sucesso='Usuario deletado com sucesso. Ele perderá suas credenciais.'))
+    except ValueError as e:
+        return redirect(url_for('jogador.admin_page', erro=str(e)))
+
+
 @jogador_bp.route('/')
 def index():
     """Página inicial com lista de jogadores"""
+    if _is_juiz():
+        return redirect(url_for('jogador.jogar_page'))
+
     jogadores = _jogadores_visiveis()
     return render_template(
         'index.html',
@@ -667,6 +749,9 @@ def deletar_jogador_form(jogador_id):
 @jogador_bp.route('/selecionar')
 def selecionar_jogadores():
     """Página para selecionar jogadores para o jogo"""
+    if _is_juiz():
+        return redirect(url_for('jogador.jogar_page'))
+
     todos_jogadores = jogador_service.listar()
     fixos = jogador_service.listar_por_tipo("fixo")
     avulsos = jogador_service.listar_por_tipo("avulso")
@@ -1109,7 +1194,7 @@ def resultado_partida_page(sorteio_id):
 @jogador_bp.route('/api/partida/registrar', methods=['POST'])
 @admin_required
 def registrar_resultado_partida():
-    """API: Registra resultado de uma partida"""
+    """API: Registra resultado de uma partida com estatísticas individuais"""
     try:
         dados = request.get_json(silent=True) or {}
         
@@ -1117,6 +1202,7 @@ def registrar_resultado_partida():
         time_vencedor = dados.get('time_vencedor')
         gols_times = dados.get('gols_times', [])
         notas = dados.get('notas', '')
+        jogadores_detalhes = dados.get('jogadores_detalhes', [])
         
         # Validar dados
         if not sorteio_id or not time_vencedor:
@@ -1131,14 +1217,29 @@ def registrar_resultado_partida():
                 'erro': 'Registre gols de todos os times'
             }), 400
         
+        # Registrar resultado da partida
         partida = partida_service.registrar_resultado(
             sorteio_id, time_vencedor, gols_times, notas
         )
         
+        # Registrar detalhes de cada jogador (gols, assistências, cartões)
+        partida_id = partida.get('id')
+        for detalhe in jogadores_detalhes:
+            jogador_stats_service.registrar_desempenho_jogador(
+                partida_id=partida_id,
+                nome_jogador=detalhe.get('nome'),
+                gols=detalhe.get('gols', 0),
+                assistencias=detalhe.get('assistencias', 0),
+                cartoes_amarelos=detalhe.get('cartoes_amarelos', 0),
+                cartoes_vermelhos=detalhe.get('cartoes_vermelhos', 0),
+                time_numero=detalhe.get('time_numero', 1),
+                posicao=detalhe.get('posicao', 'linha')
+            )
+        
         return jsonify({
             'sucesso': True,
             'partida': partida,
-            'mensagem': 'Resultado registrado com sucesso!'
+            'mensagem': 'Resultado e estatísticas registrados com sucesso!'
         })
     except Exception as e:
         return jsonify({'sucesso': False, 'erro': str(e)}), 500

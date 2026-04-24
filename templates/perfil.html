@@ -3,11 +3,11 @@
 {% block title %}Meu Perfil{% endblock %}
 
 {% block content %}
-<div class="container" style="max-width: 900px;">
+<div class="container" style="max-width: 1200px;">
     <header class="header">
         <div class="header-content">
             {% set brand_title = 'Meu Perfil' %}
-            {% set brand_subtitle = 'Dados da sua conta' %}
+            {% set brand_subtitle = 'Seus dados e estatísticas' %}
             {% include '_brand_header.html' %}
         </div>
     </header>
@@ -20,11 +20,12 @@
             <div class="alert alert-warning"><strong>⚠️</strong> {{ erro_senha }}</div>
         {% endif %}
 
+        <!-- INFORMAÇÕES DA CONTA -->
         <section class="section">
-            <h2 class="section-title">👤 Informações</h2>
+            <h2 class="section-title">👤 Informações da Conta</h2>
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-label">Nome</div>
+                    <div class="stat-label">Nome Completo</div>
                     <div class="stat-value" style="font-size: 1.2rem;">{{ usuario.nome }}</div>
                 </div>
                 <div class="stat-card">
@@ -33,33 +34,220 @@
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">Papel</div>
-                    <div class="stat-value" style="font-size: 1.2rem;">{{ usuario.role }}</div>
+                    <div class="stat-value" style="font-size: 1.2rem;">
+                        {% if usuario.role == 'super_admin' %}
+                            👑 Super Admin
+                        {% elif usuario.role == 'admin' %}
+                            🔑 Admin
+                        {% else %}
+                            👤 Usuário
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </section>
 
+        <!-- DADOS DO JOGADOR -->
         {% if jogador_proprio %}
         <section class="section">
             <h2 class="section-title">⚽ Meu Jogador</h2>
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-label">Nome</div>
+                    <div class="stat-label">Nome do Jogador</div>
                     <div class="stat-value" style="font-size: 1.2rem;">{{ jogador_proprio.nome }}</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">Nível</div>
-                    <div class="stat-value" style="font-size: 1.2rem;">{{ jogador_proprio.nivel }}</div>
+                    <div class="stat-value" style="font-size: 1.5rem; color: #667eea;">⭐ {{ jogador_proprio.nivel }}</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">Posição</div>
-                    <div class="stat-value" style="font-size: 1.2rem;">{{ jogador_proprio.posicao }}</div>
+                    <div class="stat-value" style="font-size: 1.2rem;">
+                        {% if jogador_proprio.posicao == 'goleiro' %}
+                            🧤 Goleiro
+                        {% else %}
+                            ⚽ Linha
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Tipo</div>
+                    <div class="stat-value" style="font-size: 1.2rem;">
+                        {% if jogador_proprio.tipo == 'fixo' %}
+                            🔗 Fixo
+                        {% else %}
+                            📝 Avulso
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </section>
-        {% endif %}
 
+        <!-- ESTATÍSTICAS GERAIS DO JOGADOR -->
+        {% if stats_jogador %}
         <section class="section">
-            <h2 class="section-title">🔒 Alterar Senha</h2>
+            <h2 class="section-title">📊 Estatísticas Gerais</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total de Partidas</div>
+                    <div class="stat-value" style="font-size: 1.8rem; color: #667eea;">{{ stats_jogador.total_partidas }}</div>
+                    <div class="stat-sublabel">jogos disputados</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total de Gols</div>
+                    <div class="stat-value" style="font-size: 1.8rem; color: #f093fb;">⚽ {{ stats_jogador.gols }}</div>
+                    <div class="stat-sublabel">{{ stats_jogador.gols_por_partida }} por partida</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Assistências</div>
+                    <div class="stat-value" style="font-size: 1.8rem; color: #4facfe;">🎯 {{ stats_jogador.assistencias }}</div>
+                    <div class="stat-sublabel">{{ stats_jogador.assistencias_por_partida }} por partida</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Taxa de Vitória</div>
+                    <div class="stat-value" style="font-size: 1.8rem; color: #43e97b;">📈 {{ stats_jogador.win_rate }}%</div>
+                    <div class="stat-sublabel">{{ stats_jogador.vitórias }}V {{ stats_jogador.derrotas }}D {{ stats_jogador.empates }}E</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CARTÕES -->
+        <section class="section">
+            <h2 class="section-title">🟨 Disciplina</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Cartões Amarelos</div>
+                    <div class="stat-value" style="font-size: 1.8rem; color: #ffd700;">🟨 {{ stats_jogador.cartoes_amarelos }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Cartões Vermelhos</div>
+                    <div class="stat-value" style="font-size: 1.8rem; color: #ff6b6b;">🟥 {{ stats_jogador.cartoes_vermelhos }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Melhor Artilheiro</div>
+                    <div class="stat-value" style="font-size: 1.2rem;">
+                        {% if stats_jogador.maior_artilheiro %}
+                            👑 Sim
+                        {% else %}
+                            ❌ Não
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Melhor Atuação</div>
+                    <div class="stat-value" style="font-size: 1.8rem; color: #43e97b;">{{ stats_jogador.melhor_artilheiro_partida }} gols</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- HISTÓRICO DE PARTIDAS -->
+        {% if stats_jogador.historico_partidas %}
+        <section class="section">
+            <h2 class="section-title">📋 Histórico de Partidas (Últimas 10)</h2>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.95rem;">
+                    <thead>
+                        <tr style="background: rgba(102, 126, 234, 0.1); border-bottom: 2px solid #667eea;">
+                            <th style="padding: 12px; text-align: left;">📅 Data</th>
+                            <th style="padding: 12px; text-align: center;">⚽ Gols</th>
+                            <th style="padding: 12px; text-align: center;">🎯 Assists</th>
+                            <th style="padding: 12px; text-align: center;">🟨 Amarelo</th>
+                            <th style="padding: 12px; text-align: center;">🟥 Vermelho</th>
+                            <th style="padding: 12px; text-align: center;">🏆 Resultado</th>
+                            <th style="padding: 12px; text-align: center;">👕 Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for partida in stats_jogador.historico_partidas[:10] %}
+                        <tr style="border-bottom: 1px solid rgba(102, 126, 234, 0.2); transition: background 0.3s;">
+                            <td style="padding: 12px;">
+                                {{ partida.data[:10] if partida.data else 'N/A' }}
+                            </td>
+                            <td style="padding: 12px; text-align: center; color: #f093fb; font-weight: bold;">
+                                {{ partida.gols }}
+                            </td>
+                            <td style="padding: 12px; text-align: center; color: #4facfe; font-weight: bold;">
+                                {{ partida.assistencias }}
+                            </td>
+                            <td style="padding: 12px; text-align: center;">
+                                {% if partida.cartoes_amarelos > 0 %}
+                                    <span style="color: #ffd700;">🟨 {{ partida.cartoes_amarelos }}</span>
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                            <td style="padding: 12px; text-align: center;">
+                                {% if partida.cartoes_vermelhos > 0 %}
+                                    <span style="color: #ff6b6b;">🟥 {{ partida.cartoes_vermelhos }}</span>
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                            <td style="padding: 12px; text-align: center;">
+                                {% if partida.resultado == 'vitória' %}
+                                    <span style="color: #43e97b; font-weight: bold;">✅ Vitória</span>
+                                {% elif partida.resultado == 'derrota' %}
+                                    <span style="color: #ff6b6b; font-weight: bold;">❌ Derrota</span>
+                                {% else %}
+                                    <span style="color: #ffd700; font-weight: bold;">🤝 Empate</span>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 12px; text-align: center; font-weight: bold;">
+                                Time {{ partida.time_numero }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if stats_jogador.historico_partidas|length == 0 %}
+                <p style="text-align: center; color: #999; padding: 20px;">
+                    Nenhuma partida registrada ainda.
+                </p>
+            {% endif %}
+        </section>
+        {% endif %}  <!-- Fecha: if stats_jogador.historico_partidas -->
+
+        <!-- CURIOSIDADES -->
+        <!-- Continua: if stats_jogador (linha 87) -->
+        <section class="section">
+            <h2 class="section-title">🎯 Destaques Pessoais</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                {% if stats_jogador.partidas_sem_gols > 0 %}
+                <div style="background: rgba(102, 126, 234, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #667eea;">
+                    <div style="font-weight: bold; margin-bottom: 5px;">Partidas Sem Marcar</div>
+                    <div style="font-size: 1.5rem; color: #667eea;">{{ stats_jogador.partidas_sem_gols }}</div>
+                </div>
+                {% endif %}
+                
+                {% if stats_jogador.melhor_artilheiro_partida > 0 %}
+                <div style="background: rgba(240, 147, 251, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #f093fb;">
+                    <div style="font-weight: bold; margin-bottom: 5px;">Melhor Atuação como Artilheiro</div>
+                    <div style="font-size: 1.5rem; color: #f093fb;">⚽ {{ stats_jogador.melhor_artilheiro_partida }} gols</div>
+                </div>
+                {% endif %}
+                
+                {% if stats_jogador.total_partidas > 0 %}
+                <div style="background: rgba(67, 233, 123, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #43e97b;">
+                    <div style="font-weight: bold; margin-bottom: 5px;">Partidas Ganhas</div>
+                    <div style="font-size: 1.5rem; color: #43e97b;">✅ {{ stats_jogador.vitórias }}</div>
+                </div>
+                {% endif %}
+                
+                {% if stats_jogador.total_partidas > 5 %}
+                <div style="background: rgba(79, 172, 254, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #4facfe;">
+                    <div style="font-weight: bold; margin-bottom: 5px;">Média de Participação</div>
+                    <div style="font-size: 1.2rem; color: #4facfe;">{{ stats_jogador.total_partidas }} partidas</div>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+        {% endif %}  <!-- Fecha: if stats_jogador -->
+        {% endif %}  <!-- Fecha: if jogador_proprio -->
+
+        <!-- ALTERAR SENHA -->
+        <section class="section">
+            <h2 class="section-title">🔒 Segurança - Alterar Senha</h2>
             <form method="post" action="{{ url_for('jogador.perfil_alterar_senha') }}" class="form">
                 <div class="form-group">
                     <label class="form-label" for="senha_atual">Senha atual</label>
@@ -73,9 +261,50 @@
                     <label class="form-label" for="confirmar_senha">Confirmar nova senha</label>
                     <input class="form-input" id="confirmar_senha" name="confirmar_senha" type="password" minlength="6" required>
                 </div>
-                <button class="btn btn-primary" type="submit">Salvar nova senha</button>
+                <button class="btn btn-primary" type="submit">🔐 Salvar nova senha</button>
             </form>
         </section>
     </main>
 </div>
+
+<style>
+    .stat-sublabel {
+        font-size: 0.85rem;
+        color: #999;
+        margin-top: 5px;
+    }
+
+    .stat-card {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, currentColor, transparent);
+        opacity: 0.3;
+    }
+
+    table {
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    tr:hover {
+        background: rgba(102, 126, 234, 0.05) !important;
+    }
+
+    th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+    }
+</style>
 {% endblock %}

@@ -233,7 +233,7 @@
         <!-- Header -->
         <header class="header">
             <div class="header-content">
-                <a href="{{ url_for('jogador.selecionar_jogadores') }}" class="back-link">← Voltar</a>
+                <a href="{{ url_for('jogador.jogar_page') if auth_user.role == 'juiz' else url_for('jogador.selecionar_jogadores') }}" class="back-link">← Voltar</a>
                 {% set brand_title = 'Resultado do Sorteio' %}
                 {% set brand_subtitle = num_times ~ ' times de 5 jogadores • ' ~ (jogadores|length) ~ ' jogadores totais' %}
                 {% include '_brand_header.html' %}
@@ -244,9 +244,13 @@
         <main class="main">
             <!-- Navigation Tabs -->
             <div class="nav-tabs">
+                {% if auth_user.role == 'juiz' %}
+                <a href="{{ url_for('jogador.jogar_page') }}" class="nav-tab active">🎮 Jogar</a>
+                {% else %}
                 <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
                 <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
                 <a href="{{ url_for('jogador.estatisticas') }}" class="nav-tab">📊 Estatísticas</a>
+                {% endif %}
             </div>
 
             <!-- Aviso de Múltiplos Goleiros -->
@@ -318,7 +322,7 @@
             <!-- Actions -->
             <section class="section">
                 <div class="actions-section" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px;">
-                    <a href="{{ url_for('jogador.selecionar_jogadores') }}" class="btn btn-primary">
+                    <a href="{{ url_for('jogador.jogar_page') if auth_user.role == 'juiz' else url_for('jogador.selecionar_jogadores') }}" class="btn btn-primary">
                         ← Voltar
                     </a>
                     <button id="btn-undo" class="btn btn-primary" style="background: linear-gradient(135deg, #fd7272 0%, #f5576c 100%); cursor: pointer;" disabled>
@@ -330,9 +334,9 @@
                     <a href="{{ url_for('jogador.sortear') }}" class="btn btn-success">
                         🎲 Novo Sorteio
                     </a>
-                    {% if auth_user.role == 'admin' %}
+                    {% if auth_user.role in ['admin', 'super_admin', 'juiz'] %}
                     <a href="{{ url_for('jogador.resultado_partida_page', sorteio_id=sorteio_id) }}" class="btn btn-primary" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                        🏆 Resultado
+                        {% if auth_user.role == 'juiz' %}🗳️ Iniciar Votação{% else %}🏆 Resultado{% endif %}
                     </a>
                     {% endif %}
                     <button id="btn-qrcode" class="btn btn-primary" style="background: linear-gradient(135deg, #ffa502 0%, #ffc107 100%); cursor: pointer;">

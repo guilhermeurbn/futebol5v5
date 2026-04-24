@@ -9,57 +9,12 @@
     "ativo": true
   },
   {
-    "id": "1a1eb31f-2408-4d70-a57c-9804cd0d93ca",
-    "username": "milena",
-    "nome": "milena",
-    "password_hash": "scrypt:32768:8:1$rubHyKQNqPvmwqqF$cca14c641aa42af219c88984d7a985e87b8a52f318f3fe5bce11e5d013717ab6926940939528206a8b1280283156ea083baf6d075c7dbbdc870e7ab19ede958b",
-    "role": "usuario",
-    "criado_em": "2026-04-23T22:50:27.563137",
-    "ativo": true
-  },
-  {
     "id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033",
     "username": "guilherme",
     "nome": "Guilherme",
     "password_hash": "scrypt:32768:8:1$uWVFYLKOA3OEbOMo$fe78808961a1682188d18f11dc608832cb0f045d9214240757c6bb0b193df22610d072629cbe1d58805b3ff78c2e060283e3dcefcc62dcb52791c92a23089856",
     "role": "usuario",
     "criado_em": "2026-04-23T22:51:39.113689",
-    "ativo": true
-  },
-  {
-    "id": "ca6b7b18-ff09-4dd8-82c0-93e3756ee3e2",
-    "username": "guilherme2",
-    "nome": "guilherme",
-    "password_hash": "scrypt:32768:8:1$xcFWErz1dTGWOGbp$64aea9b1ceee57ae4c3df878f5d5ad3e1b8f1a7476447c9fbd2f755c86f2c362bc334e8897e878d30718131525a0e3f3437e5a81857647bcd83dc7c3174ccd93",
-    "role": "super_admin",
-    "criado_em": "2026-04-23T23:00:43.869355",
-    "ativo": true
-  },
-  {
-    "id": "16c35c1e-adcb-4473-8fcb-d87797c16cc3",
-    "username": "milena2",
-    "nome": "milena",
-    "password_hash": "scrypt:32768:8:1$7Vsq4AzCepJ4aWI9$910e5b945ab24beec09be6c54f9c6b29310dd29ca0487fd5369354ff8090e1e297d7ecd2c27d1d1e0dfe531ced4dd176f9cc010d56ee4bf39f1fd040ade09f00",
-    "role": "usuario",
-    "criado_em": "2026-04-23T23:05:58.741067",
-    "ativo": true
-  },
-  {
-    "id": "e8358aa6-267e-4e2a-8f00-3eafdb697d0f",
-    "username": "super",
-    "nome": "Super Administrador",
-    "password_hash": "scrypt:32768:8:1$4wavFltIVPAjBjGA$64caa9ec62844f9a32b0248b2c07d73a21be96919e0095529f5f8f6c527a3b821f0518c732f5732062d501b94611f328c8e5eedfb81dff9b2e422dc58e1e8fea",
-    "role": "super_admin",
-    "criado_em": "2026-04-23T23:11:28.619507",
-    "ativo": true
-  },
-  {
-    "id": "b627d316-ae61-4b34-834f-8627fdb51240",
-    "username": "admin2",
-    "nome": "Admin de Jogos",
-    "password_hash": "scrypt:32768:8:1$j3qUmR0eqSBThn7l$f19a5a2181b414abcff54d1c4e7458991115f7458d9c8894fb3e5de951b136c8451639404ac28916b3fe6721374ea3c3d9329a8888c4e2542a188def24b3b175",
-    "role": "admin",
-    "criado_em": "2026-04-23T23:11:28.691157",
     "ativo": true
   },
   {
@@ -189,21 +144,30 @@
     "ativo": true
   },
   {
-    "id": "50845863-8ce3-4f09-956d-67d8b6a0b62f",
-    "username": "new",
-    "nome": "new",
-    "password_hash": "scrypt:32768:8:1$SKAGHd4GSHf8kV3q$b0009b001bb486d3b94290d9b662b393a638cb1c15e7d8fc49f082e3972688c40e23671777c8b75555e49836480cd9f2084dfe57624af9d0b760eb77919815ec",
-    "role": "admin",
-    "criado_em": "2026-04-24T00:03:10.479432",
+    "id": "921aa7e1-9209-444f-9295-0eb1d0821506",
+    "username": "superadmin",
+    "nome": "Super Administrador",
+    "password_hash": "scrypt:32768:8:1$mDEZgMU5w3vq55MZ$85b9b35270d137a6cf500dcc2e04f1911d8b4e1d597632fa3c08aa8ba5dc955545a77330e04f2eec25d1e319b1e010eaa28ae43c5e753da2be82f1a33e4391de",
+    "role": "super_admin",
+    "criado_em": "2026-04-24T13:13:39.092521",
     "ativo": true
   },
   {
-    "id": "889e590f-ec3d-408d-a55f-c399fdbbe1d5",
+    "id": "58f43772-15f9-49d7-a7c7-73fe3ab97f30",
     "username": "adminjogos",
     "nome": "Admin de Jogos",
-    "password_hash": "scrypt:32768:8:1$XQYfu9lk1i3kQSwT$2d0c2b27bdcd36f9c9a50a2936a67bd11d9c93d3875b045cf7ffd7e310894400aeb108bf48db51b5d914f9d74dd675060a57be9b693ccee7575f9a9a9d64f419",
+    "password_hash": "scrypt:32768:8:1$5h7YDjRTlSLRk5IH$2a5b384824858bb4afeb6f9b6b15b356ee20b1cca85e4972a17b102e3049ccd2946de7fa9171716b517164fde1ef86c1009e811e59d78cc7d9c2849bf3494fdc",
     "role": "admin",
-    "criado_em": "2026-04-24T11:37:39.336515",
+    "criado_em": "2026-04-24T13:13:39.161415",
+    "ativo": true
+  },
+  {
+    "id": "be5b79d9-36bd-4f75-85fc-0a13272ff651",
+    "username": "juiz",
+    "nome": "juiz",
+    "password_hash": "scrypt:32768:8:1$0Mw8iXkae3lE4sWL$5585716e9f4e7566fa363ebb1d0ebed550b511da95bd8d9e11bb0c5124159d9867635235e4d7dd70d4d6cae9fde599eb65f9f3e7bc9b4cb9fd2fe20656b749ed",
+    "role": "juiz",
+    "criado_em": "2026-04-24T13:17:26.672343",
     "ativo": true
   }
 ]

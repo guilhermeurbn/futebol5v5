@@ -136,7 +136,7 @@ class AuthService:
             raise ValueError("Nome deve ter ao menos 2 caracteres")
         if not password or len(password) < 6:
             raise ValueError("Senha deve ter ao menos 6 caracteres")
-        if role not in ["super_admin", "admin", "usuario"]:
+        if role not in ["super_admin", "admin", "juiz", "usuario"]:
             raise ValueError("Role invalida")
 
         usuarios = self._carregar()
@@ -217,3 +217,51 @@ class AuthService:
             "ativo": alvo.get("ativo", True),
             "criado_em": alvo.get("criado_em"),
         }
+    
+    def deletar_usuario(self, user_id: str, executor_id: Optional[str] = None) -> bool:
+        """
+        Deleta um usuário do sistema. Depois dele ser deletado, ele perderá 
+        suas credenciais e terá que criar uma nova conta.
+        
+        Args:
+            user_id: ID do usuário a deletar
+            executor_id: ID do usuário que está executando a ação (verificação de segurança)
+            
+        Raises:
+            ValueError: Se não puder deletar (ex: último admin, tentando deletar a si mesmo)
+            
+        Returns:
+            bool: True se deletado com sucesso
+        """
+        usuarios = self._carregar()
+        
+        # Verificar se o usuário existe
+        alvo = None
+        indice_alvo = -1
+        for idx, u in enumerate(usuarios):
+            if u.get("id") == user_id:
+                alvo = u
+                indice_alvo = idx
+                break
+        
+        if not alvo:
+            raise ValueError("Usuario nao encontrado")
+        
+        # Não permitir deletar a si mesmo
+        if executor_id and user_id == executor_id:
+            raise ValueError("Voce nao pode deletar sua propria conta")
+        
+        # Verificar se é o último admin/super_admin
+        if alvo.get("role") in ["super_admin", "admin"]:
+            privilegiados_ativos = [
+                u for u in usuarios
+                if u.get("role") in ["super_admin", "admin"] and u.get("id") != user_id
+            ]
+            if len(privilegiados_ativos) == 0:
+                raise ValueError("Nao e possivel deletar o ultimo usuario com acesso total")
+        
+        # Deletar o usuário
+        usuarios.pop(indice_alvo)
+        self._salvar(usuarios)
+        
+        return True
