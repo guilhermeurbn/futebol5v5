@@ -43,7 +43,7 @@ def criar_jogadores_teste():
     return jogadores
 
 
-def testar_sorteio(jogadores, quantidade):
+def executar_sorteio(jogadores, quantidade):
     """Testa o sorteio com quantidade de jogadores"""
     print(f"\n{'='*60}")
     print(f"🧪 TESTE COM {quantidade} JOGADORES")
@@ -101,7 +101,7 @@ def main():
     # Testar diferentes quantidades
     resultados = []
     for quantidade in [10, 15, 20]:
-        resultado = testar_sorteio(jogadores, quantidade)
+        resultado = executar_sorteio(jogadores, quantidade)
         resultados.append(resultado)
     
     # Resumo final
@@ -129,3 +129,18 @@ def main():
 
 if __name__ == '__main__':
     sys.exit(main())
+
+
+def test_sorteio_10_jogadores():
+    jogadores = criar_jogadores_teste()
+    assert executar_sorteio(jogadores, 10)
+
+
+def test_sorteio_15_jogadores():
+    jogadores = criar_jogadores_teste()
+    assert executar_sorteio(jogadores, 15)
+
+
+def test_sorteio_20_jogadores():
+    jogadores = criar_jogadores_teste()
+    assert executar_sorteio(jogadores, 20)

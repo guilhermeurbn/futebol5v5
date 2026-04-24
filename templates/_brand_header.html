@@ -1,5 +1,6 @@
 <div class="brand-header">
     <div class="logo-header">
+        <a href="{{ url_for('jogador.index') }}" aria-label="Ir para a página inicial" style="display:inline-block;">
         <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <defs>
                 <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -18,6 +19,7 @@
             <rect x="29" y="63" width="42" height="13" rx="6.5" fill="rgba(255,255,255,0.22)"/>
             <text x="50" y="72" font-size="12" font-weight="700" fill="white" text-anchor="middle" dominant-baseline="middle" font-family="Arial">5v5</text>
         </svg>
+        </a>
     </div>
     <div class="header-text">
         <h1>{{ brand_title|default('NaTrave') }}</h1>

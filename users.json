@@ -10,9 +10,9 @@
   },
   {
     "id": "1a1eb31f-2408-4d70-a57c-9804cd0d93ca",
-    "username": "araujo",
+    "username": "milena",
     "nome": "milena",
-    "password_hash": "scrypt:32768:8:1$egl7Ikid564ch6aR$8ed9963c016e7b0f8e4b742cfece39a07796348ea4cb2ed770e288ac9f20ae6aea11e753487ed759861b8bc58f8d6414814793f07b7de0db99a73b241abda510",
+    "password_hash": "scrypt:32768:8:1$rubHyKQNqPvmwqqF$cca14c641aa42af219c88984d7a985e87b8a52f318f3fe5bce11e5d013717ab6926940939528206a8b1280283156ea083baf6d075c7dbbdc870e7ab19ede958b",
     "role": "usuario",
     "criado_em": "2026-04-23T22:50:27.563137",
     "ativo": true
@@ -21,43 +21,43 @@
     "id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033",
     "username": "guilherme",
     "nome": "Guilherme",
-    "password_hash": "scrypt:32768:8:1$WjYKSu9QuQalpph2$74a27726f4db5eb5eae63f390f142152a9f48caa6d4cf5406a9c784ea3d8fec3a587aa338f3239d0943d21b99c349f379b912ee2f4ce919994c5b60bf7c0f957",
+    "password_hash": "scrypt:32768:8:1$uWVFYLKOA3OEbOMo$fe78808961a1682188d18f11dc608832cb0f045d9214240757c6bb0b193df22610d072629cbe1d58805b3ff78c2e060283e3dcefcc62dcb52791c92a23089856",
     "role": "usuario",
     "criado_em": "2026-04-23T22:51:39.113689",
     "ativo": true
   },
   {
     "id": "ca6b7b18-ff09-4dd8-82c0-93e3756ee3e2",
-    "username": "guiguiurbano",
+    "username": "guilherme2",
     "nome": "guilherme",
-    "password_hash": "scrypt:32768:8:1$r3ehNhjpUZC4jNCl$38ab92eb414e0b68f60857a7cda975f7dc929192682ed9bd773b5d282601ead7de1a6bbcb4ed37971b35f360d0e6f7d9e16909f331b7c96c634b07326276e355",
+    "password_hash": "scrypt:32768:8:1$xcFWErz1dTGWOGbp$64aea9b1ceee57ae4c3df878f5d5ad3e1b8f1a7476447c9fbd2f755c86f2c362bc334e8897e878d30718131525a0e3f3437e5a81857647bcd83dc7c3174ccd93",
     "role": "super_admin",
     "criado_em": "2026-04-23T23:00:43.869355",
     "ativo": true
   },
   {
     "id": "16c35c1e-adcb-4473-8fcb-d87797c16cc3",
-    "username": "milena_fontana",
+    "username": "milena2",
     "nome": "milena",
-    "password_hash": "scrypt:32768:8:1$YPtaUDAo0SpFKy11$b77d501aee1984839f16872dfb0db5fea96ed871663a69eb6b8ae80d97cab41dac73ba28b0fa26e53c2dbb0c780e366b3d00810d353ac1cddcba0bc542ee7ed2",
+    "password_hash": "scrypt:32768:8:1$7Vsq4AzCepJ4aWI9$910e5b945ab24beec09be6c54f9c6b29310dd29ca0487fd5369354ff8090e1e297d7ecd2c27d1d1e0dfe531ced4dd176f9cc010d56ee4bf39f1fd040ade09f00",
     "role": "usuario",
     "criado_em": "2026-04-23T23:05:58.741067",
     "ativo": true
   },
   {
     "id": "e8358aa6-267e-4e2a-8f00-3eafdb697d0f",
-    "username": "superadmin",
+    "username": "super",
     "nome": "Super Administrador",
-    "password_hash": "scrypt:32768:8:1$3qE4lNR0azQbv1gk$92306666bc597438ee1b591e23b2c727b5a5d285c2ab33091461c01069311203c7cc1b7603dcbf21b38584fdce748427a5aa8359a6a7fb091d287b8648c4f1a6",
+    "password_hash": "scrypt:32768:8:1$4wavFltIVPAjBjGA$64caa9ec62844f9a32b0248b2c07d73a21be96919e0095529f5f8f6c527a3b821f0518c732f5732062d501b94611f328c8e5eedfb81dff9b2e422dc58e1e8fea",
     "role": "super_admin",
     "criado_em": "2026-04-23T23:11:28.619507",
     "ativo": true
   },
   {
     "id": "b627d316-ae61-4b34-834f-8627fdb51240",
-    "username": "adminjogos",
+    "username": "admin2",
     "nome": "Admin de Jogos",
-    "password_hash": "scrypt:32768:8:1$XpJK4xZGfWukKOp3$386b79002d4ba1eef948737f7d2d549f383d1b497d12cb4c965957c97474ee2f03314c79f3ee82b7352b13f3b1e7959640ee3cf3552b5965957ae6c3d0068442",
+    "password_hash": "scrypt:32768:8:1$j3qUmR0eqSBThn7l$f19a5a2181b414abcff54d1c4e7458991115f7458d9c8894fb3e5de951b136c8451639404ac28916b3fe6721374ea3c3d9329a8888c4e2542a188def24b3b175",
     "role": "admin",
     "criado_em": "2026-04-23T23:11:28.691157",
     "ativo": true
@@ -66,16 +66,16 @@
     "id": "922542cb-0ce1-4752-9886-9fd5248d7f03",
     "username": "rennan",
     "nome": "Rennan",
-    "password_hash": "scrypt:32768:8:1$TyACBK62sFhzyfFH$00e12713f2fed0bba1ea2a65ff12dcfbbbf6c8eb004f58008c2c122c47b6c11a99b5ff18980475e1cc6bb6bfa7fc38a22d16cfd5c29ef6cb38b0ecd001e92caf",
+    "password_hash": "scrypt:32768:8:1$8V9S9OfuvVLdqMIt$be45cb9cd9741837c7952a58ec9e9eebc7a1a500fddfae17fb1775cbedef470754fbdd2628107a9eb11f3d716c4dd32b9abe9412f91d447ed2fc24cd96ae706b",
     "role": "usuario",
     "criado_em": "2026-04-23T23:19:11.825907",
     "ativo": true
   },
   {
     "id": "709d90a0-60b7-4498-bc8b-757de4a21359",
-    "username": "carlos_atacante",
+    "username": "carlos",
     "nome": "Carlos atacante",
-    "password_hash": "scrypt:32768:8:1$kk6bkgQgDPjx1FFP$f3f0401de67e37c58794506255b2b092726c825168d0f45052aa6d2eab2cc7dd844780710b6c53c3b8c84be06d0e7b89ff4fed529f075278c5fcff25d62befb7",
+    "password_hash": "scrypt:32768:8:1$m8bvQYC7DPvJTPf4$dd27677672a0be08664c29fffa40c3576768280671771b1eb14ec672eb7cb6191dab9868ecf6c162b28a9b6846dfc0290b7cec8b0e3adf00648fc2142f5293d4",
     "role": "usuario",
     "criado_em": "2026-04-23T23:19:11.963994",
     "ativo": true
@@ -84,7 +84,7 @@
     "id": "6d4b7295-4e45-484a-b5f3-b89b1c144e80",
     "username": "alex",
     "nome": "Alex",
-    "password_hash": "scrypt:32768:8:1$iowEYmIgrTQy4oUD$a4de21da29313bd9790c9732e77170222a663ab42cc19ed29c7e2d1493a54d870b6aaeaad5cafe24a1a84983967571b0192e878101a88a7b954a50cd3c4cf30e",
+    "password_hash": "scrypt:32768:8:1$PXVsvys0Klj2Z63P$4a5180a04031559d09b86be3dff81c9ee39b0fc2dcedcffcd95d3ddf7d56218a63303962a2e9f563d6da0787fac5e199b05d322dae9934c6cd6dc8d7d9593382",
     "role": "usuario",
     "criado_em": "2026-04-23T23:19:12.034291",
     "ativo": true
@@ -93,7 +93,7 @@
     "id": "108ca355-a810-454f-8281-d38effa904de",
     "username": "edmo",
     "nome": "edmo",
-    "password_hash": "scrypt:32768:8:1$RHYdCICBgZ5Yjc41$27465d62aafd68a7a01321356513922d4ac48358e58d440adf41460133cad7cfc46a3d28573edb37bd10e4dc85b2d8ade3233d6403540bd33f42241a1ae3f3ed",
+    "password_hash": "scrypt:32768:8:1$0v4MWIGTV4Xnx1UB$dcadf8d5245e97d9aa6199e41f6721ce079a8d601137604dac83b89091ee5a457919f9192125469e3db89338d89ac3182140676eb70add8b271de649af47d121",
     "role": "usuario",
     "criado_em": "2026-04-23T23:19:12.105113",
     "ativo": true
@@ -102,7 +102,7 @@
     "id": "b128d399-ef95-47df-ba62-d46c2339089d",
     "username": "netao",
     "nome": "netao",
-    "password_hash": "scrypt:32768:8:1$3pUnr92Vbo0Pl05d$69c14af760b4c7ba7466ffd7c4ddb4b13d5ab147e7870fce6dd7716634b8fcedf5bd692f4fe84abca91c7a7816ab862f9867f09bbde3473c29a2891ff379affb",
+    "password_hash": "scrypt:32768:8:1$MBOFo1OEMsYwMPjd$6bef809bee6f706a3662dab554e8e02d91052759eb16d82b8a1a050a306e5f9ca18d52c4bc4923ef9dc48e860f3208c26d8e9e74dfa408557cc79757eace24ce",
     "role": "usuario",
     "criado_em": "2026-04-23T23:19:12.174959",
     "ativo": true
@@ -111,34 +111,34 @@
     "id": "e2403749-1944-4719-bf4c-ff686fe0618e",
     "username": "ramon",
     "nome": "ramon",
-    "password_hash": "scrypt:32768:8:1$KUrt9bSOrIoFGS7h$5580c887d537620b3990ab9dbf27e2b74e51a5c0c43716dac0e553aa6aae19ad9780b4be28ec9e1e3d009f25d3e6bc625d661db1ca9f0dcf32bcf53bab26ac8e",
+    "password_hash": "scrypt:32768:8:1$luG3l3GWYS00msl9$e0ecd4625d139943132fe56678d52b674017721dacb5c35b6e8a0d23acb71e461c0f73a55cca13694843e7da8631c5824b09d53632ca0fd6a27d6c80cdf10868",
     "role": "usuario",
     "criado_em": "2026-04-23T23:19:12.244062",
     "ativo": true
   },
   {
     "id": "aa61dd5a-257e-45be-a230-f7e0472b37de",
-    "username": "andre_balada",
+    "username": "andre",
     "nome": "andre balada",
-    "password_hash": "scrypt:32768:8:1$OjU4aZJRSN9zYtao$429855ca06341c8186161c131f098bbd22e2e456f7e63200e6ec2e2857f2378b3b72e0d8f12cf782d362bd71a0e5ab75ef58c00671b73db638d5e8973383cb2c",
+    "password_hash": "scrypt:32768:8:1$v1UlVVRVrmCgLybC$eddf775c68ad214ae4ed62d2646970b482628fd4a2973115d9b512e001d0baefe5109aaf22ae29234a8149f582fa9304b0314e4ae9f9ef5abd7a3bc0585197c1",
     "role": "usuario",
     "criado_em": "2026-04-23T23:19:12.314600",
     "ativo": true
   },
   {
     "id": "0e116d68-e35c-4374-83c7-247388bda201",
-    "username": "lucas_teixeira",
+    "username": "lucas",
     "nome": "Lucas Teixeira",
-    "password_hash": "scrypt:32768:8:1$iF8Bn5D0bFDDyjLv$f2bed3bdbe2d42b3e3255ff11ad538b9ccb1deb20b3c156654fd2aa2c45ed4588cf633f9d7c2662c0a6dda715d9f043c88917b354637c07829ed8707ebd5cd02",
+    "password_hash": "scrypt:32768:8:1$VPOYWTLOyEVdSOPS$72cfd1ac27d160f24c9af93819f2f2438fcda4d3255a76a3d7d95da461b1a0bb8466d0b22f6c1005913b2efb320c606493ebbbd166355e1b480e0618051224d3",
     "role": "usuario",
     "criado_em": "2026-04-23T23:19:12.384777",
     "ativo": true
   },
   {
     "id": "7dd9fe14-1c78-408f-8ddf-2103a9988072",
-    "username": "lucas_ramos",
+    "username": "lucas2",
     "nome": "Lucas ramos",
-    "password_hash": "scrypt:32768:8:1$QjOU6EmWVPGoFQu3$aafcb49707017e489091515a64a3135794bfbf617f60435d0b8e76807793d957634bbd71dddc44cfeb4a6fc9a251e1e880f6639208d6ac54c0ef44fb8e60aa8f",
+    "password_hash": "scrypt:32768:8:1$LukTfBynydRXLFBr$b7980f13ee757003be7a583c5724b49d5d03351aa0e0fbeed60471faaae26028953bc10ded2f8b2626a1eefe4708233962a01d339a8680f564d295cccf5eb6d2",
     "role": "usuario",
     "criado_em": "2026-04-23T23:19:12.455060",
     "ativo": true
@@ -147,7 +147,7 @@
     "id": "787773c6-b31f-4cab-807f-4e2fd938a609",
     "username": "andrey",
     "nome": "Andrey",
-    "password_hash": "scrypt:32768:8:1$Ed032PmJt8tlLzwS$a5356b140cde1d3fcf706124dd8496b6223afb53e2985049d6a628ac4a3250c0bc8beee7dad27b3916b7a5de9053f35263648f5348e8a256cf49fd9c6b203655",
+    "password_hash": "scrypt:32768:8:1$76N7099WTq2Wq3N6$ac7adb149e344730eeab4842a04e9cb9d9dec4ad239e0f1594b9715ae877c866eddcdbd564d51e4545215d6090f2a6d60c1ce097fbaaede8e9cbc8578e256fac",
     "role": "usuario",
     "criado_em": "2026-04-23T23:19:12.526132",
     "ativo": true
@@ -156,7 +156,7 @@
     "id": "f6624f6a-6998-4164-80a5-90018a3c5e99",
     "username": "luan",
     "nome": "luan",
-    "password_hash": "scrypt:32768:8:1$AL31DM8F23eqIHob$b5b22b0867c9e6ff192fc4397879ac94c6aa11293a17d62ea001105cab320da0749f154e2f36c11a73e46315c573094a5e4f0e6641b14adb63c77c048e882828",
+    "password_hash": "scrypt:32768:8:1$kWkU0Wga0Sh9sPhq$9c3edbc6c6739b9b9d8843203571579fc2f1431c1fe0c13a1de68f1992020af91080245d84d742d59c41e9f3242b42f5701c71636192709e16e06978969141a9",
     "role": "usuario",
     "criado_em": "2026-04-23T23:19:12.595998",
     "ativo": true
@@ -165,16 +165,16 @@
     "id": "ffa930b7-8e0d-48bc-ae5d-1ae6ad9e29ab",
     "username": "marquinhos",
     "nome": "Marquinhos",
-    "password_hash": "scrypt:32768:8:1$B1ikkx2xhX8Q4vDL$1b789e0900bb4bd6709c6ad3d333763bf09014ed6089e3e08ccdb1f664d3d6f3905bc89094cc694085aa78f41df27c6f3bca7155dc315941cf448e7f0413b177",
+    "password_hash": "scrypt:32768:8:1$6QyicK0Kc3BoYYAU$4482b31c3282b0182bab99de69d19c049f39619749d57c537932eb4652abd0b0522fbb6113311c2404ebcf363cf98bb330ffcac01991363f6b46c24267e47d06",
     "role": "usuario",
     "criado_em": "2026-04-23T23:19:12.665775",
     "ativo": true
   },
   {
     "id": "567184bd-1f6d-455e-bf28-29dcaf5c03a4",
-    "username": "carlos",
+    "username": "carlos2",
     "nome": "Carlos",
-    "password_hash": "scrypt:32768:8:1$EnQC0ORchZCAJjbi$f9df002ce0bc1629c2e3fa52006e6b5f1c7c89953d1ac331255b44ae4d5892990dcd88c078d56372f0aaf2459b7173ff0992cbf70f2e688c1815676180fdd4aa",
+    "password_hash": "scrypt:32768:8:1$RZUDOy11D67BHEpD$5661df403900fd40a9fcab99385283231c1d36084d64c5f95998c0b85f74a3dce143cbe3d4f3cb7f437c63e3491b2fa3c2992e72c955c623420092d24704a97e",
     "role": "usuario",
     "criado_em": "2026-04-23T23:19:12.735752",
     "ativo": true
@@ -183,7 +183,7 @@
     "id": "cf358a50-e035-4292-8bf6-df5a877b1334",
     "username": "bacatela",
     "nome": "bacatela",
-    "password_hash": "scrypt:32768:8:1$hwN2amdayh6aRkSl$14cb186fb8dc024fc36182db2f9888e1023ec58c3a9101fba567cc6ae6d83eb5f65e5059dfc5ce429300ab92e0c085c482b5af4d626ec4c013a6686122fba336",
+    "password_hash": "scrypt:32768:8:1$a3nKCWfKm2IlkjTa$82912a4d71f570ecc94fa1d926cb4b29061aad7c35309dadca3bfe0cc70d19159d7e611146ee7136fde2836a43f2243b4215f7e6c32b9e27f80d6adea6711cf7",
     "role": "usuario",
     "criado_em": "2026-04-23T23:19:12.808822",
     "ativo": true
@@ -192,9 +192,18 @@
     "id": "50845863-8ce3-4f09-956d-67d8b6a0b62f",
     "username": "new",
     "nome": "new",
-    "password_hash": "scrypt:32768:8:1$q2sJD4gzBJ7h1YL8$5a72cc7a6b79e30d5e9755777fd5aad117cf1be0d663f1054fd885f1204ea361cc7c8a46bbcd8971567bdbaee47a247ac1cc23aacf19d5e35ab795ddac309417",
+    "password_hash": "scrypt:32768:8:1$SKAGHd4GSHf8kV3q$b0009b001bb486d3b94290d9b662b393a638cb1c15e7d8fc49f082e3972688c40e23671777c8b75555e49836480cd9f2084dfe57624af9d0b760eb77919815ec",
     "role": "admin",
     "criado_em": "2026-04-24T00:03:10.479432",
+    "ativo": true
+  },
+  {
+    "id": "889e590f-ec3d-408d-a55f-c399fdbbe1d5",
+    "username": "adminjogos",
+    "nome": "Admin de Jogos",
+    "password_hash": "scrypt:32768:8:1$XQYfu9lk1i3kQSwT$2d0c2b27bdcd36f9c9a50a2936a67bd11d9c93d3875b045cf7ffd7e310894400aeb108bf48db51b5d914f9d74dd675060a57be9b693ccee7575f9a9a9d64f419",
+    "role": "admin",
+    "criado_em": "2026-04-24T11:37:39.336515",
     "ativo": true
   }
 ]

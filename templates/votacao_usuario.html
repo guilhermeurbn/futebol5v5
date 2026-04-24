@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Votacao da Partida{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 920px;">
+    <header class="header">
+        <div class="header-content">
+            {% set brand_title = 'Minha Votacao' %}
+            {% set brand_subtitle = 'Preencha seus numeros na partida' %}
+            {% include '_brand_header.html' %}
+        </div>
+    </header>
+
+    <main class="main">
+        {% if erro %}
+            <div class="alert alert-warning"><strong>⚠️</strong> {{ erro }}</div>
+        {% endif %}
+
+        {% if not partida %}
+            <section class="section">
+                <h2 class="section-title">📭 Sem partida aberta</h2>
+                <p>Nenhuma partida ativa para voto agora. Aguarde o admin abrir uma rodada.</p>
+            </section>
+        {% else %}
+            <section class="section">
+                <h2 class="section-title">🗳️ {{ partida.titulo }}</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Seu jogador</div>
+                        <div class="stat-value" style="font-size: 1.2rem;">{{ participante.jogador_nome }}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Seu time</div>
+                        <div class="stat-value" style="font-size: 1.2rem;">Time {{ participante.time_numero }}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Status</div>
+                        <div class="stat-value" style="font-size: 1.2rem;">{{ partida.status }}</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2 class="section-title">✍️ Seus numeros</h2>
+                <form method="post" action="{{ url_for('jogador.votacao_salvar') }}" class="form">
+                    <input type="hidden" name="partida_id" value="{{ partida.id }}">
+
+                    <div class="form-group">
+                        <label class="form-label" for="gols">Gols</label>
+                        <input class="form-input" id="gols" name="gols" type="number" min="0" value="{{ voto.gols if voto else 0 }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="assistencias">Assistencias</label>
+                        <input class="form-input" id="assistencias" name="assistencias" type="number" min="0" value="{{ voto.assistencias if voto else 0 }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="nota">Nota (0-10)</label>
+                        <input class="form-input" id="nota" name="nota" type="number" min="0" max="10" value="{{ voto.nota if voto else 7 }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Venceu?</label>
+                        <div class="tipo-selector">
+                            <label class="tipo-option">
+                                <input type="radio" name="venceu" value="1" class="tipo-radio" {% if voto and voto.venceu %}checked{% endif %}>
+                                <span class="tipo-label">✅ Sim</span>
+                            </label>
+                            <label class="tipo-option">
+                                <input type="radio" name="venceu" value="0" class="tipo-radio" {% if not voto or not voto.venceu %}checked{% endif %}>
+                                <span class="tipo-label">❌ Nao</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Voce foi destaque?</label>
+                        <div class="tipo-selector">
+                            <label class="tipo-option">
+                                <input type="radio" name="destaque" value="1" class="tipo-radio" {% if voto and voto.destaque %}checked{% endif %}>
+                                <span class="tipo-label">⭐ Sim</span>
+                            </label>
+                            <label class="tipo-option">
+                                <input type="radio" name="destaque" value="0" class="tipo-radio" {% if not voto or not voto.destaque %}checked{% endif %}>
+                                <span class="tipo-label">- Nao</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" type="submit">Salvar voto</button>
+                </form>
+            </section>
+        {% endif %}
+    </main>
+</div>
+{% endblock %}

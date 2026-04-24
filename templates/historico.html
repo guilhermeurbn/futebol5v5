@@ -22,8 +22,14 @@
             <!-- Navigation -->
             <div class="nav-tabs">
                 <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
+                {% if auth_user.role == 'usuario' %}
+                <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab">🗳️ Minha Votação</a>
+                {% endif %}
+                {% if auth_user.role in ['admin', 'super_admin'] %}
+                <a href="{{ url_for('jogador.votacao_admin_page') }}" class="nav-tab">🛡️ Votação Admin</a>
+                {% endif %}
                 <a href="{{ url_for('jogador.historico') }}" class="nav-tab active">📜 Histórico</a>
-                <a href="{{ url_for('jogador.estatisticas') }}" class="nav-tab">📊 Estatísticas</a>
+                <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">🏅 Ranking</a>
             </div>
 
             <!-- Histórico Section -->

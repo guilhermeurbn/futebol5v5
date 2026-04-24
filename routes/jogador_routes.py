@@ -15,6 +15,7 @@ from services.qrcode_service import QRCodeService
 from services.sugestoes_service import SugestoesService
 from services.ranking_service import RankingService
 from services.auth_service import AuthService
+from services.votacao_service import VotacaoService
 import io
 import random
 
@@ -30,6 +31,7 @@ qrcode_service = QRCodeService()
 sugestoes_service = SugestoesService()
 ranking_service = RankingService()
 auth_service = AuthService()
+votacao_service = VotacaoService()
 
 
 def _is_admin():
@@ -37,15 +39,11 @@ def _is_admin():
 
 
 def _jogadores_visiveis():
-    if _is_admin():
-        return jogador_service.listar()
-    return jogador_service.listar_por_usuario(session.get('user_id'))
+    return jogador_service.listar()
 
 
 def _jogadores_visiveis_dict():
-    if _is_admin():
-        return jogador_service.listar_para_dict()
-    return jogador_service.listar_dict_por_usuario(session.get('user_id'))
+    return jogador_service.listar_para_dict()
 
 
 def _usuario_logado():
@@ -73,6 +71,12 @@ def _resposta_sem_permissao():
 def _resposta_somente_leitura():
     if request.path.startswith('/api/'):
         return jsonify({'sucesso': False, 'erro': 'Usuario com acesso somente leitura'}), 403
+    return redirect(url_for('jogador.index'))
+
+
+def _resposta_voto_somente_usuario():
+    if request.path.startswith('/api/'):
+        return jsonify({'sucesso': False, 'erro': 'Apenas usuarios podem votar'}), 403
     return redirect(url_for('jogador.index'))
 
 
@@ -127,6 +131,7 @@ def proteger_rotas():
         permitidas_escrita_usuario = {
             'jogador.logout',
             'jogador.perfil_alterar_senha',
+            'jogador.votacao_salvar',
         }
 
         bloqueadas_leitura_usuario = {
@@ -143,6 +148,14 @@ def proteger_rotas():
             return _resposta_somente_leitura()
 
     return None
+
+
+def _obter_times_do_ultimo_sorteio_global():
+    sorteios = historico_service.listar_sorteios()
+    if not sorteios:
+        return []
+    ultimo = sorteios[-1]
+    return ultimo.get('times', [])
 
 
 def _montar_sorteio_exportacao(sorteio_id, times, somas, diferenca, melhor_time, tem_aviso, aviso_msg):
@@ -364,6 +377,117 @@ def perfil_alterar_senha():
             erro_senha='A confirmacao de senha nao confere'
         ), 400
 
+
+@jogador_bp.route('/votacao', methods=['GET'])
+@login_required
+def votacao_page():
+    if _is_admin():
+        return redirect(url_for('jogador.votacao_admin_page'))
+
+    if session.get('role') != 'usuario':
+        return _resposta_voto_somente_usuario()
+
+    partida = votacao_service.obter_ativa_para_usuario(session.get('user_id'))
+    if not partida:
+        return render_template('votacao_usuario.html', partida=None, voto=None, participante=None)
+
+    participante = next(
+        (p for p in partida.get('participantes', []) if p.get('user_id') == session.get('user_id')),
+        None
+    )
+    voto = votacao_service.obter_voto_usuario(partida.get('id'), session.get('user_id'))
+    return render_template('votacao_usuario.html', partida=partida, participante=participante, voto=voto)
+
+
+@jogador_bp.route('/votacao/salvar', methods=['POST'])
+@login_required
+def votacao_salvar():
+    if _is_admin() or session.get('role') != 'usuario':
+        return _resposta_voto_somente_usuario()
+
+    partida_id = request.form.get('partida_id', type=int)
+    try:
+        votacao_service.salvar_voto(
+            partida_id=partida_id,
+            user_id=session.get('user_id'),
+            gols=request.form.get('gols', 0, type=int),
+            assistencias=request.form.get('assistencias', 0, type=int),
+            venceu=(request.form.get('venceu') == '1'),
+            destaque=(request.form.get('destaque') == '1'),
+            nota=request.form.get('nota', 0, type=int)
+        )
+        return redirect(url_for('jogador.votacao_page'))
+    except ValueError as e:
+        partida = votacao_service.obter_ativa_para_usuario(session.get('user_id'))
+        participante = None
+        voto = None
+        if partida:
+            participante = next(
+                (p for p in partida.get('participantes', []) if p.get('user_id') == session.get('user_id')),
+                None
+            )
+            voto = votacao_service.obter_voto_usuario(partida.get('id'), session.get('user_id'))
+        return render_template(
+            'votacao_usuario.html',
+            partida=partida,
+            participante=participante,
+            voto=voto,
+            erro=str(e)
+        ), 400
+
+
+@jogador_bp.route('/admin/votacao', methods=['GET'])
+@admin_required
+def votacao_admin_page():
+    ativa = votacao_service.obter_ativa()
+    historico = votacao_service.listar()
+    return render_template('votacao_admin.html', ativa=ativa, historico=historico)
+
+
+@jogador_bp.route('/admin/votacao/criar', methods=['POST'])
+@admin_required
+def votacao_admin_criar():
+    try:
+        times = _obter_times_do_ultimo_sorteio_global()
+        if not times:
+            return render_template(
+                'votacao_admin.html',
+                ativa=votacao_service.obter_ativa(),
+                historico=votacao_service.listar(),
+                erro='Nao ha sorteio no historico para iniciar votacao'
+            ), 400
+
+        usuarios = auth_service.listar_usuarios()
+        partida = votacao_service.criar_partida(
+            times_json=times,
+            usuarios=usuarios,
+            criado_por=session.get('user_id'),
+            titulo=request.form.get('titulo', '').strip()
+        )
+        return redirect(url_for('jogador.votacao_admin_page', partida_id=partida.get('id')))
+    except ValueError as e:
+        return render_template(
+            'votacao_admin.html',
+            ativa=votacao_service.obter_ativa(),
+            historico=votacao_service.listar(),
+            erro=str(e)
+        ), 400
+
+
+@jogador_bp.route('/admin/votacao/<int:partida_id>/encerrar', methods=['POST'])
+@admin_required
+def votacao_admin_encerrar(partida_id):
+    try:
+        votacao_service.encerrar_e_apurar(partida_id, session.get('user_id'))
+        return redirect(url_for('jogador.votacao_admin_page', partida_id=partida_id))
+    except ValueError as e:
+        return render_template(
+            'votacao_admin.html',
+            ativa=votacao_service.obter_ativa(),
+            historico=votacao_service.listar(),
+            erro=str(e)
+        ), 400
+
     try:
         auth_service.alterar_senha(
             user_id=session.get('user_id'),
@@ -453,7 +577,7 @@ def listar_jogadores_api():
 def criar_jogador_api():
     """API: Cria novo jogador"""
     try:
-        dados = request.get_json()
+        dados = request.get_json(silent=True) or {}
         jogador = jogador_service.criar(
             nome=dados.get('nome'),
             nivel=int(dados.get('nivel', 5)),
@@ -503,7 +627,7 @@ def obter_jogador(jogador_id):
 def atualizar_jogador(jogador_id):
     """API: Atualiza jogador"""
     try:
-        dados = request.get_json()
+        dados = request.get_json(silent=True) or {}
         jogador = jogador_service.atualizar(
             jogador_id,
             nome=dados.get('nome'),
@@ -563,7 +687,7 @@ def selecionar_jogadores():
 def atualizar_presenca():
     """API: Marca jogadores como presentes"""
     try:
-        dados = request.get_json()
+        dados = request.get_json(silent=True) or {}
         jogador_ids = dados.get('jogador_ids', [])
         
         if len(jogador_ids) not in [10, 15, 20]:
@@ -744,13 +868,7 @@ def api_estatisticas():
 @jogador_bp.route('/estatisticas')
 @jogador_bp.route('/stats')
 def estatisticas():
-    """Página com estatísticas gerais"""
-    stats = historico_service.obter_estatisticas()
-    
-    return render_template(
-        'estatisticas.html',
-        stats=stats
-    )
+    return redirect(url_for('jogador.index'))
 
 
 # ============================================================
@@ -814,55 +932,22 @@ def api_stats_comparacao(player1, player2):
 
 @jogador_bp.route('/stats/players', methods=['GET'])
 def stats_players():
-    """Página com estatísticas de jogadores"""
-    stats = stats_service.calcular_stats_jogadores()
-    
-    # Ordenar por win_rate
-    stats_ordenadas = sorted(
-        [{"nome": nome, **dados} for nome, dados in stats.items()],
-        key=lambda x: x.get('win_rate', 0),
-        reverse=True
-    )
-    
-    return render_template(
-        'stats_players.html',
-        stats=stats_ordenadas
-    )
+    return redirect(url_for('jogador.index'))
 
 
 @jogador_bp.route('/stats/times', methods=['GET'])
 def stats_times_page():
-    """Página com estatísticas de times"""
-    stats = stats_service.calcular_stats_times()
-    
-    # Ordenar por win_rate
-    stats_ordenadas = sorted(
-        [{"time_key": key, **dados} for key, dados in stats.items()],
-        key=lambda x: x.get('win_rate', 0),
-        reverse=True
-    )
-    
-    return render_template(
-        'stats_times.html',
-        stats=stats_ordenadas
-    )
+    return redirect(url_for('jogador.index'))
 
 
 @jogador_bp.route('/stats/combos', methods=['GET'])
 def stats_combos_page():
-    """Página com melhores combos"""
-    combos = stats_service.get_combos_vencedores()
-    
-    return render_template(
-        'stats_combos.html',
-        combos=combos
-    )
+    return redirect(url_for('jogador.index'))
 
 
 @jogador_bp.route('/charts', methods=['GET'])
 def charts():
-    """Página com gráficos e visualizações"""
-    return render_template('charts.html')
+    return redirect(url_for('jogador.index'))
 
 
 # ============================================================
@@ -993,7 +1078,9 @@ def export_estatisticas_csv():
 @jogador_bp.route('/api/export/sorteio', methods=['POST'])
 def api_export_sorteio_data():
     """API para armazenar dados do último sorteio na sessão"""
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
+    if not data:
+        return jsonify({'sucesso': False, 'erro': 'Corpo JSON invalido'}), 400
     session['ultimo_sorteio'] = data
     session.modified = True
     return jsonify({'sucesso': True, 'mensagem': 'Sorteio armazenado para exportação'})
@@ -1024,7 +1111,7 @@ def resultado_partida_page(sorteio_id):
 def registrar_resultado_partida():
     """API: Registra resultado de uma partida"""
     try:
-        dados = request.get_json()
+        dados = request.get_json(silent=True) or {}
         
         sorteio_id = dados.get('sorteio_id')
         time_vencedor = dados.get('time_vencedor')
@@ -1059,17 +1146,7 @@ def registrar_resultado_partida():
 
 @jogador_bp.route('/campeonato')
 def campeonato_page():
-    """Página do campeonato com ranking"""
-    campeonato = partida_service.obter_campeonato()
-    placar_geral = partida_service.obter_placar_geral()
-    ultimas_partidas = partida_service.listar_partidas(limite=10)
-    
-    return render_template(
-        'campeonato.html',
-        campeonato=campeonato,
-        placar_geral=placar_geral,
-        ultimas_partidas=ultimas_partidas
-    )
+    return redirect(url_for('jogador.index'))
 
 
 @jogador_bp.route('/api/campeonato')
@@ -1093,7 +1170,7 @@ def api_campeonato():
 def api_favoritar_time():
     """API: Favorita um time"""
     try:
-        dados = request.get_json()
+        dados = request.get_json(silent=True) or {}
         
         sorteio_id = dados.get('sorteio_id')
         time_numero = dados.get('time_numero')
@@ -1122,15 +1199,7 @@ def api_favoritar_time():
 
 @jogador_bp.route('/favoritos')
 def listar_favoritos_page():
-    """Página com times favoritos"""
-    favoritos = favorito_service.listar_favoritos()
-    stats = favorito_service.obter_estatisticas_favoritos()
-    
-    return render_template(
-        'favoritos.html',
-        favoritos=favoritos,
-        stats=stats
-    )
+    return redirect(url_for('jogador.index'))
 
 
 @jogador_bp.route('/api/favoritos')
@@ -1165,7 +1234,7 @@ def api_remover_favorito(fav_id):
 def api_renomear_favorito(fav_id):
     """API: Renomeia um favorito"""
     try:
-        dados = request.get_json()
+        dados = request.get_json(silent=True) or {}
         novo_nome = dados.get('nome', '')
         
         if not novo_nome:
@@ -1273,7 +1342,9 @@ def api_status_sorteio():
 def api_adicionar_stack():
     """API: Adiciona sorteio à pilha de undo/redo"""
     try:
-        sorteio_data = request.get_json()
+        sorteio_data = request.get_json(silent=True) or {}
+        if not sorteio_data:
+            return jsonify({'sucesso': False, 'erro': 'Corpo JSON invalido'}), 400
         
         indice, total = undoredo_service.adicionar_sorteio(sorteio_data)
         status = undoredo_service.obter_status()
@@ -1384,7 +1455,7 @@ def api_link_compartilhamento(sorteio_id):
 def api_sugestoes_nivel():
     """API: Sugestões por nível"""
     try:
-        dados = request.get_json()
+        dados = request.get_json(silent=True) or {}
         selecionados = dados.get('selecionados', [])
         todos = jogador_service.listar_para_dict()
         
@@ -1403,7 +1474,7 @@ def api_sugestoes_nivel():
 def api_sugestoes_diversidade():
     """API: Sugestões por diversidade"""
     try:
-        dados = request.get_json()
+        dados = request.get_json(silent=True) or {}
         selecionados = dados.get('selecionados', [])
         todos = jogador_service.listar_para_dict()
         
@@ -1422,7 +1493,7 @@ def api_sugestoes_diversidade():
 def api_sugestoes_vencedores():
     """API: Sugestões por jogadores vencedores"""
     try:
-        dados = request.get_json()
+        dados = request.get_json(silent=True) or {}
         selecionados = dados.get('selecionados', [])
         todos = jogador_service.listar_para_dict()
         
@@ -1441,7 +1512,7 @@ def api_sugestoes_vencedores():
 def api_sugestoes_duplas():
     """API: Sugestões por duplas vencedoras"""
     try:
-        dados = request.get_json()
+        dados = request.get_json(silent=True) or {}
         selecionados = dados.get('selecionados', [])
         todos = jogador_service.listar_para_dict()
         
@@ -1460,7 +1531,7 @@ def api_sugestoes_duplas():
 def api_sugestoes_combinadas():
     """API: Sugestões combinadas (todas as estratégias)"""
     try:
-        dados = request.get_json()
+        dados = request.get_json(silent=True) or {}
         selecionados = dados.get('selecionados', [])
         todos = jogador_service.listar_para_dict()
         
@@ -1474,32 +1545,23 @@ def api_sugestoes_combinadas():
         return jsonify({'sucesso': False, 'erro': str(e)}), 500
 
 
-# ===== RANKING DE TIMES =====
+# ===== RANKING DE JOGADORES =====
 @jogador_bp.route('/ranking')
 def pagina_ranking():
-    """Página de ranking de times"""
-    ranking_geral = ranking_service.calcular_ranking_geral(20)
-    ranking_mes = ranking_service.calcular_ranking_periodo(30, 10)
-    stats = ranking_service.obter_estatisticas_ranking()
-    
-    return render_template(
-        'ranking.html',
-        ranking_geral=ranking_geral,
-        ranking_mes=ranking_mes,
-        stats=stats
-    )
+    dados = votacao_service.ranking_jogadores_geral(50)
+    return render_template('ranking.html', dados=dados)
 
 
 @jogador_bp.route('/api/ranking/geral')
 def api_ranking_geral():
-    """API: Ranking geral de times"""
+    """API: Ranking geral de jogadores"""
     try:
-        limite = request.args.get('limite', 20, type=int)
-        ranking = ranking_service.calcular_ranking_geral(limite)
+        limite = request.args.get('limite', 50, type=int)
+        dados = votacao_service.ranking_jogadores_geral(limite)
         
         return jsonify({
             'sucesso': True,
-            'ranking': ranking
+            'dados': dados
         })
     except Exception as e:
         return jsonify({'sucesso': False, 'erro': str(e)}), 500
@@ -1507,29 +1569,9 @@ def api_ranking_geral():
 
 @jogador_bp.route('/api/ranking/periodo/<int:dias>')
 def api_ranking_periodo(dias):
-    """API: Ranking de um período específico"""
-    try:
-        limite = request.args.get('limite', 20, type=int)
-        ranking = ranking_service.calcular_ranking_periodo(dias, limite)
-        
-        return jsonify({
-            'sucesso': True,
-            'ranking': ranking,
-            'periodo_dias': dias
-        })
-    except Exception as e:
-        return jsonify({'sucesso': False, 'erro': str(e)}), 500
+    return jsonify({'sucesso': False, 'erro': 'Endpoint desativado'}), 410
 
 
 @jogador_bp.route('/api/ranking/stats')
 def api_ranking_stats():
-    """API: Estatísticas do ranking"""
-    try:
-        stats = ranking_service.obter_estatisticas_ranking()
-        
-        return jsonify({
-            'sucesso': True,
-            'stats': stats
-        })
-    except Exception as e:
-        return jsonify({'sucesso': False, 'erro': str(e)}), 500
+    return jsonify({'sucesso': False, 'erro': 'Endpoint desativado'}), 410

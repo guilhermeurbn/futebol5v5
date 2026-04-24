@@ -29,10 +29,16 @@ def criar_app(config_name: str = None) -> Flask:
         config_name = os.getenv('FLASK_ENV', 'development')
     
     app = Flask(__name__)
-    app.config.from_object(config_by_name.get(config_name, 'development'))
+    config_obj = config_by_name.get(config_name, config_by_name['default'])
+    app.config.from_object(config_obj)
     
     # Configurar secret key para sessions
-    app.secret_key = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
+    secret_key = os.getenv('SECRET_KEY')
+    if not secret_key:
+        if config_name == 'production':
+            raise RuntimeError('SECRET_KEY obrigatoria em producao')
+        secret_key = 'dev-secret-key-change-in-production'
+    app.secret_key = secret_key
     
     # Registrar blueprints
     app.register_blueprint(jogador_bp)

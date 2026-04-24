@@ -13,6 +13,7 @@ class RankingService:
     """Serviço de ranking de times"""
     
     def __init__(self):
+        self.base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         self.historico_path = 'historico.json'
         self.partidas_path = 'data/partidas.json'
         self.ranking_cache = {}
@@ -20,8 +21,13 @@ class RankingService:
     def _resolver_caminho_existente(self, caminhos: List[str]) -> Optional[str]:
         """Retorna o primeiro caminho existente para manter compatibilidade entre versões."""
         for caminho in caminhos:
-            if os.path.exists(caminho):
-                return caminho
+            candidatos = [
+                caminho,
+                os.path.join(self.base_dir, caminho)
+            ]
+            for candidato in candidatos:
+                if os.path.exists(candidato):
+                    return candidato
         return None
     
     def _carregar_historico(self) -> List[dict]:
@@ -37,7 +43,7 @@ class RankingService:
         try:
             with open(caminho, 'r', encoding='utf-8') as f:
                 return json.load(f)
-        except:
+        except (json.JSONDecodeError, OSError):
             return []
     
     def _carregar_partidas(self) -> List[dict]:
@@ -53,7 +59,7 @@ class RankingService:
         try:
             with open(caminho, 'r', encoding='utf-8') as f:
                 return json.load(f)
-        except:
+        except (json.JSONDecodeError, OSError):
             return []
     
     def _gerar_assinatura_time(self, jogadores: List[dict]) -> str:
@@ -71,6 +77,9 @@ class RankingService:
 
     def _normalizar_jogadores(self, jogadores: List) -> List[Dict]:
         """Normaliza lista de jogadores para o formato dict esperado pelo template."""
+        if isinstance(jogadores, dict):
+            jogadores = jogadores.get('jogadores', [])
+
         normalizados = []
         for jogador in jogadores:
             if isinstance(jogador, dict):
@@ -216,7 +225,7 @@ class RankingService:
                 data_sorteio = datetime.fromisoformat(sorteio.get('data', ''))
                 if data_sorteio >= data_limite:
                     historico_filtrado.append(sorteio)
-            except:
+            except (TypeError, ValueError):
                 historico_filtrado.append(sorteio)  # Incluir se não conseguir parse
         
         # Processar similar ao método anterior, mas com histórico filtrado

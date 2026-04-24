@@ -1,229 +1,89 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NaTrave | Ranking de Times</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
-    <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-content">
-                <a href="{{ url_for('jogador.index') }}" class="back-link">← Voltar</a>
-                {% set brand_title = 'Ranking de Times' %}
-                {% set brand_subtitle = 'Melhores combinações de jogadores' %}
-                {% include '_brand_header.html' %}
-            </div>
-        </header>
+{% extends 'base.html' %}
 
-        <!-- Main Content -->
-        <main class="main">
-            <!-- Estatísticas Gerais -->
-            <section class="section">
-                <h2 class="section-title">📊 Estatísticas Gerais</h2>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-label">Total de Times</div>
-                        <div class="stat-value">{{ stats.total_times }}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Pontuação Média</div>
-                        <div class="stat-value">{{ "%.1f"|format(stats.pontuacao_media_geral) }}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Taxa Vitória Média</div>
-                        <div class="stat-value">{{ "%.1f"|format(stats.taxa_vitoria_media * 100) }}%</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Melhor Time</div>
-                        <div class="stat-value" style="font-size: 0.9rem; margin-top: 5px;">
-                            {% if stats.melhor_time %}
-                                <strong>{{ stats.melhor_time.criado }}x</strong> criado
-                            {% else %}
-                                —
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </section>
+{% block title %}Ranking de Jogadores{% endblock %}
 
-            <!-- Abas de Ranking -->
-            <section class="section">
-                <div class="tabs">
-                    <button class="tab-btn active" onclick="trocarAbaRanking('geral', this)">
-                        🏆 Geral
-                    </button>
-                    <button class="tab-btn" onclick="trocarAbaRanking('mes', this)">
-                        📅 Últimos 30 Dias
-                    </button>
-                </div>
+{% block content %}
+<div class="container" style="max-width: 1080px;">
+    <header class="header">
+        <div class="header-content">
+            {% set brand_title = 'Ranking de Jogadores' %}
+            {% set brand_subtitle = 'Somente partidas criadas e apuradas pelo admin' %}
+            {% include '_brand_header.html' %}
+        </div>
+    </header>
 
-                <!-- Ranking Geral -->
-                <div id="geral" class="tab-content active">
-                    <h3 class="tab-title">🏆 Ranking Geral de Times</h3>
-                    {% if ranking_geral %}
-                        <div style="overflow-x: auto;">
-                            <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
-                                <thead>
-                                    <tr style="background: rgba(102, 126, 234, 0.1); border-bottom: 2px solid #667eea;">
-                                        <th style="padding: 12px; text-align: left; font-weight: 600; color: #667eea;">#</th>
-                                        <th style="padding: 12px; text-align: left; font-weight: 600; color: #667eea;">Jogadores</th>
-                                        <th style="padding: 12px; text-align: center; font-weight: 600; color: #667eea;">Criado</th>
-                                        <th style="padding: 12px; text-align: center; font-weight: 600; color: #667eea;">Vitórias</th>
-                                        <th style="padding: 12px; text-align: center; font-weight: 600; color: #667eea;">Taxa Vitória</th>
-                                        <th style="padding: 12px; text-align: center; font-weight: 600; color: #667eea;">Pont. Média</th>
-                                        <th style="padding: 12px; text-align: center; font-weight: 600; color: #667eea;">Score</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for time in ranking_geral %}
-                                        <tr style="border-bottom: 1px solid #333; {% if loop.index0 < 3 %}background: rgba(102, 126, 234, 0.05);{% endif %}">
-                                            <td style="padding: 12px; font-weight: bold; color: #667eea; font-size: 1.1rem;">
-                                                {% if loop.index0 == 0 %}🥇{% elif loop.index0 == 1 %}🥈{% elif loop.index0 == 2 %}🥉{% else %}{{ loop.index }}{% endif %}
-                                            </td>
-                                            <td style="padding: 12px;">
-                                                <div style="font-weight: 500; color: white;">
-                                                    {% for jogador in time.jogadores %}
-                                                        <span style="display: inline-block; margin-right: 5px;">{{ jogador.nome }}</span>
-                                                    {% endfor %}
-                                                </div>
-                                            </td>
-                                            <td style="padding: 12px; text-align: center; color: #999;">{{ time.criado }}</td>
-                                            <td style="padding: 12px; text-align: center;">
-                                                <span style="background: rgba(76, 175, 80, 0.2); padding: 4px 8px; border-radius: 4px; color: #4caf50;">
-                                                    {{ time.vitorias }}
-                                                </span>
-                                            </td>
-                                            <td style="padding: 12px; text-align: center; color: #ffc107;">
-                                                {{ "%.0f"|format(time.taxa_vitoria * 100) }}%
-                                            </td>
-                                            <td style="padding: 12px; text-align: center; color: #667eea;">
-                                                {{ "%.1f"|format(time.pontuacao_media) }}
-                                            </td>
-                                            <td style="padding: 12px; text-align: center; font-weight: bold; color: #fff;">
-                                                {{ "%.0f"|format(time.score) }}
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% else %}
-                        <div class="empty-state">
-                            <p>Sem dados de ranking ainda</p>
-                            <p class="empty-hint">Realize sorteios e registre resultados para criar um ranking</p>
-                        </div>
-                    {% endif %}
-                </div>
-
-                <!-- Ranking do Mês -->
-                <div id="mes" class="tab-content">
-                    <h3 class="tab-title">📅 Times Mais Utilizados (Últimos 30 Dias)</h3>
-                    {% if ranking_mes %}
-                        <div style="overflow-x: auto;">
-                            <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
-                                <thead>
-                                    <tr style="background: rgba(102, 126, 234, 0.1); border-bottom: 2px solid #667eea;">
-                                        <th style="padding: 12px; text-align: left; font-weight: 600; color: #667eea;">#</th>
-                                        <th style="padding: 12px; text-align: left; font-weight: 600; color: #667eea;">Jogadores</th>
-                                        <th style="padding: 12px; text-align: center; font-weight: 600; color: #667eea;">Utilizações</th>
-                                        <th style="padding: 12px; text-align: center; font-weight: 600; color: #667eea;">Pont. Média</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for time in ranking_mes %}
-                                        <tr style="border-bottom: 1px solid #333;">
-                                            <td style="padding: 12px; font-weight: bold; color: #667eea;">{{ loop.index }}</td>
-                                            <td style="padding: 12px;">
-                                                <div style="font-weight: 500; color: white;">
-                                                    {% for jogador in time.jogadores %}
-                                                        <span style="display: inline-block; margin-right: 5px;">{{ jogador.nome }}</span>
-                                                    {% endfor %}
-                                                </div>
-                                            </td>
-                                            <td style="padding: 12px; text-align: center; color: #ffc107;">{{ time.criado }}</td>
-                                            <td style="padding: 12px; text-align: center; color: #667eea;">
-                                                {{ "%.1f"|format(time.pontuacao_media) }}
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% else %}
-                        <div class="empty-state">
-                            <p>Sem dados para este período</p>
-                        </div>
-                    {% endif %}
-                </div>
-            </section>
-
-            <!-- Top Times Mais Criados -->
-            {% if stats.times_mais_criados %}
-                <section class="section">
-                    <h2 class="section-title">🌟 Times Mais Criados</h2>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
-                        {% for time in stats.times_mais_criados %}
-                            <div style="background: #2a2a3e; border: 1px solid #667eea; border-radius: 8px; padding: 15px;">
-                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                                    <span style="font-size: 1.5rem;">
-                                        {% if loop.index0 == 0 %}🥇{% elif loop.index0 == 1 %}🥈{% elif loop.index0 == 2 %}🥉{% else %}⭐{% endif %}
-                                    </span>
-                                    <span style="font-weight: bold; color: #667eea;">{{ time.criado }}x criado</span>
-                                </div>
-                                <div style="font-size: 13px; color: #999; line-height: 1.6;">
-                                    {% for jogador in time.jogadores %}
-                                        <div>• {{ jogador.nome }}</div>
-                                    {% endfor %}
-                                </div>
-                                {% if time.vitorias + time.derrotas > 0 %}
-                                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #444; font-size: 12px; color: #ffc107;">
-                                        📊 {{ time.vitorias }}V {{ time.derrotas }}D ({{ "%.0f"|format(time.taxa_vitoria * 100) }}%)
-                                    </div>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
-                    </div>
-                </section>
+    <main class="main">
+        <div class="nav-tabs">
+            <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
+            {% if auth_user.role == 'usuario' %}
+            <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab">🗳️ Minha Votação</a>
             {% endif %}
+            {% if auth_user.role in ['admin', 'super_admin'] %}
+            <a href="{{ url_for('jogador.votacao_admin_page') }}" class="nav-tab">🛡️ Votação Admin</a>
+            {% endif %}
+            <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
+            <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab active">🏅 Ranking</a>
+        </div>
 
-            <!-- Ações -->
-            <section class="section">
-                <div class="actions-section">
-                    <a href="{{ url_for('jogador.campeonato_page') }}" class="btn btn-primary">
-                        🏆 Ver Campeonato
-                    </a>
-                    <a href="{{ url_for('jogador.historico') }}" class="btn btn-secondary">
-                        📜 Histórico de Sorteios
-                    </a>
+        <section class="section">
+            <h2 class="section-title">📊 Resumo</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Partidas apuradas</div>
+                    <div class="stat-value">{{ dados.total_partidas }}</div>
                 </div>
-            </section>
-        </main>
+                <div class="stat-card">
+                    <div class="stat-label">Votos recebidos</div>
+                    <div class="stat-value">{{ dados.total_votos }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Jogadores no ranking</div>
+                    <div class="stat-value">{{ dados.total_jogadores }}</div>
+                </div>
+            </div>
+        </section>
 
-        <!-- Footer -->
-        <footer class="footer">
-            <p>⚽ NaTrave • Desenvolvido por Guilherme Urbano com ❤️</p>
-        </footer>
-    </div>
-
-    <script>
-        function trocarAbaRanking(aba, btn) {
-            document.querySelectorAll('.tab-content').forEach(el => {
-                el.classList.remove('active');
-            });
-            
-            document.querySelectorAll('.tab-btn').forEach(el => {
-                el.classList.remove('active');
-            });
-            
-            document.getElementById(aba).classList.add('active');
-            if (btn) {
-                btn.classList.add('active');
-            }
-        }
-    </script>
-</body>
-</html>
+        <section class="section">
+            <h2 class="section-title">🏆 Classificação</h2>
+            {% if dados.ranking %}
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                        <thead>
+                            <tr style="background: rgba(102, 126, 234, 0.1); border-bottom: 2px solid #667eea;">
+                                <th style="padding: 12px; text-align: left;">#</th>
+                                <th style="padding: 12px; text-align: left;">Jogador</th>
+                                <th style="padding: 12px; text-align: center;">Pontos</th>
+                                <th style="padding: 12px; text-align: center;">Jogos</th>
+                                <th style="padding: 12px; text-align: center;">Gols</th>
+                                <th style="padding: 12px; text-align: center;">Assist.</th>
+                                <th style="padding: 12px; text-align: center;">Vitórias</th>
+                                <th style="padding: 12px; text-align: center;">Destaques</th>
+                                <th style="padding: 12px; text-align: center;">Nota média</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in dados.ranking %}
+                            <tr style="border-bottom: 1px solid #333; {% if loop.index0 < 3 %}background: rgba(102, 126, 234, 0.05);{% endif %}">
+                                <td style="padding: 12px;">
+                                    {% if loop.index0 == 0 %}🥇{% elif loop.index0 == 1 %}🥈{% elif loop.index0 == 2 %}🥉{% else %}{{ loop.index }}{% endif %}
+                                </td>
+                                <td style="padding: 12px; font-weight: 600;">{{ item.jogador_nome }}</td>
+                                <td style="padding: 12px; text-align: center; font-weight: 700;">{{ item.pontos }}</td>
+                                <td style="padding: 12px; text-align: center;">{{ item.jogos }}</td>
+                                <td style="padding: 12px; text-align: center;">{{ item.gols }}</td>
+                                <td style="padding: 12px; text-align: center;">{{ item.assistencias }}</td>
+                                <td style="padding: 12px; text-align: center;">{{ item.vitorias }}</td>
+                                <td style="padding: 12px; text-align: center;">{{ item.destaques }}</td>
+                                <td style="padding: 12px; text-align: center;">{{ item.nota_media }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p>Sem dados ainda. Abra votação no painel admin, colete votos e encerre a rodada.</p>
+            {% endif %}
+        </section>
+    </main>
+</div>
+{% endblock %}

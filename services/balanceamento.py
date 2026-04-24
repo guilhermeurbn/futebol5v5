@@ -282,7 +282,7 @@ class BalanceadorTimes:
             Tupla (time1, time2, soma1, soma2)
         """
         try:
-            times, somas = BalanceadorTimes.sortear_multiplos_times_com_goleiros(jogadores)
+            times, somas, _, _ = BalanceadorTimes.sortear_multiplos_times_com_goleiros(jogadores)
             if len(times) >= 2:
                 return times[0], times[1], somas[0], somas[1]
             else:

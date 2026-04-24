@@ -72,7 +72,7 @@ def test_validacao():
     valido, msg = BalanceadorTimes.validar_jogadores_com_goleiros(jogadores)
     print(f"\nValidação: {'✅ OK' if valido else '❌ FALHOU'} - {msg if msg else 'Válido'}")
     
-    return valido
+    assert valido, msg
 
 
 def test_simulated_annealing():
@@ -94,7 +94,7 @@ def test_simulated_annealing():
     print(f"\nPontuações: {somas}")
     print(f"Diferença máxima: {max(somas) - min(somas)} pts")
     
-    return True
+    assert len(times_linha) == num_times
 
 
 def test_sorteio_com_goleiros():
@@ -126,12 +126,12 @@ def test_sorteio_com_goleiros():
         print(f"\n📊 Diferença máxima: {diferenca} pts")
         print(f"📊 Melhor time: {BalanceadorTimes.obter_melhor_time(somas)}")
         
-        return True
+        assert len(times) == BalanceadorTimes.calcular_numero_times(len(jogadores))
     except Exception as e:
         print(f"❌ Erro: {e}")
         import traceback
         traceback.print_exc()
-        return False
+        raise
 
 
 def main():

@@ -29,14 +29,13 @@
             <!-- Navigation Tabs -->
             <div class="nav-tabs">
                 <a href="{{ url_for('jogador.index') }}" class="nav-tab active">👥 Jogadores</a>
+                {% if auth_user.role == 'usuario' %}
+                <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab">🗳️ Minha Votação</a>
+                {% endif %}
+                {% if auth_user.role in ['admin', 'super_admin'] %}
+                <a href="{{ url_for('jogador.votacao_admin_page') }}" class="nav-tab">🛡️ Votação Admin</a>
+                {% endif %}
                 <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
-                <a href="{{ url_for('jogador.estatisticas') }}" class="nav-tab">📊 Estatísticas</a>
-                <a href="{{ url_for('jogador.stats_players') }}" class="nav-tab">🏆 Stats</a>
-                <a href="{{ url_for('jogador.stats_times_page') }}" class="nav-tab">🎯 Times</a>
-                <a href="{{ url_for('jogador.stats_combos_page') }}" class="nav-tab">⭐ Combos</a>
-                <a href="{{ url_for('jogador.charts') }}" class="nav-tab">📈 Gráficos</a>
-                <a href="{{ url_for('jogador.campeonato_page') }}" class="nav-tab">🏆 Campeonato</a>
-                <a href="{{ url_for('jogador.listar_favoritos_page') }}" class="nav-tab">⭐ Favoritos</a>
                 <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">🏅 Ranking</a>
             </div>
 
