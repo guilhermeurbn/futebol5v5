@@ -187,5 +187,14 @@
     "role": "usuario",
     "criado_em": "2026-04-23T23:19:12.808822",
     "ativo": true
+  },
+  {
+    "id": "50845863-8ce3-4f09-956d-67d8b6a0b62f",
+    "username": "new",
+    "nome": "new",
+    "password_hash": "scrypt:32768:8:1$q2sJD4gzBJ7h1YL8$5a72cc7a6b79e30d5e9755777fd5aad117cf1be0d663f1054fd885f1204ea361cc7c8a46bbcd8971567bdbaee47a247ac1cc23aacf19d5e35ab795ddac309417",
+    "role": "admin",
+    "criado_em": "2026-04-24T00:03:10.479432",
+    "ativo": true
   }
 ]
