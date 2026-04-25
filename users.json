@@ -144,21 +144,12 @@
     "ativo": true
   },
   {
-    "id": "921aa7e1-9209-444f-9295-0eb1d0821506",
-    "username": "superadmin",
-    "nome": "Super Administrador",
-    "password_hash": "scrypt:32768:8:1$mDEZgMU5w3vq55MZ$85b9b35270d137a6cf500dcc2e04f1911d8b4e1d597632fa3c08aa8ba5dc955545a77330e04f2eec25d1e319b1e010eaa28ae43c5e753da2be82f1a33e4391de",
-    "role": "super_admin",
-    "criado_em": "2026-04-24T13:13:39.092521",
-    "ativo": true
-  },
-  {
-    "id": "58f43772-15f9-49d7-a7c7-73fe3ab97f30",
-    "username": "adminjogos",
-    "nome": "Admin de Jogos",
-    "password_hash": "scrypt:32768:8:1$5h7YDjRTlSLRk5IH$2a5b384824858bb4afeb6f9b6b15b356ee20b1cca85e4972a17b102e3049ccd2946de7fa9171716b517164fde1ef86c1009e811e59d78cc7d9c2849bf3494fdc",
-    "role": "admin",
-    "criado_em": "2026-04-24T13:13:39.161415",
+    "id": "f56b9cb9-0a24-45fd-baae-5a6e12f7b663",
+    "username": "juiz",
+    "nome": "juiz",
+    "password_hash": "scrypt:32768:8:1$f2SSX4iqITSzyi5k$9307e4411d154d4c005ddb66dc9cf8356d35f34cf767cad507787f45a2e366a0a47e31c175dd386cd17ecd3b9cefce5904cf0995de2d4ce614751d4ca88072f6",
+    "role": "juiz",
+    "criado_em": "2026-04-25T01:47:41.394948",
     "ativo": true
   }
 ]

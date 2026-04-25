@@ -21,5 +21,55 @@
       12
     ],
     "notas": "bom jogo"
+  },
+  {
+    "id": 3,
+    "sorteio_id": 5,
+    "data": "2026-04-25T01:24:58.439514",
+    "time_vencedor": 1,
+    "gols_times": [
+      7,
+      2
+    ],
+    "notas": "",
+    "times_desempenho": [
+      {
+        "time_numero": 1,
+        "vitorias": 3,
+        "empates": 1,
+        "derrotas": 2
+      },
+      {
+        "time_numero": 2,
+        "vitorias": 0,
+        "empates": 1,
+        "derrotas": 2
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "sorteio_id": 6,
+    "data": "2026-04-25T01:31:57.351485",
+    "time_vencedor": 1,
+    "gols_times": [
+      0,
+      0
+    ],
+    "notas": "",
+    "times_desempenho": [
+      {
+        "time_numero": 1,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 0
+      },
+      {
+        "time_numero": 2,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 0
+      }
+    ]
   }
 ]

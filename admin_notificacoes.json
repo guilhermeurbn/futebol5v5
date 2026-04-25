@@ -1,0 +1,13 @@
+{
+  "ultimo_id": 1,
+  "notificacoes": [
+    {
+      "id": 1,
+      "titulo": "Novo cadastro de usuario",
+      "mensagem": "Usuario jogador3 (jogador3) acabou de se cadastrar.",
+      "tipo": "cadastro",
+      "lida": true,
+      "criado_em": "2026-04-25T01:28:38.007132"
+    }
+  ]
+}
