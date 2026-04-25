@@ -38,8 +38,9 @@ class PartidaService:
         with open(self.arquivo, "w", encoding="utf-8") as f:
             json.dump(dados, f, indent=2, ensure_ascii=False)
     
-    def registrar_resultado(self, sorteio_id: int, time_vencedor: int, 
-                           gols_times: List[int], notas: str = "") -> Dict:
+    def registrar_resultado(self, sorteio_id: int, time_vencedor: int,
+                           gols_times: List[int], notas: str = "",
+                           times_desempenho: Optional[List[Dict]] = None) -> Dict:
         """
         Registra o resultado de uma partida
         
@@ -48,6 +49,7 @@ class PartidaService:
             time_vencedor: Número do time vencedor (1, 2, etc)
             gols_times: Lista com gols de cada time
             notas: Observações sobre a partida
+            times_desempenho: Lista com vitorias/empates/derrotas por time
             
         Returns:
             Dicionário com a partida registrada
@@ -60,7 +62,8 @@ class PartidaService:
             "data": datetime.now().isoformat(),
             "time_vencedor": time_vencedor,
             "gols_times": gols_times,
-            "notas": notas
+            "notas": notas,
+            "times_desempenho": times_desempenho or []
         }
         
         partidas.append(partida)

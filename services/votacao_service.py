@@ -87,19 +87,17 @@ class VotacaoService:
             for j in time.get("jogadores", []):
                 user_id = j.get("owner_user_id")
                 usuario = user_map.get(user_id) if user_id else None
-                if not usuario:
-                    continue
-
                 participantes.append({
                     "user_id": user_id,
-                    "username": usuario.get("username", ""),
-                    "nome_usuario": usuario.get("nome", ""),
+                    "username": (usuario or {}).get("username", ""),
+                    "nome_usuario": (usuario or {}).get("nome", ""),
                     "jogador_nome": j.get("nome", ""),
-                    "time_numero": numero
+                    "time_numero": numero,
+                    "externo": usuario is None
                 })
 
         if not participantes:
-            raise ValueError("Nenhum participante com vinculo usuario-jogador encontrado")
+            raise ValueError("Nenhum participante encontrado no sorteio")
 
         partida = {
             "id": ultimo_id,
@@ -120,15 +118,25 @@ class VotacaoService:
         self._salvar(dados)
         return partida
 
+    def _normalizar_nota(self, valor: float) -> float:
+        nota = max(0.0, min(10.0, float(valor)))
+        return round(nota * 2) / 2
+
+    def _participantes_permitidos(self, partida: Dict) -> Dict[str, Dict]:
+        """Mapa de participantes válidos por nome para validar os votos."""
+        permitidos = {}
+        for participante in partida.get("participantes", []):
+            nome = (participante.get("jogador_nome") or "").strip()
+            if nome:
+                permitidos[nome] = participante
+        return permitidos
+
     def salvar_voto(
         self,
         partida_id: int,
         user_id: str,
-        gols: int,
-        assistencias: int,
-        venceu: bool,
-        destaque: bool,
-        nota: int
+        votos_obrigatorios: List[Dict],
+        votos_extras: Optional[List[Dict]] = None
     ) -> Dict:
         dados = self._carregar()
         alvo = None
@@ -142,24 +150,51 @@ class VotacaoService:
         if alvo.get("status") != "aberta":
             raise ValueError("Partida ja encerrada")
 
-        participante = None
-        for part in alvo.get("participantes", []):
-            if part.get("user_id") == user_id:
-                participante = part
-                break
+        obrigatorios = votos_obrigatorios or []
+        extras = votos_extras or []
+        permitidos = self._participantes_permitidos(alvo)
 
-        if not participante:
-            raise ValueError("Usuario nao participa desta partida")
+        if len(obrigatorios) < 3 or len(obrigatorios) > 5:
+            raise ValueError("Voce deve votar obrigatoriamente entre 3 e 5 jogadores")
+
+        nomes = set()
+        todos = []
+        for item in obrigatorios:
+            nome = (item.get("jogador_nome") or "").strip()
+            if not nome:
+                continue
+            if nome not in permitidos:
+                raise ValueError(f"Jogador invalido na votacao: {nome}")
+            if nome in nomes:
+                raise ValueError("Jogador repetido na votacao")
+            nomes.add(nome)
+            todos.append({
+                "jogador_nome": nome,
+                "time_numero": permitidos[nome].get("time_numero"),
+                "nota": self._normalizar_nota(item.get("nota", 0)),
+                "obrigatorio": True
+            })
+
+        for item in extras:
+            nome = (item.get("jogador_nome") or "").strip()
+            if not nome or nome in nomes:
+                continue
+            if nome not in permitidos:
+                raise ValueError(f"Jogador invalido na votacao: {nome}")
+            nomes.add(nome)
+            todos.append({
+                "jogador_nome": nome,
+                "time_numero": permitidos[nome].get("time_numero"),
+                "nota": self._normalizar_nota(item.get("nota", 0)),
+                "obrigatorio": False
+            })
+
+        if len([v for v in todos if v.get("obrigatorio")]) < 3:
+            raise ValueError("Voce deve votar obrigatoriamente em pelo menos 3 jogadores")
 
         voto = {
             "user_id": user_id,
-            "jogador_nome": participante.get("jogador_nome", ""),
-            "time_numero": participante.get("time_numero"),
-            "gols": max(0, int(gols)),
-            "assistencias": max(0, int(assistencias)),
-            "venceu": bool(venceu),
-            "destaque": bool(destaque),
-            "nota": max(0, min(10, int(nota))),
+            "votos": todos,
             "atualizado_em": datetime.now().isoformat()
         }
 
@@ -214,53 +249,41 @@ class VotacaoService:
         times = {}
 
         for voto in votos:
-            nome = voto.get("jogador_nome", "Jogador")
-            time = voto.get("time_numero")
-            stats = jogadores.setdefault(nome, {
-                "jogador_nome": nome,
-                "time_numero": time,
-                "gols": 0,
-                "assistencias": 0,
-                "vitorias": 0,
-                "destaques": 0,
-                "nota_total": 0,
-                "votos": 0,
-                "pontos": 0
-            })
+            for voto_jogador in voto.get("votos", []):
+                nome = voto_jogador.get("jogador_nome", "Jogador")
+                time = voto_jogador.get("time_numero")
+                nota = self._normalizar_nota(voto_jogador.get("nota", 0))
 
-            gols = int(voto.get("gols", 0))
-            ass = int(voto.get("assistencias", 0))
-            venceu = bool(voto.get("venceu", False))
-            destaque = bool(voto.get("destaque", False))
-            nota = int(voto.get("nota", 0))
+                stats = jogadores.setdefault(nome, {
+                    "jogador_nome": nome,
+                    "time_numero": time,
+                    "nota_total": 0.0,
+                    "votos": 0,
+                    "pontos": 0.0
+                })
 
-            stats["gols"] += gols
-            stats["assistencias"] += ass
-            stats["vitorias"] += 1 if venceu else 0
-            stats["destaques"] += 1 if destaque else 0
-            stats["nota_total"] += nota
-            stats["votos"] += 1
-            stats["pontos"] += gols * 3 + ass * 2 + (2 if venceu else 0) + (3 if destaque else 0) + nota
+                stats["nota_total"] += nota
+                stats["votos"] += 1
+                stats["pontos"] += nota
 
-            t = times.setdefault(time, {
-                "time_numero": time,
-                "vitorias_declaradas": 0,
-                "gols": 0,
-                "assistencias": 0,
-                "votos": 0
-            })
-            t["vitorias_declaradas"] += 1 if venceu else 0
-            t["gols"] += gols
-            t["assistencias"] += ass
-            t["votos"] += 1
+                t = times.setdefault(time, {
+                    "time_numero": time,
+                    "nota_total": 0.0,
+                    "votos": 0
+                })
+                t["nota_total"] += nota
+                t["votos"] += 1
 
-        ranking_jogadores = sorted(jogadores.values(), key=lambda x: (x["pontos"], x["gols"], x["assistencias"]), reverse=True)
-        ranking_times = sorted(times.values(), key=lambda x: (x["vitorias_declaradas"], x["gols"]), reverse=True)
+        ranking_jogadores = sorted(jogadores.values(), key=lambda x: (x["pontos"], x["votos"]), reverse=True)
+        ranking_times = sorted(times.values(), key=lambda x: (x["nota_total"], x["votos"]), reverse=True)
 
         melhor_jogador = ranking_jogadores[0] if ranking_jogadores else None
         melhor_time = ranking_times[0] if ranking_times else None
 
         for item in ranking_jogadores:
+            item["nota_media"] = round(item["nota_total"] / item["votos"], 2) if item["votos"] else 0
+
+        for item in ranking_times:
             item["nota_media"] = round(item["nota_total"] / item["votos"], 2) if item["votos"] else 0
 
         return {
@@ -283,33 +306,20 @@ class VotacaoService:
             votos = partida.get("votos", [])
             total_votos += len(votos)
             for voto in votos:
-                nome = voto.get("jogador_nome", "Jogador")
-                item = acumulado.setdefault(nome, {
-                    "jogador_nome": nome,
-                    "jogos": 0,
-                    "gols": 0,
-                    "assistencias": 0,
-                    "vitorias": 0,
-                    "destaques": 0,
-                    "nota_total": 0,
-                    "pontos": 0
-                })
+                for voto_jogador in voto.get("votos", []):
+                    nome = voto_jogador.get("jogador_nome", "Jogador")
+                    nota = self._normalizar_nota(voto_jogador.get("nota", 0))
+                    item = acumulado.setdefault(nome, {
+                        "jogador_nome": nome,
+                        "jogos": 0,
+                        "nota_total": 0.0,
+                        "pontos": 0.0
+                    })
+                    item["jogos"] += 1
+                    item["nota_total"] += nota
+                    item["pontos"] += nota
 
-                gols = int(voto.get("gols", 0))
-                ass = int(voto.get("assistencias", 0))
-                venceu = bool(voto.get("venceu", False))
-                destaque = bool(voto.get("destaque", False))
-                nota = int(voto.get("nota", 0))
-
-                item["jogos"] += 1
-                item["gols"] += gols
-                item["assistencias"] += ass
-                item["vitorias"] += 1 if venceu else 0
-                item["destaques"] += 1 if destaque else 0
-                item["nota_total"] += nota
-                item["pontos"] += gols * 3 + ass * 2 + (2 if venceu else 0) + (3 if destaque else 0) + nota
-
-        ranking = sorted(acumulado.values(), key=lambda x: (x["pontos"], x["gols"], x["assistencias"]), reverse=True)
+        ranking = sorted(acumulado.values(), key=lambda x: (x["pontos"], x["jogos"]), reverse=True)
         ranking = ranking[:max(1, int(limite))]
 
         for item in ranking:

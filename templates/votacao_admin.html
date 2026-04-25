@@ -6,8 +6,13 @@
 <div class="container" style="max-width: 1080px;">
     <header class="header">
         <div class="header-content">
+            {% if auth_user.role == 'juiz' %}
+            {% set brand_title = 'Painel do Juiz' %}
+            {% set brand_subtitle = 'Abra rodada, acompanhe votos e encerre quando quiser' %}
+            {% else %}
             {% set brand_title = 'Painel de Votacao' %}
             {% set brand_subtitle = 'Abra rodada, receba votos e apure ranking' %}
+            {% endif %}
             {% include '_brand_header.html' %}
         </div>
     </header>
@@ -17,6 +22,13 @@
             <div class="alert alert-warning"><strong>⚠️</strong> {{ erro }}</div>
         {% endif %}
 
+        {% if auth_user.role == 'juiz' %}
+            <section class="section">
+                <h2 class="section-title">🎮 Controle do Jogo</h2>
+                <p style="margin-bottom: 0;">Use esta área para abrir a votação depois de registrar o resultado, acompanhar os votos e encerrar/apurar quando quiser.</p>
+            </section>
+        {% endif %}
+
         <section class="section">
             <h2 class="section-title">🚀 Abrir rodada de votos</h2>
             <form method="post" action="{{ url_for('jogador.votacao_admin_criar') }}" class="form" style="max-width: 560px;">
@@ -24,7 +36,7 @@
                     <label class="form-label" for="titulo">Titulo</label>
                     <input class="form-input" id="titulo" name="titulo" type="text" placeholder="Ex: Rodada de sexta">
                 </div>
-                <button class="btn btn-primary" type="submit">Abrir votacao usando ultimo sorteio</button>
+                <button class="btn btn-primary" type="submit">{{ 'Abrir votação do jogo' if auth_user.role == 'juiz' else 'Abrir votacao usando ultimo sorteio' }}</button>
             </form>
         </section>
 
