@@ -117,6 +117,8 @@
                                         id="jogador_{{ jogador.id }}"
                                         class="jogador-checkbox"
                                         data-id="{{ jogador.id }}"
+                                        data-nivel="{{ jogador.nivel }}"
+                                        data-posicao="{{ jogador.posicao }}"
                                         data-nome="{{ jogador.nome }}"
                                         onchange="atualizarContador()"
                                         {% if jogador.presente %}checked{% endif %}
@@ -149,6 +151,8 @@
                                         id="jogador_{{ jogador.id }}"
                                         class="jogador-checkbox"
                                         data-id="{{ jogador.id }}"
+                                        data-nivel="{{ jogador.nivel }}"
+                                        data-posicao="{{ jogador.posicao }}"
                                         data-nome="{{ jogador.nome }}"
                                         onchange="atualizarContador()"
                                         {% if jogador.presente %}checked{% endif %}
@@ -180,6 +184,8 @@
                                     id="jogador_{{ jogador.id }}"
                                     class="jogador-checkbox"
                                     data-id="{{ jogador.id }}"
+                                    data-nivel="{{ jogador.nivel }}"
+                                    data-posicao="{{ jogador.posicao }}"
                                     data-nome="{{ jogador.nome }}"
                                     onchange="atualizarContador()"
                                     {% if jogador.presente %}checked{% endif %}
@@ -213,6 +219,8 @@
                 </div>
                 <div id="mensagemErro" class="alert alert-danger" style="display: none; margin-top: 1rem;"></div>
             </section>
+
+            <section id="offline-preview" class="section" style="display:none;"></section>
         </main>
 
         <!-- Modal de Sugestões -->
@@ -234,6 +242,16 @@
         </footer>
     </div>
 
+    <script src="{{ url_for('static', filename='offline-judge.js') }}"></script>
+    <script src="{{ url_for('static', filename='offline-judge.js') }}"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/service-worker.js')
+                    .catch(error => console.warn('[PWA] Erro ao registrar Service Worker:', error));
+            });
+        }
+    </script>
     <script>
         const QUANTIDADES_VALIDAS = [10, 15, 20];
         let quantidadeSelecionada = null;
@@ -442,10 +460,38 @@
             const checkboxes = document.querySelectorAll('.jogador-checkbox:checked');
             const ids = Array.from(checkboxes).map(cb => cb.getAttribute('data-id'));
             const msgErro = document.getElementById('mensagemErro');
+            const offline = window.NaTraveOffline && window.NaTraveOffline.isOffline();
             
             if (ids.length !== quantidadeSelecionada) {
                 msgErro.textContent = `❌ Selecione exatamente ${quantidadeSelecionada} jogadores`;
                 msgErro.style.display = 'block';
+                return;
+            }
+
+            if (offline) {
+                const jogadores = Array.from(checkboxes).map(cb => ({
+                    id: cb.getAttribute('data-id'),
+                    nome: cb.getAttribute('data-nome'),
+                    nivel: parseInt(cb.getAttribute('data-nivel') || '5', 10),
+                    posicao: cb.getAttribute('data-posicao') || 'linha'
+                }));
+
+                const preview = window.NaTraveOffline.gerarTimesLocalmente(jogadores, quantidadeSelecionada / 5);
+                window.NaTraveOffline.salvarSelecaoOffline({
+                    jogadores_ids: ids,
+                    quantidade: quantidadeSelecionada,
+                    jogadores: jogadores,
+                    preview: preview
+                });
+                window.NaTraveOffline.renderizarPreview(
+                    'offline-preview',
+                    preview,
+                    'Seleção salva localmente. Quando a internet voltar, a presença será sincronizada automaticamente.'
+                );
+                msgErro.textContent = '📴 Modo offline: sorteio salvo localmente nesta sessão.';
+                msgErro.className = 'alert alert-warning';
+                msgErro.style.display = 'block';
+                window.scrollTo({ top: document.getElementById('offline-preview').offsetTop - 20, behavior: 'smooth' });
                 return;
             }
             

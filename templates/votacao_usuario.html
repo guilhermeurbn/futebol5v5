@@ -98,6 +98,26 @@ document.querySelector('form')?.addEventListener('submit', function (e) {
         return;
     }
     if (aviso) aviso.style.display = 'none';
+
+    if (window.NaTraveOffline && window.NaTraveOffline.isOffline()) {
+        e.preventDefault();
+        const form = e.target;
+        const payload = new URLSearchParams(new FormData(form)).toString();
+        window.NaTraveOffline.queueFormSubmission({
+            label: 'Voto da partida',
+            url: form.action,
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+            body: payload,
+            kind: 'votacao_usuario'
+        }).then(() => {
+            if (aviso) {
+                aviso.textContent = '📴 Voto salvo localmente. Ele será sincronizado quando a internet voltar.';
+                aviso.style.display = 'block';
+                aviso.className = 'alert alert-warning';
+            }
+        });
+    }
 });
 </script>
 {% endblock %}

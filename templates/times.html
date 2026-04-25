@@ -361,6 +361,15 @@
         </footer>
     </div>
 
+    <script src="{{ url_for('static', filename='offline-judge.js') }}"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/service-worker.js')
+                    .catch(error => console.warn('[PWA] Erro ao registrar Service Worker:', error));
+            });
+        }
+    </script>
     <script>
     // Carregar status de undo/redo ao iniciar
     function atualizarStatusUndoRedo() {
