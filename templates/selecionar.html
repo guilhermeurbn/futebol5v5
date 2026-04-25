@@ -483,6 +483,14 @@
                     jogadores: jogadores,
                     preview: preview
                 });
+                window.NaTraveOffline.queueFormSubmission({
+                    label: 'Presença do sorteio',
+                    url: '/api/presenca',
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({jogador_ids: ids}),
+                    kind: 'presenca'
+                });
                 window.NaTraveOffline.renderizarPreview(
                     'offline-preview',
                     preview,
@@ -513,7 +521,34 @@
                 }
             })
             .catch(err => {
-                msgErro.textContent = '❌ Erro ao processar seleção';
+                const jogadores = Array.from(checkboxes).map(cb => ({
+                    id: cb.getAttribute('data-id'),
+                    nome: cb.getAttribute('data-nome'),
+                    nivel: parseInt(cb.getAttribute('data-nivel') || '5', 10),
+                    posicao: cb.getAttribute('data-posicao') || 'linha'
+                }));
+                const preview = window.NaTraveOffline.gerarTimesLocalmente(jogadores, quantidadeSelecionada / 5);
+                window.NaTraveOffline.salvarSelecaoOffline({
+                    jogadores_ids: ids,
+                    quantidade: quantidadeSelecionada,
+                    jogadores: jogadores,
+                    preview: preview
+                });
+                window.NaTraveOffline.queueFormSubmission({
+                    label: 'Presença do sorteio',
+                    url: '/api/presenca',
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({jogador_ids: ids}),
+                    kind: 'presenca'
+                });
+                window.NaTraveOffline.renderizarPreview(
+                    'offline-preview',
+                    preview,
+                    'A conexão caiu durante o envio. A seleção foi preservada e será sincronizada automaticamente.'
+                );
+                msgErro.textContent = '📴 Conexão instável: seleção salva localmente.';
+                msgErro.className = 'alert alert-warning';
                 msgErro.style.display = 'block';
             });
         }

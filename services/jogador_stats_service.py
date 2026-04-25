@@ -5,7 +5,7 @@ Rastreia gols, assistências, cartões, vitórias e muito mais de cada jogador
 import json
 import os
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 from collections import defaultdict
 
 
@@ -38,6 +38,37 @@ class JogadorStatsService:
                 return json.load(f)
         except (json.JSONDecodeError, FileNotFoundError):
             return []
+
+    def _resultado_por_time(self, partida: dict, time_numero: Optional[int]) -> str:
+        """Calcula resultado (vitória/empate/derrota) para um time em uma partida."""
+        if not time_numero:
+            return "empate"
+
+        for item in partida.get("times_desempenho", []) or []:
+            if int(item.get("time_numero", 0) or 0) != int(time_numero):
+                continue
+            if int(item.get("vitorias", 0) or 0) > 0:
+                return "vitória"
+            if int(item.get("derrotas", 0) or 0) > 0:
+                return "derrota"
+            return "empate"
+
+        time_vencedor = partida.get("time_vencedor")
+        if not time_vencedor:
+            return "empate"
+        if int(time_numero) == int(time_vencedor):
+            return "vitória"
+
+        gols_times = partida.get("gols_times", []) or []
+        indice = int(time_numero) - 1
+        if 0 <= indice < len(gols_times):
+            meu_placar = gols_times[indice]
+            if any(g > meu_placar for idx, g in enumerate(gols_times) if idx != indice):
+                return "derrota"
+            if any(g == meu_placar for idx, g in enumerate(gols_times) if idx != indice):
+                return "empate"
+
+        return "derrota"
     
     def obter_stats_jogador(self, nome_jogador: str) -> Dict:
         """
@@ -191,20 +222,11 @@ class JogadorStatsService:
         
         for detalhe in jogadores_detalhes:
             if detalhe.get("nome") == nome_jogador:
-                # Determinar resultado da partida para este jogador
                 time_numero = detalhe.get("time_numero")
-                time_vencedor = partida.get("time_vencedor")
-                
-                resultado = "derrota"
-                if time_numero == time_vencedor:
-                    resultado = "vitória"
-                elif partida.get("gols_times", []) and \
-                     len(partida.get("gols_times")) >= time_numero:
-                    gols_time = partida["gols_times"][time_numero - 1]
-                    # Podemos adicionar lógica para detectar empate se houver dados
-                
-                detalhe["resultado"] = resultado
-                return detalhe
+                resultado = self._resultado_por_time(partida, time_numero)
+                dados = dict(detalhe)
+                dados["resultado"] = resultado
+                return dados
         
         # Se não houver detalhes específicos, tentar encontrar o jogador no sorteio
         if sorteio:
@@ -215,11 +237,7 @@ class JogadorStatsService:
                     if jogador.get('nome') == nome_jogador:
                         # Encontrou o jogador neste time
                         time_numero = time_idx + 1
-                        time_vencedor = partida.get("time_vencedor")
-                        
-                        resultado = "derrota"
-                        if time_numero == time_vencedor:
-                            resultado = "vitória"
+                        resultado = self._resultado_por_time(partida, time_numero)
                         
                         return {
                             "gols": 0,

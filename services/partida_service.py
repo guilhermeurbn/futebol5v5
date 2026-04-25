@@ -37,6 +37,22 @@ class PartidaService:
         """Salva dados"""
         with open(self.arquivo, "w", encoding="utf-8") as f:
             json.dump(dados, f, indent=2, ensure_ascii=False)
+
+    def _garantir_stats_time(self, placar: Dict, time_numero: int) -> None:
+        """Garante estrutura padrão de estatísticas para um time."""
+        chave = f"time_{time_numero}"
+        if chave not in placar:
+            placar[chave] = {"vitórias": 0, "empates": 0, "derrotas": 0}
+
+    def _diferenca_placar(self, gols_times: List[int]) -> int:
+        """Calcula a maior diferença de gols entre quaisquer dois times."""
+        if len(gols_times) < 2:
+            return 0
+        diferencas = []
+        for i, gols_a in enumerate(gols_times):
+            for gols_b in gols_times[i + 1:]:
+                diferencas.append(abs(gols_a - gols_b))
+        return max(diferencas, default=0)
     
     def registrar_resultado(self, sorteio_id: int, time_vencedor: int,
                            gols_times: List[int], notas: str = "",
@@ -110,7 +126,7 @@ class PartidaService:
         for partida in partidas:
             gols = partida.get('gols_times', [])
             if len(gols) >= 2:
-                diferenca = abs(gols[0] - gols[1])
+                diferenca = self._diferenca_placar(gols)
                 if diferenca > maior_diferenca:
                     maior_diferenca = diferenca
                     maior_placar = {
@@ -146,16 +162,30 @@ class PartidaService:
         placar = {}
         
         for partida in partidas:
+            desempenho = partida.get('times_desempenho') or []
+            if desempenho:
+                for item in desempenho:
+                    time_numero = int(item.get('time_numero', 0) or 0)
+                    if time_numero <= 0:
+                        continue
+                    self._garantir_stats_time(placar, time_numero)
+                    chave = f"time_{time_numero}"
+                    placar[chave]["vitórias"] += int(item.get('vitorias', 0) or 0)
+                    placar[chave]["empates"] += int(item.get('empates', 0) or 0)
+                    placar[chave]["derrotas"] += int(item.get('derrotas', 0) or 0)
+                continue
+
             time_venc = partida.get('time_vencedor')
             num_times = len(partida.get('gols_times', []))
-            
-            # Inicializar times se não existem
+
             for i in range(1, num_times + 1):
-                time_key = f"time_{i}"
-                if time_key not in placar:
-                    placar[time_key] = {"vitórias": 0, "derrotas": 0}
-            
-            # Contar vitória/derrota
+                self._garantir_stats_time(placar, i)
+
+            if not time_venc:
+                for i in range(1, num_times + 1):
+                    placar[f"time_{i}"]["empates"] += 1
+                continue
+
             for i in range(1, num_times + 1):
                 time_key = f"time_{i}"
                 if i == time_venc:

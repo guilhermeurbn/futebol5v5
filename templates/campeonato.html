@@ -98,7 +98,7 @@
         {% if placar_geral %}
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                 {% for time, stats in placar_geral|dictsort %}
-                    {% set total = stats.get('vitórias', 0) + stats.get('derrotas', 0) %}
+                    {% set total = stats.get('vitórias', 0) + stats.get('empates', 0) + stats.get('derrotas', 0) %}
                     {% if total > 0 %}
                         {% set taxa = (stats.get('vitórias', 0) / total * 100)|round(1) %}
                     {% else %}
@@ -106,10 +106,14 @@
                     {% endif %}
                     <div style="background: rgba(102, 126, 234, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #667eea;">
                         <div style="font-weight: bold; margin-bottom: 10px; font-size: 16px;">{{ time|upper }}</div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
                             <div style="text-align: center; padding: 10px; background: rgba(76, 175, 80, 0.2); border-radius: 6px;">
                                 <div style="font-size: 12px; opacity: 0.7;">Vitórias</div>
                                 <div style="font-size: 24px; font-weight: bold; color: #4caf50;">{{ stats.get('vitórias', 0) }}</div>
+                            </div>
+                            <div style="text-align: center; padding: 10px; background: rgba(255, 193, 7, 0.2); border-radius: 6px;">
+                                <div style="font-size: 12px; opacity: 0.7;">Empates</div>
+                                <div style="font-size: 24px; font-weight: bold; color: #ffc107;">{{ stats.get('empates', 0) }}</div>
                             </div>
                             <div style="text-align: center; padding: 10px; background: rgba(244, 67, 54, 0.2); border-radius: 6px;">
                                 <div style="font-size: 12px; opacity: 0.7;">Derrotas</div>

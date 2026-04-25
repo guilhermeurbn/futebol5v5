@@ -149,6 +149,16 @@ class VotacaoService:
             raise ValueError("Partida nao encontrada")
         if alvo.get("status") != "aberta":
             raise ValueError("Partida ja encerrada")
+        if not user_id:
+            raise ValueError("Usuario invalido para votar")
+
+        participante_user_ids = {
+            p.get("user_id")
+            for p in alvo.get("participantes", [])
+            if p.get("user_id")
+        }
+        if user_id not in participante_user_ids:
+            raise ValueError("Apenas participantes da partida podem votar")
 
         obrigatorios = votos_obrigatorios or []
         extras = votos_extras or []

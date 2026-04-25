@@ -15,6 +15,15 @@
     localStorage.setItem(key, JSON.stringify(value));
   }
 
+  function escapeHtml(value) {
+    return String(value || '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
+  }
+
   function isOffline() {
     return typeof navigator !== 'undefined' && navigator.onLine === false;
   }
@@ -108,8 +117,7 @@
     const ordenados = outros.sort((a, b) => (Number(b.nivel) || 0) - (Number(a.nivel) || 0));
 
     ordenados.forEach(jogador => {
-      times.sort((a, b) => a.soma - b.soma);
-      const alvo = times[0];
+      const alvo = times.reduce((menor, atual) => (atual.soma < menor.soma ? atual : menor), times[0]);
       const nivel = Number(jogador.nivel) || 0;
       alvo.jogadores.push(jogador);
       alvo.soma += nivel;
@@ -140,7 +148,7 @@
     preview.times.forEach(time => {
       html += `<div class="team"><div class="team-header"><h3 class="team-title">Time ${time.numero}</h3><span class="team-score">${time.soma}</span></div><div class="players-list">`;
       time.jogadores.forEach(jogador => {
-        html += `<div class="player-item"><span class="player-name">${jogador.nome}</span><span class="player-level">N${jogador.nivel || 0}</span></div>`;
+        html += `<div class="player-item"><span class="player-name">${escapeHtml(jogador.nome)}</span><span class="player-level">N${jogador.nivel || 0}</span></div>`;
       });
       html += '</div></div>';
     });
