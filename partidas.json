@@ -71,5 +71,30 @@
         "derrotas": 0
       }
     ]
+  },
+  {
+    "id": 5,
+    "sorteio_id": 9,
+    "data": "2026-04-25T02:07:59.361963",
+    "time_vencedor": 1,
+    "gols_times": [
+      0,
+      0
+    ],
+    "notas": "",
+    "times_desempenho": [
+      {
+        "time_numero": 1,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 0
+      },
+      {
+        "time_numero": 2,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 0
+      }
+    ]
   }
 ]

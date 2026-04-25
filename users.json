@@ -151,5 +151,23 @@
     "role": "juiz",
     "criado_em": "2026-04-25T01:47:41.394948",
     "ativo": true
+  },
+  {
+    "id": "e6b93c78-53dd-4268-aef2-2b9637db6415",
+    "username": "superadmin",
+    "nome": "Super Administrador",
+    "password_hash": "scrypt:32768:8:1$X33sN8ewHlhklCcN$2de2efbf614aea0e5bfb0618dcabf8226fa37b44b80208ca0d5ca1d3f8e13abed756c97d087f152e3aec8c07091f40480ecbe204788c9d7a800dff1f879a7f48",
+    "role": "super_admin",
+    "criado_em": "2026-04-25T02:06:25.620600",
+    "ativo": true
+  },
+  {
+    "id": "f056d508-d7bd-4d45-8a9d-563c932d5445",
+    "username": "adminjogos",
+    "nome": "Admin de Jogos",
+    "password_hash": "scrypt:32768:8:1$VgUyVtyiCZTPt8uL$f5e86def647fe4c534267da331d3d6e5ebc3f88196205e915f8981ed2ea2149a7148720e833c19305c48b05d050b8b8f37f28aecad6c69b0d528508111d56d0b",
+    "role": "admin",
+    "criado_em": "2026-04-25T02:06:25.689534",
+    "ativo": true
   }
 ]
