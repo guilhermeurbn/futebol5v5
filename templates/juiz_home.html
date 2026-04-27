@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Painel do Juiz{% endblock %}
+
+{% block content %}
+<div class="container page-container-wide">
+    <header class="header">
+        <div class="header-content">
+            {% set brand_title = 'Painel do Juiz' %}
+            {% set brand_subtitle = 'Crie a próxima partida e acompanhe o elenco disponível' %}
+            {% include '_brand_header.html' %}
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="section">
+            <div class="surface-panel surface-panel--soft" style="text-align: center;">
+                <div class="section-label">Início da rodada</div>
+                <h2 class="section-title" style="margin-top: 0;">Criar Partida</h2>
+                <p style="max-width: 720px; margin: 0 auto 1.25rem;">Quando você iniciar uma nova partida, o sistema vai levar o fluxo até seleção, sorteio, resultado, votação e encerramento sem te deixar perder a etapa atual.</p>
+                <form method="post" action="{{ url_for('jogador.juiz_criar_partida') }}">
+                    <button class="btn btn-primary btn-large" type="submit">Criar Partida</button>
+                </form>
+            </div>
+        </section>
+
+        {% if ultima_partida %}
+        <section class="section">
+            <h2 class="section-title">🏁 Última Partida Encerrada</h2>
+            <div class="surface-panel surface-panel--accent">
+                <div class="player-details" style="margin-bottom: 1rem;">
+                    <span>{{ ultima_partida.titulo or 'Partida encerrada' }}</span>
+                    {% if ultima_partida.sorteio_id %}
+                    <span>Sorteio #{{ ultima_partida.sorteio_id }}</span>
+                    {% endif %}
+                    <span>Total de votos: {{ ultima_partida.total_votos or 0 }}</span>
+                </div>
+
+                {% if ultima_partida.resultado_resumido %}
+                <div class="summary-grid" style="margin-bottom: 1rem;">
+                    {% for time in ultima_partida.resultado_resumido %}
+                    <div class="summary-card summary-card--secondary">
+                        <div class="summary-card__label">Time {{ time.time_numero }}</div>
+                        <div class="summary-card__value">{{ time.gols }} gol{{ '' if time.gols == 1 else 's' }}</div>
+                        <div class="summary-card__subtext">{{ time.vitorias }}V {{ time.empates }}E {{ time.derrotas }}D</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Melhor Jogador</div>
+                        <div class="stat-value" style="font-size: 1.15rem;">{{ ultima_partida.melhor_jogador.jogador_nome if ultima_partida.melhor_jogador else 'N/D' }}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Melhor Time</div>
+                        <div class="stat-value" style="font-size: 1.15rem;">{% if ultima_partida.melhor_time %}Time {{ ultima_partida.melhor_time.time_numero }}{% else %}N/D{% endif %}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Pendentes</div>
+                        <div class="stat-value">{{ ultima_partida.pendentes|length }}</div>
+                    </div>
+                </div>
+
+                {% if ultima_partida.ranking_top5 %}
+                <div class="table-shell" style="margin-top: 1rem;">
+                    <table class="uniform-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Jogador</th>
+                                <th>Time</th>
+                                <th>Votos</th>
+                                <th>Média</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in ultima_partida.ranking_top5 %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ item.jogador_nome }}</td>
+                                <td>Time {{ item.time_numero }}</td>
+                                <td>{{ item.votos }}</td>
+                                <td>{{ item.nota_media }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+        {% endif %}
+
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title">👥 Perfis dos Jogadores</h2>
+                <span class="badge badge-primary">{{ total_jogadores }} cadastrados</span>
+            </div>
+
+            {% if todos_jogadores %}
+            <div class="players-grid">
+                {% for jogador in todos_jogadores %}
+                <a class="player-card" href="{{ url_for('jogador.perfil_jogador_publico', jogador_id=jogador.id) }}" style="text-decoration: none; color: inherit;">
+                    <div class="player-info">
+                        <h3 class="player-name">{{ jogador.nome }}</h3>
+                        <span class="badge {% if jogador.posicao == 'goleiro' %}badge-warning{% else %}badge-success{% endif %}">
+                            {% if jogador.posicao == 'goleiro' %}🧤 Goleiro{% else %}⚽ Linha{% endif %}
+                        </span>
+                    </div>
+                    <div class="player-details">
+                        <span>Nível {{ jogador.nivel }}</span>
+                        <span>{% if jogador.tipo == 'fixo' %}⭐ Fixo{% else %}👤 Avulso{% endif %}</span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">👥</div>
+                <p>Nenhum jogador cadastrado ainda.</p>
+            </div>
+            {% endif %}
+        </section>
+    </main>
+</div>
+{% endblock %}

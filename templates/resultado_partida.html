@@ -336,7 +336,7 @@ document.getElementById('btn-registrar').addEventListener('click', function() {
         if (data.sucesso) {
             mostrarMensagem('✅ Resultado e estatísticas registrados com sucesso!');
             setTimeout(() => {
-                window.location.href = '{{ url_for("jogador.ver_sorteio", sorteio_id=sorteio_id) }}';
+                window.location.href = data.proximo_passo_url || '{{ url_for("jogador.votacao_admin_page", sorteio_id=sorteio_id) }}';
             }, 1500);
         } else {
             if (window.NaTraveOffline && window.NaTraveOffline.isOffline()) {

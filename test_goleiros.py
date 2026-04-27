@@ -73,6 +73,7 @@ def test_validacao():
     print(f"\nValidação: {'✅ OK' if valido else '❌ FALHOU'} - {msg if msg else 'Válido'}")
     
     assert valido, msg
+    return True
 
 
 def test_simulated_annealing():
@@ -95,6 +96,7 @@ def test_simulated_annealing():
     print(f"Diferença máxima: {max(somas) - min(somas)} pts")
     
     assert len(times_linha) == num_times
+    return True
 
 
 def test_sorteio_com_goleiros():
@@ -127,11 +129,59 @@ def test_sorteio_com_goleiros():
         print(f"📊 Melhor time: {BalanceadorTimes.obter_melhor_time(somas)}")
         
         assert len(times) == BalanceadorTimes.calcular_numero_times(len(jogadores))
+        return True
     except Exception as e:
         print(f"❌ Erro: {e}")
         import traceback
         traceback.print_exc()
         raise
+
+
+def test_sorteio_com_goleiros_insuficientes():
+    """Valida se a falta de goleiros ainda mantém os times bem equilibrados."""
+    print("\n" + "="*60)
+    print("🧪 TESTE 4: GOLEIROS INSUFICIENTES")
+    print("="*60)
+
+    random_data = [
+        ("Goleiro 1", 9, "goleiro"),
+        ("Linha 1", 10, "linha"),
+        ("Linha 2", 9, "linha"),
+        ("Linha 3", 8, "linha"),
+        ("Linha 4", 7, "linha"),
+        ("Linha 5", 6, "linha"),
+        ("Linha 6", 5, "linha"),
+        ("Linha 7", 4, "linha"),
+        ("Linha 8", 3, "linha"),
+        ("Linha 9", 2, "linha"),
+    ]
+
+    jogadores = []
+    for nome, nivel, posicao in random_data:
+        jogadores.append(Jogador(
+            nome=nome,
+            nivel=nivel,
+            tipo="avulso",
+            posicao=posicao,
+            presente=True,
+            id=str(uuid.uuid4()),
+            criado_em=datetime.now().isoformat()
+        ))
+
+    times, somas, tem_aviso, aviso_msg = BalanceadorTimes.sortear_multiplos_times_com_goleiros(jogadores)
+    diferenca = BalanceadorTimes.calcular_diferenca_multiplos(somas)
+    goleiros_por_time = [sum(1 for j in time if j.posicao == "goleiro") for time in times]
+
+    print(f"\nPontuações: {somas}")
+    print(f"Goleiros por time: {goleiros_por_time}")
+    print(f"Diferença máxima: {diferenca} pts")
+    print(f"Aviso: {aviso_msg}")
+
+    assert tem_aviso
+    assert "Faltam" in aviso_msg
+    assert sorted(goleiros_por_time) == [0, 1]
+    assert diferenca <= 1
+    return True
 
 
 def main():
@@ -143,6 +193,7 @@ def main():
         test_validacao,
         test_simulated_annealing,
         test_sorteio_com_goleiros,
+        test_sorteio_com_goleiros_insuficientes,
     ]
     
     resultados = []

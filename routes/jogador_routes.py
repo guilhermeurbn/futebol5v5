@@ -1630,7 +1630,17 @@ def resultado_partida_page(sorteio_id):
     
     if not sorteio:
         return render_template('historico.html', sorteios=[], erro="Sorteio não encontrado"), 404
-    
+    # Verifica se há uma votação associada já encerrada ou se já existe resultado registrado
+    partida_votacao = _obter_partida_votacao_do_sorteio(sorteio)
+    resultado = _obter_resultado_sorteio(sorteio_id)
+    if partida_votacao and partida_votacao.get('status') == 'encerrada':
+        # Redireciona para a página de detalhes do sorteio (onde o botão estará oculto)
+        return ver_sorteio(sorteio_id)
+
+    if resultado:
+        # Já existe resultado registrado -> não permitir nova gravação via página
+        return ver_sorteio(sorteio_id)
+
     return render_template(
         'resultado_partida.html',
         sorteio=sorteio,

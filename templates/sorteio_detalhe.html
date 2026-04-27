@@ -61,7 +61,11 @@
                 <div class="surface-panel surface-panel--soft">
                     <div class="section-label">Rodada conectada</div>
                     <div class="actions-section" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px;">
+                        {# Só permite registrar resultado se a rodada não estiver encerrada e ainda não houver resultado registrado #}
+                        {% if (not partida_votacao or partida_votacao.status != 'encerrada') and not resultado_partida %}
                         <a href="{{ url_for('jogador.resultado_partida_page', sorteio_id=sorteio.id) }}" class="btn btn-primary">🏆 Registrar resultado</a>
+                        {% endif %}
+
                         {% if not partida_votacao or partida_votacao.status == 'aberta' %}
                         <form method="post" action="{{ url_for('jogador.votacao_admin_criar') }}">
                             <input type="hidden" name="sorteio_id" value="{{ sorteio.id }}">
@@ -73,6 +77,7 @@
                             Esta rodada já foi encerrada. Não é possível iniciar outra votação.
                         </div>
                         {% endif %}
+
                         <a href="{{ url_for('jogador.votacao_admin_page', sorteio_id=sorteio.id) }}" class="btn btn-secondary">📋 Ver painel da rodada</a>
                     </div>
                 </div>

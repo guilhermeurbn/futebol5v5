@@ -376,6 +376,9 @@ class VotacaoService:
                 return voto
         return None
 
+    def obter_partida(self, partida_id: int) -> Optional[Dict]:
+        return self._find_partida(partida_id)
+
     def encerrar_e_apurar(self, partida_id: int, encerrado_por: str) -> Dict:
         dados = self._carregar()
         self._encerrar_expiradas_em_dados(dados)

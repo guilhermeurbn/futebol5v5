@@ -1,0 +1,114 @@
+{
+  "status": "idle",
+  "partida_atual": null,
+  "ultima_partida_encerrada": {
+    "titulo": "rodada  teste 6",
+    "sorteio_id": 6,
+    "partida_id": 6,
+    "encerrado_em": "2026-04-27T18:33:05.598592",
+    "resultado_resumido": [
+      {
+        "time_numero": 1,
+        "gols": 1,
+        "vitorias": 1,
+        "empates": 1,
+        "derrotas": 1,
+        "resultado": "vitoria"
+      },
+      {
+        "time_numero": 2,
+        "gols": 11,
+        "vitorias": 0,
+        "empates": 1,
+        "derrotas": 1,
+        "resultado": "derrota"
+      }
+    ],
+    "melhor_jogador": null,
+    "melhor_time": null,
+    "total_votos": 0,
+    "pendentes": [
+      {
+        "user_id": "ffa930b7-8e0d-48bc-ae5d-1ae6ad9e29ab",
+        "username": "marquinhos",
+        "nome_usuario": "Marquinhos",
+        "jogador_nome": "Marquinhos",
+        "time_numero": 1,
+        "externo": false
+      },
+      {
+        "user_id": "e2403749-1944-4719-bf4c-ff686fe0618e",
+        "username": "ramon",
+        "nome_usuario": "ramon",
+        "jogador_nome": "ramon",
+        "time_numero": 1,
+        "externo": false
+      },
+      {
+        "user_id": "0e116d68-e35c-4374-83c7-247388bda201",
+        "username": "lucas",
+        "nome_usuario": "Lucas Teixeira",
+        "jogador_nome": "Lucas Teixeira",
+        "time_numero": 1,
+        "externo": false
+      },
+      {
+        "user_id": "709d90a0-60b7-4498-bc8b-757de4a21359",
+        "username": "carlos",
+        "nome_usuario": "Carlos atacante",
+        "jogador_nome": "Carlos atacante",
+        "time_numero": 1,
+        "externo": false
+      },
+      {
+        "user_id": "e6edcf85-241e-417a-b4b6-93a615145ca1",
+        "username": "",
+        "nome_usuario": "",
+        "jogador_nome": "milena",
+        "time_numero": 1,
+        "externo": true
+      },
+      {
+        "user_id": "cf358a50-e035-4292-8bf6-df5a877b1334",
+        "username": "bacatela",
+        "nome_usuario": "bacatela",
+        "jogador_nome": "bacatela",
+        "time_numero": 2,
+        "externo": false
+      },
+      {
+        "user_id": "7dd9fe14-1c78-408f-8ddf-2103a9988072",
+        "username": "lucas2",
+        "nome_usuario": "Lucas ramos",
+        "jogador_nome": "Lucas ramos",
+        "time_numero": 2,
+        "externo": false
+      },
+      {
+        "user_id": "f6624f6a-6998-4164-80a5-90018a3c5e99",
+        "username": "luan",
+        "nome_usuario": "luan",
+        "jogador_nome": "luan",
+        "time_numero": 2,
+        "externo": false
+      },
+      {
+        "user_id": "6d4b7295-4e45-484a-b5f3-b89b1c144e80",
+        "username": "alex",
+        "nome_usuario": "Alex",
+        "jogador_nome": "Alex",
+        "time_numero": 2,
+        "externo": false
+      },
+      {
+        "user_id": "b128d399-ef95-47df-ba62-d46c2339089d",
+        "username": "netao",
+        "nome_usuario": "netao",
+        "jogador_nome": "netao",
+        "time_numero": 2,
+        "externo": false
+      }
+    ],
+    "ranking_top5": []
+  }
+}

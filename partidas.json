@@ -1,56 +1,72 @@
 [
   {
     "id": 1,
-    "sorteio_id": 94,
-    "data": "2026-04-23T11:01:41.739272",
+    "sorteio_id": 1,
+    "data": "2026-04-27T17:31:18.631758",
     "time_vencedor": 2,
     "gols_times": [
-      10,
-      11
-    ],
-    "notas": "time 2 jogou melhor"
-  },
-  {
-    "id": 2,
-    "sorteio_id": 131,
-    "data": "2026-04-23T12:04:35.276230",
-    "time_vencedor": 3,
-    "gols_times": [
-      10,
-      9,
-      12
-    ],
-    "notas": "bom jogo"
-  },
-  {
-    "id": 3,
-    "sorteio_id": 5,
-    "data": "2026-04-25T01:24:58.439514",
-    "time_vencedor": 1,
-    "gols_times": [
-      7,
-      2
+      2,
+      3,
+      3
     ],
     "notas": "",
     "times_desempenho": [
       {
         "time_numero": 1,
-        "vitorias": 3,
-        "empates": 1,
+        "vitorias": 1,
+        "empates": 2,
         "derrotas": 2
       },
       {
         "time_numero": 2,
-        "vitorias": 0,
-        "empates": 1,
+        "vitorias": 2,
+        "empates": 2,
         "derrotas": 2
+      },
+      {
+        "time_numero": 3,
+        "vitorias": 2,
+        "empates": 1,
+        "derrotas": 3
       }
     ]
   },
   {
-    "id": 4,
-    "sorteio_id": 6,
-    "data": "2026-04-25T01:31:57.351485",
+    "id": 2,
+    "sorteio_id": 2,
+    "data": "2026-04-27T17:38:56.698349",
+    "time_vencedor": 3,
+    "gols_times": [
+      2,
+      2,
+      413
+    ],
+    "notas": "",
+    "times_desempenho": [
+      {
+        "time_numero": 1,
+        "vitorias": 1,
+        "empates": 1,
+        "derrotas": 1
+      },
+      {
+        "time_numero": 2,
+        "vitorias": 3,
+        "empates": 2,
+        "derrotas": 4123
+      },
+      {
+        "time_numero": 3,
+        "vitorias": 2,
+        "empates": 3,
+        "derrotas": 3
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "sorteio_id": 3,
+    "data": "2026-04-27T17:44:55.414726",
     "time_vencedor": 1,
     "gols_times": [
       0,
@@ -66,6 +82,38 @@
       },
       {
         "time_numero": 2,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 0
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "sorteio_id": 4,
+    "data": "2026-04-27T17:58:53.669079",
+    "time_vencedor": 1,
+    "gols_times": [
+      0,
+      0,
+      0
+    ],
+    "notas": "",
+    "times_desempenho": [
+      {
+        "time_numero": 1,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 0
+      },
+      {
+        "time_numero": 2,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 0
+      },
+      {
+        "time_numero": 3,
         "vitorias": 0,
         "empates": 0,
         "derrotas": 0
@@ -74,10 +122,11 @@
   },
   {
     "id": 5,
-    "sorteio_id": 9,
-    "data": "2026-04-25T02:07:59.361963",
+    "sorteio_id": 4,
+    "data": "2026-04-27T18:02:22.702233",
     "time_vencedor": 1,
     "gols_times": [
+      0,
       0,
       0
     ],
@@ -94,50 +143,56 @@
         "vitorias": 0,
         "empates": 0,
         "derrotas": 0
+      },
+      {
+        "time_numero": 3,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 0
       }
     ]
   },
   {
     "id": 6,
-    "sorteio_id": 16,
-    "data": "2026-04-26T22:44:48.415193",
-    "time_vencedor": 3,
+    "sorteio_id": 4,
+    "data": "2026-04-27T18:03:12.634454",
+    "time_vencedor": 1,
     "gols_times": [
-      2,
-      3,
-      4
+      0,
+      0,
+      0
     ],
     "notas": "",
     "times_desempenho": [
       {
         "time_numero": 1,
-        "vitorias": 1,
-        "empates": 2,
-        "derrotas": 1
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 0
       },
       {
         "time_numero": 2,
-        "vitorias": 2,
-        "empates": 4,
-        "derrotas": 1
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 0
       },
       {
         "time_numero": 3,
-        "vitorias": 2,
-        "empates": 1,
-        "derrotas": 2
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 0
       }
     ]
   },
   {
     "id": 7,
-    "sorteio_id": 18,
-    "data": "2026-04-27T00:54:52.260000",
-    "time_vencedor": 3,
+    "sorteio_id": 4,
+    "data": "2026-04-27T18:18:28.502852",
+    "time_vencedor": 1,
     "gols_times": [
-      3,
-      7,
-      10
+      0,
+      0,
+      0
     ],
     "notas": "",
     "times_desempenho": [
@@ -163,51 +218,90 @@
   },
   {
     "id": 8,
-    "sorteio_id": 19,
-    "data": "2026-04-27T01:08:54.365716",
-    "time_vencedor": 1,
+    "sorteio_id": 4,
+    "data": "2026-04-27T18:22:04.679906",
+    "time_vencedor": 2,
     "gols_times": [
       1,
-      0
+      3,
+      3
     ],
-    "notas": "",
+    "notas": "3",
     "times_desempenho": [
       {
         "time_numero": 1,
-        "vitorias": 0,
-        "empates": 0,
-        "derrotas": 0
+        "vitorias": 2,
+        "empates": 2,
+        "derrotas": 3
       },
       {
         "time_numero": 2,
-        "vitorias": 0,
-        "empates": 0,
-        "derrotas": 0
+        "vitorias": 3,
+        "empates": 3,
+        "derrotas": 3
+      },
+      {
+        "time_numero": 3,
+        "vitorias": 3,
+        "empates": 3,
+        "derrotas": 3
       }
     ]
   },
   {
     "id": 9,
-    "sorteio_id": 21,
-    "data": "2026-04-27T01:19:46.627073",
+    "sorteio_id": 5,
+    "data": "2026-04-27T18:25:43.298988",
     "time_vencedor": 2,
     "gols_times": [
-      2,
-      4
+      1,
+      1,
+      1
     ],
-    "notas": "",
+    "notas": "bom jogo",
     "times_desempenho": [
       {
         "time_numero": 1,
-        "vitorias": 0,
-        "empates": 0,
-        "derrotas": 0
+        "vitorias": 1,
+        "empates": 1,
+        "derrotas": 1
+      },
+      {
+        "time_numero": 2,
+        "vitorias": 1,
+        "empates": 1,
+        "derrotas": 1
+      },
+      {
+        "time_numero": 3,
+        "vitorias": 1,
+        "empates": 1,
+        "derrotas": 1
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "sorteio_id": 6,
+    "data": "2026-04-27T18:32:24.522751",
+    "time_vencedor": 2,
+    "gols_times": [
+      1,
+      11
+    ],
+    "notas": "1",
+    "times_desempenho": [
+      {
+        "time_numero": 1,
+        "vitorias": 1,
+        "empates": 1,
+        "derrotas": 1
       },
       {
         "time_numero": 2,
         "vitorias": 0,
-        "empates": 0,
-        "derrotas": 0
+        "empates": 1,
+        "derrotas": 1
       }
     ]
   }

@@ -18,6 +18,102 @@ class BalanceadorTimes:
     TAMANHO_TIME = 5  # 5 jogadores por time
 
     @staticmethod
+    def _soma_time(time: List[Jogador]) -> int:
+        return sum(j.nivel for j in time)
+
+    @staticmethod
+    def _contar_goleiros(time: List[Jogador]) -> int:
+        return sum(1 for j in time if j.posicao == "goleiro")
+
+    @staticmethod
+    def _limites_goleiros(num_goleiros: int, num_times: int) -> Tuple[int, int]:
+        if num_times <= 0:
+            return 0, 0
+        minimo = num_goleiros // num_times
+        maximo = math.ceil(num_goleiros / num_times)
+        return minimo, maximo
+
+    @staticmethod
+    def _calcular_energia_balanceada(times: List[List[Jogador]], num_goleiros: int) -> float:
+        """
+        Calcula energia combinando equilíbrio de nível e distribuição válida de goleiros.
+
+        A penalidade de goleiros é propositalmente alta para impedir distribuições
+        "estranhas" como um time com 2 goleiros enquanto outro fica sem, quando isso
+        não é necessário.
+        """
+        if not times:
+            return 0
+
+        somas = [BalanceadorTimes._soma_time(time) for time in times]
+        diferenca = max(somas) - min(somas)
+        media = sum(somas) / len(somas)
+        dispersao = sum(abs(soma - media) for soma in somas)
+
+        minimo_goleiros, maximo_goleiros = BalanceadorTimes._limites_goleiros(num_goleiros, len(times))
+        penalidade = 0
+
+        for time in times:
+            if len(time) != BalanceadorTimes.TAMANHO_TIME:
+                penalidade += abs(len(time) - BalanceadorTimes.TAMANHO_TIME) * 5000
+
+            qtd_goleiros = BalanceadorTimes._contar_goleiros(time)
+            if qtd_goleiros < minimo_goleiros:
+                penalidade += (minimo_goleiros - qtd_goleiros) * 2000
+            if qtd_goleiros > maximo_goleiros:
+                penalidade += (qtd_goleiros - maximo_goleiros) * 2000
+
+        return penalidade + (diferenca * 100) + dispersao
+
+    @staticmethod
+    def _refinar_times_com_restricoes(times: List[List[Jogador]], num_goleiros: int, iteracoes: int = 4000) -> List[List[Jogador]]:
+        """
+        Refina os times completos com Simulated Annealing, preservando o tamanho
+        de cada time por meio de trocas 1x1 e punindo distribuições ruins de goleiros.
+        """
+        if len(times) < 2:
+            return [time[:] for time in times]
+
+        times_trabalho = [time[:] for time in times]
+        energia_atual = BalanceadorTimes._calcular_energia_balanceada(times_trabalho, num_goleiros)
+        melhor_energia = energia_atual
+        melhores_times = [time[:] for time in times_trabalho]
+
+        temperatura = 120.0
+        temperatura_minima = 0.01
+        taxa_resfriamento = 0.995
+        iteracao = 0
+
+        while temperatura > temperatura_minima and iteracao < iteracoes:
+            time1, time2 = random.sample(range(len(times_trabalho)), 2)
+            idx1 = random.randint(0, len(times_trabalho[time1]) - 1)
+            idx2 = random.randint(0, len(times_trabalho[time2]) - 1)
+
+            times_trabalho[time1][idx1], times_trabalho[time2][idx2] = (
+                times_trabalho[time2][idx2],
+                times_trabalho[time1][idx1],
+            )
+
+            energia_nova = BalanceadorTimes._calcular_energia_balanceada(times_trabalho, num_goleiros)
+            delta_energia = energia_nova - energia_atual
+
+            if delta_energia < 0 or random.random() < math.exp(-delta_energia / temperatura):
+                energia_atual = energia_nova
+                if energia_atual < melhor_energia:
+                    melhor_energia = energia_atual
+                    melhores_times = [time[:] for time in times_trabalho]
+            else:
+                times_trabalho[time1][idx1], times_trabalho[time2][idx2] = (
+                    times_trabalho[time2][idx2],
+                    times_trabalho[time1][idx1],
+                )
+
+            temperatura *= taxa_resfriamento
+            iteracao += 1
+
+        return melhores_times
+
+    @staticmethod
     def separar_goleiros(jogadores: List[Jogador]) -> Tuple[List[Jogador], List[Jogador]]:
         """Compatibilidade: separa jogadores de linha e goleiros."""
         linha = [j for j in jogadores if j.posicao == "linha"]
@@ -181,13 +277,16 @@ class BalanceadorTimes:
         num_times = BalanceadorTimes.calcular_numero_times(len(jogadores))
         tamanho_time = BalanceadorTimes.TAMANHO_TIME
         
-        # Verificar se há mais goleiros que times
-        tem_aviso = len(goleiros) > num_times
+        # Verificar desvios de goleiros para exibir contexto ao usuário
+        tem_aviso = len(goleiros) != num_times
         aviso_msg = ""
         
-        if tem_aviso:
+        if len(goleiros) > num_times:
             excesso = len(goleiros) - num_times
             aviso_msg = f"⚠️ {excesso} goleiro(s) a mais que time(s). Alguns times terão 2+ goleiros."
+        elif len(goleiros) < num_times:
+            falta = num_times - len(goleiros)
+            aviso_msg = f"⚠️ Faltam {falta} goleiro(s) para fechar 1 por time. O sistema vai equilibrar os níveis mesmo com time(s) sem goleiro."
         
         # Ordenar por nível (decrescente)
         linha_ordenada = sorted(linha, key=lambda x: x.nivel, reverse=True)
@@ -198,71 +297,26 @@ class BalanceadorTimes:
         for idx, goleiro in enumerate(goleiros_ordenados):
             times[idx % num_times].append(goleiro)
         
-        # 2. Calcular quantos linha cada time precisa para ficar com 5
-        linha_necessaria = [tamanho_time - len(times[i]) for i in range(num_times)]
-        
-        # 3. Distribuir linha respeitando a necessidade de cada time (Snake draft)
-        linha_por_time = [[] for _ in range(num_times)]
-        idx_linha = 0
-        
-        # Snake draft: alternar direção
-        direction_asc = True
-        while idx_linha < len(linha_ordenada):
-            # Iterar sobre times
-            time_range = range(num_times) if direction_asc else range(num_times - 1, -1, -1)
-            
-            for time_idx in time_range:
-                if idx_linha < len(linha_ordenada) and len(linha_por_time[time_idx]) < linha_necessaria[time_idx]:
-                    linha_por_time[time_idx].append(linha_ordenada[idx_linha])
-                    idx_linha += 1
-            
-            # Reverter direção para próxima volta
-            direction_asc = not direction_asc
-        
-        # 4. Executar SA para balancear score entre times
-        energia_atual = BalanceadorTimes.calcular_energia(linha_por_time)
-        melhor_energia = energia_atual
-        melhores_times_linha = [time[:] for time in linha_por_time]
-        
-        temperatura = 100.0
-        temperatura_minima = 0.01
-        taxa_resfriamento = 0.99
-        iteracao = 0
-        max_iteracoes = 2000
-        
-        while temperatura > temperatura_minima and iteracao < max_iteracoes:
-            time1, time2 = random.sample(range(num_times), 2)
-            
-            if len(linha_por_time[time1]) > 0 and len(linha_por_time[time2]) > 0:
-                idx1 = random.randint(0, len(linha_por_time[time1]) - 1)
-                idx2 = random.randint(0, len(linha_por_time[time2]) - 1)
-                
-                # Fazer troca
-                linha_por_time[time1][idx1], linha_por_time[time2][idx2] = linha_por_time[time2][idx2], linha_por_time[time1][idx1]
-                
-                # Calcular nova energia
-                energia_nova = BalanceadorTimes.calcular_energia(linha_por_time)
-                
-                # Metropolis criterion
-                delta_energia = energia_nova - energia_atual
-                if delta_energia < 0 or random.random() < math.exp(-delta_energia / temperatura):
-                    energia_atual = energia_nova
-                    if energia_atual < melhor_energia:
-                        melhor_energia = energia_atual
-                        melhores_times_linha = [time[:] for time in linha_por_time]
-                else:
-                    # Desfazer troca
-                    linha_por_time[time1][idx1], linha_por_time[time2][idx2] = linha_por_time[time2][idx2], linha_por_time[time1][idx1]
-            
-            temperatura *= taxa_resfriamento
-            iteracao += 1
-        
-        # Usar melhor resultado
-        linha_por_time = melhores_times_linha
-        
-        # 5. Combinar: cada time = seus goleiros + sua linha
-        for idx, time in enumerate(times):
-            time.extend(linha_por_time[idx])
+        # 2. Completar os times com jogadores de linha, sempre reforçando o time
+        # atualmente mais fraco para compensar inclusive o peso dos goleiros.
+        for jogador_linha in linha_ordenada:
+            candidatos = [
+                idx for idx, time in enumerate(times)
+                if len(time) < tamanho_time
+            ]
+            candidatos.sort(
+                key=lambda idx: (
+                    BalanceadorTimes._soma_time(times[idx]),
+                    len(times[idx]),
+                    BalanceadorTimes._contar_goleiros(times[idx]),
+                    idx,
+                )
+            )
+            times[candidatos[0]].append(jogador_linha)
+
+        # 3. Refinar os times completos considerando nível total e distribuição
+        # de goleiros ao mesmo tempo.
+        times = BalanceadorTimes._refinar_times_com_restricoes(times, len(goleiros))
         
         # Calcular somas (todos os jogadores contam)
         somas = [sum(j.nivel for j in time) for time in times]
@@ -355,4 +409,3 @@ class BalanceadorTimes:
         
         idx_maximo = somas.index(max(somas))
         return f"Time {idx_maximo + 1}"
-
