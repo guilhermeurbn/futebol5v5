@@ -50,33 +50,49 @@ def _candidate_paths(relative_path: str):
 
 
 def load_json_data(namespace: str, default):
+    """Carrega dados JSON do banco ou do arquivo local como fallback."""
+    
+    # Primeiro tenta carregar do Postgres
     conn = get_conn()
-    if conn is None:
-        return default
-
-    ensure_json_store_table(conn)
-    with conn.cursor() as cur:
-        cur.execute(
-            f"select payload from {json_store_table_name()} where namespace = %s",
-            (namespace,),
-        )
-        row = cur.fetchone()
-        if row:
-            conn.close()
-            return row[0]
-
+    if conn is not None:
+        try:
+            ensure_json_store_table(conn)
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"select payload from {json_store_table_name()} where namespace = %s",
+                    (namespace,),
+                )
+                row = cur.fetchone()
+                if row:
+                    conn.close()
+                    return row[0]
+        except Exception as e:
+            print(f"[DB] Error loading from Postgres: {e}")
+        finally:
+            if conn:
+                conn.close()
+    
+    # Se não achou no Postgres (ou não tem conexão), tenta arquivo local
     for candidate in _candidate_paths(f"{namespace}.json"):
         if candidate.exists():
             try:
                 with candidate.open("r", encoding="utf-8") as f:
                     data = json.load(f)
-                save_json_data(namespace, data)
-                conn.close()
+                # Se tem conexão Postgres e carregou do arquivo, salva no banco
+                conn = get_conn()
+                if conn is not None:
+                    try:
+                        save_json_data(namespace, data)
+                    except Exception as e:
+                        print(f"[DB] Error saving to Postgres: {e}")
+                    finally:
+                        conn.close()
                 return data
-            except (json.JSONDecodeError, OSError):
+            except (json.JSONDecodeError, OSError) as e:
+                print(f"[DB] Error loading {namespace}.json: {e}")
                 break
-
-    conn.close()
+    
+    # Nenhuma fonte disponível
     return default
 
 
@@ -123,8 +139,10 @@ def auto_seed_on_init() -> None:
     """
     if get_database_count() > 0:
         # Banco já tem dados
+        print("[DB] Database already seeded, skipping auto-seed")
         return
     
+    print("[DB] Database empty, starting auto-seed...")
     root = _repo_root()
     namespaces = [
         "jogadores",
@@ -137,6 +155,7 @@ def auto_seed_on_init() -> None:
         "sorteios_stack",
     ]
     
+    seeded_count = 0
     for namespace in namespaces:
         for candidate in _candidate_paths(f"{namespace}.json"):
             if candidate.exists():
@@ -144,7 +163,11 @@ def auto_seed_on_init() -> None:
                     with candidate.open("r", encoding="utf-8") as f:
                         data = json.load(f)
                     save_json_data(namespace, data)
-                    print(f"[DB] Seeded {namespace}")
+                    record_count = len(data) if isinstance(data, list) else "dict"
+                    print(f"[DB] ✓ Seeded {namespace}: {record_count} records")
+                    seeded_count += 1
                 except Exception as e:
-                    print(f"[DB] Error seeding {namespace}: {e}")
+                    print(f"[DB] ✗ Error seeding {namespace}: {e}")
                 break
+    
+    print(f"[DB] Auto-seed complete: {seeded_count}/{len(namespaces)} namespaces")
