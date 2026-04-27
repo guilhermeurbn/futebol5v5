@@ -15,16 +15,38 @@
     <main class="main">
         <!-- Navigation Tabs -->
         <div class="nav-tabs">
+            {% if auth_user.role == 'juiz' %}
+            <a href="{{ url_for('jogador.jogar_page') }}" class="nav-tab">🎮 Jogar</a>
+            {% else %}
             <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
+            {% endif %}
             {% if auth_user.role == 'usuario' %}
             <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab">🗳️ Minha Votação</a>
             {% endif %}
-            {% if auth_user.role in ['admin', 'super_admin'] %}
+            {% if auth_user.role in ['admin', 'super_admin', 'juiz'] %}
             <a href="{{ url_for('jogador.votacao_admin_page') }}" class="nav-tab">🛡️ Votação Admin</a>
             {% endif %}
+            {% if auth_user.role in ['admin', 'super_admin'] %}
             <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
             <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">🏅 Ranking</a>
+            {% endif %}
         </div>
+
+        {% if partida_juiz_em_andamento %}
+            <div class="alert alert-warning">
+                <strong>🎮 Partida em andamento:</strong>
+                {% if partida_juiz_em_andamento.status == 'selecionando' %}
+                    a seleção da partida ainda está aberta.
+                {% elif partida_juiz_em_andamento.status == 'sorteada' %}
+                    o sorteio já foi feito e falta registrar o resultado.
+                {% elif partida_juiz_em_andamento.status == 'resultado_registrado' %}
+                    o resultado já foi salvo e a próxima etapa é abrir a votação.
+                {% elif partida_juiz_em_andamento.status == 'votacao_aberta' %}
+                    a votação está aberta e pode ser encerrada assim que quiser.
+                {% endif %}
+                <a href="{{ url_for('jogador.jogar_page') }}" class="btn btn-secondary" style="margin-left: 0.75rem;">Retomar fluxo</a>
+            </div>
+        {% endif %}
 
         {% if sucesso_senha %}
             <div class="alert alert-success"><strong>✅</strong> {{ sucesso_senha }}</div>

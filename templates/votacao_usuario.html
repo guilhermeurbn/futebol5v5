@@ -20,8 +20,10 @@
             {% if auth_user.role in ['admin', 'super_admin'] %}
             <a href="{{ url_for('jogador.votacao_admin_page') }}" class="nav-tab">🛡️ Votação Admin</a>
             {% endif %}
+            {% if auth_user.role in ['admin', 'super_admin'] %}
             <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
             <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">🏅 Ranking</a>
+            {% endif %}
         </div>
 
         {% if erro %}
@@ -50,7 +52,9 @@
                             <div class="summary-card__subtext">{{ voto.atualizado_em[:16].replace('T', ' ') }}</div>
                         </div>
                     </div>
+                    {% if auth_user.role in ['admin', 'super_admin'] %}
                     <a href="{{ url_for('jogador.historico') }}" class="btn btn-primary">Ver histórico</a>
+                    {% endif %}
                 </div>
             </section>
         {% else %}

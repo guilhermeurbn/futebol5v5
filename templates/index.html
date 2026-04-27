@@ -35,8 +35,10 @@
                 {% if auth_user.role in ['admin', 'super_admin'] %}
                 <a href="{{ url_for('jogador.votacao_admin_page') }}" class="nav-tab">🛡️ Votação Admin</a>
                 {% endif %}
+                {% if auth_user.role in ['admin', 'super_admin'] %}
                 <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
                 <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">🏅 Ranking</a>
+                {% endif %}
             </div>
 
             {% if erro %}
