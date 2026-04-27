@@ -6,6 +6,7 @@ import os
 from datetime import datetime
 from typing import List, Dict, Optional
 from models.jogadores import Jogador
+from services.db import load_json_data, save_json_data
 
 
 class HistoricoService:
@@ -23,11 +24,15 @@ class HistoricoService:
     
     def _garantir_arquivo(self) -> None:
         """Garante que o arquivo existe"""
+        if os.getenv("DATABASE_URL"):
+            return
         if not os.path.exists(self.arquivo):
             self._salvar([])
     
     def _carregar_raw(self) -> List[dict]:
         """Carrega dados brutos do arquivo"""
+        if os.getenv("DATABASE_URL"):
+            return load_json_data("historico", [])
         try:
             with open(self.arquivo, "r", encoding="utf-8") as f:
                 return json.load(f)
@@ -36,6 +41,9 @@ class HistoricoService:
     
     def _salvar(self, dados: List[dict]) -> None:
         """Salva dados no arquivo"""
+        if os.getenv("DATABASE_URL"):
+            save_json_data("historico", dados)
+            return
         with open(self.arquivo, "w", encoding="utf-8") as f:
             json.dump(dados, f, indent=2, ensure_ascii=False)
     

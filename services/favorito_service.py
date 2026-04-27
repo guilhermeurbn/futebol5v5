@@ -5,6 +5,7 @@ import json
 import os
 from datetime import datetime
 from typing import List, Dict, Optional
+from services.db import load_json_data, save_json_data
 
 
 class FavoritoService:
@@ -22,11 +23,15 @@ class FavoritoService:
     
     def _garantir_arquivo(self) -> None:
         """Garante que o arquivo existe"""
+        if os.getenv("DATABASE_URL"):
+            return
         if not os.path.exists(self.arquivo):
             self._salvar([])
     
     def _carregar_raw(self) -> List[dict]:
         """Carrega dados brutos"""
+        if os.getenv("DATABASE_URL"):
+            return load_json_data("favoritos", [])
         try:
             with open(self.arquivo, "r", encoding="utf-8") as f:
                 return json.load(f)
@@ -35,6 +40,9 @@ class FavoritoService:
     
     def _salvar(self, dados: List[dict]) -> None:
         """Salva dados"""
+        if os.getenv("DATABASE_URL"):
+            save_json_data("favoritos", dados)
+            return
         with open(self.arquivo, "w", encoding="utf-8") as f:
             json.dump(dados, f, indent=2, ensure_ascii=False)
     

@@ -7,6 +7,7 @@ import os
 from datetime import datetime
 from typing import Dict, List, Optional
 from collections import defaultdict
+from services.db import load_json_data
 
 
 class StatsService:
@@ -23,6 +24,8 @@ class StatsService:
     
     def _carregar_historico(self) -> List[dict]:
         """Carrega dados do histórico"""
+        if os.getenv("DATABASE_URL"):
+            return load_json_data("historico", [])
         try:
             with open(self.historico_arquivo, "r", encoding="utf-8") as f:
                 return json.load(f)

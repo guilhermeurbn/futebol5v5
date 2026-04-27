@@ -7,6 +7,7 @@ import os
 from collections import Counter
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional
+from services.db import load_json_data
 
 
 class RankingService:
@@ -32,6 +33,8 @@ class RankingService:
     
     def _carregar_historico(self) -> List[dict]:
         """Carregar histórico de sorteios"""
+        if os.getenv("DATABASE_URL"):
+            return load_json_data("historico", [])
         caminho = self._resolver_caminho_existente([
             self.historico_path,
             'data/historico.json'
@@ -48,6 +51,8 @@ class RankingService:
     
     def _carregar_partidas(self) -> List[dict]:
         """Carregar histórico de partidas"""
+        if os.getenv("DATABASE_URL"):
+            return load_json_data("partidas", [])
         caminho = self._resolver_caminho_existente([
             self.partidas_path,
             'partidas.json'

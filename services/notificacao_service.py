@@ -5,6 +5,7 @@ import json
 import os
 from datetime import datetime
 from typing import Dict, List
+from services.db import load_json_data, save_json_data
 
 
 class NotificacaoService:
@@ -15,10 +16,19 @@ class NotificacaoService:
         self._garantir_arquivo()
 
     def _garantir_arquivo(self) -> None:
+        if os.getenv("DATABASE_URL"):
+            return
         if not os.path.exists(self.arquivo):
             self._salvar({"ultimo_id": 0, "notificacoes": []})
 
     def _carregar(self) -> Dict:
+        if os.getenv("DATABASE_URL"):
+            dados = load_json_data("admin_notificacoes", {"ultimo_id": 0, "notificacoes": []})
+            if not isinstance(dados, dict):
+                return {"ultimo_id": 0, "notificacoes": []}
+            dados.setdefault("ultimo_id", 0)
+            dados.setdefault("notificacoes", [])
+            return dados
         try:
             with open(self.arquivo, "r", encoding="utf-8") as f:
                 dados = json.load(f)
@@ -31,6 +41,9 @@ class NotificacaoService:
             return {"ultimo_id": 0, "notificacoes": []}
 
     def _salvar(self, dados: Dict) -> None:
+        if os.getenv("DATABASE_URL"):
+            save_json_data("admin_notificacoes", dados)
+            return
         with open(self.arquivo, "w", encoding="utf-8") as f:
             json.dump(dados, f, indent=2, ensure_ascii=False)
 

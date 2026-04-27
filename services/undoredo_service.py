@@ -4,6 +4,7 @@ Serviço de Undo/Redo para Sorteios
 import json
 import os
 from typing import List, Dict, Optional, Tuple
+from services.db import load_json_data, save_json_data
 
 
 class UndoRedoService:
@@ -22,11 +23,20 @@ class UndoRedoService:
     
     def _garantir_arquivo(self) -> None:
         """Garante que o arquivo existe"""
+        if os.getenv("DATABASE_URL"):
+            return
         if not os.path.exists(self.arquivo):
             self._salvar({"pilha": [], "indice_atual": -1})
     
     def _carregar_raw(self) -> Dict:
         """Carrega dados brutos"""
+        if os.getenv("DATABASE_URL"):
+            dados = load_json_data("sorteios_stack", {"pilha": [], "indice_atual": -1})
+            if not isinstance(dados, dict):
+                return {"pilha": [], "indice_atual": -1}
+            dados.setdefault("pilha", [])
+            dados.setdefault("indice_atual", -1)
+            return dados
         try:
             with open(self.arquivo, "r", encoding="utf-8") as f:
                 return json.load(f)
@@ -35,6 +45,9 @@ class UndoRedoService:
     
     def _salvar(self, dados: Dict) -> None:
         """Salva dados"""
+        if os.getenv("DATABASE_URL"):
+            save_json_data("sorteios_stack", dados)
+            return
         with open(self.arquivo, "w", encoding="utf-8") as f:
             json.dump(dados, f, indent=2, ensure_ascii=False)
     

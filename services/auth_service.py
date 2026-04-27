@@ -9,6 +9,7 @@ from datetime import datetime
 from typing import Dict, List, Optional
 
 from werkzeug.security import generate_password_hash, check_password_hash
+from services.db import load_json_data, save_json_data
 
 
 class AuthService:
@@ -21,6 +22,9 @@ class AuthService:
         self._garantir_arquivo()
 
     def _garantir_arquivo(self) -> None:
+        if os.getenv("DATABASE_URL"):
+            self._garantir_contas_padrao()
+            return
         if not os.path.exists(self.arquivo):
             self._salvar([])
 
@@ -58,6 +62,8 @@ class AuthService:
             self._salvar(usuarios)
 
     def _carregar(self) -> List[Dict]:
+        if os.getenv("DATABASE_URL"):
+            return load_json_data("users", [])
         try:
             with open(self.arquivo, "r", encoding="utf-8") as f:
                 return json.load(f)
@@ -65,6 +71,9 @@ class AuthService:
             return []
 
     def _salvar(self, dados: List[Dict]) -> None:
+        if os.getenv("DATABASE_URL"):
+            save_json_data("users", dados)
+            return
         with open(self.arquivo, "w", encoding="utf-8") as f:
             json.dump(dados, f, indent=2, ensure_ascii=False)
 

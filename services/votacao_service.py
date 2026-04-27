@@ -6,6 +6,7 @@ import json
 import os
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
+from services.db import load_json_data, save_json_data
 
 
 class VotacaoService:
@@ -16,10 +17,19 @@ class VotacaoService:
         self._garantir_arquivo()
 
     def _garantir_arquivo(self) -> None:
+        if os.getenv("DATABASE_URL"):
+            return
         if not os.path.exists(self.arquivo):
             self._salvar({"ultimo_id": 0, "partidas": []})
 
     def _carregar(self) -> Dict:
+        if os.getenv("DATABASE_URL"):
+            dados = load_json_data("votacoes_partidas", {"ultimo_id": 0, "partidas": []})
+            if not isinstance(dados, dict):
+                return {"ultimo_id": 0, "partidas": []}
+            dados.setdefault("ultimo_id", 0)
+            dados.setdefault("partidas", [])
+            return dados
         try:
             with open(self.arquivo, "r", encoding="utf-8") as f:
                 dados = json.load(f)
@@ -32,6 +42,9 @@ class VotacaoService:
             return {"ultimo_id": 0, "partidas": []}
 
     def _salvar(self, dados: Dict) -> None:
+        if os.getenv("DATABASE_URL"):
+            save_json_data("votacoes_partidas", dados)
+            return
         with open(self.arquivo, "w", encoding="utf-8") as f:
             json.dump(dados, f, indent=2, ensure_ascii=False)
 

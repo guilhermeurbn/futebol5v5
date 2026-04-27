@@ -5,6 +5,7 @@ import json
 import os
 from datetime import datetime
 from typing import Dict, Optional
+from services.db import load_json_data, save_json_data
 
 
 class JuizPartidaService:
@@ -22,10 +23,20 @@ class JuizPartidaService:
         }
 
     def _garantir_arquivo(self) -> None:
+        if os.getenv("DATABASE_URL"):
+            return
         if not os.path.exists(self.arquivo):
             self._salvar(self._estado_vazio())
 
     def _carregar(self) -> Dict:
+        if os.getenv("DATABASE_URL"):
+            dados = load_json_data("juiz_partida_atual", self._estado_vazio())
+            if not isinstance(dados, dict):
+                return self._estado_vazio()
+            dados.setdefault("status", "idle")
+            dados.setdefault("partida_atual", None)
+            dados.setdefault("ultima_partida_encerrada", None)
+            return dados
         try:
             with open(self.arquivo, "r", encoding="utf-8") as f:
                 dados = json.load(f)
@@ -39,6 +50,9 @@ class JuizPartidaService:
             return self._estado_vazio()
 
     def _salvar(self, dados: Dict) -> None:
+        if os.getenv("DATABASE_URL"):
+            save_json_data("juiz_partida_atual", dados)
+            return
         with open(self.arquivo, "w", encoding="utf-8") as f:
             json.dump(dados, f, indent=2, ensure_ascii=False)
 
