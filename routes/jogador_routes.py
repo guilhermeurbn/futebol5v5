@@ -806,6 +806,11 @@ def votacao_admin_criar():
         resultado_partida = _obter_resultado_sorteio(sorteio.get('id'))
         if _is_juiz() and not resultado_partida:
             raise ValueError('Registre o resultado da partida antes de abrir a votacao')
+
+        partida_existente = votacao_service.obter_por_sorteio(sorteio.get('id'))
+        if partida_existente and partida_existente.get('status') != 'aberta':
+            raise ValueError('Esta rodada já foi encerrada e não pode abrir votação novamente')
+
         partida = votacao_service.criar_partida(
             times_json=sorteio.get('times', []),
             usuarios=usuarios,
