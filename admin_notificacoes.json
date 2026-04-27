@@ -1,5 +1,5 @@
 {
-  "ultimo_id": 2,
+  "ultimo_id": 4,
   "notificacoes": [
     {
       "id": 1,
@@ -16,6 +16,22 @@
       "tipo": "cadastro",
       "lida": true,
       "criado_em": "2026-04-26T22:08:51.550431"
+    },
+    {
+      "id": 3,
+      "titulo": "Novo cadastro de usuario",
+      "mensagem": "Usuario carlos (Carlos) acabou de se cadastrar.",
+      "tipo": "cadastro",
+      "lida": true,
+      "criado_em": "2026-04-27T18:53:58.088103"
+    },
+    {
+      "id": 4,
+      "titulo": "Novo cadastro de usuario",
+      "mensagem": "Usuario lucas_teixeira (Lucas teixeira) acabou de se cadastrar.",
+      "tipo": "cadastro",
+      "lida": true,
+      "criado_em": "2026-04-27T18:54:54.128018"
     }
   ]
 }
