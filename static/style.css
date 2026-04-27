@@ -1102,6 +1102,21 @@ body {
   border-color: var(--primary);
 }
 
+/* Acessibilidade: foco visível para seleção por teclado */
+.jogador-checkbox:focus + .jogador-label,
+.jogador-label:focus-within {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(124,58,237,0.12);
+  border-color: var(--primary);
+}
+
+/* Foco visível para cards onde o input está dentro do label */
+.player-card:focus-within {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(124,58,237,0.12);
+  border-color: var(--primary);
+}
+
 .jogador-checkbox:checked + .jogador-label {
   background: var(--primary-light);
   border-color: var(--primary);

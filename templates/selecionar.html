@@ -106,13 +106,13 @@
             <!-- Abas -->
             <section class="section">
                 <div class="tabs">
-                    <button class="tab-btn active" onclick="mudarAba('fixos')">
+                    <button class="tab-btn active" onclick="mudarAba('fixos', event)">
                         ⭐ Fixos ({{ fixos|length }})
                     </button>
-                    <button class="tab-btn" onclick="mudarAba('avulsos')">
+                    <button class="tab-btn" onclick="mudarAba('avulsos', event)">
                         👤 Avulsos ({{ avulsos|length }})
                     </button>
-                    <button class="tab-btn" onclick="mudarAba('todos')">
+                    <button class="tab-btn" onclick="mudarAba('todos', event)">
                         👥 Todos ({{ total_jogadores }})
                     </button>
                 </div>
@@ -255,7 +255,6 @@
     </div>
 
     <script src="{{ url_for('static', filename='offline-judge.js') }}"></script>
-    <script src="{{ url_for('static', filename='offline-judge.js') }}"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -323,8 +322,8 @@
                 }[categoria] || categoria;
                 
                 html += `<button class="aba-sugestoes ${categoria === 'nivel' ? 'ativa' : ''}" 
-                         onclick="trocarAbasSugestoes('${categoria}')">
-                         ${label}</button>`;
+                             onclick="trocarAbasSugestoes('${categoria}', event)">
+                             ${label}</button>`;
             }
             
             html += '</div>';
@@ -360,12 +359,12 @@
             container.innerHTML = html;
         }
         
-        function trocarAbasSugestoes(categoria) {
+        function trocarAbasSugestoes(categoria, ev) {
             document.querySelectorAll('.aba-content-sugestoes').forEach(e => e.style.display = 'none');
             document.querySelectorAll('.aba-sugestoes').forEach(e => e.classList.remove('ativa'));
             
             document.getElementById(`aba-${categoria}`).style.display = 'block';
-            event.target.classList.add('ativa');
+            if (ev && ev.currentTarget) ev.currentTarget.classList.add('ativa');
         }
         
         function selecionarSugestao(nomeSugestao) {
@@ -445,7 +444,7 @@
         }
 
         // Mudar aba
-        function mudarAba(abaNome) {
+        function mudarAba(abaNome, ev) {
             // Esconder todas as abas
             document.querySelectorAll('.tab-content').forEach(aba => {
                 aba.classList.remove('active');
@@ -458,7 +457,7 @@
             
             // Mostrar aba selecionada
             document.getElementById(abaNome).classList.add('active');
-            event.target.classList.add('active');
+            if (ev && ev.currentTarget) ev.currentTarget.classList.add('active');
         }
 
         // Limpar seleção
