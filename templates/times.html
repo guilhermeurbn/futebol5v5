@@ -79,8 +79,6 @@
                 {% if auth_user.role == 'juiz' %}
                 <a href="{{ url_for('jogador.jogar_page') }}" class="nav-tab active">🎮 Jogar</a>
                 <a href="{{ url_for('jogador.votacao_admin_page', sorteio_id=sorteio_id) }}" class="nav-tab">🛡️ Votação</a>
-                <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
-                <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">🏅 Ranking</a>
                 {% else %}
                 <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
                 <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
@@ -158,22 +156,23 @@
                 {% if auth_user.role in ['admin', 'super_admin', 'juiz'] %}
                 <div class="surface-panel surface-panel--soft" style="margin-bottom: 1rem;">
                     <div class="section-label">Próximos passos da rodada</div>
-                    <h2 class="section-title" style="margin-top: 0;">Compartilhar, registrar o resultado ou abrir a votação</h2>
+                    <h2 class="section-title" style="margin-top: 0;">COMPARTILHAR, REGISTRAR E VOTAÇÃO</h2>
                     <div class="actions-section" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px;">
                         <button id="btn-qrcode-principal" class="btn btn-primary" style="background: linear-gradient(135deg, #ffa502 0%, #ffc107 100%); cursor: pointer;">
-                            📱 Compartilhar sorteio
+                            📱 COMPARTILHAR
                         </button>
                         <a href="{{ url_for('jogador.resultado_partida_page', sorteio_id=sorteio_id) }}" class="btn btn-primary" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                            🏆 Registrar resultado
+                            🏆 REGISTRAR
                         </a>
                         <form method="post" action="{{ url_for('jogador.votacao_admin_criar') }}">
                             <input type="hidden" name="sorteio_id" value="{{ sorteio_id }}">
                             <input type="hidden" name="titulo" value="Rodada do sorteio #{{ sorteio_id }}">
                             <button class="btn btn-primary" type="submit" style="width: 100%;">
-                                🗳️ Iniciar votação
+                                🗳️ VOTAÇÃO
                             </button>
                         </form>
                     </div>
+                    <p style="margin: 0.75rem 0 0; opacity: 0.8;">A votação só abre depois que o resultado da partida for registrado.</p>
                 </div>
                 {% endif %}
                 <div class="actions-section" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px;">
@@ -204,6 +203,23 @@
                 </div>
             </section>
         </main>
+
+        <div id="modal-compartilhamento" class="modal" style="display: none;">
+            <div class="modal-content" style="max-width: 520px;">
+                <div class="modal-header">
+                    <h2>Compartilhar sorteio</h2>
+                    <button class="modal-close" type="button" onclick="fecharModalCompartilhamento()">&times;</button>
+                </div>
+                <div class="modal-body" style="padding: 20px;">
+                    <p style="margin-top: 0;">Qual modo de compartilhamento você quer usar?</p>
+                    <div class="actions-section" style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+                        <button class="btn btn-primary" type="button" onclick="abrirQRCodeDireto()">📷 QR Code</button>
+                        <button class="btn btn-primary" type="button" onclick="copiarLinkCompartilhamento()">🔗 Copiar Link</button>
+                        <button class="btn btn-primary" type="button" onclick="compartilharTextoSorteio()">📄 Copiar Texto</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Footer -->
         <footer class="footer">
@@ -299,14 +315,63 @@
     // Inicializar status ao carregar
     atualizarStatusUndoRedo();
 
+    function abrirModalCompartilhamento() {
+        const modal = document.getElementById('modal-compartilhamento');
+        if (modal) {
+            modal.style.display = 'flex';
+        }
+    }
+
+    function fecharModalCompartilhamento() {
+        const modal = document.getElementById('modal-compartilhamento');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    function abrirQRCodeDireto() {
+        fecharModalCompartilhamento();
+        const btnQRCode = document.getElementById('btn-qrcode');
+        if (btnQRCode) {
+            btnQRCode.click();
+        }
+    }
+
+    async function copiarLinkCompartilhamento() {
+        try {
+            const response = await fetch(`/api/qrcode/link-compartilhamento/{{ sorteio_id }}`);
+            const data = await response.json();
+            if (!response.ok || !data.sucesso || !data.url) {
+                throw new Error(data.erro || 'Não foi possível gerar o link');
+            }
+            try {
+                await navigator.clipboard.writeText(data.url);
+            } catch (_) {
+                const input = document.createElement('input');
+                input.value = data.url;
+                document.body.appendChild(input);
+                input.select();
+                document.execCommand('copy');
+                document.body.removeChild(input);
+            }
+            fecharModalCompartilhamento();
+            alert('✅ Link copiado para a área de transferência!');
+        } catch (error) {
+            alert('❌ ' + error.message);
+        }
+    }
+
+    function compartilharTextoSorteio() {
+        fecharModalCompartilhamento();
+        const btnCopiarTxt = document.getElementById('btn-copiar-txt');
+        if (btnCopiarTxt) {
+            btnCopiarTxt.click();
+        }
+    }
+
     const btnQRCodePrincipal = document.getElementById('btn-qrcode-principal');
     if (btnQRCodePrincipal) {
-        btnQRCodePrincipal.addEventListener('click', () => {
-            const btnQRCode = document.getElementById('btn-qrcode');
-            if (btnQRCode) {
-                btnQRCode.click();
-            }
-        });
+        btnQRCodePrincipal.addEventListener('click', abrirModalCompartilhamento);
     }
     
     // Favoritar Times

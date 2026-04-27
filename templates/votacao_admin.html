@@ -22,7 +22,7 @@
         <div class="nav-tabs">
             {% if auth_user.role == 'juiz' %}
             <a href="{{ url_for('jogador.jogar_page') }}" class="nav-tab">🎮 Jogar</a>
-            {% else %}
+            {% elif auth_user.role != 'juiz' %}
             <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
             {% endif %}
             {% if auth_user.role == 'usuario' %}
@@ -31,8 +31,10 @@
             {% if auth_user.role in ['admin', 'super_admin', 'juiz'] %}
             <a href="{{ url_for('jogador.votacao_admin_page') }}" class="nav-tab active">🛡️ Votação Admin</a>
             {% endif %}
+            {% if auth_user.role != 'juiz' %}
             <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
             <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">🏅 Ranking</a>
+            {% endif %}
         </div>
 
         {% if erro %}
