@@ -134,15 +134,33 @@ def get_database_count() -> int:
 
 def auto_seed_on_init() -> None:
     """
-    Popula o banco de dados com dados locais se estiver vazio.
+    Popula o banco de dados com dados locais se não houver jogadores.
     Chamado na inicialização da aplicação.
     """
-    if get_database_count() > 0:
-        # Banco já tem dados
-        print("[DB] Database already seeded, skipping auto-seed")
+    # Verifica se existem jogadores no banco
+    jogadores_data = load_json_data("jogadores", [])
+    
+    if jogadores_data and len(jogadores_data) > 0:
+        # Já tem jogadores, não faz nada
+        print(f"[DB] Found {len(jogadores_data)} players, skipping auto-seed")
         return
     
-    print("[DB] Database empty, starting auto-seed...")
+    print("[DB] No players found, cleaning and reseeding database...")
+    
+    # Limpa tudo no banco
+    conn = get_conn()
+    if conn is not None:
+        try:
+            with conn:
+                with conn.cursor() as cur:
+                    cur.execute(f"DELETE FROM {json_store_table_name()}")
+                    print("[DB] Cleared old data")
+        except Exception as e:
+            print(f"[DB] Error clearing database: {e}")
+        finally:
+            conn.close()
+    
+    # Faz reseed completo
     root = _repo_root()
     namespaces = [
         "jogadores",
@@ -170,4 +188,4 @@ def auto_seed_on_init() -> None:
                     print(f"[DB] ✗ Error seeding {namespace}: {e}")
                 break
     
-    print(f"[DB] Auto-seed complete: {seeded_count}/{len(namespaces)} namespaces")
+    print(f"[DB] Reseed complete: {seeded_count}/{len(namespaces)} namespaces")
