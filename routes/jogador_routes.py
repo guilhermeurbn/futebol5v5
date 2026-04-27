@@ -1134,7 +1134,9 @@ def atualizar_jogador(jogador_id):
         jogador = jogador_service.atualizar(
             jogador_id,
             nome=dados.get('nome'),
-            nivel=int(dados.get('nivel', 5))
+            nivel=int(dados.get('nivel')) if dados.get('nivel') is not None else None,
+            tipo=dados.get('tipo'),
+            posicao=dados.get('posicao')
         )
         if not jogador:
             return jsonify({'erro': 'Jogador não encontrado'}), 404
@@ -1157,6 +1159,42 @@ def deletar_jogador(jogador_id):
     if not sucesso:
         return jsonify({'erro': 'Jogador não encontrado'}), 404
     return jsonify({'sucesso': True, 'mensagem': 'Jogador deletado com sucesso'})
+
+
+@jogador_bp.route('/jogadores/<jogador_id>/editar', methods=['GET'])
+@admin_required
+def editar_jogador_page(jogador_id):
+    """Página: Formulário de edição de jogador (admin)"""
+    jogador = jogador_service.obter_por_id(jogador_id)
+    if not jogador:
+        return redirect(url_for('jogador.index'))
+
+    return render_template('editar_jogador.html', jogador=jogador, usuario=_usuario_logado())
+
+
+@jogador_bp.route('/jogadores/<jogador_id>/editar', methods=['POST'])
+@admin_required
+def editar_jogador_post(jogador_id):
+    """Form handler: atualiza jogador via form (admin)"""
+    nome = request.form.get('nome', '').strip()
+    nivel = request.form.get('nivel')
+    tipo = request.form.get('tipo')
+    posicao = request.form.get('posicao')
+
+    try:
+        jogador = jogador_service.atualizar(
+            jogador_id,
+            nome=nome or None,
+            nivel=int(nivel) if nivel else None,
+            tipo=tipo or None,
+            posicao=posicao or None
+        )
+        if not jogador:
+            return "Jogador não encontrado", 404
+        return redirect(url_for('jogador.perfil_jogador_publico', jogador_id=jogador.id))
+    except ValueError as e:
+        jogador = jogador_service.obter_por_id(jogador_id)
+        return render_template('editar_jogador.html', jogador=jogador, usuario=_usuario_logado(), erro=str(e)), 400
 
 
 @jogador_bp.route('/delete/<jogador_id>')

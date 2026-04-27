@@ -98,38 +98,60 @@ class JogadorService:
         self._salvar(dados)
         return jogador
     
-    def atualizar(self, jogador_id: str, nome: str, nivel: int) -> Optional[Jogador]:
+    def atualizar(
+        self,
+        jogador_id: str,
+        nome: Optional[str] = None,
+        nivel: Optional[int] = None,
+        tipo: Optional[str] = None,
+        posicao: Optional[str] = None,
+    ) -> Optional[Jogador]:
         """
-        Atualiza um jogador
-        
+        Atualiza um jogador com campos opcionais.
+
         Args:
             jogador_id: ID do jogador
-            nome: Novo nome
-            nivel: Novo nível
-            
+            nome: Novo nome (opcional)
+            nivel: Novo nível (opcional)
+            tipo: 'fixo' ou 'avulso' (opcional)
+            posicao: 'linha' ou 'goleiro' (opcional)
+
         Returns:
             Jogador atualizado ou None
         """
         jogador_existente = self.obter_por_id(jogador_id)
         if not jogador_existente:
             return None
-        
+
+        # Validate optional fields
+        novo_nome = nome.strip() if isinstance(nome, str) and nome.strip() else jogador_existente.nome
+        novo_nivel = int(nivel) if nivel is not None else jogador_existente.nivel
+
+        novo_tipo = jogador_existente.tipo
+        if tipo is not None:
+            if tipo not in ("fixo", "avulso"):
+                raise ValueError("Tipo deve ser 'fixo' ou 'avulso'")
+            novo_tipo = tipo
+
+        nova_posicao = jogador_existente.posicao
+        if posicao is not None:
+            if posicao not in ("linha", "goleiro"):
+                raise ValueError("Posição deve ser 'linha' ou 'goleiro'")
+            nova_posicao = posicao
+
         jogador_atualizado = Jogador(
-            nome=nome.strip(),
-            nivel=nivel,
-            tipo=jogador_existente.tipo,
-            posicao=jogador_existente.posicao,
+            nome=novo_nome,
+            nivel=novo_nivel,
+            tipo=novo_tipo,
+            posicao=nova_posicao,
             presente=jogador_existente.presente,
             id=jogador_id,
             criado_em=jogador_existente.criado_em,
-            owner_user_id=jogador_existente.owner_user_id
+            owner_user_id=jogador_existente.owner_user_id,
         )
-        
+
         dados = self._carregar_raw()
-        dados = [
-            jogador_atualizado.para_dict() if item["id"] == jogador_id else item
-            for item in dados
-        ]
+        dados = [jogador_atualizado.para_dict() if item["id"] == jogador_id else item for item in dados]
         self._salvar(dados)
         return jogador_atualizado
     

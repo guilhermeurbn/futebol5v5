@@ -274,6 +274,7 @@
                                         👁️ Perfil
                                     </a>
                                     {% if auth_user.role == 'admin' %}
+                                    <a class="btn btn-small btn-primary" href="{{ url_for('jogador.editar_jogador_page', jogador_id=jogador.id) }}">✏️ Editar</a>
                                     <button class="btn btn-small btn-danger" onclick="abrirModalDelete('{{ jogador.id }}', '{{ jogador.nome }}')">
                                         🗑️ Deletar
                                     </button>
