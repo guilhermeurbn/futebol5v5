@@ -1,18 +1,8 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#7c3aed">
-    <meta name="description" content="NaTrave - Aplicação profissional para sorteio balanceado de times em partidas de futebol 5v5">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="NaTrave">
-    <link rel="manifest" href="/manifest.json">
-    <title>⚽ NaTrave - Gerador de Times</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
+{% extends 'base.html' %}
+
+{% block title %}Jogadores{% endblock %}
+
+{% block content %}
     <div class="container">
         <!-- Header -->
         <header class="header">
@@ -518,5 +508,4 @@
             console.warn('[PWA] Service Workers não suportado neste navegador');
         }
     </script>
-</body>
-</html>
+{% endblock %}
