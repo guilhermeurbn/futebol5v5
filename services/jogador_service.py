@@ -5,28 +5,36 @@ import json
 import os
 from typing import List, Tuple, Optional
 from models.jogadores import Jogador
+from services.db import load_json_data, save_json_data
 
 
 class JogadorService:
-    """Serviço para gerenciar jogadores"""
+    """Serviço para gerenciar jogadores - com suporte a Postgres via db.py"""
     
     def __init__(self, arquivo: str = "jogadores.json"):
         """
         Inicializa o serviço
         
         Args:
-            arquivo: Caminho do arquivo JSON
+            arquivo: Caminho do arquivo JSON (fallback se sem Postgres)
         """
         self.arquivo = arquivo
+        self.namespace = "jogadores"
         self._garantir_arquivo()
     
     def _garantir_arquivo(self) -> None:
-        """Garante que o arquivo existe"""
+        """Garante que o arquivo existe como fallback"""
         if not os.path.exists(self.arquivo):
-            self._salvar([])
+            with open(self.arquivo, "w", encoding="utf-8") as f:
+                json.dump([], f)
     
     def _carregar_raw(self) -> List[dict]:
-        """Carrega dados brutos do arquivo"""
+        """Carrega dados brutos do banco de dados ou arquivo local"""
+        data = load_json_data(self.namespace, None)
+        if data is not None:
+            return data if isinstance(data, list) else []
+        
+        # Fallback: carrega do arquivo local se banco falhar
         try:
             with open(self.arquivo, "r", encoding="utf-8") as f:
                 return json.load(f)
@@ -34,9 +42,9 @@ class JogadorService:
             return []
     
     def _salvar(self, dados: List[dict]) -> None:
-        """Salva dados no arquivo"""
-        with open(self.arquivo, "w", encoding="utf-8") as f:
-            json.dump(dados, f, indent=2, ensure_ascii=False)
+        """Salva dados no banco de dados (Postgres ou arquivo local)"""
+        save_json_data(self.namespace, dados)
+    
     
     def listar(self) -> List[Jogador]:
         """Lista todos os jogadores"""

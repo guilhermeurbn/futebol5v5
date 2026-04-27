@@ -141,8 +141,24 @@ def auto_seed_on_init() -> None:
     jogadores_data = load_json_data("jogadores", [])
     
     if jogadores_data and len(jogadores_data) > 0:
-        # Já tem jogadores, não faz nada
-        print(f"[DB] Found {len(jogadores_data)} players, skipping auto-seed")
+        # Já tem jogadores, verifica integridade
+        usuarios_data = load_json_data("users", [])
+        print(f"[DB] Found {len(jogadores_data)} players and {len(usuarios_data)} users, skipping auto-seed")
+        print(f"[DB] Checking player-user relationships...")
+        
+        # Debug: verifica se há mismatches
+        user_ids = {u.get("id") for u in usuarios_data if isinstance(u, dict)}
+        orphan_count = 0
+        for jogador in jogadores_data:
+            if isinstance(jogador, dict):
+                owner = jogador.get("owner_user_id")
+                if owner and owner not in user_ids:
+                    orphan_count += 1
+        
+        if orphan_count > 0:
+            print(f"[DB] ⚠️  WARNING: {orphan_count} players have non-existent user owners!")
+        else:
+            print(f"[DB] ✓ All players have valid user relationships")
         return
     
     print("[DB] No players found, cleaning and reseeding database...")
@@ -189,3 +205,12 @@ def auto_seed_on_init() -> None:
                 break
     
     print(f"[DB] Reseed complete: {seeded_count}/{len(namespaces)} namespaces")
+    
+    # Validação pós-seed
+    print("[DB] Validating...")
+    jogadores_data = load_json_data("jogadores", [])
+    usuarios_data = load_json_data("users", [])
+    if jogadores_data and usuarios_data:
+        print(f"[DB] ✓ POST-SEED: {len(jogadores_data)} players, {len(usuarios_data)} users loaded successfully")
+    else:
+        print(f"[DB] ✗ POST-SEED validation failed: players={len(jogadores_data)}, users={len(usuarios_data)}")
