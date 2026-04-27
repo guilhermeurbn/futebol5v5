@@ -389,10 +389,23 @@
 
         // Atualizar contador de selecionados
         function atualizarContador() {
+            // Atualiza classe 'selected' nos itens de jogador para fornecer destaque visual
+            document.querySelectorAll('.jogador-checkbox').forEach(cb => {
+                const item = cb.closest('.jogador-item');
+                if (item) {
+                    if (cb.checked) {
+                        item.classList.add('selected');
+                    } else {
+                        item.classList.remove('selected');
+                    }
+                }
+            });
+
+            // Atualiza contador baseado nos checkboxes marcados
             const checkboxes = document.querySelectorAll('.jogador-checkbox:checked');
             const contador = checkboxes.length;
             document.getElementById('contador').textContent = contador;
-            
+
             // Verificar se pode sortear
             const btnSortear = document.getElementById('btnSortear');
             if (quantidadeSelecionada && contador === quantidadeSelecionada) {
