@@ -98,3 +98,53 @@ def save_json_data(namespace: str, payload) -> None:
                 (namespace, Json(payload)),
             )
     conn.close()
+
+
+def get_database_count() -> int:
+    """Retorna o número de namespaces armazenados no banco."""
+    conn = get_conn()
+    if conn is None:
+        return 0
+    
+    try:
+        ensure_json_store_table(conn)
+        with conn.cursor() as cur:
+            cur.execute(f"select count(*) from {json_store_table_name()}")
+            row = cur.fetchone()
+            return row[0] if row else 0
+    finally:
+        conn.close()
+
+
+def auto_seed_on_init() -> None:
+    """
+    Popula o banco de dados com dados locais se estiver vazio.
+    Chamado na inicialização da aplicação.
+    """
+    if get_database_count() > 0:
+        # Banco já tem dados
+        return
+    
+    root = _repo_root()
+    namespaces = [
+        "jogadores",
+        "users",
+        "partidas",
+        "historico",
+        "votacoes_partidas",
+        "favoritos",
+        "admin_notificacoes",
+        "sorteios_stack",
+    ]
+    
+    for namespace in namespaces:
+        for candidate in _candidate_paths(f"{namespace}.json"):
+            if candidate.exists():
+                try:
+                    with candidate.open("r", encoding="utf-8") as f:
+                        data = json.load(f)
+                    save_json_data(namespace, data)
+                    print(f"[DB] Seeded {namespace}")
+                except Exception as e:
+                    print(f"[DB] Error seeding {namespace}: {e}")
+                break

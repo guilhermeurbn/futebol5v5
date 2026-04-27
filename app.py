@@ -6,6 +6,7 @@ import logging
 from flask import Flask, send_file
 from config import config_by_name
 from routes.jogador_routes import jogador_bp
+from services.db import auto_seed_on_init
 # Configuração de logging
 logging.basicConfig(
     level=logging.INFO,
@@ -42,6 +43,12 @@ def criar_app(config_name: str = None) -> Flask:
     
     # Registrar blueprints
     app.register_blueprint(jogador_bp)
+    
+    # Auto-seed database se estiver vazio (Railway)
+    try:
+        auto_seed_on_init()
+    except Exception as e:
+        logger.warning(f"Erro ao fazer seed do banco: {e}")
     
     # PWA - Servir manifest.json
     @app.route('/manifest.json')
