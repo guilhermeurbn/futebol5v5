@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="container" style="max-width: 520px; padding-top: 40px;">
+    <div class="container page-container-narrow" style="padding-top: 40px;">
         <header class="header">
             <div class="header-content">
                 {% set brand_title = 'Acesso ao Sistema' %}
@@ -39,7 +39,7 @@
                 </form>
 
                 <p style="margin-top: 12px; opacity: 0.9; font-size: 0.95rem;">
-                    Não tem conta? <a href="{{ url_for('jogador.cadastro_page') }}" style="color: #7ee8fa; font-weight: 700;">Criar cadastro</a>
+                    Não tem conta? <a href="{{ url_for('jogador.cadastro_page') }}" class="text-accent-link">Criar cadastro</a>
                 </p>
 
                 <p style="margin-top: 12px; opacity: 0.8; font-size: 0.9rem;">Admin padrão: <strong>admin</strong> / <strong>admin123</strong></p>

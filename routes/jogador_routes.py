@@ -60,6 +60,7 @@ def _usuario_logado():
         'username': session.get('username'),
         'nome': session.get('nome'),
         'role': session.get('role', 'usuario'),
+        'senha_temporaria_ativa': bool(session.get('senha_temporaria_ativa')),
         'autenticado': bool(session.get('user_id'))
     }
 
@@ -86,6 +87,19 @@ def _resposta_voto_somente_usuario():
     if request.path.startswith('/api/'):
         return jsonify({'sucesso': False, 'erro': 'Apenas usuarios podem votar'}), 403
     return redirect(url_for('jogador.index'))
+
+
+def _resposta_votacao_pendente(partida):
+    mensagem = 'Voce precisa votar nesta rodada antes de continuar'
+    if request.path.startswith('/api/'):
+        return jsonify({
+            'sucesso': False,
+            'erro': mensagem,
+            'votacao_pendente': True,
+            'partida_id': (partida or {}).get('id'),
+            'sorteio_id': (partida or {}).get('sorteio_id'),
+        }), 409
+    return redirect(url_for('jogador.votacao_page'))
 
 
 def login_required(f):
@@ -126,6 +140,8 @@ def inject_auth_user():
 
 @jogador_bp.before_request
 def proteger_rotas():
+    votacao_service.encerrar_expiradas()
+
     liberadas = {
         'jogador.login_page',
         'jogador.login_submit',
@@ -151,6 +167,8 @@ def proteger_rotas():
             'jogador.index',
             'jogador.logout',
             'jogador.jogar_page',
+            'jogador.perfil_page',
+            'jogador.perfil_alterar_senha',
             'jogador.selecionar_jogadores',
             'jogador.atualizar_presenca',
             'jogador.limpar_presenca',
@@ -163,6 +181,19 @@ def proteger_rotas():
             'jogador.votacao_admin_page',
             'jogador.votacao_admin_criar',
             'jogador.votacao_admin_encerrar',
+            'jogador.historico',
+            'jogador.ver_sorteio',
+            'jogador.pagina_ranking',
+            'jogador.export_sorteio_csv',
+            'jogador.export_sorteio_txt',
+            'jogador.export_sorteio_pdf',
+            'jogador.api_export_sorteio_txt',
+            'jogador.api_favoritar_time',
+            'jogador.api_undo_sorteio',
+            'jogador.api_redo_sorteio',
+            'jogador.api_status_sorteio',
+            'jogador.api_qrcode_sorteio',
+            'jogador.api_link_compartilhamento',
         }
 
         if request.endpoint not in permitidas_juiz:
@@ -192,6 +223,21 @@ def proteger_rotas():
         if request.method in {'POST', 'PUT', 'PATCH', 'DELETE'} and request.endpoint not in permitidas_escrita_usuario:
             return _resposta_somente_leitura()
 
+        endpoints_livres_votacao = {
+            'jogador.votacao_page',
+            'jogador.votacao_salvar',
+            'jogador.logout',
+        }
+        if session.get('senha_temporaria_ativa'):
+            endpoints_livres_votacao.update({
+                'jogador.perfil_page',
+                'jogador.perfil_alterar_senha',
+            })
+
+        pendencia = votacao_service.obter_pendencia_usuario(session.get('user_id'))
+        if pendencia and request.endpoint not in endpoints_livres_votacao:
+            return _resposta_votacao_pendente(pendencia)
+
     return None
 
 
@@ -201,6 +247,21 @@ def _obter_times_do_ultimo_sorteio_global():
         return []
     ultimo = sorteios[-1]
     return ultimo.get('times', [])
+
+
+def _obter_sorteio_para_votacao(sorteio_id=None):
+    if sorteio_id:
+        return historico_service.obter_sorteio(int(sorteio_id))
+    sorteios = historico_service.listar_sorteios()
+    return sorteios[-1] if sorteios else None
+
+
+def _obter_resultado_sorteio(sorteio_id):
+    partidas = partida_service.obter_partidas_sorteio(sorteio_id)
+    if not partidas:
+        return None
+    partidas_ordenadas = sorted(partidas, key=lambda item: (item.get('data', ''), item.get('id', 0)), reverse=True)
+    return partidas_ordenadas[0]
 
 
 def _montar_sorteio_exportacao(sorteio_id, times, somas, diferenca, melhor_time, tem_aviso, aviso_msg):
@@ -247,6 +308,26 @@ def _assinatura_times_json(times_json):
         nomes = sorted(str(j.get('nome', '')).strip().lower() for j in jogadores)
         times_assinatura.append('|'.join(nomes))
     return '||'.join(sorted(times_assinatura))
+
+
+def _assinatura_sorteio_histórico(sorteio):
+    """Cria assinatura estável de um sorteio do histórico para cruzar com a votação."""
+    times_json = []
+    for time in sorteio.get('times', []):
+        times_json.append({
+            'jogadores': [
+                {'nome': jogador.get('nome', '')}
+                for jogador in time.get('jogadores', [])
+            ]
+        })
+    return _assinatura_times_json(times_json)
+
+
+def _obter_partida_votacao_do_sorteio(sorteio):
+    """Encontra a partida de votação correspondente ao sorteio do histórico."""
+    if not sorteio:
+        return None
+    return votacao_service.obter_por_sorteio(sorteio.get('id'))
 
 
 def _assinaturas_recentes_stack(limite=5):
@@ -393,12 +474,12 @@ def login_submit():
     session['username'] = usuario['username']
     session['nome'] = usuario['nome']
     session['role'] = usuario['role']
+    session['senha_temporaria_ativa'] = bool(usuario.get('senha_temporaria_ativa'))
     session.modified = True
     return redirect(url_for('jogador.index'))
 
 
 @jogador_bp.route('/logout', methods=['POST'])
-@login_required
 def logout():
     session.clear()
     return redirect(url_for('jogador.login_page'))
@@ -432,6 +513,26 @@ def perfil_page():
     )
 
 
+@jogador_bp.route('/jogadores/<jogador_id>/perfil', methods=['GET'])
+@login_required
+def perfil_jogador_publico(jogador_id):
+    jogador = jogador_service.obter_por_id(jogador_id)
+    if not jogador:
+        return redirect(url_for('jogador.index'))
+
+    try:
+        stats_jogador = jogador_stats_service.obter_stats_jogador(jogador.nome)
+    except Exception:
+        stats_jogador = None
+
+    return render_template(
+        'perfil_jogador.html',
+        jogador=jogador,
+        stats_jogador=stats_jogador,
+        usuario=_usuario_logado()
+    )
+
+
 @jogador_bp.route('/perfil/senha', methods=['POST'])
 @login_required
 def perfil_alterar_senha():
@@ -452,6 +553,8 @@ def perfil_alterar_senha():
             senha_atual=senha_atual,
             nova_senha=nova_senha
         )
+        session['senha_temporaria_ativa'] = False
+        session.modified = True
         return render_template(
             'perfil.html',
             usuario=_usuario_logado(),
@@ -486,12 +589,14 @@ def votacao_page():
     )
     voto = votacao_service.obter_voto_usuario(partida.get('id'), session.get('user_id'))
     jogadores_votaveis = partida.get('participantes', [])
+    resultado_partida = partida.get('resultado_partida')
     return render_template(
         'votacao_usuario.html',
         partida=partida,
         participante=participante,
         voto=voto,
-        jogadores_votaveis=jogadores_votaveis
+        jogadores_votaveis=jogadores_votaveis,
+        resultado_partida=resultado_partida
     )
 
 
@@ -506,10 +611,8 @@ def votacao_salvar():
         nomes = request.form.getlist('jogador_nome')
         times = request.form.getlist('time_numero')
         notas = request.form.getlist('nota')
-        obrigatorios_idx = set(request.form.getlist('obrigatorio_idx'))
 
-        votos_obrigatorios = []
-        votos_extras = []
+        votos_nao_zero = []
         for idx, nome in enumerate(nomes):
             nome = (nome or '').strip()
             if not nome:
@@ -531,10 +634,14 @@ def votacao_salvar():
                 'nota': nota_valor
             }
 
-            if str(idx) in obrigatorios_idx:
-                votos_obrigatorios.append(item)
-            elif nota_valor > 0:
-                votos_extras.append(item)
+            if nota_valor > 0:
+                votos_nao_zero.append(item)
+
+        if len(votos_nao_zero) < 5:
+            raise ValueError('Voce precisa dar nota para pelo menos 5 jogadores')
+
+        votos_obrigatorios = votos_nao_zero[:5]
+        votos_extras = votos_nao_zero[5:]
 
         votacao_service.salvar_voto(
             partida_id=partida_id,
@@ -548,6 +655,7 @@ def votacao_salvar():
         participante = None
         voto = None
         jogadores_votaveis = partida.get('participantes', []) if partida else []
+        resultado_partida = partida.get('resultado_partida') if partida else None
         if partida:
             participante = next(
                 (p for p in partida.get('participantes', []) if p.get('user_id') == session.get('user_id')),
@@ -560,6 +668,7 @@ def votacao_salvar():
             participante=participante,
             voto=voto,
             jogadores_votaveis=jogadores_votaveis,
+            resultado_partida=resultado_partida,
             erro=str(e)
         ), 400
 
@@ -569,15 +678,18 @@ def votacao_salvar():
 def votacao_admin_page():
     ativa = votacao_service.obter_ativa()
     historico = votacao_service.listar()
-    return render_template('votacao_admin.html', ativa=ativa, historico=historico)
+    sorteio_id = request.args.get('sorteio_id', type=int)
+    sorteio_contexto = historico_service.obter_sorteio(sorteio_id) if sorteio_id else None
+    return render_template('votacao_admin.html', ativa=ativa, historico=historico, sorteio_contexto=sorteio_contexto)
 
 
 @jogador_bp.route('/admin/votacao/criar', methods=['POST'])
 @admin_or_juiz_required
 def votacao_admin_criar():
     try:
-        times = _obter_times_do_ultimo_sorteio_global()
-        if not times:
+        sorteio_id = request.form.get('sorteio_id', type=int)
+        sorteio = _obter_sorteio_para_votacao(sorteio_id)
+        if not sorteio:
             return render_template(
                 'votacao_admin.html',
                 ativa=votacao_service.obter_ativa(),
@@ -586,13 +698,17 @@ def votacao_admin_criar():
             ), 400
 
         usuarios = auth_service.listar_usuarios()
+        resultado_partida = _obter_resultado_sorteio(sorteio.get('id'))
         partida = votacao_service.criar_partida(
-            times_json=times,
+            times_json=sorteio.get('times', []),
             usuarios=usuarios,
             criado_por=session.get('user_id'),
-            titulo=request.form.get('titulo', '').strip()
+            titulo=request.form.get('titulo', '').strip(),
+            sorteio_id=sorteio.get('id'),
+            resultado_partida=resultado_partida,
+            duracao_horas=8,
         )
-        return redirect(url_for('jogador.votacao_admin_page', partida_id=partida.get('id')))
+        return redirect(url_for('jogador.votacao_admin_page', partida_id=partida.get('id'), sorteio_id=sorteio.get('id')))
     except ValueError as e:
         return render_template(
             'votacao_admin.html',
@@ -622,13 +738,17 @@ def votacao_admin_encerrar(partida_id):
 def admin_page():
     usuarios = auth_service.listar_usuarios()
     notificacoes = notificacao_service.listar_notificacoes(apenas_nao_lidas=True, limite=15)
+    sucesso = session.pop('admin_sucesso', request.args.get('sucesso', ''))
+    erro = session.pop('admin_erro', request.args.get('erro', ''))
+    senha_reset = session.pop('admin_senha_reset', None)
     return render_template(
         'admin.html',
         usuarios=usuarios,
         notificacoes=notificacoes,
         total_notificacoes=notificacao_service.contar_nao_lidas(),
-        sucesso=request.args.get('sucesso', ''),
-        erro=request.args.get('erro', '')
+        sucesso=sucesso,
+        erro=erro,
+        senha_reset=senha_reset
     )
 
 
@@ -652,6 +772,22 @@ def admin_criar_usuario():
     except ValueError as e:
         usuarios = auth_service.listar_usuarios()
         return render_template('admin.html', usuarios=usuarios, erro=str(e)), 400
+
+
+@jogador_bp.route('/admin/usuarios/<user_id>/resetar-senha', methods=['POST'])
+@admin_required
+def admin_resetar_senha_usuario(user_id):
+    try:
+        dados_reset = auth_service.resetar_senha_por_admin(
+            user_id=user_id,
+            executor_id=session.get('user_id')
+        )
+        session['admin_sucesso'] = f'Senha de {dados_reset.get("nome")} resetada com sucesso'
+        session['admin_senha_reset'] = dados_reset
+        return redirect(url_for('jogador.admin_page'))
+    except ValueError as e:
+        session['admin_erro'] = str(e)
+        return redirect(url_for('jogador.admin_page'))
 
 
 @jogador_bp.route('/jogar', methods=['GET'])
@@ -994,10 +1130,23 @@ def ver_sorteio(sorteio_id):
     
     if not sorteio:
         return render_template('historico.html', sorteios=[], erro="Sorteio não encontrado"), 404
+
+    partida_votacao = _obter_partida_votacao_do_sorteio(sorteio)
+    resultado_partida = _obter_resultado_sorteio(sorteio_id)
+    ranking_top10 = []
+    melhor_jogador = None
+
+    if partida_votacao and partida_votacao.get('ranking'):
+        ranking_top10 = partida_votacao['ranking'].get('ranking_jogadores', [])[:10]
+        melhor_jogador = partida_votacao['ranking'].get('melhor_jogador')
     
     return render_template(
         'sorteio_detalhe.html',
-        sorteio=sorteio
+        sorteio=sorteio,
+        partida_votacao=partida_votacao,
+        resultado_partida=resultado_partida,
+        ranking_top10=ranking_top10,
+        melhor_jogador=melhor_jogador
     )
 
 
@@ -1311,7 +1460,10 @@ def registrar_resultado_partida():
                 time_numero=detalhe.get('time_numero', 1),
                 posicao=detalhe.get('posicao', 'linha')
             )
-        
+
+        partida['jogadores_detalhes'] = jogadores_detalhes
+        votacao_service.atualizar_resultado_da_rodada(sorteio_id, partida)
+
         return jsonify({
             'sucesso': True,
             'partida': partida,

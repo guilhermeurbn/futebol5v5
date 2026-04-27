@@ -3,7 +3,7 @@
 {% block title %}Votacao da Partida{% endblock %}
 
 {% block content %}
-<div class="container" style="max-width: 920px;">
+<div class="container page-container-narrow votacao-page">
     <header class="header">
         <div class="header-content">
             {% set brand_title = 'Minha Votacao' %}
@@ -13,6 +13,17 @@
     </header>
 
     <main class="main">
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
+            <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab active">🗳️ Minha Votação</a>
+            {% if auth_user.role in ['admin', 'super_admin'] %}
+            <a href="{{ url_for('jogador.votacao_admin_page') }}" class="nav-tab">🛡️ Votação Admin</a>
+            {% endif %}
+            <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
+            <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">🏅 Ranking</a>
+        </div>
+
         {% if erro %}
             <div class="alert alert-warning"><strong>⚠️</strong> {{ erro }}</div>
         {% endif %}
@@ -22,22 +33,68 @@
                 <h2 class="section-title">📭 Sem partida aberta</h2>
                 <p>Nenhuma partida ativa para voto agora. Aguarde o admin abrir uma rodada.</p>
             </section>
+        {% elif voto %}
+            <section class="section">
+                <div class="surface-panel surface-panel--accent">
+                    <div class="section-label">Voto registrado</div>
+                    <h2 class="section-title" style="margin-top: 0;">Você já votou nesta partida</h2>
+                    <p class="text-secondary">Seu voto foi salvo com sucesso e não pode ser enviado novamente.</p>
+                    <div class="summary-grid" style="margin-top: var(--spacing-lg);">
+                        <div class="summary-card summary-card--primary">
+                            <div class="summary-card__label">Jogadores avaliados</div>
+                            <div class="summary-card__value">{{ voto.votos|length }}</div>
+                        </div>
+                        <div class="summary-card summary-card--secondary">
+                            <div class="summary-card__label">Última atualização</div>
+                            <div class="summary-card__value--large">OK</div>
+                            <div class="summary-card__subtext">{{ voto.atualizado_em[:16].replace('T', ' ') }}</div>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('jogador.historico') }}" class="btn btn-primary">Ver histórico</a>
+                </div>
+            </section>
         {% else %}
             <section class="section">
                 <h2 class="section-title">🗳️ {{ partida.titulo }}</h2>
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-label">Seu jogador</div>
-                        <div class="stat-value" style="font-size: 1.2rem;">{{ participante.jogador_nome }}</div>
+                        <div class="stat-value">{{ participante.jogador_nome }}</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">Seu time</div>
-                        <div class="stat-value" style="font-size: 1.2rem;">Time {{ participante.time_numero }}</div>
+                        <div class="stat-value">Time {{ participante.time_numero }}</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">Status</div>
-                        <div class="stat-value" style="font-size: 1.2rem;">{{ partida.status }}</div>
+                        <div class="stat-value">{{ partida.status }}</div>
                     </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Prazo</div>
+                        <div class="stat-value">{{ partida.fecha_em[:16].replace('T', ' ') if partida.fecha_em else 'Sem prazo' }}</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2 class="section-title">🧩 Contexto da rodada</h2>
+                <div class="surface-panel surface-panel--soft">
+                    <p style="margin-top: 0;">O juiz abriu esta votação para o sorteio #{{ partida.sorteio_id }}. Você precisa votar antes do prazo ou até o juiz encerrar a rodada.</p>
+                    {% if resultado_partida %}
+                        <div class="summary-grid" style="margin-top: 1rem;">
+                            {% for time in partida.resultado_resumido %}
+                            <div class="summary-card summary-card--secondary">
+                                <div class="summary-card__label">Time {{ time.time_numero }}</div>
+                                <div class="summary-card__value">{{ time.gols }} gol{{ '' if time.gols == 1 else 's' }}</div>
+                                <div class="summary-card__subtext">{{ time.vitorias }}V {{ time.empates }}E {{ time.derrotas }}D</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning" style="margin-top: 1rem;">
+                            ⚠️ O resultado da partida ainda não foi registrado pelo juiz.
+                        </div>
+                    {% endif %}
                 </div>
             </section>
 
@@ -46,39 +103,48 @@
                 <form method="post" action="{{ url_for('jogador.votacao_salvar') }}" class="form">
                     <input type="hidden" name="partida_id" value="{{ partida.id }}">
 
-                    <p style="opacity:0.9; margin-bottom: 10px;">Marque <strong>obrigatoriamente de 3 a 5 jogadores</strong> e dê nota de <strong>0 a 10</strong> com passo de <strong>0.5</strong>. Você pode dar nota extra para os demais.</p>
+                    <div class="surface-panel surface-panel--soft votacao-intro">
+                        <div class="votacao-intro__header">
+                            <div>
+                                <div class="section-label">Como funciona</div>
+                                <h3 class="votacao-intro__title">Dê nota com a barra abaixo</h3>
+                            </div>
+                            <div class="votacao-progress">
+                                <span class="votacao-progress__label">Notas preenchidas</span>
+                                <span class="votacao-progress__badge"><span id="notas-preenchidas">0</span>/5</span>
+                            </div>
+                        </div>
+                        <p class="votacao-intro__text">Avalie pelo menos 5 jogadores. Só conta nota maior que zero.</p>
+                    </div>
 
-                    <div style="overflow-x:auto;">
-                        <table style="width:100%; border-collapse: collapse;">
-                            <thead>
-                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.2); text-align:left;">
-                                    <th style="padding:10px;">Obrigatório</th>
-                                    <th style="padding:10px;">Jogador</th>
-                                    <th style="padding:10px;">Time</th>
-                                    <th style="padding:10px;">Nota (0-10)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for j in jogadores_votaveis %}
-                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                                    <td style="padding:10px;">
-                                        <input type="checkbox" name="obrigatorio_idx" value="{{ loop.index0 }}" class="obrigatorio-check">
-                                    </td>
-                                    <td style="padding:10px;">{{ j.jogador_nome }}</td>
-                                    <td style="padding:10px;">{{ j.time_numero }}</td>
-                                    <td style="padding:10px; max-width:130px;">
-                                        <input class="form-input" type="number" min="0" max="10" step="0.5" value="0" name="nota">
-                                        <input type="hidden" name="jogador_nome" value="{{ j.jogador_nome }}">
-                                        <input type="hidden" name="time_numero" value="{{ j.time_numero }}">
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                    <div class="votacao-list">
+                        {% for j in jogadores_votaveis %}
+                        <div class="votacao-card">
+                            <div class="votacao-card__top">
+                                <div>
+                                    <div class="votacao-card__name">{{ j.jogador_nome }}</div>
+                                    <div class="votacao-card__meta">Time {{ j.time_numero }}</div>
+                                </div>
+                                <div class="votacao-card__score" data-score-for="{{ loop.index0 }}">0.0</div>
+                            </div>
+
+                            <div class="votacao-slider-wrap">
+                                <input class="votacao-slider" type="range" min="0" max="10" step="0.5" value="0" name="nota" data-score-index="{{ loop.index0 }}">
+                                <div class="votacao-slider-labels">
+                                    <span>0</span>
+                                    <span>5</span>
+                                    <span>10</span>
+                                </div>
+                            </div>
+
+                            <input type="hidden" name="jogador_nome" value="{{ j.jogador_nome }}">
+                            <input type="hidden" name="time_numero" value="{{ j.time_numero }}">
+                        </div>
+                        {% endfor %}
                     </div>
 
                     <div id="aviso-obrigatorios" class="alert alert-warning" style="display:none;">
-                        Selecione entre 3 e 5 jogadores como obrigatórios.
+                        Você precisa dar nota para pelo menos 5 jogadores.
                     </div>
 
                     <button class="btn btn-primary" type="submit">Salvar voto</button>
@@ -90,9 +156,13 @@
 
 <script>
 document.querySelector('form')?.addEventListener('submit', function (e) {
-    const checks = document.querySelectorAll('.obrigatorio-check:checked').length;
+    const notas = Array.from(document.querySelectorAll('input[name="nota"]'))
+        .filter(input => parseFloat(String(input.value || '0').replace(',', '.')) > 0).length;
     const aviso = document.getElementById('aviso-obrigatorios');
-    if (checks < 3 || checks > 5) {
+    const contador = document.getElementById('notas-preenchidas');
+    if (contador) contador.textContent = String(notas);
+
+    if (notas < 5) {
         e.preventDefault();
         if (aviso) aviso.style.display = 'block';
         return;
@@ -118,6 +188,24 @@ document.querySelector('form')?.addEventListener('submit', function (e) {
             }
         });
     }
+});
+
+document.querySelectorAll('input[name="nota"]').forEach(input => {
+    input.addEventListener('input', () => {
+        const notas = Array.from(document.querySelectorAll('input[name="nota"]'))
+            .filter(el => parseFloat(String(el.value || '0').replace(',', '.')) > 0).length;
+        const contador = document.getElementById('notas-preenchidas');
+        if (contador) contador.textContent = String(notas);
+
+        const score = input.value;
+        const badge = document.querySelector(`[data-score-for="${input.dataset.scoreIndex}"]`);
+        if (badge) badge.textContent = Number(score).toFixed(1);
+    });
+});
+
+document.querySelectorAll('input[name="nota"]').forEach(input => {
+    const badge = document.querySelector(`[data-score-for="${input.dataset.scoreIndex}"]`);
+    if (badge) badge.textContent = Number(input.value || 0).toFixed(1);
 });
 </script>
 {% endblock %}

@@ -21,9 +21,16 @@
         <main class="main">
             <!-- Navigation -->
             <div class="nav-tabs">
+                {% if auth_user.role == 'juiz' %}
+                <a href="{{ url_for('jogador.jogar_page') }}" class="nav-tab">🎮 Jogar</a>
+                <a href="{{ url_for('jogador.votacao_admin_page', sorteio_id=sorteio.id) }}" class="nav-tab">🛡️ Votação</a>
+                <a href="{{ url_for('jogador.historico') }}" class="nav-tab active">📜 Histórico</a>
+                <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">🏅 Ranking</a>
+                {% else %}
                 <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
                 <a href="{{ url_for('jogador.historico') }}" class="nav-tab active">📜 Histórico</a>
                 <a href="{{ url_for('jogador.estatisticas') }}" class="nav-tab">📊 Estatísticas</a>
+                {% endif %}
             </div>
 
             <!-- Info Section -->
@@ -46,14 +53,25 @@
                         <div class="info-label">⚽ Número de Times</div>
                         <div class="info-value">{{ sorteio.num_times }}</div>
                     </div>
-                    <div class="info-card">
-                        <div class="info-label">📊 Diferença de Pontos</div>
-                        <div class="info-value diff-{{ 'good' if sorteio.diferenca <= 1 else 'ok' if sorteio.diferenca <= 2 else 'bad' }}">
-                            {{ sorteio.diferenca }} pts
-                        </div>
+                </div>
+            </section>
+
+            {% if auth_user.role in ['admin', 'super_admin', 'juiz'] %}
+            <section class="section">
+                <div class="surface-panel surface-panel--soft">
+                    <div class="section-label">Rodada conectada</div>
+                    <div class="actions-section" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px;">
+                        <a href="{{ url_for('jogador.resultado_partida_page', sorteio_id=sorteio.id) }}" class="btn btn-primary">🏆 Registrar resultado</a>
+                        <form method="post" action="{{ url_for('jogador.votacao_admin_criar') }}">
+                            <input type="hidden" name="sorteio_id" value="{{ sorteio.id }}">
+                            <input type="hidden" name="titulo" value="Rodada do sorteio #{{ sorteio.id }}">
+                            <button class="btn btn-primary" type="submit" style="width: 100%;">🗳️ Iniciar votação</button>
+                        </form>
+                        <a href="{{ url_for('jogador.votacao_admin_page', sorteio_id=sorteio.id) }}" class="btn btn-secondary">📋 Ver painel da rodada</a>
                     </div>
                 </div>
             </section>
+            {% endif %}
 
             <!-- Times Section -->
             <section class="section">
@@ -64,7 +82,6 @@
                         <div class="team">
                             <div class="team-header">
                                 <h2 class="team-title">⚽ Time {{ time.numero }}</h2>
-                                <div class="team-score">{{ time.soma }} pts</div>
                             </div>
                             
                             <div class="players-list">
@@ -83,25 +100,94 @@
                 </div>
             </section>
 
-            <!-- Pontuações Section -->
             <section class="section">
-                <h2 class="section-title">📈 Pontuações por Time</h2>
+                <div class="section-header">
+                    <h2 class="section-title">🏆 Resultado da Partida</h2>
+                    {% if resultado_partida %}
+                        <span class="stat-badge">Resultado registrado</span>
+                    {% endif %}
+                </div>
 
-                <div class="chart-container">
-                    <div class="chart">
-                        {% set max_soma = sorteio.pontuacoes|max %}
-                        {% for time in sorteio.times %}
-                            <div class="chart-bar">
-                                <div class="chart-label">Time {{ time.numero }}</div>
-                                <div class="chart-bar-container">
-                                    <div class="chart-bar-fill" style="width: {{ (time.soma / max_soma) * 100 }}%">
-                                        {{ time.soma }} pts
-                                    </div>
+                {% if resultado_partida %}
+                    <div class="summary-grid">
+                        {% for gols in resultado_partida.gols_times %}
+                            {% set idx = loop.index %}
+                            {% set desempenho = (resultado_partida.times_desempenho | selectattr('time_numero', 'equalto', idx) | list | first) %}
+                            <div class="summary-card summary-card--secondary">
+                                <div class="summary-card__label">Time {{ idx }}</div>
+                                <div class="summary-card__value">{{ gols }} gol{{ '' if gols == 1 else 's' }}</div>
+                                <div class="summary-card__subtext">
+                                    {{ desempenho.vitorias if desempenho else 0 }}V
+                                    {{ desempenho.empates if desempenho else 0 }}E
+                                    {{ desempenho.derrotas if desempenho else 0 }}D
                                 </div>
                             </div>
                         {% endfor %}
                     </div>
+                {% else %}
+                    <div class="surface-panel surface-panel--soft">
+                        <p class="hero-empty__text" style="margin: 0;">Ainda não há resultado oficial registado para esta rodada.</p>
+                    </div>
+                {% endif %}
+            </section>
+
+            <section class="section">
+                <div class="section-header">
+                    <h2 class="section-title">🏅 Votação da Rodada</h2>
+                    {% if partida_votacao %}
+                        <span class="stat-badge">Rodada {{ partida_votacao.id }} • {{ partida_votacao.status }}</span>
+                    {% endif %}
                 </div>
+
+                {% if ranking_top10 %}
+                    <div class="summary-grid">
+                        <div class="summary-card summary-card--primary">
+                            <div class="summary-card__label">Mais votado</div>
+                            <div class="summary-card__value summary-card__value--large">{{ melhor_jogador.jogador_nome }}</div>
+                            <div class="summary-card__subtext">{{ melhor_jogador.votos }} votos • média {{ melhor_jogador.nota_media }}</div>
+                        </div>
+                        <div class="summary-card summary-card--secondary">
+                            <div class="summary-card__label">Posições exibidas</div>
+                            <div class="summary-card__value">10</div>
+                            <div class="summary-card__subtext">Top da rodada</div>
+                        </div>
+                    </div>
+
+                    <div class="table-shell">
+                        <table class="uniform-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Jogador</th>
+                                    <th>Time</th>
+                                    <th>Votos</th>
+                                    <th>Média</th>
+                                    <th>Nota total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for jogador in ranking_top10 %}
+                                    <tr>
+                                        <td>{{ loop.index }}</td>
+                                        <td><strong>{{ jogador.jogador_nome }}</strong></td>
+                                        <td>Time {{ jogador.time_numero }}</td>
+                                        <td>{{ jogador.votos }}</td>
+                                        <td>{{ jogador.nota_media }}</td>
+                                        <td>{{ jogador.pontos }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% elif partida_votacao %}
+                    <div class="surface-panel surface-panel--soft">
+                        <p class="hero-empty__text" style="margin: 0;">A votação está aberta até {{ partida_votacao.fecha_em[:16].replace('T', ' ') if partida_votacao.fecha_em else 'n/d' }}. O ranking final aparece assim que a rodada for encerrada.</p>
+                    </div>
+                {% else %}
+                    <div class="surface-panel surface-panel--soft">
+                        <p class="hero-empty__text" style="margin: 0;">Não encontrei uma votação associada a este sorteio.</p>
+                    </div>
+                {% endif %}
             </section>
         </main>
 

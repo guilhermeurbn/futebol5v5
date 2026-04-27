@@ -23,16 +23,15 @@
             <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">Maior Placar</div>
             {% if campeonato.maior_placar %}
                 <div style="font-size: 24px; font-weight: bold;">{{ campeonato.maior_placar.gols|join(' x ') }}</div>
-                <div style="font-size: 11px; opacity: 0.9; margin-top: 5px;">Diferença: {{ campeonato.maior_placar.diferenca }}</div>
+                <div style="font-size: 11px; opacity: 0.9; margin-top: 5px;">Maior margem registrada</div>
             {% else %}
                 <div style="font-size: 24px; font-weight: bold;">-</div>
             {% endif %}
         </div>
 
         <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); padding: 20px; border-radius: 12px; color: white; text-align: center;">
-            <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">Maior Diferença</div>
+            <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">Maior Margem</div>
             <div style="font-size: 32px; font-weight: bold;">{{ campeonato.maior_diferenca }}</div>
-            <div style="font-size: 11px; opacity: 0.9; margin-top: 5px;">pts</div>
         </div>
     </div>
 

@@ -13,11 +13,29 @@
     </header>
 
     <main class="main">
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
+            {% if auth_user.role == 'usuario' %}
+            <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab">🗳️ Minha Votação</a>
+            {% endif %}
+            {% if auth_user.role in ['admin', 'super_admin'] %}
+            <a href="{{ url_for('jogador.votacao_admin_page') }}" class="nav-tab">🛡️ Votação Admin</a>
+            {% endif %}
+            <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
+            <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">🏅 Ranking</a>
+        </div>
+
         {% if sucesso_senha %}
             <div class="alert alert-success"><strong>✅</strong> {{ sucesso_senha }}</div>
         {% endif %}
         {% if erro_senha %}
             <div class="alert alert-warning"><strong>⚠️</strong> {{ erro_senha }}</div>
+        {% endif %}
+        {% if usuario.senha_temporaria_ativa %}
+            <div class="alert alert-warning">
+                <strong>🔐 Atenção:</strong> você entrou com uma senha temporária. Troque-a agora nesta página para manter o acesso à conta.
+            </div>
         {% endif %}
 
         <!-- INFORMAÇÕES DA CONTA -->
@@ -39,6 +57,8 @@
                             👑 Super Admin
                         {% elif usuario.role == 'admin' %}
                             🔑 Admin
+                        {% elif usuario.role == 'juiz' %}
+                            🎮 Juiz
                         {% else %}
                             👤 Usuário
                         {% endif %}

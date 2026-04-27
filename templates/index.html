@@ -280,6 +280,9 @@
                                     <div class="player-level-fill" style="width: {{ (jogador.nivel / 10) * 100 }}%"></div>
                                 </div>
                                 <div class="player-actions">
+                                    <a class="btn btn-small btn-secondary" href="{{ url_for('jogador.perfil_jogador_publico', jogador_id=jogador.id) }}">
+                                        👁️ Perfil
+                                    </a>
                                     {% if auth_user.role == 'admin' %}
                                     <button class="btn btn-small btn-danger" onclick="abrirModalDelete('{{ jogador.id }}', '{{ jogador.nome }}')">
                                         🗑️ Deletar

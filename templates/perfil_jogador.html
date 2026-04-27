@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Perfil de {{ jogador.nome }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1200px;">
+    <header class="header">
+        <div class="header-content">
+            {% set brand_title = jogador.nome %}
+            {% set brand_subtitle = 'Perfil público do jogador' %}
+            {% include '_brand_header.html' %}
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="nav-tabs">
+            <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
+            {% if usuario.role == 'usuario' %}
+            <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab">🗳️ Minha Votação</a>
+            {% endif %}
+            {% if usuario.role in ['admin', 'super_admin'] %}
+            <a href="{{ url_for('jogador.votacao_admin_page') }}" class="nav-tab">🛡️ Votação Admin</a>
+            {% endif %}
+            <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
+            <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">🏅 Ranking</a>
+        </div>
+
+        <section class="section">
+            <h2 class="section-title">👤 Informações básicas</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Nome</div>
+                    <div class="stat-value">{{ jogador.nome }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Nível</div>
+                    <div class="stat-value">{{ jogador.nivel }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Tipo</div>
+                    <div class="stat-value">{{ 'Fixo' if jogador.tipo == 'fixo' else 'Avulso' }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Posição</div>
+                    <div class="stat-value">{{ 'Goleiro' if jogador.posicao == 'goleiro' else 'Linha' }}</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">📊 Resumo de jogos</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Partidas</div>
+                    <div class="stat-value">{{ stats_jogador.total_partidas if stats_jogador else 0 }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Vitórias</div>
+                    <div class="stat-value">{{ stats_jogador.get('vitórias', 0) if stats_jogador else 0 }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Gols</div>
+                    <div class="stat-value">{{ stats_jogador.gols if stats_jogador else 0 }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Win rate</div>
+                    <div class="stat-value">{{ stats_jogador.win_rate if stats_jogador else 0 }}%</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">🕒 Jogos recentes</h2>
+            {% if stats_jogador and stats_jogador.historico_partidas %}
+                <div class="sorteios-list">
+                    {% for jogo in stats_jogador.historico_partidas[:5] %}
+                        <div class="sorteio-card">
+                            <div class="sorteio-header">
+                                <div class="sorteio-info">
+                                    <h3 class="sorteio-title">Partida #{{ jogo.partida_id }}</h3>
+                                    <p class="sorteio-data">📅 {{ jogo.data[:10] if jogo.data else 'sem data' }}</p>
+                                </div>
+                                <div class="sorteio-stats">
+                                    <span class="stat-badge">{{ jogo.resultado }}</span>
+                                    <span class="stat-badge">⚽ {{ jogo.gols }} gols</span>
+                                    <span class="stat-badge">🎯 {{ jogo.assistencias }} assistencias</span>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">📭</div>
+                    <p>Sem jogos registrados ainda</p>
+                </div>
+            {% endif %}
+        </section>
+    </main>
+</div>
+{% endblock %}

@@ -96,5 +96,119 @@
         "derrotas": 0
       }
     ]
+  },
+  {
+    "id": 6,
+    "sorteio_id": 16,
+    "data": "2026-04-26T22:44:48.415193",
+    "time_vencedor": 3,
+    "gols_times": [
+      2,
+      3,
+      4
+    ],
+    "notas": "",
+    "times_desempenho": [
+      {
+        "time_numero": 1,
+        "vitorias": 1,
+        "empates": 2,
+        "derrotas": 1
+      },
+      {
+        "time_numero": 2,
+        "vitorias": 2,
+        "empates": 4,
+        "derrotas": 1
+      },
+      {
+        "time_numero": 3,
+        "vitorias": 2,
+        "empates": 1,
+        "derrotas": 2
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "sorteio_id": 18,
+    "data": "2026-04-27T00:54:52.260000",
+    "time_vencedor": 3,
+    "gols_times": [
+      3,
+      7,
+      10
+    ],
+    "notas": "",
+    "times_desempenho": [
+      {
+        "time_numero": 1,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 0
+      },
+      {
+        "time_numero": 2,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 0
+      },
+      {
+        "time_numero": 3,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 0
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "sorteio_id": 19,
+    "data": "2026-04-27T01:08:54.365716",
+    "time_vencedor": 1,
+    "gols_times": [
+      1,
+      0
+    ],
+    "notas": "",
+    "times_desempenho": [
+      {
+        "time_numero": 1,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 0
+      },
+      {
+        "time_numero": 2,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 0
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "sorteio_id": 21,
+    "data": "2026-04-27T01:19:46.627073",
+    "time_vencedor": 2,
+    "gols_times": [
+      2,
+      4
+    ],
+    "notas": "",
+    "times_desempenho": [
+      {
+        "time_numero": 1,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 0
+      },
+      {
+        "time_numero": 2,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 0
+      }
+    ]
   }
 ]

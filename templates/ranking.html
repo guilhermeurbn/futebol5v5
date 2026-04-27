@@ -3,7 +3,7 @@
 {% block title %}Ranking de Jogadores{% endblock %}
 
 {% block content %}
-<div class="container" style="max-width: 1080px;">
+<div class="container page-container-medium">
     <header class="header">
         <div class="header-content">
             {% set brand_title = 'Ranking de Jogadores' %}
@@ -14,11 +14,15 @@
 
     <main class="main">
         <div class="nav-tabs">
+            {% if auth_user.role == 'juiz' %}
+            <a href="{{ url_for('jogador.jogar_page') }}" class="nav-tab">🎮 Jogar</a>
+            {% else %}
             <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
+            {% endif %}
             {% if auth_user.role == 'usuario' %}
             <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab">🗳️ Minha Votação</a>
             {% endif %}
-            {% if auth_user.role in ['admin', 'super_admin'] %}
+            {% if auth_user.role in ['admin', 'super_admin', 'juiz'] %}
             <a href="{{ url_for('jogador.votacao_admin_page') }}" class="nav-tab">🛡️ Votação Admin</a>
             {% endif %}
             <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
@@ -46,35 +50,35 @@
         <section class="section">
             <h2 class="section-title">🏆 Classificação</h2>
             {% if dados.ranking %}
-                <div style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                <div class="table-shell">
+                    <table class="uniform-table">
                         <thead>
-                            <tr style="background: rgba(102, 126, 234, 0.1); border-bottom: 2px solid #667eea;">
-                                <th style="padding: 12px; text-align: left;">#</th>
-                                <th style="padding: 12px; text-align: left;">Jogador</th>
-                                <th style="padding: 12px; text-align: center;">Pontos</th>
-                                <th style="padding: 12px; text-align: center;">Jogos</th>
-                                <th style="padding: 12px; text-align: center;">Gols</th>
-                                <th style="padding: 12px; text-align: center;">Assist.</th>
-                                <th style="padding: 12px; text-align: center;">Vitórias</th>
-                                <th style="padding: 12px; text-align: center;">Destaques</th>
-                                <th style="padding: 12px; text-align: center;">Nota média</th>
+                            <tr>
+                                <th>#</th>
+                                <th>Jogador</th>
+                                <th class="text-center">Índice</th>
+                                <th class="text-center">Jogos</th>
+                                <th class="text-center">Gols</th>
+                                <th class="text-center">Assist.</th>
+                                <th class="text-center">Vitórias</th>
+                                <th class="text-center">Destaques</th>
+                                <th class="text-center">Nota média</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for item in dados.ranking %}
-                            <tr style="border-bottom: 1px solid #333; {% if loop.index0 < 3 %}background: rgba(102, 126, 234, 0.05);{% endif %}">
-                                <td style="padding: 12px;">
+                            <tr {% if loop.index0 < 3 %}style="background: rgba(102, 126, 234, 0.05);"{% endif %}>
+                                <td>
                                     {% if loop.index0 == 0 %}🥇{% elif loop.index0 == 1 %}🥈{% elif loop.index0 == 2 %}🥉{% else %}{{ loop.index }}{% endif %}
                                 </td>
-                                <td style="padding: 12px; font-weight: 600;">{{ item.jogador_nome }}</td>
-                                <td style="padding: 12px; text-align: center; font-weight: 700;">{{ item.pontos }}</td>
-                                <td style="padding: 12px; text-align: center;">{{ item.jogos }}</td>
-                                <td style="padding: 12px; text-align: center;">{{ item.gols }}</td>
-                                <td style="padding: 12px; text-align: center;">{{ item.assistencias }}</td>
-                                <td style="padding: 12px; text-align: center;">{{ item.vitorias }}</td>
-                                <td style="padding: 12px; text-align: center;">{{ item.destaques }}</td>
-                                <td style="padding: 12px; text-align: center;">{{ item.nota_media }}</td>
+                                <td style="font-weight: 600;">{{ item.jogador_nome }}</td>
+                                <td class="text-center" style="font-weight: 700;">{{ item.pontos }}</td>
+                                <td class="text-center">{{ item.jogos }}</td>
+                                <td class="text-center">{{ item.gols }}</td>
+                                <td class="text-center">{{ item.assistencias }}</td>
+                                <td class="text-center">{{ item.vitorias }}</td>
+                                <td class="text-center">{{ item.destaques }}</td>
+                                <td class="text-center">{{ item.nota_media }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>

@@ -12,10 +12,13 @@
     "id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033",
     "username": "guilherme",
     "nome": "Guilherme",
-    "password_hash": "scrypt:32768:8:1$uWVFYLKOA3OEbOMo$fe78808961a1682188d18f11dc608832cb0f045d9214240757c6bb0b193df22610d072629cbe1d58805b3ff78c2e060283e3dcefcc62dcb52791c92a23089856",
+    "password_hash": "scrypt:32768:8:1$RKUZnMoMtu9sUVjg$7fe3e902d4abb348f1a3a7492786d3a0e613494caf9949b02a76db684bb0826a1d8fc21dcebbb345922c6af7140839140a1ec917913a1ed8a3825f4f6afdb51c",
     "role": "usuario",
     "criado_em": "2026-04-23T22:51:39.113689",
-    "ativo": true
+    "ativo": true,
+    "senha_resetada_em": null,
+    "senha_resetada_por": null,
+    "senha_temporaria_ativa": false
   },
   {
     "id": "922542cb-0ce1-4752-9886-9fd5248d7f03",
@@ -168,6 +171,15 @@
     "password_hash": "scrypt:32768:8:1$VgUyVtyiCZTPt8uL$f5e86def647fe4c534267da331d3d6e5ebc3f88196205e915f8981ed2ea2149a7148720e833c19305c48b05d050b8b8f37f28aecad6c69b0d528508111d56d0b",
     "role": "admin",
     "criado_em": "2026-04-25T02:06:25.689534",
+    "ativo": true
+  },
+  {
+    "id": "8e479c6c-a6b3-4f70-be2c-5154e659441e",
+    "username": "jogador",
+    "nome": "jogadorteste",
+    "password_hash": "scrypt:32768:8:1$oj4MJqToFFMEFl54$e4be7f77485d072a4040a71d7c411d82d24a9b1859fc86a5b599fd5eb45bf49a30908cf7ae0ce865c4dd890107f31f392d199921401e1dccb7f607bf28bf7893",
+    "role": "usuario",
+    "criado_em": "2026-04-26T22:08:51.548773",
     "ativo": true
   }
 ]

@@ -3,7 +3,7 @@
 {% block title %}Times Favoritos{% endblock %}
 
 {% block content %}
-<div class="container" style="max-width: 1200px;">
+<div class="container page-container-wide">
     <div class="header">
         <div class="header-content">
             {% set brand_title = 'Times Favoritos' %}
@@ -12,56 +12,64 @@
         </div>
     </div>
 
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+        <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
+        {% if auth_user.role == 'usuario' %}
+        <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab">🗳️ Minha Votação</a>
+        {% endif %}
+        {% if auth_user.role in ['admin', 'super_admin'] %}
+        <a href="{{ url_for('jogador.votacao_admin_page') }}" class="nav-tab">🛡️ Votação Admin</a>
+        {% endif %}
+        <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
+        <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">🏅 Ranking</a>
+    </div>
+
     <!-- Stats Cards -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 12px; color: white; text-align: center;">
-            <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">Total de Favoritos</div>
-            <div style="font-size: 32px; font-weight: bold;">{{ stats.total_favoritos }}</div>
+    <div class="summary-grid">
+        <div class="summary-card summary-card--primary">
+            <div class="summary-card__label">Total de Favoritos</div>
+            <div class="summary-card__value">{{ stats.total_favoritos }}</div>
         </div>
-        
-        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 20px; border-radius: 12px; color: white; text-align: center;">
-            <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">Pontuação Média</div>
-            <div style="font-size: 32px; font-weight: bold;">{{ stats.pontuacao_media }}</div>
-            <div style="font-size: 11px; opacity: 0.9; margin-top: 5px;">pts</div>
+        <div class="summary-card summary-card--secondary">
+            <div class="summary-card__label">Índice Médio</div>
+            <div class="summary-card__value">{{ stats.pontuacao_media }}</div>
         </div>
-
-        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); padding: 20px; border-radius: 12px; color: white; text-align: center;">
-            <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">Maior Pontuação</div>
-            <div style="font-size: 32px; font-weight: bold;">{{ stats.pontuacao_maxima }}</div>
-            <div style="font-size: 11px; opacity: 0.9; margin-top: 5px;">pts</div>
+        <div class="summary-card summary-card--accent">
+            <div class="summary-card__label">Maior Índice</div>
+            <div class="summary-card__value">{{ stats.pontuacao_maxima }}</div>
         </div>
-
-        <div style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); padding: 20px; border-radius: 12px; color: #333; text-align: center;">
-            <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">Mais Utilizado</div>
-            <div style="font-size: 18px; font-weight: bold;">{{ stats.mais_usado.vezes_utilizado if stats.mais_usado else 0 }} vezes</div>
+        <div class="summary-card summary-card--success">
+            <div class="summary-card__label">Mais Utilizado</div>
+            <div class="summary-card__value summary-card__value--large">{{ stats.mais_usado.vezes_utilizado if stats.mais_usado else 0 }} vezes</div>
             {% if stats.mais_usado %}
-                <div style="font-size: 12px; margin-top: 5px;">{{ stats.mais_usado.nome[:20] }}</div>
+                <div class="summary-card__subtext">{{ stats.mais_usado.nome[:20] }}</div>
             {% endif %}
         </div>
     </div>
 
     <!-- Times Favoritos -->
     {% if favoritos %}
-        <div style="display: grid; gap: 15px;">
+        <div class="sorteios-list">
             {% for fav in favoritos %}
-                <div style="background: #2a2a3e; padding: 20px; border-radius: 12px; border-left: 4px solid #667eea;">
-                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                <div class="sorteio-card surface-panel surface-panel--accent">
+                    <div class="sorteio-header">
                         <div>
-                            <h3 style="margin: 0 0 5px 0; color: white;">
+                            <h3 class="sorteio-title" style="color: white;">
                                 ⭐ {{ fav.nome }}
                                 {% if fav.vezes_utilizado > 0 %}
                                     <span style="font-size: 12px; opacity: 0.7;">{{ fav.vezes_utilizado }} vez{{ 'es' if fav.vezes_utilizado != 1 else '' }}</span>
                                 {% endif %}
                             </h3>
-                            <div style="font-size: 12px; opacity: 0.7;">
+                            <div class="sorteio-data" style="color: rgba(255,255,255,0.7);">
                                 Sorteio #{{ fav.sorteio_id }} • Time {{ fav.time_numero }} • {{ fav.jogadores|length }} jogadores
                             </div>
                         </div>
-                        <div style="font-size: 24px; font-weight: bold; color: #ffd700;">{{ fav.pontuacao }} pts</div>
+                        <div style="font-size: 24px; font-weight: bold; color: #ffd700;">{{ fav.pontuacao }}</div>
                     </div>
 
                     <!-- Jogadores -->
-                    <div style="background: rgba(102, 126, 234, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <div class="surface-panel surface-panel--soft" style="margin-bottom: 15px;">
                         {% set goleiros = fav.jogadores|selectattr('posicao', 'equalto', 'goleiro')|list %}
                         {% set linhas = fav.jogadores|selectattr('posicao', 'equalto', 'linha')|list %}
                         
@@ -69,7 +77,7 @@
                             <div style="margin-bottom: 10px;">
                                 <div style="font-weight: bold; margin-bottom: 5px; color: #667eea;">🧤 Goleiros</div>
                                 {% for j in goleiros %}
-                                    <div style="padding: 5px 10px; background: rgba(102, 126, 234, 0.05); margin-bottom: 3px; border-radius: 4px; font-size: 13px;">
+                                    <div class="surface-panel" style="padding: 5px 10px; margin-bottom: 3px; border-radius: 4px; font-size: 13px;">
                                         {{ j.nome }} (N{{ j.nivel }}) • {{ j.tipo|capitalize }}
                                     </div>
                                 {% endfor %}
@@ -80,7 +88,7 @@
                             <div>
                                 <div style="font-weight: bold; margin-bottom: 5px; color: #667eea;">⚽ Linha</div>
                                 {% for j in linhas %}
-                                    <div style="padding: 5px 10px; background: rgba(102, 126, 234, 0.05); margin-bottom: 3px; border-radius: 4px; font-size: 13px;">
+                                    <div class="surface-panel" style="padding: 5px 10px; margin-bottom: 3px; border-radius: 4px; font-size: 13px;">
                                         {{ j.nome }} (N{{ j.nivel }}) • {{ j.tipo|capitalize }}
                                     </div>
                                 {% endfor %}
@@ -89,7 +97,7 @@
                     </div>
 
                     <!-- Actions -->
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px;">
+                    <div class="action-grid">
                         <button class="btn-usar" data-id="{{ fav.id }}" 
                                 style="padding: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.3s;">
                             ✓ Usar
@@ -107,11 +115,11 @@
             {% endfor %}
         </div>
     {% else %}
-        <div style="text-align: center; padding: 60px 20px; background: #2a2a3e; border-radius: 12px;">
-            <div style="font-size: 64px; margin-bottom: 20px;">⭐</div>
-            <h2 style="margin: 0 0 10px 0;">Nenhum Time Favoritado</h2>
-            <p style="color: #999; margin: 0 0 20px 0;">Vá para a página de sorteio e clique em "Favoritar Time"</p>
-            <a href="/sortear" style="display: inline-block; padding: 12px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">
+        <div class="hero-empty surface-panel">
+            <div class="hero-empty__icon">⭐</div>
+            <h2 class="hero-empty__title">Nenhum Time Favoritado</h2>
+            <p class="hero-empty__text">Vá para a página de sorteio e clique em "Favoritar Time"</p>
+            <a href="/sortear" class="hero-empty__link">
                 🎲 Ir para Sorteio
             </a>
         </div>
@@ -119,7 +127,7 @@
 
     <!-- Back Button -->
     <div style="margin-top: 30px; text-align: center;">
-        <a href="/" style="color: #667eea; text-decoration: none; font-size: 14px;">← Voltar para Home</a>
+        <a href="/" class="text-accent-link">← Voltar para Home</a>
     </div>
 </div>
 

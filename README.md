@@ -1,257 +1,317 @@
-# ⚽ NaTrave - Gerador de Times Equilibrados
+# NaTrave
 
-Um aplicativo web profissional para organizar, cadastrar jogadores e balancear times de futebol de forma equilibrada.
+Aplicacao web Flask para organizar jogos de futebol 5v5 com cadastro de jogadores, selecao de presentes, sorteio equilibrado, registro de resultados, votacao por partida e ranking.
 
-## 🎯 Recursos
+Hoje o projeto funciona mais como um painel completo de gestao do jogo do que apenas como um "gerador de times".
 
-- ✨ **Interface Moderna e Responsiva** - Design profissional que funciona em todos os dispositivos
-- 🎲 **Balanceamento Inteligente** - Algoritmo Snake Draft para times equilibrados
-- 👥 **Gerenciamento de Jogadores** - Adicione, edite e remova jogadores facilmente
-- 📊 **Análise de Times** - Visualize pontuação total e diferença entre times
-- 🔧 **API RESTful** - Endpoints JSON para integração com outros sistemas
-- 💾 **Persistência de Dados** - Dados salvos em JSON local
+## Visao Geral
 
-## 🛠️ Tecnologias
+O NaTrave cobre o fluxo completo de uma pelada organizada:
 
-- **Backend**: Python 3.8+, Flask 3.0
-- **Frontend**: HTML5, CSS3 com Design Responsivo
-- **Dados**: JSON
-- **Arquitetura**: MVC com Blueprints
+1. Cadastro e autenticacao de usuarios
+2. Vinculo automatico de um jogador ao usuario cadastrado
+3. Selecao de 10, 15 ou 20 presentes
+4. Sorteio de 2, 3 ou 4 times de 5 jogadores
+5. Registro de resultado da partida
+6. Abertura da votacao da rodada pelo juiz ou admin
+7. Voto obrigatorio dos participantes da rodada
+8. Encerramento manual ou automatico em 8 horas
+9. Apuracao de ranking por notas
+10. Historico, exportacao e compartilhamento
 
-## 📋 Pré-requisitos
+## Funcionalidades Atuais
 
-- Python 3.8 ou superior
-- pip (gerenciador de pacotes Python)
+- Autenticacao com perfis `super_admin`, `admin`, `juiz` e `usuario`
+- Reset simples de senha por `admin` com senha temporaria
+- Cadastro de jogadores com nome, nivel, tipo e posicao
+- Fluxo dedicado para o `juiz` em `/jogar`
+- Selecao de presenca com validacao de 10, 15 ou 20 jogadores
+- Sorteio equilibrado com suporte a goleiros
+- Anti-repeticao de sorteios recentes
+- Historico completo de sorteios
+- Undo/redo dos sorteios recentes
+- Registro de resultados com gols, assistencias e cartoes
+- Votacao por rodada com prazo de 8 horas
+- Voto obrigatorio para participantes enquanto a rodada estiver aberta
+- Ranking geral de jogadores com base nas votacoes encerradas
+- Exportacao de sorteio em CSV, TXT e PDF
+- Compartilhamento por link e QR code
+- Favoritos de times
+- Suporte offline com fila local e cache via Service Worker
 
-## ⚙️ Instalação
+## Regras de Negocio Principais
 
-1. **Clone ou baixe o projeto**
+### Quantidade de jogadores
 
-```bash
-cd futebol5v5
+O sistema aceita apenas:
+
+- `10` jogadores -> `2` times
+- `15` jogadores -> `3` times
+- `20` jogadores -> `4` times
+
+Cada time tem exatamente `5` jogadores.
+
+### Balanceamento
+
+O algoritmo atual fica em [services/balanceamento.py](services/balanceamento.py).
+
+Resumo do comportamento:
+
+- goleiros contam como jogadores normais no total de 5 por time
+- goleiros sao distribuidos primeiro
+- jogadores de linha sao distribuidos para completar os times
+- o equilibrio final e refinado com simulated annealing
+- o sistema tenta evitar repetir composicoes muito recentes
+
+### Perfis de acesso
+
+- `super_admin`: acesso total
+- `admin`: gestao completa do sistema e dos usuarios
+- `juiz`: acesso ao fluxo operacional do jogo e da votacao da rodada
+- `usuario`: acesso ao proprio perfil e a votacao quando participa de uma partida
+
+## Stack
+
+- Python 3
+- Flask
+- Jinja2
+- Persistencia em JSON local
+- ReportLab para PDF
+- `qrcode[pil]` para compartilhamento via QR code
+- HTML, CSS e JavaScript vanilla no frontend
+- Service Worker para experiencia offline
+
+## Estrutura do Projeto
+
+```text
+futebol5v5/
+├── app.py
+├── run.py
+├── config.py
+├── routes/
+│   └── jogador_routes.py
+├── services/
+│   ├── auth_service.py
+│   ├── balanceamento.py
+│   ├── export_service.py
+│   ├── favorito_service.py
+│   ├── historico_service.py
+│   ├── jogador_service.py
+│   ├── jogador_stats_service.py
+│   ├── notificacao_service.py
+│   ├── partida_service.py
+│   ├── qrcode_service.py
+│   ├── ranking_service.py
+│   ├── stats_service.py
+│   ├── sugestoes_service.py
+│   ├── undoredo_service.py
+│   └── votacao_service.py
+├── models/
+│   └── jogadores.py
+├── templates/
+├── static/
+├── jogadores.json
+├── historico.json
+├── partidas.json
+├── users.json
+└── votacoes_partidas.json
 ```
 
-2. **Crie um ambiente virtual** (recomendado)
+## Arquitetura Real
+
+- `app.py`: factory Flask, configuracao base, secret key e registro do blueprint
+- `routes/jogador_routes.py`: concentrador das rotas HTTP, permissao, paginas e APIs
+- `services/`: camada de regra de negocio e persistencia em JSON
+- `models/jogadores.py`: dataclass principal de jogador
+- `templates/`: paginas server-rendered com Jinja
+- `static/`: CSS, JavaScript e recursos PWA
+
+Observacao importante: o arquivo `routes/jogador_routes.py` concentra boa parte da orquestracao do sistema. A arquitetura continua em camadas, mas a camada de rotas hoje esta mais densa do que a documentacao antiga sugeria.
+
+## Como Rodar
+
+### 1. Criar ambiente virtual
 
 ```bash
-python -m venv venv
-
-# Ative o ambiente virtual
-# No macOS/Linux:
-source venv/bin/activate
-
-# No Windows:
-venv\Scripts\activate
+python -m venv .venv
+source .venv/bin/activate
 ```
 
-3. **Instale as dependências**
+### 2. Instalar dependencias
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## 🚀 Como Usar
+### 3. Iniciar a aplicacao
 
-### Forma Rápida (Recomendado)
+Modo recomendado:
 
 ```bash
 python run.py
 ```
 
-Este script irá:
-- ✅ Verificar as dependências
-- ✅ Criar dados de exemplo automaticamente
-- ✅ Iniciar o servidor
-
-### Forma Manual
+Modo direto:
 
 ```bash
 python app.py
 ```
 
-### Acesso
+### 4. Acessar no navegador
 
-Abra seu navegador e vá para: **http://localhost:5000**
+O `run.py` tenta subir em uma porta disponivel entre `5000`, `5001`, `5002`, `5003`, `5004`, `8000` e `8001`.
 
-### Funcionamento
+No `app.py`, sem `run.py`, a aplicacao usa a variavel `PORT` ou cai em `10000`.
 
-**Passo 1: Adicione jogadores**
- usando o slider
-- Clique em "➕ Adicionar Jogador"
+## Contas e Autenticacao
 
-**Passo 2: Sorteie times**
+O sistema garante contas padrao em [services/auth_service.py](services/auth_service.py):
 
-- Adicione pelo menos 10 jogadores
-- Clique em "🎲 Sortear Times"
-- Visualize os times equilibrados com estatísticasdores
-- Clique em "Sortear Times"
-- Veja os times equilibrados!
+- `adminjogos` / `adminjogos123`
+- `admin` / `admin123`
 
-## 📁 Estrutura do Projeto
+Use apenas para ambiente local ou desenvolvimento. Em producao, troque credenciais e defina `SECRET_KEY`.
 
-```
-futebol5v5/
-├── app.py                    # Aplicação principal
-├── config.py                 # Configurações
-├── requirements.txt          # Dependências
-├── jogadores.json           # Dados de jogadores
-├── models/
-│   └── jogadores.py         # Modelo de dados
-├── services/
-│   ├── jogador_service.py   # Serviço de jogadores
-│   └── balanceamento.py     # Lógica de balanceamento
-├── routes/
-│   └── jogador_routes.py    # Rotas e endpoints
-├── templates/
-│   ├── index.html           # Página principal
-│   └── times.html           # Página de resultados
-└── static/
-    └── style.css            # Estilos
-```
+## Arquivos de Dados
 
-## 🎨 Design
+O projeto usa JSON local como persistencia:
 
-- **Cores**: Paleta profissional com gradientes
-- **Tipografia**: Fonte do sistema para melhor performance
-- **Layout**: Grid responsivo que adapta a tablets e mobile
-- **Acessibilidade**: Contraste adequado e suporte a modo escuro
+- `jogadores.json`: jogadores cadastrados
+- `users.json`: usuarios e senhas hash
+- `historico.json`: sorteios realizados
+- `partidas.json`: resultados de partidas
+- `votacoes_partidas.json`: votacoes abertas e encerradas
+- `favoritos.json`: times favoritados
+- `sorteios_stack.json`: pilha de undo/redo
+- `admin_notificacoes.json`: notificacoes administrativas
 
-## 🔌 API Endpoints
+## Fluxos Principais
 
-```bash
-# Listar todos
-GET /api/jogadores
+### Fluxo do juiz
 
-# Criar novo
-POST /api/jogadores
-Content-Type: application/json
-{ "nome": "João Silva", "nivel": 7 }
+1. Entrar em `/jogar`
+2. Selecionar 10, 15 ou 20 jogadores
+3. Salvar presenca
+4. Sortear os times
+5. Registrar o resultado da partida
+6. Abrir e encerrar a votacao da rodada
 
-# Obter por ID
-GET /api/jogadores/<id>
+### Fluxo do usuario
 
-# Atualizar
-PUT /api/jogadores/<id>
-{ "nome": "João Silva", "nivel": 8 }
+1. Criar conta ou entrar
+2. Aceder ao proprio perfil
+3. Participar da votacao quando estiver numa partida aberta
+4. Consultar historico e ranking
 
-# Deletar
-DELETE /api/jogadores/<id>
-```
+## Endpoints Principais
 
-### Times
+### Autenticacao e perfil
 
-```bash
-# Sortear times
-GET /api/times
+- `GET /login`
+- `POST /login`
+- `POST /logout`
+- `GET /cadastro`
+- `POST /cadastro`
+- `GET /perfil`
 
-# Resposta
-{
-  "sucesso": true,
-  "time1": [...],
-  "time2": [...],
-  "soma1": 38,
-  "soma2": 35,
-  "favorito": "Time 1",
-  "diferenca": 3
-}
-```
+### Jogadores
 
-### Exemplos de Uso
+- `GET /api/jogadores`
+- `POST /api/jogadores`
+- `GET /api/jogadores/<jogador_id>`
+- `PUT /api/jogadores/<jogador_id>`
+- `DELETE /api/jogadores/<jogador_id>`
 
-Veja [exemplos_api.py](exemplos_api.py) para exemplos Python completos:
+### Presenca e sorteio
 
-```bash
-python exemplos_api.py
-```
+- `POST /api/presenca`
+- `POST /api/presenca/limpar`
+- `GET /sortear`
+- `GET /api/times`
+- `POST /api/sorteio/undo`
+- `POST /api/sorteio/redo`
+- `GET /api/sorteio/status`
 
-- `GET /api/times` - Sorteia e retorna times equilibrados
+### Historico e compartilhamento
 
-## 📊 Algoritmo de Balanceamento
+- `GET /historico`
+- `GET /sorteio/<sorteio_id>`
+- `GET /api/historico`
+- `GET /api/qrcode/link-compartilhamento/<sorteio_id>`
+- `GET /compartilhado`
 
-O projeto utiliza o **Snake Draft** para equilibrar times:
+### Resultado e votacao
 
-1. Ordena os jogadores pelo nível (melhor para pior)
-2. Alterna entre os times, pegando os melhores primeiro
-3. Garante distribuição equilibrada de habilidades
-4. Calcula a diferença total entre os times
+- `GET /resultado_partida/<sorteio_id>`
+- `POST /api/partida/registrar`
+- `GET /votacao`
+- `POST /votacao/salvar`
+- `GET /admin/votacao`
+- `POST /admin/votacao/criar`
+- `POST /admin/votacao/<partida_id>/encerrar`
 
-**Exemplo:**
-```
-Jogadores: [A(10), B(9), C(8), D(7), E(6), F(5), G(4), H(3), I(2), J(1)]
+### Exportacao
 
-Time 1: A(10) + C(8) + E(6) + G(4) + I(2) = 30 pontos
-Time 2: B(9) + D(7) + F(5) + H(3) + J(1) = 25 pontos
-Diferença: 5 pontos (equilibrado!)
-```
+- `GET /export/sorteio/csv`
+- `GET /export/sorteio/txt`
+- `GET /api/export/sorteio/txt`
+- `GET /export/sorteio/pdf`
+- `GET /export/historico/csv`
+- `GET /export/estatisticas/csv`
 
-## 🔒 Segurança
+### Ranking
 
-- Validação de entrada em todos os endpoints
-- Sanitização de dados
-- CORS ready para integração com frontends externos
-- Type hints para melhor segurança de tipos
+- `GET /ranking`
+- `GET /api/ranking/geral`
 
-## 📈 Melhorias Futuras
+Observacao: alguns endpoints antigos continuam no codigo por compatibilidade, mas parte deles esta desativada ou hoje redireciona para a home.
 
-- [ ] Autenticação de usuários
-- [ ] Histórico de sorteios
-- [ ] Integração com banco de dados (PostgreSQL/MongoDB)
-- [ ] Dashboard com estatísticas
-- [ ] Upload de foto de perfil
-- [ ] Sistema de rating de jogadores
-- [ ] Geração de PDF com times
-- [ ] Envio de convites por email
-- [ ] Mobile app nativa
+## Testes
 
-## 🐛 Troubleshooting
-
-### Porta 5000 já em uso
-```bash
-# Alternativamente, use outra porta
-python app.py --port 5001
-```
-
-### Erro ao ler jogadores.json
-- Verifique se o arquivo está no diretório raiz
-- Delete o arquivo para recreiar
-
-### Problemas com módulos
-```bash
-pip install --upgrade pip
-pip install -r requirements.txt --force-reinstall
-```
-
-## 📝 Desenvolvimento
-
-### Configuração de Desenvolvimento
+Existem dois scripts principais de validacao manual:
 
 ```bash
-export FLASK_ENV=development
-export FLASK_DEBUG=True
-python app.py
+python test_multiplos_times.py
+python test_goleiros.py
 ```
 
-### Rodando Testes (futuro)
+Notas sobre o estado atual:
 
-```bash
-pytest tests/
-```
+- `test_multiplos_times.py` valida cenarios com 10, 15 e 20 jogadores
+- `test_goleiros.py` exercita o algoritmo com goleiros
+- a cobertura automatica ainda e limitada
+- parte dos testes tem perfil mais de script de smoke test do que de suite formal
 
-## 📄 Licença
+## Offline e PWA
 
-Este projeto é código aberto e disponível sob licença MIT.
+O projeto inclui:
 
-## 👤 Autor
+- `manifest.json`
+- `static/service-worker.js`
+- `static/offline-judge.js`
 
-**Guilherme Urbano**
+Capacidades atuais:
 
-Desenvolvido com ❤️ para o futebol
+- cache de paginas e assets principais
+- fallback basico quando offline
+- fila local para submissao posterior de algumas operacoes
+- preview local de sorteio no fluxo offline
 
-## 📞 Suporte
+## Limitacoes Conhecidas
 
-Para reportar bugs ou sugerir melhorias, abra uma issue no repositório.
+- persistencia em JSON local, sem garantias de concorrencia
+- crescimento continuo dos arquivos de historico
+- parte da documentacao auxiliar antiga ainda pode estar desatualizada
+- algumas rotas legadas seguem no codigo por compatibilidade
+- a suite de testes ainda nao cobre o sistema inteiro
 
----
+## Documentacao Relacionada
 
-**Versão**: 1.0.0  
-**Última atualização**: Abril 2026
+- [ARQUITETURA.md](ARQUITETURA.md)
+- [AI_HANDOFF.md](AI_HANDOFF.md)
+- [HOSPEDAGEM_E_OFFLINE.md](HOSPEDAGEM_E_OFFLINE.md)
+- [SELECAO_JOGADORES.md](SELECAO_JOGADORES.md)
+
+## Proximo Passo Recomendado
+
+Depois deste `README`, o melhor alinhamento e atualizar o `ARQUITETURA.md` para refletir a estrutura atual do sistema, especialmente autenticacao, fluxo do juiz, votacao e offline.

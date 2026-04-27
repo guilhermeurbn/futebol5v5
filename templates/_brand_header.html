@@ -1,6 +1,6 @@
 <div class="brand-header">
     <div class="logo-header">
-        <a href="{{ url_for('jogador.index') }}" aria-label="Ir para a página inicial" style="display:inline-block;">
+        <a href="{{ url_for('jogador.jogar_page') if auth_user and auth_user.role == 'juiz' else url_for('jogador.index') }}" aria-label="Ir para a página inicial" style="display:inline-block;">
         <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <defs>
                 <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -34,16 +34,23 @@
         <div class="auth-links">
             {% if auth_user.role == 'juiz' %}
             <a class="btn btn-secondary" href="{{ url_for('jogador.jogar_page') }}">Jogar</a>
-            {% else %}
+            <a class="btn btn-secondary" href="{{ url_for('jogador.votacao_admin_page') }}">Votação</a>
+            {% endif %}
+            {% if auth_user.role != 'juiz' or auth_user.senha_temporaria_ativa %}
             <a class="btn btn-secondary" href="{{ url_for('jogador.perfil_page') }}">Perfil</a>
             {% endif %}
             {% if auth_user.role in ['admin', 'super_admin'] %}
             <a class="btn btn-warning" href="{{ url_for('jogador.admin_page') }}">Admin</a>
             {% endif %}
-            <form method="post" action="{{ url_for('jogador.logout') }}" style="display:inline;">
+            <form method="post" action="{{ url_for('jogador.logout') }}" class="logout-form">
                 <button class="btn btn-danger" type="submit">Sair</button>
             </form>
         </div>
+        {% if auth_user.senha_temporaria_ativa %}
+        <div class="alert alert-warning" style="margin-top: 0.75rem; max-width: 320px;">
+            ⚠️ Senha temporária ativa. Troque-a no Perfil.
+        </div>
+        {% endif %}
     </div>
     {% endif %}
 </div>

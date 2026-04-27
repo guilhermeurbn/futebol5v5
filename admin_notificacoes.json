@@ -1,5 +1,5 @@
 {
-  "ultimo_id": 1,
+  "ultimo_id": 2,
   "notificacoes": [
     {
       "id": 1,
@@ -8,6 +8,14 @@
       "tipo": "cadastro",
       "lida": true,
       "criado_em": "2026-04-25T01:28:38.007132"
+    },
+    {
+      "id": 2,
+      "titulo": "Novo cadastro de usuario",
+      "mensagem": "Usuario jogador (jogadorteste) acabou de se cadastrar.",
+      "tipo": "cadastro",
+      "lida": true,
+      "criado_em": "2026-04-26T22:08:51.550431"
     }
   ]
 }

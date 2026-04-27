@@ -3,6 +3,7 @@ Servico de autenticacao e usuarios.
 """
 import json
 import os
+import secrets
 import uuid
 from datetime import datetime
 from typing import Dict, List, Optional
@@ -12,6 +13,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 class AuthService:
     """Gerencia usuarios, senha e perfil."""
+
+    _TEMP_PASSWORD_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789"
 
     def __init__(self, arquivo: str = "users.json"):
         self.arquivo = arquivo
@@ -26,18 +29,6 @@ class AuthService:
     def _garantir_contas_padrao(self) -> None:
         usuarios = self._carregar()
         alterou = False
-
-        if not any((u.get("role") == "super_admin") for u in usuarios):
-            usuarios.append({
-                "id": str(uuid.uuid4()),
-                "username": "superadmin",
-                "nome": "Super Administrador",
-                "password_hash": generate_password_hash("superadmin123"),
-                "role": "super_admin",
-                "criado_em": datetime.now().isoformat(),
-                "ativo": True,
-            })
-            alterou = True
 
         if not any((u.get("username") or "").lower() == "adminjogos" for u in usuarios):
             usuarios.append({
@@ -87,6 +78,7 @@ class AuthService:
                 "nome": u.get("nome"),
                 "role": u.get("role", "usuario"),
                 "ativo": u.get("ativo", True),
+                "senha_temporaria_ativa": u.get("senha_temporaria_ativa", False),
                 "criado_em": u.get("criado_em"),
             })
         return saida
@@ -122,6 +114,7 @@ class AuthService:
                 "username": usuario.get("username"),
                 "nome": usuario.get("nome"),
                 "role": usuario.get("role", "usuario"),
+                "senha_temporaria_ativa": usuario.get("senha_temporaria_ativa", False),
             }
         return None
 
@@ -136,7 +129,7 @@ class AuthService:
             raise ValueError("Nome deve ter ao menos 2 caracteres")
         if not password or len(password) < 6:
             raise ValueError("Senha deve ter ao menos 6 caracteres")
-        if role not in ["super_admin", "admin", "juiz", "usuario"]:
+        if role not in ["admin", "juiz", "usuario"]:
             raise ValueError("Role invalida")
 
         usuarios = self._carregar()
@@ -151,6 +144,7 @@ class AuthService:
             "role": role,
             "criado_em": datetime.now().isoformat(),
             "ativo": True,
+            "senha_temporaria_ativa": False,
         }
         usuarios.append(novo)
         self._salvar(usuarios)
@@ -179,10 +173,51 @@ class AuthService:
                 raise ValueError("Senha atual incorreta")
 
             u["password_hash"] = generate_password_hash(nova_senha)
+            u["senha_temporaria_ativa"] = False
+            u["senha_resetada_em"] = None
+            u["senha_resetada_por"] = None
             self._salvar(usuarios)
             return
 
         raise ValueError("Usuario nao encontrado")
+
+    def _gerar_senha_temporaria(self, tamanho: int = 10) -> str:
+        """Gera senha temporaria legivel para reset administrativo."""
+        tamanho = max(8, int(tamanho))
+        return "".join(secrets.choice(self._TEMP_PASSWORD_ALPHABET) for _ in range(tamanho))
+
+    def resetar_senha_por_admin(self, user_id: str, executor_id: Optional[str] = None) -> Dict:
+        """
+        Reseta a senha de um usuario via painel administrativo.
+
+        Returns:
+            Dict com dados do usuario e a senha temporaria gerada.
+        """
+        usuarios = self._carregar()
+
+        alvo = None
+        for u in usuarios:
+            if u.get("id") == user_id:
+                alvo = u
+                break
+
+        if not alvo:
+            raise ValueError("Usuario nao encontrado")
+
+        senha_temporaria = self._gerar_senha_temporaria()
+        alvo["password_hash"] = generate_password_hash(senha_temporaria)
+        alvo["senha_temporaria_ativa"] = True
+        alvo["senha_resetada_em"] = datetime.now().isoformat()
+        alvo["senha_resetada_por"] = executor_id
+        self._salvar(usuarios)
+
+        return {
+            "id": alvo.get("id"),
+            "username": alvo.get("username"),
+            "nome": alvo.get("nome"),
+            "role": alvo.get("role", "usuario"),
+            "senha_temporaria": senha_temporaria,
+        }
 
     def definir_ativo(self, user_id: str, ativo: bool, executor_id: Optional[str] = None) -> Dict:
         usuarios = self._carregar()

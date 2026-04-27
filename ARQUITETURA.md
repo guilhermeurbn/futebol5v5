@@ -1,190 +1,281 @@
-cd /Users/guilhermeurbano/futebol5v5
-python run.py# 📐 Arquitetura do Projeto
+# Arquitetura do Projeto
 
-## Estrutura MVC com Blueprint
+## Resumo
 
-Este projeto segue um padrão profissional de organização usando Flask com Blueprints para melhor escalabilidade e manutenção.
+O NaTrave e uma aplicacao Flask com renderizacao server-side, regras de negocio em servicos e persistencia em JSON local.
 
-```
+A arquitetura continua organizada em camadas, mas o projeto evoluiu para um sistema maior do que o CRUD inicial. Hoje ele inclui autenticacao, perfis de acesso, fluxo do juiz, sorteio balanceado, historico, resultado de partidas, votacao, ranking, exportacao, QR code e suporte offline.
+
+## Estrutura Atual
+
+```text
 futebol5v5/
-├── app.py                 # Ponto de entrada - Factory Pattern
-├── config.py             # Configurações (dev, test, prod)
-├── run.py                # Script amigável para iniciar dev
-├── utils.py              # Funções utilitárias
-├── requirements.txt      # Dependências
-├── README.md             # Documentação
-├── .gitignore            # Git ignore
-│
-├── models/               # 📦 Camada de Dados
-│   ├── __init__.py
-│   └── jogadores.py      # Dataclass com validação
-│
-├── services/             # 🔧 Lógica de Negócio
-│   ├── __init__.py
-│   ├── jogador_service.py  # CRUD de jogadores
-│   └── balanceamento.py    # Algoritmo de times
-│
-├── routes/               # 🛣️ Endpoints
-│   ├── __init__.py
-│   └── jogador_routes.py   # Blueprints com rotas
-│
-├── static/               # 🎨 Frontend
-│   └── style.css         # Estilos CSS moderno
-│
-└── templates/            # 📄 HTML
-    ├── index.html        # Página principal
-    └── times.html        # Resultado sorteio
+├── app.py
+├── run.py
+├── config.py
+├── routes/
+│   └── jogador_routes.py
+├── services/
+│   ├── auth_service.py
+│   ├── balanceamento.py
+│   ├── export_service.py
+│   ├── favorito_service.py
+│   ├── historico_service.py
+│   ├── jogador_service.py
+│   ├── jogador_stats_service.py
+│   ├── notificacao_service.py
+│   ├── partida_service.py
+│   ├── qrcode_service.py
+│   ├── ranking_service.py
+│   ├── stats_service.py
+│   ├── sugestoes_service.py
+│   ├── undoredo_service.py
+│   └── votacao_service.py
+├── models/
+│   └── jogadores.py
+├── templates/
+├── static/
+└── *.json
 ```
 
-## Fluxo de Dados
+## Camadas
 
-```
-Requisição HTTP
-      ↓
-routes/jogador_routes.py (Blueprint)
-      ↓
-services/jogador_service.py (Lógica)
-      ↓
-models/jogadores.py (Dados)
-      ↓
-jogadores.json (Persistência)
-```
+### 1. Aplicacao
 
-## Padrões de Design
+Arquivo: [app.py](app.py)
 
-### 1. **Factory Pattern** (app.py)
-```python
-def criar_app(config_name):
-    app = Flask(__name__)
-    app.config.from_object(config_by_name[config_name])
-    return app
-```
+Responsabilidades:
 
-### 2. **Service Pattern** (services/)
-Encapsula lógica de negócio
+- criar a app Flask via factory
+- carregar configuracao
+- configurar `secret_key`
+- registrar o blueprint principal
+- servir o `manifest.json`
 
-### 3. **Repository Pattern** (JogadorService)
-Abstrai acesso aos dados
+### 2. Rotas
 
-### 4. **Blueprint Pattern** (routes/)
-Separa rotas em módulos
+Arquivo central: [routes/jogador_routes.py](routes/jogador_routes.py)
 
-## Validação de Dados
+Responsabilidades:
 
-**Modelo Jogador:**
-```python
-@dataclass
-class Jogador:
-    nome: str        # Mínimo 2 caracteres
-    nivel: int       # Entre 1 e 10
-    id: str          # UUID gerado
-    criado_em: str   # ISO timestamp
-```
+- paginas HTML
+- endpoints JSON
+- controle de sessao
+- controle de permissao por perfil
+- orquestracao entre os servicos
 
-## Algoritmo Snake Draft
+Observacao importante:
 
-Balanceia times alternando entre eles:
+Esse arquivo hoje concentra muita responsabilidade. Ele funciona como um controlador principal do sistema e ja nao representa apenas "rotas de jogador".
 
-```
-Jogadores ordenados: [A(10), B(9), C(8), D(7), E(6), F(5), G(4), H(3), I(2), J(1)]
+### 3. Modelos
 
-Iteração:
-1. Time 1 ← A(10)
-2. Time 2 ← B(9)
-3. Time 1 ← C(8)
-4. Time 2 ← D(7)
-... até completar 5 de cada
+Arquivo: [models/jogadores.py](models/jogadores.py)
 
-Resultado:
-Time 1: A, C, E, G, I = 30 pontos
-Time 2: B, D, F, H, J = 25 pontos
-Diferença: 5 (equilibrado)
-```
+Hoje existe um modelo explicito principal:
 
-## API REST
+- `Jogador`: dataclass com validacao de nome, nivel, tipo, posicao e metadados
 
-Endpoints seguem padrão RESTful:
+Outras estruturas de dominio sao persistidas diretamente como dicionarios JSON, sem dataclasses dedicadas.
 
-```
-GET    /api/jogadores         # List
-POST   /api/jogadores         # Create
-GET    /api/jogadores/<id>    # Retrieve
-PUT    /api/jogadores/<id>    # Update
-DELETE /api/jogadores/<id>    # Delete
-GET    /api/times             # Business Logic
-```
+### 4. Servicos
 
-## Tratamento de Erros
+Os servicos concentram regra de negocio e acesso aos arquivos JSON.
 
-```python
-# Validação em modelo
-try:
-    jogador = Jogador(nome, nivel)
-except ValueError as e:
-    return {'erro': str(e)}, 400
+- `auth_service.py`: usuarios, login, senha e perfis
+- `jogador_service.py`: CRUD de jogadores e presenca
+- `balanceamento.py`: algoritmo de sorteio equilibrado
+- `historico_service.py`: historico de sorteios
+- `partida_service.py`: resultados de partidas e placar geral
+- `votacao_service.py`: abertura, votos e apuracao
+- `jogador_stats_service.py`: estatisticas detalhadas por jogador
+- `stats_service.py`: estatisticas agregadas de sorteios
+- `export_service.py`: CSV, TXT e PDF
+- `favorito_service.py`: favoritos de times
+- `undoredo_service.py`: pilha de sorteios
+- `qrcode_service.py`: links e QR codes
+- `sugestoes_service.py`: sugestoes de jogadores
+- `ranking_service.py`: ranking de times legado/auxiliar
+- `notificacao_service.py`: notificacoes administrativas
 
-# Endpoints retornam JSON
-{
-    "sucesso": False,
-    "erro": "Nome inválido"
-}
-```
+### 5. Frontend
 
-## Performance
+Camadas:
 
-- **Dados**: JSON (leve, legível)
-- **Cache**: Carregamento lazy do arquivo
-- **CSS**: Variáveis CSS para performance
-- **HTML**: Semântico e otimizado
+- `templates/`: HTML com Jinja
+- `static/style.css`: design system visual
+- `static/offline-judge.js`: fila offline e preview local
+- `static/service-worker.js`: cache e suporte PWA
 
-## Segurança
+O frontend e majoritariamente server-rendered, com JavaScript pontual para interacoes como:
 
-- ✅ Validação em todos os endpoints
-- ✅ Type hints para segurança
-- ✅ Sanitização de inputs
-- ✅ Error handling sem expor dados sensíveis
+- salvar presenca
+- sortear
+- undo/redo
+- exportar/copiar texto
+- gerar QR code
+- submeter resultado da partida
+- carregar sugestoes
 
-## Testabilidade
+### 6. Persistencia
 
-Estrutura permite fácil teste unitário:
+O sistema usa arquivos JSON locais como fonte de verdade.
 
-```python
-# Teste do serviço
-def test_criar_jogador():
-    service = JogadorService(":memory:")
-    jogador = service.criar("João", 7)
-    assert jogador.nome == "João"
+Arquivos principais:
 
-# Teste do modelo
-def test_validacao_jogador():
-    with pytest.raises(ValueError):
-        Jogador("A", 15)
+- `jogadores.json`
+- `users.json`
+- `historico.json`
+- `partidas.json`
+- `votacoes_partidas.json`
+- `favoritos.json`
+- `sorteios_stack.json`
+- `admin_notificacoes.json`
+
+## Fluxos Principais
+
+### Fluxo de autenticacao
+
+```text
+Formulario de login/cadastro
+    ↓
+AuthService
+    ↓
+users.json
+    ↓
+session Flask
 ```
 
-## Extensibilidade
+### Fluxo de sorteio
 
-Adicionar novo endpoint é simples:
-
-```python
-@jogador_bp.route('/api/novo-endpoint')
-def novo_endpoint():
-    dados = jogador_service.metodo()
-    return jsonify(dados)
+```text
+Selecao de presentes
+    ↓
+JogadorService.marcar_presenca
+    ↓
+/sortear ou /api/times
+    ↓
+BalanceadorTimes
+    ↓
+HistoricoService + session['ultimo_sorteio'] + UndoRedoService
 ```
 
-## Configuração
+### Fluxo de resultado e votacao
 
-Diferentes ambientes via `config.py`:
-
-```python
-# Desenvolvimento
-export FLASK_ENV=development
-
-# Produção
-export FLASK_ENV=production
+```text
+Resultado da partida
+    ↓
+PartidaService.registrar_resultado
+    ↓
+JogadorStatsService.registrar_desempenho_jogador
+    ↓
+VotacaoService.criar_partida
+    ↓
+VotacaoService.salvar_voto
+    ↓
+VotacaoService.encerrar_e_apurar
 ```
 
----
+## Perfis e Permissoes
 
-**Versão**: 1.0.0  
-**Padrão Arquitetural**: MVC com Blueprint + Service Layer
+Os perfis atuais sao:
+
+- `super_admin`
+- `admin`
+- `juiz`
+- `usuario`
+
+Regras gerais:
+
+- `admin` e `super_admin` tem acesso total
+- `juiz` tem acesso ao fluxo operacional do jogo
+- `usuario` participa da votacao e ve seu proprio contexto
+
+As regras sao aplicadas principalmente em:
+
+- `before_request` do blueprint
+- decorators `login_required`, `admin_required` e `admin_or_juiz_required`
+
+## Algoritmo de Balanceamento
+
+Arquivo: [services/balanceamento.py](services/balanceamento.py)
+
+Comportamento atual:
+
+- cada time tem 5 jogadores
+- goleiro conta como jogador normal no total
+- a quantidade total precisa ser multipla de 5
+- goleiros sao distribuidos primeiro
+- os jogadores de linha completam os times
+- simulated annealing e usado para reduzir a diferenca de nivel entre os times
+- ha logica adicional para evitar repetir sorteios recentes
+
+Isso substitui a descricao antiga de "snake draft simples" como representacao completa do sistema.
+
+## PWA e Offline
+
+Arquivos:
+
+- `manifest.json`
+- `static/service-worker.js`
+- `static/offline-judge.js`
+
+Capacidades:
+
+- cache de assets e paginas principais
+- fallback offline para algumas navegacoes
+- fila local para requests quando a rede falha
+- preview local de sorteio em modo offline
+
+## Decisoes Arquiteturais Importantes
+
+### Persistencia em JSON
+
+Vantagens:
+
+- simplicidade
+- setup local rapido
+- facil inspecao manual dos dados
+
+Tradeoffs:
+
+- sem controle transacional
+- risco de concorrencia
+- crescimento continuo dos arquivos
+- acoplamento entre formato persistido e o codigo
+
+### Blueprint unico
+
+Vantagem:
+
+- ponto central facil de encontrar
+
+Tradeoff:
+
+- concentracao excessiva de responsabilidades
+- arquivo grande
+- manutencao mais dificil com o crescimento do produto
+
+## Estado Atual da Arquitetura
+
+Pontos fortes:
+
+- fluxo funcional ponta a ponta
+- separacao razoavel entre regras e apresentacao
+- baixo custo operacional
+- suporte offline relevante para o contexto do produto
+
+Pontos de atencao:
+
+- `routes/jogador_routes.py` esta grande demais
+- nem todas as entidades de dominio possuem modelos dedicados
+- existe codigo legado e endpoints mantidos por compatibilidade
+- algumas documentacoes auxiliares antigas podem divergir do codigo atual
+
+## Direcao de Evolucao Recomendada
+
+1. dividir `routes/jogador_routes.py` por contexto funcional
+2. criar modelos/DTOs para votacao, partida e favoritos
+3. isolar melhor persistencia de dominio para reduzir acoplamento com JSON cru
+4. ampliar testes automatizados dos fluxos HTTP principais
+5. revisar rotas legadas e templates nao mais usados
