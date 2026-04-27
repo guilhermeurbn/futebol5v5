@@ -170,6 +170,7 @@ def proteger_rotas():
             'jogador.logout',
             'jogador.jogar_page',
             'jogador.juiz_criar_partida',
+            'jogador.juiz_finalizar_partida',
             'jogador.perfil_page',
             'jogador.perfil_alterar_senha',
             'jogador.perfil_jogador_publico',
@@ -1000,6 +1001,8 @@ def juiz_finalizar_partida():
 
     juiz_partida_service.finalizar_partida(resumo)
     jogador_service.limpar_presenca()
+    # Iniciar nova partida para que o juiz caia na tela de criação/seleção
+    juiz_partida_service.iniciar_partida(session.get('user_id'))
     return redirect(url_for('jogador.jogar_page'))
 
 
