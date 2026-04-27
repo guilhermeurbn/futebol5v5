@@ -42,12 +42,22 @@
         {% if auth_user.role == 'juiz' %}
             <section class="section">
                 <h2 class="section-title">🎮 Controle do Jogo</h2>
-                <p style="margin-bottom: 0;">Use esta área para abrir a votação da rodada atual, acompanhar os votos e encerrar/apurar quando quiser.</p>
+                <p style="margin-bottom: 0;">Depois de registrar o resultado, abra a votação da rodada, acompanhe quem já votou e encerre a partida quando quiser.</p>
             </section>
         {% endif %}
 
+                {% if auth_user.role == 'juiz' and fluxo_partida and fluxo_partida.resultado_registrado and not ativa %}
+                <section class="section">
+                    <h2 class="section-title">🔒 Finalizar Sem Votação</h2>
+                    <p>Não houve abertura de votação. Se desejar, finalize a partida e registre o encerramento.</p>
+                    <form method="post" action="{{ url_for('jogador.juiz_finalizar_partida') }}">
+                        <button class="btn btn-danger" type="submit">Finalizar partida (sem votação)</button>
+                    </form>
+                </section>
+                {% endif %}
+
         <section class="section">
-            <h2 class="section-title">🚀 Abrir rodada de votos</h2>
+            <h2 class="section-title">🚀 Abrir votações</h2>
             <form method="post" action="{{ url_for('jogador.votacao_admin_criar') }}" class="form" style="max-width: 560px;">
                 {% if sorteio_contexto %}
                 <div class="surface-panel surface-panel--soft" style="margin-bottom: 1rem;">
@@ -56,11 +66,16 @@
                 </div>
                 <input type="hidden" name="sorteio_id" value="{{ sorteio_contexto.id }}">
                 {% endif %}
+                {% if auth_user.role == 'juiz' and fluxo_partida and not fluxo_partida.resultado_registrado %}
+                <div class="alert alert-warning" style="margin-bottom: 1rem;">
+                    Registre o resultado da partida antes de abrir a votação dos jogadores.
+                </div>
+                {% endif %}
                 <div class="form-group">
                     <label class="form-label" for="titulo">Titulo</label>
                     <input class="form-input" id="titulo" name="titulo" type="text" placeholder="Ex: Rodada de sexta">
                 </div>
-                <button class="btn btn-primary" type="submit">{{ 'Abrir votação do jogo' if auth_user.role == 'juiz' else 'Abrir votação deste sorteio' }}</button>
+                <button class="btn btn-primary" type="submit">{{ 'Abrir votação dos jogadores' if auth_user.role == 'juiz' else 'Abrir votação deste sorteio' }}</button>
             </form>
         </section>
 
