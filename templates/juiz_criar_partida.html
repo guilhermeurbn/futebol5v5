@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+{% block title %}Criar Partida{% endblock %}
+
+{% block content %}
+<div class="container page-container-wide">
+    <header class="header">
+        <div class="header-content">
+            {% set brand_title = 'Criar Partida' %}
+            {% set brand_subtitle = 'Escolha 10, 15 ou 20 jogadores e avance para o sorteio' %}
+            {% include '_brand_header.html' %}
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="section">
+            <div class="selection-stats">
+                <div class="stat-card">
+                    <div class="stat-label">Disponíveis</div>
+                    <div class="stat-value">{{ total_jogadores }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Selecionados</div>
+                    <div class="stat-value" id="contador">{{ total_presentes }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Meta</div>
+                    <div class="stat-value" id="necessarios">10, 15 ou 20</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">Quantidade da Partida</h2>
+            <div class="quantity-buttons">
+                <button class="qty-btn" type="button" onclick="selecionarQuantidade(10)" data-qty="10">
+                    <span class="qty-icon">🔟</span>
+                    <span class="qty-text">10</span>
+                    <span class="qty-desc">2 times</span>
+                </button>
+                <button class="qty-btn" type="button" onclick="selecionarQuantidade(15)" data-qty="15">
+                    <span class="qty-icon">1️⃣5️⃣</span>
+                    <span class="qty-text">15</span>
+                    <span class="qty-desc">3 times</span>
+                </button>
+                <button class="qty-btn" type="button" onclick="selecionarQuantidade(20)" data-qty="20">
+                    <span class="qty-icon">2️⃣0️⃣</span>
+                    <span class="qty-text">20</span>
+                    <span class="qty-desc">4 times</span>
+                </button>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title">Jogadores da Partida</h2>
+                <button class="btn btn-secondary" type="button" onclick="limparSelecao()">Limpar</button>
+            </div>
+
+            <div class="players-grid">
+                {% for jogador in todos_jogadores %}
+                <label class="player-card" style="cursor: pointer;">
+                    <input
+                        type="checkbox"
+                        class="jogador-checkbox"
+                        data-id="{{ jogador.id }}"
+                        data-nivel="{{ jogador.nivel }}"
+                        data-posicao="{{ jogador.posicao }}"
+                        data-nome="{{ jogador.nome }}"
+                        onchange="atualizarContador()"
+                        {% if jogador.presente %}checked{% endif %}
+                        style="margin-right: 0.75rem;"
+                    >
+                    <div class="player-info">
+                        <h3 class="player-name">{{ jogador.nome }}</h3>
+                        <span class="badge {% if jogador.posicao == 'goleiro' %}badge-warning{% else %}badge-success{% endif %}">
+                            {% if jogador.posicao == 'goleiro' %}🧤 Goleiro{% else %}⚽ Linha{% endif %}
+                        </span>
+                    </div>
+                    <div class="player-details">
+                        <span>Nível {{ jogador.nivel }}</span>
+                        <span>{% if jogador.tipo == 'fixo' %}⭐ Fixo{% else %}👤 Avulso{% endif %}</span>
+                    </div>
+                </label>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="surface-panel surface-panel--soft" style="text-align: center;">
+                <div class="section-label">Sorteio</div>
+                <button class="btn btn-primary btn-large" id="btnSortear" type="button" onclick="confirmarSelecao()" disabled>SORTEIO</button>
+                <div id="mensagemErro" class="alert alert-warning" style="display: none; margin-top: 1rem;"></div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script>
+const QUANTIDADES_VALIDAS = [10, 15, 20];
+let quantidadeSelecionada = null;
+
+function atualizarContador() {
+    // Alterna classe 'selected' nos player-card (rótulos) para destaque visual
+    document.querySelectorAll('.jogador-checkbox').forEach(cb => {
+        const card = cb.closest('.player-card');
+        if (card) {
+            card.classList.toggle('selected', cb.checked);
+        }
+    });
+
+    const checkboxes = document.querySelectorAll('.jogador-checkbox:checked');
+    const contador = checkboxes.length;
+    document.getElementById('contador').textContent = contador;
+
+    const btnSortear = document.getElementById('btnSortear');
+    btnSortear.disabled = !(quantidadeSelecionada && contador === quantidadeSelecionada);
+}
+
+function selecionarQuantidade(quantidade) {
+    quantidadeSelecionada = quantidadeSelecionada === quantidade ? null : quantidade;
+
+    document.querySelectorAll('.qty-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-qty') === String(quantidadeSelecionada));
+    });
+
+    if (!quantidadeSelecionada) {
+        document.getElementById('necessarios').textContent = '10, 15 ou 20';
+    } else {
+        document.getElementById('necessarios').textContent = `${quantidadeSelecionada} jogadores`;
+    }
+
+    atualizarContador();
+}
+
+function limparSelecao() {
+    document.querySelectorAll('.jogador-checkbox').forEach(cb => cb.checked = false);
+    quantidadeSelecionada = null;
+    document.querySelectorAll('.qty-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('necessarios').textContent = '10, 15 ou 20';
+    document.getElementById('mensagemErro').style.display = 'none';
+    atualizarContador();
+}
+
+function confirmarSelecao() {
+    const checkboxes = document.querySelectorAll('.jogador-checkbox:checked');
+    const ids = Array.from(checkboxes).map(cb => cb.getAttribute('data-id'));
+    const msgErro = document.getElementById('mensagemErro');
+
+    if (!quantidadeSelecionada || ids.length !== quantidadeSelecionada) {
+        msgErro.textContent = `Selecione exatamente ${quantidadeSelecionada || '10, 15 ou 20'} jogadores.`;
+        msgErro.style.display = 'block';
+        return;
+    }
+
+    msgErro.style.display = 'none';
+
+    fetch('/api/presenca', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({jogador_ids: ids})
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.sucesso) {
+            window.location.href = '/sortear';
+            return;
+        }
+        msgErro.textContent = data.erro || 'Não foi possível salvar a seleção.';
+        msgErro.style.display = 'block';
+    })
+    .catch(() => {
+        msgErro.textContent = 'Erro ao salvar seleção da partida.';
+        msgErro.style.display = 'block';
+    });
+}
+
+atualizarContador();
+</script>
+{% endblock %}

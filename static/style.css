@@ -1170,6 +1170,23 @@ body {
   color: white;
 }
 
+/* Destaque para cards de jogadores usados na área do juiz */
+.player-card.selected {
+  background: linear-gradient(90deg, rgba(124,58,237,0.06), rgba(102,126,234,0.04));
+  border-color: var(--primary);
+  box-shadow: 0 8px 22px rgba(124,58,237,0.09);
+  transform: translateY(-3px);
+  color: var(--primary);
+}
+
+.player-card.selected .player-name {
+  color: var(--primary);
+}
+
+.player-card input.jogador-checkbox:checked {
+  /* ensure accessibility for checkbox inside card */
+}
+
 /* ============================================================
    1️⃣2️⃣  BUSCA E FILTROS
    ============================================================ */
