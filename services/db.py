@@ -98,22 +98,38 @@ def load_json_data(namespace: str, default):
 
 def save_json_data(namespace: str, payload) -> None:
     conn = get_conn()
-    if conn is None:
-        return
+    if conn is not None:
+        try:
+            ensure_json_store_table(conn)
+            with conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        f"""
+                        insert into {json_store_table_name()} (namespace, payload, updated_at)
+                        values (%s, %s, now())
+                        on conflict (namespace)
+                        do update set payload = excluded.payload, updated_at = now()
+                        """,
+                        (namespace, Json(payload)),
+                    )
+            return
+        except Exception as e:
+            print(f"[DB] Error saving to Postgres: {e}")
+        finally:
+            conn.close()
 
-    ensure_json_store_table(conn)
-    with conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                f"""
-                insert into {json_store_table_name()} (namespace, payload, updated_at)
-                values (%s, %s, now())
-                on conflict (namespace)
-                do update set payload = excluded.payload, updated_at = now()
-                """,
-                (namespace, Json(payload)),
-            )
-    conn.close()
+    target_path = None
+    for candidate in _candidate_paths(f"{namespace}.json"):
+        if candidate.exists():
+            target_path = candidate
+            break
+
+    if target_path is None:
+        target_path = _repo_root() / "data" / f"{namespace}.json"
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with target_path.open("w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2, ensure_ascii=False)
 
 
 def get_database_count() -> int:
