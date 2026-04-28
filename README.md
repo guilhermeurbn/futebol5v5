@@ -159,9 +159,19 @@ python app.py
 
 ### 4. Acessar no navegador
 
-O `run.py` tenta subir em uma porta disponivel entre `5000`, `5001`, `5002`, `5003`, `5004`, `8000` e `8001`.
+O `run.py` tenta subir em portas comuns (`5000`, `5001`, `5002`, `5003`, `5004`, `8000`, `8001`, `10000`) e, se todas estiverem ocupadas, usa uma porta livre automatica do sistema.
 
-No `app.py`, sem `run.py`, a aplicacao usa a variavel `PORT` ou cai em `10000`.
+No `app.py`, sem `run.py`:
+
+- usa `PORT` quando definida
+- se `PORT` nao estiver definida, tenta `10000`
+- se `10000` estiver ocupada, escolhe automaticamente outra porta livre
+
+Para fixar manualmente uma porta local:
+
+```bash
+PORT=5050 python run.py
+```
 
 ## Contas e Autenticacao
 

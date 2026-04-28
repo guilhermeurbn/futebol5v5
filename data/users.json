@@ -42,7 +42,7 @@
   },
   {
     "id": "db1314a8-2d4e-4384-829e-8075b1e33737",
-    "username": "andr_balada",
+    "username": "andre_balada",
     "nome": "André Balada",
     "password_hash": "scrypt:32768:8:1$1A1xb5xdtI3SglEO$599744f288d1292354b9dc9e629dc130005085aa723268b40f81d8106cf5d915e23f78b83d7a00c93d917b008841c237c1c7e48947afc1a2cd0f210de1c8ce71",
     "role": "usuario",
@@ -202,7 +202,7 @@
   },
   {
     "id": "247a4217-b953-4830-a509-bd21f6727e77",
-    "username": "jo_o_pinto",
+    "username": "joao_pinto",
     "nome": "João Pinto",
     "password_hash": "scrypt:32768:8:1$aRGcaF2MtviSIWSe$096c16b4ec55c9fc63bc4496029204d321cfb952dd0465a93cca48710d23c95e32d9659ff89747924d300c19dcdc11889210225c03db1a5fce361d13e32ec4af",
     "role": "usuario",
@@ -223,7 +223,7 @@
   {
     "id": "2ba4d2a2-6f2b-4a14-a6d1-a50d639ffaf9",
     "username": "juiz",
-    "nome": "juiz",
+    "nome": "Juiz",
     "password_hash": "scrypt:32768:8:1$CCR2lwaJLMTYODFQ$08a9731761a11440c73c12a837013dc711e355c8a1ebcd9e84d515dbd1a05640d4b2ac6359e3e8e3c815a51ac5a06357ab89e77efe6a30a4b2e3bba0c1fc0203",
     "role": "juiz",
     "criado_em": "2026-04-27T19:01:38.011675",

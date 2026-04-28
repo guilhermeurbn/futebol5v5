@@ -5,6 +5,7 @@ Script de inicialização e desenvolvimento
 import os
 import sys
 import json
+import socket
 from pathlib import Path
 
 # Cores para terminal
@@ -76,6 +77,41 @@ def check_dependencies():
     return True
 
 
+def _porta_livre(porta: int) -> bool:
+    """Retorna True se a porta estiver livre para bind local."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        try:
+            sock.bind(('127.0.0.1', porta))
+        except OSError:
+            return False
+    return True
+
+
+def encontrar_porta_disponivel(preferidas=None, fallback=0) -> int:
+    """Encontra uma porta disponível, usando fallback dinâmico quando necessário."""
+    preferidas = preferidas or [5000, 5001, 5002, 5003, 5004, 8000, 8001, 10000]
+
+    porta_env = os.getenv('PORT')
+    if porta_env:
+        try:
+            candidata = int(porta_env)
+            if _porta_livre(candidata):
+                return candidata
+            print(f"{AMARELO}⚠️  Porta definida em PORT={candidata} está em uso. Usando fallback automático...{RESET}")
+        except ValueError:
+            print(f"{AMARELO}⚠️  Valor inválido em PORT ({porta_env}). Usando fallback automático...{RESET}")
+
+    for porta in preferidas:
+        if _porta_livre(porta):
+            return porta
+
+    # Fallback definitivo: pede ao SO uma porta livre
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.bind(('127.0.0.1', fallback))
+        return sock.getsockname()[1]
+
+
 def main():
     """Função principal"""
     print_header()
@@ -95,30 +131,14 @@ def main():
     
     # Iniciando servidor
     print(f"{BOLD}Iniciando servidor Flask...{RESET}\n")
-    
-    # Tentar porta 5000, se estiver ocupada, usar 5001, 5002, 5003...
-    import socket
-    
-    portas_para_tentar = [5000, 5001, 5002, 5003, 5004, 8000, 8001]
-    porta = None
-    
-    for p in portas_para_tentar:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        resultado = sock.connect_ex(('127.0.0.1', p))
-        sock.close()
-        
-        if resultado != 0:  # Porta disponível
-            porta = p
-            if p != 5000:
-                print(f"{AMARELO}⚠️  Porta 5000 já está em uso{RESET}")
-            break
-    
-    if porta is None:
-        print(f"{VERMELHO}❌ Nenhuma porta disponível!{RESET}")
-        return 1
+
+    porta = encontrar_porta_disponivel()
+    if porta != 5000:
+        print(f"{AMARELO}ℹ️  Usando porta disponível: {porta}{RESET}")
     
     print(f"{VERDE}{'='*50}{RESET}")
     print(f"{VERDE}⚽ Servidor rodando em: http://localhost:{porta}{RESET}")
+    print(f"{AZUL}💡 Dica: para fixar uma porta, rode com PORT=5050 python run.py{RESET}")
     print(f"{VERDE}{'='*50}{RESET}\n")
     
     # Importar e executar

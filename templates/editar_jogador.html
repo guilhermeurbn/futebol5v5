@@ -27,34 +27,35 @@
 
         <section class="section">
             <h2 class="section-title">✏️ Editar {{ jogador.nome }}</h2>
+            <p class="section-subtitle">Atualize os dados do jogador mantendo o padrão visual do sistema.</p>
             {% if erro %}
             <div class="alert alert-danger">{{ erro }}</div>
             {% endif %}
             <form action="{{ url_for('jogador.editar_jogador_post', jogador_id=jogador.id) }}" method="post" class="form">
-                <div class="form-row">
-                    <label>Nome</label>
-                    <input type="text" name="nome" value="{{ jogador.nome }}" required />
+                <div class="form-group">
+                    <label class="form-label" for="nome">Nome</label>
+                    <input class="form-input" id="nome" type="text" name="nome" value="{{ jogador.nome }}" minlength="2" required>
                 </div>
-                <div class="form-row">
-                    <label>Nível</label>
-                    <input type="number" name="nivel" min="1" max="10" value="{{ jogador.nivel }}" required />
+                <div class="form-group">
+                    <label class="form-label" for="nivel">Nível</label>
+                    <input class="form-input" id="nivel" type="number" name="nivel" min="1" max="10" value="{{ jogador.nivel }}" required>
                 </div>
-                <div class="form-row">
-                    <label>Tipo</label>
-                    <select name="tipo">
+                <div class="form-group">
+                    <label class="form-label" for="tipo">Tipo</label>
+                    <select class="form-input" id="tipo" name="tipo">
                         <option value="fixo" {% if jogador.tipo == 'fixo' %}selected{% endif %}>Fixo</option>
                         <option value="avulso" {% if jogador.tipo == 'avulso' %}selected{% endif %}>Avulso</option>
                     </select>
                 </div>
-                <div class="form-row">
-                    <label>Posição</label>
-                    <select name="posicao">
+                <div class="form-group">
+                    <label class="form-label" for="posicao">Posição</label>
+                    <select class="form-input" id="posicao" name="posicao">
                         <option value="linha" {% if jogador.posicao == 'linha' %}selected{% endif %}>Linha</option>
                         <option value="goleiro" {% if jogador.posicao == 'goleiro' %}selected{% endif %}>Goleiro</option>
                     </select>
                 </div>
 
-                <div class="form-row">
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
                     <button class="btn btn-primary" type="submit">Salvar alterações</button>
                     <a class="btn btn-secondary" href="{{ url_for('jogador.perfil_jogador_publico', jogador_id=jogador.id) }}">Cancelar</a>
                 </div>

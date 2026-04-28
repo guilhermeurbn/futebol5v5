@@ -1,0 +1,82 @@
+{
+  "status": "selecionando",
+  "partida_atual": {
+    "status": "selecionando",
+    "criado_por": "2ba4d2a2-6f2b-4a14-a6d1-a50d639ffaf9",
+    "criado_em": "2026-04-28T00:40:10.820243",
+    "quantidade_jogadores": 10,
+    "jogador_ids": [
+      "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+      "e9758009-9214-4cc0-aea0-f365a3381803",
+      "4d113a13-66e9-4625-8d60-8974cea228ef",
+      "cb3d184e-bf39-4638-8563-529bbe20274c",
+      "355a82e5-2c71-4212-b787-9f0a7d9ca2d0",
+      "70e90819-3eb0-41f6-9d8e-eb1a77040f68",
+      "ce422cf5-f6d1-4693-9bae-345e1ac21f2f",
+      "b17181c2-a4b4-4909-b9d1-ef979faa3063",
+      "f2fd5577-a8ce-4481-941a-e1faa70a29c5",
+      "79d8d06a-f291-4b1a-8cfe-6e255b90efaa"
+    ],
+    "sorteio_id": null,
+    "resultado_registrado": false,
+    "resultado_partida_id": null,
+    "votacao_partida_id": null,
+    "votacao_aberta": false
+  },
+  "ultima_partida_encerrada": {
+    "titulo": "jogo teste",
+    "sorteio_id": 7,
+    "partida_id": 7,
+    "encerrado_em": "2026-04-27T19:06:43.328947",
+    "resultado_resumido": [
+      {
+        "time_numero": 1,
+        "gols": 0,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 0,
+        "resultado": "empate"
+      },
+      {
+        "time_numero": 2,
+        "gols": 0,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 0,
+        "resultado": "empate"
+      },
+      {
+        "time_numero": 3,
+        "gols": 0,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 0,
+        "resultado": "empate"
+      },
+      {
+        "time_numero": 4,
+        "gols": 0,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 0,
+        "resultado": "empate"
+      }
+    ],
+    "melhor_jogador": {
+      "jogador_nome": "Alex",
+      "time_numero": 2,
+      "nota_total": 26.0,
+      "votos": 3,
+      "pontos": 26.0,
+      "nota_media": 8.67
+    },
+    "melhor_time": {
+      "time_numero": 3,
+      "nota_total": 110.0,
+      "votos": 15,
+      "nota_media": 7.33
+    },
+    "total_votos": 3,
+    "pendentes": []
+  }
+}

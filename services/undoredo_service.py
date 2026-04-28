@@ -27,19 +27,50 @@ class UndoRedoService:
             return
         if not os.path.exists(self.arquivo):
             self._salvar({"pilha": [], "indice_atual": -1})
+
+    def _normalizar_dados(self, dados) -> Dict:
+        """Normaliza estrutura legado/lista para o formato esperado de pilha."""
+        if isinstance(dados, dict):
+            pilha = dados.get("pilha", [])
+            if not isinstance(pilha, list):
+                pilha = []
+
+            indice_atual = dados.get("indice_atual", len(pilha) - 1)
+            if not isinstance(indice_atual, int):
+                indice_atual = len(pilha) - 1
+
+            if not pilha:
+                indice_atual = -1
+            else:
+                indice_atual = max(-1, min(indice_atual, len(pilha) - 1))
+
+            return {"pilha": pilha, "indice_atual": indice_atual}
+
+        # Formato legado: arquivo/db armazenado apenas como lista
+        if isinstance(dados, list):
+            return {
+                "pilha": dados,
+                "indice_atual": len(dados) - 1 if dados else -1,
+            }
+
+        return {"pilha": [], "indice_atual": -1}
     
     def _carregar_raw(self) -> Dict:
         """Carrega dados brutos"""
         if os.getenv("DATABASE_URL"):
             dados = load_json_data("sorteios_stack", {"pilha": [], "indice_atual": -1})
-            if not isinstance(dados, dict):
-                return {"pilha": [], "indice_atual": -1}
-            dados.setdefault("pilha", [])
-            dados.setdefault("indice_atual", -1)
+            dados = self._normalizar_dados(dados)
             return dados
         try:
             with open(self.arquivo, "r", encoding="utf-8") as f:
-                return json.load(f)
+                dados = json.load(f)
+                dados_normalizados = self._normalizar_dados(dados)
+
+                # Migra automaticamente arquivo legado para estrutura nova
+                if dados != dados_normalizados:
+                    self._salvar(dados_normalizados)
+
+                return dados_normalizados
         except (json.JSONDecodeError, FileNotFoundError):
             return {"pilha": [], "indice_atual": -1}
     

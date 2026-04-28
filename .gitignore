@@ -47,8 +47,17 @@ instance/
 *.log
 logs/
 
-# Dados
-jogadores.json
+# Dados na RAIZ (agora em data/)
+/admin_notificacoes.json
+/favoritos.json
+/historico.json
+/juiz_partida_atual.json
+/partidas.json
+/sorteios_stack.json
+/users.json
+/votacoes_partidas.json
+/jogadores.json
+/jogadores_payload.json
 
 # Teste
 .pytest_cache/

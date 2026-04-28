@@ -6,7 +6,7 @@ import sys
 import json
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from models.jogadores import Jogador
 from services.jogador_service import JogadorService
@@ -129,6 +129,7 @@ def main():
 
 if __name__ == '__main__':
     sys.exit(main())
+
 
 
 def test_sorteio_10_jogadores():

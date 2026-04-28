@@ -293,7 +293,7 @@ Capacidades:
 
 - [routes/jogador_routes.py](routes/jogador_routes.py) esta muito grande e centraliza orquestracao demais
 - existem rotas e templates legados que ainda permanecem por compatibilidade
-- [services/ranking_service.py](services/ranking_service.py) existe, mas o ranking atual da UI vem de `VotacaoService`
+- [services/ranking_service.py](services/ranking_service.py) existe, mas ele representa ranking de times e hoje nao e o motor principal da pagina `/ranking`
 - [templates/ranking.html](templates/ranking.html) espera campos como `gols`, `assistencias`, `vitorias` e `destaques`, mas `ranking_jogadores_geral()` hoje nao devolve tudo isso
 - [templates/selecionar.html](templates/selecionar.html) inclui `offline-judge.js` duas vezes
 - a persistencia em JSON nao oferece controle transacional

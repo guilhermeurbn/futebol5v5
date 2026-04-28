@@ -3,6 +3,7 @@ Aplicação Flask - NaTrave - Gerador de Times Equilibrados
 """
 import os
 import logging
+import socket
 from flask import Flask, send_file
 from config import config_by_name
 from routes.jogador_routes import jogador_bp
@@ -67,7 +68,27 @@ def criar_app(config_name: str = None) -> Flask:
 # Criar aplicação
 app = criar_app()
 
+
+def _porta_disponivel(preferida: int = 10000) -> int:
+    """Escolhe porta livre para execucao local quando PORT nao estiver definida."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        try:
+            sock.bind(('0.0.0.0', preferida))
+            return preferida
+        except OSError:
+            pass
+
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.bind(('0.0.0.0', 0))
+        return sock.getsockname()[1]
+
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 10000))
+    port_env = os.environ.get("PORT")
+    if port_env:
+        port = int(port_env)
+    else:
+        port = _porta_disponivel(10000)
+        logger.info(f"PORT nao definida. Usando porta livre: {port}")
     app.run(debug=app.config['DEBUG'], host='0.0.0.0', port=port)
     

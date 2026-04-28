@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 from services.db import load_json_data, save_json_data, get_database_count, _candidate_paths
 
+
 def test_paths():
     """Testa se consegue encontrar os arquivos JSON."""
     print("=" * 60)
@@ -28,6 +29,7 @@ def test_paths():
                     print(f"    → Loaded {count} records")
                 break
 
+
 def test_load_data():
     """Testa se consegue carregar dados dos JSONs."""
     print("\n" + "=" * 60)
@@ -43,6 +45,7 @@ def test_load_data():
             print(f"✓ {namespace}: Loaded {count} records")
         else:
             print(f"✗ {namespace}: Failed to load")
+
 
 def test_database_status():
     """Testa o status do banco de dados."""
@@ -60,6 +63,7 @@ def test_database_status():
         print("\nTo reset and reseed:")
         print("  1. Delete all data in Railway PostgreSQL")
         print("  2. Trigger a redeploy")
+
 
 def test_full_seed():
     """Testa fazer o seed completo."""

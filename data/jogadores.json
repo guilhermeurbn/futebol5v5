@@ -1,0 +1,152 @@
+[
+	{
+		"nome": "Rennan",
+		"nivel": 6,
+		"tipo": "fixo",
+		"posicao": "linha",
+		"presente": false,
+		"id": "0808f78e-8374-4e61-b91e-8285d46e25f1",
+		"criado_em": "2026-04-23T23:20:00.000001",
+		"owner_user_id": null
+	},
+	{
+		"nome": "Guilherme",
+		"nivel": 7,
+		"tipo": "fixo",
+		"posicao": "linha",
+		"presente": false,
+		"id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+		"criado_em": "2026-04-23T23:20:00.000002",
+		"owner_user_id": null
+	},
+	{
+		"nome": "Carlos atacante",
+		"nivel": 6,
+		"tipo": "fixo",
+		"posicao": "linha",
+		"presente": false,
+		"id": "cfd8baf3-9a1d-4252-ab2f-6bee4cdd539e",
+		"criado_em": "2026-04-23T23:20:00.000003",
+		"owner_user_id": null
+	},
+	{
+		"nome": "Alex",
+		"nivel": 5,
+		"tipo": "avulso",
+		"posicao": "linha",
+		"presente": false,
+		"id": "d9035cd3-6c4d-4e74-93e4-da1bc93cb090",
+		"criado_em": "2026-04-23T23:20:00.000004",
+		"owner_user_id": null
+	},
+	{
+		"nome": "edmo",
+		"nivel": 7,
+		"tipo": "avulso",
+		"posicao": "linha",
+		"presente": false,
+		"id": "8b4f4b94-fdbe-44b0-9dde-c1eb4d12af01",
+		"criado_em": "2026-04-23T23:20:00.000005",
+		"owner_user_id": null
+	},
+	{
+		"nome": "netao",
+		"nivel": 5,
+		"tipo": "fixo",
+		"posicao": "linha",
+		"presente": false,
+		"id": "790b5dd7-664e-469f-99a9-0db00a8eee2c",
+		"criado_em": "2026-04-23T23:20:00.000006",
+		"owner_user_id": null
+	},
+	{
+		"nome": "ramon",
+		"nivel": 7,
+		"tipo": "fixo",
+		"posicao": "linha",
+		"presente": false,
+		"id": "f6e4f187-f9f4-44e3-ad57-57fb9c5eabe0",
+		"criado_em": "2026-04-23T23:20:00.000007",
+		"owner_user_id": null
+	},
+	{
+		"nome": "andre balada",
+		"nivel": 5,
+		"tipo": "avulso",
+		"posicao": "linha",
+		"presente": false,
+		"id": "e74e72bd-3946-474d-b031-409d375d5b2c",
+		"criado_em": "2026-04-23T23:20:00.000008",
+		"owner_user_id": null
+	},
+	{
+		"nome": "Lucas Teixeira",
+		"nivel": 7,
+		"tipo": "fixo",
+		"posicao": "linha",
+		"presente": false,
+		"id": "c6d43df2-ac9b-45be-98c6-84d618c63f87",
+		"criado_em": "2026-04-23T23:20:00.000009",
+		"owner_user_id": null
+	},
+	{
+		"nome": "Lucas ramos",
+		"nivel": 8,
+		"tipo": "fixo",
+		"posicao": "linha",
+		"presente": false,
+		"id": "4d254123-e08d-4317-9598-9911781ae5ae",
+		"criado_em": "2026-04-23T23:20:00.000010",
+		"owner_user_id": null
+	},
+	{
+		"nome": "Andrey",
+		"nivel": 6,
+		"tipo": "fixo",
+		"posicao": "linha",
+		"presente": false,
+		"id": "9781928f-5831-43f5-9441-5a1f004a51ec",
+		"criado_em": "2026-04-23T23:20:00.000011",
+		"owner_user_id": null
+	},
+	{
+		"nome": "luan",
+		"nivel": 7,
+		"tipo": "fixo",
+		"posicao": "linha",
+		"presente": false,
+		"id": "f92bb3d2-1a74-436b-8edf-8a94a285580d",
+		"criado_em": "2026-04-23T23:20:00.000012",
+		"owner_user_id": null
+	},
+	{
+		"nome": "Marquinhos",
+		"nivel": 7,
+		"tipo": "fixo",
+		"posicao": "goleiro",
+		"presente": false,
+		"id": "6ef2af1a-c51e-4bd8-bf21-897fea708b56",
+		"criado_em": "2026-04-23T23:20:00.000013",
+		"owner_user_id": null
+	},
+	{
+		"nome": "Carlos",
+		"nivel": 7,
+		"tipo": "fixo",
+		"posicao": "goleiro",
+		"presente": false,
+		"id": "9fab9719-120b-4f02-8d47-26cc7481d36d",
+		"criado_em": "2026-04-23T23:20:00.000014",
+		"owner_user_id": null
+	},
+	{
+		"nome": "bacatela",
+		"nivel": 6,
+		"tipo": "fixo",
+		"posicao": "goleiro",
+		"presente": false,
+		"id": "1980f054-1821-430b-bf31-c78a02512392",
+		"criado_em": "2026-04-23T23:20:00.000015",
+		"owner_user_id": null
+	}
+]
