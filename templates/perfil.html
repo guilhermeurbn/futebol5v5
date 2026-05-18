@@ -14,16 +14,13 @@
 
     <main class="main">
         <!-- Navigation Tabs -->
+        {% if auth_user.role != 'juiz' %}
         <div class="nav-tabs">
-            {% if auth_user.role == 'juiz' %}
-            <a href="{{ url_for('jogador.jogar_page') }}" class="nav-tab">🎮 Jogar</a>
-            {% else %}
             <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
-            {% endif %}
             {% if auth_user.role == 'usuario' %}
             <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab">🗳️ Minha Votação</a>
             {% endif %}
-            {% if auth_user.role in ['admin', 'super_admin', 'juiz'] %}
+            {% if auth_user.role in ['admin', 'super_admin'] %}
             <a href="{{ url_for('jogador.votacao_admin_page') }}" class="nav-tab">🛡️ Votação Admin</a>
             {% endif %}
             {% if auth_user.role in ['admin', 'super_admin'] %}
@@ -31,6 +28,7 @@
             <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">🏅 Ranking</a>
             {% endif %}
         </div>
+        {% endif %}
 
         {% if partida_juiz_em_andamento %}
             <div class="alert alert-warning">
@@ -291,6 +289,7 @@
         <section class="section">
             <h2 class="section-title">🔒 Segurança - Alterar Senha</h2>
             <form method="post" action="{{ url_for('jogador.perfil_alterar_senha') }}" class="form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="form-group">
                     <label class="form-label" for="senha_atual">Senha atual</label>
                     <input class="form-input" id="senha_atual" name="senha_atual" type="password" required>

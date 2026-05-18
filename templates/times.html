@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>NaTrave | Resultado do Sorteio</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
@@ -75,16 +76,13 @@
         <!-- Main Content -->
         <main class="main">
             <!-- Navigation Tabs -->
+            {% if auth_user.role != 'juiz' %}
             <div class="nav-tabs">
-                {% if auth_user.role == 'juiz' %}
-                <a href="{{ url_for('jogador.jogar_page') }}" class="nav-tab active">🎮 Jogar</a>
-                <a href="{{ url_for('jogador.votacao_admin_page', sorteio_id=sorteio_id) }}" class="nav-tab">🛡️ Votação</a>
-                {% else %}
                 <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
                 <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
                 <a href="{{ url_for('jogador.estatisticas') }}" class="nav-tab">📊 Estatísticas</a>
-                {% endif %}
             </div>
+            {% endif %}
 
             <!-- Aviso de Múltiplos Goleiros -->
             {% if tem_aviso %}
@@ -165,6 +163,7 @@
                             🏆 REGISTRAR
                         </a>
                         <form method="post" action="{{ url_for('jogador.votacao_admin_criar') }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <input type="hidden" name="sorteio_id" value="{{ sorteio_id }}">
                             <input type="hidden" name="titulo" value="Rodada do sorteio #{{ sorteio_id }}">
                             <button class="btn btn-primary" type="submit" style="width: 100%;">
@@ -237,6 +236,8 @@
         }
     </script>
     <script>
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
     // Carregar status de undo/redo ao iniciar
     function atualizarStatusUndoRedo() {
         fetch('/api/sorteio/status')
@@ -261,7 +262,10 @@
         this.disabled = true;
         this.textContent = '⏳ Undo...';
         
-        fetch('/api/sorteio/undo', { method: 'POST' })
+        fetch('/api/sorteio/undo', {
+            method: 'POST',
+            headers: {'X-CSRFToken': csrfToken}
+        })
             .then(r => r.json())
             .then(data => {
                 if (data.sucesso) {
@@ -289,7 +293,10 @@
         this.disabled = true;
         this.textContent = '⏳ Redo...';
         
-        fetch('/api/sorteio/redo', { method: 'POST' })
+        fetch('/api/sorteio/redo', {
+            method: 'POST',
+            headers: {'X-CSRFToken': csrfToken}
+        })
             .then(r => r.json())
             .then(data => {
                 if (data.sucesso) {
@@ -406,7 +413,7 @@
             
             fetch('/api/favoritar-time', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
                 body: JSON.stringify({
                     sorteio_id: sorteio_id,
                     time_numero: time_num,

@@ -3,10 +3,13 @@
     "id": "f58341a0-14ec-4076-9da5-931c866ebcac",
     "username": "admin",
     "nome": "Administrador",
-    "password_hash": "scrypt:32768:8:1$KW7dfg1kjyM0CaAz$f20ebd948a0a48efd8a29045c5fa054335e1a0db1ceaf44ae4264cf8d8c8730f2a568351758b2bc68607be214a421a9a9348373df0df2f1d3c62c05d91ae002e",
+    "password_hash": "scrypt:32768:8:1$GcBnOX6QS7W6e8em$35b1d24d9a81f61f14044e3f2a3574680032e29e9bece0b080f50dc7ce001823ab6ae0d73ae4dc6f1963fc2b976e7d6969d5a67e4201fcaa346feb225b774bed",
     "role": "admin",
     "criado_em": "2026-04-23T22:47:25.614906",
-    "ativo": true
+    "ativo": true,
+    "senha_temporaria_ativa": false,
+    "senha_resetada_em": null,
+    "senha_resetada_por": null
   },
   {
     "id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033",

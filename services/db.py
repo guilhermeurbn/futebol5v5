@@ -1,9 +1,19 @@
 import json
 import os
+import time
 from pathlib import Path
+from typing import Dict, Tuple, Any
 
-import psycopg2
-from psycopg2.extras import Json
+try:
+    import psycopg2
+    from psycopg2.extras import Json
+except Exception:
+    psycopg2 = None
+    Json = None
+
+# Cache em memória com TTL (5 minutos)
+_cache: Dict[str, Tuple[Any, float]] = {}
+_cache_ttl_seconds = 300  # 5 minutos
 
 
 def _normalize_database_url(url: str) -> str:
@@ -18,7 +28,13 @@ def get_conn():
         return None
 
     url = _normalize_database_url(url)
-    return psycopg2.connect(url, sslmode=os.getenv("PGSSLMODE", "require"))
+    if psycopg2 is None:
+        return None
+    try:
+        return psycopg2.connect(url, sslmode=os.getenv("PGSSLMODE", "require"))
+    except Exception as e:
+        print(f"[DB] Error connecting to Postgres: {e}")
+        return None
 
 
 def json_store_table_name() -> str:
@@ -49,10 +65,28 @@ def _candidate_paths(relative_path: str):
     yield root / "data" / relative_path
 
 
+def _get_cached(namespace: str):
+    if namespace not in _cache:
+        return None
+
+    data, timestamp = _cache[namespace]
+    if time.time() - timestamp < _cache_ttl_seconds:
+        return data
+
+    del _cache[namespace]
+    return None
+
+
+def _set_cached(namespace: str, data) -> None:
+    _cache[namespace] = (data, time.time())
+
+
 def load_json_data(namespace: str, default):
-    """Carrega dados JSON do banco ou do arquivo local como fallback."""
-    
-    # Primeiro tenta carregar do Postgres
+    """Carrega dados JSON do cache, banco ou arquivo local como fallback."""
+    cached = _get_cached(namespace)
+    if cached is not None:
+        return cached
+
     conn = get_conn()
     if conn is not None:
         try:
@@ -64,21 +98,21 @@ def load_json_data(namespace: str, default):
                 )
                 row = cur.fetchone()
                 if row:
-                    conn.close()
-                    return row[0]
+                    data = row[0]
+                    _set_cached(namespace, data)
+                    return data
         except Exception as e:
             print(f"[DB] Error loading from Postgres: {e}")
         finally:
-            if conn:
-                conn.close()
-    
-    # Se não achou no Postgres (ou não tem conexão), tenta arquivo local
+            conn.close()
+
     for candidate in _candidate_paths(f"{namespace}.json"):
         if candidate.exists():
             try:
                 with candidate.open("r", encoding="utf-8") as f:
                     data = json.load(f)
-                # Se tem conexão Postgres e carregou do arquivo, salva no banco
+                _set_cached(namespace, data)
+
                 conn = get_conn()
                 if conn is not None:
                     try:
@@ -97,6 +131,8 @@ def load_json_data(namespace: str, default):
 
 
 def save_json_data(namespace: str, payload) -> None:
+    _set_cached(namespace, payload)
+
     conn = get_conn()
     if conn is not None:
         try:

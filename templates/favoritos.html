@@ -13,6 +13,7 @@
     </div>
 
     <!-- Navigation Tabs -->
+    {% if auth_user.role != 'juiz' %}
     <div class="nav-tabs">
         <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
         {% if auth_user.role == 'usuario' %}
@@ -24,6 +25,7 @@
         <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
         <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">🏅 Ranking</a>
     </div>
+    {% endif %}
 
     <!-- Stats Cards -->
     <div class="summary-grid">

@@ -17,13 +17,14 @@ class AuthService:
 
     _TEMP_PASSWORD_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789"
 
-    def __init__(self, arquivo: str = "users.json"):
+    def __init__(self, arquivo: str = "data/users.json"):
         self.arquivo = arquivo
         self._garantir_arquivo()
 
     def _garantir_arquivo(self) -> None:
+        # If using a proper DATABASE_URL (production), do not auto-create
+        # local default accounts to avoid shipping predictable credentials.
         if os.getenv("DATABASE_URL"):
-            self._garantir_contas_padrao()
             return
         if not os.path.exists(self.arquivo):
             self._salvar([])
@@ -33,33 +34,47 @@ class AuthService:
     def _garantir_contas_padrao(self) -> None:
         usuarios = self._carregar()
         alterou = False
+        created_credentials = []
 
-        if not any((u.get("username") or "").lower() == "adminjogos" for u in usuarios):
+        env = os.getenv('FLASK_ENV', 'development')
+
+        def _add_admin_if_missing(username: str, display_name: str):
+            nonlocal alterou
+            if any((u.get('username') or '').lower() == username.lower() for u in usuarios):
+                return
+            # Only auto-create default admins in non-production environments
+            if env == 'production':
+                return
+
+            senha = self._gerar_senha_temporaria(12)
             usuarios.append({
-                "id": str(uuid.uuid4()),
-                "username": "adminjogos",
-                "nome": "Admin de Jogos",
-                "password_hash": generate_password_hash("adminjogos123"),
-                "role": "admin",
-                "criado_em": datetime.now().isoformat(),
-                "ativo": True,
+                'id': str(uuid.uuid4()),
+                'username': username.lower(),
+                'nome': display_name,
+                'password_hash': generate_password_hash(senha),
+                'role': 'admin',
+                'criado_em': datetime.now().isoformat(),
+                'ativo': True,
+                'senha_temporaria_ativa': True,
             })
+            created_credentials.append({'username': username.lower(), 'password': senha})
             alterou = True
 
-        if not any((u.get("role") == "admin") for u in usuarios):
-            usuarios.append({
-                "id": str(uuid.uuid4()),
-                "username": "admin",
-                "nome": "Administrador",
-                "password_hash": generate_password_hash("admin123"),
-                "role": "admin",
-                "criado_em": datetime.now().isoformat(),
-                "ativo": True,
-            })
-            alterou = True
+        _add_admin_if_missing('adminjogos', 'Admin de Jogos')
+        # Ensure there's at least one admin user (only create in dev/test)
+        if not any((u.get('role') == 'admin') for u in usuarios):
+            _add_admin_if_missing('admin', 'Administrador')
 
         if alterou:
             self._salvar(usuarios)
+            # Persist generated credentials locally for developer convenience
+            try:
+                os.makedirs(os.path.dirname(self.arquivo), exist_ok=True)
+                creds_file = os.path.join(os.path.dirname(self.arquivo), 'initial_admin_credentials.json')
+                with open(creds_file, 'w', encoding='utf-8') as cf:
+                    json.dump(created_credentials, cf, indent=2, ensure_ascii=False)
+            except Exception:
+                pass
 
     def _carregar(self) -> List[Dict]:
         if os.getenv("DATABASE_URL"):

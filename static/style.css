@@ -30,7 +30,7 @@
   /* 🖤 Escala de Cinzas */
   --text: #1f2937;              /* Texto principal */
   --text-light: #6b7280;        /* Texto secundário */
-    background: linear-gradient(180deg, var(--bg-dark) 0%, var(--bg) 100%);
+  --text-lighter: #9ca3af;      /* Texto terciário - melhor contraste */
   --bg: #f9fafb;                /* Fundo claro */
   --bg-dark: #111827;           /* Fundo escuro */
   --border: #e5e7eb;            /* Bordas */
@@ -114,10 +114,10 @@ body {
 
 /* 🎯 Header - Topo com Gradient */
 .header {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
+  background: linear-gradient(180deg, #000000 0%, #0b0b0b 100%);
   color: white;
   padding: var(--spacing-2xl) var(--spacing-lg);
-  box-shadow: var(--shadow-xl);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
   position: relative;
   overflow: hidden;
 }
@@ -129,9 +129,10 @@ body {
   right: -10%;
   width: 400px;
   height: 400px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.02);
   border-radius: 50%;
   animation: float 6s ease-in-out infinite;
+  mix-blend-mode: overlay;
 }
 
 @keyframes float {
@@ -142,35 +143,52 @@ body {
 .header-content {
   max-width: 1200px;
   margin: 0 auto;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-lg);
   position: relative;
   z-index: 1;
-  flex-wrap: wrap;
+}
+
+.brand-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-lg);
+  width: 100%;
+  text-align: center;
 }
 
 .logo-header {
-  width: 80px;
-  height: 80px;
+  width: 170px;
+  height: 170px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.2);
+  background: transparent;
   border-radius: var(--radius-xl);
-  backdrop-filter: blur(10px);
   flex-shrink: 0;
-  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.logo-header svg {
+.logo-header a {
+  display: inline-flex;
   width: 100%;
   height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-logo-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .header-text {
-  flex: 1;
+  flex: 0 1 auto;
   min-width: 200px;
+}
+
+.header-text .brand-tagline {
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .brand-tagline {
@@ -180,7 +198,7 @@ body {
   margin-bottom: var(--spacing-sm);
   padding: var(--spacing-xs) var(--spacing-md);
   border-radius: var(--radius-full);
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
   color: rgba(255, 255, 255, 0.95);
   font-size: 0.75rem;
   font-weight: 700;
@@ -188,7 +206,7 @@ body {
   text-transform: uppercase;
   width: fit-content;
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .header h1 {
@@ -205,17 +223,17 @@ body {
 
 .subtitle {
   font-size: 1rem;
-  opacity: 0.95;
+  opacity: 1;
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.95);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .auth-actions {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xs);
-  align-items: flex-end;
-  margin-left: auto;
+  align-items: center;
+  width: 100%;
 }
 
 .auth-user {
@@ -228,7 +246,12 @@ body {
   display: flex;
   gap: var(--spacing-sm);
   flex-wrap: wrap;
-  justify-content: flex-end;
+  justify-content: center;
+}
+
+.auth-links .btn {
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: 0.9rem;
 }
 
 .back-link {
@@ -1571,8 +1594,8 @@ tbody td code {
 }
 
 .stat-badge {
-  background: linear-gradient(135deg, var(--primary-light) 0%, rgba(124, 58, 237, 0.08) 100%);
-  color: var(--primary);
+  background: linear-gradient(135deg, var(--primary-light) 0%, rgba(124, 58, 237, 0.15) 100%);
+  color: var(--primary-dark);
   padding: var(--spacing-sm) var(--spacing-md);
   border-radius: var(--radius);
   font-size: 0.85rem;
@@ -2402,12 +2425,51 @@ tbody td code {
    1️⃣7️⃣  RESPONSIVIDADE
    ============================================================ */
 
+/* Tablet intermediário (900px) */
+@media (max-width: 900px) {
+  .brand-header {
+    gap: var(--spacing-md);
+  }
+
+  .header h1 {
+    font-size: 2rem;
+  }
+
+  .logo-header {
+    width: 140px;
+    height: 140px;
+  }
+
+  .times-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-lg);
+  }
+
+  .players-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+  }
+
+  .auth-links {
+    gap: var(--spacing-xs);
+  }
+
+  .btn {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.9rem;
+  }
+
+  .main {
+    padding: var(--spacing-lg);
+  }
+}
+
 @media (max-width: 1024px) {
   .header h1 {
     font-size: 2rem;
   }
 
-  .main {
+  .container {
     padding: var(--spacing-lg);
   }
 
@@ -2429,10 +2491,6 @@ tbody td code {
 
   .header h1 {
     font-size: 1.8rem;
-  }
-
-  .main {
-    padding: var(--spacing-lg);
   }
 
   .section {
@@ -2480,13 +2538,18 @@ tbody td code {
     align-items: flex-start;
   }
 
-  .header-content {
-    flex-direction: column;
+  .brand-header {
     gap: var(--spacing-md);
   }
 
+  .logo-header {
+    width: 145px;
+    height: 145px;
+  }
+
   .auth-actions {
-    margin-left: 0;
+    align-items: center;
+    width: 100%;
   }
 
   table {
@@ -2518,6 +2581,11 @@ tbody td code {
 
   .main {
     padding: var(--spacing-md);
+  }
+
+  .logo-header {
+    width: 120px;
+    height: 120px;
   }
 
   .section {

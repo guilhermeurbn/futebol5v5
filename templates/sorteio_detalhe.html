@@ -20,18 +20,13 @@
         <!-- Main Content -->
         <main class="main">
             <!-- Navigation -->
+            {% if auth_user.role != 'juiz' %}
             <div class="nav-tabs">
-                {% if auth_user.role == 'juiz' %}
-                <a href="{{ url_for('jogador.jogar_page') }}" class="nav-tab">🎮 Jogar</a>
-                <a href="{{ url_for('jogador.votacao_admin_page', sorteio_id=sorteio.id) }}" class="nav-tab">🛡️ Votação</a>
-                <a href="{{ url_for('jogador.historico') }}" class="nav-tab active">📜 Histórico</a>
-                <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">🏅 Ranking</a>
-                {% else %}
                 <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
                 <a href="{{ url_for('jogador.historico') }}" class="nav-tab active">📜 Histórico</a>
                 <a href="{{ url_for('jogador.estatisticas') }}" class="nav-tab">📊 Estatísticas</a>
-                {% endif %}
             </div>
+            {% endif %}
 
             <!-- Info Section -->
             <section class="section">
@@ -68,6 +63,7 @@
 
                         {% if not partida_votacao or partida_votacao.status == 'aberta' %}
                         <form method="post" action="{{ url_for('jogador.votacao_admin_criar') }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <input type="hidden" name="sorteio_id" value="{{ sorteio.id }}">
                             <input type="hidden" name="titulo" value="Rodada do sorteio #{{ sorteio.id }}">
                             <button class="btn btn-primary" type="submit" style="width: 100%;">🗳️ Iniciar votação</button>

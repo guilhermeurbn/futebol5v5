@@ -13,6 +13,7 @@
     </header>
 
     <main class="main">
+        {% if usuario.role != 'juiz' %}
         <div class="nav-tabs">
             <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
             {% if usuario.role == 'usuario' %}
@@ -24,6 +25,7 @@
             <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
             <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">🏅 Ranking</a>
         </div>
+        {% endif %}
 
         <section class="section">
             <h2 class="section-title">✏️ Editar {{ jogador.nome }}</h2>
@@ -32,6 +34,7 @@
             <div class="alert alert-danger">{{ erro }}</div>
             {% endif %}
             <form action="{{ url_for('jogador.editar_jogador_post', jogador_id=jogador.id) }}" method="post" class="form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="form-group">
                     <label class="form-label" for="nome">Nome</label>
                     <input class="form-input" id="nome" type="text" name="nome" value="{{ jogador.nome }}" minlength="2" required>

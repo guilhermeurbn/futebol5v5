@@ -144,7 +144,7 @@ def main():
     # Importar e executar
     try:
         from app import app
-        app.run(debug=True, host='0.0.0.0', port=porta)
+        app.run(debug=app.config.get('DEBUG', False), host='0.0.0.0', port=porta)
     except KeyboardInterrupt:
         print(f"\n{AMARELO}⏹️  Servidor interrompido pelo usuário{RESET}\n")
         return 0

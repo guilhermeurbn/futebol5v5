@@ -11,6 +11,11 @@ class Config:
     TESTING = False
     JSON_SORT_KEYS = False
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
+    # Session / cookie security defaults (can be overridden per-environment)
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SECURE = False
+    PREFERRED_URL_SCHEME = 'https'
 
 
 class DevelopmentConfig(Config):
@@ -29,6 +34,8 @@ class ProductionConfig(Config):
     """Configuração de produção"""
     DEBUG = False
     TESTING = False
+    # Enforce secure cookies in production
+    SESSION_COOKIE_SECURE = True
 
 
 config_by_name = {

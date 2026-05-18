@@ -20,11 +20,13 @@
         <!-- Main Content -->
         <main class="main">
             <!-- Navigation -->
+            {% if auth_user.role != 'juiz' %}
             <div class="nav-tabs">
                 <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
                 <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
                 <a href="{{ url_for('jogador.estatisticas') }}" class="nav-tab active">📊 Estatísticas</a>
             </div>
+            {% endif %}
 
             {% if stats.total_sorteios > 0 %}
                 <!-- Stats Grid -->

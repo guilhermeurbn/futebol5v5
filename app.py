@@ -4,9 +4,29 @@ Aplicação Flask - NaTrave - Gerador de Times Equilibrados
 import os
 import logging
 import socket
+import uuid
 from flask import Flask, send_file
+try:
+    from flask_wtf import CSRFProtect
+    from flask_wtf.csrf import generate_csrf
+except Exception:
+    CSRFProtect = None
+    generate_csrf = None
+
+try:
+    from flask_talisman import Talisman
+except Exception:
+    Talisman = None
 from config import config_by_name
-from routes.jogador_routes import jogador_bp
+from routes import (
+    admin_bp,
+    auth_bp,
+    jogador_bp,
+    juiz_bp,
+    partida_bp,
+    stats_bp,
+    votacao_bp,
+)
 from services.db import auto_seed_on_init
 # Configuração de logging
 logging.basicConfig(
@@ -15,6 +35,26 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
+def _registrar_aliases_jogador(app: Flask) -> None:
+    """Mantem compatibilidade com templates que ainda usam url_for('jogador.*')."""
+    for rule in list(app.url_map.iter_rules()):
+        if rule.endpoint == "static" or "." not in rule.endpoint:
+            continue
+
+        endpoint_name = rule.endpoint.rsplit(".", 1)[1]
+        alias_endpoint = f"jogador.{endpoint_name}"
+        if alias_endpoint in app.view_functions:
+            continue
+
+        methods = rule.methods - {"HEAD", "OPTIONS"}
+        app.add_url_rule(
+            rule.rule,
+            endpoint=alias_endpoint,
+            view_func=app.view_functions[rule.endpoint],
+            methods=methods,
+            defaults=rule.defaults,
+        )
 
 
 def criar_app(config_name: str = None) -> Flask:
@@ -39,11 +79,44 @@ def criar_app(config_name: str = None) -> Flask:
     if not secret_key:
         if config_name == 'production':
             raise RuntimeError('SECRET_KEY obrigatoria em producao')
-        secret_key = 'dev-secret-key-change-in-production'
+        # Gerar UUID aleatório mesmo em dev (mais seguro que hardcoded)
+        secret_key = str(uuid.uuid4())
+        logger.warning(f"SECRET_KEY gerada dinamicamente (dev): {secret_key[:8]}...")
     app.secret_key = secret_key
+    # Initialize security middleware
+    if Talisman is not None:
+        try:
+            # Set up HTTP security headers (HSTS, X-Frame-Options, etc.)
+            Talisman(app, content_security_policy=None)
+        except Exception as e:
+            logger.warning(f"Falha ao iniciar Talisman: {e}")
+    else:
+        logger.warning("flask-talisman nao instalado; headers de seguranca extras desativados")
+
+    # Enable CSRF protection for mutating requests
+    if CSRFProtect is None or generate_csrf is None:
+        logger.error("CRÍTICO: Flask-WTF não instalado; CSRF não protegido!")
+        raise RuntimeError("Flask-WTF é obrigatório para CSRF protection")
+    
+    try:
+        csrf = CSRFProtect()
+        csrf.init_app(app)
+        # Expor helper para templates que queiram ler o token diretamente
+        app.jinja_env.globals['csrf_token'] = generate_csrf
+        logger.info("CSRF protection ativado")
+    except Exception as e:
+        logger.error(f"Falha ao iniciar CSRFProtect: {e}")
+        raise
     
     # Registrar blueprints
+    app.register_blueprint(auth_bp)
     app.register_blueprint(jogador_bp)
+    app.register_blueprint(partida_bp)
+    app.register_blueprint(votacao_bp)
+    app.register_blueprint(admin_bp)
+    app.register_blueprint(juiz_bp)
+    app.register_blueprint(stats_bp)
+    _registrar_aliases_jogador(app)
     
     # Auto-seed database se estiver vazio (Railway)
     try:

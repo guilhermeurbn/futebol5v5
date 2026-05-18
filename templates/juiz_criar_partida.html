@@ -154,10 +154,11 @@ function confirmarSelecao() {
     }
 
     msgErro.style.display = 'none';
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
     fetch('/api/presenca', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
         body: JSON.stringify({jogador_ids: ids})
     })
     .then(res => res.json())

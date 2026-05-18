@@ -13,21 +13,19 @@
     </header>
 
     <main class="main">
+        {% if auth_user.role != 'juiz' %}
         <div class="nav-tabs">
-            {% if auth_user.role == 'juiz' %}
-            <a href="{{ url_for('jogador.jogar_page') }}" class="nav-tab">🎮 Jogar</a>
-            {% else %}
             <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
-            {% endif %}
             {% if auth_user.role == 'usuario' %}
             <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab">🗳️ Minha Votação</a>
             {% endif %}
-            {% if auth_user.role in ['admin', 'super_admin', 'juiz'] %}
+            {% if auth_user.role in ['admin', 'super_admin'] %}
             <a href="{{ url_for('jogador.votacao_admin_page') }}" class="nav-tab">🛡️ Votação Admin</a>
             {% endif %}
             <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
             <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab active">🏅 Ranking</a>
         </div>
+        {% endif %}
 
         <section class="section">
             <h2 class="section-title">📊 Resumo</h2>

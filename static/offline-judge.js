@@ -28,6 +28,11 @@
     return typeof navigator !== 'undefined' && navigator.onLine === false;
   }
 
+  function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+  }
+
   function getQueue() {
     return readJSON(QUEUE_KEY, []);
   }
@@ -62,9 +67,15 @@
 
     for (const item of queue) {
       try {
+        const headers = { ...(item.headers || {}) };
+        const csrfToken = getCsrfToken();
+        if (csrfToken && !headers['X-CSRFToken']) {
+          headers['X-CSRFToken'] = csrfToken;
+        }
+
         const response = await fetch(item.url, {
           method: item.method || 'POST',
-          headers: item.headers || {},
+          headers,
           body: item.body
         });
 

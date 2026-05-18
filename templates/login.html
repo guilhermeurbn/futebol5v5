@@ -27,6 +27,7 @@
             <section class="section">
                 <h2 class="section-title">🔐 Login</h2>
                 <form method="post" action="{{ url_for('jogador.login_submit') }}" class="form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="form-group">
                         <label class="form-label" for="username">Usuário</label>
                         <input class="form-input" id="username" name="username" type="text" required autocomplete="username">

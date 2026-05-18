@@ -19,23 +19,19 @@
 
     <main class="main">
         <!-- Navigation Tabs -->
+        {% if auth_user.role != 'juiz' %}
         <div class="nav-tabs">
-            {% if auth_user.role == 'juiz' %}
-            <a href="{{ url_for('jogador.jogar_page') }}" class="nav-tab">🎮 Jogar</a>
-            {% elif auth_user.role != 'juiz' %}
             <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
-            {% endif %}
             {% if auth_user.role == 'usuario' %}
             <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab">🗳️ Minha Votação</a>
             {% endif %}
-            {% if auth_user.role in ['admin', 'super_admin', 'juiz'] %}
+            {% if auth_user.role in ['admin', 'super_admin'] %}
             <a href="{{ url_for('jogador.votacao_admin_page') }}" class="nav-tab active">🛡️ Votação Admin</a>
             {% endif %}
-            {% if auth_user.role != 'juiz' %}
             <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
             <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">🏅 Ranking</a>
-            {% endif %}
         </div>
+        {% endif %}
 
         {% if erro %}
             <div class="alert alert-warning"><strong>⚠️</strong> {{ erro }}</div>
@@ -53,6 +49,7 @@
                     <h2 class="section-title">🔒 Finalizar Sem Votação</h2>
                     <p>Não houve abertura de votação. Se desejar, finalize a partida e registre o encerramento.</p>
                     <form method="post" action="{{ url_for('jogador.juiz_finalizar_partida') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button class="btn btn-danger" type="submit">Finalizar partida (sem votação)</button>
                     </form>
                 </section>
@@ -61,6 +58,8 @@
         <section class="section">
             <h2 class="section-title">🚀 Abrir votações</h2>
             <form method="post" action="{{ url_for('jogador.votacao_admin_criar') }}" class="form" style="max-width: 560px;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 {% if sorteio_contexto %}
                 <div class="surface-panel surface-panel--soft" style="margin-bottom: 1rem;">
                     <div class="section-label">Sorteio selecionado</div>
@@ -149,6 +148,7 @@
                 </div>
 
                 <form method="post" action="{{ url_for('jogador.votacao_admin_encerrar', partida_id=ativa.id) }}" style="margin-top: 16px;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button class="btn btn-primary" type="submit">Encerrar e apurar ranking</button>
                 </form>
             </section>

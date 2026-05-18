@@ -1,56 +1,39 @@
 <div class="brand-header">
     <div class="logo-header">
         <a href="{{ url_for('jogador.jogar_page') if auth_user and auth_user.role == 'juiz' else url_for('jogador.index') }}" aria-label="Ir para a página inicial" style="display:inline-block;">
-        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <defs>
-                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:1" />
-                    <stop offset="55%" style="stop-color:#ec4899;stop-opacity:1" />
-                    <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:1" />
-                </linearGradient>
-                <filter id="logoShadow">
-                    <feDropShadow dx="0" dy="6" stdDeviation="8" flood-opacity="0.35"/>
-                </filter>
-            </defs>
-            <rect x="7" y="7" width="86" height="86" rx="26" fill="url(#logoGradient)" filter="url(#logoShadow)"/>
-            <circle cx="50" cy="42" r="24" fill="rgba(255,255,255,0.12)"/>
-            <circle cx="50" cy="42" r="18" fill="none" stroke="rgba(255,255,255,0.65)" stroke-width="2.5"/>
-            <path d="M35 58V30l15 15 15-15v28" fill="none" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-            <rect x="29" y="63" width="42" height="13" rx="6.5" fill="rgba(255,255,255,0.22)"/>
-            <text x="50" y="72" font-size="12" font-weight="700" fill="white" text-anchor="middle" dominant-baseline="middle" font-family="Arial">5v5</text>
-        </svg>
+            <img src="{{ url_for('static', filename='logo-natrave-5v5.png') }}" alt="NaTrave 5v5" class="brand-logo-image">
         </a>
-    </div>
-    <div class="header-text">
-        <h1>{{ brand_title|default('NaTrave') }}</h1>
-        {% if brand_tagline is defined and brand_tagline %}
-            <div class="brand-tagline">{{ brand_tagline }}</div>
-        {% endif %}
-        <p class="subtitle">{{ brand_subtitle|default('Organize e equilibre seus times de futebol') }}</p>
     </div>
     {% if auth_user and auth_user.autenticado %}
     <div class="auth-actions">
-        <div class="auth-user">{{ auth_user.nome }} ({{ auth_user.role }})</div>
         <div class="auth-links">
             {% if auth_user.role == 'juiz' %}
-            <a class="btn btn-secondary" href="{{ url_for('jogador.jogar_page') }}">Jogar</a>
-            <a class="btn btn-secondary" href="{{ url_for('jogador.votacao_admin_page') }}">Votação</a>
+            {% if not juiz_partida_ativa %}
+            <form method="post" action="{{ url_for('jogador.juiz_criar_partida') }}" class="logout-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn btn-primary" type="submit">Criar partida</button>
+            </form>
             {% endif %}
-            {% if auth_user.role != 'juiz' or auth_user.senha_temporaria_ativa %}
-            <a class="btn btn-secondary" href="{{ url_for('jogador.perfil_page') }}">Perfil</a>
+            {% else %}
+            {% if auth_user.role != 'juiz' %}
+            <a class="btn btn-secondary" href="{{ url_for('jogador.index') }}">Jogadores</a>
+            {% endif %}
+            {% if auth_user.role == 'usuario' %}
+            <a class="btn btn-secondary" href="{{ url_for('jogador.votacao_page') }}">Minha votação</a>
             {% endif %}
             {% if auth_user.role in ['admin', 'super_admin'] %}
+            <a class="btn btn-secondary" href="{{ url_for('jogador.votacao_admin_page') }}">Votação Admin</a>
             <a class="btn btn-warning" href="{{ url_for('jogador.admin_page') }}">Admin</a>
             {% endif %}
+            <a class="btn btn-secondary" href="{{ url_for('jogador.historico') }}">Histórico</a>
+            <a class="btn btn-secondary" href="{{ url_for('jogador.pagina_ranking') }}">Ranking</a>
+            <a class="btn btn-secondary" href="{{ url_for('jogador.perfil_page') }}">Meu perfil</a>
+            {% endif %}
             <form method="post" action="{{ url_for('jogador.logout') }}" class="logout-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button class="btn btn-danger" type="submit">Sair</button>
             </form>
         </div>
-        {% if auth_user.senha_temporaria_ativa %}
-        <div class="alert alert-warning" style="margin-top: 0.75rem; max-width: 320px;">
-            ⚠️ Senha temporária ativa. Troque-a no Perfil.
-        </div>
-        {% endif %}
     </div>
     {% endif %}
 </div>

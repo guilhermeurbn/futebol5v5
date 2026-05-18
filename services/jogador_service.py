@@ -94,6 +94,10 @@ class JogadorService:
         Returns:
             Jogador criado
         """
+        # Validar nível
+        if not isinstance(nivel, int) or nivel < 1 or nivel > 10:
+            raise ValueError(f"Nível deve ser inteiro entre 1 e 10, recebido: {nivel}")
+        
         jogador = Jogador(
             nome=nome.strip(),
             nivel=nivel,
@@ -134,6 +138,10 @@ class JogadorService:
         # Validate optional fields
         novo_nome = nome.strip() if isinstance(nome, str) and nome.strip() else jogador_existente.nome
         novo_nivel = int(nivel) if nivel is not None else jogador_existente.nivel
+        
+        # Validar range de nível (1-10)
+        if novo_nivel < 1 or novo_nivel > 10:
+            raise ValueError(f"Nível deve estar entre 1 e 10, recebido: {novo_nivel}")
 
         novo_tipo = jogador_existente.tipo
         if tipo is not None:

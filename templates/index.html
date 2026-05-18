@@ -17,6 +17,7 @@
         <!-- Main Content -->
         <main class="main">
             <!-- Navigation Tabs -->
+            {% if auth_user.role != 'juiz' %}
             <div class="nav-tabs">
                 <a href="{{ url_for('jogador.index') }}" class="nav-tab active">👥 Jogadores</a>
                 {% if auth_user.role == 'usuario' %}
@@ -28,6 +29,7 @@
                 <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
                 <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">🏅 Ranking</a>
             </div>
+            {% endif %}
 
             {% if erro %}
                 <div class="alert alert-warning">
@@ -40,6 +42,7 @@
             <section class="section">
                 <h2 class="section-title">✏️ Adicionar Jogador</h2>
                 <form action="{{ url_for('jogador.adicionar_jogador') }}" method="post" class="form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="form-group">
                         <label for="nome" class="form-label">Nome do Jogador</label>
                         <input 

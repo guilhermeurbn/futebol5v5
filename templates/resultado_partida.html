@@ -13,21 +13,19 @@
     </div>
 
     <!-- Navigation Tabs -->
+    {% if auth_user.role != 'juiz' %}
     <div class="nav-tabs">
-        {% if auth_user.role == 'juiz' %}
-        <a href="{{ url_for('jogador.jogar_page') }}" class="nav-tab">🎮 Jogar</a>
-        {% else %}
         <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
-        {% endif %}
         {% if auth_user.role == 'usuario' %}
         <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab">🗳️ Minha Votação</a>
         {% endif %}
-        {% if auth_user.role in ['admin', 'super_admin', 'juiz'] %}
+        {% if auth_user.role in ['admin', 'super_admin'] %}
         <a href="{{ url_for('jogador.votacao_admin_page', sorteio_id=sorteio_id) }}" class="nav-tab">🛡️ Votação Admin</a>
         {% endif %}
         <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
         <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">🏅 Ranking</a>
     </div>
+    {% endif %}
 
     <section class="surface-panel surface-panel--soft result-intro">
         <div class="result-intro__header">
@@ -300,6 +298,7 @@ document.getElementById('btn-registrar').addEventListener('click', function() {
         jogadores_detalhes: jogadoresDetalhes,
         times_desempenho: timesDesempenho
     };
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
     const registrarOffline = async () => {
         if (window.NaTraveOffline) {
@@ -307,7 +306,7 @@ document.getElementById('btn-registrar').addEventListener('click', function() {
                 label: 'Resultado da partida',
                 url: '/api/partida/registrar',
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
                 body: JSON.stringify(dados),
                 kind: 'resultado_partida'
             });
@@ -327,7 +326,8 @@ document.getElementById('btn-registrar').addEventListener('click', function() {
     fetch('/api/partida/registrar', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
         },
         body: JSON.stringify(dados)
     })
