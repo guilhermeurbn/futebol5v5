@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NaTrave | Recuperar senha</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="auth-page">
+    <main class="auth-shell auth-shell--single">
+        <section class="auth-panel auth-panel--form auth-panel--recovery" aria-labelledby="recoveryHeading">
+            <div class="auth-card-header">
+                <div class="section-label">Recuperação</div>
+                <h2 id="recoveryHeading" class="auth-card-title auth-card-title--login">
+                    <span class="auth-card-title__icon" aria-hidden="true">✉️</span>
+                    <span>Esqueci minha senha</span>
+                </h2>
+                <p class="auth-card-subtitle">Informe seu email para receber o link de redefinição.</p>
+            </div>
+
+            {% if erro %}
+                <div class="auth-message auth-message--warning" role="alert" aria-live="assertive">
+                    <strong>⚠️</strong>
+                    <span>{{ erro }}</span>
+                </div>
+            {% endif %}
+            {% if sucesso %}
+                <div class="auth-message auth-message--success" role="status" aria-live="polite">
+                    <strong>✅</strong>
+                    <span>{{ sucesso }}</span>
+                </div>
+            {% endif %}
+
+            <form method="post" action="{{ url_for('auth.recuperar_senha_submit') }}" class="auth-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="form-group auth-field">
+                    <label class="form-label" for="email">Email</label>
+                    <div class="auth-input-wrap">
+                        <span class="auth-input-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="5" width="18" height="14" rx="2" />
+                                <path d="m4 7 8 6 8-6" />
+                            </svg>
+                        </span>
+                        <input class="form-input auth-input" id="email" name="email" type="email" placeholder="Digite seu email" required autofocus autocomplete="email">
+                    </div>
+                </div>
+
+                <button class="btn btn-primary auth-submit" type="submit">Enviar link</button>
+            </form>
+
+            <div class="auth-card-footer">
+                <p class="auth-link-text"><a href="{{ url_for('auth.login_page') }}" class="text-accent-link">Voltar para login</a></p>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

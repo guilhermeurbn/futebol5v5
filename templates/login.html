@@ -6,46 +6,139 @@
     <title>NaTrave | Login</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
-    <div class="container page-container-narrow" style="padding-top: 40px;">
-        <header class="header">
-            <div class="header-content">
-                {% set brand_title = 'Acesso ao Sistema' %}
-                {% set brand_subtitle = 'Entre com seu usuário e senha' %}
-                {% include '_brand_header.html' %}
-            </div>
-        </header>
+<body class="auth-page">
+    <div class="auth-page__glow auth-page__glow--primary"></div>
+    <div class="auth-page__glow auth-page__glow--secondary"></div>
+    <div class="auth-page__glow auth-page__glow--accent"></div>
 
-        <main class="main">
+    <main class="auth-shell">
+        <section class="auth-panel auth-panel--intro auth-panel--intro-hero">
+            <div class="auth-panel__brand auth-panel__brand--hero auth-panel__brand--hero-lockup">
+                <div class="auth-panel__logo auth-panel__logo--image auth-panel__logo--hero auth-panel__logo--hero-large">
+                    <img src="{{ url_for('static', filename='logo-natrave-5v5.png') }}" alt="NaTrave 5v5" class="auth-panel__logo-image">
+                </div>
+                <div class="auth-panel__brand-copy auth-panel__brand-copy--hero">
+                    <h1 class="auth-title auth-title--brand auth-title--hero">Organize seu Futebol de forma <span class="auth-title__accent">Equilibrada</span></h1>
+                    <p class="auth-subtitle auth-subtitle--hero">Balanceamento, ranking, votações e gestão em um fluxo único.</p>
+                </div>
+            </div>
+
+            <div class="auth-preview-grid" aria-label="Prévia do que você encontra após entrar">
+                <article class="auth-preview-card auth-preview-card--timers">
+                    <div class="auth-preview-card__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 7h16" />
+                            <path d="M4 17h16" />
+                            <path d="M7 7v10" />
+                            <path d="M17 7v10" />
+                        </svg>
+                    </div>
+                    <p class="auth-preview-card__label">Times equilibrados</p>
+                    <p class="auth-preview-card__text">Balanceamento preciso para partidas mais justas.</p>
+                </article>
+                <article class="auth-preview-card auth-preview-card--ranking">
+                    <div class="auth-preview-card__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 19V9" />
+                            <path d="M12 19V5" />
+                            <path d="M19 19v-8" />
+                        </svg>
+                    </div>
+                    <p class="auth-preview-card__label">Ranking</p>
+                    <p class="auth-preview-card__text">Evolução clara de desempenho e posição.</p>
+                </article>
+                <article class="auth-preview-card auth-preview-card--votacoes">
+                    <div class="auth-preview-card__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M7 12h10" />
+                            <path d="M12 7v10" />
+                            <path d="M5 5h14v14H5z" />
+                        </svg>
+                    </div>
+                    <p class="auth-preview-card__label">Votações</p>
+                    <p class="auth-preview-card__text">Participação rápida e simples após cada jogo.</p>
+                </article>
+                <article class="auth-preview-card auth-preview-card--management">
+                    <div class="auth-preview-card__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 7h16" />
+                            <path d="M4 12h10" />
+                            <path d="M4 17h13" />
+                            <path d="M18 12l2 2 3-3" />
+                        </svg>
+                    </div>
+                    <p class="auth-preview-card__label">Gestão completa</p>
+                    <p class="auth-preview-card__text">Organização centralizada de jogos e jogadores.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="auth-panel auth-panel--form" aria-labelledby="loginHeading">
             {% if sucesso %}
-                <div class="alert alert-success"><strong>✅</strong> {{ sucesso }}</div>
+                <div class="auth-message auth-message--success" role="status" aria-live="polite">
+                    <strong>✅</strong>
+                    <span>{{ sucesso }}</span>
+                </div>
             {% endif %}
             {% if erro %}
-                <div class="alert alert-warning"><strong>⚠️</strong> {{ erro }}</div>
+                <div class="auth-message auth-message--warning" role="alert" aria-live="assertive">
+                    <strong>⚠️</strong>
+                    <span>{{ erro }}</span>
+                </div>
             {% endif %}
 
-            <section class="section">
-                <h2 class="section-title">🔐 Login</h2>
-                <form method="post" action="{{ url_for('jogador.login_submit') }}" class="form">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <div class="form-group">
-                        <label class="form-label" for="username">Usuário</label>
-                        <input class="form-input" id="username" name="username" type="text" required autocomplete="username">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="password">Senha</label>
-                        <input class="form-input" id="password" name="password" type="password" required autocomplete="current-password">
-                    </div>
-                    <button class="btn btn-primary" type="submit">Entrar</button>
-                </form>
+            <div class="auth-card-header">
+                <div class="section-label">Entrar</div>
+                <h2 id="loginHeading" class="auth-card-title auth-card-title--login">
+                    <span class="auth-card-title__icon" aria-hidden="true">🔒</span>
+                    <span>Acesse sua conta</span>
+                </h2>
+                <p class="auth-card-subtitle">Entre para continuar sua rotina de jogos e votações.</p>
+            </div>
 
-                <p style="margin-top: 12px; opacity: 0.9; font-size: 0.95rem;">
-                    Não tem conta? <a href="{{ url_for('jogador.cadastro_page') }}" class="text-accent-link">Criar cadastro</a>
-                </p>
+            <form method="post" action="{{ url_for('jogador.login_submit') }}" class="auth-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="form-group auth-field">
+                    <label class="form-label" for="username">Usuário</label>
+                    <div class="auth-input-wrap">
+                        <span class="auth-input-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21a8 8 0 0 0-16 0" />
+                                <circle cx="12" cy="8" r="4" />
+                            </svg>
+                        </span>
+                        <input class="form-input auth-input" id="username" name="username" type="text" placeholder="Digite seu usuário" required autocomplete="username" autofocus>
+                    </div>
+                </div>
+                <div class="form-group auth-field">
+                    <label class="form-label" for="password">Senha</label>
+                    <div class="auth-input-wrap">
+                        <span class="auth-input-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="4" y="10" width="16" height="10" rx="2" />
+                                <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                            </svg>
+                        </span>
+                        <input class="form-input auth-input" id="password" name="password" type="password" placeholder="Digite sua senha" required autocomplete="current-password">
+                    </div>
+                </div>
 
-                <p style="margin-top: 12px; opacity: 0.8; font-size: 0.9rem;">Admin padrão: <strong>admin</strong> / <strong>admin123</strong></p>
-            </section>
-        </main>
-    </div>
+                <div class="auth-utility-row">
+                    <label class="auth-remember">
+                        <input class="auth-remember__input" type="checkbox" name="remember_me">
+                        <span class="auth-remember__box" aria-hidden="true"></span>
+                        <span class="auth-remember__text">Lembrar de mim</span>
+                    </label>
+                    <a href="{{ url_for('auth.recuperar_senha_page') }}" class="auth-forgot-link">Esqueci minha senha</a>
+                </div>
+
+                <button class="btn btn-primary auth-submit" type="submit">Entrar</button>
+            </form>
+
+            <div class="auth-card-footer">
+                <p class="auth-link-text">Não tem conta? <a href="{{ url_for('jogador.cadastro_page') }}" class="text-accent-link">Criar cadastro</a></p>
+            </div>
+        </section>
+    </main>
 </body>
 </html>

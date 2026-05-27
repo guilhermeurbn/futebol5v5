@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NaTrave | Definir nova senha</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="auth-page">
+    <main class="auth-shell auth-shell--single">
+        <section class="auth-panel auth-panel--form auth-panel--recovery" aria-labelledby="resetHeading">
+            <div class="auth-card-header">
+                <div class="section-label">Segurança</div>
+                <h2 id="resetHeading" class="auth-card-title auth-card-title--login">
+                    <span class="auth-card-title__icon" aria-hidden="true">🔐</span>
+                    <span>Definir nova senha</span>
+                </h2>
+                <p class="auth-card-subtitle">Crie uma nova senha para continuar usando sua conta.</p>
+            </div>
+
+            {% if erro %}
+                <div class="auth-message auth-message--warning" role="alert" aria-live="assertive">
+                    <strong>⚠️</strong>
+                    <span>{{ erro }}</span>
+                </div>
+            {% endif %}
+
+            <form method="post" action="{{ url_for('auth.definir_senha_submit') }}" class="auth-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="token" value="{{ token }}">
+                <div class="form-group auth-field">
+                    <label class="form-label" for="nova_senha">Nova senha</label>
+                    <div class="auth-input-wrap">
+                        <span class="auth-input-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="4" y="10" width="16" height="10" rx="2" />
+                                <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                            </svg>
+                        </span>
+                        <input class="form-input auth-input" id="nova_senha" name="nova_senha" type="password" placeholder="Digite sua nova senha" required autofocus autocomplete="new-password">
+                    </div>
+                </div>
+                <div class="form-group auth-field">
+                    <label class="form-label" for="confirmar_senha">Confirmar nova senha</label>
+                    <div class="auth-input-wrap">
+                        <span class="auth-input-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="4" y="10" width="16" height="10" rx="2" />
+                                <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                            </svg>
+                        </span>
+                        <input class="form-input auth-input" id="confirmar_senha" name="confirmar_senha" type="password" placeholder="Confirme sua nova senha" required autocomplete="new-password">
+                    </div>
+                </div>
+
+                <button class="btn btn-primary auth-submit" type="submit">Salvar nova senha</button>
+            </form>
+
+            <div class="auth-card-footer">
+                <p class="auth-link-text"><a href="{{ url_for('auth.login_page') }}" class="text-accent-link">Voltar para login</a></p>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

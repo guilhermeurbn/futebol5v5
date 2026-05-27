@@ -2,9 +2,13 @@
 Rotas de Autenticação
 - Login, logout, cadastro, perfil e alteração de senha
 """
-from flask import Blueprint, request, render_template, redirect, url_for, session
+import csv
+from io import StringIO
+
+from flask import Blueprint, request, render_template, redirect, url_for, session, Response, jsonify
 from functools import wraps
 from services.auth_service import AuthService
+from services.email_service import EmailService
 from services.jogador_service import JogadorService
 from services.jogador_stats_service import JogadorStatsService
 from services.notificacao_service import NotificacaoService
@@ -13,6 +17,7 @@ from services.juiz_partida_service import JuizPartidaService
 auth_bp = Blueprint('auth', __name__)
 
 auth_service = AuthService()
+email_service = EmailService()
 jogador_service = JogadorService()
 jogador_stats_service = JogadorStatsService()
 notificacao_service = NotificacaoService()
@@ -121,6 +126,7 @@ def cadastro_page():
 def cadastro_submit():
     """Handler para submit de cadastro"""
     nome = request.form.get('nome', '').strip()
+    email = request.form.get('email', '').strip().lower()
     username = request.form.get('username', '').strip()
     senha = request.form.get('password', '')
     confirmar = request.form.get('confirmar_password', '')
@@ -128,11 +134,14 @@ def cadastro_submit():
     tipo = request.form.get('tipo', 'avulso')
     posicao = request.form.get('posicao', 'linha')
 
+    if not email or '@' not in email:
+        return render_template('cadastro.html', erro='Informe um email valido'), 400
     if senha != confirmar:
         return render_template('cadastro.html', erro='A confirmacao de senha nao confere'), 400
 
     try:
         usuario = auth_service.criar_usuario(
+            email=email,
             username=username,
             nome=nome,
             password=senha,
@@ -148,6 +157,15 @@ def cadastro_submit():
             owner_user_id=usuario.get('id')
         )
 
+        try:
+            email_service.send_welcome_email(
+                to_email=email,
+                nome=usuario.get('nome', nome),
+                username=usuario.get('username', username)
+            )
+        except Exception:
+            pass
+
         notificacao_service.criar_notificacao(
             titulo='Novo cadastro de usuario',
             mensagem=f'Usuario {usuario.get("username")} ({usuario.get("nome")}) acabou de se cadastrar.',
@@ -162,6 +180,72 @@ def cadastro_submit():
         return render_template('cadastro.html', erro=str(e)), 400
     except Exception as e:
         return render_template('cadastro.html', erro='Erro ao criar usuario'), 500
+
+
+@auth_bp.route('/recuperar-senha', methods=['GET'])
+def recuperar_senha_page():
+    if session.get('user_id'):
+        return redirect(url_for('jogador.index'))
+    return render_template('recuperar_senha.html')
+
+
+@auth_bp.route('/recuperar-senha', methods=['POST'])
+def recuperar_senha_submit():
+    email = request.form.get('email', '').strip().lower()
+    mensagem = 'Se o email existir na base, enviamos instrucoes para redefinir sua senha.'
+
+    if not email or '@' not in email:
+        return render_template('recuperar_senha.html', erro='Informe um email valido'), 400
+
+    usuario = auth_service.obter_por_email(email)
+    if usuario:
+        try:
+            token = auth_service.gerar_token_reset(usuario.get('id'))
+            reset_url = f"{email_service.base_url}{url_for('auth.definir_senha_page')}?token={token}"
+            email_service.send_password_reset_email(
+                to_email=usuario.get('email') or email,
+                nome=usuario.get('nome') or usuario.get('username') or 'usuario',
+                reset_url=reset_url,
+            )
+        except Exception:
+            pass
+
+    return render_template('recuperar_senha.html', sucesso=mensagem)
+
+
+@auth_bp.route('/definir-senha', methods=['GET'])
+def definir_senha_page():
+    if session.get('user_id'):
+        return redirect(url_for('jogador.index'))
+
+    token = request.args.get('token', '').strip()
+    usuario = auth_service.validar_token_reset(token)
+    if not usuario:
+        return render_template('definir_senha.html', erro='Link invalido ou expirado'), 400
+
+    return render_template('definir_senha.html', token=token, usuario=usuario)
+
+
+@auth_bp.route('/definir-senha', methods=['POST'])
+def definir_senha_submit():
+    token = request.form.get('token', '').strip()
+    nova_senha = request.form.get('nova_senha', '')
+    confirmar_senha = request.form.get('confirmar_senha', '')
+
+    usuario = auth_service.validar_token_reset(token)
+    if not usuario:
+        return render_template('definir_senha.html', erro='Link invalido ou expirado'), 400
+
+    if nova_senha != confirmar_senha:
+        return render_template('definir_senha.html', token=token, usuario=usuario, erro='A confirmacao de senha nao confere'), 400
+
+    try:
+        auth_service.definir_nova_senha(usuario.get('id'), nova_senha)
+        return render_template('login.html', sucesso='Senha redefinida com sucesso! Agora voce pode entrar.')
+    except ValueError as e:
+        return render_template('definir_senha.html', token=token, usuario=usuario, erro=str(e)), 400
+    except Exception:
+        return render_template('definir_senha.html', token=token, usuario=usuario, erro='Erro ao redefinir senha'), 500
 
 
 @auth_bp.route('/logout', methods=['POST'])
@@ -191,6 +275,11 @@ def perfil_page():
             # Obter estatísticas do jogador
             if jogador_proprio:
                 stats_jogador = jogador_stats_service.obter_stats_jogador(jogador_proprio.nome)
+                stats_jogador.setdefault('efficiency', {})
+                stats_jogador.setdefault('discipline', {})
+                stats_jogador.setdefault('ultimos_resultados', {'forma': [], 'pontos': 0, 'partidas': []})
+                stats_jogador.setdefault('mini_dashboard', {'kpis': {}, 'series_ultimos_5': []})
+                stats_jogador.setdefault('planilha_metricas', [])
     except ValueError as e:
         return render_template(
             'perfil.html',
@@ -227,6 +316,11 @@ def perfil_jogador_publico(jogador_id):
         stats_jogador = None
         try:
             stats_jogador = jogador_stats_service.obter_stats_jogador(jogador.nome)
+            stats_jogador.setdefault('efficiency', {})
+            stats_jogador.setdefault('discipline', {})
+            stats_jogador.setdefault('ultimos_resultados', {'forma': [], 'pontos': 0, 'partidas': []})
+            stats_jogador.setdefault('mini_dashboard', {'kpis': {}, 'series_ultimos_5': []})
+            stats_jogador.setdefault('planilha_metricas', [])
         except ValueError:
             # Se houver erro ao obter stats, continuar sem elas
             pass
@@ -290,3 +384,69 @@ def perfil_alterar_senha():
             usuario=_usuario_logado(),
             erro_senha='Erro ao alterar senha'
         ), 500
+
+
+@auth_bp.route('/api/perfil/dashboard', methods=['GET'])
+@login_required
+def perfil_dashboard_api():
+    """Retorna payload de dashboard do jogador do usuário logado."""
+    try:
+        meus = jogador_service.listar_por_usuario(session.get('user_id'))
+        jogador_proprio = meus[0] if meus else None
+        if not jogador_proprio:
+            return jsonify({'ok': True, 'dashboard': None, 'mensagem': 'Usuario sem jogador vinculado'})
+
+        stats_jogador = jogador_stats_service.obter_stats_jogador(jogador_proprio.nome)
+        return jsonify({'ok': True, 'dashboard': stats_jogador})
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Erro ao carregar dashboard do perfil: {str(e)}")
+        return jsonify({'ok': False, 'erro': 'Falha ao carregar dashboard'}), 500
+
+
+@auth_bp.route('/perfil/planilha.csv', methods=['GET'])
+@login_required
+def perfil_planilha_csv():
+    """Exporta métricas do perfil em CSV (formato planilha)."""
+    meus = jogador_service.listar_por_usuario(session.get('user_id'))
+    jogador_proprio = meus[0] if meus else None
+    if not jogador_proprio:
+        return redirect(url_for('auth.perfil_page'))
+
+    stats = jogador_stats_service.obter_stats_jogador(jogador_proprio.nome)
+    linhas = stats.get('planilha_metricas', [])
+
+    output = StringIO()
+    writer = csv.writer(output)
+    writer.writerow([
+        'Data',
+        'Partida ID',
+        'Time',
+        'Resultado',
+        'Pontos',
+        'Gols',
+        'Assistencias',
+        'Cartoes Amarelos',
+        'Cartoes Vermelhos',
+    ])
+
+    for linha in linhas:
+        writer.writerow([
+            linha.get('data', ''),
+            linha.get('partida_id', ''),
+            linha.get('time', ''),
+            linha.get('resultado', ''),
+            linha.get('pontos', 0),
+            linha.get('gols', 0),
+            linha.get('assistencias', 0),
+            linha.get('cartoes_amarelos', 0),
+            linha.get('cartoes_vermelhos', 0),
+        ])
+
+    csv_content = output.getvalue()
+    output.close()
+
+    response = Response(csv_content, mimetype='text/csv; charset=utf-8')
+    response.headers['Content-Disposition'] = 'attachment; filename=perfil_metricas.csv'
+    return response

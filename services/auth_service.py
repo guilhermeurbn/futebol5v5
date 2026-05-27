@@ -98,6 +98,7 @@ class AuthService:
         for u in usuarios:
             saida.append({
                 "id": u.get("id"),
+                "email": u.get("email"),
                 "username": u.get("username"),
                 "nome": u.get("nome"),
                 "role": u.get("role", "usuario"),
@@ -135,6 +136,7 @@ class AuthService:
         if check_password_hash(usuario.get("password_hash", ""), password or ""):
             return {
                 "id": usuario.get("id"),
+                "email": usuario.get("email"),
                 "username": usuario.get("username"),
                 "nome": usuario.get("nome"),
                 "role": usuario.get("role", "usuario"),
@@ -142,11 +144,24 @@ class AuthService:
             }
         return None
 
-    def criar_usuario(self, username: str, nome: str, password: str, role: str = "usuario") -> Dict:
+    def obter_por_email(self, email: str) -> Optional[Dict]:
+        email = (email or "").strip().lower()
+        if not email:
+            return None
+
+        for u in self._carregar():
+            if (u.get("email") or "").strip().lower() == email:
+                return u
+        return None
+
+    def criar_usuario(self, email: str = "", username: str = "", nome: str = "", password: str = "", role: str = "usuario") -> Dict:
+        email = (email or "").strip().lower()
         username = (username or "").strip().lower()
         nome = (nome or "").strip()
         role = (role or "usuario").strip().lower()
 
+        if email and "@" not in email:
+            raise ValueError("Email deve ser valido")
         if not username or len(username) < 3:
             raise ValueError("Username deve ter ao menos 3 caracteres")
         if not nome or len(nome) < 2:
@@ -157,11 +172,14 @@ class AuthService:
             raise ValueError("Role invalida")
 
         usuarios = self._carregar()
+        if email and any((u.get("email") or "").strip().lower() == email for u in usuarios):
+            raise ValueError("Email ja existe")
         if any((u.get("username") or "").lower() == username for u in usuarios):
             raise ValueError("Username ja existe")
 
         novo = {
             "id": str(uuid.uuid4()),
+            "email": email,
             "username": username,
             "nome": nome,
             "password_hash": generate_password_hash(password),
@@ -175,12 +193,81 @@ class AuthService:
 
         return {
             "id": novo["id"],
+            "email": novo["email"],
             "username": novo["username"],
             "nome": novo["nome"],
             "role": novo["role"],
             "ativo": novo["ativo"],
             "criado_em": novo["criado_em"],
         }
+
+    def definir_nova_senha(self, user_id: str, nova_senha: str) -> None:
+        if not nova_senha or len(nova_senha) < 6:
+            raise ValueError("Nova senha deve ter ao menos 6 caracteres")
+
+        usuarios = self._carregar()
+        for u in usuarios:
+            if u.get("id") != user_id:
+                continue
+
+            u["password_hash"] = generate_password_hash(nova_senha)
+            u["senha_temporaria_ativa"] = False
+            u["senha_resetada_em"] = None
+            u["senha_resetada_por"] = None
+            u.pop("password_reset_token_hash", None)
+            u.pop("password_reset_token_expira_em", None)
+            u.pop("password_reset_requested_em", None)
+            self._salvar(usuarios)
+            return
+
+        raise ValueError("Usuario nao encontrado")
+
+    def gerar_token_reset(self, user_id: str, expires_in_seconds: int = 3600) -> str:
+        if not user_id:
+            raise ValueError("Usuario nao encontrado")
+
+        token = secrets.token_urlsafe(32)
+        usuarios = self._carregar()
+        for u in usuarios:
+            if u.get("id") == user_id:
+                u["password_reset_token_hash"] = generate_password_hash(token)
+                u["password_reset_token_expira_em"] = (datetime.now().timestamp() + max(300, int(expires_in_seconds)))
+                u["password_reset_requested_em"] = datetime.now().isoformat()
+                self._salvar(usuarios)
+                return token
+
+        raise ValueError("Usuario nao encontrado")
+
+    def validar_token_reset(self, token: str) -> Optional[Dict]:
+        token = (token or "").strip()
+        if not token:
+            return None
+
+        now_ts = datetime.now().timestamp()
+        for u in self._carregar():
+            token_hash = u.get("password_reset_token_hash")
+            expira_em = u.get("password_reset_token_expira_em")
+            if not token_hash or not expira_em:
+                continue
+            try:
+                if float(expira_em) < now_ts:
+                    continue
+            except (TypeError, ValueError):
+                continue
+            if check_password_hash(token_hash, token):
+                return u
+        return None
+
+    def consumir_token_reset(self, user_id: str) -> None:
+        usuarios = self._carregar()
+        for u in usuarios:
+            if u.get("id") == user_id:
+                u.pop("password_reset_token_hash", None)
+                u.pop("password_reset_token_expira_em", None)
+                u.pop("password_reset_requested_em", None)
+                self._salvar(usuarios)
+                return
+        raise ValueError("Usuario nao encontrado")
 
     def alterar_senha(self, user_id: str, senha_atual: str, nova_senha: str) -> None:
         if not senha_atual:
@@ -237,6 +324,7 @@ class AuthService:
 
         return {
             "id": alvo.get("id"),
+            "email": alvo.get("email"),
             "username": alvo.get("username"),
             "nome": alvo.get("nome"),
             "role": alvo.get("role", "usuario"),

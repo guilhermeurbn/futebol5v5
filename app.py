@@ -134,6 +134,45 @@ def criar_app(config_name: str = None) -> Flask:
         )
     
     logger.info(f"Aplicação iniciada em modo: {config_name}")
+
+    # Filtros Jinja para formatação de datas no formato PT (DD/MM/YY)
+    from datetime import datetime
+
+    def _parse_iso_date(s: str):
+        if not s:
+            return None
+        if isinstance(s, datetime):
+            return s
+        try:
+            # normalize Z timezone
+            s2 = s.replace('Z', '')
+            # Try ISO format parsing (supports YYYY-MM-DD and YYYY-MM-DDTHH:MM:SS(.micro))
+            if 'T' in s2:
+                try:
+                    return datetime.fromisoformat(s2)
+                except Exception:
+                    # fallback to common slice
+                    return datetime.strptime(s2[:19], '%Y-%m-%dT%H:%M:%S')
+            if '-' in s2:
+                # date only
+                return datetime.strptime(s2[:10], '%Y-%m-%d')
+        except Exception:
+            return None
+
+    def dt_pt(value):
+        dt = _parse_iso_date(value)
+        if not dt:
+            return value
+        return dt.strftime('%d/%m/%y')
+
+    def dt_pt_hm(value):
+        dt = _parse_iso_date(value)
+        if not dt:
+            return value
+        return dt.strftime('%d/%m/%y às %H:%M')
+
+    app.jinja_env.filters['dt_pt'] = dt_pt
+    app.jinja_env.filters['dt_pt_hm'] = dt_pt_hm
     
     return app
 

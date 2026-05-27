@@ -7,12 +7,14 @@ from functools import wraps
 import logging
 
 from services.auth_service import AuthService
+from services.email_service import EmailService
 from services.notificacao_service import NotificacaoService
 
 admin_bp = Blueprint('admin', __name__)
 logger = logging.getLogger(__name__)
 
 auth_service = AuthService()
+email_service = EmailService()
 notificacao_service = NotificacaoService()
 
 
@@ -101,12 +103,16 @@ def admin_limpar_notificacoes():
 def admin_criar_usuario():
     """Cria novo usuário (admin)"""
     try:
+        email = request.form.get('email', '').strip().lower()
         username = request.form.get('username', '')
         nome = request.form.get('nome', '')
         password = request.form.get('password', '')
         role = request.form.get('role', 'usuario')
         
-        auth_service.criar_usuario(username=username, nome=nome, password=password, role=role)
+        if not email or '@' not in email:
+            raise ValueError('Email deve ser valido')
+
+        auth_service.criar_usuario(email=email, username=username, nome=nome, password=password, role=role)
         return redirect(url_for('admin.admin_page', sucesso='Usuario criado com sucesso'))
     except ValueError as e:
         logger.warning(f"Erro de validação ao criar usuário: {str(e)}")
@@ -127,6 +133,16 @@ def admin_resetar_senha_usuario(user_id):
             user_id=user_id,
             executor_id=session.get('user_id')
         )
+        if dados_reset.get('email'):
+            try:
+                email_service.send_temporary_password_email(
+                    to_email=dados_reset.get('email'),
+                    nome=dados_reset.get('nome') or dados_reset.get('username') or 'usuario',
+                    username=dados_reset.get('username') or '',
+                    senha_temporaria=dados_reset.get('senha_temporaria') or '',
+                )
+            except Exception:
+                logger.warning('Falha ao enviar email de senha temporaria para %s', dados_reset.get('email'))
         session['admin_sucesso'] = f'Senha de {dados_reset.get("nome")} resetada com sucesso'
         session['admin_senha_reset'] = dados_reset
         return redirect(url_for('admin.admin_page'))

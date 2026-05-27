@@ -3,7 +3,7 @@
 {% block title %}Admin{% endblock %}
 
 {% block content %}
-<div class="container page-container-wide">
+<div class="container page-container-wide admin-page">
     <header class="header">
         <div class="header-content">
             {% set brand_title = 'Painel Admin' %}
@@ -14,72 +14,117 @@
 
     <main class="main">
         {% if sucesso %}
-            <div class="alert alert-success">✅ {{ sucesso }}</div>
+            <div class="admin-feedback admin-feedback--success" role="status">
+                <div class="admin-feedback__icon">✅</div>
+                <div>
+                    <div class="admin-feedback__label">Ação concluída</div>
+                    <div class="admin-feedback__text">{{ sucesso }}</div>
+                </div>
+            </div>
         {% endif %}
         {% if erro %}
-            <div class="alert alert-warning">⚠️ {{ erro }}</div>
-        {% endif %}
-        {% if senha_reset %}
-            <div class="alert alert-success">
-                🔐 Senha temporária gerada para <strong>{{ senha_reset.nome }}</strong> ({{ senha_reset.username }}):
-                <strong style="letter-spacing: 0.04em;">{{ senha_reset.senha_temporaria }}</strong>
+            <div class="admin-feedback admin-feedback--warning" role="alert">
+                <div class="admin-feedback__icon">⚠️</div>
+                <div>
+                    <div class="admin-feedback__label">Atenção</div>
+                    <div class="admin-feedback__text">{{ erro }}</div>
+                </div>
             </div>
         {% endif %}
 
-        <!-- AÇÕES RÁPIDAS -->
-        <section class="section">
-            <h2 class="section-title">⚡ Ações Rápidas</h2>
-            <div class="action-grid action-grid--wide">
-                <a href="{{ url_for('jogador.selecionar_jogadores') }}" class="btn btn-primary">
-                    🎮 Criar Partida
-                </a>
+        <section class="section admin-page__toolbar">
+            <div class="section-header admin-page__toolbar-header">
+                <div>
+                    <h2 class="section-title">⚙️ Painel de controle</h2>
+                    <p class="section-subtitle">Abra avisos do sistema ou crie um novo usuário quando precisar.</p>
+                </div>
+                <div class="section-header-actions admin-page__toolbar-actions">
+                    <button type="button" class="btn btn-secondary btn-small admin-toolbar-btn btn-toggle-create" data-toggle-panel="notificationsPanel" aria-expanded="false" aria-controls="notificationsPanel">
+                        <span class="toggle-create-icon" aria-hidden="true"></span>
+                        <span>🔔 Avisos do sistema</span>
+                        {% if total_notificacoes %}<span class="admin-toolbar-badge">{{ total_notificacoes }}</span>{% endif %}
+                    </button>
+                    <button type="button" class="btn btn-primary btn-small admin-toolbar-btn admin-toolbar-btn--primary btn-toggle-create" data-toggle-panel="createUserPanel" aria-expanded="false" aria-controls="createUserPanel">
+                        <span class="toggle-create-icon" aria-hidden="true"></span>
+                        <span>Novo usuário</span>
+                    </button>
+                </div>
             </div>
         </section>
 
-        <section class="section">
-            <h2 class="section-title">🔔 Notificações{% if total_notificacoes %} ({{ total_notificacoes }}){% endif %}</h2>
+        <section class="section admin-drawer" id="notificationsPanel" hidden aria-hidden="true" data-panel>
+            <div class="admin-drawer__header">
+                <div>
+                    <h2 class="section-title" tabindex="-1">🔔 Avisos do sistema{% if total_notificacoes %} ({{ total_notificacoes }}){% endif %}</h2>
+                    <p class="section-subtitle">Mensagens recentes, confirmações e alertas importantes para o admin.</p>
+                </div>
+            </div>
             {% if notificacoes %}
-                <div class="sorteios-list" style="margin-top: 0; margin-bottom: 1rem;">
+                <div class="admin-drawer__list">
                     {% for n in notificacoes %}
-                    <div class="surface-panel surface-panel--accent">
-                        <div style="font-weight: 700; margin-bottom: 0.25rem;">{{ n.titulo }}</div>
-                        <div style="opacity: 0.9; margin-bottom: 0.25rem;">{{ n.mensagem }}</div>
-                        <div style="opacity: 0.7; font-size: 0.85rem;">{{ n.criado_em }}</div>
+                    <div class="surface-panel surface-panel--accent admin-drawer__item">
+                        <div class="admin-drawer__item-title">{{ n.titulo }}</div>
+                        <div class="admin-drawer__item-text">{{ n.mensagem }}</div>
+                        <div class="admin-drawer__item-meta">{{ n.criado_em|dt_pt_hm if n.criado_em else '' }}</div>
                     </div>
                     {% endfor %}
                 </div>
-                <form method="post" action="{{ url_for('jogador.admin_limpar_notificacoes') }}">
+                <form method="post" action="{{ url_for('admin.admin_limpar_notificacoes') }}" class="admin-drawer__footer">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button class="btn btn-primary" type="submit">Marcar todas como lidas</button>
                 </form>
             {% else %}
-                <p style="color: var(--text-light);">Sem notificações pendentes.</p>
+                <p class="admin-drawer__empty">Nenhum aviso novo por enquanto.</p>
             {% endif %}
         </section>
 
-        <section class="section">
-            <h2 class="section-title">➕ Criar Usuário</h2>
-            <form method="post" action="{{ url_for('jogador.admin_criar_usuario') }}" class="form action-grid action-grid--medium">
+        <section class="section admin-drawer" id="createUserPanel" hidden aria-hidden="true" data-panel>
+            <div class="admin-drawer__header">
+                <div>
+                    <h2 class="section-title" tabindex="-1">➕ Novo usuário</h2>
+                    <p class="section-subtitle">Preencha os dados para liberar acesso ao sistema.</p>
+                </div>
+            </div>
+            <form method="post" action="{{ url_for('admin.admin_criar_usuario') }}" class="form admin-form-grid">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <input class="form-input" name="nome" placeholder="Nome" required>
-                <input class="form-input" name="username" placeholder="Username" required>
-                <input class="form-input" name="password" type="password" placeholder="Senha" required>
-                <select class="form-input" name="role">
-                    <option value="admin">admin</option>
-                    <option value="juiz">juiz</option>
-                    <option value="usuario">usuario</option>
-                </select>
-                <button class="btn btn-primary" type="submit">Criar</button>
+                <label class="admin-form-field">
+                    <span class="form-label">Email</span>
+                    <input class="form-input" name="email" type="email" placeholder="Email" required>
+                </label>
+                <label class="admin-form-field">
+                    <span class="form-label">Nome</span>
+                    <input class="form-input" name="nome" placeholder="Nome" required>
+                </label>
+                <label class="admin-form-field">
+                    <span class="form-label">Username</span>
+                    <input class="form-input" name="username" placeholder="Username" required>
+                </label>
+                <label class="admin-form-field">
+                    <span class="form-label">Senha</span>
+                    <input class="form-input" name="password" type="password" placeholder="Senha" required>
+                </label>
+                <label class="admin-form-field">
+                    <span class="form-label">Perfil</span>
+                    <select class="form-input" name="role">
+                        <option value="admin">admin</option>
+                        <option value="juiz">juiz</option>
+                        <option value="usuario">usuario</option>
+                    </select>
+                </label>
+                <div class="admin-form-actions">
+                    <button class="btn btn-primary" type="submit">Salvar novo usuário</button>
+                </div>
             </form>
         </section>
 
-        <section class="section">
+        <section class="section admin-table-shell">
             <h2 class="section-title">📋 Usuários</h2>
             <div class="table-shell">
                 <table class="uniform-table">
                     <thead>
                         <tr>
                             <th>Nome</th>
+                                    <th>Email</th>
                             <th>Username</th>
                             <th>Role</th>
                             <th class="text-center">Ativo</th>
@@ -91,32 +136,37 @@
                         {% for u in usuarios %}
                         <tr>
                             <td>{{ u.nome }}</td>
+                            <td>{{ u.email or '-' }}</td>
                             <td>{{ u.username }}</td>
                             <td>{{ u.role }}</td>
                             <td class="text-center">{{ 'sim' if u.ativo else 'não' }}</td>
-                            <td>{{ u.criado_em }}</td>
-                            <td style="display: flex; gap: 6px; flex-wrap: wrap;">
-                                <!-- Botão Ativar/Desativar -->
-                                <form method="post" action="{{ url_for('jogador.admin_alterar_ativo_usuario', user_id=u.id) }}" style="display:inline;">
+                            <td>{{ u.criado_em|dt_pt if u.criado_em else '' }}</td>
+                            <td class="admin-table-actions">
+                                    <form method="post" action="{{ url_for('admin.admin_alterar_ativo_usuario', user_id=u.id) }}" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja {{ 'DESATIVAR' if u.ativo else 'ATIVAR' }} este usuário?');">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                     {% if u.ativo %}
                                         <input type="hidden" name="acao" value="desativar">
-                                        <button class="btn btn-danger" type="submit" {% if u.id == auth_user.id %}disabled title="Não pode desativar seu próprio usuário"{% endif %}>Desativar</button>
+                                        <button class="btn btn-danger" type="submit" {% if u.id == usuario.id %}disabled title="Não pode desativar seu próprio usuário"{% endif %}>Desativar</button>
                                     {% else %}
                                         <input type="hidden" name="acao" value="ativar">
                                         <button class="btn btn-success" type="submit">Ativar</button>
                                     {% endif %}
                                 </form>
 
-                                <form method="post" action="{{ url_for('jogador.admin_resetar_senha_usuario', user_id=u.id) }}" style="display:inline;" onsubmit="return confirm('Resetar a senha de {{ u.nome }} ({{ u.username }}) e gerar uma senha temporária?');">
+                                <form method="post" action="{{ url_for('admin.admin_resetar_senha_usuario', user_id=u.id) }}" style="display:inline;" onsubmit="return confirm('Resetar a senha de {{ u.nome }} ({{ u.username }}) e gerar uma senha temporária?');">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                     <button class="btn btn-primary" type="submit">🔐 Resetar Senha</button>
                                 </form>
-                                
-                                <!-- Botão Deletar -->
-                                <form method="post" action="{{ url_for('jogador.admin_deletar_usuario', user_id=u.id) }}" style="display:inline;" onsubmit="return confirm('⚠️ ATENÇÃO: Tem certeza que quer deletar este usuário?\n\n❌ O usuário ' + '{{ u.nome }}' + ' ({{ u.username }}) PERDERÁ suas credenciais\n✅ Ele poderá criar uma nova conta depois\n\nEsta ação é irreversível!');">
+
+                                <form method="post" action="{{ url_for('admin.admin_deletar_usuario', user_id=u.id) }}" style="display:inline;">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                    <button class="btn btn-warning" type="submit" {% if u.id == auth_user.id %}disabled title="Não pode deletar sua própria conta"{% endif %}>🗑️ Deletar</button>
+                                    <button
+                                        class="btn btn-warning admin-delete-btn"
+                                        type="submit"
+                                        data-delete-user="{{ u.nome }}"
+                                        data-delete-username="{{ u.username }}"
+                                        {% if u.id == usuario.id %}disabled title="Não pode deletar sua própria conta"{% endif %}
+                                    >🗑️ Deletar</button>
                                 </form>
                             </td>
                         </tr>
@@ -125,6 +175,97 @@
                 </table>
             </div>
         </section>
+
+        <div class="admin-delete-modal" id="adminDeleteModal" hidden aria-hidden="true">
+            <div class="admin-delete-modal__backdrop" data-delete-close></div>
+            <div class="admin-delete-modal__panel" role="dialog" aria-modal="true" aria-labelledby="adminDeleteModalTitle">
+                <div class="admin-delete-modal__header">
+                    <div>
+                        <div class="section-label">Atenção</div>
+                        <h3 class="admin-delete-modal__title" id="adminDeleteModalTitle">Confirmar exclusão</h3>
+                    </div>
+                    <button type="button" class="admin-delete-modal__close" data-delete-close aria-label="Fechar">✕</button>
+                </div>
+                <p class="admin-delete-modal__message" id="adminDeleteModalMessage"></p>
+                <div class="admin-delete-modal__actions">
+                    <button type="button" class="btn btn-secondary" data-delete-close>Cancelar</button>
+                    <button type="button" class="btn btn-warning" id="adminDeleteConfirmBtn">Deletar</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            (() => {
+                const deleteModal = document.getElementById('adminDeleteModal');
+                const deleteMessage = document.getElementById('adminDeleteModalMessage');
+                const deleteConfirmBtn = document.getElementById('adminDeleteConfirmBtn');
+                let pendingDeleteForm = null;
+
+                const closeDeleteModal = () => {
+                    if (!deleteModal) return;
+                    deleteModal.hidden = true;
+                    deleteModal.setAttribute('aria-hidden', 'true');
+                    pendingDeleteForm = null;
+                };
+
+                const openDeleteModal = (form, userName, userUsername) => {
+                    if (!deleteModal || !deleteMessage || !deleteConfirmBtn) return;
+                    pendingDeleteForm = form;
+                    deleteMessage.textContent = `Tem certeza que deseja Deletar o usuário ${userName} (${userUsername})? Essa ação é irreversível.`;
+                    deleteModal.hidden = false;
+                    deleteModal.setAttribute('aria-hidden', 'false');
+                    deleteConfirmBtn.focus();
+                };
+
+                document.querySelectorAll('.admin-delete-btn').forEach((button) => {
+                    button.closest('form')?.addEventListener('submit', (event) => {
+                        event.preventDefault();
+                        const userName = button.getAttribute('data-delete-user') || 'este usuário';
+                        const userUsername = button.getAttribute('data-delete-username') || '';
+                        openDeleteModal(button.closest('form'), userName, userUsername);
+                    });
+                });
+
+                document.querySelectorAll('[data-delete-close]').forEach((button) => {
+                    button.addEventListener('click', closeDeleteModal);
+                });
+
+                deleteConfirmBtn?.addEventListener('click', () => {
+                    if (pendingDeleteForm) {
+                        pendingDeleteForm.submit();
+                    }
+                    closeDeleteModal();
+                });
+
+                deleteModal?.addEventListener('keydown', (event) => {
+                    if (event.key === 'Escape') {
+                        closeDeleteModal();
+                    }
+                });
+
+                const buttons = document.querySelectorAll('[data-toggle-panel]');
+                buttons.forEach((button) => {
+                    button.addEventListener('click', () => {
+                        const panelId = button.getAttribute('data-toggle-panel');
+                        const panel = document.getElementById(panelId);
+                        if (!panel) return;
+                        const willOpen = panel.hasAttribute('hidden');
+                        panel.hidden = !willOpen ? true : false;
+                        panel.setAttribute('aria-hidden', String(!willOpen));
+                        button.setAttribute('aria-expanded', String(willOpen));
+                        button.classList.toggle('is-open', willOpen);
+                        if (willOpen) {
+                            panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            window.setTimeout(() => {
+                                const focusTarget = panel.querySelector('[tabindex="-1"], input, select, textarea, button');
+                                if (focusTarget) focusTarget.focus();
+                            }, 50);
+                        }
+                    });
+                });
+            })();
+        </script>
+
     </main>
 </div>
 {% endblock %}
