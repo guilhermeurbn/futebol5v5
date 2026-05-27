@@ -66,7 +66,7 @@
         <!-- Header -->
         <header class="header">
             <div class="header-content">
-                <a href="{{ url_for('jogador.jogar_page') if auth_user.role == 'juiz' else url_for('jogador.selecionar_jogadores') }}" class="back-link">← Voltar</a>
+                <a href="{{ url_for('jogador.jogar_page') if auth_user.role == 'juiz' else url_for('jogador_crud.index') }}" class="back-link">← Voltar</a>
                 {% set brand_title = 'Resultado do Sorteio' %}
                 {% set brand_subtitle = num_times ~ ' times de 5 jogadores • ' ~ (jogadores|length) ~ ' jogadores totais' %}
                 {% include '_brand_header.html' %}
@@ -175,7 +175,7 @@
                 </div>
                 {% endif %}
                 <div class="actions-section" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px;">
-                    <a href="{{ url_for('jogador.jogar_page') if auth_user.role == 'juiz' else url_for('jogador.selecionar_jogadores') }}" class="btn btn-primary">
+                    <a href="{{ url_for('jogador.jogar_page') if auth_user.role == 'juiz' else url_for('jogador_crud.index') }}" class="btn btn-primary">
                         ← Voltar
                     </a>
                     <button id="btn-undo" class="btn btn-primary" style="background: linear-gradient(135deg, #fd7272 0%, #f5576c 100%); cursor: pointer;" disabled>
@@ -184,9 +184,11 @@
                     <button id="btn-redo" class="btn btn-primary" style="background: linear-gradient(135deg, #54a0ff 0%, #5f27cd 100%); cursor: pointer;" disabled>
                         ↷ Redo
                     </button>
+                    {% if auth_user.role == 'juiz' %}
                     <a href="{{ url_for('jogador.sortear') }}" class="btn btn-success">
                         🎲 Novo Sorteio
                     </a>
+                    {% endif %}
                     <button id="btn-qrcode" class="btn btn-primary" style="background: linear-gradient(135deg, #ffa502 0%, #ffc107 100%); cursor: pointer;">
                         📱 QR Code
                     </button>

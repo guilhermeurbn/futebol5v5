@@ -3,127 +3,219 @@
 {% block title %}Admin de Votacao{% endblock %}
 
 {% block content %}
-<div class="container page-container-wide">
+{% set total_participantes = ativa.participantes | length if ativa else 0 %}
+{% set total_votos = ativa.votos | length if ativa else 0 %}
+{% set total_pendentes = total_participantes - total_votos %}
+{% set progresso_votos = ((total_votos / total_participantes) * 100) | round(0, 'floor') if total_participantes else 0 %}
+{% set current_user = usuario if usuario is defined and usuario else auth_user %}
+
+<div class="container page-container-wide votacao-admin-page">
     <header class="header">
         <div class="header-content">
-            {% if auth_user.role == 'juiz' %}
-            {% set brand_title = 'Painel do Juiz' %}
-            {% set brand_subtitle = 'Abra a rodada, acompanhe votos e encerre quando quiser' %}
+            {% if current_user.role == 'juiz' %}
+                {% set brand_title = 'Painel do Juiz' %}
+                {% set brand_subtitle = 'Abra a rodada, acompanhe votos e encerre quando quiser' %}
             {% else %}
-            {% set brand_title = 'Painel de Votacao' %}
-            {% set brand_subtitle = 'Conecte sorteio, resultado e votação na mesma rodada' %}
+                {% set brand_title = 'Painel de Votacao' %}
+                {% set brand_subtitle = 'Controle a rodada, acompanhe pendencias e apure o ranking' %}
             {% endif %}
             {% include '_brand_header.html' %}
         </div>
     </header>
 
     <main class="main">
-        <!-- Navigation Tabs -->
-        {% if auth_user.role != 'juiz' %}
-        <div class="nav-tabs">
+        {% if current_user.role != 'juiz' %}
+        <nav class="nav-tabs" aria-label="Navegacao principal">
             <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
-            {% if auth_user.role == 'usuario' %}
-            <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab">🗳️ Minha Votação</a>
-            {% endif %}
-            {% if auth_user.role in ['admin', 'super_admin'] %}
-            <a href="{{ url_for('jogador.votacao_admin_page') }}" class="nav-tab active">🛡️ Votação Admin</a>
-            {% endif %}
+            <a href="{{ url_for('admin.admin_page') }}" class="nav-tab">⚙️ Admin</a>
             <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
             <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">🏅 Ranking</a>
-        </div>
+        </nav>
         {% endif %}
 
+        {% if sucesso %}
+            <div class="alert alert-success" role="status"><strong>Sucesso:</strong> {{ sucesso }}</div>
+        {% endif %}
         {% if erro %}
-            <div class="alert alert-warning"><strong>⚠️</strong> {{ erro }}</div>
+            <div class="alert alert-warning" role="alert"><strong>Aviso:</strong> {{ erro }}</div>
         {% endif %}
 
-        {% if auth_user.role == 'juiz' %}
-            <section class="section">
-                <h2 class="section-title">🎮 Controle do Jogo</h2>
-                <p style="margin-bottom: 0;">Depois de registrar o resultado, abra a votação da rodada, acompanhe quem já votou e encerre a partida quando quiser.</p>
-            </section>
-        {% endif %}
+        <div class="votacao-admin-hero-mini">
+            {% if ativa %}
+                <span class="badge badge-success">Rodada aberta</span>
+                <strong>{{ ativa.titulo }}</strong>
+                <span>{{ total_votos }} votos, {{ total_pendentes }} pendentes, sorteio #{{ selected_sorteio_id if selected_sorteio_id else '-' }}</span>
+            {% else %}
+                <a class="votacao-admin-hero-action votacao-admin-hero-action--small" href="#votacao-admin-open-form">Abrir votação</a>
+            {% endif %}
+        </div>
 
-                {% if auth_user.role == 'juiz' and fluxo_partida and fluxo_partida.resultado_registrado and not ativa %}
-                <section class="section">
-                    <h2 class="section-title">🔒 Finalizar Sem Votação</h2>
-                    <p>Não houve abertura de votação. Se desejar, finalize a partida e registre o encerramento.</p>
-                    <form method="post" action="{{ url_for('jogador.juiz_finalizar_partida') }}">
+        <div class="summary-grid votacao-admin-summary-grid">
+            <div class="summary-card summary-card--primary">
+                <div class="summary-card__label">Rodada</div>
+                <div class="summary-card__value">{{ '#' ~ ativa.id if ativa else 'Nova' }}</div>
+                <div class="summary-card__subtext">{{ ativa.status if ativa else 'Aguardando abertura' }}</div>
+            </div>
+            <div class="summary-card summary-card--accent">
+                <div class="summary-card__label">Sorteio</div>
+                <div class="summary-card__value">{{ '#' ~ selected_sorteio_id if selected_sorteio_id else '-' }}</div>
+                <div class="summary-card__subtext">{{ sorteio_contexto.total_jogadores if sorteio_contexto else 0 }} jogadores</div>
+            </div>
+            <div class="summary-card summary-card--secondary">
+                <div class="summary-card__label">Pendentes</div>
+                <div class="summary-card__value">{{ total_pendentes if ativa else 0 }}</div>
+                <div class="summary-card__subtext">{{ total_votos }} votos recebidos</div>
+            </div>
+            <div class="summary-card summary-card--success">
+                <div class="summary-card__label">Prazo</div>
+                <div class="summary-card__value summary-card__value--large">{{ ativa.fecha_em|dt_pt_hm if ativa and ativa.fecha_em else 'Sem prazo' }}</div>
+            </div>
+        </div>
+
+        <div class="votacao-admin-layout">
+            <details class="section votacao-admin-disclosure votacao-admin-open">
+                <summary class="votacao-admin-summary-button">
+                    <span>
+                        <span class="votacao-admin-summary-button__eyebrow">Abertura</span>
+                        <strong>Abrir votação</strong>
+                        <small>Crie a rodada a partir do sorteio selecionado</small>
+                    </span>
+                    <span class="badge badge-primary">Abrir</span>
+                </summary>
+
+                <div class="votacao-admin-disclosure__body">
+                    <div class="section-header">
+                        <div>
+                            <h2 class="section-title">Abrir votação</h2>
+                            <p class="section-subtitle">Crie a rodada a partir do sorteio selecionado.</p>
+                        </div>
+                    </div>
+
+                    <form method="post" action="{{ url_for('votacao.votacao_admin_criar') }}" class="form votacao-admin-open-form" id="votacao-admin-open-form">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <button class="btn btn-danger" type="submit">Finalizar partida (sem votação)</button>
-                    </form>
-                </section>
-                {% endif %}
+                        <div class="form-group">
+                            <label class="form-label" for="sorteio_id">Sorteio</label>
+                            <select class="form-select" id="sorteio_id" name="sorteio_id" {% if not sorteios_disponiveis %}disabled{% endif %}>
+                                {% if sorteios_disponiveis %}
+                                    {% for sorteio in sorteios_disponiveis %}
+                                        <option value="{{ sorteio.id }}" {% if selected_sorteio_id and selected_sorteio_id == sorteio.id %}selected{% endif %}>#{{ sorteio.id }} - {{ sorteio.total_jogadores }} jogadores - {{ sorteio.num_times }} times</option>
+                                    {% endfor %}
+                                {% else %}
+                                    <option value="">Nenhum sorteio disponível</option>
+                                {% endif %}
+                            </select>
+                        </div>
 
-        <section class="section">
-            <h2 class="section-title">🚀 Abrir votações</h2>
-            <form method="post" action="{{ url_for('jogador.votacao_admin_criar') }}" class="form" style="max-width: 560px;">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                {% if sorteio_contexto %}
-                <div class="surface-panel surface-panel--soft" style="margin-bottom: 1rem;">
-                    <div class="section-label">Sorteio selecionado</div>
-                    <div><strong>#{{ sorteio_contexto.id }}</strong> • {{ sorteio_contexto.total_jogadores }} jogadores • {{ sorteio_contexto.num_times }} times</div>
+                        {% if sorteio_contexto %}
+                        <div class="surface-panel surface-panel--soft votacao-admin-context">
+                            <div class="section-label">Sorteio selecionado</div>
+                            <strong>#{{ sorteio_contexto.id }}</strong>
+                            <span>{{ sorteio_contexto.total_jogadores }} jogadores em {{ sorteio_contexto.num_times }} times</span>
+                        </div>
+                        {% endif %}
+
+                        {% if current_user.role == 'juiz' and fluxo_partida and not fluxo_partida.resultado_registrado %}
+                        <div id="votacao-admin-precondicao" class="alert alert-warning" role="alert">Registre o resultado da partida antes de abrir a votação dos jogadores.</div>
+                        {% endif %}
+
+                        <div class="form-group">
+                            <label class="form-label" for="titulo">Título da rodada</label>
+                            <input class="form-input" id="titulo" name="titulo" type="text" value="{{ titulo_preenchido or '' }}" placeholder="Ex: Rodada de sexta">
+                        </div>
+
+                        <button class="btn btn-primary" type="submit" {% if not pode_abrir_votacao %}disabled aria-disabled="true"{% endif %} {% if current_user.role == 'juiz' and fluxo_partida and not fluxo_partida.resultado_registrado %}aria-describedby="votacao-admin-precondicao"{% endif %}>
+                            {{ 'Abrir votação dos jogadores' if current_user.role == 'juiz' else 'Abrir votação deste sorteio' }}
+                        </button>
+                    </form>
                 </div>
-                <input type="hidden" name="sorteio_id" value="{{ sorteio_contexto.id }}">
-                {% endif %}
-                {% if auth_user.role == 'juiz' and fluxo_partida and not fluxo_partida.resultado_registrado %}
-                <div class="alert alert-warning" style="margin-bottom: 1rem;">
-                    Registre o resultado da partida antes de abrir a votação dos jogadores.
+            </details>
+
+            <details class="section votacao-admin-disclosure votacao-admin-status">
+                <summary class="votacao-admin-summary-button">
+                    <span>
+                        <span class="votacao-admin-summary-button__eyebrow">Operação</span>
+                        <strong>Ações da rodada</strong>
+                        <small>Resultado vinculado e encerramento</small>
+                    </span>
+                    <span class="badge badge-primary">Abrir</span>
+                </summary>
+
+                <div class="votacao-admin-disclosure__body">
+                    <div class="section-header">
+                        <div>
+                            <h2 class="section-title">Operação</h2>
+                            <p class="section-subtitle">Ações e resultado vinculado à rodada.</p>
+                        </div>
+                    </div>
+
+                    {% if ativa %}
+                        {% if ativa.resultado_resumido %}
+                        <div class="votacao-admin-result-grid">
+                            {% for time in ativa.resultado_resumido %}
+                            <div class="surface-panel surface-panel--soft votacao-admin-result-card">
+                                <span class="section-label">Time {{ time.time_numero }}</span>
+                                <strong>{{ time.gols }} gol{{ '' if time.gols == 1 else 's' }}</strong>
+                                <small>{{ time.vitorias }}V {{ time.empates }}E {{ time.derrotas }}D</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="surface-panel surface-panel--soft">
+                            <p class="hero-empty__text votacao-admin-muted">O resultado da partida ainda não foi anexado a esta rodada.</p>
+                        </div>
+                        {% endif %}
+
+                        <form method="post" action="{{ url_for('votacao.votacao_admin_encerrar', partida_id=ativa.id) }}" class="votacao-admin-close-form" onsubmit="return confirm('Encerrar esta rodada e apurar ranking agora?');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button class="btn btn-primary" type="submit">Encerrar e apurar ranking</button>
+                        </form>
+                    {% elif current_user.role == 'juiz' and fluxo_partida and fluxo_partida.resultado_registrado %}
+                        <div class="surface-panel surface-panel--accent">
+                            <p class="hero-empty__text votacao-admin-muted">Resultado registrado. Você pode abrir a votação ou finalizar sem coleta de notas.</p>
+                        </div>
+                        <form method="post" action="{{ url_for('juiz.juiz_finalizar_partida') }}" onsubmit="return confirm('Finalizar esta partida sem abrir votação?');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button class="btn btn-danger" type="submit">Finalizar sem votação</button>
+                        </form>
+                    {% else %}
+                        <div class="hero-empty hero-empty--compact">
+                            <div class="hero-empty__icon">📭</div>
+                            <h3 class="hero-empty__title">Nenhuma votação ativa</h3>
+                            <p class="hero-empty__text">Abra uma votação para liberar a avaliação dos participantes.</p>
+                        </div>
+                    {% endif %}
                 </div>
-                {% endif %}
-                <div class="form-group">
-                    <label class="form-label" for="titulo">Titulo</label>
-                    <input class="form-input" id="titulo" name="titulo" type="text" placeholder="Ex: Rodada de sexta">
-                </div>
-                <button class="btn btn-primary" type="submit">{{ 'Abrir votação dos jogadores' if auth_user.role == 'juiz' else 'Abrir votação deste sorteio' }}</button>
-            </form>
-        </section>
+            </details>
+        </div>
 
         {% if ativa %}
-            <section class="section">
-                <h2 class="section-title">🟢 Partida ativa: {{ ativa.titulo }}</h2>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-label">ID</div>
-                        <div class="stat-value">{{ ativa.id }}</div>
+        <details class="section votacao-admin-disclosure">
+            <summary class="votacao-admin-summary-button">
+                <span>
+                    <span class="votacao-admin-summary-button__eyebrow">Participantes</span>
+                    <strong>Lista de participantes</strong>
+                    <small>Quem já votou e quem ainda está pendente</small>
+                </span>
+                <span class="badge badge-primary">{{ total_participantes }}</span>
+            </summary>
+
+            <div class="votacao-admin-disclosure__body">
+                <div class="section-header">
+                    <div>
+                        <h2 class="section-title">Participantes</h2>
+                        <p class="section-subtitle">Quem já votou e quem ainda está pendente.</p>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Sorteio</div>
-                        <div class="stat-value">#{{ ativa.sorteio_id or '-' }}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Votos recebidos</div>
-                        <div class="stat-value">{{ ativa.votos | length }}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Prazo final</div>
-                        <div class="stat-value">{{ ativa.fecha_em[:16].replace('T', ' ') if ativa.fecha_em else 'Sem prazo' }}</div>
-                    </div>
+                    <span class="badge badge-primary">{{ total_participantes }} participantes</span>
                 </div>
 
-                {% if ativa.resultado_resumido %}
-                    <div class="summary-grid" style="margin-top: 1rem;">
-                        {% for time in ativa.resultado_resumido %}
-                        <div class="summary-card summary-card--secondary">
-                            <div class="summary-card__label">Time {{ time.time_numero }}</div>
-                            <div class="summary-card__value">{{ time.gols }} gol{{ '' if time.gols == 1 else 's' }}</div>
-                            <div class="summary-card__subtext">{{ time.vitorias }}V {{ time.empates }}E {{ time.derrotas }}D</div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="alert alert-warning" style="margin-top: 1rem;">⚠️ O resultado da partida ainda não foi anexado a esta rodada.</div>
-                {% endif %}
-
-                <div class="table-shell" style="margin-top: 1rem;">
+                <div class="table-shell">
                     <table class="uniform-table">
                         <thead>
                             <tr>
-                                <th>Jogador</th>
-                                <th>Usuário</th>
-                                <th>Time</th>
-                                <th>Status do voto</th>
+                                <th scope="col">Jogador</th>
+                                <th scope="col">Usuário</th>
+                                <th scope="col">Time</th>
+                                <th scope="col">Status</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -133,12 +225,12 @@
                                 <td>{{ participante.nome_usuario or participante.username or 'Externo' }}</td>
                                 <td>Time {{ participante.time_numero }}</td>
                                 <td>
-                                    {% if participante.user_id and participante.user_id in ativa.votos|map(attribute='user_id')|list %}
-                                        ✅ Votou
+                                    {% if participante.user_id and participante.user_id in voted_user_ids %}
+                                        <span class="badge badge-success">Votou</span>
                                     {% elif participante.user_id %}
-                                        ⏳ Pendente
+                                        <span class="badge badge-warning">Pendente</span>
                                     {% else %}
-                                        ➖ Externo
+                                        <span class="badge badge-primary">Externo</span>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -146,90 +238,119 @@
                         </tbody>
                     </table>
                 </div>
-
-                <form method="post" action="{{ url_for('jogador.votacao_admin_encerrar', partida_id=ativa.id) }}" style="margin-top: 16px;">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button class="btn btn-primary" type="submit">Encerrar e apurar ranking</button>
-                </form>
-            </section>
+            </div>
+        </details>
         {% endif %}
 
-        <section class="section">
-            <h2 class="section-title">📚 Historico de rodadas</h2>
-            {% if historico %}
-                {% for partida in historico %}
-                    <div class="player-card" style="margin-bottom: 12px; padding: 14px;">
-                        <div class="player-info" style="margin-bottom: 8px;">
-                            <h3 class="player-name">#{{ partida.id }} - {{ partida.titulo }}</h3>
-                            <span class="badge {% if partida.status == 'aberta' %}badge-warning{% else %}badge-success{% endif %}">{{ partida.status }}</span>
-                        </div>
-                        <div class="player-details">
-                            <span>Sorteio: #{{ partida.sorteio_id or '-' }}</span>
-                            <span>Votos: {{ partida.votos | length }}</span>
-                            <span>Participantes: {{ partida.participantes | length }}</span>
-                            <span>Prazo: {{ partida.fecha_em[:16].replace('T', ' ') if partida.fecha_em else 'n/a' }}</span>
-                        </div>
+        <details class="section votacao-admin-disclosure">
+            <summary class="votacao-admin-summary-button">
+                <span>
+                    <span class="votacao-admin-summary-button__eyebrow">Histórico</span>
+                    <strong>Histórico de rodadas</strong>
+                    <small>Últimas votações abertas e encerradas</small>
+                </span>
+                {% if historico %}
+                    <span class="badge badge-primary">{{ historico | length }} registros</span>
+                {% endif %}
+            </summary>
 
-                        {% if partida.resultado_resumido %}
-                            <div style="margin-top: 8px;">
+            <div class="votacao-admin-disclosure__body">
+                {% if historico %}
+                    <p class="section-subtitle votacao-admin-history-note">Do registro mais recente para o mais antigo, com destaque para resultados e ranking quando disponíveis.</p>
+                    <div class="votacao-admin-history-list">
+                        {% for partida in historico %}
+                        <article class="surface-panel votacao-admin-history-card {% if loop.first %}votacao-admin-history-card--featured{% endif %} {% if partida.status == 'aberta' %}votacao-admin-history-card--open{% else %}votacao-admin-history-card--closed{% endif %}">
+                            <div class="votacao-admin-history-head">
+                                <div>
+                                    <div class="votacao-admin-history-kicker">{{ 'Rodada em andamento' if partida.status == 'aberta' else 'Rodada encerrada' }}</div>
+                                    <h3 class="player-name">#{{ partida.id }} - {{ partida.titulo }}</h3>
+                                    <div class="votacao-admin-history-meta">
+                                        <span>Sorteio #{{ partida.sorteio_id or '-' }}</span>
+                                        <span>{{ partida.votos | length }} votos</span>
+                                        <span>{{ partida.participantes | length }} participantes</span>
+                                        <span>{{ partida.fecha_em|dt_pt_hm if partida.fecha_em else 'sem prazo' }}</span>
+                                    </div>
+                                </div>
+                                <div class="votacao-admin-history-side">
+                                    <span class="badge {% if partida.status == 'aberta' %}badge-warning{% else %}badge-success{% endif %}">{{ partida.status }}</span>
+                                    <span class="votacao-admin-history-counter">{{ partida.ranking.total_votos if partida.ranking else partida.votos | length }} avaliações</span>
+                                </div>
+                            </div>
+
+                            {% if partida.status == 'aberta' %}
+                            <div class="surface-panel surface-panel--soft votacao-admin-history-open-note">
+                                <p class="hero-empty__text votacao-admin-muted">Esta rodada ainda está aberta. O histórico completo e o ranking surgem assim que ela for encerrada.</p>
+                            </div>
+                            {% elif partida.ranking %}
+                            <div class="votacao-admin-history-chips">
+                                <span class="votacao-admin-history-chip">{% if partida.resultado_resumido %}Resultado anexado{% else %}Sem resultado{% endif %}</span>
+                                <span class="votacao-admin-history-chip">Ranking apurado</span>
+                                <span class="votacao-admin-history-chip">Encerrada</span>
+                            </div>
+
+                            {% if partida.resultado_resumido %}
+                            <div class="votacao-admin-history-result-grid">
                                 {% for time in partida.resultado_resumido %}
-                                    <span style="display: inline-block; margin-right: 12px;">Time {{ time.time_numero }}: {{ time.gols }} gol{{ '' if time.gols == 1 else 's' }} • {{ time.vitorias }}V {{ time.empates }}E {{ time.derrotas }}D</span>
+                                    <div class="surface-panel surface-panel--soft votacao-admin-history-result-card">
+                                        <span class="section-label">Time {{ time.time_numero }}</span>
+                                        <strong>{{ time.gols }} gol{{ '' if time.gols == 1 else 's' }}</strong>
+                                        <small>{{ time.vitorias }}V {{ time.empates }}E {{ time.derrotas }}D</small>
+                                    </div>
                                 {% endfor %}
                             </div>
-                        {% endif %}
-
-                        {% if partida.ranking %}
-                            <div style="margin-top: 10px;">
-                                <strong>Melhor time:</strong>
-                                {% if partida.ranking.melhor_time %}
-                                    Time {{ partida.ranking.melhor_time.time_numero }}
-                                {% else %}
-                                    N/A
-                                {% endif %}
-                                |
-                                <strong>Melhor jogador:</strong>
-                                {% if partida.ranking.melhor_jogador %}
-                                    {{ partida.ranking.melhor_jogador.jogador_nome }}
-                                {% else %}
-                                    N/A
-                                {% endif %}
-                            </div>
-                            <div style="margin-top: 6px; opacity: 0.9;">
-                                Total de votos: {{ partida.ranking.total_votos }}
-                            </div>
-                            {% if partida.ranking.ranking_jogadores %}
-                                <div class="table-shell" style="margin-top: 10px;">
-                                    <table class="uniform-table">
-                                        <thead>
-                                            <tr>
-                                                <th>#</th>
-                                                <th>Jogador</th>
-                                                <th>Time</th>
-                                                <th>Votos</th>
-                                                <th>Média</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for item in partida.ranking.ranking_jogadores[:5] %}
-                                            <tr>
-                                                <td>{{ loop.index }}</td>
-                                                <td>{{ item.jogador_nome }}</td>
-                                                <td>Time {{ item.time_numero }}</td>
-                                                <td>{{ item.votos }}</td>
-                                                <td>{{ item.nota_media }}</td>
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
                             {% endif %}
-                        {% endif %}
+
+                            <div class="votacao-admin-history-ranking">
+                                <div class="votacao-admin-history-ranking-summary">
+                                    <div><strong>Melhor time:</strong> {{ 'Time ' ~ partida.ranking.melhor_time.time_numero if partida.ranking.melhor_time else 'N/A' }}</div>
+                                    <div><strong>Melhor jogador:</strong> {{ partida.ranking.melhor_jogador.jogador_nome if partida.ranking.melhor_jogador else 'N/A' }}</div>
+                                    <div><strong>Total de votos:</strong> {{ partida.ranking.total_votos }}</div>
+                                </div>
+
+                            {% if partida.ranking.ranking_jogadores %}
+                            <div class="table-shell">
+                                <table class="uniform-table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">Jogador</th>
+                                            <th scope="col">Time</th>
+                                            <th scope="col">Votos</th>
+                                            <th scope="col">Média</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in partida.ranking.ranking_jogadores[:5] %}
+                                        <tr>
+                                            <td>{{ loop.index }}</td>
+                                            <td>{{ item.jogador_nome }}</td>
+                                            <td>Time {{ item.time_numero }}</td>
+                                            <td>{{ item.votos }}</td>
+                                            <td>{{ item.nota_media }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% endif %}
+                            </div>
+                            {% else %}
+                            <div class="surface-panel surface-panel--soft votacao-admin-history-open-note">
+                                <p class="hero-empty__text votacao-admin-muted">Rodada encerrada, mas sem ranking disponível no momento.</p>
+                            </div>
+                            {% endif %}
+                        </article>
+                        {% endfor %}
                     </div>
-                {% endfor %}
-            {% else %}
-                <p>Nenhuma rodada criada ainda.</p>
-            {% endif %}
-        </section>
+                {% else %}
+                    <div class="hero-empty hero-empty--compact">
+                        <div class="hero-empty__icon">🗂️</div>
+                        <h3 class="hero-empty__title">Nenhuma rodada criada ainda</h3>
+                        <p class="hero-empty__text">Abra a primeira votação para começar o histórico de avaliações.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </details>
     </main>
 </div>
 {% endblock %}

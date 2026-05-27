@@ -3,7 +3,7 @@
 {% block title %}Ranking de Jogadores{% endblock %}
 
 {% block content %}
-<div class="container page-container-medium">
+<div class="container page-container-wide">
     <header class="header">
         <div class="header-content">
             {% set brand_title = 'Ranking de Jogadores' %}
@@ -19,9 +19,7 @@
             {% if auth_user.role == 'usuario' %}
             <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab">🗳️ Minha Votação</a>
             {% endif %}
-            {% if auth_user.role in ['admin', 'super_admin'] %}
-            <a href="{{ url_for('jogador.votacao_admin_page') }}" class="nav-tab">🛡️ Votação Admin</a>
-            {% endif %}
+            {# Link 'Rodada' removido para simplificar a navegação #}
             <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
             <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab active">🏅 Ranking</a>
         </div>

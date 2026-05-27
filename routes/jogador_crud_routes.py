@@ -81,7 +81,7 @@ def index():
         return redirect(url_for('juiz.jogar_page'))
 
     try:
-        jogadores = jogador_service.listar()
+        jogadores = jogador_service.listar_para_dict()
         return render_template(
             'index.html',
             jogadores=jogadores,
@@ -103,8 +103,7 @@ def index():
 def listar_jogadores_api():
     """API: Lista todos os jogadores"""
     try:
-        jogadores = jogador_service.listar()
-        return jsonify([j.para_dict() for j in jogadores])
+        return jsonify(jogador_service.listar_para_dict())
     except Exception as e:
         import logging
         logger = logging.getLogger(__name__)
@@ -149,8 +148,11 @@ def adicionar_jogador():
     try:
         nome = request.form.get('nome', '').strip()
         nivel = int(request.form.get('nivel', 5))
-        tipo = request.form.get('tipo', 'avulso')
-        posicao = request.form.get('posicao', 'linha')
+        tipo = request.form.get('tipo', '').strip()
+        posicao = request.form.get('posicao', '').strip()
+
+        if not tipo or not posicao:
+            raise ValueError('Selecione o tipo e a posição do jogador')
         
         jogador_service.criar(nome, nivel, tipo, posicao)
         if _is_juiz():
@@ -310,14 +312,17 @@ def deletar_jogador_form(jogador_id):
 @jogador_bp.route('/selecionar')
 def selecionar_jogadores():
     """Página para selecionar jogadores para o jogo"""
+    if _is_admin():
+        return redirect(url_for('jogador_crud.index'))
+
     if _is_juiz():
         return redirect(url_for('juiz.jogar_page'))
 
     try:
         todos_jogadores = jogador_service.listar()
-        fixos = jogador_service.listar_por_tipo("fixo")
-        avulsos = jogador_service.listar_por_tipo("avulso")
-        presentes = jogador_service.listar_presentes()
+        fixos = [j for j in todos_jogadores if j.tipo == "fixo"]
+        avulsos = [j for j in todos_jogadores if j.tipo == "avulso"]
+        presentes = [j for j in todos_jogadores if j.presente]
         
         return render_template(
             'selecionar.html',

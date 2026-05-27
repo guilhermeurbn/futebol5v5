@@ -23,9 +23,7 @@
                 {% if auth_user.role == 'usuario' %}
                 <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab">🗳️ Minha Votação</a>
                 {% endif %}
-                {% if auth_user.role in ['admin', 'super_admin'] %}
-                <a href="{{ url_for('jogador.votacao_admin_page') }}" class="nav-tab">🛡️ Votação Admin</a>
-                {% endif %}
+                {# Link 'Rodada' removido para simplificar a navegação #}
                 <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
                 <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">🏅 Ranking</a>
             </div>
@@ -37,226 +35,215 @@
                 </div>
             {% endif %}
 
-            <!-- Form Section -->
-            {% if auth_user.role == 'admin' %}
-            <section class="section">
-                <h2 class="section-title">✏️ Adicionar Jogador</h2>
-                <form action="{{ url_for('jogador.adicionar_jogador') }}" method="post" class="form">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <div class="form-group">
-                        <label for="nome" class="form-label">Nome do Jogador</label>
-                        <input 
-                            type="text" 
-                            id="nome"
-                            name="nome" 
-                            class="form-input"
-                            placeholder="Digite o nome do jogador"
-                            required
-                            minlength="2"
-                        >
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="nivel" class="form-label">Nível (1-10)</label>
-                        <div class="level-selector">
-                            <div class="level-buttons">
-                                <button type="button" class="level-btn" data-nivel="1">1</button>
-                                <button type="button" class="level-btn" data-nivel="2">2</button>
-                                <button type="button" class="level-btn" data-nivel="3">3</button>
-                                <button type="button" class="level-btn" data-nivel="4">4</button>
-                                <button type="button" class="level-btn" data-nivel="5" data-active>5</button>
-                                <button type="button" class="level-btn" data-nivel="6">6</button>
-                                <button type="button" class="level-btn" data-nivel="7">7</button>
-                                <button type="button" class="level-btn" data-nivel="8">8</button>
-                                <button type="button" class="level-btn" data-nivel="9">9</button>
-                                <button type="button" class="level-btn" data-nivel="10">10</button>
-                            </div>
-                            <input 
-                                type="number" 
-                                id="nivel"
-                                name="nivel" 
-                                min="1" 
-                                max="10"
-                                value="5"
-                                class="level-input"
-                            >
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="tipo" class="form-label">Tipo de Jogador</label>
-                        <div class="tipo-selector">
-                            <label class="tipo-option">
-                                <input type="radio" name="tipo" value="fixo" class="tipo-radio">
-                                <span class="tipo-label">⭐ Fixo (joga sempre)</span>
-                            </label>
-                            <label class="tipo-option">
-                                <input type="radio" name="tipo" value="avulso" class="tipo-radio" checked>
-                                <span class="tipo-label">👤 Avulso (esporádico)</span>
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="posicao" class="form-label">Posição</label>
-                        <div class="posicao-selector">
-                            <label class="posicao-option">
-                                <input type="radio" name="posicao" value="linha" class="posicao-radio" checked>
-                                <span class="posicao-label">⚽ Linha</span>
-                            </label>
-                            <label class="posicao-option">
-                                <input type="radio" name="posicao" value="goleiro" class="posicao-radio">
-                                <span class="posicao-label">🧤 Goleiro</span>
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <script>
-                        const nivelBtns = document.querySelectorAll('.level-btn');
-                        const nivelInput = document.getElementById('nivel');
-                        
-                        // Função para atualizar botão ativo
-                        function atualizarBotaoAtivo(nivel) {
-                            nivelBtns.forEach(btn => {
-                                if (btn.getAttribute('data-nivel') === String(nivel)) {
-                                    btn.setAttribute('data-active', '');
-                                } else {
-                                    btn.removeAttribute('data-active');
-                                }
-                            });
-                        }
-                        
-                        // Atualizar quando clicar nos botões
-                        nivelBtns.forEach(btn => {
-                            btn.addEventListener('click', (e) => {
-                                e.preventDefault();
-                                const nivel = btn.getAttribute('data-nivel');
-                                nivelInput.value = nivel;
-                                atualizarBotaoAtivo(nivel);
-                            });
-                        });
-                        
-                        // Atualizar quando digitar no input
-                        nivelInput.addEventListener('input', () => {
-                            let nivel = parseInt(nivelInput.value);
-                            
-                            // Validar range
-                            if (isNaN(nivel) || nivel < 1) {
-                                nivel = 1;
-                            } else if (nivel > 10) {
-                                nivel = 10;
-                            }
-                            
-                            nivelInput.value = nivel;
-                            atualizarBotaoAtivo(nivel);
-                        });
-                        
-                        // Inicializar botão ativo ao carregar
-                        atualizarBotaoAtivo(nivelInput.value);
-                    </script>
-                    
-                    <button type="submit" class="btn btn-primary">
-                        <span>➕ Adicionar Jogador</span>
-                    </button>
-                </form>
-            </section>
-            {% endif %}
-
             <!-- Players Section -->
             <section class="section">
                 <div class="section-header">
                     <h2 class="section-title">👥 Jogadores Cadastrados</h2>
-                    <span class="badge badge-primary">{{ total_jogadores }} jogadores</span>
+                    <div class="section-header-actions">
+                        <span class="badge badge-primary">{{ total_jogadores }} jogadores</span>
+                        {% if auth_user.role in ['admin', 'super_admin'] %}
+                        <button type="button" id="toggleCreatePlayerBtn" class="btn btn-secondary btn-small btn-toggle-create" aria-expanded="false" aria-controls="createPlayerPanel">
+                            <span class="toggle-create-icon" aria-hidden="true"></span>
+                            <span>Jogador</span>
+                        </button>
+                        {% endif %}
+                        {% if jogadores %}
+                        <button type="button" id="toggleSearchBtn" class="btn btn-secondary btn-small btn-toggle-create btn-toggle-search" aria-expanded="false" aria-controls="playersSearchPanel">
+                            <span class="toggle-create-icon" aria-hidden="true"></span>
+                            <span>Buscar</span>
+                        </button>
+                        {% endif %}
+                    </div>
                 </div>
 
-                {% if jogadores %}
-                    <!-- Search Bar -->
-                    <div class="search-container">
-                        <input 
-                            type="text" 
-                            id="searchInput" 
-                            class="search-input"
-                            placeholder="🔍 Buscar jogador pelo nome..."
-                            autocomplete="off"
-                        >
-                        <div id="searchResultsCount" class="search-results-count"></div>
-                    </div>
-
-                    <!-- Advanced Filters -->
-                    <div style="background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%); padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid rgba(124, 58, 237, 0.3); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);">
-                        <h3 style="margin: 0 0 1rem 0; font-size: 0.95rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #ffffff;">⚙️ Filtros Avançados</h3>
-                        
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                            <!-- Filtro por Nível -->
+                {% if auth_user.role in ['admin', 'super_admin'] %}
+                    <!-- Player Creation Panel -->
+                    <section id="createPlayerPanel" class="section player-create-section" hidden>
+                        <div class="section-header">
                             <div>
-                                <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; color: rgba(255,255,255,0.9);">
-                                    📊 Nível
-                                </label>
-                                <div style="display: flex; gap: 0.5rem;">
-                                    <input 
-                                        type="number" 
-                                        id="nivelMin"
-                                        min="1" 
-                                        max="10" 
-                                        value="1"
-                                        placeholder="Min"
-                                        class="filter-input"
-                                        style="width: 50%; padding: 0.5rem; border: 1px solid rgba(124, 58, 237, 0.45); border-radius: 8px; background: rgba(124, 58, 237, 0.15); color: #ffffff;"
-                                    >
-                                    <input 
-                                        type="number" 
-                                        id="nivelMax"
-                                        min="1" 
-                                        max="10" 
-                                        value="10"
-                                        placeholder="Max"
-                                        class="filter-input"
-                                        style="width: 50%; padding: 0.5rem; border: 1px solid rgba(124, 58, 237, 0.45); border-radius: 8px; background: rgba(124, 58, 237, 0.15); color: #ffffff;"
+                                <h2 class="section-title">➕ Adicionar Jogador</h2>
+                                <p class="section-subtitle">Cadastre um novo jogador ao time preenchendo os dados abaixo.</p>
+                            </div>
+                        </div>
+
+                        <form action="{{ url_for('jogador.adicionar_jogador') }}" method="post" class="player-create-form">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                            <div class="form-group player-create-name-group">
+                                <label for="nome" class="form-label">Nome do Jogador</label>
+                                <input
+                                    type="text"
+                                    id="nome"
+                                    name="nome"
+                                    class="form-input"
+                                    placeholder="Digite o nome..."
+                                    required
+                                    minlength="2"
+                                    autocomplete="off"
+                                >
+                            </div>
+
+                            <div class="form-group player-create-level-group">
+                                <label for="nivel" class="form-label">Nível (1-10)</label>
+                                <div class="level-selector">
+                                    <div class="level-buttons">
+                                        <button type="button" class="level-btn" data-nivel="1">1</button>
+                                        <button type="button" class="level-btn" data-nivel="2">2</button>
+                                        <button type="button" class="level-btn" data-nivel="3">3</button>
+                                        <button type="button" class="level-btn" data-nivel="4">4</button>
+                                        <button type="button" class="level-btn" data-nivel="5" data-active>5</button>
+                                        <button type="button" class="level-btn" data-nivel="6">6</button>
+                                        <button type="button" class="level-btn" data-nivel="7">7</button>
+                                        <button type="button" class="level-btn" data-nivel="8">8</button>
+                                        <button type="button" class="level-btn" data-nivel="9">9</button>
+                                        <button type="button" class="level-btn" data-nivel="10">10</button>
+                                    </div>
+                                    <input
+                                        type="hidden"
+                                        id="nivel"
+                                        name="nivel"
+                                        value="5"
                                     >
                                 </div>
                             </div>
 
-                            <!-- Filtro por Tipo -->
+                            <div class="form-group player-create-type-group">
+                                <label class="form-label">Tipo</label>
+                                <div class="tipo-selector">
+                                    <label class="tipo-option">
+                                        <input type="radio" name="tipo" value="fixo" class="tipo-radio" required>
+                                        <span class="tipo-label">⭐ Fixo</span>
+                                    </label>
+                                    <label class="tipo-option">
+                                        <input type="radio" name="tipo" value="avulso" class="tipo-radio" required>
+                                        <span class="tipo-label">👤 Avulso</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group player-create-position-group">
+                                <label class="form-label">Posição</label>
+                                <div class="posicao-selector">
+                                    <label class="posicao-option">
+                                        <input type="radio" name="posicao" value="linha" class="posicao-radio" required>
+                                        <span class="posicao-label">⚽ Linha</span>
+                                    </label>
+                                    <label class="posicao-option">
+                                        <input type="radio" name="posicao" value="goleiro" class="posicao-radio" required>
+                                        <span class="posicao-label">🧤 Goleiro</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group player-create-actions">
+                                <button type="submit" class="btn btn-primary btn-large">
+                                    <span>➕ Adicionar Jogador</span>
+                                </button>
+                            </div>
+
+                            <script>
+                                (() => {
+                                    const createPanel = document.getElementById('createPlayerPanel');
+                                    if (!createPanel) return;
+
+                                    const nivelBtns = createPanel.querySelectorAll('.level-btn');
+                                    const nivelInput = document.getElementById('nivel');
+
+                                    function atualizarBotaoAtivo(nivel) {
+                                        nivelBtns.forEach(btn => {
+                                            if (btn.getAttribute('data-nivel') === String(nivel)) {
+                                                btn.setAttribute('data-active', '');
+                                            } else {
+                                                btn.removeAttribute('data-active');
+                                            }
+                                        });
+                                    }
+
+                                    nivelBtns.forEach(btn => {
+                                        btn.addEventListener('click', (e) => {
+                                            e.preventDefault();
+                                            const nivel = btn.getAttribute('data-nivel');
+                                            nivelInput.value = nivel;
+                                            atualizarBotaoAtivo(nivel);
+                                        });
+                                    });
+
+                                    atualizarBotaoAtivo(nivelInput.value);
+                                })();
+                            </script>
+                        </form>
+                    </section>
+                {% endif %}
+
+                {% if jogadores %}
+                    <!-- Busca -->
+                    <section id="playersSearchPanel" class="section players-search-section" hidden>
+                        <div class="section-header">
                             <div>
-                                <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; color: rgba(255,255,255,0.9);">
-                                    👤 Tipo
-                                </label>
-                                <select id="tipoFilter" class="filter-input" style="padding: 0.5rem; border: 1px solid rgba(124, 58, 237, 0.45); border-radius: 8px; background: rgba(124, 58, 237, 0.15); color: #ffffff; width: 100%;">
+                                <h2 class="section-title">🔎 Buscar jogadores</h2>
+                                <p class="section-subtitle">Pesquise e refine a lista sem sair da página.</p>
+                            </div>
+                            <span id="searchResultsCount" class="badge badge-primary"></span>
+                        </div>
+
+                        <div class="players-search-grid">
+                            <div class="form-group players-search-name">
+                                <label for="searchInput" class="form-label">Nome</label>
+                                <input
+                                    type="text"
+                                    id="searchInput"
+                                    class="form-input"
+                                    placeholder="Buscar pelo nome..."
+                                    autocomplete="off"
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="tipoFilter" class="form-label">Tipo</label>
+                                <select id="tipoFilter" class="form-input filter-input">
                                     <option value="">Todos</option>
                                     <option value="fixo">⭐ Fixo</option>
                                     <option value="avulso">👤 Avulso</option>
                                 </select>
                             </div>
 
-                            <!-- Filtro por Posição -->
-                            <div>
-                                <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; color: rgba(255,255,255,0.9);">
-                                    ⚽ Posição
-                                </label>
-                                <select id="posicaoFilter" class="filter-input" style="padding: 0.5rem; border: 1px solid rgba(124, 58, 237, 0.45); border-radius: 8px; background: rgba(124, 58, 237, 0.15); color: #ffffff; width: 100%;">
+                            <div class="form-group">
+                                <label for="posicaoFilter" class="form-label">Posição</label>
+                                <select id="posicaoFilter" class="form-input filter-input">
                                     <option value="">Todos</option>
                                     <option value="linha">⚽ Linha</option>
                                     <option value="goleiro">🧤 Goleiro</option>
                                 </select>
                             </div>
 
-                            <!-- Botão Limpar Filtros -->
-                            <div style="display: flex; align-items: flex-end;">
-                                <button 
-                                    id="clearFiltersBtn"
-                                    class="btn btn-secondary"
-                                    style="width: 100%;"
-                                    onclick="limparFiltros()"
-                                >
-                                    🔄 Limpar Filtros
+                            <div class="form-group">
+                                <label for="nivelFilter" class="form-label">Nível</label>
+                                <select id="nivelFilter" class="form-input filter-input">
+                                    <option value="">Todos</option>
+                                    <option value="1">Nível 1</option>
+                                    <option value="2">Nível 2</option>
+                                    <option value="3">Nível 3</option>
+                                    <option value="4">Nível 4</option>
+                                    <option value="5">Nível 5</option>
+                                    <option value="6">Nível 6</option>
+                                    <option value="7">Nível 7</option>
+                                    <option value="8">Nível 8</option>
+                                    <option value="9">Nível 9</option>
+                                    <option value="10">Nível 10</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group players-search-actions">
+                                <button id="clearFiltersBtn" class="btn btn-secondary" onclick="limparFiltros()">
+                                    🔄 Limpar
                                 </button>
                             </div>
                         </div>
-                    </div>
+                    </section>
 
                     <div class="players-grid" id="playersGrid">
                         {% for jogador in jogadores %}
-                            <div class="player-card" data-name="{{ jogador.nome|lower }}" data-player-id="{{ jogador.id }}">
+                            <div class="player-card" data-name="{{ jogador.nome|lower }}" data-player-id="{{ jogador.id }}" data-nivel="{{ jogador.nivel }}" data-tipo="{{ jogador.tipo }}" data-posicao="{{ jogador.posicao }}">
                                 <div class="player-header">
                                     <div>
                                         <h3 class="player-name">{{ jogador.nome }}</h3>
@@ -287,24 +274,6 @@
                         {% endfor %}
                     </div>
 
-                    <!-- Actions -->
-                    <div class="actions-section">
-                        {% if auth_user.role == 'admin' %}
-                        {% if total_jogadores >= 10 %}
-                            <a href="{{ url_for('jogador.selecionar_jogadores') }}" class="btn btn-large btn-primary">
-                                👥 Selecionar Jogadores para o Jogo
-                            </a>
-                        {% else %}
-                            <button class="btn btn-large btn-primary" disabled>
-                                👥 Selecionar Jogadores (faltam {{ 10 - total_jogadores }} jogadores)
-                            </button>
-                        {% endif %}
-                        {% else %}
-                            <button class="btn btn-large btn-secondary" disabled>
-                                👀 Modo somente leitura para usuário comum
-                            </button>
-                        {% endif %}
-                    </div>
                 {% else %}
                     <div class="empty-state">
                         <div class="empty-icon">👥</div>
@@ -320,12 +289,12 @@
         <div id="deleteModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2>🗑️ Deletar Jogador</h2>
+                    <h2>🗑️ Confirmar exclusão</h2>
                     <button class="modal-close" onclick="fecharModalDelete()">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <p>Tem certeza que deseja deletar <strong id="playerNameToDelete">o jogador</strong>?</p>
-                    <p class="modal-warning">⚠️ Esta ação não pode ser desfeita</p>
+                    <p>Tem certeza que deseja <strong>DELETAR</strong> <strong id="playerNameToDelete">o jogador</strong>?</p>
+                    <p class="modal-warning">⚠️ Essa ação é irreversível e remove o jogador do sistema.</p>
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" onclick="fecharModalDelete()">
@@ -348,38 +317,93 @@
     <!-- Scripts -->
     <script>
         // ===== BUSCA DE JOGADORES =====
+        const toggleCreatePlayerBtn = document.getElementById('toggleCreatePlayerBtn');
+        const createPlayerPanel = document.getElementById('createPlayerPanel');
+        const nomeJogadorInput = document.getElementById('nome');
         const searchInput = document.getElementById('searchInput');
         const playersGrid = document.getElementById('playersGrid');
         const playerCards = document.querySelectorAll('.player-card');
+        const toggleSearchBtn = document.getElementById('toggleSearchBtn');
+        const playersSearchPanel = document.getElementById('playersSearchPanel');
         const searchResultsCount = document.getElementById('searchResultsCount');
 
         // ===== FILTROS AVANÇADOS =====
-        const nivelMinInput = document.getElementById('nivelMin');
-        const nivelMaxInput = document.getElementById('nivelMax');
+        const nivelFilter = document.getElementById('nivelFilter');
         const tipoFilter = document.getElementById('tipoFilter');
         const posicaoFilter = document.getElementById('posicaoFilter');
 
+        if (toggleCreatePlayerBtn && createPlayerPanel) {
+            toggleCreatePlayerBtn.addEventListener('click', () => {
+                const aberto = !createPlayerPanel.hidden;
+                createPlayerPanel.hidden = aberto;
+                toggleCreatePlayerBtn.setAttribute('aria-expanded', String(!aberto));
+                toggleCreatePlayerBtn.classList.toggle('is-open', !aberto);
+
+                if (!aberto) {
+                    nomeJogadorInput?.focus();
+                }
+            });
+        }
+
+        function valorNormalizado(valor) {
+            return String(valor || '').trim().toLowerCase();
+        }
+
+        function atualizarOpcoesDisponiveis() {
+            const contadores = {
+                tipo: {},
+                posicao: {},
+                nivel: {}
+            };
+
+            playerCards.forEach(card => {
+                const tipo = valorNormalizado(card.dataset.tipo);
+                const posicao = valorNormalizado(card.dataset.posicao);
+                const nivel = valorNormalizado(card.dataset.nivel);
+
+                if (tipo) contadores.tipo[tipo] = (contadores.tipo[tipo] || 0) + 1;
+                if (posicao) contadores.posicao[posicao] = (contadores.posicao[posicao] || 0) + 1;
+                if (nivel) contadores.nivel[nivel] = (contadores.nivel[nivel] || 0) + 1;
+            });
+
+            [
+                [tipoFilter, contadores.tipo],
+                [posicaoFilter, contadores.posicao],
+                [nivelFilter, contadores.nivel]
+            ].forEach(([select, contador]) => {
+                if (!select) return;
+                Array.from(select.options).forEach(option => {
+                    if (!option.dataset.label) option.dataset.label = option.textContent;
+                    if (!option.value) {
+                        option.textContent = option.dataset.label;
+                        option.disabled = false;
+                        return;
+                    }
+
+                    const total = contador[valorNormalizado(option.value)] || 0;
+                    option.textContent = `${option.dataset.label} (${total})`;
+                    option.disabled = total === 0;
+                });
+            });
+        }
+
         function aplicarFiltros() {
-            const searchTerm = (searchInput?.value || '').toLowerCase().trim();
-            const nivelMin = parseInt(nivelMinInput?.value || 1) || 1;
-            const nivelMax = parseInt(nivelMaxInput?.value || 10) || 10;
-            const tipoSelecionado = tipoFilter?.value || '';
-            const posicaoSelecionada = posicaoFilter?.value || '';
+            const searchTerm = valorNormalizado(searchInput?.value);
+            const nivelSelecionado = valorNormalizado(nivelFilter?.value);
+            const tipoSelecionado = valorNormalizado(tipoFilter?.value);
+            const posicaoSelecionada = valorNormalizado(posicaoFilter?.value);
 
             let visibleCount = 0;
 
             playerCards.forEach(card => {
-                const playerName = card.getAttribute('data-name');
-                const playerNivel = parseInt(card.querySelector('[data-nivel]')?.getAttribute('data-nivel') || 5);
-                
-                // Extrair tipo e posição do HTML
-                const tipoHtml = card.querySelector('.player-tipo')?.textContent || '';
-                const playerTipo = tipoHtml.includes('Fixo') ? 'fixo' : 'avulso';
-                const playerPosicao = tipoHtml.includes('🧤') ? 'goleiro' : 'linha';
+                const playerName = valorNormalizado(card.dataset.name);
+                const playerNivel = valorNormalizado(card.dataset.nivel);
+                const playerTipo = valorNormalizado(card.dataset.tipo);
+                const playerPosicao = valorNormalizado(card.dataset.posicao);
 
                 // Aplicar filtros
                 const matchesNome = playerName.includes(searchTerm);
-                const matchesNivel = playerNivel >= nivelMin && playerNivel <= nivelMax;
+                const matchesNivel = !nivelSelecionado || playerNivel === nivelSelecionado;
                 const matchesTipo = !tipoSelecionado || playerTipo === tipoSelecionado;
                 const matchesPosicao = !posicaoSelecionada || playerPosicao === posicaoSelecionada;
 
@@ -390,7 +414,7 @@
             });
 
             // Atualizar contador
-            if (searchTerm || tipoSelecionado || posicaoSelecionada || nivelMin > 1 || nivelMax < 10) {
+            if (searchTerm || tipoSelecionado || posicaoSelecionada || nivelSelecionado) {
                 searchResultsCount.textContent = `${visibleCount} resultado${visibleCount !== 1 ? 's' : ''}`;
                 searchResultsCount.style.display = 'block';
             } else {
@@ -400,17 +424,27 @@
 
         function limparFiltros() {
             if (searchInput) searchInput.value = '';
-            if (nivelMinInput) nivelMinInput.value = '1';
-            if (nivelMaxInput) nivelMaxInput.value = '10';
+            if (nivelFilter) nivelFilter.value = '';
             if (tipoFilter) tipoFilter.value = '';
             if (posicaoFilter) posicaoFilter.value = '';
             aplicarFiltros();
         }
 
         // Event listeners para filtros
+        if (toggleSearchBtn && playersSearchPanel) {
+            toggleSearchBtn.addEventListener('click', () => {
+                const aberto = !playersSearchPanel.hidden;
+                playersSearchPanel.hidden = aberto;
+                toggleSearchBtn.setAttribute('aria-expanded', String(!aberto));
+                toggleSearchBtn.classList.toggle('is-open', !aberto);
+
+                if (!aberto) {
+                    searchInput?.focus();
+                }
+            });
+        }
         if (searchInput) searchInput.addEventListener('input', aplicarFiltros);
-        if (nivelMinInput) nivelMinInput.addEventListener('change', aplicarFiltros);
-        if (nivelMaxInput) nivelMaxInput.addEventListener('change', aplicarFiltros);
+        if (nivelFilter) nivelFilter.addEventListener('change', aplicarFiltros);
         if (tipoFilter) tipoFilter.addEventListener('change', aplicarFiltros);
         if (posicaoFilter) posicaoFilter.addEventListener('change', aplicarFiltros);
 
@@ -422,6 +456,8 @@
                 }
             });
         }
+
+        atualizarOpcoesDisponiveis();
 
         {% if auth_user.role == 'admin' %}
             // ===== MODAL DELETE =====

@@ -130,9 +130,9 @@ def _destino_fluxo_juiz(estado):
     if status == 'sorteada' and sorteio_id:
         return url_for('partida.ver_sorteio', sorteio_id=sorteio_id)
     if status in {'resultado_registrado', 'votacao_aberta'} and sorteio_id:
-        return url_for('votacao.votacao_admin_page', sorteio_id=sorteio_id)
+        return url_for('admin.admin_page', sorteio_id=sorteio_id)
     if votacao_partida_id:
-        return url_for('votacao.votacao_admin_page')
+        return url_for('admin.admin_page')
     return None
 
 
@@ -154,9 +154,9 @@ def jogar_page():
         todos_jogadores = jogador_service.listar()
         
         if estado_fluxo.get('status') == 'selecionando':
-            fixos = jogador_service.listar_por_tipo("fixo")
-            avulsos = jogador_service.listar_por_tipo("avulso")
-            presentes = jogador_service.listar_presentes()
+            fixos = [j for j in todos_jogadores if j.tipo == "fixo"]
+            avulsos = [j for j in todos_jogadores if j.tipo == "avulso"]
+            presentes = [j for j in todos_jogadores if j.presente]
             
             return render_template(
                 'juiz_criar_partida.html',
@@ -195,9 +195,9 @@ def juiz_criar_partida():
         juiz_partida_service.iniciar_partida(session.get('user_id'))
         
         todos_jogadores = jogador_service.listar()
-        fixos = jogador_service.listar_por_tipo("fixo")
-        avulsos = jogador_service.listar_por_tipo("avulso")
-        presentes = jogador_service.listar_presentes()
+        fixos = [j for j in todos_jogadores if j.tipo == "fixo"]
+        avulsos = [j for j in todos_jogadores if j.tipo == "avulso"]
+        presentes = [j for j in todos_jogadores if j.presente]
 
         return render_template(
             'juiz_criar_partida.html',

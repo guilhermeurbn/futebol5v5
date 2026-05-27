@@ -22,11 +22,9 @@
                 {% if auth_user.role == 'usuario' %}
                 <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab">🗳️ Minha Votação</a>
                 {% endif %}
-                {% if auth_user.role in ['admin', 'super_admin'] %}
-                <a href="{{ url_for('jogador.votacao_admin_page') }}" class="nav-tab">🛡️ Votação Admin</a>
-                {% endif %}
+                {# Link 'Rodada' removido para simplificar a navegação #}
                 <a href="{{ url_for('jogador.historico') }}" class="nav-tab active">📜 Histórico</a>
-                <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab active">🏅 Ranking</a>
+                <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">🏅 Ranking</a>
             </div>
             {% endif %}
 
@@ -42,7 +40,7 @@
                                     <div class="sorteio-info">
                                         <h3 class="sorteio-title">🎲 Sorteio #{{ sorteio.id }}</h3>
                                         <p class="sorteio-data">
-                                            📅 {{ sorteio.data[:10] }} às {{ sorteio.data[11:16] }}
+                                            📅 {{ sorteio.data|dt_pt_hm }}
                                         </p>
                                     </div>
                                     <div class="sorteio-stats">
@@ -65,10 +63,9 @@
                                 </div>
 
                                 <div class="sorteio-actions">
-                                    <a href="{{ url_for('jogador.ver_sorteio', sorteio_id=sorteio.id) }}" class="btn btn-primary btn-small">
-                                        👁️ Ver Detalhes
-                                    </a>
+                                    <button class="btn btn-primary btn-small btn-open-sorteio" data-sorteio-id="{{ sorteio.id }}">👁️ Ver Detalhes</button>
                                 </div>
+                                <div class="sorteio-details" id="sorteio-details-{{ sorteio.id }}" hidden aria-hidden="true"></div>
                             </div>
                         {% endfor %}
                     </div>
@@ -87,4 +84,56 @@
             <p>⚽ NaTrave • Desenvolvido por Guilherme Urbano com ❤️</p>
         </footer>
     </div>
+        <script>
+        // Historico: carregar detalhes do sorteio inline (times + resultado) e remover blocos de votação
+        document.addEventListener('click', async (e) => {
+            const btn = e.target.closest('.btn-open-sorteio');
+            if (!btn) return;
+            const id = btn.getAttribute('data-sorteio-id');
+            const container = document.getElementById('sorteio-details-' + id);
+            if (!container) return;
+
+            if (!container.hidden) {
+                // fechar
+                container.hidden = true;
+                container.innerHTML = '';
+                btn.textContent = '👁️ Ver Detalhes';
+                return;
+            }
+
+            btn.textContent = '⏳ Carregando...';
+            try {
+                const res = await fetch(`/sorteio/${id}`);
+                if (!res.ok) throw new Error('Falha ao carregar');
+                const text = await res.text();
+
+                // Extrair apenas as sections de 'Times' e 'Resultado da Partida' do HTML retornado
+                const tmp = document.createElement('div');
+                tmp.innerHTML = text;
+                const sections = tmp.querySelectorAll('.section');
+                let html = '';
+                sections.forEach(sec => {
+                    const h2 = sec.querySelector('h2.section-title');
+                    if (!h2) return;
+                    const title = h2.textContent.trim();
+                    if (title.includes('Times') || title.includes('Resultado da Partida')) {
+                        html += sec.outerHTML;
+                    }
+                });
+                if (!html) html = tmp.querySelector('main') ? tmp.querySelector('main').innerHTML : text;
+
+                // Remove possíveis botões de votação dentro do trecho
+                html = html.replace(/<form[^>]*action="[^"]*votacao[^"]*"[\s\S]*?<\/form>/gi, '');
+                html = html.replace(/<a[^>]*href="[^"]*votacao[^"]*"[\s\S]*?<\/a>/gi, '');
+
+                container.innerHTML = html;
+                container.hidden = false;
+                btn.textContent = '✖ Fechar';
+            } catch (err) {
+                console.error(err);
+                btn.textContent = 'Erro';
+                setTimeout(() => btn.textContent = '👁️ Ver Detalhes', 1500);
+            }
+        });
+        </script>
 {% endblock %}

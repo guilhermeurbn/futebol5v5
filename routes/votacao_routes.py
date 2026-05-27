@@ -9,6 +9,7 @@ import logging
 from services.votacao_service import VotacaoService
 from services.auth_service import AuthService
 from services.juiz_partida_service import JuizPartidaService
+from services.historico_service import HistoricoService
 
 votacao_bp = Blueprint('votacao', __name__)
 logger = logging.getLogger(__name__)
@@ -16,6 +17,7 @@ logger = logging.getLogger(__name__)
 votacao_service = VotacaoService()
 auth_service = AuthService()
 juiz_partida_service = JuizPartidaService()
+historico_service = HistoricoService()
 
 
 # ============================================================
@@ -62,6 +64,57 @@ def _resposta_voto_somente_usuario():
     return redirect(url_for('jogador_crud.index'))
 
 
+def _resolver_contexto_admin(sorteio_id_hint=None):
+    """Monta contexto unificado da tela admin para evitar perdas em fluxos de erro."""
+    ativa = votacao_service.obter_ativa()
+    historico = votacao_service.listar()[:30]
+
+    sorteios = historico_service.listar_sorteios() or []
+    sorteios_ordenados = sorted(sorteios, key=lambda s: int(s.get('id', 0) or 0), reverse=True)
+
+    fluxo_partida = None
+    if _is_juiz():
+        estado = juiz_partida_service.obter_estado()
+        fluxo_partida = estado.get('partida_atual')
+
+    selecionado = sorteio_id_hint
+    if not selecionado and fluxo_partida:
+        selecionado = fluxo_partida.get('sorteio_id')
+    if not selecionado and ativa:
+        selecionado = ativa.get('sorteio_id')
+    if not selecionado and sorteios_ordenados:
+        selecionado = sorteios_ordenados[0].get('id')
+
+    sorteio_contexto = None
+    if selecionado:
+        try:
+            selecionado = int(selecionado)
+            sorteio_contexto = next((s for s in sorteios_ordenados if int(s.get('id', 0) or 0) == selecionado), None)
+        except (TypeError, ValueError):
+            selecionado = None
+
+    voted_user_ids = {
+        voto.get('user_id')
+        for voto in (ativa or {}).get('votos', [])
+        if voto.get('user_id')
+    }
+
+    pode_abrir_votacao = bool(selecionado)
+    if _is_juiz() and fluxo_partida and not fluxo_partida.get('resultado_registrado'):
+        pode_abrir_votacao = False
+
+    return {
+        'ativa': ativa,
+        'historico': historico,
+        'sorteios_disponiveis': sorteios_ordenados,
+        'sorteio_contexto': sorteio_contexto,
+        'selected_sorteio_id': selecionado,
+        'fluxo_partida': fluxo_partida,
+        'voted_user_ids': voted_user_ids,
+        'pode_abrir_votacao': pode_abrir_votacao,
+    }
+
+
 # ============================================================
 # VOTAÇÃO DE USUÁRIO
 # ============================================================
@@ -70,7 +123,7 @@ def _resposta_voto_somente_usuario():
 def votacao_page():
     """Página para votação de usuários"""
     if _is_admin():
-        return redirect(url_for('votacao.votacao_admin_page'))
+        return redirect(url_for('admin.admin_page'))
 
     if session.get('role') != 'usuario':
         return _resposta_voto_somente_usuario()
@@ -190,32 +243,10 @@ def votacao_salvar():
 @votacao_bp.route('/admin/votacao', methods=['GET'])
 @admin_or_juiz_required
 def votacao_admin_page():
-    """Página de votação admin"""
-    try:
-        ativa = votacao_service.obter_ativa()
-        historico = votacao_service.listar()
-        sorteio_id = request.args.get('sorteio_id', type=int)
-        
-        from services.historico_service import HistoricoService
-        historico_service = HistoricoService()
-        sorteio_contexto = historico_service.obter_sorteio(sorteio_id) if sorteio_id else None
-        
-        fluxo_partida = None
-        if _is_juiz():
-            estado = juiz_partida_service.obter_estado()
-            fluxo_partida = estado.get('partida_atual')
-        
-        return render_template(
-            'votacao_admin.html',
-            ativa=ativa,
-            historico=historico,
-            sorteio_contexto=sorteio_contexto,
-            fluxo_partida=fluxo_partida,
-            usuario=_usuario_logado()
-        )
-    except Exception as e:
-        logger.error(f"Erro ao carregar votação admin: {str(e)}")
-        return render_template('votacao_admin.html', erro='Erro ao carregar votação'), 500
+    """Mantido por compatibilidade; redireciona para a central de rodada no admin."""
+    sorteio_id = request.args.get('sorteio_id', type=int)
+    sucesso = request.args.get('sucesso', '').strip()
+    return redirect(url_for('admin.admin_page', sorteio_id=sorteio_id, sucesso=sucesso))
 
 
 @votacao_bp.route('/admin/votacao/criar', methods=['POST'])
@@ -223,19 +254,27 @@ def votacao_admin_page():
 def votacao_admin_criar():
     """Cria nova votação"""
     try:
+        titulo = (request.form.get('titulo', '') or '').strip()
         sorteio_id = request.form.get('sorteio_id', type=int)
-        
-        from services.historico_service import HistoricoService
-        historico_service = HistoricoService()
-        sorteio = historico_service.obter_sorteio(sorteio_id) if sorteio_id else None
+
+        if not sorteio_id and _is_juiz():
+            estado = juiz_partida_service.obter_estado()
+            sorteio_id = ((estado.get('partida_atual') or {}).get('sorteio_id'))
+
+        if not sorteio_id:
+            sorteios = historico_service.listar_sorteios() or []
+            if sorteios:
+                sorteio_recente = max(sorteios, key=lambda s: int(s.get('id', 0) or 0))
+                sorteio_id = sorteio_recente.get('id')
+
+        sorteio = historico_service.obter_sorteio(int(sorteio_id)) if sorteio_id else None
         
         if not sorteio:
-            ativa = votacao_service.obter_ativa()
-            historico = votacao_service.listar()
+            contexto = _resolver_contexto_admin(sorteio_id_hint=sorteio_id)
             return render_template(
                 'votacao_admin.html',
-                ativa=ativa,
-                historico=historico,
+                **contexto,
+                titulo_preenchido=titulo,
                 erro='Nao ha sorteio no historico para iniciar votacao',
                 usuario=_usuario_logado()
             ), 400
@@ -264,7 +303,7 @@ def votacao_admin_criar():
             times_json=sorteio.get('times', []),
             usuarios=usuarios,
             criado_por=session.get('user_id'),
-            titulo=request.form.get('titulo', '').strip(),
+            titulo=titulo,
             sorteio_id=sorteio.get('id'),
             resultado_partida=resultado_partida,
             duracao_horas=8,
@@ -273,25 +312,30 @@ def votacao_admin_criar():
         if _is_juiz():
             juiz_partida_service.marcar_votacao_aberta(sorteio.get('id'), partida.get('id'))
         
-        return redirect(url_for('votacao.votacao_admin_page', partida_id=partida.get('id'), sorteio_id=sorteio.get('id')))
+        return redirect(url_for(
+            'admin.admin_page',
+            partida_id=partida.get('id'),
+            sorteio_id=sorteio.get('id'),
+            sucesso='Rodada aberta com sucesso.'
+        ))
     except ValueError as e:
-        ativa = votacao_service.obter_ativa()
-        historico = votacao_service.listar()
+        sorteio_id_hint = request.form.get('sorteio_id', type=int)
+        contexto = _resolver_contexto_admin(sorteio_id_hint=sorteio_id_hint)
         return render_template(
             'votacao_admin.html',
-            ativa=ativa,
-            historico=historico,
+            **contexto,
+            titulo_preenchido=(request.form.get('titulo', '') or '').strip(),
             erro=str(e),
             usuario=_usuario_logado()
         ), 400
     except Exception as e:
         logger.error(f"Erro ao criar votação: {str(e)}")
-        ativa = votacao_service.obter_ativa()
-        historico = votacao_service.listar()
+        sorteio_id_hint = request.form.get('sorteio_id', type=int)
+        contexto = _resolver_contexto_admin(sorteio_id_hint=sorteio_id_hint)
         return render_template(
             'votacao_admin.html',
-            ativa=ativa,
-            historico=historico,
+            **contexto,
+            titulo_preenchido=(request.form.get('titulo', '') or '').strip(),
             erro='Erro ao criar votação',
             usuario=_usuario_logado()
         ), 500
@@ -325,25 +369,21 @@ def votacao_admin_encerrar(partida_id):
             jogador_service.limpar_presenca()
             return redirect(url_for('juiz.jogar_page'))
         
-        return redirect(url_for('votacao.votacao_admin_page', partida_id=partida_id))
+        return redirect(url_for('admin.admin_page', partida_id=partida_id, sucesso='Rodada encerrada e ranking apurado.'))
     except ValueError as e:
-        ativa = votacao_service.obter_ativa()
-        historico = votacao_service.listar()
+        contexto = _resolver_contexto_admin()
         return render_template(
             'votacao_admin.html',
-            ativa=ativa,
-            historico=historico,
+            **contexto,
             erro=str(e),
             usuario=_usuario_logado()
         ), 400
     except Exception as e:
         logger.error(f"Erro ao encerrar votação: {str(e)}")
-        ativa = votacao_service.obter_ativa()
-        historico = votacao_service.listar()
+        contexto = _resolver_contexto_admin()
         return render_template(
             'votacao_admin.html',
-            ativa=ativa,
-            historico=historico,
+            **contexto,
             erro='Erro ao encerrar votação',
             usuario=_usuario_logado()
         ), 500

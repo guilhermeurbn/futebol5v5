@@ -7,32 +7,38 @@
     {% if auth_user and auth_user.autenticado %}
     <div class="auth-actions">
         <div class="auth-links">
-            {% if auth_user.role == 'juiz' %}
+            {% if auth_user.role in ['admin', 'super_admin'] %}
+            <!-- Admin Dashboard - Minimal buttons -->
+            <a class="btn btn-warning" href="{{ url_for('admin.admin_page') }}" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; font-weight: 700;">⚙️ Admin</a>
+            <form method="post" action="{{ url_for('jogador.logout') }}" class="logout-form" style="margin: 0;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn btn-danger" type="submit" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; font-weight: 700;">🚪 Sair</button>
+            </form>
+            {% elif auth_user.role == 'juiz' %}
             {% if not juiz_partida_ativa %}
             <form method="post" action="{{ url_for('jogador.juiz_criar_partida') }}" class="logout-form">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button class="btn btn-primary" type="submit">Criar partida</button>
             </form>
             {% endif %}
-            {% else %}
-            {% if auth_user.role != 'juiz' %}
-            <a class="btn btn-secondary" href="{{ url_for('jogador.index') }}">Jogadores</a>
-            {% endif %}
-            {% if auth_user.role == 'usuario' %}
-            <a class="btn btn-secondary" href="{{ url_for('jogador.votacao_page') }}">Minha votação</a>
-            {% endif %}
-            {% if auth_user.role in ['admin', 'super_admin'] %}
-            <a class="btn btn-secondary" href="{{ url_for('jogador.votacao_admin_page') }}">Votação Admin</a>
-            <a class="btn btn-warning" href="{{ url_for('jogador.admin_page') }}">Admin</a>
-            {% endif %}
-            <a class="btn btn-secondary" href="{{ url_for('jogador.historico') }}">Histórico</a>
-            <a class="btn btn-secondary" href="{{ url_for('jogador.pagina_ranking') }}">Ranking</a>
-            <a class="btn btn-secondary" href="{{ url_for('jogador.perfil_page') }}">Meu perfil</a>
-            {% endif %}
             <form method="post" action="{{ url_for('jogador.logout') }}" class="logout-form">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button class="btn btn-danger" type="submit">Sair</button>
             </form>
+            {% else %}
+            <!-- Regular User Navigation -->
+            <a class="btn btn-secondary" href="{{ url_for('jogador.index') }}">Jogadores</a>
+            {% if auth_user.role == 'usuario' %}
+            <a class="btn btn-secondary" href="{{ url_for('jogador.votacao_page') }}">Minha votação</a>
+            {% endif %}
+            <a class="btn btn-secondary" href="{{ url_for('jogador.historico') }}">Histórico</a>
+            <a class="btn btn-secondary" href="{{ url_for('jogador.pagina_ranking') }}">Ranking</a>
+            <a class="btn btn-secondary" href="{{ url_for('jogador.perfil_page') }}">Meu perfil</a>
+            <form method="post" action="{{ url_for('jogador.logout') }}" class="logout-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn btn-danger" type="submit">Sair</button>
+            </form>
+            {% endif %}
         </div>
     </div>
     {% endif %}

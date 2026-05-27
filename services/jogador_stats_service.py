@@ -4,14 +4,19 @@ Rastreia gols, assistências, cartões, vitórias e muito mais de cada jogador
 """
 import json
 import os
+import time
+import unicodedata
 from datetime import datetime
 from typing import Dict, List, Optional
 from collections import defaultdict
-from services.db import load_json_data
+from services.db import load_json_data, save_json_data
 
 
 class JogadorStatsService:
     """Serviço para calcular estatísticas detalhadas por jogador"""
+
+    _cache_stats: Dict[str, Dict] = {}
+    _cache_ttl_seconds = 60
     
     def __init__(self, partidas_arquivo: str = "partidas.json", historico_arquivo: str = "historico.json"):
         """
@@ -23,6 +28,26 @@ class JogadorStatsService:
         """
         self.partidas_arquivo = partidas_arquivo
         self.historico_arquivo = historico_arquivo
+
+    @classmethod
+    def invalidar_cache_stats(cls) -> None:
+        """Limpa cache em memória das estatísticas por jogador."""
+        cls._cache_stats.clear()
+
+    def _obter_stats_em_cache(self, chave: str) -> Optional[Dict]:
+        item = self._cache_stats.get(chave)
+        if not item:
+            return None
+        if time.time() - item.get("ts", 0) > self._cache_ttl_seconds:
+            self._cache_stats.pop(chave, None)
+            return None
+        return item.get("data")
+
+    def _salvar_stats_em_cache(self, chave: str, data: Dict) -> None:
+        self._cache_stats[chave] = {
+            "ts": time.time(),
+            "data": data,
+        }
     
     def _carregar_partidas(self) -> List[dict]:
         """Carrega dados de partidas"""
@@ -43,6 +68,168 @@ class JogadorStatsService:
                 return json.load(f)
         except (json.JSONDecodeError, FileNotFoundError):
             return []
+
+    def _stats_vazio(self, nome_jogador: str) -> Dict:
+        """Retorna estrutura base de estatísticas com compatibilidade retroativa."""
+        return {
+            "nome": nome_jogador,
+            "total_partidas": 0,
+            "gols": 0,
+            "assistencias": 0,
+            "cartoes_amarelos": 0,
+            "cartoes_vermelhos": 0,
+            "vitórias": 0,
+            "vitorias": 0,
+            "derrotas": 0,
+            "empates": 0,
+            "win_rate": 0.0,
+            "win_rate_valido": True,
+            "gols_por_partida": 0.0,
+            "assistencias_por_partida": 0.0,
+            "maior_artilheiro": False,
+            "melhor_artilheiro_partida": 0,
+            "partidas_sem_gols": 0,
+            "historico_partidas": [],
+            "efficiency": {
+                "participacoes_gol": 0,
+                "participacoes_por_partida": 0.0,
+                "taxa_partidas_com_participacao": 0.0,
+                "peso_gols_assistencias": 0.0,
+            },
+            "discipline": {
+                "cartoes_total": 0,
+                "cartoes_por_partida": 0.0,
+                "indice_disciplina": 100.0,
+                "partidas_sem_cartao_aprox": 0,
+            },
+            "ultimos_resultados": {
+                "limite": 5,
+                "forma": [],
+                "sequencia": "",
+                "pontos": 0,
+                "partidas": [],
+            },
+            "mini_dashboard": {
+                "kpis": {
+                    "win_rate": 0.0,
+                    "participacoes_por_partida": 0.0,
+                    "indice_disciplina": 100.0,
+                    "pontos_ultimos_5": 0,
+                },
+                "series_ultimos_5": [],
+            },
+            "planilha_metricas": [],
+        }
+
+    def _normalizar_nome(self, nome: str) -> str:
+        """Normaliza nomes para comparação case-insensitive e sem acentos."""
+        if not isinstance(nome, str):
+            return ""
+        texto = unicodedata.normalize("NFKD", nome.strip().casefold())
+        return "".join(c for c in texto if not unicodedata.combining(c))
+
+    def _resultado_para_pontos(self, resultado: str) -> int:
+        if resultado == "vitória":
+            return 3
+        if resultado == "empate":
+            return 1
+        return 0
+
+    def _build_recent_form(self, historico_partidas: List[Dict], limite: int = 5) -> Dict:
+        ultimas = (historico_partidas or [])[:limite]
+        sigla = {"vitória": "V", "empate": "E", "derrota": "D"}
+        forma = [sigla.get(p.get("resultado"), "E") for p in ultimas]
+        pontos = sum(self._resultado_para_pontos(p.get("resultado", "empate")) for p in ultimas)
+
+        return {
+            "limite": limite,
+            "forma": forma,
+            "sequencia": "".join(forma),
+            "pontos": pontos,
+            "partidas": ultimas,
+        }
+
+    def _build_efficiency(self, stats: Dict) -> Dict:
+        total = int(stats.get("total_partidas", 0) or 0)
+        gols = int(stats.get("gols", 0) or 0)
+        assist = int(stats.get("assistencias", 0) or 0)
+        participacoes = gols + assist
+
+        partidas_com_participacao = 0
+        for partida in stats.get("historico_partidas", []):
+            if (partida.get("gols", 0) or 0) + (partida.get("assistencias", 0) or 0) > 0:
+                partidas_com_participacao += 1
+
+        return {
+            "participacoes_gol": participacoes,
+            "participacoes_por_partida": round(participacoes / total, 2) if total > 0 else 0.0,
+            "taxa_partidas_com_participacao": round((partidas_com_participacao / total) * 100, 1) if total > 0 else 0.0,
+            "peso_gols_assistencias": round(((gols * 1.0) + (assist * 0.7)) / total, 2) if total > 0 else 0.0,
+        }
+
+    def _build_discipline(self, stats: Dict) -> Dict:
+        total = int(stats.get("total_partidas", 0) or 0)
+        amarelos = int(stats.get("cartoes_amarelos", 0) or 0)
+        vermelhos = int(stats.get("cartoes_vermelhos", 0) or 0)
+        punicao = (amarelos * 1) + (vermelhos * 3)
+
+        indice = 100.0
+        if total > 0:
+            indice = max(0.0, round(100 - ((punicao / total) * 12), 1))
+
+        return {
+            "cartoes_total": amarelos + vermelhos,
+            "cartoes_por_partida": round((amarelos + vermelhos) / total, 2) if total > 0 else 0.0,
+            "indice_disciplina": indice,
+            "partidas_sem_cartao_aprox": max(0, total - (amarelos + vermelhos)),
+        }
+
+    def _build_mini_dashboard(self, stats: Dict) -> Dict:
+        ultimos = stats.get("ultimos_resultados", {}).get("partidas", [])
+        return {
+            "kpis": {
+                "win_rate": stats.get("win_rate", 0.0),
+                "participacoes_por_partida": stats.get("efficiency", {}).get("participacoes_por_partida", 0.0),
+                "indice_disciplina": stats.get("discipline", {}).get("indice_disciplina", 100.0),
+                "pontos_ultimos_5": stats.get("ultimos_resultados", {}).get("pontos", 0),
+            },
+            "series_ultimos_5": [
+                {
+                    "data": p.get("data"),
+                    "resultado": p.get("resultado"),
+                    "gols": p.get("gols", 0),
+                    "assistencias": p.get("assistencias", 0),
+                    "pontos": self._resultado_para_pontos(p.get("resultado", "empate")),
+                }
+                for p in ultimos
+            ],
+        }
+
+    def _build_planilha_metricas(self, stats: Dict) -> List[Dict]:
+        """Dados tabulares prontos para exportação CSV em formato de planilha."""
+        linhas = []
+        for partida in stats.get("historico_partidas", []):
+            resultado = partida.get("resultado", "empate")
+            linhas.append({
+                "data": (partida.get("data") or "")[:10],
+                "partida_id": partida.get("partida_id"),
+                "time": partida.get("time_numero"),
+                "resultado": resultado,
+                "pontos": self._resultado_para_pontos(resultado),
+                "gols": partida.get("gols", 0),
+                "assistencias": partida.get("assistencias", 0),
+                "cartoes_amarelos": partida.get("cartoes_amarelos", 0),
+                "cartoes_vermelhos": partida.get("cartoes_vermelhos", 0),
+            })
+        return linhas
+
+    def _validar_win_rate(self, stats: Dict) -> bool:
+        """Valida consistência do win rate calculado para evitar regressões silenciosas."""
+        total = int(stats.get("total_partidas", 0) or 0)
+        if total <= 0:
+            return float(stats.get("win_rate", 0.0) or 0.0) == 0.0
+        esperado = round((int(stats.get("vitórias", 0) or 0) / total) * 100, 1)
+        return float(stats.get("win_rate", 0.0) or 0.0) == esperado
 
     def _resultado_por_time(self, partida: dict, time_numero: Optional[int]) -> str:
         """Calcula resultado (vitória/empate/derrota) para um time em uma partida."""
@@ -103,35 +290,28 @@ class JogadorStatsService:
             }
         """
         try:
+            chave_cache = self._normalizar_nome(nome_jogador)
+            cache_hit = self._obter_stats_em_cache(chave_cache)
+            if cache_hit is not None:
+                return cache_hit
+
             partidas = self._carregar_partidas()
             historico = self._carregar_historico()
-            
-            stats = {
-                "nome": nome_jogador,
-                "total_partidas": 0,
-                "gols": 0,
-                "assistencias": 0,
-                "cartoes_amarelos": 0,
-                "cartoes_vermelhos": 0,
-                "vitórias": 0,
-                "derrotas": 0,
-                "empates": 0,
-                "win_rate": 0.0,
-                "gols_por_partida": 0.0,
-                "assistencias_por_partida": 0.0,
-                "maior_artilheiro": False,
-                "melhor_artilheiro_partida": 0,
-                "partidas_sem_gols": 0,
-                "historico_partidas": []
-            }
+            stats = self._stats_vazio(nome_jogador)
             
             if not partidas:
                 return stats
             
             historico_dict = {h.get('id'): h for h in historico}
+            gols_todos = defaultdict(int)
             
             # Processar cada partida
             for partida in partidas:
+                for detalhe_global in partida.get("jogadores_detalhes", []) or []:
+                    nome_global = detalhe_global.get("nome")
+                    if nome_global:
+                        gols_todos[nome_global] += int(detalhe_global.get("gols", 0) or 0)
+
                 sorteio_id = partida.get('sorteio_id')
                 sorteio = historico_dict.get(sorteio_id, {})
                 
@@ -182,38 +362,30 @@ class JogadorStatsService:
                 stats["win_rate"] = round((stats["vitórias"] / stats["total_partidas"]) * 100, 1)
                 stats["gols_por_partida"] = round(stats["gols"] / stats["total_partidas"], 2)
                 stats["assistencias_por_partida"] = round(stats["assistencias"] / stats["total_partidas"], 2)
+            stats["vitorias"] = stats["vitórias"]
             
             # Verificar se é o maior artilheiro (por total de gols)
-            gols_todos = self._calcular_gols_todos_jogadores()
             if gols_todos and max(gols_todos.values(), default=0) == stats["gols"] and stats["gols"] > 0:
                 stats["maior_artilheiro"] = True
             
             # Ordenar histórico por data (mais recente primeiro)
             stats["historico_partidas"].sort(key=lambda x: x.get('data', ''), reverse=True)
-            
+
+            # Dashboard e dados para planilha/exportação
+            stats["ultimos_resultados"] = self._build_recent_form(stats["historico_partidas"], limite=5)
+            stats["efficiency"] = self._build_efficiency(stats)
+            stats["discipline"] = self._build_discipline(stats)
+            stats["mini_dashboard"] = self._build_mini_dashboard(stats)
+            stats["planilha_metricas"] = self._build_planilha_metricas(stats)
+            stats["win_rate_valido"] = self._validar_win_rate(stats)
+            self._salvar_stats_em_cache(chave_cache, stats)
+
             return stats
         except Exception as e:
             # Se houver erro, retornar stats vazio em vez de quebrar a aplicação
             import sys
             print(f"Erro ao calcular stats para {nome_jogador}: {str(e)}", file=sys.stderr)
-            return {
-                "nome": nome_jogador,
-                "total_partidas": 0,
-                "gols": 0,
-                "assistencias": 0,
-                "cartoes_amarelos": 0,
-                "cartoes_vermelhos": 0,
-                "vitórias": 0,
-                "derrotas": 0,
-                "empates": 0,
-                "win_rate": 0.0,
-                "gols_por_partida": 0.0,
-                "assistencias_por_partida": 0.0,
-                "maior_artilheiro": False,
-                "melhor_artilheiro_partida": 0,
-                "partidas_sem_gols": 0,
-                "historico_partidas": []
-            }
+            return self._stats_vazio(nome_jogador)
     
     def _extrair_detalhes_jogador(self, partida: dict, nome_jogador: str, sorteio: dict) -> Optional[dict]:
         """
@@ -224,9 +396,10 @@ class JogadorStatsService:
         """
         # Procurar detalhes do jogador nos dados de jogadores da partida
         jogadores_detalhes = partida.get("jogadores_detalhes", [])
+        nome_normalizado = self._normalizar_nome(nome_jogador)
         
         for detalhe in jogadores_detalhes:
-            if detalhe.get("nome") == nome_jogador:
+            if self._normalizar_nome(detalhe.get("nome", "")) == nome_normalizado:
                 time_numero = detalhe.get("time_numero")
                 resultado = self._resultado_por_time(partida, time_numero)
                 dados = dict(detalhe)
@@ -239,7 +412,7 @@ class JogadorStatsService:
             for time_idx, time_data in enumerate(times):
                 jogadores = time_data.get('jogadores', [])
                 for jogador in jogadores:
-                    if jogador.get('nome') == nome_jogador:
+                    if self._normalizar_nome(jogador.get('nome', '')) == nome_normalizado:
                         # Encontrou o jogador neste time
                         time_numero = time_idx + 1
                         resultado = self._resultado_por_time(partida, time_numero)
@@ -410,8 +583,12 @@ class JogadorStatsService:
         
         # Salvar mudanças
         try:
-            with open(self.partidas_arquivo, "w", encoding="utf-8") as f:
-                json.dump(partidas, f, indent=2, ensure_ascii=False)
+            if os.getenv("DATABASE_URL"):
+                save_json_data("partidas", partidas)
+            else:
+                with open(self.partidas_arquivo, "w", encoding="utf-8") as f:
+                    json.dump(partidas, f, indent=2, ensure_ascii=False)
+            self.invalidar_cache_stats()
             return True
         except Exception:
             return False

@@ -197,6 +197,9 @@ def _salvar_ultimo_sorteio_sessao(payload):
 @partida_bp.route('/sortear')
 def sortear():
     """Página com times sorteados"""
+    if _is_admin():
+        return redirect(url_for('jogador_crud.index'))
+
     try:
         presentes = jogador_service.listar_presentes()
         times, somas, tem_aviso, aviso_msg = _sortear_diferente_do_anterior(presentes)
@@ -424,7 +427,7 @@ def registrar_resultado_partida():
             'sucesso': True,
             'partida': partida,
             'mensagem': 'Resultado registrado com sucesso!',
-            'proximo_passo_url': url_for('votacao.votacao_admin_page', sorteio_id=sorteio_id)
+            'proximo_passo_url': url_for('admin.admin_page', sorteio_id=sorteio_id)
         })
     except ValueError as e:
         return jsonify({'sucesso': False, 'erro': str(e)}), 400

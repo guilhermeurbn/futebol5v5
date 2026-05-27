@@ -30,55 +30,53 @@
 
             <!-- Info Section -->
             <section class="section">
-                <div class="section-header">
-                    <h2 class="section-title">🎲 Sorteio #{{ sorteio.id }}</h2>
-                    <a href="{{ url_for('jogador.historico') }}" class="btn btn-secondary btn-small">← Voltar</a>
-                </div>
-
-                <div class="sorteio-info-grid">
-                    <div class="info-card">
-                        <div class="info-label">📅 Data e Hora</div>
-                        <div class="info-value">{{ sorteio.data[:10] }} às {{ sorteio.data[11:16] }}</div>
-                    </div>
-                    <div class="info-card">
-                        <div class="info-label">👥 Total de Jogadores</div>
-                        <div class="info-value">{{ sorteio.total_jogadores }}</div>
-                    </div>
-                    <div class="info-card">
-                        <div class="info-label">⚽ Número de Times</div>
-                        <div class="info-value">{{ sorteio.num_times }}</div>
-                    </div>
-                </div>
-            </section>
-
-            {% if auth_user.role in ['admin', 'super_admin', 'juiz'] %}
-            <section class="section">
-                <div class="surface-panel surface-panel--soft">
-                    <div class="section-label">Rodada conectada</div>
-                    <div class="actions-section" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px;">
-                        {# Só permite registrar resultado se a rodada não estiver encerrada e ainda não houver resultado registrado #}
-                        {% if (not partida_votacao or partida_votacao.status != 'encerrada') and not resultado_partida %}
-                        <a href="{{ url_for('jogador.resultado_partida_page', sorteio_id=sorteio.id) }}" class="btn btn-primary">🏆 Registrar resultado</a>
+                <div class="sorteio-header" role="banner">
+                    <h1 class="sorteio-title">
+                        <span class="sorteio-icon" aria-hidden="true">🎲</span>
+                        <span class="sorteio-main">Sorteio #{{ sorteio.id }}</span>
+                        {% if sorteio.nome %}
+                            <span class="sorteio-subtitle"> — {{ sorteio.nome }}</span>
                         {% endif %}
+                    </h1>
 
-                        {% if not partida_votacao or partida_votacao.status == 'aberta' %}
-                        <form method="post" action="{{ url_for('jogador.votacao_admin_criar') }}">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <input type="hidden" name="sorteio_id" value="{{ sorteio.id }}">
-                            <input type="hidden" name="titulo" value="Rodada do sorteio #{{ sorteio.id }}">
-                            <button class="btn btn-primary" type="submit" style="width: 100%;">🗳️ Iniciar votação</button>
-                        </form>
-                        {% else %}
-                        <div class="alert alert-warning" style="margin: 0;">
-                            Esta rodada já foi encerrada. Não é possível iniciar outra votação.
+                    <div class="sorteio-meta" aria-label="Sorteio actions">
+                        <a href="{{ url_for('jogador.historico') }}" class="btn btn-secondary btn-small">← Voltar</a>
+                    </div>
+                </div>
+
+                <div class="sorteio-hero">
+                    <div class="sorteio-hero-inner">
+                        <div class="sorteio-hero-left">
+                            <div class="sorteio-title-inline">
+                                <span class="sorteio-icon" aria-hidden="true">🎲</span>
+                                <div>
+                                    <div class="sorteio-hint">Sorteio</div>
+                                    <div class="sorteio-id">#{{ sorteio.id }}</div>
+                                </div>
+                            </div>
                         </div>
-                        {% endif %}
 
-                        <a href="{{ url_for('jogador.votacao_admin_page', sorteio_id=sorteio.id) }}" class="btn btn-secondary">📋 Ver painel da rodada</a>
+                        <div class="sorteio-stats">
+                            <div class="sorteio-stat">
+                                <div class="sorteio-stat-label">📅 Data e Hora</div>
+                                <div class="sorteio-stat-value">{{ sorteio.data|dt_pt_hm }}</div>
+                            </div>
+
+                            <div class="sorteio-stat">
+                                <div class="sorteio-stat-label">👥 Jogadores</div>
+                                <div class="sorteio-stat-value">{{ sorteio.total_jogadores }}</div>
+                            </div>
+
+                            <div class="sorteio-stat">
+                                <div class="sorteio-stat-label">⚽ Times</div>
+                                <div class="sorteio-stat-value">{{ sorteio.num_times }}</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
-            {% endif %}
+
+            {# 'Rodada conectada' actions removed — kept minimal and focused detail view per request #}
 
             <!-- Times Section -->
             <section class="section">
@@ -188,7 +186,7 @@
                     </div>
                 {% elif partida_votacao %}
                     <div class="surface-panel surface-panel--soft">
-                        <p class="hero-empty__text" style="margin: 0;">A votação está aberta até {{ partida_votacao.fecha_em[:16].replace('T', ' ') if partida_votacao.fecha_em else 'n/d' }}. O ranking final aparece assim que a rodada for encerrada.</p>
+                        <p class="hero-empty__text" style="margin: 0;">A votação está aberta até {{ partida_votacao.fecha_em|dt_pt_hm if partida_votacao.fecha_em else 'n/d' }}. O ranking final aparece assim que a rodada for encerrada.</p>
                     </div>
                 {% else %}
                     <div class="surface-panel surface-panel--soft">

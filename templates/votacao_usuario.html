@@ -18,9 +18,6 @@
         <div class="nav-tabs">
             <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
             <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab active">🗳️ Minha Votação</a>
-            {% if auth_user.role in ['admin', 'super_admin'] %}
-            <a href="{{ url_for('jogador.votacao_admin_page') }}" class="nav-tab">🛡️ Votação Admin</a>
-            {% endif %}
             <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
             <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">🏅 Ranking</a>
         </div>
@@ -49,7 +46,7 @@
                         <div class="summary-card summary-card--secondary">
                             <div class="summary-card__label">Última atualização</div>
                             <div class="summary-card__value--large">OK</div>
-                            <div class="summary-card__subtext">{{ voto.atualizado_em[:16].replace('T', ' ') }}</div>
+                            <div class="summary-card__subtext">{{ voto.atualizado_em|dt_pt_hm }}</div>
                         </div>
                     </div>
                     {% if auth_user.role in ['admin', 'super_admin'] %}
@@ -75,7 +72,7 @@
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">Prazo</div>
-                        <div class="stat-value">{{ partida.fecha_em[:16].replace('T', ' ') if partida.fecha_em else 'Sem prazo' }}</div>
+                        <div class="stat-value">{{ partida.fecha_em|dt_pt_hm if partida.fecha_em else 'Sem prazo' }}</div>
                     </div>
                 </div>
             </section>

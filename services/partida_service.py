@@ -42,9 +42,13 @@ class PartidaService:
         """Salva dados"""
         if os.getenv("DATABASE_URL"):
             save_json_data("partidas", dados)
+            from services.jogador_stats_service import JogadorStatsService
+            JogadorStatsService.invalidar_cache_stats()
             return
         with open(self.arquivo, "w", encoding="utf-8") as f:
             json.dump(dados, f, indent=2, ensure_ascii=False)
+        from services.jogador_stats_service import JogadorStatsService
+        JogadorStatsService.invalidar_cache_stats()
 
     def _garantir_stats_time(self, placar: Dict, time_numero: int) -> None:
         """Garante estrutura padrão de estatísticas para um time."""
