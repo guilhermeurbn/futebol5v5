@@ -7,6 +7,7 @@ from io import StringIO
 
 from flask import Blueprint, request, render_template, redirect, url_for, session, Response, jsonify
 from functools import wraps
+import os
 from services.auth_service import AuthService
 from services.email_service import EmailService
 from services.jogador_service import JogadorService
@@ -403,6 +404,58 @@ def perfil_dashboard_api():
         logger = logging.getLogger(__name__)
         logger.error(f"Erro ao carregar dashboard do perfil: {str(e)}")
         return jsonify({'ok': False, 'erro': 'Falha ao carregar dashboard'}), 500
+
+
+# ============================================================
+# ROTA DE TESTE: Enviar senha temporária por email (DEV ONLY)
+# ============================================================
+
+
+@auth_bp.route('/teste-email', methods=['POST', 'GET'])
+def teste_email_route():
+    """Endpoint de teste para enviar uma senha temporaria a um usuario.
+
+    Aceita `email` ou `username` via query string ou form data.
+    Só funciona quando FLASK_ENV != 'production'.
+    """
+    if os.getenv('FLASK_ENV', 'development') == 'production':
+        return jsonify({'ok': False, 'error': 'Endpoint desativado em production'}), 403
+
+    email = (request.values.get('email') or '').strip().lower()
+    username = (request.values.get('username') or '').strip().lower()
+
+    usuario = None
+    if email:
+        usuario = auth_service.obter_por_email(email)
+    elif username:
+        usuario = auth_service.obter_por_username(username)
+    else:
+        return jsonify({'ok': False, 'error': 'Informe email ou username'}), 400
+
+    if not usuario:
+        return jsonify({'ok': False, 'error': 'Usuario nao encontrado'}), 404
+
+    try:
+        dados = auth_service.resetar_senha_por_admin(user_id=usuario.get('id'))
+        # tentar enviar email com a senha temporaria
+        result = None
+        try:
+            result = email_service.send_temporary_password_email(
+                to_email=dados.get('email') or usuario.get('email'),
+                nome=dados.get('nome') or dados.get('username') or 'usuario',
+                username=dados.get('username') or '',
+                senha_temporaria=dados.get('senha_temporaria') or ''
+            )
+        except Exception:
+            # swallow email errors but report
+            return jsonify({'ok': False, 'error': 'Falha ao enviar email'}), 500
+
+        return jsonify({'ok': True, 'sent': result.ok, 'message_id': result.message_id})
+    except ValueError as e:
+        return jsonify({'ok': False, 'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'ok': False, 'error': 'Erro interno'}), 500
+
 
 
 @auth_bp.route('/perfil/planilha.csv', methods=['GET'])
