@@ -53,6 +53,12 @@ def login_required(f):
     def wrapper(*args, **kwargs):
         if not session.get('user_id'):
             return redirect(url_for('auth.login_page'))
+        if session.get('senha_temporaria_ativa') and request.endpoint not in {
+            'auth.perfil_page',
+            'auth.perfil_alterar_senha',
+            'auth.logout',
+        }:
+            return redirect(url_for('auth.perfil_page'))
         return f(*args, **kwargs)
     return wrapper
 
@@ -87,6 +93,8 @@ def inject_auth_user():
 def login_page():
     """Página de login"""
     if session.get('user_id'):
+        if session.get('senha_temporaria_ativa'):
+            return redirect(url_for('auth.perfil_page'))
         return redirect(url_for('jogador.index'))
     return render_template('login.html')
 
@@ -108,6 +116,8 @@ def login_submit():
         session['role'] = usuario['role']
         session['senha_temporaria_ativa'] = bool(usuario.get('senha_temporaria_ativa'))
         session.modified = True
+        if session['senha_temporaria_ativa']:
+            return redirect(url_for('auth.perfil_page'))
         return redirect(url_for('jogador.index'))
     except ValueError as e:
         return render_template('login.html', erro=str(e)), 400
@@ -193,23 +203,27 @@ def recuperar_senha_page():
 @auth_bp.route('/recuperar-senha', methods=['POST'])
 def recuperar_senha_submit():
     email = request.form.get('email', '').strip().lower()
-    mensagem = 'Se o email existir na base, enviamos instrucoes para redefinir sua senha.'
+    mensagem = 'Se o email existir na base, enviamos uma senha temporaria para acesso.'
 
     if not email or '@' not in email:
         return render_template('recuperar_senha.html', erro='Informe um email valido'), 400
 
     usuario = auth_service.obter_por_email(email)
-    if usuario:
-        try:
-            token = auth_service.gerar_token_reset(usuario.get('id'))
-            reset_url = f"{email_service.base_url}{url_for('auth.definir_senha_page')}?token={token}"
-            email_service.send_password_reset_email(
-                to_email=usuario.get('email') or email,
-                nome=usuario.get('nome') or usuario.get('username') or 'usuario',
-                reset_url=reset_url,
-            )
-        except Exception:
-            pass
+    if not usuario:
+        return render_template('recuperar_senha.html', erro='Nao encontramos uma conta com esse email. Use o email cadastrado na conta.'), 404
+
+    try:
+        dados_reset = auth_service.resetar_senha_por_admin(usuario.get('id'))
+        resultado_email = email_service.send_temporary_password_email(
+            to_email=usuario.get('email') or email,
+            nome=usuario.get('nome') or usuario.get('username') or 'usuario',
+            username=usuario.get('username') or 'usuario',
+            senha_temporaria=dados_reset.get('senha_temporaria') or '',
+        )
+        if not resultado_email.ok:
+            return render_template('recuperar_senha.html', erro='Nao foi possivel enviar o email de senha temporaria'), 500
+    except Exception as exc:
+        return render_template('recuperar_senha.html', erro=f'Erro ao enviar email: {exc}'), 500
 
     return render_template('recuperar_senha.html', sucesso=mensagem)
 
@@ -346,6 +360,7 @@ def perfil_alterar_senha():
     senha_atual = request.form.get('senha_atual', '')
     nova_senha = request.form.get('nova_senha', '')
     confirmar_senha = request.form.get('confirmar_senha', '')
+    senha_temporaria = bool(session.get('senha_temporaria_ativa'))
 
     if nova_senha != confirmar_senha:
         return render_template(
@@ -358,7 +373,8 @@ def perfil_alterar_senha():
         auth_service.alterar_senha(
             user_id=session.get('user_id'),
             senha_atual=senha_atual,
-            nova_senha=nova_senha
+            nova_senha=nova_senha,
+            senha_temporaria=senha_temporaria,
         )
         session['senha_temporaria_ativa'] = False
         session.modified = True
@@ -503,3 +519,31 @@ def perfil_planilha_csv():
     response = Response(csv_content, mimetype='text/csv; charset=utf-8')
     response.headers['Content-Disposition'] = 'attachment; filename=perfil_metricas.csv'
     return response
+
+
+# Rota simples de teste de email (envio genérico)
+@auth_bp.route('/teste-email/simple', methods=['GET'])
+def teste_email_simples():
+    """Envio rápido para checar se Resend funciona.
+
+    Use `?email=destinatario@example.com` para alterar o destinatário.
+    Desabilitado em `production`.
+    """
+    if os.getenv('FLASK_ENV', 'development') == 'production':
+        return "Endpoint desativado em production", 403
+
+    destinatario = request.args.get('email', 'teuemail@gmail.com').strip()
+    if not destinatario or '@' not in destinatario:
+        return "Informe um email valido via ?email=...", 400
+
+    try:
+        resultado = email_service.send_email(
+            to_email=destinatario,
+            subject='Teste NaTrave',
+            html='<h1>Email funcionando 🚀</h1>'
+        )
+        if resultado.ok:
+            return f"Email enviado! id={resultado.message_id}", 200
+        return f"Falha ao enviar: {resultado.error}", 500
+    except Exception as e:
+        return f"Erro interno: {e}", 500

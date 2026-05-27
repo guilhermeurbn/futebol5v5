@@ -263,6 +263,33 @@
                         }
                     });
                 });
+
+                document.querySelectorAll('form[action*="resetar-senha"]').forEach((form) => {
+                    form.addEventListener('submit', () => {
+                        const apiKey = window.localStorage.getItem('natrave_resend_api_key') || '';
+                        const fromEmail = window.localStorage.getItem('natrave_resend_from_email') || '';
+                        if (!apiKey || !fromEmail) return;
+
+                        let apiKeyInput = form.querySelector('input[name="resend_api_key"]');
+                        let fromEmailInput = form.querySelector('input[name="resend_from_email"]');
+
+                        if (!apiKeyInput) {
+                            apiKeyInput = document.createElement('input');
+                            apiKeyInput.type = 'hidden';
+                            apiKeyInput.name = 'resend_api_key';
+                            form.appendChild(apiKeyInput);
+                        }
+                        if (!fromEmailInput) {
+                            fromEmailInput = document.createElement('input');
+                            fromEmailInput.type = 'hidden';
+                            fromEmailInput.name = 'resend_from_email';
+                            form.appendChild(fromEmailInput);
+                        }
+
+                        apiKeyInput.value = apiKey;
+                        fromEmailInput.value = fromEmail;
+                    });
+                });
             })();
         </script>
 

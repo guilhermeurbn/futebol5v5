@@ -75,6 +75,17 @@ def _resposta_votacao_pendente(partida):
     return redirect(url_for('votacao.votacao_page'))
 
 
+def _senha_temporaria_obrigatoria():
+    return bool(session.get('user_id')) and bool(session.get('senha_temporaria_ativa'))
+
+
+def _resposta_troca_senha_obrigatoria():
+    mensagem = 'Voce precisa trocar a senha temporaria no seu perfil antes de continuar'
+    if request.path.startswith('/api/'):
+        return jsonify({'sucesso': False, 'erro': mensagem, 'troca_senha_obrigatoria': True}), 403
+    return redirect(url_for('auth.perfil_page'))
+
+
 # ============================================================
 # DECORADORES
 # ============================================================
@@ -84,6 +95,12 @@ def login_required(f):
     def wrapper(*args, **kwargs):
         if not session.get('user_id'):
             return _resposta_nao_autenticado()
+        if _senha_temporaria_obrigatoria() and request.endpoint not in {
+            'auth.perfil_page',
+            'auth.perfil_alterar_senha',
+            'auth.logout',
+        }:
+            return _resposta_troca_senha_obrigatoria()
         return f(*args, **kwargs)
     return wrapper
 
@@ -93,6 +110,12 @@ def admin_required(f):
     def wrapper(*args, **kwargs):
         if not session.get('user_id'):
             return _resposta_nao_autenticado()
+        if _senha_temporaria_obrigatoria() and request.endpoint not in {
+            'auth.perfil_page',
+            'auth.perfil_alterar_senha',
+            'auth.logout',
+        }:
+            return _resposta_troca_senha_obrigatoria()
         if not _is_admin():
             return _resposta_sem_permissao()
         return f(*args, **kwargs)
@@ -104,6 +127,12 @@ def admin_or_juiz_required(f):
     def wrapper(*args, **kwargs):
         if not session.get('user_id'):
             return _resposta_nao_autenticado()
+        if _senha_temporaria_obrigatoria() and request.endpoint not in {
+            'auth.perfil_page',
+            'auth.perfil_alterar_senha',
+            'auth.logout',
+        }:
+            return _resposta_troca_senha_obrigatoria()
         if not (_is_admin() or _is_juiz()):
             return _resposta_sem_permissao()
         return f(*args, **kwargs)

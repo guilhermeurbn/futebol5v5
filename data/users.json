@@ -224,36 +224,16 @@
     "senha_temporaria_ativa": false
   },
   {
-    "id": "15208feb-123f-4a45-9b80-427dbd62480c",
-    "username": "adminjogos",
-    "nome": "Admin de Jogos",
-    "password_hash": "scrypt:32768:8:1$nfmqXqiBfcyRtHl5$c9d02dea7bb57fba30f089f5309b6d04f018e3cc836d09d54e182cbdab65bf8a22723c99dc0becc41f8d5376476495869274bdca89f13753105c38f568238434",
-    "role": "admin",
-    "criado_em": "2026-04-27T19:21:52.481381",
-    "ativo": true
-  },
-  {
-    "id": "84ecadd4-8938-43a1-ab70-74438e67c38d",
-    "username": "iphone",
-    "nome": "iphone",
-    "password_hash": "scrypt:32768:8:1$4gk6tTJKKoBhakN7$e6764b599887b2026c73bf0e1e168f05bffd28bf4ea71dbea5c29dbf930cebfb7c3deb4a42fe599ca6524f00f631948f8ed4c0bcb8abd5536efd659885d8310a",
+    "id": "d43169c0-168a-407c-ab86-b4f91cfd199f",
+    "email": "guiurbano11@gmail.com",
+    "username": "guiguiurbano",
+    "nome": "guilherme urbano",
+    "password_hash": "scrypt:32768:8:1$bAfYZZyHrFnVhIaS$737e6fd3ef66f9e12478f461a8e1660e90b7ef985eaa8e2bd2d57b044fc4b3835bbdf38208b4ce69704bc6c39b6ad8d7440ed8239b427d79022f1b4ebf6f6eb8",
     "role": "usuario",
-    "criado_em": "2026-05-24T12:31:50.512031",
+    "criado_em": "2026-05-27T23:20:16.881670",
     "ativo": true,
-    "senha_temporaria_ativa": false
-  },
-  {
-    "id": "01a62eaa-b7e8-453b-8d81-22331f145284",
-    "email": "ola@gmail.com",
-    "username": "olaa",
-    "nome": "olaa",
-    "password_hash": "scrypt:32768:8:1$a1zOCtOsrOSVeEA5$be521cd2728565d4f7143c8dead285d3e5bf12e55d540ab9384c2dbe6ca17ec16ca1d85d28b26fcf12e178186bde1b06003b0f18518ef7cc8f824891aa6a444c",
-    "role": "usuario",
-    "criado_em": "2026-05-24T12:53:01.155235",
-    "ativo": true,
-    "senha_temporaria_ativa": false,
-    "password_reset_token_hash": "scrypt:32768:8:1$DHSWWihuQGk6WehZ$dcb32b74d92bfbf6d100f905d4b852234f4d9176aab45a60c54647ffe154e37b331462ea692dfb6c6d9d06a3d30a0eee3b72785c7b9c1e19bfe46b47cbc31616",
-    "password_reset_token_expira_em": 1779814914.611646,
-    "password_reset_requested_em": "2026-05-26T17:01:54.611661"
+    "senha_temporaria_ativa": true,
+    "senha_resetada_em": "2026-05-27T23:20:26.028620",
+    "senha_resetada_por": null
   }
 ]

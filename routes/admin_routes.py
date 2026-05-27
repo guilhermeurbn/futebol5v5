@@ -2,6 +2,8 @@
 Rotas de Administração
 - Dashboard admin, gerenciamento de usuários e notificações
 """
+import os
+
 from flask import Blueprint, request, render_template, redirect, url_for, session
 from functools import wraps
 import logging
@@ -16,6 +18,18 @@ logger = logging.getLogger(__name__)
 auth_service = AuthService()
 email_service = EmailService()
 notificacao_service = NotificacaoService()
+
+
+def _resolver_credenciais_resend(form):
+    api_key = (form.get('resend_api_key') or '').strip()
+    from_email = (form.get('resend_from_email') or '').strip()
+
+    if not api_key:
+        api_key = email_service._resolve_credentials()[0]
+    if not from_email:
+        from_email = email_service._resolve_credentials()[1]
+
+    return api_key, from_email
 
 
 # ============================================================
@@ -133,17 +147,30 @@ def admin_resetar_senha_usuario(user_id):
             user_id=user_id,
             executor_id=session.get('user_id')
         )
+        session['admin_sucesso'] = f'Senha de {dados_reset.get("nome")} resetada com sucesso'
         if dados_reset.get('email'):
+            api_key, from_email = _resolver_credenciais_resend(request.form)
             try:
-                email_service.send_temporary_password_email(
+                if not api_key or not from_email:
+                    raise RuntimeError('Informe RESEND_API_KEY e RESEND_FROM_EMAIL para o teste')
+
+                local_email_service = EmailService(api_key=api_key, from_email=from_email, base_url=email_service.base_url)
+                resultado = local_email_service.send_temporary_password_email(
                     to_email=dados_reset.get('email'),
                     nome=dados_reset.get('nome') or dados_reset.get('username') or 'usuario',
                     username=dados_reset.get('username') or '',
                     senha_temporaria=dados_reset.get('senha_temporaria') or '',
                 )
-            except Exception:
-                logger.warning('Falha ao enviar email de senha temporaria para %s', dados_reset.get('email'))
-        session['admin_sucesso'] = f'Senha de {dados_reset.get("nome")} resetada com sucesso'
+                if not resultado.ok:
+                    logger.warning('Falha ao enviar email de senha temporaria para %s: %s', dados_reset.get('email'), resultado.error)
+                    session.pop('admin_sucesso', None)
+                    session['admin_erro'] = f'Usuario resetado, mas falha no email: {resultado.error}'
+                else:
+                    session['admin_sucesso'] = f'Senha de {dados_reset.get("nome")} resetada e email enviado com sucesso'
+            except Exception as exc:
+                logger.warning('Falha ao enviar email de senha temporaria para %s: %s', dados_reset.get('email'), exc)
+                session.pop('admin_sucesso', None)
+                session['admin_erro'] = f'Usuario resetado, mas falha no email: {exc}'
         session['admin_senha_reset'] = dados_reset
         return redirect(url_for('admin.admin_page'))
     except ValueError as e:
@@ -195,3 +222,5 @@ def admin_deletar_usuario(user_id):
     except Exception as e:
         logger.error(f"Erro ao deletar usuário: {str(e)}")
         return redirect(url_for('admin.admin_page', erro='Erro ao deletar usuário'))
+
+

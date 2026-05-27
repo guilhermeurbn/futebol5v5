@@ -77,6 +77,9 @@ def index():
     if not session.get('user_id'):
         return redirect(url_for('auth.login_page'))
 
+    if session.get('senha_temporaria_ativa'):
+        return redirect(url_for('auth.perfil_page'))
+
     if _is_juiz():
         return redirect(url_for('juiz.jogar_page'))
 

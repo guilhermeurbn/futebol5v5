@@ -54,6 +54,8 @@
             </div>
         {% endif %}
 
+        {% if not usuario.senha_temporaria_ativa %}
+
         <section class="section profile-hero">
             <div class="profile-hero__identity">
                 <h2 class="section-title">Seu Perfil</h2>
@@ -315,14 +317,18 @@
         {% endif %}
         {% endif %}
 
+        {% endif %}
+
         <section class="section">
             <h2 class="section-title">Segurança - Alterar Senha</h2>
             <form method="post" action="{{ url_for('auth.perfil_alterar_senha') }}" class="form">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                {% if not usuario.senha_temporaria_ativa %}
                 <div class="form-group">
                     <label class="form-label" for="senha_atual">Senha atual</label>
                     <input class="form-input" id="senha_atual" name="senha_atual" type="password" required>
                 </div>
+                {% endif %}
                 <div class="form-group">
                     <label class="form-label" for="nova_senha">Nova senha</label>
                     <input class="form-input" id="nova_senha" name="nova_senha" type="password" minlength="6" required>

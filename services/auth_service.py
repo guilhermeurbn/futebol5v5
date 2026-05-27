@@ -269,9 +269,10 @@ class AuthService:
                 return
         raise ValueError("Usuario nao encontrado")
 
-    def alterar_senha(self, user_id: str, senha_atual: str, nova_senha: str) -> None:
+    def alterar_senha(self, user_id: str, senha_atual: str, nova_senha: str, senha_temporaria: bool = False) -> None:
         if not senha_atual:
-            raise ValueError("Informe a senha atual")
+            if not senha_temporaria:
+                raise ValueError("Informe a senha atual")
         if not nova_senha or len(nova_senha) < 6:
             raise ValueError("Nova senha deve ter ao menos 6 caracteres")
 
@@ -280,7 +281,7 @@ class AuthService:
             if u.get("id") != user_id:
                 continue
 
-            if not check_password_hash(u.get("password_hash", ""), senha_atual):
+            if not senha_temporaria and not check_password_hash(u.get("password_hash", ""), senha_atual):
                 raise ValueError("Senha atual incorreta")
 
             u["password_hash"] = generate_password_hash(nova_senha)

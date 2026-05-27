@@ -4,6 +4,7 @@ Servico de email baseado na API do Resend.
 import json
 import logging
 import os
+from pathlib import Path
 from dataclasses import dataclass
 from typing import Optional
 
@@ -23,22 +24,68 @@ class EmailResult:
 class EmailService:
     """Envia emails transacionais usando Resend."""
 
-    def __init__(self) -> None:
-        self.api_key = os.getenv("RESEND_API_KEY", "").strip()
-        self.from_email = os.getenv("RESEND_FROM_EMAIL", "").strip()
-        self.base_url = os.getenv("APP_BASE_URL", "http://localhost:5051").rstrip("/")
+    _DEFAULT_SECRETS_PATH = Path(__file__).resolve().parent.parent / '.secrets' / 'resend.json'
 
-    def _enabled(self) -> bool:
-        return bool(self.api_key and self.from_email)
+    def __init__(
+        self,
+        api_key: Optional[str] = None,
+        from_email: Optional[str] = None,
+        base_url: Optional[str] = None,
+    ) -> None:
+        self._api_key = (api_key or "").strip() if api_key is not None else ""
+        self._from_email = (from_email or "").strip() if from_email is not None else ""
+        self.base_url = (base_url if base_url is not None else os.getenv("APP_BASE_URL", "http://localhost:5051")).rstrip("/")
 
-    def _post(self, payload: dict) -> EmailResult:
-        if not self._enabled():
+    def _load_secrets_file(self) -> tuple[str, str]:
+        secrets_path = os.getenv('RESEND_SECRETS_FILE', str(self._DEFAULT_SECRETS_PATH)).strip()
+        if not secrets_path:
+            return '', ''
+
+        path = Path(secrets_path).expanduser()
+        if not path.exists():
+            return '', ''
+
+        try:
+            with path.open('r', encoding='utf-8') as file:
+                data = json.load(file) or {}
+            api_key = (data.get('RESEND_API_KEY') or data.get('api_key') or '').strip()
+            from_email = (data.get('RESEND_FROM_EMAIL') or data.get('from_email') or '').strip()
+            return api_key, from_email
+        except Exception as exc:
+            logger.warning('Falha ao ler arquivo secreto de email %s: %s', path, exc)
+            return '', ''
+
+    def _resolve_credentials(self, api_key: Optional[str] = None, from_email: Optional[str] = None) -> tuple[str, str]:
+        resolved_api_key = (api_key if api_key is not None else self._api_key).strip()
+        resolved_from_email = (from_email if from_email is not None else self._from_email).strip()
+
+        if not resolved_api_key:
+            resolved_api_key = os.getenv('RESEND_API_KEY', '').strip()
+        if not resolved_from_email:
+            resolved_from_email = os.getenv('RESEND_FROM_EMAIL', '').strip()
+
+        if not resolved_api_key or not resolved_from_email:
+            file_api_key, file_from_email = self._load_secrets_file()
+            if not resolved_api_key:
+                resolved_api_key = file_api_key
+            if not resolved_from_email:
+                resolved_from_email = file_from_email
+
+        return resolved_api_key, resolved_from_email
+
+    def _enabled(self, api_key: Optional[str] = None, from_email: Optional[str] = None) -> bool:
+        resolved_api_key, resolved_from_email = self._resolve_credentials(api_key=api_key, from_email=from_email)
+        return bool(resolved_api_key and resolved_from_email)
+
+    def _post(self, payload: dict, api_key: Optional[str] = None, from_email: Optional[str] = None) -> EmailResult:
+        resolved_api_key, resolved_from_email = self._resolve_credentials(api_key=api_key, from_email=from_email)
+        if not resolved_api_key or not resolved_from_email:
             logger.warning("Resend desativado: configure RESEND_API_KEY e RESEND_FROM_EMAIL")
             return EmailResult(ok=False, error="Resend nao configurado")
 
         url = "https://api.resend.com/emails"
         headers = {
-            "Authorization": f"Bearer {self.api_key}",
+            "Authorization": f"Bearer {resolved_api_key}",
             "Content-Type": "application/json",
             "User-Agent": "NaTrave/1.0",
         }
@@ -66,8 +113,9 @@ class EmailService:
             return EmailResult(ok=False, error=str(exc))
 
     def send_email(self, to_email: str, subject: str, html: str, text: str = "") -> EmailResult:
+        from_email = self._resolve_credentials()[1]
         payload = {
-            "from": self.from_email,
+            "from": from_email,
             "to": [to_email],
             "subject": subject,
             "html": html,
@@ -97,40 +145,29 @@ class EmailService:
         return result
 
     def send_temporary_password_email(self, to_email: str, nome: str, username: str, senha_temporaria: str) -> EmailResult:
-        subject = "Sua nova senha no NaTrave 5v5"
+        subject = "Sua senha temporária no NaTrave 5v5"
         html = f"""
         <div style="font-family: Arial, sans-serif; background:#0b0b0f; color:#f3f4f6; padding:24px;">
             <div style="max-width:600px;margin:0 auto;background:#111118;border:1px solid rgba(141,255,47,.18);border-radius:18px;padding:28px;">
                 <p style="margin:0 0 12px;color:#8DFF2F;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">NaTrave 5v5</p>
-                <h1 style="margin:0 0 12px;font-size:28px;line-height:1.1;">Senha atualizada</h1>
-                <p style="margin:0 0 18px;color:#d1d5db;font-size:16px;line-height:1.6;">Olá, {nome}. O admin redefiniu sua senha para a conta <strong>{username}</strong>.</p>
+                <h1 style="margin:0 0 12px;font-size:28px;line-height:1.1;">Senha temporária gerada</h1>
+                <p style="margin:0 0 18px;color:#d1d5db;font-size:16px;line-height:1.6;">Olá, {nome}. Sua senha temporária para a conta <strong>{username}</strong> é:</p>
                 <div style="margin:0 0 22px;padding:16px 18px;border-radius:14px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.18);font-size:18px;font-weight:700;letter-spacing:.02em;">{senha_temporaria}</div>
-                <p style="margin:0;color:#9ca3af;font-size:14px;line-height:1.5;">Entre no sistema e troque essa senha assim que possível.</p>
+                <p style="margin:0;color:#9ca3af;font-size:14px;line-height:1.5;">Entre com essa senha e troque-a imediatamente no seu perfil para continuar usando o sistema.</p>
             </div>
         </div>
         """
         text = (
-            f"Olá, {nome}. O admin redefiniu sua senha no NaTrave 5v5. "
-            f"Usuário: {username}. Senha temporária: {senha_temporaria}. "
-            "Troque essa senha assim que possível."
+            f"Olá, {nome}. Sua senha temporária no NaTrave 5v5 para o usuário {username} é: {senha_temporaria}. "
+            "Entre com ela e troque-a imediatamente no seu perfil."
         )
         return self.send_email(to_email, subject, html, text)
 
     def send_password_reset_email(self, to_email: str, nome: str, reset_url: str) -> EmailResult:
-        subject = "Redefina sua senha no NaTrave 5v5"
-        html = f"""
-        <div style="font-family: Arial, sans-serif; background:#0b0b0f; color:#f3f4f6; padding:24px;">
-          <div style="max-width:600px;margin:0 auto;background:#111118;border:1px solid rgba(124,58,237,.18);border-radius:18px;padding:28px;">
-            <p style="margin:0 0 12px;color:#8DFF2F;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">NaTrave 5v5</p>
-            <h1 style="margin:0 0 12px;font-size:28px;line-height:1.1;">Redefinir senha</h1>
-            <p style="margin:0 0 18px;color:#d1d5db;font-size:16px;line-height:1.6;">Olá, {nome}. Recebemos uma solicitação para redefinir sua senha.</p>
-            <p style="margin:0 0 22px;line-height:1.6;"><a href="{reset_url}" style="display:inline-block;background:#7c3aed;color:#fff;text-decoration:none;padding:14px 20px;border-radius:12px;font-weight:700;">Criar nova senha</a></p>
-            <p style="margin:0;color:#9ca3af;font-size:14px;line-height:1.5;">Se você não solicitou isso, pode ignorar este email.</p>
-          </div>
-        </div>
-        """
-        text = (
-            f"Olá, {nome}. Para redefinir sua senha no NaTrave 5v5, acesse: {reset_url}. "
-            "Se você não solicitou isso, ignore este email."
+        # Mantido por compatibilidade com chamadas antigas.
+        return self.send_temporary_password_email(
+            to_email=to_email,
+            nome=nome,
+            username=nome,
+            senha_temporaria=reset_url,
         )
-        return self.send_email(to_email, subject, html, text)

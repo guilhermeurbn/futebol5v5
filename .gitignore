@@ -67,3 +67,4 @@ htmlcov/
 # Variáveis de ambiente
 .env
 .env.local
+.secrets/
