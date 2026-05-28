@@ -137,7 +137,7 @@
 
     <!-- Back Button -->
     <div class="result-back-wrap">
-        <a href="/sorteio/{{ sorteio_id }}" class="result-team__backlink">← Voltar para Sorteio</a>
+        <a href="{{ url_for('partida.ver_sorteio', sorteio_id=sorteio_id) }}" class="result-team__backlink">← Voltar para Sorteio</a>
     </div>
 </div>
 
@@ -333,7 +333,7 @@ document.getElementById('btn-registrar').addEventListener('click', function() {
         if (data.sucesso) {
             mostrarMensagem('✅ Resultado e estatísticas registrados com sucesso!');
             setTimeout(() => {
-                window.location.href = data.proximo_passo_url || '{{ url_for("admin.admin_page") }}';
+                window.location.href = data.proximo_passo_url || '{{ url_for("juiz.jogar_page") if auth_user and auth_user.role == "juiz" else url_for("admin.admin_page") }}';
             }, 1500);
         } else {
             if (window.NaTraveOffline && window.NaTraveOffline.isOffline()) {

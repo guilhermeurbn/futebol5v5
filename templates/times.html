@@ -66,7 +66,7 @@
         <!-- Header -->
         <header class="header">
             <div class="header-content">
-                <a href="{{ url_for('jogador.jogar_page') if auth_user.role == 'juiz' else url_for('jogador_crud.index') }}" class="back-link">← Voltar</a>
+                <a href="{{ url_for('juiz.jogar_page') if auth_user and auth_user.role == 'juiz' else url_for('jogador_crud.index') }}" class="back-link">← Voltar</a>
                 {% set brand_title = 'Resultado do Sorteio' %}
                 {% set brand_subtitle = num_times ~ ' times de 5 jogadores • ' ~ (jogadores|length) ~ ' jogadores totais' %}
                 {% include '_brand_header.html' %}
@@ -152,53 +152,54 @@
             <!-- Actions -->
             <section class="section">
                 {% if auth_user.role in ['admin', 'super_admin', 'juiz'] %}
-                <div class="surface-panel surface-panel--soft" style="margin-bottom: 1rem;">
-                    <div class="section-label">Próximos passos da rodada</div>
-                    <h2 class="section-title" style="margin-top: 0;">COMPARTILHAR, REGISTRAR E VOTAÇÃO</h2>
-                    <div class="actions-section" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px;">
-                        <button id="btn-qrcode-principal" class="btn btn-primary" style="background: linear-gradient(135deg, #ffa502 0%, #ffc107 100%); cursor: pointer;">
-                            📱 COMPARTILHAR
+                <div class="surface-panel surface-panel--soft times-workflow-panel" style="margin-bottom: 1rem;">
+                    <div class="section-label">Próxima etapa da rodada</div>
+                    <h2 class="section-title times-workflow-panel__title" style="margin-top: 0;">Registrar, então abrir votação</h2>
+                    <p class="times-workflow-panel__text">A ordem é simples: compartilhe se precisar, registre o resultado e só então abra a avaliação.</p>
+
+                    <div class="times-actions times-actions--primary">
+                        <button id="btn-qrcode-principal" class="btn btn-primary times-action times-action--share" type="button">
+                            📱 Compartilhar
                         </button>
-                        <a href="{{ url_for('jogador.resultado_partida_page', sorteio_id=sorteio_id) }}" class="btn btn-primary" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                            🏆 REGISTRAR
+                        <a href="{{ url_for('partida.resultado_partida_page', sorteio_id=sorteio_id) }}" class="btn btn-primary times-action times-action--record">
+                            🏆 Registrar resultado
                         </a>
-                        <form method="post" action="{{ url_for('jogador.votacao_admin_criar') }}">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <input type="hidden" name="sorteio_id" value="{{ sorteio_id }}">
-                            <input type="hidden" name="titulo" value="Rodada do sorteio #{{ sorteio_id }}">
-                            <button class="btn btn-primary" type="submit" style="width: 100%;">
-                                🗳️ VOTAÇÃO
-                            </button>
-                        </form>
+                        <a href="{{ url_for('votacao.votacao_admin_page', sorteio_id=sorteio_id) }}" class="btn btn-primary times-action times-action--vote">
+                            🗳️ Abrir votação
+                        </a>
                     </div>
-                    <p style="margin: 0.75rem 0 0; opacity: 0.8;">A votação só abre depois que o resultado da partida for registrado.</p>
+
+                    <div class="times-workflow-panel__note">
+                        A votação só abre depois que o resultado da partida for registrado.
+                    </div>
                 </div>
                 {% endif %}
-                <div class="actions-section" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px;">
-                    <a href="{{ url_for('jogador.jogar_page') if auth_user.role == 'juiz' else url_for('jogador_crud.index') }}" class="btn btn-primary">
+
+                <div class="times-actions times-actions--secondary">
+                    <a href="{{ url_for('juiz.jogar_page') if auth_user and auth_user.role == 'juiz' else url_for('jogador_crud.index') }}" class="btn btn-secondary times-action times-action--back">
                         ← Voltar
                     </a>
-                    <button id="btn-undo" class="btn btn-primary" style="background: linear-gradient(135deg, #fd7272 0%, #f5576c 100%); cursor: pointer;" disabled>
+                    <button id="btn-undo" class="btn btn-secondary times-action times-action--undo" type="button" disabled>
                         ↶ Undo
                     </button>
-                    <button id="btn-redo" class="btn btn-primary" style="background: linear-gradient(135deg, #54a0ff 0%, #5f27cd 100%); cursor: pointer;" disabled>
+                    <button id="btn-redo" class="btn btn-secondary times-action times-action--redo" type="button" disabled>
                         ↷ Redo
                     </button>
                     {% if auth_user.role == 'juiz' %}
-                    <a href="{{ url_for('jogador.sortear') }}" class="btn btn-success">
-                        🎲 Novo Sorteio
+                    <a href="{{ url_for('partida.sortear') }}" class="btn btn-success times-action times-action--new-draw">
+                        🎲 Novo sorteio
                     </a>
                     {% endif %}
-                    <button id="btn-qrcode" class="btn btn-primary" style="background: linear-gradient(135deg, #ffa502 0%, #ffc107 100%); cursor: pointer;">
+                    <button id="btn-qrcode" class="btn btn-secondary times-action times-action--qrcode" type="button">
                         📱 QR Code
                     </button>
-                    <a href="{{ url_for('jogador.export_sorteio_csv') }}" class="btn btn-primary" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <a href="{{ url_for('jogador.export_sorteio_csv') }}" class="btn btn-secondary times-action times-action--csv">
                         📥 CSV
                     </a>
-                    <button id="btn-copiar-txt" class="btn btn-primary" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); cursor: pointer;">
+                    <button id="btn-copiar-txt" class="btn btn-secondary times-action times-action--txt" type="button">
                         📄 Copiar TXT
                     </button>
-                    <a href="{{ url_for('jogador.export_sorteio_pdf') }}" class="btn btn-primary" style="background: linear-gradient(135deg, #ff8c42 0%, #ffb347 100%);">
+                    <a href="{{ url_for('jogador.export_sorteio_pdf') }}" class="btn btn-secondary times-action times-action--pdf">
                         🧾 PDF
                     </a>
                 </div>

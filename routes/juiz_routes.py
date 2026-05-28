@@ -129,10 +129,14 @@ def _destino_fluxo_juiz(estado):
 
     if status == 'sorteada' and sorteio_id:
         return url_for('partida.ver_sorteio', sorteio_id=sorteio_id)
-    if status in {'resultado_registrado', 'votacao_aberta'} and sorteio_id:
-        return url_for('admin.admin_page', sorteio_id=sorteio_id)
+    if status == 'resultado_registrado' and sorteio_id:
+        return url_for('votacao.votacao_admin_page', sorteio_id=sorteio_id)
+    if status == 'votacao_aberta' and sorteio_id:
+        return url_for('votacao.votacao_admin_page', sorteio_id=sorteio_id)
+    if votacao_partida_id and sorteio_id:
+        return url_for('votacao.votacao_admin_page', sorteio_id=sorteio_id)
     if votacao_partida_id:
-        return url_for('admin.admin_page')
+        return url_for('votacao.votacao_admin_page')
     return None
 
 

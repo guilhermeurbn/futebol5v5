@@ -38,7 +38,7 @@
                 {% elif partida_juiz_em_andamento.status == 'votacao_aberta' %}
                     a votação está aberta e pode ser encerrada assim que quiser.
                 {% endif %}
-                <a href="{{ url_for('jogador.jogar_page') }}" class="btn btn-secondary" style="margin-left: 0.75rem;">Retomar fluxo</a>
+                <a href="{{ url_for('juiz.jogar_page') }}" class="btn btn-secondary" style="margin-left: 0.75rem;">Retomar fluxo</a>
             </div>
         {% endif %}
 

@@ -1,6 +1,6 @@
 <div class="brand-header">
     <div class="logo-header">
-        <a href="{{ url_for('jogador.jogar_page') if auth_user and auth_user.role == 'juiz' else url_for('jogador.index') }}" aria-label="Ir para a página inicial" style="display:inline-block;">
+        <a href="{{ url_for('juiz.jogar_page') if auth_user and auth_user.role == 'juiz' else url_for('jogador.index') }}" aria-label="Ir para a página inicial" style="display:inline-block;">
             <img src="{{ url_for('static', filename='logo-natrave-5v5.png') }}" alt="NaTrave 5v5" class="brand-logo-image">
         </a>
     </div>
@@ -16,7 +16,7 @@
             </form>
             {% elif auth_user.role == 'juiz' %}
             {% if not juiz_partida_ativa %}
-            <form method="post" action="{{ url_for('jogador.juiz_criar_partida') }}" class="logout-form">
+            <form method="post" action="{{ url_for('juiz.juiz_criar_partida') }}" class="logout-form">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button class="btn btn-primary" type="submit">Criar partida</button>
             </form>

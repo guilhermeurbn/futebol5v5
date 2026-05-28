@@ -427,7 +427,7 @@ def registrar_resultado_partida():
             'sucesso': True,
             'partida': partida,
             'mensagem': 'Resultado registrado com sucesso!',
-            'proximo_passo_url': url_for('admin.admin_page', sorteio_id=sorteio_id)
+            'proximo_passo_url': url_for('votacao.votacao_admin_page', sorteio_id=sorteio_id, sucesso='Resultado registrado. Agora abra a votacao.') if _is_juiz() else url_for('admin.admin_page', sorteio_id=sorteio_id)
         })
     except ValueError as e:
         return jsonify({'sucesso': False, 'erro': str(e)}), 400

@@ -94,7 +94,7 @@ html {
 
 body {
   font-family: var(--font-family);
-  background-color: #1a1a1a;
+  background-color: #000000;
   color: #e0e0e0;
   line-height: 1.6;
   font-weight: 400;
@@ -114,11 +114,12 @@ body {
   flex-direction: column;
   min-height: 100vh;
   width: 100%;
+  background: #000000;
 }
 
 /* 🎯 Header - Topo com Gradient */
 .header {
-  background: linear-gradient(180deg, #000000 0%, #0b0b0b 100%);
+  background: #000000;
   color: white;
   padding: var(--spacing-2xl) var(--spacing-lg);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
@@ -415,6 +416,84 @@ body {
 
 .admin-page .admin-drawer__header .section-title {
   margin-bottom: 0.35rem;
+}
+
+/* ============================================================
+   Sorteio / times actions harmony
+   ============================================================ */
+.times-workflow-panel {
+  padding: 1.25rem 1.25rem 1rem;
+}
+
+.times-workflow-panel__title {
+  font-size: clamp(1.4rem, 2vw, 2rem);
+  line-height: 1.1;
+  text-transform: none;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+}
+
+.times-workflow-panel__text {
+  margin: 0 0 1rem;
+  color: var(--text-light);
+  max-width: 46rem;
+}
+
+.times-workflow-panel__note {
+  margin-top: 0.9rem;
+  color: var(--text-light);
+  font-size: 0.95rem;
+}
+
+.times-actions {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.times-actions--primary {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.times-actions--secondary {
+  margin-top: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+}
+
+.times-action {
+  min-height: 3.15rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-weight: 700;
+}
+
+.times-actions--primary .times-action--share,
+.times-actions--primary .times-action--qrcode {
+  background: linear-gradient(135deg, #ffb703 0%, #fb8500 100%);
+}
+
+.times-actions--primary .times-action--record {
+  background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
+}
+
+.times-actions--primary .times-action--vote {
+  background: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%);
+}
+
+.times-action--back,
+.times-action--undo,
+.times-action--redo,
+.times-action--csv,
+.times-action--txt,
+.times-action--pdf,
+.times-action--new-draw {
+  opacity: 0.95;
+}
+
+.times-action--undo:disabled,
+.times-action--redo:disabled {
+  opacity: 0.45;
 }
 
 .admin-page .admin-drawer__list {
@@ -816,7 +895,7 @@ body {
 
 /* 📦 Seção Padrão */
 .section {
-  background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
+  background: linear-gradient(135deg, #121212 0%, #070707 100%);
   border-radius: var(--radius-lg);
   padding: var(--spacing-2xl);
   margin-bottom: var(--spacing-xl);
@@ -2760,6 +2839,7 @@ tbody td code {
 
 .profile-page {
   max-width: 1200px;
+  background: #000000;
 }
 
 .profile-hero {
@@ -2947,9 +3027,9 @@ tbody td code {
 }
 
 .votacao-page {
-  background: linear-gradient(180deg, rgba(124, 58, 237, 0.03), rgba(6, 182, 212, 0.03));
-  padding: var(--spacing-md);
-  border-radius: var(--radius-xl);
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
 }
 
 .votacao-intro {
@@ -3137,6 +3217,7 @@ tbody td code {
 .votacao-admin-page {
   position: relative;
   isolation: isolate;
+  background: #000000;
 }
 
 .votacao-admin-page::before,
@@ -4245,11 +4326,7 @@ tbody td code {
     margin: 0;
     font-family: var(--font-family);
     color: #f3f4f6;
-    background:
-      radial-gradient(circle at top left, rgba(124, 58, 237, 0.08), transparent 24%),
-      radial-gradient(circle at top right, rgba(16, 185, 129, 0.05), transparent 22%),
-      radial-gradient(circle at bottom center, rgba(6, 182, 212, 0.05), transparent 22%),
-      linear-gradient(180deg, #020203 0%, #050506 48%, #020203 100%);
+  background: #000000;
     position: relative;
     overflow-x: hidden;
   }
@@ -4261,7 +4338,7 @@ tbody td code {
     height: 20rem;
     border-radius: 50%;
     filter: blur(54px);
-    opacity: 0.18;
+    opacity: 0;
     pointer-events: none;
   }
 

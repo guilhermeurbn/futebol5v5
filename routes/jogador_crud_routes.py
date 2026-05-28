@@ -37,6 +37,18 @@ def _usuario_logado():
     }
 
 
+def _ordenar_jogadores_usuario_primeiro(jogadores):
+    """Coloca primeiro o jogador pertencente ao usuário logado."""
+    usuario_id = session.get('user_id')
+    if not usuario_id:
+        return jogadores
+
+    return sorted(
+        jogadores,
+        key=lambda jogador: 0 if jogador.get('owner_user_id') == usuario_id else 1,
+    )
+
+
 def admin_or_juiz_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
@@ -84,7 +96,7 @@ def index():
         return redirect(url_for('juiz.jogar_page'))
 
     try:
-        jogadores = jogador_service.listar_para_dict()
+        jogadores = _ordenar_jogadores_usuario_primeiro(jogador_service.listar_para_dict())
         return render_template(
             'index.html',
             jogadores=jogadores,

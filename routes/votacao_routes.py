@@ -246,6 +246,14 @@ def votacao_admin_page():
     """Mantido por compatibilidade; redireciona para a central de rodada no admin."""
     sorteio_id = request.args.get('sorteio_id', type=int)
     sucesso = request.args.get('sucesso', '').strip()
+    if _is_juiz():
+        contexto = _resolver_contexto_admin(sorteio_id_hint=sorteio_id)
+        return render_template(
+            'votacao_admin.html',
+            **contexto,
+            sucesso=sucesso or None,
+            usuario=_usuario_logado(),
+        )
     return redirect(url_for('admin.admin_page', sorteio_id=sorteio_id, sucesso=sucesso))
 
 
@@ -312,6 +320,9 @@ def votacao_admin_criar():
         if _is_juiz():
             juiz_partida_service.marcar_votacao_aberta(sorteio.get('id'), partida.get('id'))
         
+        if _is_juiz():
+            return redirect(url_for('votacao.votacao_admin_page', sorteio_id=sorteio.get('id'), sucesso='Votacao aberta com sucesso.'))
+
         return redirect(url_for(
             'admin.admin_page',
             partida_id=partida.get('id'),

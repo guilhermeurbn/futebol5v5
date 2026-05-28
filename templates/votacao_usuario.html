@@ -3,7 +3,7 @@
 {% block title %}Votacao da Partida{% endblock %}
 
 {% block content %}
-<div class="container page-container-narrow votacao-page">
+<div class="container page-container-wide">
     <header class="header">
         <div class="header-content">
             {% set brand_title = 'Minha Votacao' %}
@@ -30,14 +30,14 @@
         {% if not partida %}
             <section class="section">
                 <h2 class="section-title">📭 Sem partida aberta</h2>
-                <p>Nenhuma partida ativa para voto agora. Aguarde o admin abrir uma rodada.</p>
-            </section>
+                <p>Nenhuma partida ativa para voto. Aguarde o Juiz abrir uma rodada.</p>
+        </section>
         {% elif voto %}
             <section class="section">
                 <div class="surface-panel surface-panel--accent">
                     <div class="section-label">Voto registrado</div>
                     <h2 class="section-title" style="margin-top: 0;">Você já votou nesta partida</h2>
-                    <p class="text-secondary">Seu voto foi salvo com sucesso e não pode ser enviado novamente.</p>
+                    <p class="text-secondary">Seu voto foi salvo com sucesso!</p>
                     <div class="summary-grid" style="margin-top: var(--spacing-lg);">
                         <div class="summary-card summary-card--primary">
                             <div class="summary-card__label">Jogadores avaliados</div>

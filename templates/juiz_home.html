@@ -18,7 +18,7 @@
                 <div class="section-label">Início da rodada</div>
                 <h2 class="section-title" style="margin-top: 0;">Criar Partida</h2>
                 <p style="max-width: 720px; margin: 0 auto 1.25rem;">Quando você iniciar uma nova partida, o sistema vai levar o fluxo até seleção, sorteio, resultado, votação e encerramento sem te deixar perder a etapa atual.</p>
-                <form method="post" action="{{ url_for('jogador.juiz_criar_partida') }}">
+                <form method="post" action="{{ url_for('juiz.juiz_criar_partida') }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button class="btn btn-primary btn-large" type="submit">Criar Partida</button>
                 </form>

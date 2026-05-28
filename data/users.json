@@ -224,16 +224,24 @@
     "senha_temporaria_ativa": false
   },
   {
-    "id": "d43169c0-168a-407c-ab86-b4f91cfd199f",
+    "id": "415dd2ec-8172-45c6-b52d-c6bba00dbe23",
+    "username": "adminjogos",
+    "nome": "Admin de Jogos",
+    "password_hash": "scrypt:32768:8:1$8ksd1HBAoEY2S9W2$8c8da074361d7fa77926a4624858d83b41603bda30c8e76af83e936b25e9f64fde29c74d0d01beff6badc183e93320c0923088eb5b9a6b571b257c38b8f189fa",
+    "role": "admin",
+    "criado_em": "2026-05-27T23:38:24.741912",
+    "ativo": true,
+    "senha_temporaria_ativa": true
+  },
+  {
+    "id": "8c0f22d9-eb33-4bb1-8adf-c70499428839",
     "email": "guiurbano11@gmail.com",
     "username": "guiguiurbano",
     "nome": "guilherme urbano",
-    "password_hash": "scrypt:32768:8:1$bAfYZZyHrFnVhIaS$737e6fd3ef66f9e12478f461a8e1660e90b7ef985eaa8e2bd2d57b044fc4b3835bbdf38208b4ce69704bc6c39b6ad8d7440ed8239b427d79022f1b4ebf6f6eb8",
+    "password_hash": "scrypt:32768:8:1$BRYMRtmhjP5Wgdn9$deca785e01c09ce5f27b00f3a8c8e0c723df6a4ca27dbcdd5d7de385a1bf4e4ecd339ff9f49c910c9aae5a668341bbfff711a631fc3bf04ee8de058143fc67a0",
     "role": "usuario",
-    "criado_em": "2026-05-27T23:20:16.881670",
+    "criado_em": "2026-05-28T00:26:59.612579",
     "ativo": true,
-    "senha_temporaria_ativa": true,
-    "senha_resetada_em": "2026-05-27T23:20:26.028620",
-    "senha_resetada_por": null
+    "senha_temporaria_ativa": false
   }
 ]
