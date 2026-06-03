@@ -80,9 +80,13 @@ def check_dependencies():
 
 def _porta_livre(porta: int) -> bool:
     """Retorna True se a porta estiver livre para bind local."""
+    # Bind to 0.0.0.0 when testing availability so the check matches
+    # the address used to actually run the server (app.run host='0.0.0.0').
+    # This prevents a false-positive where 127.0.0.1:porta está livre,
+    # mas 0.0.0.0:porta já está sendo usado por outro processo.
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         try:
-            sock.bind(('127.0.0.1', porta))
+            sock.bind(('0.0.0.0', porta))
         except OSError:
             return False
     return True
