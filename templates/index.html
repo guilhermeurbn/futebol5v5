@@ -2,6 +2,8 @@
 
 {% block title %}Jogadores{% endblock %}
 
+{% block body_class %}page-index{% endblock %}
+
 {% block content %}
     <div class="container" style="background:#000000; min-height:100vh; width:100%;">
         <!-- Header -->
@@ -37,14 +39,14 @@
 
             <!-- Players Section -->
             <section class="section">
-                <div class="section-header">
-                    <h2 class="section-title">👥 Jogadores Cadastrados</h2>
+                        <div class="section-header">
+                            <h2 class="section-title">👥 Jogadores Cadastrados</h2>
                     <div class="section-header-actions">
                         <span class="badge badge-primary">{{ total_jogadores }} jogadores</span>
                         {% if auth_user.role in ['admin', 'super_admin'] %}
                         <button type="button" id="toggleCreatePlayerBtn" class="btn btn-secondary btn-small btn-toggle-create" aria-expanded="false" aria-controls="createPlayerPanel">
                             <span class="toggle-create-icon" aria-hidden="true"></span>
-                            <span>Jogador</span>
+                                    <span>Jogador</span>
                         </button>
                         {% endif %}
                         {% if jogadores %}
@@ -61,9 +63,9 @@
                     <section id="createPlayerPanel" class="section player-create-section" hidden>
                         <div class="section-header">
                             <div>
-                                <h2 class="section-title">➕ Adicionar Jogador</h2>
-                                <p class="section-subtitle">Cadastre um novo jogador ao time preenchendo os dados abaixo.</p>
-                            </div>
+                                    <h2 class="section-title">Adicionar Jogador</h2>
+                                    <p class="section-subtitle">Cadastre um novo jogador ao time preenchendo os dados abaixo.</p>
+                                </div>
                         </div>
 
                         <form action="{{ url_for('jogador.adicionar_jogador') }}" method="post" class="player-create-form">
@@ -137,7 +139,7 @@
 
                             <div class="form-group player-create-actions">
                                 <button type="submit" class="btn btn-primary btn-large">
-                                    <span>➕ Adicionar Jogador</span>
+                                    <span>Adicionar Jogador</span>
                                 </button>
                             </div>
 
@@ -243,34 +245,62 @@
 
                     <div class="players-grid" id="playersGrid">
                         {% for jogador in jogadores %}
-                            <div class="player-card" data-name="{{ jogador.nome|lower }}" data-player-id="{{ jogador.id }}" data-nivel="{{ jogador.nivel }}" data-tipo="{{ jogador.tipo }}" data-posicao="{{ jogador.posicao }}">
-                                <div class="player-header">
-                                    <div>
-                                        <h3 class="player-name">{{ jogador.nome }}</h3>
-                                        <span class="player-tipo">
-                                            {% if jogador.tipo == 'fixo' %}⭐ Fixo{% else %}👤 Avulso{% endif %}
-                                            {% if jogador.posicao == 'goleiro' %}🧤{% else %}⚽{% endif %}
-                                        </span>
+                            {% set nome_partes = jogador.nome.split() %}
+                            {% set avatar_text = nome_partes[0][:2] if nome_partes else jogador.nome[:2] %}
+                            <article class="player-card player-card--premium" data-name="{{ jogador.nome|lower }}" data-player-id="{{ jogador.id }}" data-nivel="{{ jogador.nivel }}" data-tipo="{{ jogador.tipo }}" data-posicao="{{ jogador.posicao }}">
+                                <img class="player-card__bg" src="{{ url_for('static', filename='foto_card_jogador.jpeg') }}" alt="" aria-hidden="true">
+                                <div class="player-card__surface">
+                                    <div class="player-card__top">
+                                        <div class="player-card__avatar-shell">
+                                            <div class="player-card__avatar" aria-hidden="true">{{ avatar_text|upper }}</div>
+                                        </div>
                                     </div>
-                                    <span class="player-level-badge" data-nivel="{{ jogador.nivel }}">
-                                        Nível {{ jogador.nivel }}
-                                    </span>
+
+                                    <div class="player-card__content">
+                                        <div class="player-card__identity">
+                                            <div class="player-card__identity-row">
+                                                <h3 class="player-card__name">{{ jogador.nome }}</h3>
+                                                <span class="player-card__level-badge">
+                                                    Nível {{ jogador.nivel }}
+                                                </span>
+                                            </div>
+                                            <div class="player-card__tags">
+                                                <span class="player-card__tag">
+                                                    {% if jogador.tipo == 'fixo' %}⭐ Fixo{% else %}👤 Avulso{% endif %}
+                                                </span>
+                                                <span class="player-card__tag player-card__tag--ghost">
+                                                    {% if jogador.posicao == 'goleiro' %}🧤 Goleiro{% else %}⚽ Linha{% endif %}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="player-card__stats">
+                                            <div class="player-card__stat">
+                                                <span class="player-card__stat-value">{{ jogador.stats_card.wins }}</span>
+                                                <span class="player-card__stat-label">Vitórias</span>
+                                            </div>
+                                            <div class="player-card__stat">
+                                                <span class="player-card__stat-value">{{ jogador.stats_card.matches }}</span>
+                                                <span class="player-card__stat-label">Partidas</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="player-card__actions">
+                                            <a class="btn btn-primary btn-large player-card__cta" href="{{ url_for('jogador.perfil_jogador_publico', jogador_id=jogador.id) }}">
+                                                Ver perfil
+                                            </a>
+                                            {% if auth_user.role == 'admin' %}
+                                            <div class="player-card__admin-actions">
+                                                <a class="btn btn-small btn-secondary" href="{{ url_for('jogador.editar_jogador_page', jogador_id=jogador.id) }}">✏️ Editar</a>
+                                                <button class="btn btn-small btn-danger" onclick="abrirModalDelete('{{ jogador.id }}', '{{ jogador.nome }}')">
+                                                    🗑️ Deletar
+                                                </button>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="player-level-bar">
-                                    <div class="player-level-fill" style="width: {{ (jogador.nivel / 10) * 100 }}%"></div>
-                                </div>
-                                <div class="player-actions">
-                                    <a class="btn btn-small btn-secondary" href="{{ url_for('jogador.perfil_jogador_publico', jogador_id=jogador.id) }}">
-                                        👁️ Perfil
-                                    </a>
-                                    {% if auth_user.role == 'admin' %}
-                                    <a class="btn btn-small btn-primary" href="{{ url_for('jogador.editar_jogador_page', jogador_id=jogador.id) }}">✏️ Editar</a>
-                                    <button class="btn btn-small btn-danger" onclick="abrirModalDelete('{{ jogador.id }}', '{{ jogador.nome }}')">
-                                        🗑️ Deletar
-                                    </button>
-                                    {% endif %}
-                                </div>
-                            </div>
+                            </article>
                         {% endfor %}
                     </div>
 
@@ -312,6 +342,27 @@
         <footer class="footer">
             <p>⚽ NaTrave • Desenvolvido por Guilherme Urbano com ❤️</p>
         </footer>
+
+        {% if device_is_mobile %}
+        <div class="mobile-bottom-dock" aria-label="Ações rápidas no mobile">
+            {% if auth_user.role in ['admin', 'super_admin'] %}
+            <button type="button" class="mobile-bottom-dock__btn" onclick="document.getElementById('toggleCreatePlayerBtn')?.click();">
+                <!-- Icon removed per request – animation remains on the button itself -->
+                <span class="mobile-bottom-dock__label">Novo</span>
+            </button>
+            {% endif %}
+            {% if jogadores %}
+            <button type="button" class="mobile-bottom-dock__btn" onclick="document.getElementById('toggleSearchBtn')?.click();">
+                <span class="mobile-bottom-dock__icon">🔎</span>
+                <span class="mobile-bottom-dock__label">Buscar</span>
+            </button>
+            {% endif %}
+            <button type="button" class="mobile-bottom-dock__btn" onclick="document.getElementById('playersGrid')?.scrollIntoView({behavior:'smooth', block:'start'});">
+                <span class="mobile-bottom-dock__icon">👥</span>
+                <span class="mobile-bottom-dock__label">Cards</span>
+            </button>
+        </div>
+        {% endif %}
     </div>
 
     <!-- Scripts -->
