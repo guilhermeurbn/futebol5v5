@@ -5,6 +5,7 @@ import os
 import logging
 import socket
 import uuid
+import argparse
 from flask import Flask, send_file
 try:
     from flask_wtf import CSRFProtect
@@ -27,6 +28,7 @@ from routes import (
     stats_bp,
     votacao_bp,
 )
+from routes.commons import detectar_device_context
 from services.db import auto_seed_on_init
 # Configuração de logging
 logging.basicConfig(
@@ -87,7 +89,11 @@ def criar_app(config_name: str = None) -> Flask:
     if Talisman is not None:
         try:
             # Set up HTTP security headers (HSTS, X-Frame-Options, etc.)
-            Talisman(app, content_security_policy=None)
+            Talisman(
+                app,
+                content_security_policy=None,
+                force_https=(config_name == 'production'),
+            )
         except Exception as e:
             logger.warning(f"Falha ao iniciar Talisman: {e}")
     else:
@@ -117,6 +123,10 @@ def criar_app(config_name: str = None) -> Flask:
     app.register_blueprint(juiz_bp)
     app.register_blueprint(stats_bp)
     _registrar_aliases_jogador(app)
+
+    @app.context_processor
+    def inject_device_context():
+        return detectar_device_context()
     
     # Auto-seed database se estiver vazio (Railway)
     try:
@@ -173,6 +183,17 @@ def criar_app(config_name: str = None) -> Flask:
 
     app.jinja_env.filters['dt_pt'] = dt_pt
     app.jinja_env.filters['dt_pt_hm'] = dt_pt_hm
+
+    # Em desenvolvimento, garantir que mudanças em templates sejam recarregadas
+    # automaticamente sem precisar reiniciar o servidor manualmente.
+    try:
+        if config_name == 'development' or app.config.get('DEBUG', False):
+            app.config['TEMPLATES_AUTO_RELOAD'] = True
+            app.jinja_env.auto_reload = True
+            logger.info('Templates auto-reload habilitado (development/debug)')
+    except Exception:
+        # Segurança: não impedir startup se não for possível ajustar o Jinja env
+        logger.debug('Não foi possível habilitar TEMPLATES_AUTO_RELOAD')
     
     return app
 
@@ -184,7 +205,6 @@ app = criar_app()
 def _porta_disponivel(preferida: int = 10000) -> int:
     """Escolhe porta livre para execucao local quando PORT nao estiver definida."""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
             sock.bind(('0.0.0.0', preferida))
             return preferida
@@ -196,11 +216,23 @@ def _porta_disponivel(preferida: int = 10000) -> int:
         return sock.getsockname()[1]
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(add_help=True)
+    parser.add_argument('--device-mode', choices=['mobile', 'desktop'], help='Força o modo visual do site')
+    args = parser.parse_args()
+
+    if args.device_mode:
+        os.environ['DEVICE_MODE'] = args.device_mode
+
     port_env = os.environ.get("PORT")
     if port_env:
         port = int(port_env)
     else:
         port = _porta_disponivel(10000)
         logger.info(f"PORT nao definida. Usando porta livre: {port}")
-    app.run(debug=app.config['DEBUG'], host='0.0.0.0', port=port)
+    debug_enabled = (
+        app.config['DEBUG']
+        and os.getenv('FLASK_ENV', 'development') == 'development'
+        and os.getenv('ENABLE_FLASK_DEBUG', '').lower() in {'1', 'true', 'yes'}
+    )
+    app.run(debug=debug_enabled, host='0.0.0.0', port=port)
     
