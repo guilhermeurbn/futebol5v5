@@ -6,6 +6,7 @@ import os
 import sys
 import json
 import socket
+import argparse
 from pathlib import Path
 
 # Cores para terminal
@@ -80,7 +81,6 @@ def check_dependencies():
 def _porta_livre(porta: int) -> bool:
     """Retorna True se a porta estiver livre para bind local."""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
             sock.bind(('127.0.0.1', porta))
         except OSError:
@@ -114,6 +114,10 @@ def encontrar_porta_disponivel(preferidas=None, fallback=0) -> int:
 
 def main():
     """Função principal"""
+    parser = argparse.ArgumentParser(add_help=True)
+    parser.add_argument('--device-mode', choices=['mobile', 'desktop'], help='Força o modo visual do site')
+    args = parser.parse_args()
+
     print_header()
     
     # Verificar dependências
@@ -132,19 +136,35 @@ def main():
     # Iniciando servidor
     print(f"{BOLD}Iniciando servidor Flask...{RESET}\n")
 
+    if args.device_mode:
+        os.environ['DEVICE_MODE'] = args.device_mode
+        print(f"{AMARELO}ℹ️  Device mode forçado via terminal: {args.device_mode}{RESET}")
+
     porta = encontrar_porta_disponivel()
     if porta != 5000:
         print(f"{AMARELO}ℹ️  Usando porta disponível: {porta}{RESET}")
     
     print(f"{VERDE}{'='*50}{RESET}")
     print(f"{VERDE}⚽ Servidor rodando em: http://localhost:{porta}{RESET}")
+    if args.device_mode:
+        print(f"{AZUL}📱 Modo visual ativo: {args.device_mode}{RESET}")
     print(f"{AZUL}💡 Dica: para fixar uma porta, rode com PORT=5050 python run.py{RESET}")
     print(f"{VERDE}{'='*50}{RESET}\n")
     
     # Importar e executar
     try:
         from app import app
-        app.run(debug=app.config.get('DEBUG', False), host='0.0.0.0', port=porta)
+        # Habilita automaticamente o modo debug/reloader em development quando
+        # a configuração `DEBUG` está ativa e a variável `FLASK_ENV` é 'development'.
+        # Antes era necessário definir `ENABLE_FLASK_DEBUG`, agora o reload fica
+        # disponível por padrão em ambiente de desenvolvimento.
+        debug_enabled = (
+            app.config.get('DEBUG', False)
+            and os.getenv('FLASK_ENV', 'development') == 'development'
+        )
+        if debug_enabled:
+            print(f"{AMARELO}ℹ️  Debug/reloader habilitado automaticamente (development).{RESET}")
+        app.run(debug=debug_enabled, host='0.0.0.0', port=porta)
     except KeyboardInterrupt:
         print(f"\n{AMARELO}⏹️  Servidor interrompido pelo usuário{RESET}\n")
         return 0
