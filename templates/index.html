@@ -528,53 +528,15 @@
         {% endif %}
     </script>
 
-    <!-- Service Worker Registration for PWA -->
     <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/static/service-worker.js')
-                    .then(registration => {
-                        console.log('[PWA] Service Worker registrado com sucesso:', registration);
-                        
-                        // Verificar se há update disponível
-                        registration.addEventListener('updatefound', () => {
-                            const newWorker = registration.installing;
-                            newWorker.addEventListener('statechange', () => {
-                                if (newWorker.state === 'activated') {
-                                    console.log('[PWA] Nova versão disponível!');
-                                    // Notificar usuário
-                                    if (confirm('📦 Nova versão da app disponível!\n\nDeseja atualizar agora?')) {
-                                        newWorker.postMessage({ type: 'SKIP_WAITING' });
-                                        window.location.reload();
-                                    }
-                                }
-                            });
-                        });
-                    })
-                    .catch(error => {
-                        console.error('[PWA] Erro ao registrar Service Worker:', error);
-                    });
-            });
-            
-            // Escutar mensagens do service worker
-            navigator.serviceWorker.addEventListener('message', event => {
-                if (event.data.type === 'CACHE_UPDATED') {
-                    console.log('[PWA] Cache atualizado');
-                }
-            });
-            
-            // Detectar mudanças de conexão
-            window.addEventListener('online', () => {
-                console.log('[PWA] Conexão restaurada!');
-                document.body.style.opacity = '1';
-            });
-            
-            window.addEventListener('offline', () => {
-                console.log('[PWA] Modo offline ativado');
-                document.body.style.opacity = '0.8';
-            });
-        } else {
-            console.warn('[PWA] Service Workers não suportado neste navegador');
-        }
+        window.addEventListener('online', () => {
+            console.log('[PWA] Conexão restaurada!');
+            document.body.style.opacity = '1';
+        });
+
+        window.addEventListener('offline', () => {
+            console.log('[PWA] Modo offline ativado');
+            document.body.style.opacity = '0.8';
+        });
     </script>
 {% endblock %}

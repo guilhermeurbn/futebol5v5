@@ -259,14 +259,6 @@
 
     <script src="{{ url_for('static', filename='offline-judge.js') }}"></script>
     <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/static/service-worker.js')
-                    .catch(error => console.warn('[PWA] Erro ao registrar Service Worker:', error));
-            });
-        }
-    </script>
-    <script>
         const QUANTIDADES_VALIDAS = [10, 15, 20];
         let quantidadeSelecionada = null;
 
