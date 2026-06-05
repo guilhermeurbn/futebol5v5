@@ -5334,6 +5334,8 @@ tbody td code {
   .nav-tab {
     padding: var(--spacing-sm);
     font-size: 0.88rem;
+    white-space: normal;
+    line-height: 1.2;
   }
 
   .stats-grid,
@@ -5374,6 +5376,14 @@ tbody td code {
     grid-template-columns: 1fr;
   }
 
+  .btn {
+    padding: 0.6rem 0.9rem;
+    font-size: 0.9rem;
+    white-space: normal;
+    min-width: 0;
+    line-height: 1.15;
+  }
+
   .result-team__input,
   .result-team__submit,
   .times-action,
@@ -5388,6 +5398,20 @@ tbody td code {
   .btn-renomear,
   .btn-remover {
     width: 100%;
+  }
+
+  .result-intro__badge,
+  .result-team__badge,
+  .votacao-admin-hero-action,
+  .votacao-admin-summary-button,
+  .nav-tab {
+    white-space: normal;
+  }
+
+  .votacao-admin-hero-action,
+  .votacao-admin-summary-button {
+    width: 100%;
+    text-align: left;
   }
 
   .table-shell {
@@ -5465,6 +5489,15 @@ tbody td code {
   .page-index .player-card__cta.btn,
   .page-index .player-card__admin-actions .btn {
     min-height: 2.9rem;
+  }
+
+  .player-card__cta.btn,
+  .player-card__admin-actions .btn,
+  .profile-hero__actions .btn,
+  .profile-private-card-actions .btn,
+  .admin-page .admin-table-actions .btn,
+  .admin-page .admin-page__toolbar-actions .btn {
+    width: 100%;
   }
 
   .page-index .section-header-actions {
@@ -5910,6 +5943,10 @@ tbody td code {
     height: 120px;
   }
 
+  .nav-tabs {
+    grid-template-columns: 1fr;
+  }
+
   .section {
     padding: var(--spacing-md);
     margin-bottom: var(--spacing-lg);
@@ -5917,6 +5954,56 @@ tbody td code {
 
   .section-title {
     font-size: 1.4rem;
+  }
+
+  .level-buttons {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.45rem;
+  }
+
+  .tipo-selector,
+  .posicao-selector {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-highlight-grid,
+  .profile-private-main-grid,
+  .profile-private-section--split,
+  .profile-private-history-grid,
+  .profile-page--public .profile-public-progress-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-private-metrics,
+  .profile-private-player-card .profile-private-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-hero__actions,
+  .profile-private-card-actions,
+  .profile-private-player-card .profile-private-card-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .profile-private-summary-row,
+  .profile-private-history-card__top,
+  .votacao-admin-history-head,
+  .votacao-admin-progress__top,
+  .votacao-admin-progress__meta,
+  .votacao-admin-history-side {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .votacao-admin-result-grid,
+  .votacao-admin-history-result-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .votacao-admin-summary-button,
+  .votacao-admin-hero-action {
+    padding: 0.65rem 0.85rem;
   }
 }
 
