@@ -206,6 +206,26 @@ def admin_alterar_ativo_usuario(user_id):
         return redirect(url_for('admin.admin_page', erro='Erro ao alterar status'))
 
 
+@admin_bp.route('/admin/usuarios/<user_id>/email', methods=['POST'])
+@admin_required
+def admin_atualizar_email_usuario(user_id):
+    """Atualiza o email de um usuário."""
+    try:
+        email = request.form.get('email', '').strip().lower()
+        auth_service.atualizar_email(
+            user_id=user_id,
+            email=email,
+            executor_id=session.get('user_id')
+        )
+        return redirect(url_for('admin.admin_page', sucesso='Email atualizado com sucesso'))
+    except ValueError as e:
+        logger.warning(f"Erro ao atualizar email: {str(e)}")
+        return redirect(url_for('admin.admin_page', erro=str(e)))
+    except Exception as e:
+        logger.error(f"Erro ao atualizar email do usuário: {str(e)}")
+        return redirect(url_for('admin.admin_page', erro='Erro ao atualizar email'))
+
+
 @admin_bp.route('/admin/usuarios/<user_id>/deletar', methods=['POST'])
 @admin_required
 def admin_deletar_usuario(user_id):

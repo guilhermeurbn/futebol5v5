@@ -176,6 +176,75 @@
             </div>
         </section>
 
+        <section class="section admin-users-mobile" aria-label="Usuários em formato móvel">
+            <h2 class="section-title">📋 Usuários</h2>
+            <div class="admin-users-mobile__list">
+                {% for u in usuarios %}
+                <details class="admin-user-card">
+                    <summary class="admin-user-card__summary">
+                        <div class="admin-user-card__identity">
+                            <div class="admin-user-card__name">{{ u.nome }}</div>
+                            <div class="admin-user-card__meta">@{{ u.username }} • {{ u.role }} • {{ 'sim' if u.ativo else 'não' }}</div>
+                        </div>
+                        <div class="admin-user-card__chevron" aria-hidden="true">⌄</div>
+                    </summary>
+                    <div class="admin-user-card__body">
+                        <div class="admin-user-card__info-grid">
+                            <div class="admin-user-card__info-item admin-user-card__info-item--email">
+                                <div class="admin-user-card__info-head">
+                                    <span class="admin-user-card__label">Email</span>
+                                    <button type="button" class="admin-email-edit-toggle" data-email-toggle="{{ u.id }}" aria-controls="emailEdit-{{ u.id }}" aria-expanded="false" title="Editar email">✏️</button>
+                                </div>
+                                <span class="admin-user-card__value admin-user-card__value--email" data-email-display="{{ u.id }}">{{ u.email or '-' }}</span>
+                                <form class="admin-email-edit-form" id="emailEdit-{{ u.id }}" data-email-form="{{ u.id }}" method="post" action="{{ url_for('admin.admin_atualizar_email_usuario', user_id=u.id) }}" hidden>
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <input class="form-input admin-email-edit-input" type="email" name="email" value="{{ u.email or '' }}" placeholder="novoemail@exemplo.com" required>
+                                    <div class="admin-email-edit-actions">
+                                        <button type="submit" class="btn btn-primary btn-small">Salvar</button>
+                                        <button type="button" class="btn btn-secondary btn-small" data-email-cancel="{{ u.id }}">Cancelar</button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="admin-user-card__info-item">
+                                <span class="admin-user-card__label">Criado em</span>
+                                <span class="admin-user-card__value">{{ u.criado_em|dt_pt if u.criado_em else '' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="admin-user-card__actions">
+                            <form method="post" action="{{ url_for('admin.admin_alterar_ativo_usuario', user_id=u.id) }}" onsubmit="return confirm('Tem certeza que deseja {{ 'DESATIVAR' if u.ativo else 'ATIVAR' }} este usuário?');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                {% if u.ativo %}
+                                    <input type="hidden" name="acao" value="desativar">
+                                    <button class="btn btn-danger btn-block" type="submit" {% if u.id == usuario.id %}disabled title="Não pode desativar seu próprio usuário"{% endif %}>Desativar</button>
+                                {% else %}
+                                    <input type="hidden" name="acao" value="ativar">
+                                    <button class="btn btn-success btn-block" type="submit">Ativar</button>
+                                {% endif %}
+                            </form>
+
+                            <form method="post" action="{{ url_for('admin.admin_resetar_senha_usuario', user_id=u.id) }}" onsubmit="return confirm('Resetar a senha de {{ u.nome }} ({{ u.username }}) e gerar uma senha temporária?');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button class="btn btn-primary btn-block" type="submit">🔐 Resetar Senha</button>
+                            </form>
+
+                            <form method="post" action="{{ url_for('admin.admin_deletar_usuario', user_id=u.id) }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button
+                                    class="btn btn-warning admin-delete-btn btn-block"
+                                    type="submit"
+                                    data-delete-user="{{ u.nome }}"
+                                    data-delete-username="{{ u.username }}"
+                                    {% if u.id == usuario.id %}disabled title="Não pode deletar sua própria conta"{% endif %}
+                                >🗑️ Deletar</button>
+                            </form>
+                        </div>
+                    </div>
+                </details>
+                {% endfor %}
+            </div>
+        </section>
+
         <div class="admin-delete-modal" id="adminDeleteModal" hidden aria-hidden="true">
             <div class="admin-delete-modal__backdrop" data-delete-close></div>
             <div class="admin-delete-modal__panel" role="dialog" aria-modal="true" aria-labelledby="adminDeleteModalTitle">
@@ -261,6 +330,53 @@
                                 if (focusTarget) focusTarget.focus();
                             }, 50);
                         }
+                    });
+                });
+
+                document.querySelectorAll('.admin-user-card').forEach((card) => {
+                    card.addEventListener('toggle', () => {
+                        if (!card.open) return;
+                        document.querySelectorAll('.admin-user-card[open]').forEach((otherCard) => {
+                            if (otherCard !== card) {
+                                otherCard.open = false;
+                            }
+                        });
+                    });
+                });
+
+                document.querySelectorAll('[data-email-toggle]').forEach((button) => {
+                    button.addEventListener('click', () => {
+                        const userId = button.getAttribute('data-email-toggle');
+                        const form = document.querySelector(`[data-email-form="${userId}"]`);
+                        const isHidden = form?.hasAttribute('hidden');
+                        if (!form) return;
+
+                        document.querySelectorAll('.admin-email-edit-form:not([hidden])').forEach((openForm) => {
+                            if (openForm !== form) {
+                                openForm.setAttribute('hidden', '');
+                            }
+                        });
+
+                        if (isHidden) {
+                            form.removeAttribute('hidden');
+                            button.setAttribute('aria-expanded', 'true');
+                            window.setTimeout(() => {
+                                form.querySelector('input[type="email"]')?.focus();
+                            }, 30);
+                        } else {
+                            form.setAttribute('hidden', '');
+                            button.setAttribute('aria-expanded', 'false');
+                        }
+                    });
+                });
+
+                document.querySelectorAll('[data-email-cancel]').forEach((button) => {
+                    button.addEventListener('click', () => {
+                        const userId = button.getAttribute('data-email-cancel');
+                        const form = document.querySelector(`[data-email-form="${userId}"]`);
+                        const toggle = document.querySelector(`[data-email-toggle="${userId}"]`);
+                        if (form) form.setAttribute('hidden', '');
+                        if (toggle) toggle.setAttribute('aria-expanded', 'false');
                     });
                 });
 

@@ -790,6 +790,193 @@ body {
   display: inline-flex;
 }
 
+.admin-table-shell {
+  display: none;
+}
+
+.admin-users-mobile {
+  display: block;
+}
+
+.admin-users-mobile__list {
+  display: grid;
+  gap: 1rem;
+}
+
+.admin-user-card {
+  border: 1px solid rgba(124, 58, 237, 0.16);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(26, 26, 28, 0.98), rgba(14, 14, 16, 0.98));
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.admin-user-card[open] {
+  border-color: rgba(124, 58, 237, 0.34);
+}
+
+.admin-user-card__summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.95rem 1rem;
+  user-select: none;
+}
+
+.admin-user-card__summary::-webkit-details-marker {
+  display: none;
+}
+
+.admin-user-card__identity {
+  min-width: 0;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.admin-user-card__name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #f8fafc;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.admin-user-card__meta {
+  color: rgba(226, 232, 240, 0.72);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.admin-user-card__chevron {
+  flex: 0 0 auto;
+  color: var(--primary);
+  font-size: 1.2rem;
+  transition: transform 0.2s ease;
+}
+
+.admin-user-card[open] .admin-user-card__chevron {
+  transform: rotate(180deg);
+}
+
+.admin-user-card__body {
+  display: grid;
+  gap: 0.85rem;
+  padding: 0 1rem 1rem;
+}
+
+.admin-user-card__info-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.6rem;
+}
+
+.admin-user-card__info-item {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.admin-user-card__info-item--email {
+  gap: 0.45rem;
+}
+
+.admin-user-card__info-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.admin-email-edit-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid rgba(124, 58, 237, 0.18);
+  border-radius: 999px;
+  background: rgba(124, 58, 237, 0.12);
+  color: #f8fafc;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.admin-email-edit-toggle:hover {
+  background: rgba(124, 58, 237, 0.2);
+}
+
+.admin-user-card__value--email {
+  word-break: break-word;
+}
+
+.admin-email-edit-form {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.admin-email-edit-input {
+  min-height: 2.7rem;
+  padding: 0.55rem 0.8rem;
+}
+
+.admin-email-edit-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.admin-email-edit-actions .btn {
+  width: auto;
+  min-width: 0;
+}
+
+.admin-user-card__label {
+  color: var(--text-light);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 800;
+}
+
+.admin-user-card__value {
+  color: #f3f4f6;
+  font-size: 0.92rem;
+  word-break: break-word;
+}
+
+.admin-user-card__actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.55rem;
+}
+
+.admin-user-card__actions .btn {
+  width: 100%;
+  min-height: 2.7rem;
+  padding: 0.62rem 0.85rem;
+  font-size: 0.88rem;
+  white-space: normal;
+  line-height: 1.15;
+}
+
+  .admin-user-card__info-head {
+    align-items: flex-start;
+  }
+
+  .admin-email-edit-actions {
+    flex-direction: column;
+  }
+
+  .admin-email-edit-actions .btn {
+    width: 100%;
+  }
+
 @media (max-width: 900px) {
   .admin-page .admin-page__toolbar-header,
   .admin-page .admin-drawer__header {
@@ -801,6 +988,57 @@ body {
   }
 
   .admin-page .admin-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 961px) {
+  .admin-users-mobile__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.15rem;
+  }
+
+  .admin-user-card {
+    min-height: 100%;
+  }
+
+  .admin-user-card__summary {
+    padding: 1rem 1.1rem;
+  }
+
+  .admin-user-card__name {
+    font-size: 1.15rem;
+  }
+
+  .admin-user-card__meta {
+    font-size: 0.84rem;
+  }
+
+  .admin-user-card__body {
+    padding: 0 1.1rem 1.1rem;
+  }
+
+  .admin-user-card__info-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-user-card__actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .admin-user-card__actions .btn {
+    min-height: 2.85rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-users-mobile__list {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .admin-user-card__info-grid,
+  .admin-user-card__actions {
     grid-template-columns: 1fr;
   }
 }
@@ -5388,8 +5626,6 @@ tbody td code {
   .result-team__submit,
   .times-action,
   .combo-card .btn,
-  .admin-page .admin-table-actions .btn,
-  .admin-page .admin-page__toolbar-actions .btn,
   .actions-section .btn,
   .action-grid .btn,
   .qty-btn,
@@ -5412,6 +5648,44 @@ tbody td code {
   .votacao-admin-summary-button {
     width: 100%;
     text-align: left;
+  }
+
+  .admin-page .admin-table-actions {
+    flex-direction: row;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  .admin-page .admin-table-actions form {
+    display: inline-flex;
+    flex: 0 0 auto;
+  }
+
+  .admin-page .admin-table-actions .btn,
+  .admin-page .admin-page__toolbar-actions .btn,
+  .player-card__admin-actions .btn {
+    width: auto;
+    min-width: 0;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.78rem;
+    line-height: 1.1;
+    white-space: normal;
+  }
+
+  .player-card__admin-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.4rem;
+    width: 100%;
+  }
+
+  .player-card__admin-actions .btn {
+    justify-content: center;
+    text-align: center;
+    min-height: 2.6rem;
   }
 
   .table-shell {
@@ -5492,11 +5766,8 @@ tbody td code {
   }
 
   .player-card__cta.btn,
-  .player-card__admin-actions .btn,
   .profile-hero__actions .btn,
-  .profile-private-card-actions .btn,
-  .admin-page .admin-table-actions .btn,
-  .admin-page .admin-page__toolbar-actions .btn {
+  .profile-private-card-actions .btn {
     width: 100%;
   }
 
@@ -6004,6 +6275,15 @@ tbody td code {
   .votacao-admin-summary-button,
   .votacao-admin-hero-action {
     padding: 0.65rem 0.85rem;
+  }
+
+  .admin-page .admin-table-actions .btn,
+  .admin-page .admin-page__toolbar-actions .btn,
+  .player-card__admin-actions .btn,
+  .btn-usar,
+  .btn-renomear,
+  .btn-remover {
+    min-height: 2.4rem;
   }
 }
 

@@ -366,6 +366,44 @@ class AuthService:
             "ativo": alvo.get("ativo", True),
             "criado_em": alvo.get("criado_em"),
         }
+
+    def atualizar_email(self, user_id: str, email: str, executor_id: Optional[str] = None) -> Dict:
+        email = (email or "").strip().lower()
+        if not email or "@" not in email:
+            raise ValueError("Email deve ser valido")
+
+        usuarios = self._carregar()
+        alvo = None
+        for u in usuarios:
+            if u.get("id") == user_id:
+                alvo = u
+                break
+
+        if not alvo:
+            raise ValueError("Usuario nao encontrado")
+
+        email_existente = next(
+            (
+                u for u in usuarios
+                if (u.get("email") or "").strip().lower() == email and u.get("id") != user_id
+            ),
+            None,
+        )
+        if email_existente:
+            raise ValueError("Email ja existe")
+
+        alvo["email"] = email
+        self._salvar(usuarios)
+
+        return {
+            "id": alvo.get("id"),
+            "email": alvo.get("email"),
+            "username": alvo.get("username"),
+            "nome": alvo.get("nome"),
+            "role": alvo.get("role", "usuario"),
+            "ativo": alvo.get("ativo", True),
+            "criado_em": alvo.get("criado_em"),
+        }
     
     def deletar_usuario(self, user_id: str, executor_id: Optional[str] = None) -> bool:
         """
