@@ -5,7 +5,7 @@ import os
 import logging
 import socket
 import uuid
-from flask import Flask, send_file
+from flask import Flask, send_file, request
 try:
     from flask_wtf import CSRFProtect
     from flask_wtf.csrf import generate_csrf
@@ -136,6 +136,21 @@ def criar_app(config_name: str = None) -> Flask:
             os.path.join(os.path.dirname(__file__), 'manifest.json'),
             mimetype='application/manifest+json'
         )
+
+    @app.after_request
+    def add_cache_headers(response):
+        content_type = (response.headers.get('Content-Type') or '').lower()
+        request_path = request.path if request else ''
+
+        if 'text/html' in content_type or request_path in {'/', '/login', '/cadastro', '/recuperar-senha'}:
+            response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+            response.headers['Pragma'] = 'no-cache'
+            response.headers['Expires'] = '0'
+
+        if request_path == '/manifest.json':
+            response.headers['Cache-Control'] = 'no-cache, max-age=0'
+
+        return response
     
     logger.info(f"Aplicação iniciada em modo: {config_name}")
 

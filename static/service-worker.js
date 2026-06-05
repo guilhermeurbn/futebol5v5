@@ -1,7 +1,7 @@
 // NaTrave Service Worker - Offline Support & Caching Strategy
-const CACHE_NAME = 'natrave-v2';
-const RUNTIME_CACHE = 'natrave-runtime-v2';
-const IMAGE_CACHE = 'natrave-images-v2';
+const CACHE_NAME = 'natrave-v3';
+const RUNTIME_CACHE = 'natrave-runtime-v3';
+const IMAGE_CACHE = 'natrave-images-v3';
 
 // URLs que devem estar sempre em cache
 const urlsToCache = [

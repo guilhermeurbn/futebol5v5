@@ -39,8 +39,18 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/static/service-worker.js')
+                const serviceWorkerUrl = '/static/service-worker.js?v=20260605-1';
+                navigator.serviceWorker.register(serviceWorkerUrl, { updateViaCache: 'none' })
+                    .then(registration => {
+                        if (registration.waiting) {
+                            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                        }
+                    })
                     .catch(error => console.warn('[PWA] Erro ao registrar Service Worker:', error));
+
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    window.location.reload();
+                });
             });
         }
     </script>
