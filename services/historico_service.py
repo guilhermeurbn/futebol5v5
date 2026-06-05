@@ -12,7 +12,7 @@ from services.db import load_json_data, save_json_data
 class HistoricoService:
     """Serviço para gerenciar histórico de sorteios"""
     
-    def __init__(self, arquivo: str = "historico.json"):
+    def __init__(self, arquivo: str = "data/historico.json"):
         """
         Inicializa o serviço
         

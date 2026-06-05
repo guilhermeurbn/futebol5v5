@@ -11,7 +11,7 @@ from services.db import load_json_data, save_json_data
 class JogadorService:
     """Serviço para gerenciar jogadores - com suporte a Postgres via db.py"""
     
-    def __init__(self, arquivo: str = "jogadores.json"):
+    def __init__(self, arquivo: str = "data/jogadores.json"):
         """
         Inicializa o serviço
         

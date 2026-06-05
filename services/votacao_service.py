@@ -12,7 +12,7 @@ from services.db import load_json_data, save_json_data
 class VotacaoService:
     """Gerencia o ciclo de votacao e apuracao de uma rodada."""
 
-    def __init__(self, arquivo: str = "votacoes_partidas.json"):
+    def __init__(self, arquivo: str = "data/votacoes_partidas.json"):
         self.arquivo = arquivo
         self._garantir_arquivo()
 

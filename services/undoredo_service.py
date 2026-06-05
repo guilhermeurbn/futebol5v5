@@ -10,7 +10,7 @@ from services.db import load_json_data, save_json_data
 class UndoRedoService:
     """Serviço para gerenciar pilha de sorteios (undo/redo)"""
     
-    def __init__(self, arquivo: str = "sorteios_stack.json"):
+    def __init__(self, arquivo: str = "data/sorteios_stack.json"):
         """
         Inicializa o serviço
         

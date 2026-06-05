@@ -11,7 +11,7 @@ from services.db import load_json_data, save_json_data
 class JuizPartidaService:
     """Mantem o estado persistido da partida atual do juiz."""
 
-    def __init__(self, arquivo: str = "juiz_partida_atual.json"):
+    def __init__(self, arquivo: str = "data/juiz_partida_atual.json"):
         self.arquivo = arquivo
         self._garantir_arquivo()
 

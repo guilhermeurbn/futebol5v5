@@ -11,7 +11,7 @@ from services.db import load_json_data, save_json_data
 class FavoritoService:
     """Serviço para gerenciar times favoritos"""
     
-    def __init__(self, arquivo: str = "favoritos.json"):
+    def __init__(self, arquivo: str = "data/favoritos.json"):
         """
         Inicializa o serviço
         

@@ -11,7 +11,7 @@ from services.db import load_json_data, save_json_data
 class PartidaService:
     """Serviço para gerenciar partidas e resultados competitivos"""
     
-    def __init__(self, arquivo: str = "partidas.json"):
+    def __init__(self, arquivo: str = "data/partidas.json"):
         """
         Inicializa o serviço
         

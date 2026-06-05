@@ -11,7 +11,7 @@ from services.db import load_json_data, save_json_data
 class NotificacaoService:
     """Armazena notificacoes administrativas em arquivo JSON."""
 
-    def __init__(self, arquivo: str = "admin_notificacoes.json"):
+    def __init__(self, arquivo: str = "data/admin_notificacoes.json"):
         self.arquivo = arquivo
         self._garantir_arquivo()
 
