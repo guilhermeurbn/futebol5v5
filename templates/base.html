@@ -39,9 +39,10 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                const serviceWorkerUrl = '/static/service-worker.js?v=20260605-1';
+                const serviceWorkerUrl = '/static/service-worker.js?v=20260605-2';
                 navigator.serviceWorker.register(serviceWorkerUrl, { updateViaCache: 'none' })
                     .then(registration => {
+                        registration.update().catch(() => {});
                         if (registration.waiting) {
                             registration.waiting.postMessage({ type: 'SKIP_WAITING' });
                         }

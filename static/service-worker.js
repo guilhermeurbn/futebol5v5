@@ -1,7 +1,8 @@
 // NaTrave Service Worker - Offline Support & Caching Strategy
-const CACHE_NAME = 'natrave-v3';
-const RUNTIME_CACHE = 'natrave-runtime-v3';
-const IMAGE_CACHE = 'natrave-images-v3';
+const SW_VERSION = '20260605-2';
+const CACHE_NAME = `natrave-v${SW_VERSION}`;
+const RUNTIME_CACHE = `natrave-runtime-v${SW_VERSION}`;
+const IMAGE_CACHE = `natrave-images-v${SW_VERSION}`;
 
 // URLs que devem estar sempre em cache
 const urlsToCache = [
@@ -89,15 +90,11 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Estratégia para HTML pages
+  // Estratégia para HTML pages: network first para evitar versão antiga presa no cache
   if (url.pathname.endsWith('.html') || !url.pathname.includes('.')) {
     event.respondWith(
       fetch(event.request)
         .then(response => {
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, responseToCache);
-          });
           return response;
         })
         .catch(() => {
@@ -254,6 +251,14 @@ self.addEventListener('message', event => {
   if (event.data && event.data.type === 'CLEAR_CACHE') {
     caches.delete(RUNTIME_CACHE).then(() => {
       console.log('[Service Worker] Cache de runtime limpo');
+    });
+  }
+
+  if (event.data && event.data.type === 'CLEAR_ALL_CACHES') {
+    caches.keys().then(cacheNames => {
+      return Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
+    }).then(() => {
+      console.log('[Service Worker] Todos os caches foram limpos');
     });
   }
 });

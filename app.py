@@ -147,7 +147,7 @@ def criar_app(config_name: str = None) -> Flask:
             response.headers['Pragma'] = 'no-cache'
             response.headers['Expires'] = '0'
 
-        if request_path == '/manifest.json':
+        if request_path in {'/manifest.json', '/static/service-worker.js'}:
             response.headers['Cache-Control'] = 'no-cache, max-age=0'
 
         return response
