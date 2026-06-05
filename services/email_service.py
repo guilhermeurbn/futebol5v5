@@ -9,12 +9,6 @@ from dataclasses import dataclass
 from typing import Optional
 
 import requests
-try:
-    # Provide a `request` alias for tests that monkeypatch `request.urlopen`
-    # (tests expect `services.email_service.request.urlopen`).
-    import urllib.request as request
-except Exception:
-    request = None
 
 
 logger = logging.getLogger(__name__)
@@ -103,41 +97,14 @@ class EmailService:
                 json=payload,
                 timeout=15,
             )
-            print("RESEND STATUS:", response.status_code)
-            print("RESEND RESPONSE:", response.text)
             response.raise_for_status()
             data = response.json() if response.text else {}
             message_id = data.get("id")
             return EmailResult(ok=True, message_id=message_id)
         except requests.HTTPError as exc:
-            # Fallback: alguns testes monkeypatcham `services.email_service.request.urlopen`.
-            # Se `urllib.request` estiver disponível e exposto como `request`, tente usar
-            # `request.urlopen` para compatibilidade nos testes locais.
             status_code = exc.response.status_code if exc.response is not None else None
             details = exc.response.text if exc.response is not None else str(exc)
-            logger.warning("Erro HTTP do Resend (requests): %s - %s; tentando fallback urlopen se disponível", status_code, details)
-            if request and hasattr(request, 'urlopen'):
-                try:
-                    import urllib.request as _urllib_request
-                    req = _urllib_request.Request(
-                        url,
-                        data=json.dumps(payload).encode('utf-8'),
-                        headers=headers,
-                        method='POST'
-                    )
-                    resp = request.urlopen(req, timeout=15)
-                    # se o handler de teste devolver um objeto com read(), extraiemos payload
-                    body = None
-                    try:
-                        text = resp.read().decode('utf-8') if hasattr(resp, 'read') else ''
-                        body = json.loads(text) if text else {}
-                    except Exception:
-                        body = {}
-                    message_id = body.get('id') if isinstance(body, dict) else None
-                    return EmailResult(ok=True, message_id=message_id)
-                except Exception as exc2:
-                    logger.error('Fallback urlopen falhou: %s', exc2)
-                    return EmailResult(ok=False, error=f'HTTP {status_code}')
+            logger.warning("Erro HTTP do Resend: %s - %s", status_code, details)
             return EmailResult(ok=False, error=f"HTTP {status_code}")
         except Exception as exc:
             logger.error("Erro ao enviar email via Resend: %s", exc)
@@ -195,10 +162,20 @@ class EmailService:
         return self.send_email(to_email, subject, html, text)
 
     def send_password_reset_email(self, to_email: str, nome: str, reset_url: str) -> EmailResult:
-        # Mantido por compatibilidade com chamadas antigas.
-        return self.send_temporary_password_email(
-            to_email=to_email,
-            nome=nome,
-            username=nome,
-            senha_temporaria=reset_url,
+        subject = "Redefina sua senha no NaTrave 5v5"
+        html = f"""
+        <div style="font-family: Arial, sans-serif; background:#0b0b0f; color:#f3f4f6; padding:24px;">
+            <div style="max-width:600px;margin:0 auto;background:#111118;border:1px solid rgba(141,255,47,.18);border-radius:18px;padding:28px;">
+                <p style="margin:0 0 12px;color:#8DFF2F;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">NaTrave 5v5</p>
+                <h1 style="margin:0 0 12px;font-size:28px;line-height:1.1;">Redefinicao de senha</h1>
+                <p style="margin:0 0 18px;color:#d1d5db;font-size:16px;line-height:1.6;">Ola, {nome}. Use o link abaixo para criar uma nova senha.</p>
+                <p style="margin:0 0 22px;"><a href="{reset_url}" style="display:inline-block;padding:12px 16px;border-radius:10px;background:#8DFF2F;color:#0b0b0f;text-decoration:none;font-weight:700;">Definir nova senha</a></p>
+                <p style="margin:0;color:#9ca3af;font-size:14px;line-height:1.5;">Se voce nao pediu essa alteracao, ignore este email.</p>
+            </div>
+        </div>
+        """
+        text = (
+            f"Ola, {nome}. Use este link para redefinir sua senha no NaTrave 5v5: {reset_url}. "
+            "Se voce nao pediu essa alteracao, ignore este email."
         )
+        return self.send_email(to_email, subject, html, text)

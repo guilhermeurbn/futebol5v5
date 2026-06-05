@@ -239,11 +239,20 @@ class JogadorStatsService:
         for item in partida.get("times_desempenho", []) or []:
             if int(item.get("time_numero", 0) or 0) != int(time_numero):
                 continue
-            if int(item.get("vitorias", 0) or 0) > 0:
+            # Só considerar times_desempenho quando houver informação útil
+            v = int(item.get("vitorias", 0) or 0)
+            d = int(item.get("derrotas", 0) or 0)
+            e = int(item.get("empates", 0) or 0)
+            if v == 0 and d == 0 and e == 0:
+                # sem informação explícita neste registro; ignore e caia
+                # para a lógica fallback que usa `time_vencedor` / gols
+                continue
+            if v > 0:
                 return "vitória"
-            if int(item.get("derrotas", 0) or 0) > 0:
+            if d > 0:
                 return "derrota"
-            return "empate"
+            if e > 0:
+                return "empate"
 
         time_vencedor = partida.get("time_vencedor")
         if not time_vencedor:

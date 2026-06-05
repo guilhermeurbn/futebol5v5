@@ -1,3 +1,46 @@
+{% set banner_mode = (brand_header_variant | default('')) == 'banner' %}
+{% if banner_mode %}
+<div class="brand-header brand-header--banner brand-header--banner-simple">
+    <div class="brand-header__banner-center">
+        <div class="logo-header brand-header__banner-logo">
+            <a href="{{ url_for('juiz.jogar_page') if auth_user and auth_user.role == 'juiz' else url_for('jogador.index') }}" aria-label="Ir para a página inicial" style="display:inline-block;">
+                <img src="{{ url_for('static', filename='logo-natrave-5v5.png') }}" alt="NaTrave 5v5" class="brand-logo-image">
+            </a>
+        </div>
+
+        {% if auth_user and auth_user.autenticado %}
+        <div class="auth-actions brand-header__banner-actions">
+            <div class="auth-links">
+                {% if auth_user.role in ['admin', 'super_admin'] %}
+                <a class="btn btn-warning" href="{{ url_for('admin.admin_page') }}" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; font-weight: 700;">⚙️ Admin</a>
+                <form method="post" action="{{ url_for('jogador.logout') }}" class="logout-form" style="margin: 0;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-danger" type="submit" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; font-weight: 700;">🚪 Sair</button>
+                </form>
+                {% elif auth_user.role == 'juiz' %}
+                {% if not juiz_partida_ativa %}
+                <form method="post" action="{{ url_for('juiz.juiz_criar_partida') }}" class="logout-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-primary" type="submit">Criar partida</button>
+                </form>
+                {% endif %}
+                <form method="post" action="{{ url_for('jogador.logout') }}" class="logout-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-danger" type="submit">Sair</button>
+                </form>
+                {% else %}
+                <a class="btn btn-secondary" href="{{ url_for('jogador.perfil_page') }}">Meu perfil</a>
+                <form method="post" action="{{ url_for('jogador.logout') }}" class="logout-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-danger" type="submit">Sair</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% else %}
 <div class="brand-header">
     <div class="logo-header">
         <a href="{{ url_for('juiz.jogar_page') if auth_user and auth_user.role == 'juiz' else url_for('jogador.index') }}" aria-label="Ir para a página inicial" style="display:inline-block;">
@@ -27,12 +70,6 @@
             </form>
             {% else %}
             <!-- Regular User Navigation -->
-            <a class="btn btn-secondary" href="{{ url_for('jogador.index') }}">Jogadores</a>
-            {% if auth_user.role == 'usuario' %}
-            <a class="btn btn-secondary" href="{{ url_for('jogador.votacao_page') }}">Minha votação</a>
-            {% endif %}
-            <a class="btn btn-secondary" href="{{ url_for('jogador.historico') }}">Histórico</a>
-            <a class="btn btn-secondary" href="{{ url_for('jogador.pagina_ranking') }}">Ranking</a>
             <a class="btn btn-secondary" href="{{ url_for('jogador.perfil_page') }}">Meu perfil</a>
             <form method="post" action="{{ url_for('jogador.logout') }}" class="logout-form">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -43,3 +80,4 @@
     </div>
     {% endif %}
 </div>
+{% endif %}

@@ -62,8 +62,7 @@ Notas:
 
 Geradas automaticamente por [services/auth_service.py](services/auth_service.py):
 
-- `adminjogos` / `adminjogos123`
-- `admin` / `admin123`
+- Bootstrap admins are generated locally when needed and the temporary credentials are written only to `.secrets/initial_admin_credentials.json`.
 
 Trocar em qualquer ambiente serio.
 

@@ -18,6 +18,14 @@ class ExportService:
     """Serviço para exportar dados em diferentes formatos"""
 
     @staticmethod
+    def _csv_safe(value):
+        if isinstance(value, str):
+            stripped = value.lstrip()
+            if stripped.startswith(('=', '+', '-', '@', '\t', '\r', '\n')):
+                return f"'{value}"
+        return value
+
+    @staticmethod
     def _normalizar_jogador(jogador):
         if isinstance(jogador, Jogador):
             return jogador
@@ -73,10 +81,10 @@ class ExportService:
             
             for jogador in time:
                 writer.writerow([
-                    jogador.nome,
-                    jogador.nivel,
-                    jogador.tipo,
-                    jogador.posicao
+                    ExportService._csv_safe(jogador.nome),
+                    ExportService._csv_safe(jogador.nivel),
+                    ExportService._csv_safe(jogador.tipo),
+                    ExportService._csv_safe(jogador.posicao)
                 ])
             
             writer.writerow([''])
@@ -119,12 +127,12 @@ class ExportService:
                 melhor_time = "-"
             
             writer.writerow([
-                sorteio.get('id', ''),
-                data,
-                sorteio.get('total_jogadores', ''),
-                sorteio.get('num_times', ''),
-                sorteio.get('diferenca', ''),
-                melhor_time
+                ExportService._csv_safe(sorteio.get('id', '')),
+                ExportService._csv_safe(data),
+                ExportService._csv_safe(sorteio.get('total_jogadores', '')),
+                ExportService._csv_safe(sorteio.get('num_times', '')),
+                ExportService._csv_safe(sorteio.get('diferenca', '')),
+                ExportService._csv_safe(melhor_time)
             ])
         
         return output.getvalue()
@@ -314,8 +322,8 @@ class ExportService:
         
         for jogador in stats.get('jogadores_frequentes', []):
             writer.writerow([
-                jogador.get('nome', ''),
-                jogador.get('vezes', '')
+                ExportService._csv_safe(jogador.get('nome', '')),
+                ExportService._csv_safe(jogador.get('vezes', ''))
             ])
         
         return output.getvalue()

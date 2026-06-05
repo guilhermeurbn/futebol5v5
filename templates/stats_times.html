@@ -119,46 +119,48 @@
                 <h2>🎯 Times Mais Vencedores</h2>
                 
                 {% if stats %}
-                    <table class="stats-table">
-                        <thead>
-                            <tr>
-                                <th>Time</th>
-                                <th>Criado</th>
-                                <th>Vencedores</th>
-                                <th>Win Rate</th>
-                                <th>Índice Médio</th>
-                                <th>Melhor/Pior</th>
-                                <th>Jogadores Comuns</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for time in stats %}
+                    <div class="table-shell">
+                        <table class="stats-table">
+                            <thead>
                                 <tr>
-                                    <td class="time-name">{{ time.time_key }}</td>
-                                    <td>
-                                        <span class="badge badge-primary">{{ time.vezes_criado }}</span>
-                                    </td>
-                                    <td>
-                                        <span class="badge badge-success">{{ time.vezes_vencedor }}</span>
-                                    </td>
-                                    <td>
-                                        <span class="badge badge-success">{{ time.win_rate }}%</span>
-                                    </td>
-                                    <td><strong>{{ time.pontuacao_media }}</strong></td>
-                                    <td>{{ time.melhor_pontuacao }} / {{ time.pior_pontuacao }}</td>
-                                    <td>
-                                        <small>
-                                            {% for jogador in time.jogadores_comuns %}
-                                                {% if loop.index <= 2 %}
-                                                    <span style="display: inline-block; margin-right: 0.5rem;">{{ jogador.nome }}</span>
-                                                {% endif %}
-                                            {% endfor %}
-                                        </small>
-                                    </td>
+                                    <th>Time</th>
+                                    <th>Criado</th>
+                                    <th>Vencedores</th>
+                                    <th>Win Rate</th>
+                                    <th>Índice Médio</th>
+                                    <th>Melhor/Pior</th>
+                                    <th>Jogadores Comuns</th>
                                 </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {% for time in stats %}
+                                    <tr>
+                                        <td class="time-name">{{ time.time_key }}</td>
+                                        <td>
+                                            <span class="badge badge-primary">{{ time.vezes_criado }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-success">{{ time.vezes_vencedor }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-success">{{ time.win_rate }}%</span>
+                                        </td>
+                                        <td><strong>{{ time.pontuacao_media }}</strong></td>
+                                        <td>{{ time.melhor_pontuacao }} / {{ time.pior_pontuacao }}</td>
+                                        <td>
+                                            <small>
+                                                {% for jogador in time.jogadores_comuns %}
+                                                    {% if loop.index <= 2 %}
+                                                        <span style="display: inline-block; margin-right: 0.5rem;">{{ jogador.nome }}</span>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </small>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 {% else %}
                     <div style="padding: 2rem; text-align: center; color: var(--text-secondary);">
                         <p>📊 Nenhum sorteio realizado ainda</p>

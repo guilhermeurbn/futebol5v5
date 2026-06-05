@@ -5,12 +5,15 @@ Rotas de Gerenciamento de Jogadores
 """
 from flask import Blueprint, request, render_template, redirect, url_for, jsonify, session
 from functools import wraps
+from routes.commons import login_required
 from services.jogador_service import JogadorService
+from services.jogador_stats_service import JogadorStatsService
 from services.juiz_partida_service import JuizPartidaService
 
 jogador_bp = Blueprint('jogador_crud', __name__)
 
 jogador_service = JogadorService()
+jogador_stats_service = JogadorStatsService()
 juiz_partida_service = JuizPartidaService()
 
 
@@ -34,6 +37,20 @@ def _usuario_logado():
         'role': session.get('role', 'usuario'),
         'senha_temporaria_ativa': bool(session.get('senha_temporaria_ativa')),
         'autenticado': bool(session.get('user_id'))
+    }
+
+
+def _jogador_publico(jogador):
+    if not jogador:
+        return None
+    return {
+        'id': jogador.id,
+        'nome': jogador.nome,
+        'nivel': jogador.nivel,
+        'tipo': jogador.tipo,
+        'posicao': jogador.posicao,
+        'presente': jogador.presente,
+        'criado_em': jogador.criado_em,
     }
 
 
@@ -97,10 +114,24 @@ def index():
 
     try:
         jogadores = _ordenar_jogadores_usuario_primeiro(jogador_service.listar_para_dict())
+        jogadores_premium = []
+
+        for jogador in jogadores:
+            stats = jogador_stats_service.obter_stats_jogador(jogador.get('nome', ''))
+            jogadores_premium.append({
+                **jogador,
+                'stats_card': {
+                    'wins': stats.get('vitórias', stats.get('vitorias', 0)),
+                    'matches': stats.get('total_partidas', 0),
+                    'approval': stats.get('win_rate', 0.0),
+                    'approval_valid': stats.get('win_rate_valido', True),
+                }
+            })
+
         return render_template(
             'index.html',
-            jogadores=jogadores,
-            total_jogadores=len(jogadores),
+            jogadores=jogadores_premium,
+            total_jogadores=len(jogadores_premium),
             usuario=_usuario_logado()
         )
     except Exception as e:
@@ -115,10 +146,11 @@ def index():
 # ============================================================
 
 @jogador_bp.route('/api/jogadores', methods=['GET'])
+@login_required
 def listar_jogadores_api():
     """API: Lista todos os jogadores"""
     try:
-        return jsonify(jogador_service.listar_para_dict())
+        return jsonify([_jogador_publico(jogador) for jogador in jogador_service.listar()])
     except Exception as e:
         import logging
         logger = logging.getLogger(__name__)
@@ -144,7 +176,7 @@ def criar_jogador_api():
         )
         return jsonify({
             'sucesso': True,
-            'jogador': jogador.para_dict(),
+            'jogador': _jogador_publico(jogador),
             'mensagem': 'Jogador criado com sucesso'
         }), 201
     except ValueError as e:
@@ -187,13 +219,14 @@ def adicionar_jogador():
 # ============================================================
 
 @jogador_bp.route('/api/jogadores/<jogador_id>', methods=['GET'])
+@login_required
 def obter_jogador(jogador_id):
     """API: Obtém jogador por ID"""
     try:
         jogador = jogador_service.obter_por_id(jogador_id, None if _is_admin() else session.get('user_id'))
         if not jogador:
             return jsonify({'erro': 'Jogador não encontrado'}), 404
-        return jsonify(jogador.para_dict())
+        return jsonify(_jogador_publico(jogador))
     except Exception as e:
         import logging
         logger = logging.getLogger(__name__)
@@ -357,6 +390,7 @@ def selecionar_jogadores():
 
 
 @jogador_bp.route('/api/presenca', methods=['POST'])
+@admin_or_juiz_required
 def atualizar_presenca():
     """API: Marca jogadores como presentes"""
     try:
@@ -388,6 +422,7 @@ def atualizar_presenca():
 
 
 @jogador_bp.route('/api/presenca/limpar', methods=['POST'])
+@admin_or_juiz_required
 def limpar_presenca():
     """API: Limpa seleção de presença"""
     try:

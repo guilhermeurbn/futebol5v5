@@ -6,6 +6,7 @@ import os
 import secrets
 import uuid
 from datetime import datetime
+from pathlib import Path
 from typing import Dict, List, Optional
 
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -16,6 +17,7 @@ class AuthService:
     """Gerencia usuarios, senha e perfil."""
 
     _TEMP_PASSWORD_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789"
+    _DEFAULT_BOOTSTRAP_CREDENTIALS_FILE = Path(__file__).resolve().parent.parent / '.secrets' / 'initial_admin_credentials.json'
 
     def __init__(self, arquivo: str = "data/users.json"):
         self.arquivo = arquivo
@@ -60,18 +62,17 @@ class AuthService:
             created_credentials.append({'username': username.lower(), 'password': senha})
             alterou = True
 
-        _add_admin_if_missing('adminjogos', 'Admin de Jogos')
         # Ensure there's at least one admin user (only create in dev/test)
         if not any((u.get('role') == 'admin') for u in usuarios):
             _add_admin_if_missing('admin', 'Administrador')
 
         if alterou:
             self._salvar(usuarios)
-            # Persist generated credentials locally for developer convenience
+            # Persist generated credentials only in local secrets storage
             try:
-                os.makedirs(os.path.dirname(self.arquivo), exist_ok=True)
-                creds_file = os.path.join(os.path.dirname(self.arquivo), 'initial_admin_credentials.json')
-                with open(creds_file, 'w', encoding='utf-8') as cf:
+                creds_file = Path(os.getenv('ADMIN_BOOTSTRAP_CREDENTIALS_FILE', str(self._DEFAULT_BOOTSTRAP_CREDENTIALS_FILE))).expanduser()
+                creds_file.parent.mkdir(parents=True, exist_ok=True)
+                with creds_file.open('w', encoding='utf-8') as cf:
                     json.dump(created_credentials, cf, indent=2, ensure_ascii=False)
             except Exception:
                 pass

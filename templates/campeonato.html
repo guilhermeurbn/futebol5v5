@@ -59,26 +59,28 @@
             {% if campeonato.times_vencedores|length > 3 %}
                 <div style="margin-top: 30px; padding-top: 30px; border-top: 1px solid #667eea;">
                     <h3 style="margin-top: 0;">Ranking Completo</h3>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <thead>
-                            <tr style="background: rgba(102, 126, 234, 0.1); border-bottom: 2px solid #667eea;">
-                                <th style="padding: 12px; text-align: left;">#</th>
-                                <th style="padding: 12px; text-align: left;">Time</th>
-                                <th style="padding: 12px; text-align: center;">Vitórias</th>
-                                <th style="padding: 12px; text-align: center;">Taxa de Vitória</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for time, vitorias in campeonato.times_vencedores|dictsort(by='value', reverse=true) %}
-                                <tr style="border-bottom: 1px solid rgba(102, 126, 234, 0.2); transition: background 0.3s;">
-                                    <td style="padding: 12px; font-weight: bold;">{{ loop.index }}</td>
-                                    <td style="padding: 12px;">🏟️ Time {{ time }}</td>
-                                    <td style="padding: 12px; text-align: center; font-weight: bold; color: #ffd700;">{{ vitorias }}</td>
-                                    <td style="padding: 12px; text-align: center;">{{ ((vitorias / campeonato.total_partidas) * 100)|round(1) }}%</td>
+                    <div class="table-shell">
+                        <table class="uniform-table" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: rgba(102, 126, 234, 0.1); border-bottom: 2px solid #667eea;">
+                                    <th style="padding: 12px; text-align: left;">#</th>
+                                    <th style="padding: 12px; text-align: left;">Time</th>
+                                    <th style="padding: 12px; text-align: center;">Vitórias</th>
+                                    <th style="padding: 12px; text-align: center;">Taxa de Vitória</th>
                                 </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {% for time, vitorias in campeonato.times_vencedores|dictsort(by='value', reverse=true) %}
+                                    <tr style="border-bottom: 1px solid rgba(102, 126, 234, 0.2); transition: background 0.3s;">
+                                        <td style="padding: 12px; font-weight: bold;">{{ loop.index }}</td>
+                                        <td style="padding: 12px;">🏟️ Time {{ time }}</td>
+                                        <td style="padding: 12px; text-align: center; font-weight: bold; color: #ffd700;">{{ vitorias }}</td>
+                                        <td style="padding: 12px; text-align: center;">{{ ((vitorias / campeonato.total_partidas) * 100)|round(1) }}%</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             {% endif %}
         {% else %}

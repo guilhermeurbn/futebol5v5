@@ -243,5 +243,16 @@
     "criado_em": "2026-05-28T00:26:59.612579",
     "ativo": true,
     "senha_temporaria_ativa": false
+  },
+  {
+    "id": "96ee84cb-8e66-47da-ae76-3b7c4e23e2eb",
+    "email": "guilhermeurbanopt@gmail.com",
+    "username": "guisanto",
+    "nome": "Guilherme Urbano",
+    "password_hash": "scrypt:32768:8:1$SBf8W4vMZS5jqZUs$8ea9c2245e3c2ee4c1598a7558d0cf1cc59c5181b5ce783af90916bedfa473244370abfce50a45f0bc05749228c911cbdadb0b5b1dd3536e7015a545b6db52c2",
+    "role": "usuario",
+    "criado_em": "2026-06-05T11:57:53.809166",
+    "ativo": true,
+    "senha_temporaria_ativa": false
   }
 ]

@@ -159,7 +159,13 @@ python app.py
 
 ### 4. Acessar no navegador
 
-O `run.py` tenta subir em portas comuns (`5000`, `5001`, `5002`, `5003`, `5004`, `8000`, `8001`, `10000`) e, se todas estiverem ocupadas, usa uma porta livre automatica do sistema.
+O `run.py` usa a porta `5000` por padrao.
+
+Para escolher outra porta local:
+
+```bash
+PORT=5001 python run.py
+```
 
 No `app.py`, sem `run.py`:
 
@@ -167,20 +173,17 @@ No `app.py`, sem `run.py`:
 - se `PORT` nao estiver definida, tenta `10000`
 - se `10000` estiver ocupada, escolhe automaticamente outra porta livre
 
-Para fixar manualmente uma porta local:
-
 ```bash
-PORT=5050 python run.py
+PORT=5001 python app.py
 ```
 
 ## Contas e Autenticacao
 
-O sistema garante contas padrao em [services/auth_service.py](services/auth_service.py):
+O sistema pode gerar contas administrativas locais em [services/auth_service.py](services/auth_service.py) quando o banco/local storage estiver vazio.
 
-- `adminjogos` / `adminjogos123`
-- `admin` / `admin123`
+As credenciais bootstrap geradas em desenvolvimento ficam em `.secrets/initial_admin_credentials.json`, que não é versionado.
 
-Use apenas para ambiente local ou desenvolvimento. Em producao, troque credenciais e defina `SECRET_KEY`.
+Em producao, defina `SECRET_KEY` e credenciais de email via variáveis de ambiente.
 
 ## Arquivos de Dados
 

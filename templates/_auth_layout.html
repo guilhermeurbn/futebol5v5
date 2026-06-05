@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NaTrave | {% block title %}Auth{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="auth-page {% block body_class %}{% endblock %}">
+    <div class="auth-page__glow auth-page__glow--primary"></div>
+    <div class="auth-page__glow auth-page__glow--secondary"></div>
+    <div class="auth-page__glow auth-page__glow--accent"></div>
+
+    <main class="auth-shell {% block auth_shell_class %}{% endblock %}">
+        {% block auth_intro_wrapper %}{% endblock %}
+
+        <section class="auth-panel auth-panel--form {% block auth_form_panel_class %}{% endblock %}" aria-labelledby="{% block auth_heading_id %}authHeading{% endblock %}">
+            {% block auth_messages %}{% endblock %}
+            {% block auth_card_header %}{% endblock %}
+            {% block auth_form %}{% endblock %}
+            {% block auth_card_footer %}{% endblock %}
+        </section>
+    </main>
+</body>
+</html>

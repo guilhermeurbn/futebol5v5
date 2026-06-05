@@ -55,216 +55,145 @@
         {% endif %}
 
         {% if not usuario.senha_temporaria_ativa %}
+        {% set win_rate = stats_jogador.win_rate if stats_jogador else 0 %}
+        {% set total_partidas = stats_jogador.total_partidas if stats_jogador else 0 %}
+        {% set gols = stats_jogador.gols if stats_jogador else 0 %}
+        {% set aprovacao = stats_jogador.get('efficiency', {}).get('taxa_partidas_com_participacao', 0) if stats_jogador else 0 %}
+        {% set disciplina = stats_jogador.get('discipline', {}).get('indice_disciplina', 0) if stats_jogador else 0 %}
+        {% set evolucao = (stats_jogador.get('ultimos_resultados', {}).get('pontos', 0) / 15 * 100) if stats_jogador and stats_jogador.get('ultimos_resultados', {}).get('pontos', 0) else 0 %}
+        {% set nome_jogador = jogador_proprio.nome if jogador_proprio else usuario.nome %}
+        {% set nome_partes = nome_jogador.split() %}
+        {% set avatar_text = nome_partes[0][:2] if nome_partes else nome_jogador[:2] %}
 
-        <section class="section profile-hero">
-            <div class="profile-hero__identity">
-                <h2 class="section-title">Seu Perfil</h2>
-                <p class="section-subtitle">Acompanhamento completo da sua performance no Fut5v5.</p>
-                <div class="profile-chip-row">
-                    <span class="badge badge-primary">@{{ usuario.username }}</span>
-                    {% if usuario.role == 'super_admin' %}
-                        <span class="badge badge-warning">Super Admin</span>
-                    {% elif usuario.role == 'admin' %}
-                        <span class="badge badge-warning">Admin</span>
-                    {% elif usuario.role == 'juiz' %}
-                        <span class="badge badge-primary">Juiz</span>
-                    {% else %}
-                        <span class="badge badge-success">Usuario</span>
-                    {% endif %}
-                </div>
-            </div>
-            <div class="profile-hero__actions">
-                <a href="{{ url_for('auth.perfil_planilha_csv') }}" class="btn btn-accent btn-small">📥 Exportar planilha</a>
-                <a href="{{ url_for('auth.perfil_dashboard_api') }}" class="btn btn-outline btn-small">🔌 API dashboard</a>
-            </div>
-        </section>
-
-        <section class="section">
-            <h2 class="section-title">Informações da Conta</h2>
-            <div class="stats-grid profile-kpi-grid">
-                <div class="stat-card profile-kpi-card">
-                    <div class="stat-label">Nome Completo</div>
-                    <div class="profile-mini-value">{{ usuario.nome }}</div>
-                </div>
-                <div class="stat-card profile-kpi-card">
-                    <div class="stat-label">Usuario</div>
-                    <div class="profile-mini-value">{{ usuario.username }}</div>
-                </div>
-                <div class="stat-card profile-kpi-card">
-                    <div class="stat-label">Papel</div>
-                    <div class="profile-mini-value">
-                        {% if usuario.role == 'super_admin' %}
-                            👑 Super Admin
-                        {% elif usuario.role == 'admin' %}
-                            🔑 Admin
-                        {% elif usuario.role == 'juiz' %}
-                            🎮 Juiz
-                        {% else %}
-                            👤 Usuário
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        {% if jogador_proprio %}
-        <section class="section">
-            <h2 class="section-title">Meu Jogador</h2>
-            <div class="stats-grid profile-kpi-grid">
-                <div class="stat-card profile-kpi-card">
-                    <div class="stat-label">Nome do Jogador</div>
-                    <div class="profile-mini-value">{{ jogador_proprio.nome }}</div>
-                </div>
-                <div class="stat-card profile-kpi-card">
-                    <div class="stat-label">Nível</div>
-                    <div class="profile-mini-value">⭐ {{ jogador_proprio.nivel }}</div>
-                </div>
-                <div class="stat-card profile-kpi-card">
-                    <div class="stat-label">Posição</div>
-                    <div class="profile-mini-value">
-                        {% if jogador_proprio.posicao == 'goleiro' %}
-                            🧤 Goleiro
-                        {% else %}
-                            ⚽ Linha
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="stat-card profile-kpi-card">
-                    <div class="stat-label">Tipo</div>
-                    <div class="profile-mini-value">
-                        {% if jogador_proprio.tipo == 'fixo' %}
-                            🔗 Fixo
-                        {% else %}
-                            📝 Avulso
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        {% if stats_jogador %}
-        <section class="section">
-            <h2 class="section-title">Dashboard Principal</h2>
-            <div class="stats-grid profile-kpi-grid">
-                <div class="stat-card profile-kpi-card">
-                    <div class="stat-label">Total de Partidas</div>
-                    <div class="profile-kpi-value">{{ stats_jogador.total_partidas }}</div>
-                    <div class="stat-sublabel">jogos disputados</div>
-                </div>
-                <div class="stat-card profile-kpi-card">
-                    <div class="stat-label">Total de Gols</div>
-                    <div class="profile-kpi-value">⚽ {{ stats_jogador.gols }}</div>
-                    <div class="stat-sublabel">{{ stats_jogador.gols_por_partida }} por partida</div>
-                </div>
-                <div class="stat-card profile-kpi-card">
-                    <div class="stat-label">Assistências</div>
-                    <div class="profile-kpi-value">🎯 {{ stats_jogador.assistencias }}</div>
-                    <div class="stat-sublabel">{{ stats_jogador.assistencias_por_partida }} por partida</div>
-                </div>
-                <div class="stat-card profile-kpi-card">
-                    <div class="stat-label">Taxa de Vitória</div>
-                    <div class="profile-kpi-value">📈 {{ stats_jogador.win_rate }}%</div>
-                    <div class="stat-sublabel">{{ stats_jogador.get('vitórias', 0) }}V {{ stats_jogador.derrotas }}D {{ stats_jogador.empates }}E</div>
-                </div>
-            </div>
-            <div class="profile-winrate-status">
-                {% if stats_jogador.get('win_rate_valido', True) %}
-                    <span class="badge badge-success">Win rate validado</span>
-                {% else %}
-                    <span class="badge badge-danger">Inconsistência no win rate</span>
-                {% endif %}
-            </div>
-        </section>
-
-        <section class="section">
-            <h2 class="section-title">Performance e Disciplina</h2>
-            <div class="profile-dashboard-grid">
-                <div class="profile-progress-panel">
-                    <div class="profile-progress-row">
-                        <div class="profile-progress-label">Participação Ofensiva</div>
-                        <div class="profile-progress-track">
-                            <div class="profile-progress-fill" style="width: {{ stats_jogador.get('efficiency', {}).get('taxa_partidas_com_participacao', 0) }}%;"></div>
+        <section class="section profile-private-shell">
+            <article class="player-card player-card--premium profile-private-card profile-private-player-card">
+                <div class="player-card__surface profile-private-surface">
+                    <div class="profile-private-player-card__top">
+                        <div class="player-card__avatar-shell profile-private-avatar">
+                            <div class="player-card__avatar" aria-hidden="true">{{ avatar_text|upper }}</div>
                         </div>
-                        <div class="profile-progress-value">{{ stats_jogador.get('efficiency', {}).get('taxa_partidas_com_participacao', 0) }}%</div>
-                    </div>
-                    <div class="profile-progress-row">
-                        <div class="profile-progress-label">Índice de Disciplina</div>
-                        <div class="profile-progress-track">
-                            <div class="profile-progress-fill profile-progress-fill--success" style="width: {{ stats_jogador.get('discipline', {}).get('indice_disciplina', 0) }}%;"></div>
-                        </div>
-                        <div class="profile-progress-value">{{ stats_jogador.get('discipline', {}).get('indice_disciplina', 0) }}</div>
-                    </div>
-                    <div class="profile-progress-row">
-                        <div class="profile-progress-label">Aproveitamento (últimos 5)</div>
-                        <div class="profile-progress-track">
-                            <div class="profile-progress-fill profile-progress-fill--warning" style="width: {{ (stats_jogador.get('ultimos_resultados', {}).get('pontos', 0) / 15 * 100) if stats_jogador.get('ultimos_resultados', {}).get('pontos', 0) else 0 }}%;"></div>
-                        </div>
-                        <div class="profile-progress-value">{{ stats_jogador.get('ultimos_resultados', {}).get('pontos', 0) }}/15</div>
-                    </div>
-                </div>
 
-                <div class="stats-grid profile-kpi-grid">
-                    <div class="stat-card profile-kpi-card">
-                        <div class="stat-label">Cartões Amarelos</div>
-                        <div class="profile-mini-value">🟨 {{ stats_jogador.cartoes_amarelos }}</div>
-                    </div>
-                    <div class="stat-card profile-kpi-card">
-                        <div class="stat-label">Cartões Vermelhos</div>
-                        <div class="profile-mini-value">🟥 {{ stats_jogador.cartoes_vermelhos }}</div>
-                    </div>
-                    <div class="stat-card profile-kpi-card">
-                        <div class="stat-label">Melhor Artilheiro</div>
-                        <div class="profile-mini-value">{{ '👑 Sim' if stats_jogador.maior_artilheiro else '❌ Não' }}</div>
-                    </div>
-                    <div class="stat-card profile-kpi-card">
-                        <div class="stat-label">Melhor Atuação</div>
-                        <div class="profile-mini-value">{{ stats_jogador.melhor_artilheiro_partida }} gols</div>
-                    </div>
-                </div>
-            </div>
-            <div class="profile-form-row">
-                <span class="stat-label">Forma recente</span>
-                <div class="profile-chip-row">
-                    {% for r in stats_jogador.get('ultimos_resultados', {}).get('forma', []) %}
-                        {% if r == 'V' %}
-                            <span class="badge badge-success">V</span>
-                        {% elif r == 'D' %}
-                            <span class="badge badge-danger">D</span>
-                        {% else %}
-                            <span class="badge badge-warning">E</span>
-                        {% endif %}
-                    {% else %}
-                        <span class="badge badge-primary">Sem jogos recentes</span>
-                    {% endfor %}
-                </div>
-            </div>
-        </section>
+                        <div class="player-card__content profile-private-player-card__identity">
+                            <div class="section-label">Meu painel</div>
+                            <div class="player-card__identity-row">
+                                <h2 class="player-card__name profile-private-player-card__name">{{ nome_jogador }}</h2>
+                                <span class="player-card__level-badge">Nível {{ jogador_proprio.nivel if jogador_proprio else 1 }}</span>
+                            </div>
+                            <div class="player-card__tags">
+                                <span class="player-card__tag">@{{ usuario.username }}</span>
+                                <span class="player-card__tag player-card__tag--ghost">
+                                    {% if usuario.role == 'super_admin' %}Super Admin{% elif usuario.role == 'admin' %}Admin{% elif usuario.role == 'juiz' %}Juiz{% else %}Usuário{% endif %}
+                                </span>
+                            {% if jogador_proprio and jogador_proprio.posicao == 'goleiro' %}
+                                <span class="player-card__tag">🧤 Goleiro</span>
+                            {% else %}
+                                <span class="player-card__tag">⚽ Linha</span>
+                            {% endif %}
+                            {% if jogador_proprio and jogador_proprio.tipo == 'fixo' %}
+                                <span class="player-card__tag player-card__tag--ghost">⭐ Fixo</span>
+                            {% else %}
+                                <span class="player-card__tag player-card__tag--ghost">📝 Avulso</span>
+                            {% endif %}
+                            </div>
+                        </div>
 
-        {% if stats_jogador.historico_partidas %}
-        <section class="section">
-            <h2 class="section-title">Histórico de Partidas (Últimas 10)</h2>
-            <div class="table-shell">
-                <table class="uniform-table">
-                    <thead>
-                        <tr>
-                            <th>Data</th>
-                            <th class="text-center">Gols</th>
-                            <th class="text-center">Assistências</th>
-                            <th class="text-center">Amarelo</th>
-                            <th class="text-center">Vermelho</th>
-                            <th class="text-center">Resultado</th>
-                            <th class="text-center">Time</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for partida in stats_jogador.historico_partidas[:10] %}
-                        <tr>
-                            <td>{{ partida.data|dt_pt if partida.data else 'N/A' }}</td>
-                            <td class="text-center">{{ partida.gols }}</td>
-                            <td class="text-center">{{ partida.assistencias }}</td>
-                            <td class="text-center">{{ partida.cartoes_amarelos if partida.cartoes_amarelos > 0 else '—' }}</td>
-                            <td class="text-center">{{ partida.cartoes_vermelhos if partida.cartoes_vermelhos > 0 else '—' }}</td>
-                            <td class="text-center">
+                        <div class="profile-private-score">
+                            <div class="player-card__ring" style="--progress: {{ win_rate }};">
+                                <div class="player-card__ring-inner">
+                                    <span class="player-card__ring-label">Aprovação</span>
+                                    <strong class="player-card__ring-value">{{ win_rate }}%</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-private-combined-heading">
+                        <div class="section-label">Resumo</div>
+                        <h3 class="profile-private-section-title">Resumo de jogos e jogos recentes</h3>
+                    </div>
+
+                    <div class="profile-private-main-grid">
+                        <div class="profile-private-metrics">
+                            <div class="profile-private-metric-card">
+                                <span class="profile-private-metric-icon">🏆</span>
+                                <span class="profile-private-metric-label">Vitórias</span>
+                                <strong class="profile-private-metric-value">{{ stats_jogador.get('vitórias', 0) if stats_jogador else 0 }}</strong>
+                            </div>
+                            <div class="profile-private-metric-card">
+                                <span class="profile-private-metric-icon">⚽</span>
+                                <span class="profile-private-metric-label">Partidas</span>
+                                <strong class="profile-private-metric-value">{{ total_partidas }}</strong>
+                            </div>
+                            <div class="profile-private-metric-card">
+                                <span class="profile-private-metric-icon">🎯</span>
+                                <span class="profile-private-metric-label">Gols</span>
+                                <strong class="profile-private-metric-value">{{ gols }}</strong>
+                            </div>
+                            <div class="profile-private-metric-card">
+                                <span class="profile-private-metric-icon">🤝</span>
+                                <span class="profile-private-metric-label">Assist.</span>
+                                <strong class="profile-private-metric-value">{{ stats_jogador.assistencias if stats_jogador else 0 }}</strong>
+                            </div>
+                        </div>
+
+                        <div class="profile-private-bars">
+                            <div class="profile-progress-row profile-progress-row--stacked">
+                                <div class="profile-progress-row__head">
+                                    <div class="profile-progress-label">Participação ofensiva</div>
+                                    <div class="profile-progress-value">{{ aprovacao }}%</div>
+                                </div>
+                                <div class="profile-progress-track profile-progress-track--thin">
+                                    <div class="profile-progress-fill profile-progress-fill--violet" style="width: {{ aprovacao }}%;"></div>
+                                </div>
+                            </div>
+                            <div class="profile-progress-row profile-progress-row--stacked">
+                                <div class="profile-progress-row__head">
+                                    <div class="profile-progress-label">Disciplina</div>
+                                    <div class="profile-progress-value">{{ disciplina }}%</div>
+                                </div>
+                                <div class="profile-progress-track profile-progress-track--thin">
+                                    <div class="profile-progress-fill profile-progress-fill--green" style="width: {{ disciplina }}%;"></div>
+                                </div>
+                            </div>
+                            <div class="profile-progress-row profile-progress-row--stacked">
+                                <div class="profile-progress-row__head">
+                                    <div class="profile-progress-label">Evolução recente</div>
+                                    <div class="profile-progress-value">{{ stats_jogador.get('ultimos_resultados', {}).get('pontos', 0) if stats_jogador else 0 }}/15</div>
+                                </div>
+                                <div class="profile-progress-track profile-progress-track--thin">
+                                    <div class="profile-progress-fill profile-progress-fill--amber" style="width: {{ evolucao }}%;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="profile-private-footnote">
+                            {% if stats_jogador %}
+                                <span>{% if stats_jogador.get('win_rate_valido', True) %}Win rate validado{% else %}Win rate inconsistente{% endif %}</span>
+                                <span>{{ stats_jogador.get('efficiency', {}).get('participacoes_por_partida', 0) }} participações por partida</span>
+                                <span>{{ stats_jogador.get('vitórias', 0) }}V {{ stats_jogador.derrotas }}D {{ stats_jogador.empates }}E</span>
+                            {% else %}
+                                <span>Sem estatísticas consolidadas ainda</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                {% if stats_jogador and stats_jogador.historico_partidas %}
+                <div class="profile-private-section">
+                    <h3 class="profile-private-section-title">Jogos recentes</h3>
+                    <div class="profile-private-history-grid">
+                        {% for partida in stats_jogador.historico_partidas[:6] %}
+                        <article class="profile-private-history-card">
+                            <div class="profile-private-history-card__top">
+                                <strong>{{ partida.data|dt_pt if partida.data else 'N/A' }}</strong>
+                                <span class="profile-private-history-badge">Time {{ partida.time_numero }}</span>
+                            </div>
+                            <div class="profile-private-history-stats">
+                                <span><b>{{ partida.gols }}</b> gols</span>
+                                <span><b>{{ partida.assistencias }}</b> assistências</span>
+                                <span><b>{{ partida.cartoes_amarelos if partida.cartoes_amarelos > 0 else 0 }}</b> amarelos</span>
+                                <span><b>{{ partida.cartoes_vermelhos if partida.cartoes_vermelhos > 0 else 0 }}</b> vermelhos</span>
+                            </div>
+                            <div class="profile-private-history-result">
                                 {% if partida.resultado == 'vitória' %}
                                     <span class="badge badge-success">Vitória</span>
                                 {% elif partida.resultado == 'derrota' %}
@@ -272,74 +201,51 @@
                                 {% else %}
                                     <span class="badge badge-warning">Empate</span>
                                 {% endif %}
-                            </td>
-                            <td class="text-center">Time {{ partida.time_numero }}</td>
-                        </tr>
+                            </div>
+                        </article>
                         {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                </div>
+            </article>
         </section>
         {% endif %}
 
-        <section class="section">
-            <h2 class="section-title">Destaques Pessoais</h2>
-            <div class="profile-highlight-grid">
-                {% if stats_jogador.partidas_sem_gols > 0 %}
-                <div class="profile-highlight profile-highlight--primary">
-                    <div class="profile-highlight-title">Partidas sem marcar</div>
-                    <div class="profile-highlight-value">{{ stats_jogador.partidas_sem_gols }}</div>
-                </div>
-                {% endif %}
-                
-                {% if stats_jogador.melhor_artilheiro_partida > 0 %}
-                <div class="profile-highlight profile-highlight--secondary">
-                    <div class="profile-highlight-title">Melhor atuação no ataque</div>
-                    <div class="profile-highlight-value">⚽ {{ stats_jogador.melhor_artilheiro_partida }} gols</div>
-                </div>
-                {% endif %}
-                
-                {% if stats_jogador.total_partidas > 0 %}
-                <div class="profile-highlight profile-highlight--success">
-                    <div class="profile-highlight-title">Partidas ganhas</div>
-                    <div class="profile-highlight-value">✅ {{ stats_jogador.get('vitórias', 0) }}</div>
-                </div>
-                {% endif %}
-                
-                {% if stats_jogador.total_partidas > 5 %}
-                <div class="profile-highlight profile-highlight--accent">
-                    <div class="profile-highlight-title">Participações por partida</div>
-                    <div class="profile-highlight-value">{{ stats_jogador.get('efficiency', {}).get('participacoes_por_partida', 0) }}</div>
-                </div>
-                {% endif %}
-            </div>
-        </section>
-        {% endif %}
-        {% endif %}
+            <section class="section profile-private-account-panel profile-private-section profile-private-section--split">
+                    <div class="profile-private-section-block">
+                        <div class="section-label">Resumo da conta</div>
+                        <div class="profile-private-summary-list">
+                            <div class="profile-private-summary-row"><span>Nome completo</span><strong>{{ usuario.nome }}</strong></div>
+                            <div class="profile-private-summary-row"><span>Usuário</span><strong>{{ usuario.username }}</strong></div>
+                            <div class="profile-private-summary-row"><span>Papel</span><strong>{% if usuario.role == 'super_admin' %}Super Admin{% elif usuario.role == 'admin' %}Admin{% elif usuario.role == 'juiz' %}Juiz{% else %}Usuário{% endif %}</strong></div>
+                        </div>
+                    </div>
 
-        {% endif %}
-
-        <section class="section">
-            <h2 class="section-title">Segurança - Alterar Senha</h2>
-            <form method="post" action="{{ url_for('auth.perfil_alterar_senha') }}" class="form">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                {% if not usuario.senha_temporaria_ativa %}
-                <div class="form-group">
-                    <label class="form-label" for="senha_atual">Senha atual</label>
-                    <input class="form-input" id="senha_atual" name="senha_atual" type="password" required>
-                </div>
-                {% endif %}
-                <div class="form-group">
-                    <label class="form-label" for="nova_senha">Nova senha</label>
-                    <input class="form-input" id="nova_senha" name="nova_senha" type="password" minlength="6" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="confirmar_senha">Confirmar nova senha</label>
-                    <input class="form-input" id="confirmar_senha" name="confirmar_senha" type="password" minlength="6" required>
-                </div>
-                <button class="btn btn-primary" type="submit">Salvar nova senha</button>
-            </form>
-        </section>
+                    <div class="profile-private-section-block">
+                        <div class="section-label">Segurança</div>
+                        <h3 class="profile-private-section-title">Alterar senha</h3>
+                        <form method="post" action="{{ url_for('auth.perfil_alterar_senha') }}" class="form profile-private-password-form">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            {% if not usuario.senha_temporaria_ativa %}
+                            <div class="form-group">
+                                <label class="form-label" for="senha_atual">Senha atual</label>
+                                <input class="form-input" id="senha_atual" name="senha_atual" type="password" required>
+                            </div>
+                            {% endif %}
+                            <div class="form-group">
+                                <label class="form-label" for="nova_senha">Nova senha</label>
+                                <input class="form-input" id="nova_senha" name="nova_senha" type="password" minlength="6" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="confirmar_senha">Confirmar nova senha</label>
+                                <input class="form-input" id="confirmar_senha" name="confirmar_senha" type="password" minlength="6" required>
+                            </div>
+                            <button class="btn btn-primary" type="submit">Salvar nova senha</button>
+                        </form>
+                    </div>
+            </section>
     </main>
 </div>
 {% endblock %}

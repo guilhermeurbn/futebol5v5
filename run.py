@@ -5,9 +5,7 @@ Script de inicialização e desenvolvimento
 import os
 import sys
 import json
-import socket
 import argparse
-from pathlib import Path
 
 # Cores para terminal
 VERDE = '\033[92m'
@@ -78,49 +76,26 @@ def check_dependencies():
     return True
 
 
-def _porta_livre(porta: int) -> bool:
-    """Retorna True se a porta estiver livre para bind local."""
-    # Bind to 0.0.0.0 when testing availability so the check matches
-    # the address used to actually run the server (app.run host='0.0.0.0').
-    # This prevents a false-positive where 127.0.0.1:porta está livre,
-    # mas 0.0.0.0:porta já está sendo usado por outro processo.
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        try:
-            sock.bind(('0.0.0.0', porta))
-        except OSError:
-            return False
-    return True
-
-
-def encontrar_porta_disponivel(preferidas=None, fallback=0) -> int:
-    """Encontra uma porta disponível, usando fallback dinâmico quando necessário."""
-    preferidas = preferidas or [5000, 5001, 5002, 5003, 5004, 8000, 8001, 10000]
-
+def obter_porta(default=5000) -> int:
+    """Usa PORT quando definida; caso contrario, usa a porta padrao."""
     porta_env = os.getenv('PORT')
-    if porta_env:
-        try:
-            candidata = int(porta_env)
-            if _porta_livre(candidata):
-                return candidata
-            print(f"{AMARELO}⚠️  Porta definida em PORT={candidata} está em uso. Usando fallback automático...{RESET}")
-        except ValueError:
-            print(f"{AMARELO}⚠️  Valor inválido em PORT ({porta_env}). Usando fallback automático...{RESET}")
+    if not porta_env:
+        return default
 
-    for porta in preferidas:
-        if _porta_livre(porta):
-            return porta
+    try:
+        porta = int(porta_env)
+    except ValueError:
+        raise ValueError(f"PORT precisa ser um numero inteiro. Recebido: {porta_env}")
 
-    # Fallback definitivo: pede ao SO uma porta livre
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        sock.bind(('127.0.0.1', fallback))
-        return sock.getsockname()[1]
+    if not 1 <= porta <= 65535:
+        raise ValueError(f"PORT precisa estar entre 1 e 65535. Recebido: {porta}")
+
+    return porta
 
 
 def main():
     """Função principal"""
-    parser = argparse.ArgumentParser(add_help=True)
-    parser.add_argument('--device-mode', choices=['mobile', 'desktop'], help='Força o modo visual do site')
-    args = parser.parse_args()
+    argparse.ArgumentParser(add_help=True).parse_args()
 
     print_header()
     
@@ -140,19 +115,15 @@ def main():
     # Iniciando servidor
     print(f"{BOLD}Iniciando servidor Flask...{RESET}\n")
 
-    if args.device_mode:
-        os.environ['DEVICE_MODE'] = args.device_mode
-        print(f"{AMARELO}ℹ️  Device mode forçado via terminal: {args.device_mode}{RESET}")
-
-    porta = encontrar_porta_disponivel()
-    if porta != 5000:
-        print(f"{AMARELO}ℹ️  Usando porta disponível: {porta}{RESET}")
+    try:
+        porta = obter_porta()
+    except ValueError as e:
+        print(f"{VERMELHO}❌ {e}{RESET}\n")
+        return 1
     
     print(f"{VERDE}{'='*50}{RESET}")
     print(f"{VERDE}⚽ Servidor rodando em: http://localhost:{porta}{RESET}")
-    if args.device_mode:
-        print(f"{AZUL}📱 Modo visual ativo: {args.device_mode}{RESET}")
-    print(f"{AZUL}💡 Dica: para fixar uma porta, rode com PORT=5050 python run.py{RESET}")
+    print(f"{AZUL}💡 Para escolher a porta: PORT=5001 python run.py{RESET}")
     print(f"{VERDE}{'='*50}{RESET}\n")
     
     # Importar e executar

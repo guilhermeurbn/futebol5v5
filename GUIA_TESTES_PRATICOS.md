@@ -80,7 +80,7 @@ def usuario_admin(auth_service):
     return auth_service.criar_usuario(
         username='admin',
         nome='Admin User',
-        password='admin123',
+        password='SUA_SENHA_ADMIN_LOCAL',
         role='admin'
     )
 

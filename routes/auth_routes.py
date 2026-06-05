@@ -2,11 +2,9 @@
 Rotas de Autenticação
 - Login, logout, cadastro, perfil e alteração de senha
 """
-import csv
-from io import StringIO
-
-from flask import Blueprint, request, render_template, redirect, url_for, session, Response, jsonify
+from flask import Blueprint, request, render_template, redirect, url_for, session, jsonify
 from functools import wraps
+import logging
 import os
 from services.auth_service import AuthService
 from services.email_service import EmailService
@@ -16,6 +14,7 @@ from services.notificacao_service import NotificacaoService
 from services.juiz_partida_service import JuizPartidaService
 
 auth_bp = Blueprint('auth', __name__)
+logger = logging.getLogger(__name__)
 
 auth_service = AuthService()
 email_service = EmailService()
@@ -63,6 +62,11 @@ def login_required(f):
     return wrapper
 
 
+def _is_request_local():
+    remote_addr = request.remote_addr or ''
+    return remote_addr in {'127.0.0.1', '::1', 'localhost'}
+
+
 # ============================================================
 # CONTEXT PROCESSORS
 # ============================================================
@@ -104,12 +108,14 @@ def login_submit():
     """Handler para submit de login"""
     username = request.form.get('username', '').strip()
     password = request.form.get('password', '')
+    remember_me = request.form.get('remember_me') in {'1', 'on', 'true', 'yes'}
     
     try:
         usuario = auth_service.autenticar(username, password)
         if not usuario:
             return render_template('login.html', erro='Usuario ou senha invalidos'), 401
 
+        session.permanent = remember_me
         session['user_id'] = usuario['id']
         session['username'] = usuario['username']
         session['nome'] = usuario['nome']
@@ -203,27 +209,28 @@ def recuperar_senha_page():
 @auth_bp.route('/recuperar-senha', methods=['POST'])
 def recuperar_senha_submit():
     email = request.form.get('email', '').strip().lower()
-    mensagem = 'Se o email existir na base, enviamos uma senha temporaria para acesso.'
+    mensagem = 'Se o email existir na base, enviamos um link de redefinicao de senha.'
 
     if not email or '@' not in email:
         return render_template('recuperar_senha.html', erro='Informe um email valido'), 400
 
     usuario = auth_service.obter_por_email(email)
     if not usuario:
-        return render_template('recuperar_senha.html', erro='Nao encontramos uma conta com esse email. Use o email cadastrado na conta.'), 404
+        return render_template('recuperar_senha.html', sucesso=mensagem)
 
     try:
-        dados_reset = auth_service.resetar_senha_por_admin(usuario.get('id'))
-        resultado_email = email_service.send_temporary_password_email(
+        token = auth_service.gerar_token_reset(usuario.get('id'))
+        base_url = (os.getenv('APP_BASE_URL') or request.url_root).rstrip('/')
+        reset_url = f"{base_url}{url_for('auth.definir_senha_page', token=token)}"
+        resultado_email = email_service.send_password_reset_email(
             to_email=usuario.get('email') or email,
             nome=usuario.get('nome') or usuario.get('username') or 'usuario',
-            username=usuario.get('username') or 'usuario',
-            senha_temporaria=dados_reset.get('senha_temporaria') or '',
+            reset_url=reset_url,
         )
         if not resultado_email.ok:
-            return render_template('recuperar_senha.html', erro='Nao foi possivel enviar o email de senha temporaria'), 500
+            logger.warning('Falha ao enviar email de recuperacao para %s: %s', email, resultado_email.error)
     except Exception as exc:
-        return render_template('recuperar_senha.html', erro=f'Erro ao enviar email: {exc}'), 500
+        logger.warning('Erro ao processar recuperacao de senha para %s: %s', email, exc)
 
     return render_template('recuperar_senha.html', sucesso=mensagem)
 
@@ -403,38 +410,20 @@ def perfil_alterar_senha():
         ), 500
 
 
-@auth_bp.route('/api/perfil/dashboard', methods=['GET'])
-@login_required
-def perfil_dashboard_api():
-    """Retorna payload de dashboard do jogador do usuário logado."""
-    try:
-        meus = jogador_service.listar_por_usuario(session.get('user_id'))
-        jogador_proprio = meus[0] if meus else None
-        if not jogador_proprio:
-            return jsonify({'ok': True, 'dashboard': None, 'mensagem': 'Usuario sem jogador vinculado'})
-
-        stats_jogador = jogador_stats_service.obter_stats_jogador(jogador_proprio.nome)
-        return jsonify({'ok': True, 'dashboard': stats_jogador})
-    except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.error(f"Erro ao carregar dashboard do perfil: {str(e)}")
-        return jsonify({'ok': False, 'erro': 'Falha ao carregar dashboard'}), 500
-
-
 # ============================================================
 # ROTA DE TESTE: Enviar senha temporária por email (DEV ONLY)
 # ============================================================
 
 
 @auth_bp.route('/teste-email', methods=['POST', 'GET'])
+@login_required
 def teste_email_route():
     """Endpoint de teste para enviar uma senha temporaria a um usuario.
 
     Aceita `email` ou `username` via query string ou form data.
     Só funciona quando FLASK_ENV != 'production'.
     """
-    if os.getenv('FLASK_ENV', 'development') == 'production':
+    if os.getenv('FLASK_ENV', 'development') == 'production' or not _is_request_local() or not _is_admin():
         return jsonify({'ok': False, 'error': 'Endpoint desativado em production'}), 403
 
     email = (request.values.get('email') or '').strip().lower()
@@ -472,64 +461,16 @@ def teste_email_route():
     except Exception as e:
         return jsonify({'ok': False, 'error': 'Erro interno'}), 500
 
-
-
-@auth_bp.route('/perfil/planilha.csv', methods=['GET'])
-@login_required
-def perfil_planilha_csv():
-    """Exporta métricas do perfil em CSV (formato planilha)."""
-    meus = jogador_service.listar_por_usuario(session.get('user_id'))
-    jogador_proprio = meus[0] if meus else None
-    if not jogador_proprio:
-        return redirect(url_for('auth.perfil_page'))
-
-    stats = jogador_stats_service.obter_stats_jogador(jogador_proprio.nome)
-    linhas = stats.get('planilha_metricas', [])
-
-    output = StringIO()
-    writer = csv.writer(output)
-    writer.writerow([
-        'Data',
-        'Partida ID',
-        'Time',
-        'Resultado',
-        'Pontos',
-        'Gols',
-        'Assistencias',
-        'Cartoes Amarelos',
-        'Cartoes Vermelhos',
-    ])
-
-    for linha in linhas:
-        writer.writerow([
-            linha.get('data', ''),
-            linha.get('partida_id', ''),
-            linha.get('time', ''),
-            linha.get('resultado', ''),
-            linha.get('pontos', 0),
-            linha.get('gols', 0),
-            linha.get('assistencias', 0),
-            linha.get('cartoes_amarelos', 0),
-            linha.get('cartoes_vermelhos', 0),
-        ])
-
-    csv_content = output.getvalue()
-    output.close()
-
-    response = Response(csv_content, mimetype='text/csv; charset=utf-8')
-    response.headers['Content-Disposition'] = 'attachment; filename=perfil_metricas.csv'
-    return response
-
-
 # Rota simples de teste de email (envio genérico)
 @auth_bp.route('/teste-email/simple', methods=['GET'])
+@login_required
 def teste_email_simples():
     """Envio rápido para checar se Resend funciona.
 
     Use `?email=destinatario@example.com` para alterar o destinatário.
     Desabilitado em `production`.
     """
-    if os.getenv('FLASK_ENV', 'development') == 'production':
+    if os.getenv('FLASK_ENV', 'development') == 'production' or not _is_request_local() or not _is_admin():
         return "Endpoint desativado em production", 403
 
     destinatario = request.args.get('email', 'teuemail@gmail.com').strip()

@@ -5,7 +5,6 @@ import os
 import logging
 import socket
 import uuid
-import argparse
 from flask import Flask, send_file
 try:
     from flask_wtf import CSRFProtect
@@ -28,7 +27,6 @@ from routes import (
     stats_bp,
     votacao_bp,
 )
-from routes.commons import detectar_device_context
 from services.db import auto_seed_on_init
 # Configuração de logging
 logging.basicConfig(
@@ -124,10 +122,6 @@ def criar_app(config_name: str = None) -> Flask:
     app.register_blueprint(stats_bp)
     _registrar_aliases_jogador(app)
 
-    @app.context_processor
-    def inject_device_context():
-        return detectar_device_context()
-    
     # Auto-seed database se estiver vazio (Railway)
     try:
         auto_seed_on_init()
@@ -216,13 +210,6 @@ def _porta_disponivel(preferida: int = 10000) -> int:
         return sock.getsockname()[1]
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(add_help=True)
-    parser.add_argument('--device-mode', choices=['mobile', 'desktop'], help='Força o modo visual do site')
-    args = parser.parse_args()
-
-    if args.device_mode:
-        os.environ['DEVICE_MODE'] = args.device_mode
-
     port_env = os.environ.get("PORT")
     if port_env:
         port = int(port_env)

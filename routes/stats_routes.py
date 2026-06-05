@@ -10,6 +10,7 @@ from functools import wraps
 import io
 import logging
 
+from routes.commons import login_required
 from services.stats_service import StatsService
 from services.historico_service import HistoricoService
 from services.export_service import ExportService
@@ -50,6 +51,7 @@ def _usuario_logado():
 # ============================================================
 
 @stats_bp.route('/api/estatisticas')
+@login_required
 def api_estatisticas():
     """API: Retorna estatísticas gerais"""
     try:
@@ -72,6 +74,7 @@ def estatisticas():
 # ============================================================
 
 @stats_bp.route('/api/stats/players', methods=['GET'])
+@login_required
 def api_stats_players():
     """API: Estatísticas detalhadas por jogador"""
     try:
@@ -103,6 +106,7 @@ def stats_players():
 # ============================================================
 
 @stats_bp.route('/api/stats/times', methods=['GET'])
+@login_required
 def api_stats_times():
     """API: Estatísticas de times"""
     try:
@@ -134,6 +138,7 @@ def stats_times_page():
 # ============================================================
 
 @stats_bp.route('/api/stats/geral', methods=['GET'])
+@login_required
 def api_stats_geral():
     """API: Estatísticas gerais de sorteios"""
     try:
@@ -149,6 +154,7 @@ def api_stats_geral():
 # ============================================================
 
 @stats_bp.route('/api/stats/combos', methods=['GET'])
+@login_required
 def api_stats_combos():
     """API: Melhores combos vencedores"""
     try:
@@ -170,6 +176,7 @@ def stats_combos_page():
 # ============================================================
 
 @stats_bp.route('/api/stats/comparacao/<player1>/<player2>', methods=['GET'])
+@login_required
 def api_stats_comparacao(player1, player2):
     """API: Comparação entre dois jogadores"""
     try:
@@ -195,6 +202,7 @@ def charts():
 # ============================================================
 
 @stats_bp.route('/export/sorteio/csv', methods=['GET'])
+@login_required
 def export_sorteio_csv():
     """Exporta último sorteio em CSV"""
     try:
@@ -221,6 +229,7 @@ def export_sorteio_csv():
 
 
 @stats_bp.route('/export/historico/csv', methods=['GET'])
+@login_required
 def export_historico_csv():
     """Exporta histórico completo em CSV"""
     try:
@@ -239,6 +248,7 @@ def export_historico_csv():
 
 
 @stats_bp.route('/export/estatisticas/csv', methods=['GET'])
+@login_required
 def export_estatisticas_csv():
     """Exporta estatísticas em CSV"""
     try:
@@ -261,6 +271,7 @@ def export_estatisticas_csv():
 # ============================================================
 
 @stats_bp.route('/export/sorteio/txt', methods=['GET'])
+@login_required
 def export_sorteio_txt():
     """Retorna último sorteio em texto simples"""
     try:
@@ -281,6 +292,7 @@ def export_sorteio_txt():
 
 
 @stats_bp.route('/api/export/sorteio/txt', methods=['GET'])
+@login_required
 def api_export_sorteio_txt():
     """API para copiar texto do último sorteio"""
     try:
@@ -305,6 +317,7 @@ def api_export_sorteio_txt():
 # ============================================================
 
 @stats_bp.route('/export/sorteio/pdf', methods=['GET'])
+@login_required
 def export_sorteio_pdf():
     """Exporta último sorteio em PDF"""
     try:
@@ -334,6 +347,7 @@ def export_sorteio_pdf():
 
 
 @stats_bp.route('/api/export/sorteio', methods=['POST'])
+@login_required
 def api_export_sorteio_data():
     """API para armazenar dados do último sorteio na sessão"""
     try:
@@ -353,6 +367,7 @@ def api_export_sorteio_data():
 # ============================================================
 
 @stats_bp.route('/api/sugestoes/nivel', methods=['POST'])
+@login_required
 def api_sugestoes_nivel():
     """API: Sugestões por nível"""
     try:
@@ -375,6 +390,7 @@ def api_sugestoes_nivel():
 
 
 @stats_bp.route('/api/sugestoes/diversidade', methods=['POST'])
+@login_required
 def api_sugestoes_diversidade():
     """API: Sugestões por diversidade"""
     try:
@@ -397,6 +413,7 @@ def api_sugestoes_diversidade():
 
 
 @stats_bp.route('/api/sugestoes/vencedores', methods=['POST'])
+@login_required
 def api_sugestoes_vencedores():
     """API: Sugestões por jogadores vencedores"""
     try:
@@ -419,6 +436,7 @@ def api_sugestoes_vencedores():
 
 
 @stats_bp.route('/api/sugestoes/duplas', methods=['POST'])
+@login_required
 def api_sugestoes_duplas():
     """API: Sugestões por duplas vencedoras"""
     try:
@@ -441,6 +459,7 @@ def api_sugestoes_duplas():
 
 
 @stats_bp.route('/api/sugestoes/combinadas', methods=['POST'])
+@login_required
 def api_sugestoes_combinadas():
     """API: Sugestões combinadas (todas as estratégias)"""
     try:

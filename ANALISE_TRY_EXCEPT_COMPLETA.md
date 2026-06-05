@@ -95,7 +95,7 @@ except Exception as e:
 ```python
 try:
     os.makedirs(os.path.dirname(self.arquivo), exist_ok=True)
-    creds_file = os.path.join(os.path.dirname(self.arquivo), 'initial_admin_credentials.json')
+    creds_file = os.path.join('.secrets', 'initial_admin_credentials.json')
     with open(creds_file, 'w', encoding='utf-8') as cf:
         json.dump(created_credentials, cf, indent=2, ensure_ascii=False)
 except Exception:  # ❌ Silencia TODOS os erros
@@ -106,7 +106,7 @@ except Exception:  # ❌ Silencia TODOS os erros
 ```python
 try:
     os.makedirs(os.path.dirname(self.arquivo), exist_ok=True)
-    creds_file = os.path.join(os.path.dirname(self.arquivo), 'initial_admin_credentials.json')
+    creds_file = os.path.join('.secrets', 'initial_admin_credentials.json')
     with open(creds_file, 'w', encoding='utf-8') as cf:
         json.dump(created_credentials, cf, indent=2, ensure_ascii=False)
 except PermissionError as e:

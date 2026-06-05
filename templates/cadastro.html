@@ -1,150 +1,150 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NaTrave | Cadastro</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body class="auth-page">
-    <div class="auth-page__glow auth-page__glow--primary"></div>
-    <div class="auth-page__glow auth-page__glow--secondary"></div>
-    <div class="auth-page__glow auth-page__glow--accent"></div>
+{% extends '_auth_layout.html' %}
 
-    <main class="auth-shell">
-        <section class="auth-panel auth-panel--intro auth-panel--intro-hero">
-            <div class="auth-panel__brand auth-panel__brand--hero auth-panel__brand--hero-lockup">
-                <div class="auth-panel__logo auth-panel__logo--image auth-panel__logo--hero auth-panel__logo--hero-large">
-                    <img src="{{ url_for('static', filename='logo-natrave-5v5.png') }}" alt="NaTrave 5v5" class="auth-panel__logo-image">
-                </div>
-                <div class="auth-panel__brand-copy auth-panel__brand-copy--hero">
-                    <h1 class="auth-title auth-title--brand auth-title--hero">Crie sua conta e organize seu jogo com mais precisão.</h1>
-                    <p class="auth-subtitle auth-subtitle--hero">Cadastre-se para acompanhar partidas, participar das votações e manter seu histórico centralizado.</p>
+{% block title %}Cadastro{% endblock %}
+{% block auth_shell_class %}auth-shell--signup-equal{% endblock %}
+{% block auth_heading_id %}signupHeading{% endblock %}
+{% block auth_form_panel_class %}auth-panel--form--flex{% endblock %}
+
+{% block auth_intro_wrapper %}
+    <section class="auth-panel auth-panel--intro auth-panel--intro-hero">
+        {% include '_auth_intro.html' %}
+    </section>
+{% endblock %}
+
+{% block auth_messages %}
+    {% if erro %}
+        <div class="auth-message auth-message--warning" role="alert" aria-live="assertive">
+            <strong>⚠️</strong>
+            <span>{{ erro }}</span>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block auth_card_header %}
+    <div class="auth-card-header">
+        <div class="section-label">Cadastro</div>
+        <h2 id="signupHeading" class="auth-card-title auth-card-title--login">
+            <span class="auth-card-title__icon" aria-hidden="true">🆕</span>
+            <span>Novo usuário</span>
+        </h2>
+        <p class="auth-card-subtitle">Crie seu acesso com perfil de jogador.</p>
+    </div>
+{% endblock %}
+
+{% block auth_form %}
+    <form method="post" action="{{ url_for('jogador.cadastro_submit') }}" class="auth-form auth-form--signup-premium">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="nivel" value="5">
+
+        <div class="auth-form-grid auth-form-grid--signup-premium">
+            <div class="form-group auth-field">
+                <label class="form-label" for="email">Email</label>
+                <div class="auth-input-wrap">
+                    <span class="auth-input-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="5" width="18" height="14" rx="2" />
+                            <path d="m4 7 8 6 8-6" />
+                        </svg>
+                    </span>
+                    <input class="form-input auth-input" id="email" name="email" type="email" placeholder="Digite seu email" required autocomplete="email" autofocus>
                 </div>
             </div>
-        </section>
 
-        <section class="auth-panel auth-panel--form" aria-labelledby="signupHeading">
-            {% if erro %}
-                <div class="auth-message auth-message--warning" role="alert" aria-live="assertive">
-                    <strong>⚠️</strong>
-                    <span>{{ erro }}</span>
+            <div class="form-group auth-field">
+                <label class="form-label" for="nome">Nome</label>
+                <div class="auth-input-wrap">
+                    <span class="auth-input-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21a8 8 0 0 0-16 0" />
+                            <circle cx="12" cy="8" r="4" />
+                        </svg>
+                    </span>
+                    <input class="form-input auth-input" id="nome" name="nome" type="text" placeholder="Digite seu nome" required minlength="2" autocomplete="name">
                 </div>
-            {% endif %}
-
-            <div class="auth-card-header">
-                <div class="section-label">Cadastro</div>
-                <h2 id="signupHeading" class="auth-card-title auth-card-title--login">
-                    <span class="auth-card-title__icon" aria-hidden="true">🆕</span>
-                    <span>Novo usuário</span>
-                </h2>
-                <p class="auth-card-subtitle">Preencha seus dados para criar o acesso ao sistema e recuperar a senha por email quando precisar.</p>
             </div>
 
-            <form method="post" action="{{ url_for('jogador.cadastro_submit') }}" class="auth-form">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div class="form-group auth-field">
-                    <label class="form-label" for="email">Email</label>
-                    <div class="auth-input-wrap">
-                        <span class="auth-input-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="3" y="5" width="18" height="14" rx="2" />
-                                <path d="m4 7 8 6 8-6" />
-                            </svg>
-                        </span>
-                        <input class="form-input auth-input" id="email" name="email" type="email" placeholder="Digite seu email" required autocomplete="email" autofocus>
-                    </div>
+            <div class="form-group auth-field auth-form-grid--full">
+                <label class="form-label" for="username">Usuário</label>
+                <div class="auth-input-wrap">
+                    <span class="auth-input-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21a8 8 0 0 0-16 0" />
+                            <circle cx="12" cy="8" r="4" />
+                        </svg>
+                    </span>
+                    <input class="form-input auth-input" id="username" name="username" type="text" placeholder="Digite seu usuário" required minlength="3" autocomplete="username">
                 </div>
-                <div class="form-group auth-field">
-                    <label class="form-label" for="nome">Nome</label>
-                    <div class="auth-input-wrap">
-                        <span class="auth-input-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M20 21a8 8 0 0 0-16 0" />
-                                <circle cx="12" cy="8" r="4" />
-                            </svg>
-                        </span>
-                        <input class="form-input auth-input" id="nome" name="nome" type="text" placeholder="Digite seu nome" required minlength="2" autocomplete="name">
-                    </div>
-                </div>
-                <div class="form-group auth-field">
-                    <label class="form-label" for="username">Usuário</label>
-                    <div class="auth-input-wrap">
-                        <span class="auth-input-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M20 21a8 8 0 0 0-16 0" />
-                                <circle cx="12" cy="8" r="4" />
-                            </svg>
-                        </span>
-                        <input class="form-input auth-input" id="username" name="username" type="text" placeholder="Digite seu usuário" required minlength="3" autocomplete="username">
-                    </div>
-                </div>
-                <div class="form-group auth-field">
-                    <label class="form-label" for="password">Senha</label>
-                    <div class="auth-input-wrap">
-                        <span class="auth-input-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="4" y="10" width="16" height="10" rx="2" />
-                                <path d="M8 10V7a4 4 0 0 1 8 0v3" />
-                            </svg>
-                        </span>
-                        <input class="form-input auth-input" id="password" name="password" type="password" placeholder="Digite sua senha" required minlength="6" autocomplete="new-password">
-                    </div>
-                </div>
-                <div class="form-group auth-field">
-                    <label class="form-label" for="confirmar_password">Confirmar senha</label>
-                    <div class="auth-input-wrap">
-                        <span class="auth-input-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="4" y="10" width="16" height="10" rx="2" />
-                                <path d="M8 10V7a4 4 0 0 1 8 0v3" />
-                            </svg>
-                        </span>
-                        <input class="form-input auth-input" id="confirmar_password" name="confirmar_password" type="password" placeholder="Confirme sua senha" required minlength="6" autocomplete="new-password">
-                    </div>
-                </div>
-                <div class="auth-form-grid auth-form-grid--signup">
-                    <div class="form-group auth-field">
-                        <label class="form-label" for="nivel">Nível do seu jogador (1-10)</label>
-                        <div class="auth-input-wrap">
-                            <span class="auth-input-icon" aria-hidden="true">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M4 19h16" />
-                                    <path d="M8 16V8" />
-                                    <path d="M12 16V5" />
-                                    <path d="M16 16v-4" />
-                                </svg>
-                            </span>
-                            <input class="form-input auth-input" id="nivel" name="nivel" type="number" min="1" max="10" value="5" required>
-                        </div>
-                    </div>
-                    <div class="form-group auth-field">
-                        <label class="form-label" for="tipo">Tipo</label>
-                        <div class="auth-input-wrap">
-                            <select class="form-input auth-input auth-select" id="tipo" name="tipo">
-                                <option value="avulso">avulso</option>
-                                <option value="fixo">fixo</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group auth-field auth-form-grid--full">
-                        <label class="form-label" for="posicao">Posição</label>
-                        <div class="auth-input-wrap">
-                            <select class="form-input auth-input auth-select" id="posicao" name="posicao">
-                                <option value="linha">linha</option>
-                                <option value="goleiro">goleiro</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <button class="btn btn-primary auth-submit" type="submit">Criar conta</button>
-            </form>
-
-            <div class="auth-card-footer">
-                <p class="auth-link-text">Já tem conta? <a href="{{ url_for('jogador.login_page') }}" class="text-accent-link">Entrar</a></p>
             </div>
-        </section>
-    </main>
-</body>
-</html>
+
+            <div class="form-group auth-field">
+                <label class="form-label" for="password">Senha</label>
+                <div class="auth-input-wrap">
+                    <span class="auth-input-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="4" y="10" width="16" height="10" rx="2" />
+                            <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                        </svg>
+                    </span>
+                    <input class="form-input auth-input" id="password" name="password" type="password" placeholder="Crie uma senha" required minlength="6" autocomplete="new-password">
+                </div>
+            </div>
+
+            <div class="form-group auth-field">
+                <label class="form-label" for="confirmar_password">Confirmar senha</label>
+                <div class="auth-input-wrap">
+                    <span class="auth-input-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="4" y="10" width="16" height="10" rx="2" />
+                            <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                        </svg>
+                    </span>
+                    <input class="form-input auth-input" id="confirmar_password" name="confirmar_password" type="password" placeholder="Repita sua senha" required minlength="6" autocomplete="new-password">
+                </div>
+            </div>
+
+            <div class="auth-choice-block auth-form-grid--full">
+                <p class="auth-choice-block__label">Tipo de jogador</p>
+                <div class="auth-choice-grid" role="radiogroup" aria-label="Tipo de jogador">
+                    <label class="auth-choice-option">
+                        <input type="radio" name="tipo" value="fixo" class="auth-choice-option__input" required>
+                        <span class="auth-choice-option__check" aria-hidden="true"></span>
+                        <span class="auth-choice-option__title">Fixo</span>
+                        <span class="auth-choice-option__hint">Presença frequente</span>
+                    </label>
+                    <label class="auth-choice-option">
+                        <input type="radio" name="tipo" value="avulso" class="auth-choice-option__input" checked required>
+                        <span class="auth-choice-option__check" aria-hidden="true"></span>
+                        <span class="auth-choice-option__title">Avulso</span>
+                        <span class="auth-choice-option__hint">Participação flexível</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="auth-choice-block auth-form-grid--full">
+                <p class="auth-choice-block__label">Posição</p>
+                <div class="auth-choice-grid" role="radiogroup" aria-label="Posição de jogo">
+                    <label class="auth-choice-option">
+                        <input type="radio" name="posicao" value="linha" class="auth-choice-option__input" checked required>
+                        <span class="auth-choice-option__check" aria-hidden="true"></span>
+                        <span class="auth-choice-option__title">Linha</span>
+                        <span class="auth-choice-option__hint">Atua na linha</span>
+                    </label>
+                    <label class="auth-choice-option">
+                        <input type="radio" name="posicao" value="goleiro" class="auth-choice-option__input" required>
+                        <span class="auth-choice-option__check" aria-hidden="true"></span>
+                        <span class="auth-choice-option__title">Gol</span>
+                        <span class="auth-choice-option__hint">Atua no gol</span>
+                    </label>
+                </div>
+            </div>
+
+            <button class="btn btn-primary auth-submit auth-form-grid--full" type="submit">Criar conta</button>
+        </div>
+    </form>
+{% endblock %}
+
+{% block auth_card_footer %}
+    <div class="auth-card-footer">
+        <p class="auth-link-text">Já tem conta? <a href="{{ url_for('jogador.login_page') }}" class="text-accent-link">Entrar</a></p>
+    </div>
+{% endblock %}

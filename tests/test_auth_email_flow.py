@@ -10,17 +10,14 @@ from services.email_service import EmailService
 
 
 class FakeResponse:
-    def __init__(self, payload):
-        self._payload = payload
+    status_code = 200
+    text = '{"id": "email_123"}'
 
-    def read(self):
-        return json.dumps(self._payload).encode('utf-8')
+    def raise_for_status(self):
+        return None
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc, tb):
-        return False
+    def json(self):
+        return {'id': 'email_123'}
 
 
 def test_auth_service_email_and_reset_token_roundtrip(tmp_path):
@@ -50,13 +47,14 @@ def test_email_service_send_welcome_email(monkeypatch):
 
     captured = {}
 
-    def fake_urlopen(req, timeout=0):
-        captured['url'] = req.full_url
-        captured['headers'] = dict(req.header_items())
-        captured['body'] = json.loads(req.data.decode('utf-8'))
-        return FakeResponse({'id': 'email_123'})
+    def fake_post(url, headers=None, json=None, timeout=0):
+        captured['url'] = url
+        captured['headers'] = headers or {}
+        captured['body'] = json or {}
+        captured['timeout'] = timeout
+        return FakeResponse()
 
-    monkeypatch.setattr('services.email_service.request.urlopen', fake_urlopen)
+    monkeypatch.setattr('services.email_service.requests.post', fake_post)
 
     service = EmailService()
     result = service.send_welcome_email('user@example.com', 'User', 'user123')
@@ -66,3 +64,4 @@ def test_email_service_send_welcome_email(monkeypatch):
     assert captured['url'] == 'https://api.resend.com/emails'
     assert captured['body']['to'] == ['user@example.com']
     assert 'Authorization' in captured['headers']
+    assert captured['timeout'] == 15
