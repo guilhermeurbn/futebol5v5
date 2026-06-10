@@ -58,7 +58,12 @@
 
     {% if notificacoes_url %}
     <a href="{{ notificacoes_url }}" class="admin-notification-fab" aria-label="Abrir avisos do sistema">
-        <span class="admin-notification-fab__icon" aria-hidden="true">🔔</span>
+        <span class="admin-notification-fab__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true">
+                <path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5" />
+                <path d="M9.8 20a2.4 2.4 0 0 0 4.4 0" />
+            </svg>
+        </span>
         <span class="admin-notification-fab__count">{{ total_notificacoes }}</span>
     </a>
     {% endif %}
