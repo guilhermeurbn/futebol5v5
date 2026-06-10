@@ -20,18 +20,6 @@ email_service = EmailService()
 notificacao_service = NotificacaoService()
 
 
-def _resolver_credenciais_resend(form):
-    api_key = (form.get('resend_api_key') or '').strip()
-    from_email = (form.get('resend_from_email') or '').strip()
-
-    if not api_key:
-        api_key = email_service._resolve_credentials()[0]
-    if not from_email:
-        from_email = email_service._resolve_credentials()[1]
-
-    return api_key, from_email
-
-
 # ============================================================
 # DECORATORS
 # ============================================================
@@ -108,6 +96,25 @@ def admin_limpar_notificacoes():
         return redirect(url_for('admin.admin_page', erro='Erro ao limpar notificações'))
 
 
+@admin_bp.route('/admin/notificacoes', methods=['GET'])
+@admin_required
+def admin_notificacoes_page():
+    """Lista completa de notificações administrativas."""
+    try:
+        notificacoes = notificacao_service.listar_notificacoes(apenas_nao_lidas=True, limite=100)
+        arquivadas = notificacao_service.listar_arquivadas(limite=50)
+        return render_template(
+            'admin_notificacoes.html',
+            notificacoes=notificacoes,
+            arquivadas=arquivadas,
+            total_notificacoes=notificacao_service.contar_nao_lidas(),
+            usuario=_usuario_logado(),
+        )
+    except Exception as e:
+        logger.error(f"Erro ao carregar notificacoes admin: {str(e)}")
+        return render_template('admin_notificacoes.html', notificacoes=[], arquivadas=[], erro='Erro ao carregar avisos', usuario=_usuario_logado()), 500
+
+
 # ============================================================
 # GERENCIAMENTO DE USUÁRIOS
 # ============================================================
@@ -149,13 +156,8 @@ def admin_resetar_senha_usuario(user_id):
         )
         session['admin_sucesso'] = f'Senha de {dados_reset.get("nome")} resetada com sucesso'
         if dados_reset.get('email'):
-            api_key, from_email = _resolver_credenciais_resend(request.form)
             try:
-                if not api_key or not from_email:
-                    raise RuntimeError('Informe RESEND_API_KEY e RESEND_FROM_EMAIL para o teste')
-
-                local_email_service = EmailService(api_key=api_key, from_email=from_email, base_url=email_service.base_url)
-                resultado = local_email_service.send_temporary_password_email(
+                resultado = email_service.send_temporary_password_email(
                     to_email=dados_reset.get('email'),
                     nome=dados_reset.get('nome') or dados_reset.get('username') or 'usuario',
                     username=dados_reset.get('username') or '',

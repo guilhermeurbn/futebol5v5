@@ -5,7 +5,7 @@ import os
 import logging
 import socket
 import uuid
-from flask import Flask, send_file, request
+from flask import Flask, send_file, request, session, url_for
 try:
     from flask_wtf import CSRFProtect
     from flask_wtf.csrf import generate_csrf
@@ -27,6 +27,7 @@ from routes import (
     stats_bp,
     votacao_bp,
 )
+from services.notificacao_service import NotificacaoService
 from services.db import auto_seed_on_init
 # Configuração de logging
 logging.basicConfig(
@@ -34,6 +35,7 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+notificacao_service = NotificacaoService()
 
 
 def _registrar_aliases_jogador(app: Flask) -> None:
@@ -192,6 +194,23 @@ def criar_app(config_name: str = None) -> Flask:
 
     app.jinja_env.filters['dt_pt'] = dt_pt
     app.jinja_env.filters['dt_pt_hm'] = dt_pt_hm
+
+    @app.context_processor
+    def inject_notificacoes_globais():
+        total_notificacoes = 0
+        notificacoes_url = None
+        try:
+            if session.get('user_id') and session.get('role') in {'admin', 'super_admin'}:
+                total_notificacoes = notificacao_service.contar_nao_lidas()
+                notificacoes_url = url_for('admin.admin_notificacoes_page')
+        except Exception:
+            total_notificacoes = 0
+            notificacoes_url = None
+
+        return {
+            'total_notificacoes': total_notificacoes,
+            'notificacoes_url': notificacoes_url,
+        }
 
     # Em desenvolvimento, garantir que mudanças em templates sejam recarregadas
     # automaticamente sem precisar reiniciar o servidor manualmente.

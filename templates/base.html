@@ -55,6 +55,13 @@
             });
         }
     </script>
+
+    {% if notificacoes_url %}
+    <a href="{{ notificacoes_url }}" class="admin-notification-fab" aria-label="Abrir avisos do sistema">
+        <span class="admin-notification-fab__icon" aria-hidden="true">🔔</span>
+        <span class="admin-notification-fab__count">{{ total_notificacoes }}</span>
+    </a>
+    {% endif %}
     {% block content %}{% endblock %}
 </body>
 </html>

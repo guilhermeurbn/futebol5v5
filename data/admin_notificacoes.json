@@ -1,6 +1,7 @@
 {
-  "ultimo_id": 4,
-  "notificacoes": [
+  "ultimo_id": 7,
+  "notificacoes": [],
+  "arquivadas": [
     {
       "id": 1,
       "titulo": "Novo cadastro de usuario",
@@ -32,6 +33,30 @@
       "tipo": "cadastro",
       "lida": true,
       "criado_em": "2026-04-27T18:54:54.128018"
+    },
+    {
+      "id": 5,
+      "titulo": "Novo cadastro de usuario",
+      "mensagem": "Usuario ola (ola) acabou de se cadastrar.",
+      "tipo": "cadastro",
+      "lida": true,
+      "criado_em": "2026-06-06T00:07:55.689205"
+    },
+    {
+      "id": 6,
+      "titulo": "Novo cadastro de usuario",
+      "mensagem": "Usuario ola (ola) acabou de se cadastrar.",
+      "tipo": "cadastro",
+      "lida": true,
+      "criado_em": "2026-06-06T00:10:31.233968"
+    },
+    {
+      "id": 7,
+      "titulo": "Novo cadastro de usuario",
+      "mensagem": "Usuario olaaa (olaa) acabou de se cadastrar.",
+      "tipo": "cadastro",
+      "lida": true,
+      "criado_em": "2026-06-08T22:24:13.721981"
     }
   ]
 }

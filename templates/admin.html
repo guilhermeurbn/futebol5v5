@@ -32,148 +32,63 @@
             </div>
         {% endif %}
 
-        <section class="section admin-page__toolbar">
-            <div class="section-header admin-page__toolbar-header">
-                <div>
-                    <h2 class="section-title">⚙️ Painel de controle</h2>
-                    <p class="section-subtitle">Abra avisos do sistema ou crie um novo usuário quando precisar.</p>
-                </div>
-                <div class="section-header-actions admin-page__toolbar-actions">
-                    <button type="button" class="btn btn-secondary btn-small admin-toolbar-btn btn-toggle-create" data-toggle-panel="notificationsPanel" aria-expanded="false" aria-controls="notificationsPanel">
-                        <span class="toggle-create-icon" aria-hidden="true"></span>
-                        <span>🔔 Avisos do sistema</span>
-                        {% if total_notificacoes %}<span class="admin-toolbar-badge">{{ total_notificacoes }}</span>{% endif %}
-                    </button>
-                    <button type="button" class="btn btn-primary btn-small admin-toolbar-btn admin-toolbar-btn--primary btn-toggle-create" data-toggle-panel="createUserPanel" aria-expanded="false" aria-controls="createUserPanel">
-                        <span class="toggle-create-icon" aria-hidden="true"></span>
-                        <span>Novo usuário</span>
-                    </button>
-                </div>
-            </div>
-        </section>
+        {% if total_notificacoes %}
+        <div class="admin-page__notification-hint">O atalho de avisos aparece no canto da tela em todas as páginas.</div>
+        {% endif %}
 
-        <section class="section admin-drawer" id="notificationsPanel" hidden aria-hidden="true" data-panel>
-            <div class="admin-drawer__header">
+        <section class="section admin-users-section">
+            <div class="section-header admin-users-section__header">
                 <div>
-                    <h2 class="section-title" tabindex="-1">🔔 Avisos do sistema{% if total_notificacoes %} ({{ total_notificacoes }}){% endif %}</h2>
-                    <p class="section-subtitle">Mensagens recentes, confirmações e alertas importantes para o admin.</p>
+                    <h2 class="section-title">📋 Usuários</h2>
+                    <p class="section-subtitle">Gerencie perfis, permissões e acesso em um só lugar.</p>
+                </div>
+                <div class="section-header-actions admin-users-section__actions">
+                    <button type="button" class="btn btn-primary btn-small admin-users-section__add-btn btn-toggle-create" data-toggle-panel="createUserPanel" aria-expanded="false" aria-controls="createUserPanel">
+                        <span class="toggle-create-icon" aria-hidden="true"></span>
+                        <span>Adicionar usuário</span>
+                    </button>
                 </div>
             </div>
-            {% if notificacoes %}
-                <div class="admin-drawer__list">
-                    {% for n in notificacoes %}
-                    <div class="surface-panel surface-panel--accent admin-drawer__item">
-                        <div class="admin-drawer__item-title">{{ n.titulo }}</div>
-                        <div class="admin-drawer__item-text">{{ n.mensagem }}</div>
-                        <div class="admin-drawer__item-meta">{{ n.criado_em|dt_pt_hm if n.criado_em else '' }}</div>
+
+            <section class="section admin-drawer admin-users-section__create" id="createUserPanel" hidden aria-hidden="true" data-panel>
+                <div class="admin-drawer__header">
+                    <div>
+                        <h2 class="section-title" tabindex="-1">Novo usuário</h2>
+                        <p class="section-subtitle">Preencha os dados para liberar acesso ao sistema.</p>
                     </div>
-                    {% endfor %}
                 </div>
-                <form method="post" action="{{ url_for('admin.admin_limpar_notificacoes') }}" class="admin-drawer__footer">
+                <form method="post" action="{{ url_for('admin.admin_criar_usuario') }}" class="form admin-form-grid">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button class="btn btn-primary" type="submit">Marcar todas como lidas</button>
+                    <label class="admin-form-field">
+                        <span class="form-label">Email</span>
+                        <input class="form-input" name="email" type="email" placeholder="Email" required>
+                    </label>
+                    <label class="admin-form-field">
+                        <span class="form-label">Nome</span>
+                        <input class="form-input" name="nome" placeholder="Nome" required>
+                    </label>
+                    <label class="admin-form-field">
+                        <span class="form-label">Username</span>
+                        <input class="form-input" name="username" placeholder="Username" required>
+                    </label>
+                    <label class="admin-form-field">
+                        <span class="form-label">Senha</span>
+                        <input class="form-input" name="password" type="password" placeholder="Senha" required>
+                    </label>
+                    <label class="admin-form-field">
+                        <span class="form-label">Perfil</span>
+                        <select class="form-input" name="role">
+                            <option value="admin">admin</option>
+                            <option value="juiz">juiz</option>
+                            <option value="usuario">usuario</option>
+                        </select>
+                    </label>
+                    <div class="admin-form-actions">
+                        <button class="btn btn-primary" type="submit">Salvar novo usuário</button>
+                    </div>
                 </form>
-            {% else %}
-                <p class="admin-drawer__empty">Nenhum aviso novo por enquanto.</p>
-            {% endif %}
-        </section>
+            </section>
 
-        <section class="section admin-drawer" id="createUserPanel" hidden aria-hidden="true" data-panel>
-            <div class="admin-drawer__header">
-                <div>
-                    <h2 class="section-title" tabindex="-1">Novo usuário</h2>
-                    <p class="section-subtitle">Preencha os dados para liberar acesso ao sistema.</p>
-                </div>
-            </div>
-            <form method="post" action="{{ url_for('admin.admin_criar_usuario') }}" class="form admin-form-grid">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <label class="admin-form-field">
-                    <span class="form-label">Email</span>
-                    <input class="form-input" name="email" type="email" placeholder="Email" required>
-                </label>
-                <label class="admin-form-field">
-                    <span class="form-label">Nome</span>
-                    <input class="form-input" name="nome" placeholder="Nome" required>
-                </label>
-                <label class="admin-form-field">
-                    <span class="form-label">Username</span>
-                    <input class="form-input" name="username" placeholder="Username" required>
-                </label>
-                <label class="admin-form-field">
-                    <span class="form-label">Senha</span>
-                    <input class="form-input" name="password" type="password" placeholder="Senha" required>
-                </label>
-                <label class="admin-form-field">
-                    <span class="form-label">Perfil</span>
-                    <select class="form-input" name="role">
-                        <option value="admin">admin</option>
-                        <option value="juiz">juiz</option>
-                        <option value="usuario">usuario</option>
-                    </select>
-                </label>
-                <div class="admin-form-actions">
-                    <button class="btn btn-primary" type="submit">Salvar novo usuário</button>
-                </div>
-            </form>
-        </section>
-
-        <section class="section admin-table-shell">
-            <h2 class="section-title">📋 Usuários</h2>
-            <div class="table-shell">
-                <table class="uniform-table">
-                    <thead>
-                        <tr>
-                            <th>Nome</th>
-                                    <th>Email</th>
-                            <th>Username</th>
-                            <th>Role</th>
-                            <th class="text-center">Ativo</th>
-                            <th>Criado em</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for u in usuarios %}
-                        <tr>
-                            <td>{{ u.nome }}</td>
-                            <td>{{ u.email or '-' }}</td>
-                            <td>{{ u.username }}</td>
-                            <td>{{ u.role }}</td>
-                            <td class="text-center">{{ 'sim' if u.ativo else 'não' }}</td>
-                            <td>{{ u.criado_em|dt_pt if u.criado_em else '' }}</td>
-                            <td class="admin-table-actions">
-                                    <form method="post" action="{{ url_for('admin.admin_alterar_ativo_usuario', user_id=u.id) }}" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja {{ 'DESATIVAR' if u.ativo else 'ATIVAR' }} este usuário?');">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                    {% if u.ativo %}
-                                        <input type="hidden" name="acao" value="desativar">
-                                        <button class="btn btn-danger" type="submit" {% if u.id == usuario.id %}disabled title="Não pode desativar seu próprio usuário"{% endif %}>Desativar</button>
-                                    {% else %}
-                                        <input type="hidden" name="acao" value="ativar">
-                                        <button class="btn btn-success" type="submit">Ativar</button>
-                                    {% endif %}
-                                </form>
-
-                                <form method="post" action="{{ url_for('admin.admin_resetar_senha_usuario', user_id=u.id) }}" style="display:inline;" onsubmit="return confirm('Resetar a senha de {{ u.nome }} ({{ u.username }}) e gerar uma senha temporária?');">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                    <button class="btn btn-primary" type="submit">🔐 Resetar Senha</button>
-                                </form>
-
-                                <form method="post" action="{{ url_for('admin.admin_deletar_usuario', user_id=u.id) }}" style="display:inline;">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                    <button
-                                        class="btn btn-warning admin-delete-btn"
-                                        type="submit"
-                                        data-delete-user="{{ u.nome }}"
-                                        data-delete-username="{{ u.username }}"
-                                        {% if u.id == usuario.id %}disabled title="Não pode deletar sua própria conta"{% endif %}
-                                    >🗑️ Deletar</button>
-                                </form>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
         </section>
 
         <section class="section admin-users-mobile" aria-label="Usuários em formato móvel">
@@ -324,7 +239,6 @@
                         button.setAttribute('aria-expanded', String(willOpen));
                         button.classList.toggle('is-open', willOpen);
                         if (willOpen) {
-                            panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
                             window.setTimeout(() => {
                                 const focusTarget = panel.querySelector('[tabindex="-1"], input, select, textarea, button');
                                 if (focusTarget) focusTarget.focus();
@@ -367,43 +281,6 @@
                             form.setAttribute('hidden', '');
                             button.setAttribute('aria-expanded', 'false');
                         }
-                    });
-                });
-
-                document.querySelectorAll('[data-email-cancel]').forEach((button) => {
-                    button.addEventListener('click', () => {
-                        const userId = button.getAttribute('data-email-cancel');
-                        const form = document.querySelector(`[data-email-form="${userId}"]`);
-                        const toggle = document.querySelector(`[data-email-toggle="${userId}"]`);
-                        if (form) form.setAttribute('hidden', '');
-                        if (toggle) toggle.setAttribute('aria-expanded', 'false');
-                    });
-                });
-
-                document.querySelectorAll('form[action*="resetar-senha"]').forEach((form) => {
-                    form.addEventListener('submit', () => {
-                        const apiKey = window.localStorage.getItem('natrave_resend_api_key') || '';
-                        const fromEmail = window.localStorage.getItem('natrave_resend_from_email') || '';
-                        if (!apiKey || !fromEmail) return;
-
-                        let apiKeyInput = form.querySelector('input[name="resend_api_key"]');
-                        let fromEmailInput = form.querySelector('input[name="resend_from_email"]');
-
-                        if (!apiKeyInput) {
-                            apiKeyInput = document.createElement('input');
-                            apiKeyInput.type = 'hidden';
-                            apiKeyInput.name = 'resend_api_key';
-                            form.appendChild(apiKeyInput);
-                        }
-                        if (!fromEmailInput) {
-                            fromEmailInput = document.createElement('input');
-                            fromEmailInput.type = 'hidden';
-                            fromEmailInput.name = 'resend_from_email';
-                            form.appendChild(fromEmailInput);
-                        }
-
-                        apiKeyInput.value = apiKey;
-                        fromEmailInput.value = fromEmail;
                     });
                 });
             })();

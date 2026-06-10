@@ -6,6 +6,10 @@
 {% block auth_intro_wrapper %}
     <section class="auth-panel auth-panel--intro auth-panel--intro-hero">
         {% include '_auth_intro.html' %}
+        <div class="auth-scroll-cue" aria-hidden="true">
+            <span class="auth-scroll-cue__icon">↓</span>
+            <span class="auth-scroll-cue__text">Continue rolando</span>
+        </div>
     </section>
 {% endblock %}
 
@@ -80,4 +84,24 @@
     <div class="auth-card-footer">
         <p class="auth-link-text">Não tem conta? <a href="{{ url_for('jogador.cadastro_page') }}" class="text-accent-link">Criar cadastro</a></p>
     </div>
+{% endblock %}
+
+{% block auth_scripts %}
+<script>
+(() => {
+    const cue = document.querySelector('.auth-scroll-cue');
+    if (!cue) return;
+
+    const hideCue = () => cue.classList.add('is-hidden');
+    const onScroll = () => {
+        if (window.scrollY > 10) {
+            hideCue();
+            window.removeEventListener('scroll', onScroll);
+        }
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('touchmove', hideCue, { passive: true, once: true });
+})();
+</script>
 {% endblock %}
