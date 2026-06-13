@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Histórico de Sorteios{% endblock %}
+
+{% block content %}
+<div class="container page-container-wide judge-workspace-page judge-history-page">
+    <header class="header">
+        <div class="header-content">
+            {% set brand_title = 'Histórico' %}
+            {% set brand_subtitle = 'Sorteios anteriores' %}
+            {% include '_brand_header.html' %}
+        </div>
+    </header>
+
+    <main class="main">
+        {% set current_section = 'historico' %}
+        {% set judge_nav_sorteio_id = sorteio_atual_id %}
+        {% include '_judge_nav.html' %}
+
+        {% if erro %}
+        <div class="alert alert-warning" role="alert">{{ erro }}</div>
+        {% endif %}
+
+        <section class="judge-flow-card judge-draw-history">
+            <div class="judge-flow-card__heading">
+                <div>
+                    <span class="judge-flow-kicker">Sorteios salvos</span>
+                    <h1>Histórico de sorteios</h1>
+                    <p>Veja as formações mais recentes em um só lugar.</p>
+                </div>
+                <span class="judge-history-count">{{ sorteios | length }}</span>
+            </div>
+
+            {% if sorteios %}
+            <div class="judge-draw-history__list">
+                {% for item in sorteios %}
+                <details class="judge-draw-history__item" {% if item.id == sorteio_atual_id %}open{% endif %}>
+                    <summary>
+                        <span class="judge-draw-history__identity">
+                            <span class="judge-draw-history__number">#{{ item.id }}</span>
+                            <span>
+                                <strong>Sorteio #{{ item.id }}</strong>
+                                <small>{{ item.data|dt_pt_hm }}</small>
+                            </span>
+                        </span>
+                        <span class="judge-draw-history__meta">
+                            <span>{{ item.total_jogadores }} jogadores</span>
+                            <span>{{ item.num_times }} times</span>
+                            <span>Dif. {{ item.diferenca }}</span>
+                            {% if item.id == sorteio_atual_id %}
+                            <span class="judge-draw-history__current">Atual</span>
+                            {% endif %}
+                        </span>
+                    </summary>
+
+                    <div class="judge-draw-history__body">
+                        <div class="judge-draw-history__teams">
+                            {% for time in item.times %}
+                            <div>
+                                <strong>Time {{ time.numero }}</strong>
+                                <span>{{ time.jogadores | map(attribute='nome') | join(', ') }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </details>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="judge-flow-empty">Os sorteios aparecerão aqui após a primeira partida.</p>
+            {% endif %}
+        </section>
+    </main>
+</div>
+{% endblock %}

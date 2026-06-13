@@ -1,0 +1,68 @@
+{% set nav_sorteio_id = judge_nav_sorteio_id | default(none) %}
+
+<div class="judge-nav-shell">
+<nav class="judge-nav" aria-label="Navegação do Painel do Juiz">
+  {% if nav_sorteio_id and current_section not in ['home', 'criar'] %}
+  <span class="judge-nav__tab judge-nav__tab--disabled" aria-disabled="true" title="Conclua a partida atual antes de criar outra">
+    <span class="judge-nav__icon" aria-hidden="true">🎲</span>
+    <span class="judge-nav__label">Criar</span>
+  </span>
+  {% else %}
+  <a href="{{ url_for('juiz.jogar_page') }}"
+     class="judge-nav__tab {% if current_section in ['home', 'criar'] %}judge-nav__tab--active{% endif %}"
+     {% if current_section in ['home', 'criar'] %}aria-current="page"{% endif %}>
+    <span class="judge-nav__icon" aria-hidden="true">🎲</span>
+    <span class="judge-nav__label">Criar</span>
+  </a>
+  {% endif %}
+
+  {% if nav_sorteio_id %}
+  <a href="{{ url_for('partida.ver_sorteio', sorteio_id=nav_sorteio_id) }}"
+     class="judge-nav__tab {% if current_section == 'times' %}judge-nav__tab--active{% endif %}"
+     {% if current_section == 'times' %}aria-current="page"{% endif %}>
+    <span class="judge-nav__icon" aria-hidden="true">⚽</span>
+    <span class="judge-nav__label">Times</span>
+  </a>
+  {% else %}
+  <span class="judge-nav__tab judge-nav__tab--disabled" aria-disabled="true" title="Crie uma partida para ver os times">
+    <span class="judge-nav__icon" aria-hidden="true">⚽</span>
+    <span class="judge-nav__label">Times</span>
+  </span>
+  {% endif %}
+
+  {% if nav_sorteio_id %}
+  <a href="{{ url_for('partida.compartilhar_sorteio', sorteio_id=nav_sorteio_id) }}"
+     class="judge-nav__tab {% if current_section == 'compartilhar' %}judge-nav__tab--active{% endif %}"
+     {% if current_section == 'compartilhar' %}aria-current="page"{% endif %}>
+    <span class="judge-nav__icon" aria-hidden="true">↗</span>
+    <span class="judge-nav__label">Compartilhar</span>
+  </a>
+  {% else %}
+  <span class="judge-nav__tab judge-nav__tab--disabled" aria-disabled="true" title="Crie uma partida para compartilhar os times">
+    <span class="judge-nav__icon" aria-hidden="true">↗</span>
+    <span class="judge-nav__label">Compartilhar</span>
+  </span>
+  {% endif %}
+
+  {% if nav_sorteio_id %}
+  <a href="{{ url_for('votacao.votacao_admin_page', sorteio_id=nav_sorteio_id) }}"
+     class="judge-nav__tab {% if current_section == 'votacao' %}judge-nav__tab--active{% endif %}"
+     {% if current_section == 'votacao' %}aria-current="page"{% endif %}>
+    <span class="judge-nav__icon" aria-hidden="true">🗳️</span>
+    <span class="judge-nav__label">Votações</span>
+  </a>
+  {% else %}
+  <span class="judge-nav__tab judge-nav__tab--disabled" aria-disabled="true" title="Crie uma partida para iniciar a votação">
+    <span class="judge-nav__icon" aria-hidden="true">🗳️</span>
+    <span class="judge-nav__label">Votações</span>
+  </span>
+  {% endif %}
+
+  <a href="{{ url_for('juiz.juiz_historico') }}"
+     class="judge-nav__tab {% if current_section == 'historico' %}judge-nav__tab--active{% endif %}"
+     {% if current_section == 'historico' %}aria-current="page"{% endif %}>
+    <span class="judge-nav__icon" aria-hidden="true">◷</span>
+    <span class="judge-nav__label">Histórico</span>
+  </a>
+</nav>
+</div>

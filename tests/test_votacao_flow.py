@@ -1,0 +1,465 @@
+from datetime import datetime, timedelta
+
+from app import criar_app
+from routes import juiz_routes, partida_routes, votacao_routes
+from services.votacao_service import VotacaoService
+
+
+def _times():
+    return [{
+        'numero': 1,
+        'jogadores': [
+            {'nome': f'Jogador {idx}', 'owner_user_id': f'u{idx}'}
+            for idx in range(1, 6)
+        ],
+    }]
+
+
+def _usuarios():
+    return [
+        {'id': f'u{idx}', 'username': f'user{idx}', 'nome': f'Usuario {idx}'}
+        for idx in range(1, 6)
+    ]
+
+
+def _votos():
+    return [
+        {'jogador_nome': f'Jogador {idx}', 'time_numero': 1, 'nota': 8}
+        for idx in range(1, 6)
+    ]
+
+
+def test_voting_window_is_twelve_hours(tmp_path):
+    service = VotacaoService(str(tmp_path / 'votacoes.json'))
+    partida = service.criar_partida(
+        _times(),
+        _usuarios(),
+        'juiz',
+        sorteio_id=1,
+        duracao_horas=12,
+    )
+
+    aberta = datetime.fromisoformat(partida['aberta_em'])
+    fecha = datetime.fromisoformat(partida['fecha_em'])
+    assert fecha - aberta == timedelta(hours=12)
+
+
+def test_voting_closes_when_every_eligible_player_votes(tmp_path):
+    service = VotacaoService(str(tmp_path / 'votacoes.json'))
+    partida = service.criar_partida(
+        _times(),
+        _usuarios(),
+        'juiz',
+        sorteio_id=1,
+        duracao_horas=12,
+    )
+
+    for idx in range(1, 6):
+        service.salvar_voto(partida['id'], f'u{idx}', _votos())
+
+    encerrada = service.obter_partida(partida['id'])
+    assert encerrada['status'] == 'encerrada'
+    assert encerrada['encerramento_motivo'] == 'todos_votaram'
+    assert encerrada['ranking']['total_votos'] == 5
+    assert encerrada['ranking']['melhor_jogador']
+
+
+def test_judge_rating_is_not_part_of_voting(tmp_path):
+    service = VotacaoService(str(tmp_path / 'votacoes.json'))
+    partida = service.criar_partida(
+        _times(),
+        _usuarios(),
+        'juiz',
+        sorteio_id=1,
+        duracao_horas=12,
+    )
+
+    assert 'avaliacao_juiz' not in partida
+
+
+def test_orphan_user_links_do_not_block_automatic_close(tmp_path):
+    service = VotacaoService(str(tmp_path / 'votacoes.json'))
+    times = _times()
+    times[0]['jogadores'].append({'nome': 'Externo', 'owner_user_id': 'usuario-inexistente'})
+    partida = service.criar_partida(
+        times,
+        _usuarios(),
+        'juiz',
+        sorteio_id=1,
+        duracao_horas=12,
+    )
+
+    for idx in range(1, 6):
+        service.salvar_voto(partida['id'], f'u{idx}', _votos())
+
+    encerrada = service.obter_partida(partida['id'])
+    externo = next(p for p in encerrada['participantes'] if p['jogador_nome'] == 'Externo')
+    assert externo['user_id'] is None
+    assert externo['externo'] is True
+    assert encerrada['encerramento_motivo'] == 'todos_votaram'
+
+
+def test_legacy_player_is_linked_by_unique_normalized_name(tmp_path):
+    service = VotacaoService(str(tmp_path / 'votacoes.json'))
+    times = [{
+        'numero': 1,
+        'jogadores': [{'nome': 'André Balada', 'owner_user_id': None}],
+    }]
+    usuarios = [{
+        'id': 'andre-id',
+        'username': 'andre_balada',
+        'nome': 'Andre Balada',
+        'role': 'usuario',
+        'ativo': True,
+    }]
+
+    partida = service.criar_partida(
+        times,
+        usuarios,
+        'juiz',
+        sorteio_id=1,
+    )
+
+    assert partida['participantes'][0]['user_id'] == 'andre-id'
+    assert partida['participantes'][0]['externo'] is False
+
+
+def test_ambiguous_legacy_name_is_not_linked(tmp_path):
+    service = VotacaoService(str(tmp_path / 'votacoes.json'))
+    times = [{
+        'numero': 1,
+        'jogadores': [{'nome': 'Guilherme', 'owner_user_id': None}],
+    }]
+    usuarios = [
+        {'id': 'u1', 'username': 'gui1', 'nome': 'Guilherme', 'role': 'usuario', 'ativo': True},
+        {'id': 'u2', 'username': 'gui2', 'nome': 'Guilherme', 'role': 'usuario', 'ativo': True},
+    ]
+
+    partida = service.criar_partida(
+        times,
+        usuarios,
+        'juiz',
+        sorteio_id=1,
+    )
+
+    assert partida['participantes'][0]['user_id'] is None
+
+
+def _login_juiz(client):
+    with client.session_transaction() as sess:
+        sess['user_id'] = 'juiz-id'
+        sess['username'] = 'juiz'
+        sess['nome'] = 'Juiz'
+        sess['role'] = 'juiz'
+        sess['senha_temporaria_ativa'] = False
+
+
+def test_share_page_renders_selected_draw(monkeypatch):
+    app = criar_app('testing')
+    app.config['WTF_CSRF_ENABLED'] = False
+    sorteio = {
+        'id': 7,
+        'total_jogadores': 5,
+        'num_times': 1,
+        'pontuacoes': [25],
+        'diferenca': 0,
+        'times': [{
+            'numero': 1,
+            'jogadores': [{'nome': 'Jogador 1'}],
+        }],
+    }
+    monkeypatch.setattr(
+        partida_routes.historico_service,
+        'obter_sorteio',
+        lambda sorteio_id: sorteio if sorteio_id == 7 else None,
+    )
+
+    with app.test_client() as client:
+        _login_juiz(client)
+        response = client.get('/sorteio/7/compartilhar')
+
+    body = response.get_data(as_text=True)
+    assert response.status_code == 200
+    assert 'Times do sorteio #7' in body
+    assert '>Copiar<' in body
+    assert 'Baixar PDF' in body
+
+
+def test_judge_draw_page_uses_dedicated_times_workspace(monkeypatch):
+    app = criar_app('testing')
+    app.config['WTF_CSRF_ENABLED'] = False
+    sorteio = {
+        'id': 7,
+        'total_jogadores': 5,
+        'num_times': 1,
+        'pontuacoes': [25],
+        'diferenca': 0,
+        'times': [{
+            'numero': 1,
+            'jogadores': [{
+                'nome': 'Jogador 1',
+                'nivel': 5,
+                'posicao': 'linha',
+            }],
+        }],
+    }
+    monkeypatch.setattr(
+        partida_routes.historico_service,
+        'obter_sorteio',
+        lambda sorteio_id: sorteio if sorteio_id == 7 else None,
+    )
+    monkeypatch.setattr(
+        partida_routes.votacao_service,
+        'obter_por_sorteio',
+        lambda sorteio_id: None,
+    )
+    monkeypatch.setattr(
+        partida_routes.partida_service,
+        'obter_partidas_sorteio',
+        lambda sorteio_id: [],
+    )
+
+    with app.test_client() as client:
+        _login_juiz(client)
+        response = client.get('/sorteio/7')
+
+    body = response.get_data(as_text=True)
+    assert response.status_code == 200
+    assert 'judge-teams-page' in body
+    assert 'Times definidos' in body
+    assert 'Ir para votações' in body
+    assert 'Histórico de sorteios' not in body
+
+
+def test_judge_history_has_its_own_page(monkeypatch):
+    app = criar_app('testing')
+    app.config['WTF_CSRF_ENABLED'] = False
+    sorteios = [
+        {
+            'id': 6,
+            'data': '2026-06-12T20:00:00',
+            'total_jogadores': 10,
+            'num_times': 2,
+            'diferenca': 1,
+            'times': _times(),
+        },
+        {
+            'id': 7,
+            'data': '2026-06-13T20:00:00',
+            'total_jogadores': 10,
+            'num_times': 2,
+            'diferenca': 0,
+            'times': _times(),
+        },
+    ]
+    monkeypatch.setattr(juiz_routes.historico_service, 'listar_sorteios', lambda: sorteios)
+    monkeypatch.setattr(
+        juiz_routes.juiz_partida_service,
+        'obter_estado',
+        lambda: {'status': 'sorteada', 'partida_atual': {'sorteio_id': 7}},
+    )
+
+    with app.test_client() as client:
+        _login_juiz(client)
+        response = client.get('/jogar/historico')
+
+    body = response.get_data(as_text=True)
+    assert response.status_code == 200
+    assert 'judge-history-page' in body
+    assert 'Histórico de sorteios' in body
+    assert body.index('Sorteio #7') < body.index('Sorteio #6')
+
+
+def test_judge_voting_context_cannot_mix_draws(monkeypatch):
+    app = criar_app('testing')
+    app.config['WTF_CSRF_ENABLED'] = False
+    sorteios = [
+        {'id': 8, 'times': _times()},
+        {'id': 9, 'times': _times()},
+    ]
+    ativa_outro_sorteio = {
+        'id': 99,
+        'sorteio_id': 9,
+        'status': 'aberta',
+        'votos': [{'user_id': 'u1'}],
+    }
+    monkeypatch.setattr(votacao_routes.historico_service, 'listar_sorteios', lambda: sorteios)
+    monkeypatch.setattr(votacao_routes.votacao_service, 'obter_ativa', lambda: ativa_outro_sorteio)
+    monkeypatch.setattr(votacao_routes.votacao_service, 'listar', lambda: [ativa_outro_sorteio])
+    monkeypatch.setattr(
+        votacao_routes.votacao_service,
+        'obter_por_sorteio',
+        lambda sorteio_id: ativa_outro_sorteio if sorteio_id == 9 else None,
+    )
+    monkeypatch.setattr(
+        votacao_routes.partida_service,
+        'obter_partidas_sorteio',
+        lambda sorteio_id: [],
+    )
+    monkeypatch.setattr(
+        votacao_routes.juiz_partida_service,
+        'obter_estado',
+        lambda: {
+            'status': 'sorteada',
+            'partida_atual': {
+                'sorteio_id': 8,
+                'avaliacao_juiz': None,
+                'votacao_partida_id': None,
+            },
+        },
+    )
+
+    with app.test_request_context('/admin/votacao?sorteio_id=9'):
+        from flask import session
+
+        session['user_id'] = 'juiz-id'
+        session['role'] = 'juiz'
+        contexto = votacao_routes._resolver_contexto_admin(sorteio_id_hint=9)
+
+    assert contexto['selected_sorteio_id'] == 8
+    assert contexto['ativa'] is None
+    assert contexto['voted_user_ids'] == set()
+
+
+def test_judge_cannot_open_vote_for_another_draw(monkeypatch):
+    app = criar_app('testing')
+    app.config['WTF_CSRF_ENABLED'] = False
+    sorteio = {
+        'id': 9,
+        'times': _times(),
+    }
+    monkeypatch.setattr(
+        votacao_routes.historico_service,
+        'obter_sorteio',
+        lambda sorteio_id: sorteio if sorteio_id == 9 else None,
+    )
+    monkeypatch.setattr(
+        votacao_routes.juiz_partida_service,
+        'obter_estado',
+        lambda: {
+            'partida_atual': {
+                'sorteio_id': 8,
+            },
+        },
+    )
+    monkeypatch.setattr(
+        votacao_routes.historico_service,
+        'listar_sorteios',
+        lambda: [sorteio],
+    )
+    monkeypatch.setattr(
+        votacao_routes.votacao_service,
+        'obter_ativa',
+        lambda: None,
+    )
+    monkeypatch.setattr(
+        votacao_routes.votacao_service,
+        'listar',
+        lambda: [],
+    )
+    monkeypatch.setattr(
+        votacao_routes.votacao_service,
+        'obter_por_sorteio',
+        lambda sorteio_id: None,
+    )
+
+    with app.test_client() as client:
+        _login_juiz(client)
+        response = client.post('/admin/votacao/criar', data={'sorteio_id': '9'})
+
+    assert response.status_code == 400
+    assert 'nao pertence a partida atual' in response.get_data(as_text=True)
+
+
+def test_judge_registers_team_result_before_voting(monkeypatch):
+    app = criar_app('testing')
+    app.config['WTF_CSRF_ENABLED'] = False
+    sorteio = {
+        'id': 8,
+        'times': [
+            {'numero': 1, 'jogadores': [{'nome': 'A'}]},
+            {'numero': 2, 'jogadores': [{'nome': 'B'}]},
+        ],
+    }
+    salvo = {}
+
+    monkeypatch.setattr(votacao_routes.historico_service, 'listar_sorteios', lambda: [sorteio])
+    monkeypatch.setattr(votacao_routes.votacao_service, 'obter_ativa', lambda: None)
+    monkeypatch.setattr(votacao_routes.votacao_service, 'obter_por_sorteio', lambda sorteio_id: None)
+    monkeypatch.setattr(votacao_routes.partida_service, 'obter_partidas_sorteio', lambda sorteio_id: [])
+    monkeypatch.setattr(
+        votacao_routes.juiz_partida_service,
+        'obter_estado',
+        lambda: {'partida_atual': {'sorteio_id': 8}},
+    )
+
+    def registrar_resultado(**dados):
+        salvo.update(dados)
+        return {'id': 31, **dados}
+
+    monkeypatch.setattr(votacao_routes.partida_service, 'registrar_resultado', registrar_resultado)
+    monkeypatch.setattr(
+        votacao_routes.juiz_partida_service,
+        'marcar_resultado_registrado',
+        lambda sorteio_id, resultado_id: salvo.update(
+            {'estado_sorteio_id': sorteio_id, 'resultado_id': resultado_id}
+        ),
+    )
+
+    with app.test_client() as client:
+        _login_juiz(client)
+        response = client.post('/admin/votacao/resultado', data={
+            'sorteio_id': '8',
+            'vitorias_1': '2',
+            'empates_1': '1',
+            'derrotas_1': '1',
+            'gols_1': '9',
+            'vitorias_2': '1',
+            'empates_2': '1',
+            'derrotas_2': '2',
+            'gols_2': '7',
+        })
+
+    assert response.status_code == 302
+    assert salvo['gols_times'] == [9, 7]
+    assert salvo['times_desempenho'][0]['vitorias'] == 2
+    assert salvo['resultado_id'] == 31
+
+
+def test_judge_result_rejects_unbalanced_wins_and_losses(monkeypatch):
+    app = criar_app('testing')
+    app.config['WTF_CSRF_ENABLED'] = False
+    sorteio = {
+        'id': 8,
+        'times': [
+            {'numero': 1, 'jogadores': [{'nome': 'A'}]},
+            {'numero': 2, 'jogadores': [{'nome': 'B'}]},
+        ],
+    }
+
+    monkeypatch.setattr(votacao_routes.historico_service, 'listar_sorteios', lambda: [sorteio])
+    monkeypatch.setattr(votacao_routes.votacao_service, 'obter_ativa', lambda: None)
+    monkeypatch.setattr(votacao_routes.votacao_service, 'obter_por_sorteio', lambda sorteio_id: None)
+    monkeypatch.setattr(votacao_routes.partida_service, 'obter_partidas_sorteio', lambda sorteio_id: [])
+    monkeypatch.setattr(
+        votacao_routes.juiz_partida_service,
+        'obter_estado',
+        lambda: {'partida_atual': {'sorteio_id': 8}},
+    )
+
+    with app.test_client() as client:
+        _login_juiz(client)
+        response = client.post('/admin/votacao/resultado', data={
+            'sorteio_id': '8',
+            'vitorias_1': '2',
+            'empates_1': '0',
+            'derrotas_1': '0',
+            'gols_1': '5',
+            'vitorias_2': '0',
+            'empates_2': '0',
+            'derrotas_2': '1',
+            'gols_2': '2',
+        })
+
+    assert response.status_code == 400
+    assert 'total de vitórias deve ser igual ao total de derrotas' in response.get_data(as_text=True)

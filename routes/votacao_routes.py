@@ -10,6 +10,7 @@ from services.votacao_service import VotacaoService
 from services.auth_service import AuthService
 from services.juiz_partida_service import JuizPartidaService
 from services.historico_service import HistoricoService
+from services.partida_service import PartidaService
 
 votacao_bp = Blueprint('votacao', __name__)
 logger = logging.getLogger(__name__)
@@ -18,6 +19,7 @@ votacao_service = VotacaoService()
 auth_service = AuthService()
 juiz_partida_service = JuizPartidaService()
 historico_service = HistoricoService()
+partida_service = PartidaService()
 
 
 # ============================================================
@@ -64,11 +66,32 @@ def _resposta_voto_somente_usuario():
     return redirect(url_for('jogador_crud.index'))
 
 
+def _resumo_encerramento(partida):
+    ranking = (partida or {}).get('ranking') or {}
+    return {
+        'titulo': (partida or {}).get('titulo'),
+        'sorteio_id': (partida or {}).get('sorteio_id'),
+        'partida_id': (partida or {}).get('id'),
+        'encerrado_em': (partida or {}).get('encerrado_em'),
+        'resultado_resumido': (partida or {}).get('resultado_resumido', []),
+        'melhor_jogador': ranking.get('melhor_jogador'),
+        'melhor_time': ranking.get('melhor_time'),
+        'total_votos': ranking.get('total_votos', 0),
+        'pendentes': ranking.get('participantes_pendentes', []),
+        'ranking_top5': (ranking.get('ranking_jogadores') or [])[:5],
+    }
+
+
+def _obter_resultado_sorteio(sorteio_id):
+    partidas = partida_service.obter_partidas_sorteio(sorteio_id)
+    if not partidas:
+        return None
+    return max(partidas, key=lambda item: (item.get('data', ''), item.get('id', 0)))
+
+
 def _resolver_contexto_admin(sorteio_id_hint=None):
     """Monta contexto unificado da tela admin para evitar perdas em fluxos de erro."""
-    ativa = votacao_service.obter_ativa()
-    historico = votacao_service.listar()[:30]
-
+    ativa_global = votacao_service.obter_ativa()
     sorteios = historico_service.listar_sorteios() or []
     sorteios_ordenados = sorted(sorteios, key=lambda s: int(s.get('id', 0) or 0), reverse=True)
 
@@ -77,13 +100,16 @@ def _resolver_contexto_admin(sorteio_id_hint=None):
         estado = juiz_partida_service.obter_estado()
         fluxo_partida = estado.get('partida_atual')
 
-    selecionado = sorteio_id_hint
-    if not selecionado and fluxo_partida:
+    selecionado = None
+    if _is_juiz() and fluxo_partida and fluxo_partida.get('sorteio_id'):
         selecionado = fluxo_partida.get('sorteio_id')
-    if not selecionado and ativa:
-        selecionado = ativa.get('sorteio_id')
-    if not selecionado and sorteios_ordenados:
-        selecionado = sorteios_ordenados[0].get('id')
+    elif not _is_juiz():
+        if sorteio_id_hint:
+            selecionado = sorteio_id_hint
+        elif ativa_global:
+            selecionado = ativa_global.get('sorteio_id')
+        elif sorteios_ordenados:
+            selecionado = sorteios_ordenados[0].get('id')
 
     sorteio_contexto = None
     if selecionado:
@@ -93,25 +119,48 @@ def _resolver_contexto_admin(sorteio_id_hint=None):
         except (TypeError, ValueError):
             selecionado = None
 
+    rodada_selecionada = votacao_service.obter_por_sorteio(selecionado) if selecionado else None
+    ativa = (
+        rodada_selecionada
+        if rodada_selecionada and rodada_selecionada.get('status') == 'aberta'
+        else None
+    )
+    if (
+        _is_juiz()
+        and fluxo_partida
+        and fluxo_partida.get('votacao_partida_id')
+        and rodada_selecionada
+        and rodada_selecionada.get('status') == 'encerrada'
+    ):
+        juiz_partida_service.finalizar_partida(_resumo_encerramento(rodada_selecionada))
+        fluxo_partida = None
+
     voted_user_ids = {
         voto.get('user_id')
         for voto in (ativa or {}).get('votos', [])
         if voto.get('user_id')
     }
 
-    pode_abrir_votacao = bool(selecionado)
-    if _is_juiz() and fluxo_partida and not fluxo_partida.get('resultado_registrado'):
+    resultado_partida = _obter_resultado_sorteio(selecionado) if selecionado else None
+    pode_abrir_votacao = bool(selecionado) and not rodada_selecionada and bool(resultado_partida)
+    fluxo_corresponde = bool(
+        fluxo_partida
+        and selecionado
+        and int(fluxo_partida.get('sorteio_id', 0) or 0) == int(selecionado)
+    )
+    if _is_juiz() and fluxo_partida and (not fluxo_corresponde or not resultado_partida):
         pode_abrir_votacao = False
 
     return {
         'ativa': ativa,
-        'historico': historico,
         'sorteios_disponiveis': sorteios_ordenados,
         'sorteio_contexto': sorteio_contexto,
         'selected_sorteio_id': selecionado,
         'fluxo_partida': fluxo_partida,
         'voted_user_ids': voted_user_ids,
         'pode_abrir_votacao': pode_abrir_votacao,
+        'resultado_partida': resultado_partida,
+        'rodada_selecionada': rodada_selecionada,
     }
 
 
@@ -240,6 +289,94 @@ def votacao_salvar():
 # VOTAÇÃO ADMIN/JUIZ
 # ============================================================
 
+@votacao_bp.route('/admin/votacao/resultado', methods=['POST'])
+@admin_or_juiz_required
+def votacao_resultado_juiz():
+    if not _is_juiz():
+        return redirect(url_for('admin.admin_page'))
+
+    sorteio_id = request.form.get('sorteio_id', type=int)
+    try:
+        contexto = _resolver_contexto_admin(sorteio_id_hint=sorteio_id)
+        sorteio = contexto.get('sorteio_contexto')
+        if not sorteio:
+            raise ValueError('Crie uma partida antes de registrar o resultado')
+        if contexto.get('rodada_selecionada'):
+            raise ValueError('A votação desta partida já foi aberta')
+        if contexto.get('resultado_partida'):
+            raise ValueError('O resultado desta partida já foi registrado')
+
+        estado = juiz_partida_service.obter_estado()
+        partida_atual = estado.get('partida_atual') or {}
+        if int(partida_atual.get('sorteio_id', 0) or 0) != int(sorteio_id or 0):
+            raise ValueError('Este sorteio não pertence à partida atual do juiz')
+
+        times_desempenho = []
+        numeros_times = []
+        for time in sorteio.get('times', []):
+            try:
+                numero = int(time.get('numero'))
+                numeros_times.append(numero)
+                item = {
+                    'time_numero': numero,
+                    'vitorias': int(request.form.get(f'vitorias_{numero}', 0)),
+                    'empates': int(request.form.get(f'empates_{numero}', 0)),
+                    'derrotas': int(request.form.get(f'derrotas_{numero}', 0)),
+                    'gols': int(request.form.get(f'gols_{numero}', 0)),
+                }
+            except (TypeError, ValueError):
+                raise ValueError('Use apenas números inteiros no resultado')
+            if any(valor < 0 for chave, valor in item.items() if chave != 'time_numero'):
+                raise ValueError('O resultado não pode ter números negativos')
+            times_desempenho.append(item)
+
+        if not numeros_times or len(set(numeros_times)) != len(numeros_times):
+            raise ValueError('Os times deste sorteio são inválidos')
+
+        total_vitorias = sum(item['vitorias'] for item in times_desempenho)
+        total_empates = sum(item['empates'] for item in times_desempenho)
+        total_jogos = total_vitorias + total_empates + sum(
+            item['derrotas'] for item in times_desempenho
+        )
+        if total_jogos == 0:
+            raise ValueError('Registre ao menos um jogo antes de continuar')
+        if total_vitorias != sum(item['derrotas'] for item in times_desempenho):
+            raise ValueError('O total de vitórias deve ser igual ao total de derrotas')
+        empates_por_time = [item['empates'] for item in times_desempenho]
+        if total_empates % 2 != 0 or max(empates_por_time, default=0) > total_empates / 2:
+            raise ValueError('Cada empate deve aparecer para os dois times')
+
+        gols_times = [item['gols'] for item in times_desempenho]
+        maiores_vitorias = max(item['vitorias'] for item in times_desempenho)
+        lideres = [
+            item['time_numero']
+            for item in times_desempenho
+            if maiores_vitorias > 0 and item['vitorias'] == maiores_vitorias
+        ]
+        time_vencedor = lideres[0] if len(lideres) == 1 else None
+
+        partida = partida_service.registrar_resultado(
+            sorteio_id=sorteio_id,
+            time_vencedor=time_vencedor,
+            gols_times=gols_times,
+            notas='',
+            times_desempenho=times_desempenho,
+        )
+        juiz_partida_service.marcar_resultado_registrado(sorteio_id, partida.get('id'))
+        return redirect(url_for(
+            'votacao.votacao_admin_page',
+            sorteio_id=sorteio_id,
+            sucesso='Resultado salvo. Agora você pode abrir a votação dos jogadores.',
+        ))
+    except ValueError as e:
+        contexto = _resolver_contexto_admin(sorteio_id_hint=sorteio_id)
+        return render_template(
+            'votacao_admin.html',
+            **contexto,
+            erro=str(e),
+            usuario=_usuario_logado(),
+        ), 400
+
 @votacao_bp.route('/admin/votacao', methods=['GET'])
 @admin_or_juiz_required
 def votacao_admin_page():
@@ -289,19 +426,14 @@ def votacao_admin_criar():
 
         usuarios = auth_service.listar_usuarios()
         
-        from services.partida_service import PartidaService
-        partida_service = PartidaService()
-        
-        def _obter_resultado_sorteio(sid):
-            partidas = partida_service.obter_partidas_sorteio(sid)
-            if not partidas:
-                return None
-            partidas_ordenadas = sorted(partidas, key=lambda item: (item.get('data', ''), item.get('id', 0)), reverse=True)
-            return partidas_ordenadas[0] if partidas_ordenadas else None
-        
         resultado_partida = _obter_resultado_sorteio(sorteio.get('id'))
+        if _is_juiz():
+            estado = juiz_partida_service.obter_estado()
+            fluxo_partida = estado.get('partida_atual') or {}
+            if int(fluxo_partida.get('sorteio_id', 0) or 0) != int(sorteio.get('id')):
+                raise ValueError('Este sorteio nao pertence a partida atual do juiz')
         if _is_juiz() and not resultado_partida:
-            raise ValueError('Registre o resultado da partida antes de abrir a votacao')
+            raise ValueError('Registre primeiro o resultado dos times')
 
         partida_existente = votacao_service.obter_por_sorteio(sorteio.get('id'))
         if partida_existente and partida_existente.get('status') != 'aberta':
@@ -314,7 +446,7 @@ def votacao_admin_criar():
             titulo=titulo,
             sorteio_id=sorteio.get('id'),
             resultado_partida=resultado_partida,
-            duracao_horas=8,
+            duracao_horas=12,
         )
         
         if _is_juiz():
@@ -330,6 +462,8 @@ def votacao_admin_criar():
             sucesso='Rodada aberta com sucesso.'
         ))
     except ValueError as e:
+        if not _is_juiz():
+            return redirect(url_for('admin.admin_page', erro=str(e)))
         sorteio_id_hint = request.form.get('sorteio_id', type=int)
         contexto = _resolver_contexto_admin(sorteio_id_hint=sorteio_id_hint)
         return render_template(
@@ -363,20 +497,7 @@ def votacao_admin_encerrar(partida_id):
             from services.jogador_service import JogadorService
             jogador_service = JogadorService()
             
-            resumo = {
-                'titulo': partida_encerrada.get('titulo'),
-                'sorteio_id': partida_encerrada.get('sorteio_id'),
-                'partida_id': partida_encerrada.get('id'),
-                'encerrado_em': partida_encerrada.get('encerrado_em'),
-                'resultado_resumido': partida_encerrada.get('resultado_resumido', []),
-                'melhor_jogador': (partida_encerrada.get('ranking') or {}).get('melhor_jogador'),
-                'melhor_time': (partida_encerrada.get('ranking') or {}).get('melhor_time'),
-                'total_votos': (partida_encerrada.get('ranking') or {}).get('total_votos', 0),
-                'pendentes': (partida_encerrada.get('ranking') or {}).get('participantes_pendentes', []),
-                'ranking_top5': ((partida_encerrada.get('ranking') or {}).get('ranking_jogadores') or [])[:5],
-            }
-            
-            juiz_partida_service.finalizar_partida(resumo)
+            juiz_partida_service.finalizar_partida(_resumo_encerramento(partida_encerrada))
             jogador_service.limpar_presenca()
             return redirect(url_for('juiz.jogar_page'))
         

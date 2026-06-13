@@ -18,12 +18,6 @@
                     <button class="btn btn-danger" type="submit" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; font-weight: 700;">🚪 Sair</button>
                 </form>
                 {% elif auth_user.role == 'juiz' %}
-                {% if not juiz_partida_ativa %}
-                <form method="post" action="{{ url_for('juiz.juiz_criar_partida') }}" class="logout-form">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button class="btn btn-primary" type="submit">Criar partida</button>
-                </form>
-                {% endif %}
                 <form method="post" action="{{ url_for('jogador.logout') }}" class="logout-form">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button class="btn btn-danger" type="submit">Sair</button>
@@ -58,12 +52,6 @@
                 <button class="btn btn-danger" type="submit" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; font-weight: 700;">🚪 Sair</button>
             </form>
             {% elif auth_user.role == 'juiz' %}
-            {% if not juiz_partida_ativa %}
-            <form method="post" action="{{ url_for('juiz.juiz_criar_partida') }}" class="logout-form">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button class="btn btn-primary" type="submit">Criar partida</button>
-            </form>
-            {% endif %}
             <form method="post" action="{{ url_for('jogador.logout') }}" class="logout-form">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button class="btn btn-danger" type="submit">Sair</button>

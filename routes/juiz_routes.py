@@ -144,6 +144,35 @@ def _destino_fluxo_juiz(estado):
 # FLUXO PRINCIPAL DO JUIZ
 # ============================================================
 
+@juiz_bp.route('/jogar/historico', methods=['GET'])
+@juiz_required
+def juiz_historico():
+    """Lista os sorteios anteriores em uma pagina dedicada ao juiz."""
+    try:
+        sorteios = sorted(
+            historico_service.listar_sorteios() or [],
+            key=lambda item: int(item.get('id', 0) or 0),
+            reverse=True,
+        )
+        estado = juiz_partida_service.obter_estado()
+        sorteio_atual_id = ((estado.get('partida_atual') or {}).get('sorteio_id'))
+        return render_template(
+            'juiz_historico.html',
+            sorteios=sorteios,
+            sorteio_atual_id=sorteio_atual_id,
+            usuario=_usuario_logado(),
+        )
+    except Exception as e:
+        logger.error(f"Erro ao carregar historico do juiz: {str(e)}")
+        return render_template(
+            'juiz_historico.html',
+            sorteios=[],
+            sorteio_atual_id=None,
+            erro='Erro ao carregar histórico',
+            usuario=_usuario_logado(),
+        ), 500
+
+
 @juiz_bp.route('/jogar', methods=['GET'])
 @juiz_required
 def jogar_page():
@@ -170,7 +199,8 @@ def jogar_page():
                 presentes=presentes,
                 total_presentes=len(presentes),
                 total_jogadores=len(todos_jogadores),
-                usuario=_usuario_logado()
+                usuario=_usuario_logado(),
+                ultima_partida=estado_fluxo.get('ultima_partida_encerrada')
             )
 
         ultima_partida = estado_fluxo.get('ultima_partida_encerrada')
@@ -233,9 +263,11 @@ def juiz_finalizar_partida():
         if not partida_atual:
             return redirect(url_for('juiz.jogar_page', erro='Nenhuma partida ativa para finalizar'))
 
-        # Só permite finalizar se o resultado foi registrado
         if not partida_atual.get('resultado_registrado'):
             return redirect(url_for('juiz.jogar_page', erro='Resultado não registrado; não é possível finalizar'))
+
+        if partida_atual.get('votacao_partida_id') and not partida_atual.get('votacao_aberta'):
+            return redirect(url_for('juiz.jogar_page', erro='A rodada ainda não foi liberada para votação'))
 
         sorteio_id = partida_atual.get('sorteio_id')
         resultado = _obter_resultado_sorteio(sorteio_id) if sorteio_id else None

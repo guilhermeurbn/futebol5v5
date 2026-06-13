@@ -14,7 +14,7 @@
     <main class="auth-shell {% block auth_shell_class %}{% endblock %}">
         {% block auth_intro_wrapper %}{% endblock %}
 
-        <section class="auth-panel auth-panel--form {% block auth_form_panel_class %}{% endblock %}" aria-labelledby="{% block auth_heading_id %}authHeading{% endblock %}">
+        <section class="auth-panel auth-panel--form {% block auth_form_panel_class %}{% endblock %}" id="loginFormPanel" aria-labelledby="{% block auth_heading_id %}authHeading{% endblock %}">
             {% block auth_messages %}{% endblock %}
             {% block auth_card_header %}{% endblock %}
             {% block auth_form %}{% endblock %}
@@ -23,5 +23,32 @@
     </main>
 
     {% block auth_scripts %}{% endblock %}
+    <script>
+        (function () {
+            if (!document.body.classList.contains('auth-page--login')) return;
+
+            if ('scrollRestoration' in history) {
+                history.scrollRestoration = 'manual';
+            }
+
+            window.addEventListener('pageshow', function () {
+                const navegacao = performance.getEntriesByType?.('navigation')?.[0];
+                if (navegacao?.type === 'reload') {
+                    requestAnimationFrame(function () {
+                        window.scrollTo(0, 0);
+                    });
+                }
+            });
+
+            const indicador = document.querySelector('.auth-scroll-hint');
+            const formulario = document.getElementById('loginFormPanel');
+            if (indicador && formulario && 'IntersectionObserver' in window) {
+                const observador = new IntersectionObserver(function (entradas) {
+                    indicador.classList.toggle('is-hidden', entradas[0].isIntersecting);
+                }, { threshold: 0.08 });
+                observador.observe(formulario);
+            }
+        })();
+    </script>
 </body>
 </html>

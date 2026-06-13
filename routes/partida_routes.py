@@ -200,8 +200,24 @@ def sortear():
     if _is_admin():
         return redirect(url_for('jogador_crud.index'))
 
+    if not session.get('user_id'):
+        return redirect(url_for('auth.login_page'))
+
+    if not _is_juiz():
+        return redirect(url_for('jogador_crud.index'))
+
+    fluxo = juiz_partida_service.obter_estado()
+    if (fluxo.get('status') or 'idle') not in {'selecionando', 'sorteada'}:
+        return redirect(url_for('juiz.jogar_page'))
+
+    if (fluxo.get('status') or 'idle') == 'sorteada' and fluxo.get('partida_atual', {}).get('sorteio_id'):
+        return redirect(url_for('partida.ver_sorteio', sorteio_id=fluxo['partida_atual']['sorteio_id']))
+
     try:
         presentes = jogador_service.listar_presentes()
+        if len(presentes) not in {10, 15, 20}:
+            return render_template('index.html', erro='Selecione exatamente 10, 15 ou 20 jogadores antes de sortear.'), 400
+
         times, somas, tem_aviso, aviso_msg = _sortear_diferente_do_anterior(presentes)
         num_times = len(times)
         diferenca = BalanceadorTimes.calcular_diferenca_multiplos(somas)
@@ -220,19 +236,7 @@ def sortear():
         _salvar_ultimo_sorteio_sessao(sorteio_data)
         undoredo_service.adicionar_sorteio(sorteio_data)
         
-        return render_template(
-            'times.html',
-            jogadores=presentes,
-            times=times,
-            somas=somas,
-            num_times=num_times,
-            diferenca=diferenca,
-            melhor_time=melhor_time,
-            sorteio_id=sorteio_id,
-            tem_aviso=tem_aviso,
-            aviso_msg=aviso_msg,
-            usuario=_usuario_logado()
-        )
+        return redirect(url_for('partida.ver_sorteio', sorteio_id=sorteio_id))
     except ValueError as e:
         logger.error(f"Erro ao sortear: {str(e)}")
         return render_template('index.html', erro=str(e)), 400
@@ -245,7 +249,17 @@ def sortear():
 def sortear_api():
     """API: Sorteia times"""
     try:
+        if not session.get('user_id') or not _is_juiz():
+            return jsonify({'sucesso': False, 'erro': 'Acesso restrito ao juiz'}), 403
+
+        fluxo = juiz_partida_service.obter_estado()
+        if (fluxo.get('status') or 'idle') not in {'selecionando', 'sorteada'}:
+            return jsonify({'sucesso': False, 'erro': 'Fluxo do juiz fora da etapa de selecao'}), 409
+
         presentes = jogador_service.listar_presentes()
+        if len(presentes) not in {10, 15, 20}:
+            return jsonify({'sucesso': False, 'erro': 'Selecione exatamente 10, 15 ou 20 jogadores.'}), 400
+
         times, somas, tem_aviso, aviso_msg = _sortear_diferente_do_anterior(presentes)
         diferenca = BalanceadorTimes.calcular_diferenca_multiplos(somas)
         melhor_time = BalanceadorTimes.obter_melhor_time(somas)
@@ -310,6 +324,15 @@ def ver_sorteio(sorteio_id):
         if partida_votacao and partida_votacao.get('ranking'):
             ranking_top10 = partida_votacao['ranking'].get('ranking_jogadores', [])[:10]
             melhor_jogador = partida_votacao['ranking'].get('melhor_jogador')
+
+        if _is_juiz():
+            return render_template(
+                'juiz_times.html',
+                sorteio=sorteio,
+                partida_votacao=partida_votacao,
+                resultado_partida=resultado_partida,
+                usuario=_usuario_logado(),
+            )
         
         return render_template(
             'sorteio_detalhe.html',
@@ -323,6 +346,29 @@ def ver_sorteio(sorteio_id):
     except Exception as e:
         logger.error(f"Erro ao visualizar sorteio: {str(e)}")
         return render_template('historico.html', sorteios=[], erro='Erro ao carregar sorteio'), 500
+
+
+@partida_bp.route('/sorteio/<int:sorteio_id>/compartilhar')
+@admin_or_juiz_required
+def compartilhar_sorteio(sorteio_id):
+    """Central enxuta de compartilhamento do sorteio mais recente."""
+    sorteio = historico_service.obter_sorteio(sorteio_id)
+    if not sorteio:
+        return render_template('historico.html', sorteios=[], erro="Sorteio não encontrado"), 404
+
+    sorteio_data = {
+        'sorteio_id': sorteio.get('id'),
+        'times': sorteio.get('times', []),
+        'num_times': sorteio.get('num_times', 0),
+        'somas': sorteio.get('pontuacoes', []),
+        'diferenca': sorteio.get('diferenca', 0),
+    }
+    _salvar_ultimo_sorteio_sessao(sorteio_data)
+    return render_template(
+        'juiz_compartilhar.html',
+        sorteio=sorteio,
+        usuario=_usuario_logado(),
+    )
 
 
 @partida_bp.route('/api/historico')

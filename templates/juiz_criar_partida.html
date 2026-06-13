@@ -3,63 +3,61 @@
 {% block title %}Criar Partida{% endblock %}
 
 {% block content %}
-<div class="container page-container-wide">
+<div class="container page-container-wide judge-workspace-page judge-create-page">
     <header class="header">
         <div class="header-content">
             {% set brand_title = 'Criar Partida' %}
-            {% set brand_subtitle = 'Escolha 10, 15 ou 20 jogadores e avance para o sorteio' %}
+            {% set brand_subtitle = 'Seleção, sorteio e times' %}
             {% include '_brand_header.html' %}
         </div>
     </header>
 
     <main class="main">
-        <section class="section">
-            <div class="selection-stats">
-                <div class="stat-card">
-                    <div class="stat-label">Disponíveis</div>
-                    <div class="stat-value">{{ total_jogadores }}</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Selecionados</div>
-                    <div class="stat-value" id="contador">{{ total_presentes }}</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Meta</div>
-                    <div class="stat-value" id="necessarios">10, 15 ou 20</div>
-                </div>
-            </div>
-        </section>
+        {# Navigation Bar #}
+        {% set current_section = 'criar' %}
+        {% include '_judge_nav.html' %}
 
-        <section class="section">
-            <h2 class="section-title">Quantidade da Partida</h2>
-            <div class="quantity-buttons">
-                <button class="qty-btn" type="button" onclick="selecionarQuantidade(10)" data-qty="10">
-                    <span class="qty-icon">🔟</span>
-                    <span class="qty-text">10</span>
-                    <span class="qty-desc">2 times</span>
-                </button>
-                <button class="qty-btn" type="button" onclick="selecionarQuantidade(15)" data-qty="15">
-                    <span class="qty-icon">1️⃣5️⃣</span>
-                    <span class="qty-text">15</span>
-                    <span class="qty-desc">3 times</span>
-                </button>
-                <button class="qty-btn" type="button" onclick="selecionarQuantidade(20)" data-qty="20">
-                    <span class="qty-icon">2️⃣0️⃣</span>
-                    <span class="qty-text">20</span>
-                    <span class="qty-desc">4 times</span>
-                </button>
-            </div>
-        </section>
-
-        <section class="section">
-            <div class="section-header">
-                <h2 class="section-title">Jogadores da Partida</h2>
-                <button class="btn btn-secondary" type="button" onclick="limparSelecao()">Limpar</button>
+        <section class="judge-flow-card judge-create-panel">
+            <div class="judge-create-header">
+                <div>
+                    <h1>Quem vai jogar?</h1>
+                    <p>Escolha a quantidade e selecione os jogadores.</p>
+                </div>
+                <span class="judge-available-count">{{ total_jogadores }} jogadores disponíveis</span>
             </div>
 
-            <div class="players-grid">
+            <div class="judge-format-picker">
+                <span class="judge-format-picker__label">Quantos jogadores?</span>
+                <div class="judge-format-options" role="group" aria-label="Quantidade de jogadores">
+                    <button class="qty-btn judge-format-option" type="button" onclick="selecionarQuantidade(10)" data-qty="10" aria-pressed="false">
+                        <strong>10</strong>
+                        <span>2 times</span>
+                    </button>
+                    <button class="qty-btn judge-format-option" type="button" onclick="selecionarQuantidade(15)" data-qty="15" aria-pressed="false">
+                        <strong>15</strong>
+                        <span>3 times</span>
+                    </button>
+                    <button class="qty-btn judge-format-option" type="button" onclick="selecionarQuantidade(20)" data-qty="20" aria-pressed="false">
+                        <strong>20</strong>
+                        <span>4 times</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="judge-selection-toolbar">
+                <div class="judge-selection-toolbar__status" aria-live="polite">
+                    <span>Selecionados</span>
+                    <strong><span id="contador">{{ total_presentes }}</span><span id="metaContador"></span></strong>
+                </div>
+                <button class="judge-clear-button" id="btnLimpar" type="button" onclick="limparSelecao()">Limpar seleção</button>
+                <div class="judge-selection-progress" id="progressoSelecaoTrilho" aria-hidden="true">
+                    <span id="progressoSelecao"></span>
+                </div>
+            </div>
+
+            <div class="players-grid judge-players-grid">
                 {% for jogador in todos_jogadores %}
-                <label class="player-card" style="cursor: pointer;">
+                <label class="judge-player-option">
                     <input
                         type="checkbox"
                         class="jogador-checkbox"
@@ -69,29 +67,42 @@
                         data-nome="{{ jogador.nome }}"
                         onchange="atualizarContador()"
                         {% if jogador.presente %}checked{% endif %}
-                        style="margin-right: 0.75rem;"
                     >
-                    <div class="player-info">
-                        <h3 class="player-name">{{ jogador.nome }}</h3>
-                        <span class="badge {% if jogador.posicao == 'goleiro' %}badge-warning{% else %}badge-success{% endif %}">
-                            {% if jogador.posicao == 'goleiro' %}🧤 Goleiro{% else %}⚽ Linha{% endif %}
+                    <img class="judge-player-option__bg" src="{{ jogador.foto_url or url_for('static', filename='foto_card_jogador.jpeg') }}" alt="" aria-hidden="true">
+                    <span class="judge-player-option__overlay" aria-hidden="true"></span>
+                    <span class="judge-player-option__check" aria-hidden="true"></span>
+                    <span class="judge-player-option__surface">
+                        <span class="judge-player-option__avatar-shell">
+                            <span class="judge-player-option__avatar" aria-hidden="true">{{ jogador.nome[:2]|upper }}</span>
                         </span>
-                    </div>
-                    <div class="player-details">
-                        <span>Nível {{ jogador.nivel }}</span>
-                        <span>{% if jogador.tipo == 'fixo' %}⭐ Fixo{% else %}👤 Avulso{% endif %}</span>
-                    </div>
+                        <span class="judge-player-option__content">
+                            <span class="judge-player-option__identity">
+                                <strong>{{ jogador.nome }}</strong>
+                                <span class="judge-player-option__level">Nível {{ jogador.nivel }}</span>
+                            </span>
+                            <span class="judge-player-option__tags">
+                                <span class="judge-player-option__tag">
+                                    {{ '⭐ Fixo' if jogador.tipo == 'fixo' else '👤 Avulso' }}
+                                </span>
+                                <span class="judge-player-option__tag judge-player-option__tag--position">
+                                    {{ '🧤 Goleiro' if jogador.posicao == 'goleiro' else '⚽ Linha' }}
+                                </span>
+                            </span>
+                        </span>
+                    </span>
                 </label>
                 {% endfor %}
             </div>
-        </section>
 
-        <section class="section">
-            <div class="surface-panel surface-panel--soft" style="text-align: center;">
-                <div class="section-label">Sorteio</div>
-                <button class="btn btn-primary btn-large" id="btnSortear" type="button" onclick="confirmarSelecao()" disabled>SORTEIO</button>
-                <div id="mensagemErro" class="alert alert-warning" style="display: none; margin-top: 1rem;"></div>
+            <div class="judge-create-action" id="acoesSorteio">
+                <div>
+                    <span id="orientacaoSelecao">Escolha 10, 15 ou 20 jogadores.</span>
+                </div>
+                <button class="btn btn-primary" id="btnSortear" type="button" onclick="confirmarSelecao()" disabled>
+                    <span id="btnSortearTexto">Escolha a quantidade</span>
+                </button>
             </div>
+            <div id="mensagemErro" class="alert alert-warning judge-create-error" role="alert" style="display: none;"></div>
         </section>
     </main>
 </div>
@@ -101,9 +112,8 @@ const QUANTIDADES_VALIDAS = [10, 15, 20];
 let quantidadeSelecionada = null;
 
 function atualizarContador() {
-    // Alterna classe 'selected' nos player-card (rótulos) para destaque visual
     document.querySelectorAll('.jogador-checkbox').forEach(cb => {
-        const card = cb.closest('.player-card');
+        const card = cb.closest('.judge-player-option');
         if (card) {
             card.classList.toggle('selected', cb.checked);
         }
@@ -114,30 +124,59 @@ function atualizarContador() {
     document.getElementById('contador').textContent = contador;
 
     const btnSortear = document.getElementById('btnSortear');
-    btnSortear.disabled = !(quantidadeSelecionada && contador === quantidadeSelecionada);
-}
+    const btnSortearTexto = document.getElementById('btnSortearTexto');
+    const metaContador = document.getElementById('metaContador');
+    const orientacao = document.getElementById('orientacaoSelecao');
+    const progresso = document.getElementById('progressoSelecao');
+    const progressoTrilho = document.getElementById('progressoSelecaoTrilho');
+    const btnLimpar = document.getElementById('btnLimpar');
+    const acoesSorteio = document.getElementById('acoesSorteio');
+    const completos = quantidadeSelecionada && contador === quantidadeSelecionada;
+    const faltam = quantidadeSelecionada ? quantidadeSelecionada - contador : 0;
 
-function selecionarQuantidade(quantidade) {
-    quantidadeSelecionada = quantidadeSelecionada === quantidade ? null : quantidade;
+    metaContador.textContent = quantidadeSelecionada ? ` de ${quantidadeSelecionada}` : '';
+    progresso.style.width = quantidadeSelecionada
+        ? `${Math.min((contador / quantidadeSelecionada) * 100, 100)}%`
+        : '0%';
+    btnLimpar.disabled = contador === 0;
+    btnSortear.disabled = !completos;
+    progressoTrilho.classList.toggle('is-complete', Boolean(completos));
+    acoesSorteio.classList.toggle('is-ready', Boolean(completos));
 
-    document.querySelectorAll('.qty-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-qty') === String(quantidadeSelecionada));
+    document.querySelectorAll('.jogador-checkbox').forEach(cb => {
+        cb.disabled = Boolean(quantidadeSelecionada && contador >= quantidadeSelecionada && !cb.checked);
     });
 
     if (!quantidadeSelecionada) {
-        document.getElementById('necessarios').textContent = '10, 15 ou 20';
+        btnSortearTexto.textContent = 'Escolha a quantidade';
+        orientacao.textContent = 'Escolha 10, 15 ou 20 jogadores.';
+    } else if (faltam > 0) {
+        btnSortearTexto.textContent = 'Aguardando seleção';
+        orientacao.textContent = `Selecione mais ${faltam} jogador${faltam === 1 ? '' : 'es'}.`;
+    } else if (faltam < 0) {
+        btnSortearTexto.textContent = 'Ajuste a seleção';
+        orientacao.textContent = `Remova ${Math.abs(faltam)} jogador${faltam === -1 ? '' : 'es'}.`;
     } else {
-        document.getElementById('necessarios').textContent = `${quantidadeSelecionada} jogadores`;
+        btnSortearTexto.textContent = `Sortear ${quantidadeSelecionada / 5} times`;
+        orientacao.textContent = 'Tudo pronto para o sorteio.';
     }
+}
 
+function selecionarQuantidade(quantidade) {
+    quantidadeSelecionada = quantidade;
+
+    document.querySelectorAll('.qty-btn').forEach(btn => {
+        const selecionado = btn.getAttribute('data-qty') === String(quantidadeSelecionada);
+        btn.classList.toggle('selected', selecionado);
+        btn.setAttribute('aria-pressed', String(selecionado));
+    });
+
+    document.getElementById('mensagemErro').style.display = 'none';
     atualizarContador();
 }
 
 function limparSelecao() {
     document.querySelectorAll('.jogador-checkbox').forEach(cb => cb.checked = false);
-    quantidadeSelecionada = null;
-    document.querySelectorAll('.qty-btn').forEach(btn => btn.classList.remove('active'));
-    document.getElementById('necessarios').textContent = '10, 15 ou 20';
     document.getElementById('mensagemErro').style.display = 'none';
     atualizarContador();
 }
@@ -148,12 +187,18 @@ function confirmarSelecao() {
     const msgErro = document.getElementById('mensagemErro');
 
     if (!quantidadeSelecionada || ids.length !== quantidadeSelecionada) {
-        msgErro.textContent = `Selecione exatamente ${quantidadeSelecionada || '10, 15 ou 20'} jogadores.`;
+        msgErro.textContent = quantidadeSelecionada
+            ? `Selecione exatamente ${quantidadeSelecionada} jogadores.`
+            : 'Escolha 10, 15 ou 20 jogadores.';
         msgErro.style.display = 'block';
         return;
     }
 
     msgErro.style.display = 'none';
+    const btnSortear = document.getElementById('btnSortear');
+    const btnSortearTexto = document.getElementById('btnSortearTexto');
+    btnSortear.disabled = true;
+    btnSortearTexto.textContent = 'Preparando sorteio...';
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
     fetch('/api/presenca', {
@@ -161,21 +206,29 @@ function confirmarSelecao() {
         headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
         body: JSON.stringify({jogador_ids: ids})
     })
-    .then(res => res.json())
+    .then(async res => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.erro || 'Não foi possível iniciar o sorteio. Tente novamente.');
+        return data;
+    })
     .then(data => {
         if (data.sucesso) {
             window.location.href = '/sortear';
             return;
         }
-        msgErro.textContent = data.erro || 'Não foi possível salvar a seleção.';
-        msgErro.style.display = 'block';
+        throw new Error(data.erro || 'Não foi possível iniciar o sorteio. Tente novamente.');
     })
-    .catch(() => {
-        msgErro.textContent = 'Erro ao salvar seleção da partida.';
+    .catch(error => {
+        msgErro.textContent = error.message || 'Não foi possível iniciar o sorteio. Tente novamente.';
         msgErro.style.display = 'block';
+        atualizarContador();
     });
 }
 
-atualizarContador();
+if (QUANTIDADES_VALIDAS.includes(document.querySelectorAll('.jogador-checkbox:checked').length)) {
+    selecionarQuantidade(document.querySelectorAll('.jogador-checkbox:checked').length);
+} else {
+    atualizarContador();
+}
 </script>
 {% endblock %}

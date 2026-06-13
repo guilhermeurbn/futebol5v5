@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}Compartilhar Sorteio{% endblock %}
+
+{% block content %}
+<div class="container page-container-wide judge-workspace-page judge-share-page">
+    <header class="header">
+        <div class="header-content">
+            {% set brand_title = 'Compartilhar sorteio' %}
+            {% set brand_subtitle = 'Sorteio #' ~ sorteio.id ~ ' pronto para enviar' %}
+            {% include '_brand_header.html' %}
+        </div>
+    </header>
+
+    <main class="main">
+        {% if auth_user.role == 'juiz' %}
+            {% set current_section = 'compartilhar' %}
+            {% set judge_nav_sorteio_id = sorteio.id %}
+            {% include '_judge_nav.html' %}
+        {% endif %}
+
+        <section class="judge-flow-card judge-share-card">
+            <div class="judge-flow-card__heading">
+                <div>
+                    <h1>Times do sorteio #{{ sorteio.id }}</h1>
+                    <p>{{ sorteio.total_jogadores }} jogadores · {{ sorteio.num_times }} times</p>
+                </div>
+                <span class="judge-flow-status is-complete">Pronto</span>
+            </div>
+
+            <div class="judge-share-teams">
+                {% for time in sorteio.times %}
+                <article class="judge-share-team">
+                    <strong>Time {{ time.numero }}</strong>
+                    <span>{{ time.jogadores | map(attribute='nome') | join(', ') }}</span>
+                </article>
+                {% endfor %}
+            </div>
+
+            <p class="judge-share-actions__label">Como deseja compartilhar?</p>
+            <div class="judge-share-actions">
+                <button class="judge-share-option" type="button" id="copiarSorteio">
+                    <span class="judge-share-option__type">COPIAR</span>
+                    <span><strong id="copiarSorteioTitulo">Copiar</strong><small>Texto pronto para WhatsApp</small></span>
+                </button>
+                <a class="judge-share-option" href="{{ url_for('stats.export_sorteio_pdf') }}">
+                    <span class="judge-share-option__type">PDF</span>
+                    <span><strong>Baixar PDF</strong><small>Para visualizar ou imprimir</small></span>
+                </a>
+            </div>
+            <p class="judge-copy-feedback" id="copiarSorteioStatus" role="status" aria-live="polite"></p>
+        </section>
+    </main>
+</div>
+
+<script>
+document.getElementById('copiarSorteio')?.addEventListener('click', async function () {
+    const botao = this;
+    const titulo = document.getElementById('copiarSorteioTitulo');
+    const status = document.getElementById('copiarSorteioStatus');
+
+    try {
+        botao.disabled = true;
+        status.textContent = 'Preparando o texto...';
+
+        const resposta = await fetch('{{ url_for("stats.api_export_sorteio_txt") }}', {
+            headers: { 'Accept': 'application/json' }
+        });
+        const dados = await resposta.json();
+        if (!resposta.ok || !dados.sucesso) {
+            throw new Error(dados.erro || 'Não foi possível preparar o sorteio');
+        }
+
+        if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(dados.conteudo);
+        } else {
+            const campo = document.createElement('textarea');
+            campo.value = dados.conteudo;
+            campo.setAttribute('readonly', '');
+            campo.style.position = 'fixed';
+            campo.style.opacity = '0';
+            document.body.appendChild(campo);
+            campo.select();
+            if (!document.execCommand('copy')) {
+                throw new Error('Não foi possível copiar automaticamente');
+            }
+            campo.remove();
+        }
+
+        titulo.textContent = 'Copiado!';
+        status.textContent = 'Sorteio copiado. Agora é só colar no WhatsApp.';
+        setTimeout(() => {
+            titulo.textContent = 'Copiar';
+        }, 2500);
+    } catch (erro) {
+        status.textContent = erro.message;
+    } finally {
+        botao.disabled = false;
+    }
+});
+</script>
+{% endblock %}

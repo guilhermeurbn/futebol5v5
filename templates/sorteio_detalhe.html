@@ -20,12 +20,23 @@
         <!-- Main Content -->
         <main class="main">
             <!-- Navigation -->
-            {% if auth_user.role != 'juiz' %}
+            {% if auth_user.role == 'juiz' %}
+                {% set current_section = 'times' %}
+                {% set judge_nav_sorteio_id = sorteio.id %}
+                {% include '_judge_nav.html' %}
+            {% else %}
             <div class="nav-tabs">
                 <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
                 <a href="{{ url_for('jogador.historico') }}" class="nav-tab active">📜 Histórico</a>
                 <a href="{{ url_for('jogador.estatisticas') }}" class="nav-tab">📊 Estatísticas</a>
             </div>
+            {% endif %}
+
+            {% if auth_user.role == 'juiz' %}
+            <section class="judge-detail-actions" aria-label="Próximos passos">
+                <a href="{{ url_for('partida.compartilhar_sorteio', sorteio_id=sorteio.id) }}">Compartilhar sorteio</a>
+                <a href="{{ url_for('votacao.votacao_admin_page', sorteio_id=sorteio.id) }}">Votações</a>
+            </section>
             {% endif %}
 
             <!-- Info Section -->

@@ -30,7 +30,7 @@
 
             <!-- Histórico Section -->
             <section class="section">
-                <h2 class="section-title">📜 Sorteios Realizados</h2>
+                <h2 class="section-title">Histórico de partidas</h2>
 
                 {% if sorteios %}
                     <div class="sorteios-list">
@@ -63,7 +63,7 @@
                                 </div>
 
                                 <div class="sorteio-actions">
-                                    <button class="btn btn-primary btn-small btn-open-sorteio" data-sorteio-id="{{ sorteio.id }}">👁️ Ver Detalhes</button>
+                                    <a class="btn btn-primary btn-small" href="{{ url_for('partida.ver_sorteio', sorteio_id=sorteio.id) }}">Ver resultado</a>
                                 </div>
                                 <div class="sorteio-details" id="sorteio-details-{{ sorteio.id }}" hidden aria-hidden="true"></div>
                             </div>
@@ -84,56 +84,4 @@
             <p>⚽ NaTrave • Desenvolvido por Guilherme Urbano com ❤️</p>
         </footer>
     </div>
-        <script>
-        // Historico: carregar detalhes do sorteio inline (times + resultado) e remover blocos de votação
-        document.addEventListener('click', async (e) => {
-            const btn = e.target.closest('.btn-open-sorteio');
-            if (!btn) return;
-            const id = btn.getAttribute('data-sorteio-id');
-            const container = document.getElementById('sorteio-details-' + id);
-            if (!container) return;
-
-            if (!container.hidden) {
-                // fechar
-                container.hidden = true;
-                container.innerHTML = '';
-                btn.textContent = '👁️ Ver Detalhes';
-                return;
-            }
-
-            btn.textContent = '⏳ Carregando...';
-            try {
-                const res = await fetch(`/sorteio/${id}`);
-                if (!res.ok) throw new Error('Falha ao carregar');
-                const text = await res.text();
-
-                // Extrair apenas as sections de 'Times' e 'Resultado da Partida' do HTML retornado
-                const tmp = document.createElement('div');
-                tmp.innerHTML = text;
-                const sections = tmp.querySelectorAll('.section');
-                let html = '';
-                sections.forEach(sec => {
-                    const h2 = sec.querySelector('h2.section-title');
-                    if (!h2) return;
-                    const title = h2.textContent.trim();
-                    if (title.includes('Times') || title.includes('Resultado da Partida')) {
-                        html += sec.outerHTML;
-                    }
-                });
-                if (!html) html = tmp.querySelector('main') ? tmp.querySelector('main').innerHTML : text;
-
-                // Remove possíveis botões de votação dentro do trecho
-                html = html.replace(/<form[^>]*action="[^"]*votacao[^"]*"[\s\S]*?<\/form>/gi, '');
-                html = html.replace(/<a[^>]*href="[^"]*votacao[^"]*"[\s\S]*?<\/a>/gi, '');
-
-                container.innerHTML = html;
-                container.hidden = false;
-                btn.textContent = '✖ Fechar';
-            } catch (err) {
-                console.error(err);
-                btn.textContent = 'Erro';
-                setTimeout(() => btn.textContent = '👁️ Ver Detalhes', 1500);
-            }
-        });
-        </script>
 {% endblock %}

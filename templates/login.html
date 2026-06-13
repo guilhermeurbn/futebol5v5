@@ -1,11 +1,15 @@
 {% extends '_auth_layout.html' %}
 
 {% block title %}Login{% endblock %}
+{% block body_class %}auth-page--login{% endblock %}
 {% block auth_heading_id %}loginHeading{% endblock %}
 
 {% block auth_intro_wrapper %}
-    <section class="auth-panel auth-panel--intro auth-panel--intro-hero">
+    <section class="auth-panel auth-panel--intro auth-panel--intro-hero" id="loginIntro">
         {% include '_auth_intro.html' %}
+        <a class="auth-scroll-hint" href="#loginFormPanel" aria-label="Ir para o formulário de login">
+            <span class="auth-scroll-hint__icon" aria-hidden="true">↓</span>
+        </a>
     </section>
 {% endblock %}
 
@@ -47,7 +51,7 @@
                         <circle cx="12" cy="8" r="4" />
                     </svg>
                 </span>
-                <input class="form-input auth-input" id="username" name="username" type="text" placeholder="Digite seu usuário" required autocomplete="username" autofocus>
+                <input class="form-input auth-input" id="username" name="username" type="text" placeholder="Digite seu usuário" required autocomplete="username">
             </div>
         </div>
         <div class="form-group auth-field">

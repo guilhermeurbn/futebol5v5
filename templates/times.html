@@ -75,6 +75,12 @@
 
         <!-- Main Content -->
         <main class="main">
+            {% if auth_user.role == 'juiz' %}
+                {% set current_section = 'times' %}
+                {% set judge_nav_sorteio_id = sorteio_id %}
+                {% include '_judge_nav.html' %}
+            {% endif %}
+
             <!-- Navigation Tabs -->
             {% if auth_user.role != 'juiz' %}
             <div class="nav-tabs">
@@ -153,28 +159,22 @@
             <section class="section">
                 {% if auth_user.role in ['admin', 'super_admin', 'juiz'] %}
                 <div class="surface-panel surface-panel--soft times-workflow-panel" style="margin-bottom: 1rem;">
-                    <div class="section-label">Próxima etapa da rodada</div>
-                    <h2 class="section-title times-workflow-panel__title" style="margin-top: 0;">Registrar, então abrir votação</h2>
-                    <p class="times-workflow-panel__text">A ordem é simples: compartilhe se precisar, registre o resultado e só então abra a avaliação.</p>
+                    <div class="section-label">Sorteio concluído</div>
+                    <h2 class="section-title times-workflow-panel__title" style="margin-top: 0;">Times prontos</h2>
+                    <p class="times-workflow-panel__text">Escolha o próximo passo.</p>
 
                     <div class="times-actions times-actions--primary">
-                        <button id="btn-qrcode-principal" class="btn btn-primary times-action times-action--share" type="button">
-                            📱 Compartilhar
-                        </button>
-                        <a href="{{ url_for('partida.resultado_partida_page', sorteio_id=sorteio_id) }}" class="btn btn-primary times-action times-action--record">
-                            🏆 Registrar resultado
+                        <a href="{{ url_for('partida.compartilhar_sorteio', sorteio_id=sorteio_id) }}" class="btn btn-primary times-action times-action--share">
+                            Compartilhar sorteio
                         </a>
                         <a href="{{ url_for('votacao.votacao_admin_page', sorteio_id=sorteio_id) }}" class="btn btn-primary times-action times-action--vote">
-                            🗳️ Abrir votação
+                            Votações
                         </a>
-                    </div>
-
-                    <div class="times-workflow-panel__note">
-                        A votação só abre depois que o resultado da partida for registrado.
                     </div>
                 </div>
                 {% endif %}
 
+                {% if auth_user.role != 'juiz' %}
                 <div class="times-actions times-actions--secondary">
                     <a href="{{ url_for('juiz.jogar_page') if auth_user and auth_user.role == 'juiz' else url_for('jogador_crud.index') }}" class="btn btn-secondary times-action times-action--back">
                         ← Voltar
@@ -203,6 +203,7 @@
                         🧾 PDF
                     </a>
                 </div>
+                {% endif %}
             </section>
         </main>
 

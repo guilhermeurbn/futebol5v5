@@ -74,6 +74,7 @@ Trocar em qualquer ambiente serio.
 - [models/jogadores.py](models/jogadores.py): modelo `Jogador`
 - [templates/](templates): frontend server-rendered
 - [static/style.css](static/style.css): tema visual
+- [JUDGE_DESIGN_SYSTEM.md](JUDGE_DESIGN_SYSTEM.md): cores, tokens e componentes oficiais da area do juiz
 - [static/offline-judge.js](static/offline-judge.js): fila offline e preview local
 - [static/service-worker.js](static/service-worker.js): cache/PWA
 

@@ -284,7 +284,9 @@ def export_sorteio_txt():
         somas = sorteio_data.get('somas', [])
         diferenca = sorteio_data.get('diferenca', 0)
         
-        txt_content = export_service.exportar_sorteio_texto(times, somas, diferenca)
+        txt_content = export_service.exportar_sorteio_texto(
+            times, somas, diferenca, sorteio_data.get('sorteio_id') or sorteio_data.get('id')
+        )
         return Response(txt_content, mimetype='text/plain; charset=utf-8')
     except Exception as e:
         logger.error(f"Erro ao exportar TXT: {str(e)}")
@@ -305,7 +307,9 @@ def api_export_sorteio_txt():
         somas = sorteio_data.get('somas', [])
         diferenca = sorteio_data.get('diferenca', 0)
 
-        txt_content = export_service.exportar_sorteio_texto(times, somas, diferenca)
+        txt_content = export_service.exportar_sorteio_texto(
+            times, somas, diferenca, sorteio_data.get('sorteio_id') or sorteio_data.get('id')
+        )
         return jsonify({'sucesso': True, 'conteudo': txt_content})
     except Exception as e:
         logger.error(f"Erro ao exportar TXT via API: {str(e)}")

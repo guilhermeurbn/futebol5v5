@@ -4,6 +4,7 @@ Liga sorteio, resultado da partida e apuracao dos votos.
 """
 import json
 import os
+import unicodedata
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 from services.db import load_json_data, save_json_data
@@ -147,6 +148,43 @@ class VotacaoService:
             self._salvar(dados)
         return alterou
 
+    def _participantes_aptos(self, partida: Dict) -> set:
+        return {
+            participante.get("user_id")
+            for participante in partida.get("participantes", [])
+            if participante.get("user_id")
+        }
+
+    def _todos_participantes_votaram(self, partida: Dict) -> bool:
+        aptos = self._participantes_aptos(partida)
+        if not aptos:
+            return False
+        votantes = {
+            voto.get("user_id")
+            for voto in partida.get("votos", [])
+            if voto.get("user_id")
+        }
+        return aptos.issubset(votantes)
+
+    def _chave_identidade(self, valor: Optional[str]) -> str:
+        texto = unicodedata.normalize("NFKD", (valor or "").strip().lower())
+        return "".join(char for char in texto if not unicodedata.combining(char))
+
+    def _usuarios_por_identidade(self, usuarios: List[Dict]) -> Dict[str, Optional[Dict]]:
+        candidatos = {}
+        for usuario in usuarios:
+            if usuario.get("role", "usuario") != "usuario" or not usuario.get("ativo", True):
+                continue
+            for valor in (usuario.get("nome"), usuario.get("username")):
+                chave = self._chave_identidade(valor)
+                if not chave:
+                    continue
+                if chave in candidatos and candidatos[chave] != usuario:
+                    candidatos[chave] = None
+                else:
+                    candidatos[chave] = usuario
+        return candidatos
+
     def listar(self) -> List[Dict]:
         dados = self._carregar()
         self._encerrar_expiradas_em_dados(dados)
@@ -199,7 +237,7 @@ class VotacaoService:
         titulo: str = "",
         sorteio_id: Optional[int] = None,
         resultado_partida: Optional[Dict] = None,
-        duracao_horas: int = 8,
+        duracao_horas: int = 12,
     ) -> Dict:
         dados = self._carregar()
         self._encerrar_expiradas_em_dados(dados)
@@ -219,14 +257,20 @@ class VotacaoService:
         ultimo_id = int(dados.get("ultimo_id", 0)) + 1
         participantes = []
         user_map = {u.get("id"): u for u in usuarios if u.get("id")}
+        usuarios_por_identidade = self._usuarios_por_identidade(usuarios)
 
         for time in times_json:
             numero = time.get("numero")
             for j in time.get("jogadores", []):
                 user_id = j.get("owner_user_id")
                 usuario = user_map.get(user_id) if user_id else None
+                if not usuario:
+                    usuario = usuarios_por_identidade.get(
+                        self._chave_identidade(j.get("nome"))
+                    )
+                    user_id = usuario.get("id") if usuario else None
                 participantes.append({
-                    "user_id": user_id,
+                    "user_id": user_id if usuario else None,
                     "username": (usuario or {}).get("username", ""),
                     "nome_usuario": (usuario or {}).get("nome", ""),
                     "jogador_nome": j.get("nome", ""),
@@ -238,7 +282,8 @@ class VotacaoService:
             raise ValueError("Nenhum participante encontrado no sorteio")
 
         aberta_em = self._agora()
-        fecha_em = aberta_em + timedelta(hours=max(1, int(duracao_horas or 8)))
+        duracao_horas = max(1, int(duracao_horas or 12))
+        fecha_em = aberta_em + timedelta(hours=duracao_horas)
 
         partida = {
             "id": ultimo_id,
@@ -248,7 +293,7 @@ class VotacaoService:
             "criado_em": aberta_em.isoformat(),
             "aberta_em": aberta_em.isoformat(),
             "fecha_em": fecha_em.isoformat(),
-            "duracao_horas": max(1, int(duracao_horas or 8)),
+            "duracao_horas": duracao_horas,
             "criado_por": criado_por,
             "encerrado_em": None,
             "encerrado_por": None,
@@ -377,6 +422,8 @@ class VotacaoService:
         votos = alvo.get("votos", [])
         votos.append(voto)
         alvo["votos"] = votos
+        if self._todos_participantes_votaram(alvo):
+            self._encerrar_partida_obj(alvo, "sistema", motivo="todos_votaram")
         self._salvar(dados)
         return voto
 

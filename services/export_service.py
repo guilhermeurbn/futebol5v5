@@ -138,45 +138,29 @@ class ExportService:
         return output.getvalue()
     
     @staticmethod
-    def exportar_sorteio_texto(times: List[List[Jogador]], somas: List[int], diferenca: int) -> str:
-        """
-        Exporta um sorteio em formato texto simples
-        
-        Returns:
-            String em texto
-        """
-        linhas = []
-        linhas.append("=" * 60)
-        linhas.append("⚽ RESULTADO DO SORTEIO - NaTrave")
-        linhas.append(f"Data: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
-        linhas.append("=" * 60)
-        linhas.append("")
-        
-        linhas.append("📊 RESUMO")
-        linhas.append(f"  • Número de times: {len(times)}")
-        linhas.append(f"  • Total de jogadores: {sum(len(time) for time in times)}")
-        linhas.append(f"  • Diferença máxima: {diferenca} pts")
-        linhas.append("")
-        
-        for idx, (time, soma) in enumerate(zip(times, somas), 1):
-            time = ExportService._normalizar_time(time)
-            linhas.append(f"⚽ TIME {idx} ({soma} pts)")
-            linhas.append("-" * 40)
-            
-            # Contar goleiros
-            goleiros = [j for j in time if j.posicao == 'goleiro']
-            linha = [j for j in time if j.posicao == 'linha']
-            
-            for jogador in time:
-                icon = "🧤" if jogador.posicao == 'goleiro' else "⚽"
-                tipo = "Fixo" if jogador.tipo == 'fixo' else "Avulso"
-                linhas.append(f"  {icon} {jogador.nome:20} | Nível {jogador.nivel} | {tipo}")
-            
+    def exportar_sorteio_texto(
+        times: List[List[Jogador]],
+        somas: List[int],
+        diferenca: int,
+        sorteio_id: int = None,
+    ) -> str:
+        """Monta uma mensagem curta, legível e pronta para WhatsApp."""
+        titulo = "⚽ *Times da partida*"
+        if sorteio_id:
+            titulo += f" · Sorteio #{sorteio_id}"
+
+        linhas = [titulo, ""]
+        for idx, time in enumerate(times, 1):
+            jogadores = ExportService._normalizar_time(time)
+            linhas.append(f"*Time {idx}*")
+            for jogador in jogadores:
+                marcador = "🧤" if jogador.posicao == "goleiro" else "•"
+                linhas.append(f"{marcador} {jogador.nome}")
             linhas.append("")
-        
-        linhas.append("=" * 60)
-        linhas.append("Gerado por NaTrave - https://github.com/guilhermeurbn/futebol5v5")
-        
+
+        total_jogadores = sum(len(time) for time in times)
+        linhas.append(f"{total_jogadores} jogadores · {len(times)} times")
+        linhas.append("_Sorteio organizado no NaTrave_")
         return "\n".join(linhas)
 
     @staticmethod

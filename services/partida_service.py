@@ -66,7 +66,7 @@ class PartidaService:
                 diferencas.append(abs(gols_a - gols_b))
         return max(diferencas, default=0)
     
-    def registrar_resultado(self, sorteio_id: int, time_vencedor: int,
+    def registrar_resultado(self, sorteio_id: int, time_vencedor: Optional[int],
                            gols_times: List[int], notas: str = "",
                            times_desempenho: Optional[List[Dict]] = None) -> Dict:
         """
@@ -84,8 +84,9 @@ class PartidaService:
         """
         partidas = self._carregar_raw()
         
+        ultimo_id = max((int(p.get("id", 0) or 0) for p in partidas), default=0)
         partida = {
-            "id": len(partidas) + 1,
+            "id": ultimo_id + 1,
             "sorteio_id": sorteio_id,
             "data": datetime.now().isoformat(),
             "time_vencedor": time_vencedor,

@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}Times do Sorteio{% endblock %}
+
+{% block content %}
+<div class="container page-container-wide judge-workspace-page judge-teams-page">
+    <header class="header">
+        <div class="header-content">
+            {% set brand_title = 'Times' %}
+            {% set brand_subtitle = 'Sorteio #' ~ sorteio.id %}
+            {% include '_brand_header.html' %}
+        </div>
+    </header>
+
+    <main class="main">
+        {% set current_section = 'times' %}
+        {% set judge_nav_sorteio_id = sorteio.id %}
+        {% include '_judge_nav.html' %}
+
+        <section class="judge-flow-card judge-draw-summary">
+            <div class="judge-flow-card__heading">
+                <div>
+                    <span class="judge-flow-kicker">Sorteio #{{ sorteio.id }}</span>
+                    <h1>Times definidos</h1>
+                    <p>{{ sorteio.total_jogadores }} jogadores · {{ sorteio.num_times }} times</p>
+                </div>
+                <span class="judge-flow-status is-complete">Pronto</span>
+            </div>
+
+            <div class="judge-draw-stats">
+                <div>
+                    <span>Equilíbrio</span>
+                    <strong>Diferença {{ sorteio.diferenca }}</strong>
+                </div>
+                <div>
+                    <span>Formato</span>
+                    <strong>{{ sorteio.num_times }} times de 5</strong>
+                </div>
+            </div>
+        </section>
+
+        <section class="judge-teams-grid" aria-label="Times sorteados">
+            {% for time in sorteio.times %}
+            <article class="judge-team-card">
+                <div class="judge-team-card__header">
+                    <span class="judge-team-card__number">{{ time.numero }}</span>
+                    <div>
+                        <h2>Time {{ time.numero }}</h2>
+                        {% if sorteio.pontuacoes and sorteio.pontuacoes[loop.index0] is defined %}
+                        <span>{{ sorteio.pontuacoes[loop.index0] }} pontos</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="judge-team-card__players">
+                    {% for jogador in time.jogadores %}
+                    <div class="judge-team-player">
+                        <span class="judge-team-player__position" aria-hidden="true">
+                            {{ 'G' if jogador.posicao == 'goleiro' else loop.index }}
+                        </span>
+                        <span>
+                            <strong>{{ jogador.nome }}</strong>
+                            <small>{{ 'Goleiro' if jogador.posicao == 'goleiro' else 'Linha' }} · Nível {{ jogador.nivel }}</small>
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </article>
+            {% endfor %}
+        </section>
+
+        <section class="judge-flow-card judge-next-actions">
+            <div>
+                <h2>Próximo passo</h2>
+                <p>Compartilhe os times ou avance para a avaliação.</p>
+            </div>
+            <div class="judge-next-actions__buttons">
+                <a class="btn btn-secondary" href="{{ url_for('partida.compartilhar_sorteio', sorteio_id=sorteio.id) }}">
+                    Compartilhar
+                </a>
+                <a class="btn btn-primary" href="{{ url_for('votacao.votacao_admin_page', sorteio_id=sorteio.id) }}">
+                    Ir para votações
+                </a>
+            </div>
+        </section>
+
+    </main>
+</div>
+{% endblock %}

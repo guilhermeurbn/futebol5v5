@@ -394,6 +394,14 @@ def selecionar_jogadores():
 def atualizar_presenca():
     """API: Marca jogadores como presentes"""
     try:
+        if _is_juiz():
+            estado = juiz_partida_service.obter_estado()
+            if (estado.get('status') or 'idle') != 'selecionando':
+                return jsonify({
+                    'sucesso': False,
+                    'erro': 'O fluxo do juiz nao esta na etapa de selecao'
+                }), 409
+
         dados = request.get_json(silent=True) or {}
         jogador_ids = dados.get('jogador_ids', [])
         
@@ -426,6 +434,14 @@ def atualizar_presenca():
 def limpar_presenca():
     """API: Limpa seleção de presença"""
     try:
+        if _is_juiz():
+            estado = juiz_partida_service.obter_estado()
+            if (estado.get('status') or 'idle') not in {'selecionando', 'idle'}:
+                return jsonify({
+                    'sucesso': False,
+                    'erro': 'Nao e possivel limpar a selecao fora da etapa de selecao'
+                }), 409
+
         jogador_service.limpar_presenca()
         return jsonify({
             'sucesso': True,
