@@ -1,5 +1,5 @@
 // NaTrave Service Worker - Offline Support & Caching Strategy
-const SW_VERSION = '20260605-2';
+const SW_VERSION = '20260613-1';
 const CACHE_NAME = `natrave-v${SW_VERSION}`;
 const RUNTIME_CACHE = `natrave-runtime-v${SW_VERSION}`;
 const IMAGE_CACHE = `natrave-images-v${SW_VERSION}`;
@@ -7,7 +7,7 @@ const IMAGE_CACHE = `natrave-images-v${SW_VERSION}`;
 // URLs que devem estar sempre em cache
 const urlsToCache = [
   '/',
-  '/static/style.css',
+  '/static/style.css?v=20260613-1',
   '/static/offline-judge.js',
   '/sortear',
   '/historico',
@@ -135,24 +135,10 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Estratégia para CSS e JavaScript
+  // Estratégia para CSS e JavaScript: rede primeiro para publicar o visual novo imediatamente
   if (url.pathname.endsWith('.css') || url.pathname.endsWith('.js')) {
     event.respondWith(
-      caches.match(event.request).then(response => {
-        if (response) {
-          // Atualizar cache em background
-          fetch(event.request).then(newResponse => {
-            if (newResponse.status === 200) {
-              caches.open(CACHE_NAME).then(cache => {
-                cache.put(event.request, newResponse);
-              });
-            }
-          }).catch(() => {});
-          return response;
-        }
-        
-        // Não está em cache, fazer requisição
-        return fetch(event.request).then(response => {
+      fetch(event.request, { cache: 'no-store' }).then(response => {
           if (response.status === 200) {
             const responseToCache = response.clone();
             caches.open(CACHE_NAME).then(cache => {
@@ -160,14 +146,17 @@ self.addEventListener('fetch', event => {
             });
           }
           return response;
-        }).catch(() => {
-          // Se falhar e não tiver cache, retornar placeholder
+        })
+        .catch(() => caches.match(event.request))
+        .then(response => {
+          if (response) {
+            return response;
+          }
           if (url.pathname.endsWith('.css')) {
             return new Response('', { headers: { 'Content-Type': 'text/css' } });
           }
           return new Response('', { headers: { 'Content-Type': 'application/javascript' } });
-        });
-      })
+        })
     );
     return;
   }

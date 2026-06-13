@@ -152,6 +152,9 @@ def criar_app(config_name: str = None) -> Flask:
         if request_path in {'/manifest.json', '/static/service-worker.js'}:
             response.headers['Cache-Control'] = 'no-cache, max-age=0'
 
+        if request_path in {'/static/style.css', '/static/offline-judge.js'}:
+            response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+
         return response
     
     logger.info(f"Aplicação iniciada em modo: {config_name}")
