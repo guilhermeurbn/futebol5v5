@@ -5,18 +5,22 @@ import os
 import logging
 import socket
 import uuid
-from flask import Flask, send_file, request, session, url_for
+from urllib.parse import quote, urlparse
+
+from flask import Flask, send_file, request, session, url_for, redirect
 try:
     from flask_wtf import CSRFProtect
-    from flask_wtf.csrf import generate_csrf
+    from flask_wtf.csrf import CSRFError, generate_csrf
 except Exception:
     CSRFProtect = None
+    CSRFError = None
     generate_csrf = None
 
 try:
     from flask_talisman import Talisman
 except Exception:
     Talisman = None
+from werkzeug.middleware.proxy_fix import ProxyFix
 from config import config_by_name
 from routes import (
     admin_bp,
@@ -75,6 +79,9 @@ def criar_app(config_name: str = None) -> Flask:
     app = Flask(__name__)
     config_obj = config_by_name.get(config_name, config_by_name['default'])
     app.config.from_object(config_obj)
+
+    # Preserve the original scheme/host when deployed behind a reverse proxy.
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
     
     # Configurar secret key para sessions
     secret_key = os.getenv('SECRET_KEY')
@@ -156,6 +163,25 @@ def criar_app(config_name: str = None) -> Flask:
             response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
 
         return response
+
+    if CSRFError is not None:
+        @app.errorhandler(CSRFError)
+        def handle_csrf_error(error):
+            logger.warning('CSRF validation failed on %s: %s', request.path, error.description)
+
+            fallback_path = url_for('votacao.votacao_admin_page')
+            referrer = request.referrer or ''
+            if referrer:
+                referrer_url = urlparse(referrer)
+                current_url = urlparse(request.host_url)
+                if referrer_url.scheme in {'http', 'https'} and referrer_url.netloc == current_url.netloc:
+                    fallback_path = referrer_url.path or fallback_path
+                    if referrer_url.query:
+                        fallback_path = f'{fallback_path}?{referrer_url.query}'
+
+            separator = '&' if '?' in fallback_path else '?'
+            mensagem = quote('Sua sessao expirou ou o formulario ficou desatualizado. Recarregue a pagina e tente novamente.')
+            return redirect(f'{fallback_path}{separator}erro={mensagem}')
     
     logger.info(f"Aplicação iniciada em modo: {config_name}")
 

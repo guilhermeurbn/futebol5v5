@@ -51,3 +51,21 @@ def test_seed_users_have_unique_usernames_and_no_pending_local_reset():
     assert guigui.get('senha_temporaria_ativa') is False
     assert 'senha_resetada_em' not in guigui
     assert 'senha_resetada_por' not in guigui
+
+
+def test_votacao_admin_post_without_csrf_redirects_to_recovery_page():
+    app = criar_app('testing')
+
+    with app.test_client() as client:
+        with client.session_transaction() as sess:
+            sess['user_id'] = 'test-juiz'
+            sess['username'] = 'juiz'
+            sess['nome'] = 'Juiz Teste'
+            sess['role'] = 'juiz'
+
+        response = client.post('/admin/votacao/criar', data={'sorteio_id': '1', 'titulo': 'Teste'})
+
+    assert response.status_code == 302
+    location = response.headers.get('Location', '')
+    assert '/admin/votacao' in location
+    assert 'erro=' in location

@@ -4,10 +4,18 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn wsgi:app
+    startCommand: gunicorn --workers 2 --threads 4 --timeout 60 wsgi:app
     envVars:
       - key: FLASK_ENV
         value: production
+      - key: WEB_CONCURRENCY
+        value: "2"
+      - key: WEB_THREADS
+        value: "4"
+      - key: GUNICORN_TIMEOUT
+        value: "60"
+      - key: DB_CONNECT_TIMEOUT
+        value: "5"
       - key: SECRET_KEY
         generateValue: true
       - key: RESEND_API_KEY

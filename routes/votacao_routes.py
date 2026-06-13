@@ -383,12 +383,14 @@ def votacao_admin_page():
     """Mantido por compatibilidade; redireciona para a central de rodada no admin."""
     sorteio_id = request.args.get('sorteio_id', type=int)
     sucesso = request.args.get('sucesso', '').strip()
+    erro = request.args.get('erro', '').strip()
     if _is_juiz():
         contexto = _resolver_contexto_admin(sorteio_id_hint=sorteio_id)
         return render_template(
             'votacao_admin.html',
             **contexto,
             sucesso=sucesso or None,
+            erro=erro or None,
             usuario=_usuario_logado(),
         )
     return redirect(url_for('admin.admin_page', sorteio_id=sorteio_id, sucesso=sucesso))

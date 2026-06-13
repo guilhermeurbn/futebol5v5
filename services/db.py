@@ -31,7 +31,12 @@ def get_conn():
     if psycopg2 is None:
         return None
     try:
-        return psycopg2.connect(url, sslmode=os.getenv("PGSSLMODE", "require"))
+        connect_timeout = int(os.getenv("DB_CONNECT_TIMEOUT", "5"))
+        return psycopg2.connect(
+            url,
+            sslmode=os.getenv("PGSSLMODE", "require"),
+            connect_timeout=connect_timeout,
+        )
     except Exception as e:
         print(f"[DB] Error connecting to Postgres: {e}")
         return None
