@@ -170,7 +170,7 @@ def criar_jogador_api():
         dados = request.get_json(silent=True) or {}
         jogador = jogador_service.criar(
             nome=dados.get('nome'),
-            nivel=int(dados.get('nivel', 5)),
+            nivel=float(dados.get('nivel', 5.0)),
             tipo=dados.get('tipo', 'avulso'),
             posicao=dados.get('posicao', 'linha')
         )
@@ -194,7 +194,7 @@ def adicionar_jogador():
     """Formulário: Adiciona novo jogador"""
     try:
         nome = request.form.get('nome', '').strip()
-        nivel = int(request.form.get('nivel', 5))
+        nivel = float(request.form.get('nivel', 5.0))
         tipo = request.form.get('tipo', '').strip()
         posicao = request.form.get('posicao', '').strip()
 
@@ -247,7 +247,7 @@ def atualizar_jogador(jogador_id):
         jogador = jogador_service.atualizar(
             jogador_id,
             nome=dados.get('nome'),
-            nivel=int(dados.get('nivel')) if dados.get('nivel') is not None else None,
+            nivel=float(dados.get('nivel')) if dados.get('nivel') is not None else None,
             tipo=dados.get('tipo'),
             posicao=dados.get('posicao')
         )
@@ -301,7 +301,7 @@ def editar_jogador_post(jogador_id):
         jogador = jogador_service.atualizar(
             jogador_id,
             nome=nome or None,
-            nivel=int(nivel) if nivel else None,
+            nivel=float(nivel) if nivel else None,
             tipo=tipo or None,
             posicao=posicao or None
         )

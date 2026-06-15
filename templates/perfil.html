@@ -3,7 +3,7 @@
 {% block title %}Meu Perfil{% endblock %}
 
 {% block content %}
-<div class="container profile-page">
+<div class="container profile-page profile-page--public profile-page--self{% if auth_user.role in ['admin', 'super_admin'] %} page-container-wide judge-workspace-page admin-page admin-page--ecosystem{% elif auth_user.role == 'usuario' %} page-container-wide player-workspace-page{% endif %}">
     <header class="header">
         <div class="header-content">
             {% set brand_title = 'Meu Perfil' %}
@@ -19,10 +19,8 @@
             {% if auth_user.role == 'usuario' %}
             <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab">🗳️ Minha Votação</a>
             {% endif %}
-            {% if auth_user.role in ['admin', 'super_admin'] %}
             <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
             <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">🏅 Ranking</a>
-            {% endif %}
         </div>
         {% endif %}
 
@@ -42,210 +40,400 @@
             </div>
         {% endif %}
 
-        {% if sucesso_senha %}
-            <div class="alert alert-success"><strong>✅</strong> {{ sucesso_senha }}</div>
-        {% endif %}
-        {% if erro_senha %}
-            <div class="alert alert-warning"><strong>⚠️</strong> {{ erro_senha }}</div>
-        {% endif %}
         {% if usuario.senha_temporaria_ativa %}
             <div class="alert alert-warning">
                 <strong>🔐 Atenção:</strong> você entrou com uma senha temporária. Troque-a agora nesta página para manter o acesso à conta.
             </div>
         {% endif %}
 
-        {% if not usuario.senha_temporaria_ativa %}
-        {% set win_rate = stats_jogador.win_rate if stats_jogador else 0 %}
+        {% if not usuario.senha_temporaria_ativa and jogador_proprio %}
+        {% set jogador = jogador_proprio %}
+        {% set nome_partes = jogador.nome.split() %}
+        {% set avatar_text = nome_partes[0][:2] if nome_partes else jogador.nome[:2] %}
         {% set total_partidas = stats_jogador.total_partidas if stats_jogador else 0 %}
-        {% set gols = stats_jogador.gols if stats_jogador else 0 %}
-        {% set aprovacao = stats_jogador.get('efficiency', {}).get('taxa_partidas_com_participacao', 0) if stats_jogador else 0 %}
-        {% set disciplina = stats_jogador.get('discipline', {}).get('indice_disciplina', 0) if stats_jogador else 0 %}
-        {% set evolucao = (stats_jogador.get('ultimos_resultados', {}).get('pontos', 0) / 15 * 100) if stats_jogador and stats_jogador.get('ultimos_resultados', {}).get('pontos', 0) else 0 %}
-        {% set nome_jogador = jogador_proprio.nome if jogador_proprio else usuario.nome %}
-        {% set nome_partes = nome_jogador.split() %}
-        {% set avatar_text = nome_partes[0][:2] if nome_partes else nome_jogador[:2] %}
+        {% set total_vitorias = stats_jogador.get('vitórias', 0) if stats_jogador else 0 %}
+        {% set total_gols = stats_jogador.gols if stats_jogador else 0 %}
+        {% set total_assistencias = stats_jogador.assistencias if stats_jogador else 0 %}
+        {% set win_rate = stats_jogador.win_rate if stats_jogador else 0 %}
+        {% set gols_por_partida = stats_jogador.get('gols_por_partida', 0) if stats_jogador else 0 %}
+        {% set assistencias_por_partida = stats_jogador.get('assistencias_por_partida', 0) if stats_jogador else 0 %}
+        {% set win_rate_safe = 100 if win_rate > 100 else 0 if win_rate < 0 else win_rate %}
+        {% if win_rate_safe >= 75 %}
+            {% set approval_tier = 'Elite' %}
+            {% set approval_tone = 'high' %}
+        {% elif win_rate_safe >= 50 %}
+            {% set approval_tier = 'Competitivo' %}
+            {% set approval_tone = 'mid' %}
+        {% elif win_rate_safe > 0 %}
+            {% set approval_tier = 'Em evolução' %}
+            {% set approval_tone = 'low' %}
+        {% else %}
+            {% set approval_tier = 'Sem base' %}
+            {% set approval_tone = 'base' %}
+        {% endif %}
+        {% set historico_recente = stats_jogador.historico_partidas[:6] if stats_jogador and stats_jogador.historico_partidas else [] %}
+        {% set jogo_destaque = historico_recente[0] if historico_recente else None %}
+        {% set outros_jogos = historico_recente[1:] if historico_recente|length > 1 else [] %}
 
-        <section class="section profile-private-shell">
-            <article class="player-card player-card--premium profile-private-card profile-private-player-card">
-                <div class="player-card__surface profile-private-surface">
-                    <div class="profile-private-player-card__top">
-                        <div class="player-card__avatar-shell profile-private-avatar">
-                            <div class="player-card__avatar" aria-hidden="true">{{ avatar_text|upper }}</div>
+        <section class="section public-profile-shell">
+            <article class="public-profile-dossier" data-player-id="{{ jogador.id }}">
+                <div class="public-profile-hero">
+                    <div class="public-profile-hero__identity">
+                        <div class="public-profile-hero__topbar">
+                            <div class="section-label public-profile-eyebrow">Meu perfil</div>
+                            <a class="btn btn-secondary btn-small public-profile-back" href="{{ url_for('jogador.index') }}">Voltar</a>
                         </div>
 
-                        <div class="player-card__content profile-private-player-card__identity">
-                            <div class="section-label">Meu painel</div>
-                            <div class="player-card__identity-row">
-                                <h2 class="player-card__name profile-private-player-card__name">{{ nome_jogador }}</h2>
-                                <span class="player-card__level-badge">Nível {{ jogador_proprio.nivel if jogador_proprio else 1 }}</span>
+                        <div class="public-profile-hero__main">
+                            <div class="public-profile-avatar-wrap">
+                                <div class="player-card__avatar public-profile-avatar" aria-hidden="true">{{ avatar_text|upper }}</div>
                             </div>
-                            <div class="player-card__tags">
-                                <span class="player-card__tag">@{{ usuario.username }}</span>
-                                <span class="player-card__tag player-card__tag--ghost">
-                                    {% if usuario.role == 'super_admin' %}Super Admin{% elif usuario.role == 'admin' %}Admin{% elif usuario.role == 'juiz' %}Juiz{% else %}Usuário{% endif %}
-                                </span>
-                            {% if jogador_proprio and jogador_proprio.posicao == 'goleiro' %}
-                                <span class="player-card__tag">🧤 Goleiro</span>
-                            {% else %}
-                                <span class="player-card__tag">⚽ Linha</span>
-                            {% endif %}
-                            {% if jogador_proprio and jogador_proprio.tipo == 'fixo' %}
-                                <span class="player-card__tag player-card__tag--ghost">⭐ Fixo</span>
-                            {% else %}
-                                <span class="player-card__tag player-card__tag--ghost">📝 Avulso</span>
-                            {% endif %}
-                            </div>
-                        </div>
-
-                        <div class="profile-private-score">
-                            <div class="player-card__ring" style="--progress: {{ win_rate }};">
-                                <div class="player-card__ring-inner">
-                                    <span class="player-card__ring-label">Aprovação</span>
-                                    <strong class="player-card__ring-value">{{ win_rate }}%</strong>
+                            <div class="public-profile-hero__meta">
+                                <div class="public-profile-name-row">
+                                    <h1 class="public-profile-name">{{ jogador.nome }}</h1>
+                                    <span class="public-profile-level">{{ '%.2f'|format(jogador.nivel|float) }}</span>
+                                </div>
+                                <div class="public-profile-tags">
+                                    <span class="public-profile-pill public-profile-pill--solid">{% if jogador.tipo == 'fixo' %}Fixo{% else %}Avulso{% endif %}</span>
+                                    <span class="public-profile-pill public-profile-pill--ghost">{% if jogador.posicao == 'goleiro' %}Goleiro{% else %}Linha{% endif %}</span>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <div class="profile-private-combined-heading">
-                        <div class="section-label">Resumo</div>
-                        <h3 class="profile-private-section-title">Resumo de jogos e jogos recentes</h3>
-                    </div>
-
-                    <div class="profile-private-main-grid">
-                        <div class="profile-private-metrics">
-                            <div class="profile-private-metric-card">
-                                <span class="profile-private-metric-icon">🏆</span>
-                                <span class="profile-private-metric-label">Vitórias</span>
-                                <strong class="profile-private-metric-value">{{ stats_jogador.get('vitórias', 0) if stats_jogador else 0 }}</strong>
-                            </div>
-                            <div class="profile-private-metric-card">
-                                <span class="profile-private-metric-icon">⚽</span>
-                                <span class="profile-private-metric-label">Partidas</span>
-                                <strong class="profile-private-metric-value">{{ total_partidas }}</strong>
-                            </div>
-                            <div class="profile-private-metric-card">
-                                <span class="profile-private-metric-icon">🎯</span>
-                                <span class="profile-private-metric-label">Gols</span>
-                                <strong class="profile-private-metric-value">{{ gols }}</strong>
-                            </div>
-                            <div class="profile-private-metric-card">
-                                <span class="profile-private-metric-icon">🤝</span>
-                                <span class="profile-private-metric-label">Assist.</span>
-                                <strong class="profile-private-metric-value">{{ stats_jogador.assistencias if stats_jogador else 0 }}</strong>
-                            </div>
-                        </div>
-
-                        <div class="profile-private-bars">
-                            <div class="profile-progress-row profile-progress-row--stacked">
-                                <div class="profile-progress-row__head">
-                                    <div class="profile-progress-label">Participação ofensiva</div>
-                                    <div class="profile-progress-value">{{ aprovacao }}%</div>
-                                </div>
-                                <div class="profile-progress-track profile-progress-track--thin">
-                                    <div class="profile-progress-fill profile-progress-fill--violet" style="width: {{ aprovacao }}%;"></div>
-                                </div>
-                            </div>
-                            <div class="profile-progress-row profile-progress-row--stacked">
-                                <div class="profile-progress-row__head">
-                                    <div class="profile-progress-label">Disciplina</div>
-                                    <div class="profile-progress-value">{{ disciplina }}%</div>
-                                </div>
-                                <div class="profile-progress-track profile-progress-track--thin">
-                                    <div class="profile-progress-fill profile-progress-fill--green" style="width: {{ disciplina }}%;"></div>
-                                </div>
-                            </div>
-                            <div class="profile-progress-row profile-progress-row--stacked">
-                                <div class="profile-progress-row__head">
-                                    <div class="profile-progress-label">Evolução recente</div>
-                                    <div class="profile-progress-value">{{ stats_jogador.get('ultimos_resultados', {}).get('pontos', 0) if stats_jogador else 0 }}/15</div>
-                                </div>
-                                <div class="profile-progress-track profile-progress-track--thin">
-                                    <div class="profile-progress-fill profile-progress-fill--amber" style="width: {{ evolucao }}%;"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="profile-private-footnote">
-                            {% if stats_jogador %}
-                                <span>{% if stats_jogador.get('win_rate_valido', True) %}Win rate validado{% else %}Win rate inconsistente{% endif %}</span>
-                                <span>{{ stats_jogador.get('efficiency', {}).get('participacoes_por_partida', 0) }} participações por partida</span>
-                                <span>{{ stats_jogador.get('vitórias', 0) }}V {{ stats_jogador.derrotas }}D {{ stats_jogador.empates }}E</span>
-                            {% else %}
-                                <span>Sem estatísticas consolidadas ainda</span>
-                            {% endif %}
                         </div>
                     </div>
 
-                {% if stats_jogador and stats_jogador.historico_partidas %}
-                <div class="profile-private-section">
-                    <h3 class="profile-private-section-title">Jogos recentes</h3>
-                    <div class="profile-private-history-grid">
-                        {% for partida in stats_jogador.historico_partidas[:6] %}
-                        <article class="profile-private-history-card">
-                            <div class="profile-private-history-card__top">
-                                <strong>{{ partida.data|dt_pt if partida.data else 'N/A' }}</strong>
-                                <span class="profile-private-history-badge">Time {{ partida.time_numero }}</span>
+                    <aside class="public-profile-scoreboard">
+                        <div class="public-profile-approval public-profile-approval--{{ approval_tone }}">
+                            <span class="public-profile-approval__label">Aprovação</span>
+                            <div class="public-profile-approval__headline">
+                                <strong class="public-profile-approval__value">{{ '%.1f'|format(win_rate_safe|float) }}%</strong>
+                                <span class="public-profile-approval__tier">{{ approval_tier }}</span>
                             </div>
-                            <div class="profile-private-history-stats">
-                                <span><b>{{ partida.gols }}</b> gols</span>
-                                <span><b>{{ partida.assistencias }}</b> assistências</span>
-                                <span><b>{{ partida.cartoes_amarelos if partida.cartoes_amarelos > 0 else 0 }}</b> amarelos</span>
-                                <span><b>{{ partida.cartoes_vermelhos if partida.cartoes_vermelhos > 0 else 0 }}</b> vermelhos</span>
+                            <div class="public-profile-approval__meter" role="img" aria-label="Aprovação {{ '%.1f'|format(win_rate_safe|float) }} por cento">
+                                <span class="public-profile-approval__fill" style="width: {{ win_rate_safe }}%;"></span>
                             </div>
-                            <div class="profile-private-history-result">
-                                {% if partida.resultado == 'vitória' %}
-                                    <span class="badge badge-success">Vitória</span>
-                                {% elif partida.resultado == 'derrota' %}
-                                    <span class="badge badge-danger">Derrota</span>
-                                {% else %}
-                                    <span class="badge badge-warning">Empate</span>
-                                {% endif %}
+                            <span class="public-profile-approval__hint">Taxa de vitórias nas partidas registradas.</span>
+                        </div>
+                    </aside>
+                </div>
+
+                <section class="public-profile-kpi-strip">
+                    <article class="stat-card public-profile-kpi public-profile-kpi--featured">
+                        <span class="stat-label">Partidas</span>
+                        <strong class="public-profile-kpi__value">{{ total_partidas }}</strong>
+                        <small class="public-profile-kpi__meta">Base da amostra competitiva</small>
+                    </article>
+                    <article class="stat-card public-profile-kpi">
+                        <span class="stat-label">Vitórias</span>
+                        <strong class="public-profile-kpi__value">{{ total_vitorias }}</strong>
+                        <small class="public-profile-kpi__meta">{{ win_rate }}% de aprovação</small>
+                    </article>
+                    <article class="stat-card public-profile-kpi">
+                        <span class="stat-label">Gols</span>
+                        <strong class="public-profile-kpi__value">{{ total_gols }}</strong>
+                        <small class="public-profile-kpi__meta">{{ gols_por_partida }} por partida</small>
+                    </article>
+                    <article class="stat-card public-profile-kpi">
+                        <span class="stat-label">Assistências</span>
+                        <strong class="public-profile-kpi__value">{{ total_assistencias }}</strong>
+                        <small class="public-profile-kpi__meta">{{ assistencias_por_partida }} por partida</small>
+                    </article>
+                </section>
+
+                <section class="public-profile-recent-section">
+                    <div class="public-profile-section-heading">
+                        <div>
+                            <div class="section-label public-profile-eyebrow">Recorte recente</div>
+                            <h3 class="profile-private-section-title">Jogos recentes</h3>
+                        </div>
+                        <p class="public-profile-section-note">Sua atuação nas últimas rodadas registradas.</p>
+                    </div>
+
+                    {% set hist = jogador.historico_nivel if jogador.historico_nivel else [] %}
+                    {% if hist %}
+                    <div class="public-profile-evolution">
+                        <div class="public-profile-evolution__head">
+                            <span class="section-label public-profile-eyebrow">Evolução de rating</span>
+                            <strong class="public-profile-evolution__current">{{ '%.2f'|format(jogador.nivel|float) }}</strong>
+                        </div>
+                        <div class="public-profile-evolution__track">
+                            {% for entry in hist[-8:]|reverse %}
+                            <div class="public-profile-evolution__step public-profile-evolution__step--{{ 'up' if entry.nivel_novo > entry.nivel_anterior else 'down' if entry.nivel_novo < entry.nivel_anterior else 'flat' }}">
+                                <span class="public-profile-evolution__val">{{ '%.2f'|format(entry.nivel_novo|float) }}</span>
+                                <span class="public-profile-evolution__arrow">{% if entry.nivel_novo > entry.nivel_anterior %}↑{% elif entry.nivel_novo < entry.nivel_anterior %}↓{% else %}–{% endif %}</span>
+                                <span class="public-profile-evolution__ts">{{ entry.ts[:10] if entry.ts else '' }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if jogo_destaque %}
+                    <article class="public-profile-match public-profile-match--featured public-profile-match--{{ 'win' if jogo_destaque.resultado == 'vitória' else 'loss' if jogo_destaque.resultado == 'derrota' else 'draw' }}">
+                        <div class="public-profile-match__top">
+                            <div>
+                                <span class="public-profile-match__date">{{ jogo_destaque.data|dt_pt if jogo_destaque.data else 'N/A' }}</span>
+                                <h4>Última atuação registrada</h4>
+                            </div>
+                            <span class="public-profile-result-chip public-profile-result-chip--{{ 'win' if jogo_destaque.resultado == 'vitória' else 'loss' if jogo_destaque.resultado == 'derrota' else 'draw' }}">{{ jogo_destaque.resultado|capitalize }}</span>
+                        </div>
+                        <div class="public-profile-match__body">
+                            <div class="public-profile-match__meta-grid">
+                                <div><span>Time</span><strong>{{ jogo_destaque.time_numero }}</strong></div>
+                                <div><span>Posição</span><strong>{{ 'Goleiro' if jogo_destaque.posicao == 'goleiro' else 'Linha' }}</strong></div>
+                                <div><span>Gols</span><strong>{{ jogo_destaque.gols }}</strong></div>
+                                <div><span>Assistências</span><strong>{{ jogo_destaque.assistencias }}</strong></div>
+                            </div>
+                        </div>
+                    </article>
+
+                    {% if outros_jogos %}
+                    <div class="public-profile-match-grid">
+                        {% for jogo in outros_jogos %}
+                        <article class="public-profile-match public-profile-match--compact public-profile-match--{{ 'win' if jogo.resultado == 'vitória' else 'loss' if jogo.resultado == 'derrota' else 'draw' }}">
+                            <div class="public-profile-match__top">
+                                <strong>{{ jogo.data|dt_pt if jogo.data else 'N/A' }}</strong>
+                                <span class="public-profile-match__team">Time {{ jogo.time_numero }}</span>
+                            </div>
+                            <div class="public-profile-match__stats">
+                                <span><b>{{ jogo.gols }}</b> gols</span>
+                                <span><b>{{ jogo.assistencias }}</b> assist.</span>
+                                <span><b>{{ 'GOL' if jogo.posicao == 'goleiro' else 'LIN' }}</b> posição</span>
+                            </div>
+                            <div class="public-profile-match__footer">
+                                <span class="public-profile-result-chip public-profile-result-chip--{{ 'win' if jogo.resultado == 'vitória' else 'loss' if jogo.resultado == 'derrota' else 'draw' }}">{{ jogo.resultado|capitalize }}</span>
+                                <span class="public-profile-match__cards">{{ (jogo.cartoes_amarelos or 0) + (jogo.cartoes_vermelhos or 0) }} cartões</span>
                             </div>
                         </article>
                         {% endfor %}
                     </div>
-                </div>
-                {% endif %}
-
-                </div>
+                    {% endif %}
+                    {% else %}
+                    <div class="public-profile-empty">
+                        <div class="section-label public-profile-eyebrow">Sem histórico</div>
+                        <h3>Nenhuma partida registrada ainda</h3>
+                        <p>Quando você participar das próximas rodadas, seu desempenho aparecerá aqui automaticamente.</p>
+                    </div>
+                    {% endif %}
+                </section>
             </article>
         </section>
         {% endif %}
 
-            <section class="section profile-private-account-panel profile-private-section profile-private-section--split">
-                    <div class="profile-private-section-block">
-                        <div class="section-label">Resumo da conta</div>
-                        <div class="profile-private-summary-list">
-                            <div class="profile-private-summary-row"><span>Nome completo</span><strong>{{ usuario.nome }}</strong></div>
-                            <div class="profile-private-summary-row"><span>Usuário</span><strong>{{ usuario.username }}</strong></div>
-                            <div class="profile-private-summary-row"><span>Papel</span><strong>{% if usuario.role == 'super_admin' %}Super Admin{% elif usuario.role == 'admin' %}Admin{% elif usuario.role == 'juiz' %}Juiz{% else %}Usuário{% endif %}</strong></div>
-                        </div>
-                    </div>
+            <section class="profile-account-access" aria-label="Conta e segurança">
+                <div class="profile-account-access__identity">
+                    <span class="profile-account-access__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="4" y="10" width="16" height="11" rx="3"></rect>
+                            <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+                            <path d="M12 14v3"></path>
+                        </svg>
+                    </span>
+                    <span class="profile-account-access__copy">
+                        <span class="section-label">Conta privada</span>
+                        <strong>Acesso e segurança</strong>
+                        <small>Gerencie suas credenciais sem sair do perfil.</small>
+                    </span>
+                </div>
 
-                    <div class="profile-private-section-block">
-                        <div class="section-label">Segurança</div>
-                        <h3 class="profile-private-section-title">Alterar senha</h3>
-                        <form method="post" action="{{ url_for('auth.perfil_alterar_senha') }}" class="form profile-private-password-form">
+                <div class="profile-account-access__facts">
+                    <span><small>Usuário</small><strong>@{{ usuario.username }}</strong></span>
+                    <span>
+                        <small>Perfil</small>
+                        <strong>{% if usuario.role == 'super_admin' %}Super Admin{% elif usuario.role == 'admin' %}Admin{% elif usuario.role == 'juiz' %}Juiz{% else %}Jogador{% endif %}</strong>
+                    </span>
+                </div>
+
+                <div class="profile-account-access__action">
+                    {% if sucesso_senha %}
+                    <span class="profile-account-access__success" role="status">{{ sucesso_senha }}</span>
+                    {% endif %}
+                    <button
+                        type="button"
+                        class="btn btn-secondary profile-account-access__button"
+                        data-open-password-dialog
+                        aria-haspopup="dialog"
+                        aria-controls="passwordDialog"
+                    >
+                        Alterar senha
+                    </button>
+                </div>
+            </section>
+
+            <dialog
+                class="profile-security-dialog"
+                id="passwordDialog"
+                aria-labelledby="passwordDialogTitle"
+                aria-describedby="passwordDialogDescription"
+                data-auto-open="{{ 'true' if usuario.senha_temporaria_ativa or erro_senha else 'false' }}"
+                data-required="{{ 'true' if usuario.senha_temporaria_ativa else 'false' }}"
+                {% if usuario.senha_temporaria_ativa or erro_senha %}open{% endif %}
+            >
+                <div class="profile-security-dialog__shell">
+                    <header class="profile-security-dialog__header">
+                        <div>
+                            <span class="section-label">Segurança da conta</span>
+                            <h2 id="passwordDialogTitle">
+                                {% if usuario.senha_temporaria_ativa %}Defina sua senha{% else %}Alterar senha{% endif %}
+                            </h2>
+                            <p id="passwordDialogDescription">
+                                {% if usuario.senha_temporaria_ativa %}
+                                    Crie uma senha pessoal para continuar usando sua conta.
+                                {% else %}
+                                    Escolha uma senha exclusiva com pelo menos 6 caracteres.
+                                {% endif %}
+                            </p>
+                        </div>
+                        {% if not usuario.senha_temporaria_ativa %}
+                        <button type="button" class="profile-security-dialog__close" data-close-password-dialog aria-label="Fechar alteração de senha">✕</button>
+                        {% endif %}
+                    </header>
+
+                    <div class="profile-security-dialog__body">
+                        {% if erro_senha %}
+                        <div class="profile-security-dialog__error" role="alert" aria-live="assertive" tabindex="-1">
+                            {{ erro_senha }}
+                        </div>
+                        {% endif %}
+
+                        <form method="post" action="{{ url_for('auth.perfil_alterar_senha') }}" class="form profile-private-password-form" id="passwordForm">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             {% if not usuario.senha_temporaria_ativa %}
-                            <div class="form-group">
+                            <div class="form-group profile-security-field">
                                 <label class="form-label" for="senha_atual">Senha atual</label>
-                                <input class="form-input" id="senha_atual" name="senha_atual" type="password" required>
+                                <div class="profile-security-input">
+                                    <input class="form-input" id="senha_atual" name="senha_atual" type="password" required autocomplete="current-password">
+                                    <button type="button" class="profile-password-toggle" data-password-toggle="senha_atual" aria-label="Mostrar senha atual" aria-controls="senha_atual" aria-pressed="false">
+                                        <svg class="profile-password-toggle__show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path><circle cx="12" cy="12" r="2.5"></circle></svg>
+                                        <svg class="profile-password-toggle__hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m3 3 18 18"></path><path d="M10.6 6.1A9.7 9.7 0 0 1 12 6c6 0 9.5 6 9.5 6a15.8 15.8 0 0 1-2.1 2.8"></path><path d="M6.6 6.7C4 8.4 2.5 12 2.5 12s3.5 6 9.5 6a9.8 9.8 0 0 0 3-.5"></path></svg>
+                                    </button>
+                                </div>
                             </div>
                             {% endif %}
-                            <div class="form-group">
+
+                            <div class="form-group profile-security-field">
                                 <label class="form-label" for="nova_senha">Nova senha</label>
-                                <input class="form-input" id="nova_senha" name="nova_senha" type="password" minlength="6" required>
+                                <div class="profile-security-input">
+                                    <input class="form-input" id="nova_senha" name="nova_senha" type="password" minlength="6" required autocomplete="new-password" aria-describedby="passwordRequirements">
+                                    <button type="button" class="profile-password-toggle" data-password-toggle="nova_senha" aria-label="Mostrar nova senha" aria-controls="nova_senha" aria-pressed="false">
+                                        <svg class="profile-password-toggle__show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path><circle cx="12" cy="12" r="2.5"></circle></svg>
+                                        <svg class="profile-password-toggle__hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m3 3 18 18"></path><path d="M10.6 6.1A9.7 9.7 0 0 1 12 6c6 0 9.5 6 9.5 6s-.8 1.4-2.1 2.8"></path><path d="M6.6 6.7C4 8.4 2.5 12 2.5 12s3.5 6 9.5 6a9.8 9.8 0 0 0 3-.5"></path></svg>
+                                    </button>
+                                </div>
+                                <div class="profile-security-requirement" id="passwordRequirements" data-password-requirement>
+                                    <span aria-hidden="true"></span>
+                                    6 caracteres ou mais
+                                </div>
                             </div>
-                            <div class="form-group">
+
+                            <div class="form-group profile-security-field">
                                 <label class="form-label" for="confirmar_senha">Confirmar nova senha</label>
-                                <input class="form-input" id="confirmar_senha" name="confirmar_senha" type="password" minlength="6" required>
+                                <div class="profile-security-input">
+                                    <input class="form-input" id="confirmar_senha" name="confirmar_senha" type="password" minlength="6" required autocomplete="new-password" aria-describedby="passwordMatch">
+                                    <button type="button" class="profile-password-toggle" data-password-toggle="confirmar_senha" aria-label="Mostrar confirmação da senha" aria-controls="confirmar_senha" aria-pressed="false">
+                                        <svg class="profile-password-toggle__show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path><circle cx="12" cy="12" r="2.5"></circle></svg>
+                                        <svg class="profile-password-toggle__hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m3 3 18 18"></path><path d="M10.6 6.1A9.7 9.7 0 0 1 12 6c6 0 9.5 6 9.5 6s-.8 1.4-2.1 2.8"></path><path d="M6.6 6.7C4 8.4 2.5 12 2.5 12s3.5 6 9.5 6a9.8 9.8 0 0 0 3-.5"></path></svg>
+                                    </button>
+                                </div>
+                                <div class="profile-security-requirement" id="passwordMatch" data-password-match>
+                                    <span aria-hidden="true"></span>
+                                    Repita a nova senha
+                                </div>
                             </div>
-                            <button class="btn btn-primary" type="submit">Salvar nova senha</button>
+
+                            <footer class="profile-security-dialog__actions">
+                                {% if usuario.senha_temporaria_ativa %}
+                                <button class="btn btn-secondary" type="submit" form="profileLogoutForm">Sair da conta</button>
+                                {% else %}
+                                <button class="btn btn-secondary" type="button" data-close-password-dialog>Cancelar</button>
+                                {% endif %}
+                                <button class="btn btn-primary" type="submit">Salvar nova senha</button>
+                            </footer>
                         </form>
                     </div>
-            </section>
+                </div>
+            </dialog>
+            {% if usuario.senha_temporaria_ativa %}
+            <form id="profileLogoutForm" method="post" action="{{ url_for('auth.logout') }}" hidden>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            </form>
+            {% endif %}
+
+            <script>
+                (() => {
+                    const dialog = document.getElementById('passwordDialog');
+                    const opener = document.querySelector('[data-open-password-dialog]');
+                    const form = document.getElementById('passwordForm');
+                    const newPassword = document.getElementById('nova_senha');
+                    const confirmPassword = document.getElementById('confirmar_senha');
+                    const requirement = document.querySelector('[data-password-requirement]');
+                    const match = document.querySelector('[data-password-match]');
+                    const required = dialog?.dataset.required === 'true';
+
+                    if (!dialog || !opener || !form) return;
+
+                    const openDialog = () => {
+                        if (dialog.hasAttribute('open')) dialog.removeAttribute('open');
+                        if (!dialog.open) dialog.showModal();
+                        document.body.classList.add('modal-open');
+                        const error = dialog.querySelector('[role="alert"]');
+                        (error || dialog.querySelector('input:not([type="hidden"])'))?.focus();
+                    };
+
+                    const closeDialog = () => {
+                        if (required) return;
+                        dialog.close();
+                    };
+
+                    opener.addEventListener('click', openDialog);
+                    dialog.querySelectorAll('[data-close-password-dialog]').forEach((button) => {
+                        button.addEventListener('click', closeDialog);
+                    });
+                    dialog.addEventListener('cancel', (event) => {
+                        if (required) event.preventDefault();
+                    });
+                    dialog.addEventListener('click', (event) => {
+                        if (!required && event.target === dialog) closeDialog();
+                    });
+                    dialog.addEventListener('close', () => {
+                        document.body.classList.remove('modal-open');
+                        form.reset();
+                        confirmPassword.setCustomValidity('');
+                        requirement?.classList.remove('is-valid');
+                        match?.classList.remove('is-valid', 'is-invalid');
+                        opener.focus();
+                    });
+
+                    dialog.querySelectorAll('[data-password-toggle]').forEach((button) => {
+                      button.addEventListener('click', () => {
+                        const input = document.getElementById(button.dataset.passwordToggle);
+                        if (!input) return;
+
+                        const showing = input.type === 'text';
+                        input.type = showing ? 'password' : 'text';
+                        button.setAttribute('aria-label', `${showing ? 'Mostrar' : 'Ocultar'} ${input.labels[0].textContent.toLowerCase()}`);
+                        button.setAttribute('aria-pressed', String(!showing));
+                    });
+                    });
+
+                    const validatePasswords = () => {
+                        const longEnough = newPassword.value.length >= 6;
+                        const hasConfirmation = confirmPassword.value.length > 0;
+                        const matches = hasConfirmation && newPassword.value === confirmPassword.value;
+
+                        requirement?.classList.toggle('is-valid', longEnough);
+                        match?.classList.toggle('is-valid', matches);
+                        match?.classList.toggle('is-invalid', hasConfirmation && !matches);
+                        confirmPassword.setCustomValidity(hasConfirmation && !matches ? 'As novas senhas não coincidem.' : '');
+                    };
+
+                    newPassword.addEventListener('input', validatePasswords);
+                    confirmPassword.addEventListener('input', validatePasswords);
+
+                    if (dialog.dataset.autoOpen === 'true') {
+                        openDialog();
+                    }
+                })();
+            </script>
     </main>
 </div>
 {% endblock %}

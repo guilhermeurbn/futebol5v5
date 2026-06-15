@@ -53,7 +53,7 @@
                         <div class="result-team__group-label result-team__group-label--goalkeeper">🧤 Goleiros</div>
                         {% for j in goleiros %}
                             <div class="result-team__player-row">
-                                <div class="result-team__player-name">{{ j.nome }} <span class="result-team__player-level">N{{ j.nivel }}</span></div>
+                                <div class="result-team__player-name">{{ j.nome }} <span class="result-team__player-level">{{ '%.2f'|format(j.nivel|float) }}</span></div>
                                 <div class="result-team__input-row">
                                      <input type="number" min="0" max="20" value="0" placeholder="Gols"
                                          class="result-team__input jogador-gols" data-team="{{ team_num }}" data-jogador="{{ j.nome }}" data-posicao="goleiro">
@@ -72,7 +72,7 @@
                         <div class="result-team__group-label result-team__group-label--line">⚽ Linha</div>
                         {% for j in linhas %}
                             <div class="result-team__player-row">
-                                <div class="result-team__player-name">{{ j.nome }} <span class="result-team__player-level">N{{ j.nivel }}</span></div>
+                                <div class="result-team__player-name">{{ j.nome }} <span class="result-team__player-level">{{ '%.2f'|format(j.nivel|float) }}</span></div>
                                 <div class="result-team__input-row">
                                      <input type="number" min="0" max="20" value="0" placeholder="Gols"
                                          class="result-team__input jogador-gols" data-team="{{ team_num }}" data-jogador="{{ j.nome }}" data-posicao="linha">

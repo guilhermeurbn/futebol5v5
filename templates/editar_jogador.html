@@ -3,7 +3,7 @@
 {% block title %}Editar jogador - {{ jogador.nome }}{% endblock %}
 
 {% block content %}
-<div class="container" style="max-width: 900px;">
+<div class="container{% if usuario.role in ['admin', 'super_admin'] %} page-container-wide judge-workspace-page admin-page admin-page--ecosystem{% endif %}" style="max-width: 900px;">
     <header class="header">
         <div class="header-content">
             {% set brand_title = 'Editar jogador' %}
@@ -37,8 +37,11 @@
                     <input class="form-input" id="nome" type="text" name="nome" value="{{ jogador.nome }}" minlength="2" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="nivel">Nível</label>
-                    <input class="form-input" id="nivel" type="number" name="nivel" min="1" max="10" value="{{ jogador.nivel }}" required>
+                    <label class="form-label" for="nivel">Nota / Rating</label>
+                    <input class="form-input" id="nivel" type="number" name="nivel"
+                           min="0" max="10" step="0.01"
+                           value="{{ '%.2f'|format(jogador.nivel|float) }}" required>
+                    <small style="color: rgba(148,163,184,0.9); margin-top: 0.3rem; display:block;">0.00 – 10.00 • precisão 0.01 • Nota inicial manual; depois evolui via votação.</small>
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="tipo">Tipo</label>

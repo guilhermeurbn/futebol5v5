@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>NaTrave | Resultado do Sorteio</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='20260615-2') }}">
     <style>
         /* Grid específico para número de times */
         .times-container.num-2 {
@@ -62,7 +62,7 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container{% if auth_user.role in ['admin', 'super_admin'] %} page-container-wide judge-workspace-page admin-page admin-page--ecosystem{% elif auth_user.role == 'usuario' %} page-container-wide player-workspace-page{% elif auth_user.role == 'juiz' %} page-container-wide judge-workspace-page{% endif %}">
         <!-- Header -->
         <header class="header">
             <div class="header-content">
@@ -129,15 +129,7 @@
                             <div class="team-header">
                                 <h2 class="team-title">⚽ Time {{ loop.index }}</h2>
                             </div>
-                            
-                            <!-- Botão Favoritar -->
-                            <div style="padding: 10px; text-align: center; border-bottom: 1px solid rgba(102, 126, 234, 0.2);">
-                                <button class="btn-favoritar" data-time-num="{{ loop.index }}" data-pontuacao="{{ somas[loop.index0] }}" data-sorteio="{{ sorteio_id }}"
-                                        style="padding: 8px 15px; background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); color: #333; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; transition: all 0.3s;">
-                                    ⭐ Favoritar
-                                </button>
-                            </div>
-                            
+
                             <!-- 5 Jogadores do Time -->
                             <div class="players-list">
                                 {% for jogador in time %}
@@ -376,68 +368,6 @@
     if (btnQRCodePrincipal) {
         btnQRCodePrincipal.addEventListener('click', abrirModalCompartilhamento);
     }
-    
-    // Favoritar Times
-    document.querySelectorAll('.btn-favoritar').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const time_num = parseInt(this.dataset.timeNum);
-            const pontuacao = parseInt(this.dataset.pontuacao);
-            const sorteio_id = parseInt(this.dataset.sorteio);
-            
-            // Coletar jogadores do time
-            const time_card = this.closest('.team');
-            const jogadores = [];
-            
-            time_card.querySelectorAll('.player-item').forEach(item => {
-                const nome = item.querySelector('.player-name').textContent.trim().replace(/^[\d.]+ /, '').replace(/^[🧤⚽] /, '');
-                const nivel = parseInt(item.querySelector('.player-level').textContent.match(/\d+/)[0]);
-                const posicao = item.querySelector('.player-name').textContent.includes('🧤') ? 'goleiro' : 'linha';
-                const tipo = 'avulso'; // Assumir avulso por enquanto
-                
-                jogadores.push({ nome, nivel, posicao, tipo });
-            });
-            
-            // Pedir nome do favorito
-            const nome_padrao = `Time ${time_num}`;
-            const nome_fav = prompt('Nome para este time favorito:', nome_padrao);
-            
-            if (nome_fav === null) return; // Cancelado
-            
-            // Enviar para API
-            this.disabled = true;
-            this.textContent = 'Salvando...';
-            
-            fetch('/api/favoritar-time', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
-                body: JSON.stringify({
-                    sorteio_id: sorteio_id,
-                    time_numero: time_num,
-                    jogadores: jogadores,
-                    pontuacao: pontuacao,
-                    nome: nome_fav
-                })
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.sucesso) {
-                    alert('✅ Time favoritado com sucesso!');
-                    this.textContent = '✓ Favoritado';
-                    this.style.background = 'rgba(76, 175, 80, 0.5)';
-                } else {
-                    alert('❌ Erro: ' + data.erro);
-                    this.disabled = false;
-                    this.textContent = '⭐ Favoritar';
-                }
-            })
-            .catch(err => {
-                console.error('Erro:', err);
-                alert('❌ Erro ao favoritar time');
-                this.disabled = false;
-                this.textContent = '⭐ Favoritar';
-            });
-        });
-    });
     
     // QR Code Modal
     function mostrarModalQRCode() {

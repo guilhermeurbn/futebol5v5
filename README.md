@@ -36,7 +36,6 @@ O NaTrave cobre o fluxo completo de uma pelada organizada:
 - Ranking geral de jogadores com base nas votacoes encerradas
 - Exportacao de sorteio em CSV, TXT e PDF
 - Compartilhamento por link e QR code
-- Favoritos de times
 - Suporte offline com fila local e cache via Service Worker
 
 ## Regras de Negocio Principais
@@ -94,7 +93,6 @@ futebol5v5/
 │   ├── auth_service.py
 │   ├── balanceamento.py
 │   ├── export_service.py
-│   ├── favorito_service.py
 │   ├── historico_service.py
 │   ├── jogador_service.py
 │   ├── jogador_stats_service.py
@@ -194,7 +192,6 @@ O projeto usa JSON local como persistencia:
 - `historico.json`: sorteios realizados
 - `partidas.json`: resultados de partidas
 - `votacoes_partidas.json`: votacoes abertas e encerradas
-- `favoritos.json`: times favoritados
 - `sorteios_stack.json`: pilha de undo/redo
 - `admin_notificacoes.json`: notificacoes administrativas
 

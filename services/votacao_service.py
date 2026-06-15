@@ -132,6 +132,24 @@ class VotacaoService:
         partida["encerrado_por"] = encerrado_por
         partida["encerramento_motivo"] = motivo
         partida["resultado_resumido"] = self._resumo_times_resultado(partida.get("resultado_partida"))
+
+        # ── Evolução de nível pós-votação ────────────────────────────────
+        try:
+            from services.nivel_evolution_service import aplicar_evolucao_pos_votacao
+            from services.jogador_service import JogadorService
+            _jogador_svc = JogadorService()
+            evolucao = aplicar_evolucao_pos_votacao(
+                ranking_jogadores=ranking.get("ranking_jogadores", []),
+                jogador_service=_jogador_svc,
+                sorteio_id=partida.get("sorteio_id"),
+            )
+            partida["evolucao_nivel"] = evolucao
+        except Exception as _exc:
+            import logging
+            logging.getLogger(__name__).warning(
+                "Evolução de nível ignorada: %s", _exc, exc_info=True
+            )
+
         return partida
 
     def _encerrar_expiradas_em_dados(self, dados: Dict) -> bool:

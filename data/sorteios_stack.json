@@ -1,693 +1,6 @@
 {
   "pilha": [
     {
-      "sorteio_id": 1,
-      "times": [
-        {
-          "numero": 1,
-          "jogadores": [
-            {
-              "nome": "Guilherme",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
-              "criado_em": "2026-04-23T23:20:00.000002",
-              "owner_user_id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033"
-            },
-            {
-              "nome": "Lucas Teixeira",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "4d113a13-66e9-4625-8d60-8974cea228ef",
-              "criado_em": "2026-04-27T18:58:36.198660",
-              "owner_user_id": "263d73cf-5a95-44b4-a538-bb4c69ba068e"
-            },
-            {
-              "nome": "Renan",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "cb3d184e-bf39-4638-8563-529bbe20274c",
-              "criado_em": "2026-04-27T18:58:36.406589",
-              "owner_user_id": "6a5290cd-317b-4764-b1df-6969f849adc5"
-            },
-            {
-              "nome": "Ramon",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "355a82e5-2c71-4212-b787-9f0a7d9ca2d0",
-              "criado_em": "2026-04-27T18:58:36.544754",
-              "owner_user_id": "6cb9f4f5-f4ad-4786-8aca-183e88333730"
-            },
-            {
-              "nome": "lucas",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "ce422cf5-f6d1-4693-9bae-345e1ac21f2f",
-              "criado_em": "2026-04-27T18:58:36.682523",
-              "owner_user_id": "96304901-a961-4c0d-b7d4-f93f4203dca3"
-            }
-          ],
-          "soma": 35
-        },
-        {
-          "numero": 2,
-          "jogadores": [
-            {
-              "nome": "Carlos",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "e9758009-9214-4cc0-aea0-f365a3381803",
-              "criado_em": "2026-04-27T18:58:36.129568",
-              "owner_user_id": "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7"
-            },
-            {
-              "nome": "André Balada",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "fdbe49b3-d73e-4db3-af5f-f23c089b8c38",
-              "criado_em": "2026-04-27T18:58:36.267786",
-              "owner_user_id": "db1314a8-2d4e-4384-829e-8075b1e33737"
-            },
-            {
-              "nome": "Bacatela",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "cea7df59-6699-479b-88a7-e4194af7481b",
-              "criado_em": "2026-04-27T18:58:36.475618",
-              "owner_user_id": "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6"
-            },
-            {
-              "nome": "Luan",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "70e90819-3eb0-41f6-9d8e-eb1a77040f68",
-              "criado_em": "2026-04-27T18:58:36.613892",
-              "owner_user_id": "2faa1197-c93f-4239-b490-4afa38cfa89c"
-            },
-            {
-              "nome": "Alex",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "b17181c2-a4b4-4909-b9d1-ef979faa3063",
-              "criado_em": "2026-04-27T18:58:36.751447",
-              "owner_user_id": "19e6a32e-2a20-49a2-81e0-da12aa681505"
-            }
-          ],
-          "soma": 35
-        }
-      ],
-      "num_times": 2,
-      "somas": [
-        35,
-        35
-      ],
-      "diferenca": 0,
-      "melhor_time": "Time 1",
-      "tem_aviso": true,
-      "aviso_msg": "⚠️ Faltam 2 goleiro(s) para fechar 1 por time. O sistema vai equilibrar os níveis mesmo com time(s) sem goleiro."
-    },
-    {
-      "sorteio_id": 2,
-      "times": [
-        {
-          "numero": 1,
-          "jogadores": [
-            {
-              "nome": "Guilherme",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
-              "criado_em": "2026-04-23T23:20:00.000002",
-              "owner_user_id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033"
-            },
-            {
-              "nome": "Lucas Teixeira",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "4d113a13-66e9-4625-8d60-8974cea228ef",
-              "criado_em": "2026-04-27T18:58:36.198660",
-              "owner_user_id": "263d73cf-5a95-44b4-a538-bb4c69ba068e"
-            },
-            {
-              "nome": "Renan",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "cb3d184e-bf39-4638-8563-529bbe20274c",
-              "criado_em": "2026-04-27T18:58:36.406589",
-              "owner_user_id": "6a5290cd-317b-4764-b1df-6969f849adc5"
-            },
-            {
-              "nome": "Ramon",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "355a82e5-2c71-4212-b787-9f0a7d9ca2d0",
-              "criado_em": "2026-04-27T18:58:36.544754",
-              "owner_user_id": "6cb9f4f5-f4ad-4786-8aca-183e88333730"
-            },
-            {
-              "nome": "lucas",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "ce422cf5-f6d1-4693-9bae-345e1ac21f2f",
-              "criado_em": "2026-04-27T18:58:36.682523",
-              "owner_user_id": "96304901-a961-4c0d-b7d4-f93f4203dca3"
-            }
-          ],
-          "soma": 35
-        },
-        {
-          "numero": 2,
-          "jogadores": [
-            {
-              "nome": "Carlos",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "e9758009-9214-4cc0-aea0-f365a3381803",
-              "criado_em": "2026-04-27T18:58:36.129568",
-              "owner_user_id": "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7"
-            },
-            {
-              "nome": "André Balada",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "fdbe49b3-d73e-4db3-af5f-f23c089b8c38",
-              "criado_em": "2026-04-27T18:58:36.267786",
-              "owner_user_id": "db1314a8-2d4e-4384-829e-8075b1e33737"
-            },
-            {
-              "nome": "Bacatela",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "cea7df59-6699-479b-88a7-e4194af7481b",
-              "criado_em": "2026-04-27T18:58:36.475618",
-              "owner_user_id": "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6"
-            },
-            {
-              "nome": "Luan",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "70e90819-3eb0-41f6-9d8e-eb1a77040f68",
-              "criado_em": "2026-04-27T18:58:36.613892",
-              "owner_user_id": "2faa1197-c93f-4239-b490-4afa38cfa89c"
-            },
-            {
-              "nome": "Netao",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "79d8d06a-f291-4b1a-8cfe-6e255b90efaa",
-              "criado_em": "2026-04-27T18:58:36.889149",
-              "owner_user_id": "cdf3f7f9-4e38-41a1-9557-4b8020050c57"
-            }
-          ],
-          "soma": 35
-        }
-      ],
-      "num_times": 2,
-      "somas": [
-        35,
-        35
-      ],
-      "diferenca": 0,
-      "melhor_time": "Time 1",
-      "tem_aviso": true,
-      "aviso_msg": "⚠️ Faltam 2 goleiro(s) para fechar 1 por time. O sistema vai equilibrar os níveis mesmo com time(s) sem goleiro."
-    },
-    {
-      "sorteio_id": 3,
-      "times": [
-        {
-          "numero": 1,
-          "jogadores": [
-            {
-              "nome": "Guilherme",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
-              "criado_em": "2026-04-23T23:20:00.000002",
-              "owner_user_id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033"
-            },
-            {
-              "nome": "Lucas Teixeira",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "4d113a13-66e9-4625-8d60-8974cea228ef",
-              "criado_em": "2026-04-27T18:58:36.198660",
-              "owner_user_id": "263d73cf-5a95-44b4-a538-bb4c69ba068e"
-            },
-            {
-              "nome": "Renan",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "cb3d184e-bf39-4638-8563-529bbe20274c",
-              "criado_em": "2026-04-27T18:58:36.406589",
-              "owner_user_id": "6a5290cd-317b-4764-b1df-6969f849adc5"
-            },
-            {
-              "nome": "Ramon",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "355a82e5-2c71-4212-b787-9f0a7d9ca2d0",
-              "criado_em": "2026-04-27T18:58:36.544754",
-              "owner_user_id": "6cb9f4f5-f4ad-4786-8aca-183e88333730"
-            },
-            {
-              "nome": "Drey",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "f2fd5577-a8ce-4481-941a-e1faa70a29c5",
-              "criado_em": "2026-04-27T18:58:36.820490",
-              "owner_user_id": "381b5d0f-f140-4bcd-bc95-38744e15df31"
-            }
-          ],
-          "soma": 35
-        },
-        {
-          "numero": 2,
-          "jogadores": [
-            {
-              "nome": "Carlos",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "e9758009-9214-4cc0-aea0-f365a3381803",
-              "criado_em": "2026-04-27T18:58:36.129568",
-              "owner_user_id": "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7"
-            },
-            {
-              "nome": "André Balada",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "fdbe49b3-d73e-4db3-af5f-f23c089b8c38",
-              "criado_em": "2026-04-27T18:58:36.267786",
-              "owner_user_id": "db1314a8-2d4e-4384-829e-8075b1e33737"
-            },
-            {
-              "nome": "Bacatela",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "cea7df59-6699-479b-88a7-e4194af7481b",
-              "criado_em": "2026-04-27T18:58:36.475618",
-              "owner_user_id": "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6"
-            },
-            {
-              "nome": "Luan",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "70e90819-3eb0-41f6-9d8e-eb1a77040f68",
-              "criado_em": "2026-04-27T18:58:36.613892",
-              "owner_user_id": "2faa1197-c93f-4239-b490-4afa38cfa89c"
-            },
-            {
-              "nome": "Netao",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "79d8d06a-f291-4b1a-8cfe-6e255b90efaa",
-              "criado_em": "2026-04-27T18:58:36.889149",
-              "owner_user_id": "cdf3f7f9-4e38-41a1-9557-4b8020050c57"
-            }
-          ],
-          "soma": 35
-        }
-      ],
-      "num_times": 2,
-      "somas": [
-        35,
-        35
-      ],
-      "diferenca": 0,
-      "melhor_time": "Time 1",
-      "tem_aviso": true,
-      "aviso_msg": "⚠️ Faltam 2 goleiro(s) para fechar 1 por time. O sistema vai equilibrar os níveis mesmo com time(s) sem goleiro."
-    },
-    {
-      "sorteio_id": 4,
-      "times": [
-        {
-          "numero": 1,
-          "jogadores": [
-            {
-              "nome": "Guilherme",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
-              "criado_em": "2026-04-23T23:20:00.000002",
-              "owner_user_id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033"
-            },
-            {
-              "nome": "André Balada",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "fdbe49b3-d73e-4db3-af5f-f23c089b8c38",
-              "criado_em": "2026-04-27T18:58:36.267786",
-              "owner_user_id": "db1314a8-2d4e-4384-829e-8075b1e33737"
-            },
-            {
-              "nome": "Ramon",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "355a82e5-2c71-4212-b787-9f0a7d9ca2d0",
-              "criado_em": "2026-04-27T18:58:36.544754",
-              "owner_user_id": "6cb9f4f5-f4ad-4786-8aca-183e88333730"
-            },
-            {
-              "nome": "Alex",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "b17181c2-a4b4-4909-b9d1-ef979faa3063",
-              "criado_em": "2026-04-27T18:58:36.751447",
-              "owner_user_id": "19e6a32e-2a20-49a2-81e0-da12aa681505"
-            },
-            {
-              "nome": "Rafael",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "d7c98c14-1a07-4cff-b1e5-ee970c5ba387",
-              "criado_em": "2026-04-27T18:58:36.957858",
-              "owner_user_id": "9ae112c8-8068-41e4-b6c0-e73873935699"
-            }
-          ],
-          "soma": 35
-        },
-        {
-          "numero": 2,
-          "jogadores": [
-            {
-              "nome": "Carlos",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "e9758009-9214-4cc0-aea0-f365a3381803",
-              "criado_em": "2026-04-27T18:58:36.129568",
-              "owner_user_id": "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7"
-            },
-            {
-              "nome": "Renan",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "cb3d184e-bf39-4638-8563-529bbe20274c",
-              "criado_em": "2026-04-27T18:58:36.406589",
-              "owner_user_id": "6a5290cd-317b-4764-b1df-6969f849adc5"
-            },
-            {
-              "nome": "Luan",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "70e90819-3eb0-41f6-9d8e-eb1a77040f68",
-              "criado_em": "2026-04-27T18:58:36.613892",
-              "owner_user_id": "2faa1197-c93f-4239-b490-4afa38cfa89c"
-            },
-            {
-              "nome": "Drey",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "f2fd5577-a8ce-4481-941a-e1faa70a29c5",
-              "criado_em": "2026-04-27T18:58:36.820490",
-              "owner_user_id": "381b5d0f-f140-4bcd-bc95-38744e15df31"
-            },
-            {
-              "nome": "Markinhos",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "20deebe2-9d0e-4165-a427-901b6261de5b",
-              "criado_em": "2026-04-27T18:58:37.026611",
-              "owner_user_id": "d6fc64d5-32bf-4da4-95f8-3602fe376f17"
-            }
-          ],
-          "soma": 35
-        },
-        {
-          "numero": 3,
-          "jogadores": [
-            {
-              "nome": "Lucas Teixeira",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "4d113a13-66e9-4625-8d60-8974cea228ef",
-              "criado_em": "2026-04-27T18:58:36.198660",
-              "owner_user_id": "263d73cf-5a95-44b4-a538-bb4c69ba068e"
-            },
-            {
-              "nome": "Bacatela",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "cea7df59-6699-479b-88a7-e4194af7481b",
-              "criado_em": "2026-04-27T18:58:36.475618",
-              "owner_user_id": "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6"
-            },
-            {
-              "nome": "lucas",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "ce422cf5-f6d1-4693-9bae-345e1ac21f2f",
-              "criado_em": "2026-04-27T18:58:36.682523",
-              "owner_user_id": "96304901-a961-4c0d-b7d4-f93f4203dca3"
-            },
-            {
-              "nome": "Netao",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "79d8d06a-f291-4b1a-8cfe-6e255b90efaa",
-              "criado_em": "2026-04-27T18:58:36.889149",
-              "owner_user_id": "cdf3f7f9-4e38-41a1-9557-4b8020050c57"
-            },
-            {
-              "nome": "Edmo",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "8d03d8dc-f18b-4ca3-9ea4-f7776ea89b44",
-              "criado_em": "2026-04-27T18:58:37.095181",
-              "owner_user_id": "93377df9-a1dd-429a-a48f-e6bafb2e8254"
-            }
-          ],
-          "soma": 35
-        }
-      ],
-      "num_times": 3,
-      "somas": [
-        35,
-        35,
-        35
-      ],
-      "diferenca": 0,
-      "melhor_time": "Time 1",
-      "tem_aviso": true,
-      "aviso_msg": "⚠️ Faltam 3 goleiro(s) para fechar 1 por time. O sistema vai equilibrar os níveis mesmo com time(s) sem goleiro."
-    },
-    {
-      "sorteio_id": 5,
-      "times": [
-        {
-          "numero": 1,
-          "jogadores": [
-            {
-              "nome": "Guilherme",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
-              "criado_em": "2026-04-23T23:20:00.000002",
-              "owner_user_id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033"
-            },
-            {
-              "nome": "Alex",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "b17181c2-a4b4-4909-b9d1-ef979faa3063",
-              "criado_em": "2026-04-27T18:58:36.751447",
-              "owner_user_id": "19e6a32e-2a20-49a2-81e0-da12aa681505"
-            },
-            {
-              "nome": "Renan",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "cb3d184e-bf39-4638-8563-529bbe20274c",
-              "criado_em": "2026-04-27T18:58:36.406589",
-              "owner_user_id": "6a5290cd-317b-4764-b1df-6969f849adc5"
-            },
-            {
-              "nome": "Ramon",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "355a82e5-2c71-4212-b787-9f0a7d9ca2d0",
-              "criado_em": "2026-04-27T18:58:36.544754",
-              "owner_user_id": "6cb9f4f5-f4ad-4786-8aca-183e88333730"
-            },
-            {
-              "nome": "lucas",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "ce422cf5-f6d1-4693-9bae-345e1ac21f2f",
-              "criado_em": "2026-04-27T18:58:36.682523",
-              "owner_user_id": "96304901-a961-4c0d-b7d4-f93f4203dca3"
-            }
-          ],
-          "soma": 35
-        },
-        {
-          "numero": 2,
-          "jogadores": [
-            {
-              "nome": "Carlos",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "e9758009-9214-4cc0-aea0-f365a3381803",
-              "criado_em": "2026-04-27T18:58:36.129568",
-              "owner_user_id": "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7"
-            },
-            {
-              "nome": "André Balada",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "fdbe49b3-d73e-4db3-af5f-f23c089b8c38",
-              "criado_em": "2026-04-27T18:58:36.267786",
-              "owner_user_id": "db1314a8-2d4e-4384-829e-8075b1e33737"
-            },
-            {
-              "nome": "Bacatela",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "cea7df59-6699-479b-88a7-e4194af7481b",
-              "criado_em": "2026-04-27T18:58:36.475618",
-              "owner_user_id": "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6"
-            },
-            {
-              "nome": "Luan",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "70e90819-3eb0-41f6-9d8e-eb1a77040f68",
-              "criado_em": "2026-04-27T18:58:36.613892",
-              "owner_user_id": "2faa1197-c93f-4239-b490-4afa38cfa89c"
-            },
-            {
-              "nome": "Lucas Teixeira",
-              "nivel": 7,
-              "tipo": "fixo",
-              "posicao": "linha",
-              "presente": true,
-              "id": "4d113a13-66e9-4625-8d60-8974cea228ef",
-              "criado_em": "2026-04-27T18:58:36.198660",
-              "owner_user_id": "263d73cf-5a95-44b4-a538-bb4c69ba068e"
-            }
-          ],
-          "soma": 35
-        }
-      ],
-      "num_times": 2,
-      "somas": [
-        35,
-        35
-      ],
-      "diferenca": 0,
-      "melhor_time": "Time 1",
-      "tem_aviso": true,
-      "aviso_msg": "⚠️ Faltam 2 goleiro(s) para fechar 1 por time. O sistema vai equilibrar os níveis mesmo com time(s) sem goleiro."
-    },
-    {
       "sorteio_id": 6,
       "times": [
         {
@@ -938,7 +251,1092 @@
       "melhor_time": "Time 1",
       "tem_aviso": true,
       "aviso_msg": "⚠️ Faltam 2 goleiro(s) para fechar 1 por time. O sistema vai equilibrar os níveis mesmo com time(s) sem goleiro."
+    },
+    {
+      "sorteio_id": 8,
+      "times": [
+        {
+          "numero": 1,
+          "jogadores": [
+            {
+              "nome": "Guilherme",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+              "criado_em": "2026-04-23T23:20:00.000002",
+              "owner_user_id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033"
+            },
+            {
+              "nome": "André Balada",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "fdbe49b3-d73e-4db3-af5f-f23c089b8c38",
+              "criado_em": "2026-04-27T18:58:36.267786",
+              "owner_user_id": "db1314a8-2d4e-4384-829e-8075b1e33737"
+            },
+            {
+              "nome": "Ramon",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "355a82e5-2c71-4212-b787-9f0a7d9ca2d0",
+              "criado_em": "2026-04-27T18:58:36.544754",
+              "owner_user_id": "6cb9f4f5-f4ad-4786-8aca-183e88333730"
+            },
+            {
+              "nome": "Alex",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "b17181c2-a4b4-4909-b9d1-ef979faa3063",
+              "criado_em": "2026-04-27T18:58:36.751447",
+              "owner_user_id": "19e6a32e-2a20-49a2-81e0-da12aa681505"
+            },
+            {
+              "nome": "Markinhos",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "20deebe2-9d0e-4165-a427-901b6261de5b",
+              "criado_em": "2026-04-27T18:58:37.026611",
+              "owner_user_id": "d6fc64d5-32bf-4da4-95f8-3602fe376f17"
+            }
+          ],
+          "soma": 35
+        },
+        {
+          "numero": 2,
+          "jogadores": [
+            {
+              "nome": "Carlos",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "e9758009-9214-4cc0-aea0-f365a3381803",
+              "criado_em": "2026-04-27T18:58:36.129568",
+              "owner_user_id": "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7"
+            },
+            {
+              "nome": "Renan",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "cb3d184e-bf39-4638-8563-529bbe20274c",
+              "criado_em": "2026-04-27T18:58:36.406589",
+              "owner_user_id": "6a5290cd-317b-4764-b1df-6969f849adc5"
+            },
+            {
+              "nome": "Luan",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "70e90819-3eb0-41f6-9d8e-eb1a77040f68",
+              "criado_em": "2026-04-27T18:58:36.613892",
+              "owner_user_id": "2faa1197-c93f-4239-b490-4afa38cfa89c"
+            },
+            {
+              "nome": "Drey",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "f2fd5577-a8ce-4481-941a-e1faa70a29c5",
+              "criado_em": "2026-04-27T18:58:36.820490",
+              "owner_user_id": "381b5d0f-f140-4bcd-bc95-38744e15df31"
+            },
+            {
+              "nome": "Edmo",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "8d03d8dc-f18b-4ca3-9ea4-f7776ea89b44",
+              "criado_em": "2026-04-27T18:58:37.095181",
+              "owner_user_id": "93377df9-a1dd-429a-a48f-e6bafb2e8254"
+            }
+          ],
+          "soma": 35
+        },
+        {
+          "numero": 3,
+          "jogadores": [
+            {
+              "nome": "Lucas Teixeira",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "4d113a13-66e9-4625-8d60-8974cea228ef",
+              "criado_em": "2026-04-27T18:58:36.198660",
+              "owner_user_id": "263d73cf-5a95-44b4-a538-bb4c69ba068e"
+            },
+            {
+              "nome": "Bacatela",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "cea7df59-6699-479b-88a7-e4194af7481b",
+              "criado_em": "2026-04-27T18:58:36.475618",
+              "owner_user_id": "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6"
+            },
+            {
+              "nome": "lucas",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "ce422cf5-f6d1-4693-9bae-345e1ac21f2f",
+              "criado_em": "2026-04-27T18:58:36.682523",
+              "owner_user_id": "96304901-a961-4c0d-b7d4-f93f4203dca3"
+            },
+            {
+              "nome": "Netao",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "79d8d06a-f291-4b1a-8cfe-6e255b90efaa",
+              "criado_em": "2026-04-27T18:58:36.889149",
+              "owner_user_id": "cdf3f7f9-4e38-41a1-9557-4b8020050c57"
+            },
+            {
+              "nome": "Samuel",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "cc0eaccd-5ecb-49cc-a1fc-8d022ad2e97e",
+              "criado_em": "2026-04-27T18:58:37.163908",
+              "owner_user_id": "309a7150-a532-4eaf-bb91-f450ffce7fe7"
+            }
+          ],
+          "soma": 35
+        }
+      ],
+      "num_times": 3,
+      "somas": [
+        35,
+        35,
+        35
+      ],
+      "diferenca": 0,
+      "melhor_time": "Time 1",
+      "tem_aviso": true,
+      "aviso_msg": "⚠️ Faltam 3 goleiro(s) para fechar 1 por time. O sistema vai equilibrar os níveis mesmo com time(s) sem goleiro."
+    },
+    {
+      "sorteio_id": 9,
+      "times": [
+        {
+          "numero": 1,
+          "jogadores": [
+            {
+              "nome": "Guilherme",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+              "criado_em": "2026-04-23T23:20:00.000002",
+              "owner_user_id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033"
+            },
+            {
+              "nome": "Lucas Teixeira",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "4d113a13-66e9-4625-8d60-8974cea228ef",
+              "criado_em": "2026-04-27T18:58:36.198660",
+              "owner_user_id": "263d73cf-5a95-44b4-a538-bb4c69ba068e"
+            },
+            {
+              "nome": "Renan",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "cb3d184e-bf39-4638-8563-529bbe20274c",
+              "criado_em": "2026-04-27T18:58:36.406589",
+              "owner_user_id": "6a5290cd-317b-4764-b1df-6969f849adc5"
+            },
+            {
+              "nome": "Ramon",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "355a82e5-2c71-4212-b787-9f0a7d9ca2d0",
+              "criado_em": "2026-04-27T18:58:36.544754",
+              "owner_user_id": "6cb9f4f5-f4ad-4786-8aca-183e88333730"
+            },
+            {
+              "nome": "Drey",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "f2fd5577-a8ce-4481-941a-e1faa70a29c5",
+              "criado_em": "2026-04-27T18:58:36.820490",
+              "owner_user_id": "381b5d0f-f140-4bcd-bc95-38744e15df31"
+            }
+          ],
+          "soma": 35
+        },
+        {
+          "numero": 2,
+          "jogadores": [
+            {
+              "nome": "Carlos",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "e9758009-9214-4cc0-aea0-f365a3381803",
+              "criado_em": "2026-04-27T18:58:36.129568",
+              "owner_user_id": "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7"
+            },
+            {
+              "nome": "André Balada",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "fdbe49b3-d73e-4db3-af5f-f23c089b8c38",
+              "criado_em": "2026-04-27T18:58:36.267786",
+              "owner_user_id": "db1314a8-2d4e-4384-829e-8075b1e33737"
+            },
+            {
+              "nome": "Bacatela",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "cea7df59-6699-479b-88a7-e4194af7481b",
+              "criado_em": "2026-04-27T18:58:36.475618",
+              "owner_user_id": "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6"
+            },
+            {
+              "nome": "Luan",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "70e90819-3eb0-41f6-9d8e-eb1a77040f68",
+              "criado_em": "2026-04-27T18:58:36.613892",
+              "owner_user_id": "2faa1197-c93f-4239-b490-4afa38cfa89c"
+            },
+            {
+              "nome": "Netao",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "79d8d06a-f291-4b1a-8cfe-6e255b90efaa",
+              "criado_em": "2026-04-27T18:58:36.889149",
+              "owner_user_id": "cdf3f7f9-4e38-41a1-9557-4b8020050c57"
+            }
+          ],
+          "soma": 35
+        }
+      ],
+      "num_times": 2,
+      "somas": [
+        35,
+        35
+      ],
+      "diferenca": 0,
+      "melhor_time": "Time 1",
+      "tem_aviso": true,
+      "aviso_msg": "⚠️ Faltam 2 goleiro(s) para fechar 1 por time. O sistema vai equilibrar os níveis mesmo com time(s) sem goleiro."
+    },
+    {
+      "sorteio_id": 10,
+      "times": [
+        {
+          "numero": 1,
+          "jogadores": [
+            {
+              "nome": "Guilherme",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+              "criado_em": "2026-04-23T23:20:00.000002",
+              "owner_user_id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033"
+            },
+            {
+              "nome": "Lucas Teixeira",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "4d113a13-66e9-4625-8d60-8974cea228ef",
+              "criado_em": "2026-04-27T18:58:36.198660",
+              "owner_user_id": "263d73cf-5a95-44b4-a538-bb4c69ba068e"
+            },
+            {
+              "nome": "Renan",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "cb3d184e-bf39-4638-8563-529bbe20274c",
+              "criado_em": "2026-04-27T18:58:36.406589",
+              "owner_user_id": "6a5290cd-317b-4764-b1df-6969f849adc5"
+            },
+            {
+              "nome": "Ramon",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "355a82e5-2c71-4212-b787-9f0a7d9ca2d0",
+              "criado_em": "2026-04-27T18:58:36.544754",
+              "owner_user_id": "6cb9f4f5-f4ad-4786-8aca-183e88333730"
+            },
+            {
+              "nome": "lucas",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "ce422cf5-f6d1-4693-9bae-345e1ac21f2f",
+              "criado_em": "2026-04-27T18:58:36.682523",
+              "owner_user_id": "96304901-a961-4c0d-b7d4-f93f4203dca3"
+            }
+          ],
+          "soma": 35
+        },
+        {
+          "numero": 2,
+          "jogadores": [
+            {
+              "nome": "Carlos",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "e9758009-9214-4cc0-aea0-f365a3381803",
+              "criado_em": "2026-04-27T18:58:36.129568",
+              "owner_user_id": "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7"
+            },
+            {
+              "nome": "André Balada",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "fdbe49b3-d73e-4db3-af5f-f23c089b8c38",
+              "criado_em": "2026-04-27T18:58:36.267786",
+              "owner_user_id": "db1314a8-2d4e-4384-829e-8075b1e33737"
+            },
+            {
+              "nome": "Bacatela",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "cea7df59-6699-479b-88a7-e4194af7481b",
+              "criado_em": "2026-04-27T18:58:36.475618",
+              "owner_user_id": "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6"
+            },
+            {
+              "nome": "Luan",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "70e90819-3eb0-41f6-9d8e-eb1a77040f68",
+              "criado_em": "2026-04-27T18:58:36.613892",
+              "owner_user_id": "2faa1197-c93f-4239-b490-4afa38cfa89c"
+            },
+            {
+              "nome": "Alex",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "b17181c2-a4b4-4909-b9d1-ef979faa3063",
+              "criado_em": "2026-04-27T18:58:36.751447",
+              "owner_user_id": "19e6a32e-2a20-49a2-81e0-da12aa681505"
+            }
+          ],
+          "soma": 35
+        }
+      ],
+      "num_times": 2,
+      "somas": [
+        35,
+        35
+      ],
+      "diferenca": 0,
+      "melhor_time": "Time 1",
+      "tem_aviso": true,
+      "aviso_msg": "⚠️ Faltam 2 goleiro(s) para fechar 1 por time. O sistema vai equilibrar os níveis mesmo com time(s) sem goleiro."
+    },
+    {
+      "sorteio_id": 11,
+      "times": [
+        {
+          "numero": 1,
+          "jogadores": [
+            {
+              "nome": "Guilherme",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+              "criado_em": "2026-04-23T23:20:00.000002",
+              "owner_user_id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033"
+            },
+            {
+              "nome": "Lucas Teixeira",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "4d113a13-66e9-4625-8d60-8974cea228ef",
+              "criado_em": "2026-04-27T18:58:36.198660",
+              "owner_user_id": "263d73cf-5a95-44b4-a538-bb4c69ba068e"
+            },
+            {
+              "nome": "Renan",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "cb3d184e-bf39-4638-8563-529bbe20274c",
+              "criado_em": "2026-04-27T18:58:36.406589",
+              "owner_user_id": "6a5290cd-317b-4764-b1df-6969f849adc5"
+            },
+            {
+              "nome": "Bacatela",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "cea7df59-6699-479b-88a7-e4194af7481b",
+              "criado_em": "2026-04-27T18:58:36.475618",
+              "owner_user_id": "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6"
+            },
+            {
+              "nome": "lucas",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "ce422cf5-f6d1-4693-9bae-345e1ac21f2f",
+              "criado_em": "2026-04-27T18:58:36.682523",
+              "owner_user_id": "96304901-a961-4c0d-b7d4-f93f4203dca3"
+            }
+          ],
+          "soma": 35
+        },
+        {
+          "numero": 2,
+          "jogadores": [
+            {
+              "nome": "Carlos",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "e9758009-9214-4cc0-aea0-f365a3381803",
+              "criado_em": "2026-04-27T18:58:36.129568",
+              "owner_user_id": "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7"
+            },
+            {
+              "nome": "André Balada",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "fdbe49b3-d73e-4db3-af5f-f23c089b8c38",
+              "criado_em": "2026-04-27T18:58:36.267786",
+              "owner_user_id": "db1314a8-2d4e-4384-829e-8075b1e33737"
+            },
+            {
+              "nome": "Ramon",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "355a82e5-2c71-4212-b787-9f0a7d9ca2d0",
+              "criado_em": "2026-04-27T18:58:36.544754",
+              "owner_user_id": "6cb9f4f5-f4ad-4786-8aca-183e88333730"
+            },
+            {
+              "nome": "Luan",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "70e90819-3eb0-41f6-9d8e-eb1a77040f68",
+              "criado_em": "2026-04-27T18:58:36.613892",
+              "owner_user_id": "2faa1197-c93f-4239-b490-4afa38cfa89c"
+            },
+            {
+              "nome": "Alex",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "b17181c2-a4b4-4909-b9d1-ef979faa3063",
+              "criado_em": "2026-04-27T18:58:36.751447",
+              "owner_user_id": "19e6a32e-2a20-49a2-81e0-da12aa681505"
+            }
+          ],
+          "soma": 35
+        }
+      ],
+      "num_times": 2,
+      "somas": [
+        35,
+        35
+      ],
+      "diferenca": 0,
+      "melhor_time": "Time 1",
+      "tem_aviso": true,
+      "aviso_msg": "⚠️ Faltam 2 goleiro(s) para fechar 1 por time. O sistema vai equilibrar os níveis mesmo com time(s) sem goleiro."
+    },
+    {
+      "sorteio_id": 12,
+      "times": [
+        {
+          "numero": 1,
+          "jogadores": [
+            {
+              "nome": "Guilherme",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+              "criado_em": "2026-04-23T23:20:00.000002",
+              "owner_user_id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033"
+            },
+            {
+              "nome": "Lucas Teixeira",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "4d113a13-66e9-4625-8d60-8974cea228ef",
+              "criado_em": "2026-04-27T18:58:36.198660",
+              "owner_user_id": "263d73cf-5a95-44b4-a538-bb4c69ba068e"
+            },
+            {
+              "nome": "Renan",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "cb3d184e-bf39-4638-8563-529bbe20274c",
+              "criado_em": "2026-04-27T18:58:36.406589",
+              "owner_user_id": "6a5290cd-317b-4764-b1df-6969f849adc5"
+            },
+            {
+              "nome": "Ramon",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "355a82e5-2c71-4212-b787-9f0a7d9ca2d0",
+              "criado_em": "2026-04-27T18:58:36.544754",
+              "owner_user_id": "6cb9f4f5-f4ad-4786-8aca-183e88333730"
+            },
+            {
+              "nome": "Bacatela",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "cea7df59-6699-479b-88a7-e4194af7481b",
+              "criado_em": "2026-04-27T18:58:36.475618",
+              "owner_user_id": "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6"
+            }
+          ],
+          "soma": 35
+        },
+        {
+          "numero": 2,
+          "jogadores": [
+            {
+              "nome": "Carlos",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "e9758009-9214-4cc0-aea0-f365a3381803",
+              "criado_em": "2026-04-27T18:58:36.129568",
+              "owner_user_id": "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7"
+            },
+            {
+              "nome": "André Balada",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "fdbe49b3-d73e-4db3-af5f-f23c089b8c38",
+              "criado_em": "2026-04-27T18:58:36.267786",
+              "owner_user_id": "db1314a8-2d4e-4384-829e-8075b1e33737"
+            },
+            {
+              "nome": "lucas",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "ce422cf5-f6d1-4693-9bae-345e1ac21f2f",
+              "criado_em": "2026-04-27T18:58:36.682523",
+              "owner_user_id": "96304901-a961-4c0d-b7d4-f93f4203dca3"
+            },
+            {
+              "nome": "Luan",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "70e90819-3eb0-41f6-9d8e-eb1a77040f68",
+              "criado_em": "2026-04-27T18:58:36.613892",
+              "owner_user_id": "2faa1197-c93f-4239-b490-4afa38cfa89c"
+            },
+            {
+              "nome": "Alex",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "b17181c2-a4b4-4909-b9d1-ef979faa3063",
+              "criado_em": "2026-04-27T18:58:36.751447",
+              "owner_user_id": "19e6a32e-2a20-49a2-81e0-da12aa681505"
+            }
+          ],
+          "soma": 35
+        }
+      ],
+      "num_times": 2,
+      "somas": [
+        35,
+        35
+      ],
+      "diferenca": 0,
+      "melhor_time": "Time 1",
+      "tem_aviso": true,
+      "aviso_msg": "⚠️ Faltam 2 goleiro(s) para fechar 1 por time. O sistema vai equilibrar os níveis mesmo com time(s) sem goleiro."
+    },
+    {
+      "sorteio_id": 13,
+      "times": [
+        {
+          "numero": 1,
+          "jogadores": [
+            {
+              "nome": "Guilherme",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+              "criado_em": "2026-04-23T23:20:00.000002",
+              "owner_user_id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033"
+            },
+            {
+              "nome": "Lucas Teixeira",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "4d113a13-66e9-4625-8d60-8974cea228ef",
+              "criado_em": "2026-04-27T18:58:36.198660",
+              "owner_user_id": "263d73cf-5a95-44b4-a538-bb4c69ba068e"
+            },
+            {
+              "nome": "Bacatela",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "cea7df59-6699-479b-88a7-e4194af7481b",
+              "criado_em": "2026-04-27T18:58:36.475618",
+              "owner_user_id": "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6"
+            },
+            {
+              "nome": "Ramon",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "355a82e5-2c71-4212-b787-9f0a7d9ca2d0",
+              "criado_em": "2026-04-27T18:58:36.544754",
+              "owner_user_id": "6cb9f4f5-f4ad-4786-8aca-183e88333730"
+            },
+            {
+              "nome": "Drey",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "f2fd5577-a8ce-4481-941a-e1faa70a29c5",
+              "criado_em": "2026-04-27T18:58:36.820490",
+              "owner_user_id": "381b5d0f-f140-4bcd-bc95-38744e15df31"
+            }
+          ],
+          "soma": 35
+        },
+        {
+          "numero": 2,
+          "jogadores": [
+            {
+              "nome": "Carlos",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "e9758009-9214-4cc0-aea0-f365a3381803",
+              "criado_em": "2026-04-27T18:58:36.129568",
+              "owner_user_id": "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7"
+            },
+            {
+              "nome": "André Balada",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "fdbe49b3-d73e-4db3-af5f-f23c089b8c38",
+              "criado_em": "2026-04-27T18:58:36.267786",
+              "owner_user_id": "db1314a8-2d4e-4384-829e-8075b1e33737"
+            },
+            {
+              "nome": "Renan",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "cb3d184e-bf39-4638-8563-529bbe20274c",
+              "criado_em": "2026-04-27T18:58:36.406589",
+              "owner_user_id": "6a5290cd-317b-4764-b1df-6969f849adc5"
+            },
+            {
+              "nome": "Luan",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "70e90819-3eb0-41f6-9d8e-eb1a77040f68",
+              "criado_em": "2026-04-27T18:58:36.613892",
+              "owner_user_id": "2faa1197-c93f-4239-b490-4afa38cfa89c"
+            },
+            {
+              "nome": "Netao",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "79d8d06a-f291-4b1a-8cfe-6e255b90efaa",
+              "criado_em": "2026-04-27T18:58:36.889149",
+              "owner_user_id": "cdf3f7f9-4e38-41a1-9557-4b8020050c57"
+            }
+          ],
+          "soma": 35
+        }
+      ],
+      "num_times": 2,
+      "somas": [
+        35,
+        35
+      ],
+      "diferenca": 0,
+      "melhor_time": "Time 1",
+      "tem_aviso": true,
+      "aviso_msg": "⚠️ Faltam 2 goleiro(s) para fechar 1 por time. O sistema vai equilibrar os níveis mesmo com time(s) sem goleiro."
+    },
+    {
+      "sorteio_id": 14,
+      "times": [
+        {
+          "numero": 1,
+          "jogadores": [
+            {
+              "nome": "Guilherme",
+              "nivel": 7.0,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+              "criado_em": "2026-04-23T23:20:00.000002",
+              "owner_user_id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033",
+              "historico_nivel": []
+            },
+            {
+              "nome": "Carlos",
+              "nivel": 7.0,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "e9758009-9214-4cc0-aea0-f365a3381803",
+              "criado_em": "2026-04-27T18:58:36.129568",
+              "owner_user_id": "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7",
+              "historico_nivel": []
+            },
+            {
+              "nome": "Renan",
+              "nivel": 7.0,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "cb3d184e-bf39-4638-8563-529bbe20274c",
+              "criado_em": "2026-04-27T18:58:36.406589",
+              "owner_user_id": "6a5290cd-317b-4764-b1df-6969f849adc5",
+              "historico_nivel": []
+            },
+            {
+              "nome": "Ramon",
+              "nivel": 7.0,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "355a82e5-2c71-4212-b787-9f0a7d9ca2d0",
+              "criado_em": "2026-04-27T18:58:36.544754",
+              "owner_user_id": "6cb9f4f5-f4ad-4786-8aca-183e88333730",
+              "historico_nivel": []
+            },
+            {
+              "nome": "lucas",
+              "nivel": 7.0,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "ce422cf5-f6d1-4693-9bae-345e1ac21f2f",
+              "criado_em": "2026-04-27T18:58:36.682523",
+              "owner_user_id": "96304901-a961-4c0d-b7d4-f93f4203dca3",
+              "historico_nivel": []
+            }
+          ],
+          "soma": 35.0
+        },
+        {
+          "numero": 2,
+          "jogadores": [
+            {
+              "nome": "Lucas Teixeira",
+              "nivel": 7.0,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "4d113a13-66e9-4625-8d60-8974cea228ef",
+              "criado_em": "2026-04-27T18:58:36.198660",
+              "owner_user_id": "263d73cf-5a95-44b4-a538-bb4c69ba068e",
+              "historico_nivel": []
+            },
+            {
+              "nome": "André Balada",
+              "nivel": 7.0,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "fdbe49b3-d73e-4db3-af5f-f23c089b8c38",
+              "criado_em": "2026-04-27T18:58:36.267786",
+              "owner_user_id": "db1314a8-2d4e-4384-829e-8075b1e33737",
+              "historico_nivel": []
+            },
+            {
+              "nome": "Bacatela",
+              "nivel": 7.0,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "cea7df59-6699-479b-88a7-e4194af7481b",
+              "criado_em": "2026-04-27T18:58:36.475618",
+              "owner_user_id": "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6",
+              "historico_nivel": []
+            },
+            {
+              "nome": "Luan",
+              "nivel": 7.0,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "70e90819-3eb0-41f6-9d8e-eb1a77040f68",
+              "criado_em": "2026-04-27T18:58:36.613892",
+              "owner_user_id": "2faa1197-c93f-4239-b490-4afa38cfa89c",
+              "historico_nivel": []
+            },
+            {
+              "nome": "Alex",
+              "nivel": 7.0,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "b17181c2-a4b4-4909-b9d1-ef979faa3063",
+              "criado_em": "2026-04-27T18:58:36.751447",
+              "owner_user_id": "19e6a32e-2a20-49a2-81e0-da12aa681505",
+              "historico_nivel": []
+            }
+          ],
+          "soma": 35.0
+        }
+      ],
+      "num_times": 2,
+      "somas": [
+        35.0,
+        35.0
+      ],
+      "diferenca": 0.0,
+      "melhor_time": "Time 1",
+      "tem_aviso": true,
+      "aviso_msg": "⚠️ Faltam 2 goleiro(s) para fechar 1 por time. O sistema vai equilibrar os níveis mesmo com time(s) sem goleiro."
+    },
+    {
+      "sorteio_id": 15,
+      "times": [
+        {
+          "numero": 1,
+          "jogadores": [
+            {
+              "nome": "Guilherme",
+              "nivel": 7.0,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+              "criado_em": "2026-04-23T23:20:00.000002",
+              "owner_user_id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033",
+              "historico_nivel": []
+            },
+            {
+              "nome": "Lucas Teixeira",
+              "nivel": 7.0,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "4d113a13-66e9-4625-8d60-8974cea228ef",
+              "criado_em": "2026-04-27T18:58:36.198660",
+              "owner_user_id": "263d73cf-5a95-44b4-a538-bb4c69ba068e",
+              "historico_nivel": []
+            },
+            {
+              "nome": "Renan",
+              "nivel": 7.0,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "cb3d184e-bf39-4638-8563-529bbe20274c",
+              "criado_em": "2026-04-27T18:58:36.406589",
+              "owner_user_id": "6a5290cd-317b-4764-b1df-6969f849adc5",
+              "historico_nivel": []
+            },
+            {
+              "nome": "Ramon",
+              "nivel": 7.0,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "355a82e5-2c71-4212-b787-9f0a7d9ca2d0",
+              "criado_em": "2026-04-27T18:58:36.544754",
+              "owner_user_id": "6cb9f4f5-f4ad-4786-8aca-183e88333730",
+              "historico_nivel": []
+            },
+            {
+              "nome": "Drey",
+              "nivel": 7.0,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "f2fd5577-a8ce-4481-941a-e1faa70a29c5",
+              "criado_em": "2026-04-27T18:58:36.820490",
+              "owner_user_id": "381b5d0f-f140-4bcd-bc95-38744e15df31",
+              "historico_nivel": []
+            }
+          ],
+          "soma": 35.0
+        },
+        {
+          "numero": 2,
+          "jogadores": [
+            {
+              "nome": "Carlos",
+              "nivel": 7.0,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "e9758009-9214-4cc0-aea0-f365a3381803",
+              "criado_em": "2026-04-27T18:58:36.129568",
+              "owner_user_id": "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7",
+              "historico_nivel": []
+            },
+            {
+              "nome": "André Balada",
+              "nivel": 7.0,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "fdbe49b3-d73e-4db3-af5f-f23c089b8c38",
+              "criado_em": "2026-04-27T18:58:36.267786",
+              "owner_user_id": "db1314a8-2d4e-4384-829e-8075b1e33737",
+              "historico_nivel": []
+            },
+            {
+              "nome": "Bacatela",
+              "nivel": 7.0,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "cea7df59-6699-479b-88a7-e4194af7481b",
+              "criado_em": "2026-04-27T18:58:36.475618",
+              "owner_user_id": "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6",
+              "historico_nivel": []
+            },
+            {
+              "nome": "Luan",
+              "nivel": 7.0,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "70e90819-3eb0-41f6-9d8e-eb1a77040f68",
+              "criado_em": "2026-04-27T18:58:36.613892",
+              "owner_user_id": "2faa1197-c93f-4239-b490-4afa38cfa89c",
+              "historico_nivel": []
+            },
+            {
+              "nome": "Netao",
+              "nivel": 7.0,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "79d8d06a-f291-4b1a-8cfe-6e255b90efaa",
+              "criado_em": "2026-04-27T18:58:36.889149",
+              "owner_user_id": "cdf3f7f9-4e38-41a1-9557-4b8020050c57",
+              "historico_nivel": []
+            }
+          ],
+          "soma": 35.0
+        }
+      ],
+      "num_times": 2,
+      "somas": [
+        35.0,
+        35.0
+      ],
+      "diferenca": 0.0,
+      "melhor_time": "Time 1",
+      "tem_aviso": true,
+      "aviso_msg": "⚠️ Faltam 2 goleiro(s) para fechar 1 por time. O sistema vai equilibrar os níveis mesmo com time(s) sem goleiro."
     }
   ],
-  "indice_atual": 6
+  "indice_atual": 9
 }

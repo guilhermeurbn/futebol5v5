@@ -97,9 +97,13 @@ class JogadorService:
         Returns:
             Jogador criado
         """
-        # Validar nível
-        if not isinstance(nivel, int) or nivel < 1 or nivel > 10:
-            raise ValueError(f"Nível deve ser inteiro entre 1 e 10, recebido: {nivel}")
+        # Validar nível (float 0.0-10.0)
+        try:
+            nivel = round(float(nivel), 2)
+        except (TypeError, ValueError):
+            raise ValueError(f"Nível inválido: deve ser um número, recebido: {nivel}")
+        if not (0.0 <= nivel <= 10.0):
+            raise ValueError(f"Nível deve estar entre 0.0 e 10.0, recebido: {nivel}")
         
         jogador = Jogador(
             nome=nome.strip(),
@@ -143,11 +147,16 @@ class JogadorService:
 
         # Validate optional fields
         novo_nome = nome.strip() if isinstance(nome, str) and nome.strip() else jogador_existente.nome
-        novo_nivel = int(nivel) if nivel is not None else jogador_existente.nivel
-        
-        # Validar range de nível (1-10)
-        if novo_nivel < 1 or novo_nivel > 10:
-            raise ValueError(f"Nível deve estar entre 1 e 10, recebido: {novo_nivel}")
+
+        if nivel is not None:
+            try:
+                novo_nivel = round(float(nivel), 2)
+            except (TypeError, ValueError):
+                raise ValueError(f"Nível inválido: deve ser um número, recebido: {nivel}")
+            if not (0.0 <= novo_nivel <= 10.0):
+                raise ValueError(f"Nível deve estar entre 0.0 e 10.0, recebido: {novo_nivel}")
+        else:
+            novo_nivel = jogador_existente.nivel
 
         novo_tipo = jogador_existente.tipo
         if tipo is not None:
@@ -170,11 +179,55 @@ class JogadorService:
             id=jogador_id,
             criado_em=jogador_existente.criado_em,
             owner_user_id=jogador_existente.owner_user_id,
+            historico_nivel=jogador_existente.historico_nivel or [],
         )
 
         dados[indice] = jogador_atualizado.para_dict()
         self._salvar(dados)
         return jogador_atualizado
+
+    def obter_por_nome(self, nome: str) -> Optional['Jogador']:
+        """Busca jogador pelo nome exato (case-insensitive)."""
+        nome_clean = nome.strip().lower()
+        for item in self._carregar_raw():
+            if item.get("nome", "").strip().lower() == nome_clean:
+                return Jogador.do_dict(item)
+        return None
+
+    def aplicar_evolucao_nivel(
+        self,
+        jogador_id: str,
+        novo_nivel: float,
+        motivo: str = "votacao",
+        nivel_anterior: Optional[float] = None,
+        nota_media: Optional[float] = None,
+    ) -> Optional['Jogador']:
+        """Aplica evolução de nível baseada em votação e registra histórico."""
+        from datetime import datetime
+        dados = self._carregar_raw()
+        indice = next((i for i, item in enumerate(dados) if item.get("id") == jogador_id), None)
+        if indice is None:
+            return None
+
+        item = dados[indice]
+        nivel_ant = nivel_anterior if nivel_anterior is not None else float(item.get("nivel", 5))
+        novo_nivel_clamped = round(max(0.0, min(10.0, float(novo_nivel))), 2)
+
+        historico = list(item.get("historico_nivel") or [])
+        historico.append({
+            "ts": datetime.now().isoformat(),
+            "nivel_anterior": nivel_ant,
+            "nivel_novo": novo_nivel_clamped,
+            "motivo": motivo,
+            "nota_media": nota_media,
+        })
+        historico = historico[-50:]  # manter últimos 50 registros
+
+        item["nivel"] = novo_nivel_clamped
+        item["historico_nivel"] = historico
+        dados[indice] = item
+        self._salvar(dados)
+        return Jogador.do_dict(item)
     
     def deletar(self, jogador_id: str) -> bool:
         """

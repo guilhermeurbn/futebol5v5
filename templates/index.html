@@ -5,7 +5,7 @@
 {% block body_class %}page-index{% endblock %}
 
 {% block content %}
-    <div class="container" style="background:#000000; min-height:100vh; width:100%;">
+    <div class="container{% if auth_user.role in ['admin', 'super_admin'] %} page-container-wide judge-workspace-page admin-page admin-page--ecosystem{% elif auth_user.role == 'usuario' %} page-container-wide player-workspace-page{% endif %}" style="background:#000000; min-height:100vh; width:100%;">
         <!-- Header -->
         <header class="header">
             <div class="header-content">
@@ -261,7 +261,7 @@
                                             <div class="player-card__identity-row">
                                                 <h3 class="player-card__name">{{ jogador.nome }}</h3>
                                                 <span class="player-card__level-badge">
-                                                    Nível {{ jogador.nivel }}
+                                                    {{ '%.2f'|format(jogador.nivel|float) }}
                                                 </span>
                                             </div>
                                             <div class="player-card__tags">
@@ -286,9 +286,15 @@
                                         </div>
 
                                         <div class="player-card__actions">
+                                            {% if auth_user.role == 'usuario' and jogador.owner_user_id == auth_user.id %}
+                                            <a class="btn btn-primary btn-large player-card__cta" href="{{ url_for('auth.perfil_page') }}">
+                                                Meu perfil
+                                            </a>
+                                            {% else %}
                                             <a class="btn btn-primary btn-large player-card__cta" href="{{ url_for('jogador.perfil_jogador_publico', jogador_id=jogador.id) }}">
                                                 Ver perfil
                                             </a>
+                                            {% endif %}
                                             {% if auth_user.role == 'admin' %}
                                             <div class="player-card__admin-actions">
                                                 <a class="btn btn-small btn-secondary" href="{{ url_for('jogador.editar_jogador_page', jogador_id=jogador.id) }}">✏️ Editar</a>

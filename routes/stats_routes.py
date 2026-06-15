@@ -188,16 +188,6 @@ def api_stats_comparacao(player1, player2):
 
 
 # ============================================================
-# CHARTS
-# ============================================================
-
-@stats_bp.route('/charts', methods=['GET'])
-def charts():
-    """Página de charts (redireciona)"""
-    return redirect(url_for('jogador_crud.index'))
-
-
-# ============================================================
 # EXPORTAÇÃO - CSV
 # ============================================================
 

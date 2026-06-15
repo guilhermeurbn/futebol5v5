@@ -49,7 +49,6 @@ logs/
 
 # Dados na RAIZ (agora em data/)
 /admin_notificacoes.json
-/favoritos.json
 /historico.json
 /juiz_partida_atual.json
 /partidas.json
@@ -58,6 +57,7 @@ logs/
 /votacoes_partidas.json
 /jogadores.json
 /jogadores_payload.json
+data/*.bak*
 
 # Teste
 .pytest_cache/

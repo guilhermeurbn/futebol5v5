@@ -12,12 +12,24 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app import criar_app
+from routes import auth_routes
+from services.auth_service import AuthService
 
 
 @pytest.fixture
-def app():
+def app(tmp_path, monkeypatch):
     """Create test Flask app"""
     app = criar_app('testing')
+
+    monkeypatch.setattr(
+        auth_routes,
+        'auth_service',
+        AuthService(arquivo=str(tmp_path / 'users.json')),
+    )
+    monkeypatch.setattr(auth_routes, 'jogador_service', Mock())
+    monkeypatch.setattr(auth_routes, 'email_service', Mock())
+    monkeypatch.setattr(auth_routes, 'notificacao_service', Mock())
+
     app.config['TESTING'] = True
     # Disable CSRF for testing POST endpoints
     app.config['WTF_CSRF_ENABLED'] = False

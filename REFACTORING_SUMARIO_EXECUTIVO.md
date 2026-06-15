@@ -65,10 +65,8 @@ routes/
 - Sorteios `/sortear`, `/api/times`
 - Histórico `/historico`, `/sorteio/<id>`
 - Resultados `/resultado_partida/<id>`, `/api/partida/registrar`
-- Favoritos `/api/favoritar-time`, `/api/favoritos`
 - Undo/Redo `/api/sorteio/undo`, `/api/sorteio/redo`
 - QR Code `/api/qrcode/sorteio/<id>`, `/compartilhado`
-- Campeonato `/campeonato`, `/api/campeonato`
 
 **Status**: ✅ Criado e funcional
 

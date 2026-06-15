@@ -3,85 +3,300 @@
 {% block title %}Histórico de Sorteios{% endblock %}
 
 {% block content %}
-    <div class="container" style="background:#000000; min-height:100vh; width:100%;">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-content">
-                {% set brand_title = 'NaTrave' %}
-                {% set brand_subtitle = 'Histórico de Sorteios' %}
-                {% include '_brand_header.html' %}
-            </div>
-        </header>
+<div class="container page-container-wide history-page{% if auth_user.role in ['admin', 'super_admin'] %} judge-workspace-page admin-page admin-page--ecosystem{% elif auth_user.role == 'usuario' %} player-workspace-page{% elif auth_user.role == 'juiz' %} judge-workspace-page{% endif %}" style="background:#000000; min-height:100vh; width:100%;">
+    <header class="header">
+        <div class="header-content">
+            {% set brand_title = 'Histórico' %}
+            {% set brand_subtitle = 'Sorteios, resultados e votação em uma única página' %}
+            {% include '_brand_header.html' %}
+        </div>
+    </header>
 
-        <!-- Main Content -->
-        <main class="main">
-            <!-- Navigation -->
-            {% if auth_user.role != 'juiz' %}
-            <div class="nav-tabs">
-                <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
-                {% if auth_user.role == 'usuario' %}
-                <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab">🗳️ Minha Votação</a>
-                {% endif %}
-                {# Link 'Rodada' removido para simplificar a navegação #}
-                <a href="{{ url_for('jogador.historico') }}" class="nav-tab active">📜 Histórico</a>
-                <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">🏅 Ranking</a>
+    <main class="main">
+        {% if auth_user.role != 'juiz' %}
+        <div class="nav-tabs">
+            <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
+            {% if auth_user.role == 'usuario' %}
+            <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab">🗳️ Minha Votação</a>
+            {% endif %}
+            <a href="{{ url_for('jogador.historico') }}" class="nav-tab active">📜 Histórico</a>
+            <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">🏅 Ranking</a>
+        </div>
+        {% endif %}
+
+        {% if erro %}
+        <div class="alert alert-warning" role="alert">{{ erro }}</div>
+        {% endif %}
+
+        <section class="section">
+            <div class="judge-flow-card judge-draw-history history-page__hero">
+                <div class="judge-flow-card__heading">
+                    <div>
+                        <span class="judge-flow-kicker">Visão consolidada</span>
+                        <h1>Histórico de sorteios</h1>
+                        <p>Cada rodada mostra times, placar e situação da votação sem depender de páginas antigas.</p>
+                    </div>
+                    <span class="judge-history-count">{{ resumo.total_sorteios }}</span>
+                </div>
+
+                <div class="stats-grid history-page__summary-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Sorteios salvos</div>
+                        <div class="stat-value">{{ resumo.total_sorteios }}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Com resultado</div>
+                        <div class="stat-value">{{ resumo.com_resultado }}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Votações abertas</div>
+                        <div class="stat-value">{{ resumo.votacoes_abertas }}</div>
+                    </div>
+                    <div class="stat-card destaque">
+                        <div class="stat-label">Votações encerradas</div>
+                        <div class="stat-value">{{ resumo.votacoes_encerradas }}</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            {% if sorteios %}
+            <div class="judge-draw-history__list history-page__list">
+                {% for sorteio in sorteios %}
+                <details class="judge-draw-history__item votacao-admin-history-card {% if loop.first %}votacao-admin-history-card--featured{% endif %} {% if sorteio.votacao_encerrada %}votacao-admin-history-card--closed{% elif sorteio.votacao_aberta %}votacao-admin-history-card--open{% endif %}" {% if loop.first %}open{% endif %}>
+                    <summary class="history-page__summary">
+                        <span class="judge-draw-history__identity">
+                            <span class="judge-draw-history__number">#{{ sorteio.id }}</span>
+                            <span>
+                                <strong>Sorteio #{{ sorteio.id }}</strong>
+                                <small>{{ sorteio.data|dt_pt_hm }}</small>
+                            </span>
+                        </span>
+
+                        <span class="judge-draw-history__meta history-page__meta">
+                            <span>{{ sorteio.total_jogadores }} jogadores</span>
+                            <span>{{ sorteio.num_times }} times</span>
+                            <span>Dif. {{ sorteio.diferenca }}</span>
+                            {% if sorteio.resultado_partida %}
+                            <span class="history-page__status history-page__status--result">Resultado lançado</span>
+                            {% else %}
+                            <span class="history-page__status">Sem resultado</span>
+                            {% endif %}
+                            {% if sorteio.votacao_encerrada %}
+                            <button
+                                type="button"
+                                class="judge-draw-history__ranking-btn"
+                                data-ranking-trigger
+                                data-sorteio-id="{{ sorteio.id }}"
+                                data-sorteio-data="{{ sorteio.data|dt_pt_hm }}"
+                                data-media-geral="{{ '%.2f'|format(sorteio.ranking_media_geral or 0) }}"
+                                data-total-jogadores="{{ sorteio.ranking_total_jogadores or 0 }}"
+                                {% if not sorteio.ranking_top10 %}disabled title="Sem ranking para este sorteio"{% endif %}
+                            >
+                                Ver ranking
+                            </button>
+                            {% elif sorteio.votacao_aberta %}
+                            <span class="history-page__status history-page__status--open">Votação aberta</span>
+                            {% else %}
+                            <span class="history-page__status">Sem votação</span>
+                            {% endif %}
+                        </span>
+                    </summary>
+
+                    <div class="judge-draw-history__body history-page__body">
+                        <div class="votacao-admin-history-meta">
+                            <span>Última atualização da rodada: {{ sorteio.resultado_partida.data|dt_pt_hm if sorteio.resultado_partida else sorteio.data|dt_pt_hm }}</span>
+                            {% if sorteio.partida_votacao %}
+                            <span>Status da votação: {{ sorteio.partida_votacao.status }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="judge-draw-history__teams history-page__teams">
+                            {% for time in sorteio.times %}
+                            <div>
+                                <strong>Time {{ time.numero }}</strong>
+                                <span>{{ time.jogadores | map(attribute='nome') | join(', ') }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        {% if sorteio.resultado_resumo %}
+                        <div class="votacao-admin-history-result-grid">
+                            {% for item in sorteio.resultado_resumo %}
+                            <div class="votacao-admin-history-result-card">
+                                <small>Time {{ item.time_numero }}</small>
+                                <strong>{{ item.gols }} gol{{ '' if item.gols == 1 else 's' }}</strong>
+                                <small>
+                                    {{ item.desempenho.vitorias if item.desempenho else 0 }}V
+                                    {{ item.desempenho.empates if item.desempenho else 0 }}E
+                                    {{ item.desempenho.derrotas if item.desempenho else 0 }}D
+                                </small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="surface-panel surface-panel--soft votacao-admin-history-open-note">
+                            <p class="hero-empty__text">O sorteio foi salvo, mas ainda não há placar registrado para essa rodada.</p>
+                        </div>
+                        {% endif %}
+
+                        {% if sorteio.votacao_encerrada and sorteio.melhor_jogador %}
+                        <div class="votacao-admin-history-ranking-summary">
+                            <span>Mais votado: <strong>{{ sorteio.melhor_jogador.jogador_nome }}</strong></span>
+                            <span>{{ sorteio.melhor_jogador.votos }} voto(s)</span>
+                            <span>Média {{ sorteio.melhor_jogador.nota_media }}</span>
+                        </div>
+                        {% elif sorteio.votacao_aberta %}
+                        <div class="surface-panel surface-panel--soft votacao-admin-history-open-note">
+                            <p class="hero-empty__text">A votação dessa rodada está aberta. O ranking final aparece aqui quando for encerrada.</p>
+                        </div>
+                        {% elif sorteio.partida_votacao %}
+                        <div class="surface-panel surface-panel--soft votacao-admin-history-open-note">
+                            <p class="hero-empty__text">A rodada existe, mas ainda não há ranking consolidado disponível.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <script id="ranking-data-{{ sorteio.id }}" type="application/json">{{ sorteio.ranking_top10 | tojson }}</script>
+                </details>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📜</div>
+                <p>Nenhum sorteio realizado ainda</p>
+                <p class="empty-hint">Assim que uma rodada for criada, ela aparecerá aqui com o resumo completo.</p>
             </div>
             {% endif %}
+        </section>
+    </main>
 
-            <!-- Histórico Section -->
-            <section class="section">
-                <h2 class="section-title">Histórico de partidas</h2>
+    <footer class="footer">
+        <p>⚽ NaTrave • Desenvolvido por Guilherme Urbano com ❤️</p>
+    </footer>
+</div>
 
-                {% if sorteios %}
-                    <div class="sorteios-list">
-                        {% for sorteio in sorteios %}
-                            <div class="sorteio-card">
-                                <div class="sorteio-header">
-                                    <div class="sorteio-info">
-                                        <h3 class="sorteio-title">🎲 Sorteio #{{ sorteio.id }}</h3>
-                                        <p class="sorteio-data">
-                                            📅 {{ sorteio.data|dt_pt_hm }}
-                                        </p>
-                                    </div>
-                                    <div class="sorteio-stats">
-                                        <span class="stat-badge">
-                                            👥 {{ sorteio.total_jogadores }} jogadores
-                                        </span>
-                                        <span class="stat-badge">
-                                            ⚽ {{ sorteio.num_times }} times
-                                        </span>
-                                    </div>
-                                </div>
+<div class="judge-ranking-modal" id="historyRankingModal" hidden aria-hidden="true">
+    <div class="judge-ranking-modal__backdrop" data-ranking-close></div>
+    <div class="judge-ranking-modal__panel" role="dialog" aria-modal="true" aria-labelledby="historyRankingModalTitle">
+        <div class="judge-ranking-modal__header">
+            <div>
+                <small id="historyRankingModalSorteio">Sorteio</small>
+                <h2 id="historyRankingModalTitle">Ranking da rodada</h2>
+            </div>
+            <button type="button" class="judge-ranking-modal__close" data-ranking-close aria-label="Fechar">✕</button>
+        </div>
 
-                                <!-- Times Preview -->
-                                <div class="sorteio-preview">
-                                    {% for time in sorteio.times %}
-                                        <div class="time-preview">
-                                            <strong>Time {{ time.numero }}</strong>
-                                        </div>
-                                    {% endfor %}
-                                </div>
+        <div class="judge-ranking-modal__summary">
+            <span id="historyRankingModalMedia">Média geral: 0.00</span>
+            <span id="historyRankingModalTotal">0 jogador(es)</span>
+        </div>
 
-                                <div class="sorteio-actions">
-                                    <a class="btn btn-primary btn-small" href="{{ url_for('partida.ver_sorteio', sorteio_id=sorteio.id) }}">Ver resultado</a>
-                                </div>
-                                <div class="sorteio-details" id="sorteio-details-{{ sorteio.id }}" hidden aria-hidden="true"></div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="empty-state">
-                        <div class="empty-icon">📜</div>
-                        <p>Nenhum sorteio realizado ainda</p>
-                        <p class="empty-hint">Realize um sorteio para ver o histórico</p>
-                    </div>
-                {% endif %}
-            </section>
-        </main>
-
-        <!-- Footer -->
-        <footer class="footer">
-            <p>⚽ NaTrave • Desenvolvido por Guilherme Urbano com ❤️</p>
-        </footer>
+        <div class="judge-ranking-modal__body">
+            <table class="judge-ranking-modal__table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Jogador</th>
+                        <th>Time</th>
+                        <th>Votos</th>
+                        <th>Média</th>
+                    </tr>
+                </thead>
+                <tbody id="historyRankingModalBody">
+                    <tr>
+                        <td colspan="5">Sem ranking para este sorteio.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
+</div>
+
+<script>
+(() => {
+    const modal = document.getElementById('historyRankingModal');
+    if (!modal) return;
+
+    const modalSorteio = document.getElementById('historyRankingModalSorteio');
+    const modalMedia = document.getElementById('historyRankingModalMedia');
+    const modalTotal = document.getElementById('historyRankingModalTotal');
+    const modalBody = document.getElementById('historyRankingModalBody');
+    const triggers = document.querySelectorAll('[data-ranking-trigger]');
+    const closers = modal.querySelectorAll('[data-ranking-close]');
+
+    const closeModal = () => {
+        modal.hidden = true;
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+    };
+
+    const openModal = () => {
+        modal.hidden = false;
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+    };
+
+    const renderRows = (ranking) => {
+        if (!Array.isArray(ranking) || ranking.length === 0) {
+            modalBody.innerHTML = '<tr><td colspan="5">Sem ranking para este sorteio.</td></tr>';
+            return;
+        }
+
+        modalBody.innerHTML = ranking.map((jogador, index) => {
+            const nome = jogador.jogador_nome || 'Jogador';
+            const time = jogador.time_numero ?? '-';
+            const votos = jogador.votos ?? 0;
+            const media = Number(jogador.nota_media ?? 0).toFixed(2);
+
+            return `<tr>
+                <td>${index + 1}</td>
+                <td><strong>${nome}</strong></td>
+                <td>Time ${time}</td>
+                <td>${votos}</td>
+                <td>${media}</td>
+            </tr>`;
+        }).join('');
+    };
+
+    triggers.forEach((button) => {
+        button.addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const sorteioId = button.dataset.sorteioId;
+            const sorteioData = button.dataset.sorteioData || '-';
+            const mediaGeral = button.dataset.mediaGeral || '0.00';
+            const totalJogadores = button.dataset.totalJogadores || '0';
+            const dataEl = document.getElementById(`ranking-data-${sorteioId}`);
+
+            let ranking = [];
+            if (dataEl && dataEl.textContent) {
+                try {
+                    ranking = JSON.parse(dataEl.textContent);
+                } catch (error) {
+                    ranking = [];
+                }
+            }
+
+            modalSorteio.textContent = `Sorteio #${sorteioId} · ${sorteioData}`;
+            modalMedia.textContent = `Média geral: ${mediaGeral}`;
+            modalTotal.textContent = `${totalJogadores} jogador(es)`;
+            renderRows(ranking);
+            openModal();
+        });
+    });
+
+    closers.forEach((closeButton) => {
+        closeButton.addEventListener('click', closeModal);
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !modal.hidden) {
+            closeModal();
+        }
+    });
+})();
+</script>
 {% endblock %}

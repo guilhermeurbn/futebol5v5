@@ -3,7 +3,7 @@
 {% block title %}Admin{% endblock %}
 
 {% block content %}
-<div class="container page-container-wide admin-page">
+<div class="container page-container-wide judge-workspace-page admin-page">
     <header class="header">
         <div class="header-content">
             {% set brand_title = 'Painel Admin' %}
@@ -36,7 +36,13 @@
         <div class="admin-page__notification-hint">O atalho de avisos aparece no canto da tela em todas as páginas.</div>
         {% endif %}
 
-        <section class="section admin-users-section">
+        <section class="judge-flow-intro judge-flow-intro--compact admin-page__hero">
+            <span class="judge-flow-kicker">Administração central</span>
+            <h1>Painel Admin</h1>
+            <p>Gerencie usuários, permissões e acessos com o mesmo padrão visual e operacional do fluxo do juiz.</p>
+        </section>
+
+        <section class="section judge-flow-card admin-users-section">
             <div class="section-header admin-users-section__header">
                 <div>
                     <h2 class="section-title">📋 Usuários</h2>
@@ -50,7 +56,7 @@
                 </div>
             </div>
 
-            <section class="section admin-drawer admin-users-section__create" id="createUserPanel" hidden aria-hidden="true" data-panel>
+            <section class="section judge-flow-card admin-drawer admin-users-section__create" id="createUserPanel" hidden aria-hidden="true" data-panel>
                 <div class="admin-drawer__header">
                     <div>
                         <h2 class="section-title" tabindex="-1">Novo usuário</h2>
@@ -91,7 +97,7 @@
 
         </section>
 
-        <section class="section admin-users-mobile" aria-label="Usuários em formato móvel">
+        <section class="section judge-flow-card admin-users-mobile" aria-label="Usuários em formato móvel">
             <h2 class="section-title">📋 Usuários</h2>
             <div class="admin-users-mobile__list">
                 {% for u in usuarios %}

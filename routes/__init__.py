@@ -4,7 +4,7 @@ Módulos de Rotas - Exportação de Blueprints
 7 módulos especializados:
 - auth_routes.py: Autenticação e perfil
 - jogador_crud_routes.py: Gerenciamento de jogadores
-- partida_routes.py: Sorteios, partidas e favoritos
+- partida_routes.py: Sorteios, partidas e compartilhamento
 - votacao_routes.py: Sistema de votação
 - admin_routes.py: Dashboard administrativo
 - stats_routes.py: Estatísticas, rankings e exportação

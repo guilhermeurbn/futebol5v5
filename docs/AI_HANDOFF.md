@@ -85,7 +85,6 @@ Trocar em qualquer ambiente serio.
 - `historico.json`
 - `partidas.json`
 - `votacoes_partidas.json`
-- `favoritos.json`
 - `sorteios_stack.json`
 - `admin_notificacoes.json`
 

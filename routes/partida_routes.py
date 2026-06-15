@@ -1,6 +1,6 @@
 """
-Rotas de Partidas, Sorteios e Favoritos
-- Sorteios, histórico de partidas, favoritos, undo/redo
+Rotas de Partidas e Sorteios
+- Sorteios, histórico de partidas, undo/redo
 - QR codes e compartilhamento
 """
 from flask import Blueprint, request, render_template, redirect, url_for, jsonify, session, send_file, Response
@@ -13,7 +13,6 @@ from services.jogador_service import JogadorService
 from services.balanceamento import BalanceadorTimes
 from services.historico_service import HistoricoService
 from services.partida_service import PartidaService
-from services.favorito_service import FavoritoService
 from services.undoredo_service import UndoRedoService
 from services.qrcode_service import QRCodeService
 from services.export_service import ExportService
@@ -27,7 +26,6 @@ logger = logging.getLogger(__name__)
 jogador_service = JogadorService()
 historico_service = HistoricoService()
 partida_service = PartidaService()
-favorito_service = FavoritoService()
 undoredo_service = UndoRedoService()
 qrcode_service = QRCodeService()
 export_service = ExportService()
@@ -84,7 +82,7 @@ def _sortear_diferente_do_anterior(presentes, tentativas_max=8):
 
     tentativas_max = max(10, tentativas_max)
     resultado = None
-    
+
     for _ in range(max(1, tentativas_max)):
         candidato = BalanceadorTimes.sortear_multiplos_times_com_goleiros(presentes)
         assinatura_candidato = _assinatura_times_obj(candidato[0])
@@ -93,7 +91,6 @@ def _sortear_diferente_do_anterior(presentes, tentativas_max=8):
         if not assinaturas_bloqueadas or assinatura_candidato not in assinaturas_bloqueadas:
             return candidato
 
-    # Fallback: força uma variação
     if resultado:
         variacao = _forcar_variacao_times(resultado[0], assinaturas_bloqueadas)
         if variacao:
@@ -296,16 +293,76 @@ def sortear_api():
 # HISTÓRICO
 # ============================================================
 
+def _enriquecer_sorteio_historico(sorteio):
+    """Anexa status de resultado e votação para a visão resumida do histórico."""
+    item = dict(sorteio)
+    sorteio_id = item.get('id')
+    resultado_partida = _obter_resultado_sorteio(sorteio_id)
+    partida_votacao = votacao_service.obter_por_sorteio(sorteio_id)
+    ranking = ((partida_votacao or {}).get('ranking') or {})
+    ranking_jogadores = ranking.get('ranking_jogadores') or []
+    ranking_top10 = ranking_jogadores[:10]
+    melhor_jogador = ranking.get('melhor_jogador')
+    status_votacao = (partida_votacao or {}).get('status') or 'nao_iniciada'
+
+    resultado_resumo = []
+    if resultado_partida:
+        desempenho_times = resultado_partida.get('times_desempenho') or []
+        for idx, gols in enumerate(resultado_partida.get('gols_times', []) or [], start=1):
+            desempenho = next(
+                (item_desempenho for item_desempenho in desempenho_times if int(item_desempenho.get('time_numero', 0) or 0) == idx),
+                None,
+            )
+            resultado_resumo.append({
+                'time_numero': idx,
+                'gols': gols,
+                'desempenho': desempenho or {'vitorias': 0, 'empates': 0, 'derrotas': 0},
+            })
+
+    item.update({
+        'resultado_partida': resultado_partida,
+        'resultado_resumo': resultado_resumo,
+        'partida_votacao': partida_votacao,
+        'votacao_status': status_votacao,
+        'votacao_encerrada': status_votacao == 'encerrada',
+        'votacao_aberta': status_votacao == 'aberta',
+        'ranking_top10': ranking_top10,
+        'ranking_total_jogadores': ranking.get('total_jogadores') or len(ranking_jogadores),
+        'ranking_media_geral': ranking.get('media_geral') or 0,
+        'melhor_jogador': melhor_jogador,
+    })
+    return item
+
+
+def _resumo_historico_vazio():
+    return {
+        'total_sorteios': 0,
+        'com_resultado': 0,
+        'votacoes_encerradas': 0,
+        'votacoes_abertas': 0,
+    }
+
 @partida_bp.route('/historico')
 def historico():
     """Página com histórico de sorteios"""
     try:
-        sorteios = historico_service.listar_sorteios()
-        sorteios = list(reversed(sorteios))  # Mais recente primeiro
-        return render_template('historico.html', sorteios=sorteios, usuario=_usuario_logado())
+        sorteios = list(reversed(historico_service.listar_sorteios()))
+        sorteios = [_enriquecer_sorteio_historico(sorteio) for sorteio in sorteios]
+        resumo = {
+            'total_sorteios': len(sorteios),
+            'com_resultado': sum(1 for sorteio in sorteios if sorteio.get('resultado_partida')),
+            'votacoes_encerradas': sum(1 for sorteio in sorteios if sorteio.get('votacao_encerrada')),
+            'votacoes_abertas': sum(1 for sorteio in sorteios if sorteio.get('votacao_aberta')),
+        }
+        return render_template('historico.html', sorteios=sorteios, resumo=resumo, usuario=_usuario_logado())
     except Exception as e:
         logger.error(f"Erro ao carregar histórico: {str(e)}")
-        return render_template('historico.html', sorteios=[], erro='Erro ao carregar histórico'), 500
+        return render_template(
+            'historico.html',
+            sorteios=[],
+            resumo=_resumo_historico_vazio(),
+            erro='Erro ao carregar histórico',
+        ), 500
 
 
 @partida_bp.route('/sorteio/<int:sorteio_id>')
@@ -314,7 +371,7 @@ def ver_sorteio(sorteio_id):
     try:
         sorteio = historico_service.obter_sorteio(sorteio_id)
         if not sorteio:
-            return render_template('historico.html', sorteios=[], erro="Sorteio não encontrado"), 404
+            return render_template('historico.html', sorteios=[], resumo=_resumo_historico_vazio(), erro="Sorteio não encontrado"), 404
 
         partida_votacao = votacao_service.obter_por_sorteio(sorteio.get('id'))
         resultado_partida = _obter_resultado_sorteio(sorteio_id)
@@ -345,7 +402,7 @@ def ver_sorteio(sorteio_id):
         )
     except Exception as e:
         logger.error(f"Erro ao visualizar sorteio: {str(e)}")
-        return render_template('historico.html', sorteios=[], erro='Erro ao carregar sorteio'), 500
+        return render_template('historico.html', sorteios=[], resumo=_resumo_historico_vazio(), erro='Erro ao carregar sorteio'), 500
 
 
 @partida_bp.route('/api/sorteio/<int:sorteio_id>/times', methods=['POST'])
@@ -402,7 +459,7 @@ def atualizar_times_sorteio(sorteio_id):
             times_atualizados.append({
                 'numero': idx + 1,
                 'jogadores': jogadores_time,
-                'soma': sum(int(j.get('nivel', 0) or 0) for j in jogadores_time),
+                'soma': round(sum(float(j.get('nivel', 0) or 0) for j in jogadores_time), 2),
             })
 
         if sorted(chaves_recebidas) != sorted(chaves_originais):
@@ -435,7 +492,7 @@ def compartilhar_sorteio(sorteio_id):
     """Central enxuta de compartilhamento do sorteio mais recente."""
     sorteio = historico_service.obter_sorteio(sorteio_id)
     if not sorteio:
-        return render_template('historico.html', sorteios=[], erro="Sorteio não encontrado"), 404
+        return render_template('historico.html', sorteios=[], resumo=_resumo_historico_vazio(), erro="Sorteio não encontrado"), 404
 
     sorteio_data = {
         'sorteio_id': sorteio.get('id'),
@@ -484,7 +541,7 @@ def resultado_partida_page(sorteio_id):
     try:
         sorteio = historico_service.obter_sorteio(sorteio_id)
         if not sorteio:
-            return render_template('historico.html', sorteios=[], erro="Sorteio não encontrado"), 404
+            return render_template('historico.html', sorteios=[], resumo=_resumo_historico_vazio(), erro="Sorteio não encontrado"), 404
 
         partida_votacao = votacao_service.obter_por_sorteio(sorteio.get('id'))
         resultado = _obter_resultado_sorteio(sorteio_id)
@@ -503,7 +560,7 @@ def resultado_partida_page(sorteio_id):
         )
     except Exception as e:
         logger.error(f"Erro ao carregar resultado: {str(e)}")
-        return render_template('historico.html', sorteios=[], erro='Erro ao carregar'), 500
+        return render_template('historico.html', sorteios=[], resumo=_resumo_historico_vazio(), erro='Erro ao carregar'), 500
 
 
 @partida_bp.route('/api/partida/registrar', methods=['POST'])
@@ -561,130 +618,6 @@ def registrar_resultado_partida():
     except Exception as e:
         logger.error(f"Erro ao registrar resultado: {str(e)}")
         return jsonify({'sucesso': False, 'erro': 'Erro ao registrar resultado'}), 500
-
-
-# ============================================================
-# CAMPEONATO
-# ============================================================
-
-@partida_bp.route('/campeonato')
-def campeonato_page():
-    return redirect(url_for('jogador_crud.index'))
-
-
-@partida_bp.route('/api/campeonato')
-def api_campeonato():
-    """API: Retorna dados do campeonato"""
-    try:
-        campeonato = partida_service.obter_campeonato()
-        placar_geral = partida_service.obter_placar_geral()
-        return jsonify({
-            'sucesso': True,
-            'campeonato': campeonato,
-            'placar_geral': placar_geral
-        })
-    except Exception as e:
-        logger.error(f"Erro ao retornar campeonato: {str(e)}")
-        return jsonify({'sucesso': False, 'erro': 'Erro ao carregar campeonato'}), 500
-
-
-# ============================================================
-# FAVORITOS
-# ============================================================
-
-@partida_bp.route('/api/favoritar-time', methods=['POST'])
-def api_favoritar_time():
-    """API: Favorita um time"""
-    try:
-        dados = request.get_json(silent=True) or {}
-        sorteio_id = dados.get('sorteio_id')
-        time_numero = dados.get('time_numero')
-        jogadores = dados.get('jogadores', [])
-        pontuacao = dados.get('pontuacao', 0)
-        nome = dados.get('nome', '')
-        
-        if not sorteio_id or not time_numero or not jogadores:
-            return jsonify({'sucesso': False, 'erro': 'Dados incompletos'}), 400
-        
-        favorito = favorito_service.favoritar_time(
-            sorteio_id, time_numero, jogadores, pontuacao, nome
-        )
-        
-        return jsonify({
-            'sucesso': True,
-            'favorito': favorito,
-            'mensagem': 'Time favoritado com sucesso!'
-        })
-    except ValueError as e:
-        return jsonify({'sucesso': False, 'erro': str(e)}), 400
-    except Exception as e:
-        logger.error(f"Erro ao favoritar time: {str(e)}")
-        return jsonify({'sucesso': False, 'erro': 'Erro ao favoritar'}), 500
-
-
-@partida_bp.route('/favoritos')
-def listar_favoritos_page():
-    return redirect(url_for('jogador_crud.index'))
-
-
-@partida_bp.route('/api/favoritos')
-def api_listar_favoritos():
-    """API: Lista todos os favoritos"""
-    try:
-        favoritos = favorito_service.listar_favoritos()
-        return jsonify({'sucesso': True, 'favoritos': favoritos})
-    except Exception as e:
-        logger.error(f"Erro ao listar favoritos: {str(e)}")
-        return jsonify({'sucesso': False, 'erro': 'Erro ao listar favoritos'}), 500
-
-
-@partida_bp.route('/api/favorito/<int:fav_id>/remover', methods=['DELETE'])
-def api_remover_favorito(fav_id):
-    """API: Remove um favorito"""
-    try:
-        sucesso = favorito_service.remover_favorito(fav_id)
-        if sucesso:
-            return jsonify({'sucesso': True, 'mensagem': 'Favorito removido com sucesso'})
-        return jsonify({'sucesso': False, 'erro': 'Favorito não encontrado'}), 404
-    except Exception as e:
-        logger.error(f"Erro ao remover favorito: {str(e)}")
-        return jsonify({'sucesso': False, 'erro': 'Erro ao remover'}), 500
-
-
-@partida_bp.route('/api/favorito/<int:fav_id>/renomear', methods=['POST'])
-def api_renomear_favorito(fav_id):
-    """API: Renomeia um favorito"""
-    try:
-        dados = request.get_json(silent=True) or {}
-        novo_nome = dados.get('nome', '')
-        
-        if not novo_nome:
-            return jsonify({'sucesso': False, 'erro': 'Nome não pode ser vazio'}), 400
-        
-        favorito = favorito_service.renomear_favorito(fav_id, novo_nome)
-        if favorito:
-            return jsonify({'sucesso': True, 'favorito': favorito, 'mensagem': 'Renomeado com sucesso'})
-        return jsonify({'sucesso': False, 'erro': 'Favorito não encontrado'}), 404
-    except ValueError as e:
-        return jsonify({'sucesso': False, 'erro': str(e)}), 400
-    except Exception as e:
-        logger.error(f"Erro ao renomear favorito: {str(e)}")
-        return jsonify({'sucesso': False, 'erro': 'Erro ao renomear'}), 500
-
-
-@partida_bp.route('/api/favorito/<int:fav_id>/usar', methods=['POST'])
-def api_usar_favorito(fav_id):
-    """API: Marca favorito como usado"""
-    try:
-        sucesso = favorito_service.incrementar_uso(fav_id)
-        if sucesso:
-            favorito = favorito_service.obter_favorito(fav_id)
-            return jsonify({'sucesso': True, 'favorito': favorito, 'mensagem': 'Favorito utilizado'})
-        return jsonify({'sucesso': False, 'erro': 'Favorito não encontrado'}), 404
-    except Exception as e:
-        logger.error(f"Erro ao usar favorito: {str(e)}")
-        return jsonify({'sucesso': False, 'erro': 'Erro ao usar favorito'}), 500
-
 
 # ============================================================
 # UNDO / REDO

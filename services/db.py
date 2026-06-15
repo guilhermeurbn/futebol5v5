@@ -247,7 +247,6 @@ def auto_seed_on_init() -> None:
         "partidas",
         "historico",
         "votacoes_partidas",
-        "favoritos",
         "admin_notificacoes",
         "sorteios_stack",
     ]

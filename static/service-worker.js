@@ -1,5 +1,5 @@
 // NaTrave Service Worker - Offline Support & Caching Strategy
-const SW_VERSION = '20260613-1';
+const SW_VERSION = '20260615-2';
 const CACHE_NAME = `natrave-v${SW_VERSION}`;
 const RUNTIME_CACHE = `natrave-runtime-v${SW_VERSION}`;
 const IMAGE_CACHE = `natrave-images-v${SW_VERSION}`;
@@ -7,13 +7,10 @@ const IMAGE_CACHE = `natrave-images-v${SW_VERSION}`;
 // URLs que devem estar sempre em cache
 const urlsToCache = [
   '/',
-  '/static/style.css?v=20260613-1',
+  '/static/style.css?v=20260615-2',
   '/static/offline-judge.js',
   '/sortear',
-  '/historico',
-  '/favoritos',
-  '/campeonato',
-  '/charts'
+  '/historico'
 ];
 
 // Instalação do Service Worker
@@ -218,17 +215,6 @@ self.addEventListener('fetch', event => {
         });
       })
   );
-});
-
-// Background Sync (experimental)
-self.addEventListener('sync', event => {
-  if (event.tag === 'sync-favoritos') {
-    event.waitUntil(
-      fetch('/api/favoritos', { method: 'GET' })
-        .then(() => console.log('[Service Worker] Sync favoritos completo'))
-        .catch(err => console.error('[Service Worker] Sync favoritos falhou:', err))
-    );
-  }
 });
 
 // Message Handler - Para comunicação com cliente

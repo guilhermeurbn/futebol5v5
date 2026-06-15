@@ -56,8 +56,8 @@ def criar_app(config_name: str = None) -> Flask:
     # Gerenciamento de Jogadores
     app.register_blueprint(jogador_bp, url_prefix='')  # /api/jogadores, /selecionar, etc
     
-    # Partidas, Sorteios e Favoritos
-    app.register_blueprint(partida_bp, url_prefix='')  # /sortear, /historico, /favoritos, etc
+    # Partidas, Sorteios e Compartilhamento
+    app.register_blueprint(partida_bp, url_prefix='')  # /sortear, /historico, /sorteio/<id>, etc
     
     # Votação
     app.register_blueprint(votacao_bp, url_prefix='')  # /votacao, /admin/votacao, etc
@@ -102,7 +102,7 @@ jogador_bp (Gerenciamento de Jogadores):
   ✓ /api/presenca POST
   ✓ /api/presenca/limpar POST
 
-partida_bp (Sorteios e Favoritos):
+partida_bp (Sorteios e Partidas):
   ✓ /sortear
   ✓ /api/times
   ✓ /historico
@@ -110,14 +110,6 @@ partida_bp (Sorteios e Favoritos):
   ✓ /api/historico
   ✓ /resultado_partida/<id>
   ✓ /api/partida/registrar POST
-  ✓ /campeonato
-  ✓ /api/campeonato
-  ✓ /api/favoritar-time POST
-  ✓ /favoritos
-  ✓ /api/favoritos
-  ✓ /api/favorito/<id>/remover DELETE
-  ✓ /api/favorito/<id>/renomear POST
-  ✓ /api/favorito/<id>/usar POST
   ✓ /api/sorteio/undo POST
   ✓ /api/sorteio/redo POST
   ✓ /api/sorteio/status GET

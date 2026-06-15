@@ -18,7 +18,6 @@ def seed_database():
         "partidas",
         "historico",
         "votacoes_partidas",
-        "favoritos",
         "admin_notificacoes",
         "sorteios_stack",
     ]

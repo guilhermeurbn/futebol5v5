@@ -19,7 +19,6 @@ futebol5v5/
 │   ├── auth_service.py
 │   ├── balanceamento.py
 │   ├── export_service.py
-│   ├── favorito_service.py
 │   ├── historico_service.py
 │   ├── jogador_service.py
 │   ├── jogador_stats_service.py
@@ -91,7 +90,6 @@ Os servicos concentram regra de negocio e acesso aos arquivos JSON.
 - `jogador_stats_service.py`: estatisticas detalhadas por jogador
 - `stats_service.py`: estatisticas agregadas de sorteios
 - `export_service.py`: CSV, TXT e PDF
-- `favorito_service.py`: favoritos de times
 - `undoredo_service.py`: pilha de sorteios
 - `qrcode_service.py`: links e QR codes
 - `sugestoes_service.py`: sugestoes de jogadores
@@ -128,7 +126,6 @@ Arquivos principais:
 - `historico.json`
 - `partidas.json`
 - `votacoes_partidas.json`
-- `favoritos.json`
 - `sorteios_stack.json`
 - `admin_notificacoes.json`
 

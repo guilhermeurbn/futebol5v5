@@ -154,6 +154,15 @@ def _login_juiz(client):
         sess['senha_temporaria_ativa'] = False
 
 
+def _login_usuario(client):
+    with client.session_transaction() as sess:
+        sess['user_id'] = 'user-id'
+        sess['username'] = 'usuario'
+        sess['nome'] = 'Usuario'
+        sess['role'] = 'usuario'
+        sess['senha_temporaria_ativa'] = False
+
+
 def test_share_page_renders_selected_draw(monkeypatch):
     app = criar_app('testing')
     app.config['WTF_CSRF_ENABLED'] = False
@@ -268,6 +277,72 @@ def test_judge_history_has_its_own_page(monkeypatch):
     assert 'judge-history-page' in body
     assert 'Histórico de sorteios' in body
     assert body.index('Sorteio #7') < body.index('Sorteio #6')
+
+
+def test_public_history_renders_inline_round_summary(monkeypatch):
+    app = criar_app('testing')
+    app.config['WTF_CSRF_ENABLED'] = False
+
+    sorteios = [{
+        'id': 11,
+        'data': '2026-06-15T20:00:00',
+        'total_jogadores': 10,
+        'num_times': 2,
+        'diferenca': 1,
+        'times': [
+            {
+                'numero': 1,
+                'jogadores': [
+                    {'nome': 'Jogador 1'},
+                    {'nome': 'Jogador 2'},
+                ],
+            },
+            {
+                'numero': 2,
+                'jogadores': [
+                    {'nome': 'Jogador 3'},
+                    {'nome': 'Jogador 4'},
+                ],
+            },
+        ],
+    }]
+    resultado = {
+        'id': 77,
+        'data': '2026-06-15T21:00:00',
+        'gols_times': [3, 2],
+        'times_desempenho': [
+            {'time_numero': 1, 'vitorias': 1, 'empates': 0, 'derrotas': 0},
+            {'time_numero': 2, 'vitorias': 0, 'empates': 0, 'derrotas': 1},
+        ],
+    }
+    votacao = {
+        'id': 88,
+        'status': 'encerrada',
+        'ranking': {
+            'ranking_jogadores': [
+                {'jogador_nome': 'Jogador 1', 'time_numero': 1, 'votos': 4, 'nota_media': 8.5},
+            ],
+            'melhor_jogador': {'jogador_nome': 'Jogador 1', 'votos': 4, 'nota_media': 8.5},
+            'media_geral': 8.5,
+            'total_jogadores': 1,
+        },
+    }
+
+    monkeypatch.setattr(partida_routes.historico_service, 'listar_sorteios', lambda: sorteios)
+    monkeypatch.setattr(partida_routes.partida_service, 'obter_partidas_sorteio', lambda sorteio_id: [resultado] if sorteio_id == 11 else [])
+    monkeypatch.setattr(partida_routes.votacao_service, 'obter_por_sorteio', lambda sorteio_id: votacao if sorteio_id == 11 else None)
+
+    with app.test_client() as client:
+        _login_usuario(client)
+        response = client.get('/historico')
+
+    body = response.get_data(as_text=True)
+    assert response.status_code == 200
+    assert 'Sorteio #11' in body
+    assert 'Resultado lançado' in body
+    assert 'Status da votação: encerrada' in body
+    assert 'Ver ranking' in body
+    assert 'Ver resultado' not in body
 
 
 def test_judge_voting_context_cannot_mix_draws(monkeypatch):

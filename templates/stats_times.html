@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NaTrave | Stats Times</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='20260615-2') }}">
     <style>
         .stats-table {
             width: 100%;
@@ -89,7 +89,7 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container{% if auth_user.role in ['admin', 'super_admin'] %} page-container-wide judge-workspace-page admin-page admin-page--ecosystem{% elif auth_user.role == 'usuario' %} page-container-wide player-workspace-page{% endif %}">
         <!-- Header -->
         <header class="header">
             <div class="header-content">

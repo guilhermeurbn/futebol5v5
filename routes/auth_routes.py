@@ -168,7 +168,7 @@ def cadastro_submit():
         # Cada usuário novo já nasce com seu próprio jogador
         jogador_service.criar(
             nome=nome,
-            nivel=int(nivel),
+            nivel=float(nivel),
             tipo=tipo,
             posicao=posicao,
             owner_user_id=usuario.get('id')
@@ -334,6 +334,8 @@ def perfil_jogador_publico(jogador_id):
         jogador = jogador_service.obter_por_id(jogador_id)
         if not jogador:
             return redirect(url_for('jogador.index'))
+        if jogador.owner_user_id == session.get('user_id'):
+            return redirect(url_for('auth.perfil_page'))
 
         stats_jogador = None
         try:

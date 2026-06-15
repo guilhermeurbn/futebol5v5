@@ -129,5 +129,229 @@
         "gols": 0
       }
     ]
+  },
+  {
+    "id": 6,
+    "sorteio_id": 8,
+    "data": "2026-06-15T01:36:20.929275",
+    "time_vencedor": null,
+    "gols_times": [
+      0,
+      0,
+      0
+    ],
+    "notas": "",
+    "times_desempenho": [
+      {
+        "time_numero": 1,
+        "vitorias": 2,
+        "empates": 0,
+        "derrotas": 0,
+        "gols": 0
+      },
+      {
+        "time_numero": 2,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 4,
+        "gols": 0
+      },
+      {
+        "time_numero": 3,
+        "vitorias": 2,
+        "empates": 0,
+        "derrotas": 0,
+        "gols": 0
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "sorteio_id": 9,
+    "data": "2026-06-15T01:43:56.955439",
+    "time_vencedor": 1,
+    "gols_times": [
+      0,
+      0
+    ],
+    "notas": "",
+    "times_desempenho": [
+      {
+        "time_numero": 1,
+        "vitorias": 1,
+        "empates": 0,
+        "derrotas": 0,
+        "gols": 0
+      },
+      {
+        "time_numero": 2,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 1,
+        "gols": 0
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "sorteio_id": 10,
+    "data": "2026-06-15T01:45:10.444550",
+    "time_vencedor": 1,
+    "gols_times": [
+      0,
+      0
+    ],
+    "notas": "",
+    "times_desempenho": [
+      {
+        "time_numero": 1,
+        "vitorias": 1,
+        "empates": 0,
+        "derrotas": 0,
+        "gols": 0
+      },
+      {
+        "time_numero": 2,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 1,
+        "gols": 0
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "sorteio_id": 11,
+    "data": "2026-06-15T02:05:55.018909",
+    "time_vencedor": 1,
+    "gols_times": [
+      0,
+      0
+    ],
+    "notas": "",
+    "times_desempenho": [
+      {
+        "time_numero": 1,
+        "vitorias": 2,
+        "empates": 0,
+        "derrotas": 1,
+        "gols": 0
+      },
+      {
+        "time_numero": 2,
+        "vitorias": 1,
+        "empates": 0,
+        "derrotas": 2,
+        "gols": 0
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "sorteio_id": 12,
+    "data": "2026-06-15T02:08:39.878079",
+    "time_vencedor": 1,
+    "gols_times": [
+      0,
+      0
+    ],
+    "notas": "",
+    "times_desempenho": [
+      {
+        "time_numero": 1,
+        "vitorias": 1,
+        "empates": 0,
+        "derrotas": 0,
+        "gols": 0
+      },
+      {
+        "time_numero": 2,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 1,
+        "gols": 0
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "sorteio_id": 13,
+    "data": "2026-06-15T02:23:25.009999",
+    "time_vencedor": null,
+    "gols_times": [
+      0,
+      0
+    ],
+    "notas": "",
+    "times_desempenho": [
+      {
+        "time_numero": 1,
+        "vitorias": 1,
+        "empates": 0,
+        "derrotas": 1,
+        "gols": 0
+      },
+      {
+        "time_numero": 2,
+        "vitorias": 1,
+        "empates": 0,
+        "derrotas": 1,
+        "gols": 0
+      }
+    ]
+  },
+  {
+    "id": 12,
+    "sorteio_id": 14,
+    "data": "2026-06-15T14:37:29.774507",
+    "time_vencedor": 1,
+    "gols_times": [
+      1,
+      1
+    ],
+    "notas": "",
+    "times_desempenho": [
+      {
+        "time_numero": 1,
+        "vitorias": 1,
+        "empates": 0,
+        "derrotas": 0,
+        "gols": 1
+      },
+      {
+        "time_numero": 2,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 1,
+        "gols": 1
+      }
+    ]
+  },
+  {
+    "id": 13,
+    "sorteio_id": 15,
+    "data": "2026-06-15T14:48:57.030444",
+    "time_vencedor": null,
+    "gols_times": [
+      0,
+      0
+    ],
+    "notas": "",
+    "times_desempenho": [
+      {
+        "time_numero": 1,
+        "vitorias": 5,
+        "empates": 0,
+        "derrotas": 5,
+        "gols": 0
+      },
+      {
+        "time_numero": 2,
+        "vitorias": 5,
+        "empates": 0,
+        "derrotas": 5,
+        "gols": 0
+      }
+    ]
   }
 ]

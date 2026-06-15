@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NaTrave | Stats Jogadores</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='20260615-2') }}">
 </head>
 <body>
-    <div class="container page-container-wide">
+    <div class="container page-container-wide{% if auth_user.role in ['admin', 'super_admin'] %} judge-workspace-page admin-page admin-page--ecosystem{% elif auth_user.role == 'usuario' %} player-workspace-page{% endif %}">
         <!-- Header -->
         <header class="header">
             <div class="header-content">
