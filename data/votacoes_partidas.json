@@ -1,5 +1,5 @@
 {
-  "ultimo_id": 6,
+  "ultimo_id": 7,
   "partidas": [
     {
       "id": 1,
@@ -2347,6 +2347,351 @@
         "id": 4,
         "sorteio_id": 6,
         "data": "2026-06-13T19:27:33.932081",
+        "time_vencedor": 1,
+        "gols_times": [
+          0,
+          0
+        ],
+        "notas": "",
+        "times_desempenho": [
+          {
+            "time_numero": 1,
+            "vitorias": 1,
+            "empates": 0,
+            "derrotas": 0,
+            "gols": 0
+          },
+          {
+            "time_numero": 2,
+            "vitorias": 0,
+            "empates": 0,
+            "derrotas": 1,
+            "gols": 0
+          }
+        ]
+      },
+      "resultado_resumido": [
+        {
+          "time_numero": 1,
+          "gols": 0,
+          "vitorias": 1,
+          "empates": 0,
+          "derrotas": 0,
+          "resultado": "vitoria"
+        },
+        {
+          "time_numero": 2,
+          "gols": 0,
+          "vitorias": 0,
+          "empates": 0,
+          "derrotas": 1,
+          "resultado": "derrota"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "sorteio_id": 7,
+      "titulo": "Votação do sorteio #7",
+      "status": "encerrada",
+      "criado_em": "2026-06-13T20:11:23.147863",
+      "aberta_em": "2026-06-13T20:11:23.147863",
+      "fecha_em": "2026-06-14T08:11:23.147863",
+      "duracao_horas": 12,
+      "criado_por": "2ba4d2a2-6f2b-4a14-a6d1-a50d639ffaf9",
+      "encerrado_em": "2026-06-13T20:11:26.509291",
+      "encerrado_por": "2ba4d2a2-6f2b-4a14-a6d1-a50d639ffaf9",
+      "encerramento_motivo": "manual",
+      "times": [
+        {
+          "numero": 1,
+          "jogadores": [
+            {
+              "nome": "Guilherme",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+              "criado_em": "2026-04-23T23:20:00.000002",
+              "owner_user_id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033"
+            },
+            {
+              "nome": "Lucas Teixeira",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "4d113a13-66e9-4625-8d60-8974cea228ef",
+              "criado_em": "2026-04-27T18:58:36.198660",
+              "owner_user_id": "263d73cf-5a95-44b4-a538-bb4c69ba068e"
+            },
+            {
+              "nome": "Renan",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "cb3d184e-bf39-4638-8563-529bbe20274c",
+              "criado_em": "2026-04-27T18:58:36.406589",
+              "owner_user_id": "6a5290cd-317b-4764-b1df-6969f849adc5"
+            },
+            {
+              "nome": "Ramon",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "355a82e5-2c71-4212-b787-9f0a7d9ca2d0",
+              "criado_em": "2026-04-27T18:58:36.544754",
+              "owner_user_id": "6cb9f4f5-f4ad-4786-8aca-183e88333730"
+            },
+            {
+              "nome": "Carlos",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "e9758009-9214-4cc0-aea0-f365a3381803",
+              "criado_em": "2026-04-27T18:58:36.129568",
+              "owner_user_id": "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7"
+            }
+          ],
+          "soma": 35
+        },
+        {
+          "numero": 2,
+          "jogadores": [
+            {
+              "nome": "lucas",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "ce422cf5-f6d1-4693-9bae-345e1ac21f2f",
+              "criado_em": "2026-04-27T18:58:36.682523",
+              "owner_user_id": "96304901-a961-4c0d-b7d4-f93f4203dca3"
+            },
+            {
+              "nome": "André Balada",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "fdbe49b3-d73e-4db3-af5f-f23c089b8c38",
+              "criado_em": "2026-04-27T18:58:36.267786",
+              "owner_user_id": "db1314a8-2d4e-4384-829e-8075b1e33737"
+            },
+            {
+              "nome": "Bacatela",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "cea7df59-6699-479b-88a7-e4194af7481b",
+              "criado_em": "2026-04-27T18:58:36.475618",
+              "owner_user_id": "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6"
+            },
+            {
+              "nome": "Luan",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "70e90819-3eb0-41f6-9d8e-eb1a77040f68",
+              "criado_em": "2026-04-27T18:58:36.613892",
+              "owner_user_id": "2faa1197-c93f-4239-b490-4afa38cfa89c"
+            },
+            {
+              "nome": "Netao",
+              "nivel": 7,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "79d8d06a-f291-4b1a-8cfe-6e255b90efaa",
+              "criado_em": "2026-04-27T18:58:36.889149",
+              "owner_user_id": "cdf3f7f9-4e38-41a1-9557-4b8020050c57"
+            }
+          ],
+          "soma": 35
+        }
+      ],
+      "participantes": [
+        {
+          "user_id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033",
+          "username": "guilherme",
+          "nome_usuario": "Guilherme",
+          "jogador_nome": "Guilherme",
+          "time_numero": 1,
+          "externo": false
+        },
+        {
+          "user_id": "263d73cf-5a95-44b4-a538-bb4c69ba068e",
+          "username": "lucas_teixeira",
+          "nome_usuario": "Lucas Teixeira",
+          "jogador_nome": "Lucas Teixeira",
+          "time_numero": 1,
+          "externo": false
+        },
+        {
+          "user_id": "6a5290cd-317b-4764-b1df-6969f849adc5",
+          "username": "renan",
+          "nome_usuario": "Renan",
+          "jogador_nome": "Renan",
+          "time_numero": 1,
+          "externo": false
+        },
+        {
+          "user_id": "6cb9f4f5-f4ad-4786-8aca-183e88333730",
+          "username": "ramon",
+          "nome_usuario": "Ramon",
+          "jogador_nome": "Ramon",
+          "time_numero": 1,
+          "externo": false
+        },
+        {
+          "user_id": "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7",
+          "username": "carlos",
+          "nome_usuario": "Carlos",
+          "jogador_nome": "Carlos",
+          "time_numero": 1,
+          "externo": false
+        },
+        {
+          "user_id": "96304901-a961-4c0d-b7d4-f93f4203dca3",
+          "username": "lucas",
+          "nome_usuario": "lucas",
+          "jogador_nome": "lucas",
+          "time_numero": 2,
+          "externo": false
+        },
+        {
+          "user_id": "db1314a8-2d4e-4384-829e-8075b1e33737",
+          "username": "andre_balada",
+          "nome_usuario": "André Balada",
+          "jogador_nome": "André Balada",
+          "time_numero": 2,
+          "externo": false
+        },
+        {
+          "user_id": "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6",
+          "username": "bacatela",
+          "nome_usuario": "Bacatela",
+          "jogador_nome": "Bacatela",
+          "time_numero": 2,
+          "externo": false
+        },
+        {
+          "user_id": "2faa1197-c93f-4239-b490-4afa38cfa89c",
+          "username": "luan",
+          "nome_usuario": "Luan",
+          "jogador_nome": "Luan",
+          "time_numero": 2,
+          "externo": false
+        },
+        {
+          "user_id": "cdf3f7f9-4e38-41a1-9557-4b8020050c57",
+          "username": "netao",
+          "nome_usuario": "Netao",
+          "jogador_nome": "Netao",
+          "time_numero": 2,
+          "externo": false
+        }
+      ],
+      "votos": [],
+      "ranking": {
+        "total_votos": 0,
+        "ranking_times": [],
+        "ranking_jogadores": [],
+        "melhor_jogador": null,
+        "melhor_time": null,
+        "participantes_pendentes": [
+          {
+            "user_id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033",
+            "username": "guilherme",
+            "nome_usuario": "Guilherme",
+            "jogador_nome": "Guilherme",
+            "time_numero": 1,
+            "externo": false
+          },
+          {
+            "user_id": "263d73cf-5a95-44b4-a538-bb4c69ba068e",
+            "username": "lucas_teixeira",
+            "nome_usuario": "Lucas Teixeira",
+            "jogador_nome": "Lucas Teixeira",
+            "time_numero": 1,
+            "externo": false
+          },
+          {
+            "user_id": "6a5290cd-317b-4764-b1df-6969f849adc5",
+            "username": "renan",
+            "nome_usuario": "Renan",
+            "jogador_nome": "Renan",
+            "time_numero": 1,
+            "externo": false
+          },
+          {
+            "user_id": "6cb9f4f5-f4ad-4786-8aca-183e88333730",
+            "username": "ramon",
+            "nome_usuario": "Ramon",
+            "jogador_nome": "Ramon",
+            "time_numero": 1,
+            "externo": false
+          },
+          {
+            "user_id": "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7",
+            "username": "carlos",
+            "nome_usuario": "Carlos",
+            "jogador_nome": "Carlos",
+            "time_numero": 1,
+            "externo": false
+          },
+          {
+            "user_id": "96304901-a961-4c0d-b7d4-f93f4203dca3",
+            "username": "lucas",
+            "nome_usuario": "lucas",
+            "jogador_nome": "lucas",
+            "time_numero": 2,
+            "externo": false
+          },
+          {
+            "user_id": "db1314a8-2d4e-4384-829e-8075b1e33737",
+            "username": "andre_balada",
+            "nome_usuario": "André Balada",
+            "jogador_nome": "André Balada",
+            "time_numero": 2,
+            "externo": false
+          },
+          {
+            "user_id": "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6",
+            "username": "bacatela",
+            "nome_usuario": "Bacatela",
+            "jogador_nome": "Bacatela",
+            "time_numero": 2,
+            "externo": false
+          },
+          {
+            "user_id": "2faa1197-c93f-4239-b490-4afa38cfa89c",
+            "username": "luan",
+            "nome_usuario": "Luan",
+            "jogador_nome": "Luan",
+            "time_numero": 2,
+            "externo": false
+          },
+          {
+            "user_id": "cdf3f7f9-4e38-41a1-9557-4b8020050c57",
+            "username": "netao",
+            "nome_usuario": "Netao",
+            "jogador_nome": "Netao",
+            "time_numero": 2,
+            "externo": false
+          }
+        ]
+      },
+      "resultado_partida": {
+        "id": 5,
+        "sorteio_id": 7,
+        "data": "2026-06-13T20:11:21.351787",
         "time_vencedor": 1,
         "gols_times": [
           0,

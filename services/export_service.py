@@ -115,7 +115,7 @@ class ExportService:
                 try:
                     data_obj = datetime.fromisoformat(data)
                     data = data_obj.strftime('%d/%m/%Y %H:%M:%S')
-                except:
+                except (ValueError, TypeError):
                     pass
             
             # Encontrar melhor time

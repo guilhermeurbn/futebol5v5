@@ -217,7 +217,7 @@ class StatsService:
                 data_sorteio = datetime.fromisoformat(data_str)
                 if (agora - data_sorteio).total_seconds() < 86400:
                     ultima_24h_count += 1
-            except:
+            except (ValueError, TypeError):
                 pass
         
         # Calcular tendência

@@ -15,6 +15,9 @@ except Exception:
 _cache: Dict[str, Tuple[Any, float]] = {}
 _cache_ttl_seconds = 300  # 5 minutos
 
+# SQL injection whitelist
+ALLOWED_TABLES = {"app_json_store"}
+
 
 def _normalize_database_url(url: str) -> str:
     if url.startswith("postgres://"):
@@ -43,7 +46,10 @@ def get_conn():
 
 
 def json_store_table_name() -> str:
-    return "app_json_store"
+    table = "app_json_store"
+    if table not in ALLOWED_TABLES:
+        raise ValueError(f"Table '{table}' not in whitelist")
+    return table
 
 
 def ensure_json_store_table(conn) -> None:

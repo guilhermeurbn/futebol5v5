@@ -4,6 +4,7 @@ Servico de email baseado na API do Resend.
 import json
 import logging
 import os
+import re
 from pathlib import Path
 from dataclasses import dataclass
 from typing import Optional
@@ -11,7 +12,22 @@ from typing import Optional
 import requests
 
 
+class RedactingFormatter(logging.Formatter):
+    """Redacts sensitive credentials from log records."""
+    
+    BEARER_PATTERN = re.compile(r'Bearer\s+[\w\-._~+/]+=*')
+    
+    def format(self, record: logging.LogRecord) -> str:
+        msg = super().format(record)
+        return self.BEARER_PATTERN.sub('Bearer [REDACTED]', msg)
+
+
 logger = logging.getLogger(__name__)
+redacting_formatter = RedactingFormatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+for handler in logger.handlers:
+    handler.setFormatter(redacting_formatter)
 
 
 @dataclass

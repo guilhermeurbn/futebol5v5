@@ -8,6 +8,8 @@ import uuid
 from urllib.parse import quote, urlparse
 
 from flask import Flask, send_file, request, session, url_for, redirect
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 try:
     from flask_wtf import CSRFProtect
     from flask_wtf.csrf import CSRFError, generate_csrf
@@ -83,6 +85,15 @@ def criar_app(config_name: str = None) -> Flask:
     # Preserve the original scheme/host when deployed behind a reverse proxy.
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
     
+    # Rate limiting setup
+    limiter = Limiter(
+        app=app,
+        key_func=get_remote_address,
+        default_limits=["200 per day", "50 per hour"],
+        storage_uri="memory://"
+    )
+    logger.info("Rate limiter initialized")
+    
     # Configurar secret key para sessions
     secret_key = os.getenv('SECRET_KEY')
     if not secret_key:
@@ -123,6 +134,12 @@ def criar_app(config_name: str = None) -> Flask:
     
     # Registrar blueprints
     app.register_blueprint(auth_bp)
+    
+    # Apply rate limiting to auth endpoints (after blueprint registration)
+    app.view_functions['auth.login_submit'] = limiter.limit("5/minute")(app.view_functions['auth.login_submit'])
+    app.view_functions['auth.cadastro_submit'] = limiter.limit("3/hour")(app.view_functions['auth.cadastro_submit'])
+    app.view_functions['auth.recuperar_senha_submit'] = limiter.limit("3/hour")(app.view_functions['auth.recuperar_senha_submit'])
+    
     app.register_blueprint(jogador_bp)
     app.register_blueprint(partida_bp)
     app.register_blueprint(votacao_bp)

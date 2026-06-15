@@ -24,7 +24,7 @@ class SugestoesService:
         try:
             with open(self.historico_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
-        except:
+        except (IOError, json.JSONDecodeError):
             return []
     
     def _carregar_stats(self):
@@ -36,7 +36,7 @@ class SugestoesService:
         try:
             with open(stats_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
-        except:
+        except (IOError, json.JSONDecodeError):
             return {}
     
     def obter_sugestoes_nivel(self, jogadores_selecionados: list, todos_jogadores: list, num_sugestoes: int = 5) -> list:
@@ -164,7 +164,7 @@ class SugestoesService:
                             nome_lower = jogador.get('nome', '').lower()
                             vitorias[nome_lower] += 1
                             total_participacoes[nome_lower] += 1
-                except:
+                except (ValueError, IndexError, KeyError):
                     pass
             
             # Contar participação
@@ -235,7 +235,7 @@ class SugestoesService:
                                     if nome_companheiro != nome_selecionado:
                                         dupla = tuple(sorted([nome_selecionado, nome_companheiro]))
                                         duplas_vencedoras[dupla] += 1
-                except:
+                except (ValueError, IndexError, KeyError):
                     pass
         
         # Encontrar jogadores que mais aparecem em duplas vencedoras
