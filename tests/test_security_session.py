@@ -41,7 +41,7 @@ class TestSessionTimeout:
         app = criar_app('testing')
         
         # Check that the app has the setting
-        assert hasattr(app.config, 'PERMANENT_SESSION_LIFETIME'), \
+        assert 'PERMANENT_SESSION_LIFETIME' in app.config, \
             "App config must have PERMANENT_SESSION_LIFETIME"
         
         config = TestingConfig()

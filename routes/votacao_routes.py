@@ -89,6 +89,28 @@ def _obter_resultado_sorteio(sorteio_id):
     return max(partidas, key=lambda item: (item.get('data', ''), item.get('id', 0)))
 
 
+def _resumo_ranking_encerrado(rodada):
+    ranking = (rodada or {}).get('ranking') or {}
+    ranking_jogadores = ranking.get('ranking_jogadores') or []
+    jogadores_votados = [
+        item for item in ranking_jogadores
+        if int(item.get('votos', 0) or 0) > 0
+    ]
+
+    media_geral = 0.0
+    if jogadores_votados:
+        soma_medias = sum(float(item.get('nota_media', 0) or 0) for item in jogadores_votados)
+        media_geral = round(soma_medias / len(jogadores_votados), 2)
+
+    return {
+        'ranking_jogadores': jogadores_votados,
+        'ranking_top10': jogadores_votados[:10],
+        'media_geral': media_geral,
+        'melhor_jogador': ranking.get('melhor_jogador'),
+        'total_jogadores': len(jogadores_votados),
+    }
+
+
 def _resolver_contexto_admin(sorteio_id_hint=None):
     """Monta contexto unificado da tela admin para evitar perdas em fluxos de erro."""
     ativa_global = votacao_service.obter_ativa()
@@ -151,6 +173,14 @@ def _resolver_contexto_admin(sorteio_id_hint=None):
     if _is_juiz() and fluxo_partida and (not fluxo_corresponde or not resultado_partida):
         pode_abrir_votacao = False
 
+    ranking_encerrado = _resumo_ranking_encerrado(rodada_selecionada) if rodada_selecionada else {
+        'ranking_jogadores': [],
+        'ranking_top10': [],
+        'media_geral': 0.0,
+        'melhor_jogador': None,
+        'total_jogadores': 0,
+    }
+
     return {
         'ativa': ativa,
         'sorteios_disponiveis': sorteios_ordenados,
@@ -161,6 +191,11 @@ def _resolver_contexto_admin(sorteio_id_hint=None):
         'pode_abrir_votacao': pode_abrir_votacao,
         'resultado_partida': resultado_partida,
         'rodada_selecionada': rodada_selecionada,
+        'ranking_jogadores_encerrada': ranking_encerrado['ranking_jogadores'],
+        'ranking_top10_encerrada': ranking_encerrado['ranking_top10'],
+        'media_geral_jogadores': ranking_encerrado['media_geral'],
+        'melhor_jogador_encerrada': ranking_encerrado['melhor_jogador'],
+        'total_jogadores_votados': ranking_encerrado['total_jogadores'],
     }
 
 
@@ -370,9 +405,23 @@ def votacao_resultado_juiz():
         ))
     except ValueError as e:
         contexto = _resolver_contexto_admin(sorteio_id_hint=sorteio_id)
+        form_values = {}
+        sorteio_contexto = contexto.get('sorteio_contexto') or {}
+        for time in sorteio_contexto.get('times', []) or []:
+            try:
+                numero = int(time.get('numero'))
+            except (TypeError, ValueError):
+                continue
+
+            for campo in ('vitorias', 'empates', 'derrotas', 'gols'):
+                chave = f'{campo}_{numero}'
+                valor = request.form.get(chave)
+                form_values[chave] = (valor if valor is not None else '0')
+
         return render_template(
             'votacao_admin.html',
             **contexto,
+            resultado_form_values=form_values,
             erro=str(e),
             usuario=_usuario_logado(),
         ), 400

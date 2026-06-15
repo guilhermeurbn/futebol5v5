@@ -211,7 +211,7 @@ def sortear():
         return redirect(url_for('juiz.jogar_page'))
 
     if (fluxo.get('status') or 'idle') == 'sorteada' and fluxo.get('partida_atual', {}).get('sorteio_id'):
-        return redirect(url_for('partida.ver_sorteio', sorteio_id=fluxo['partida_atual']['sorteio_id']))
+        return redirect(url_for('juiz.juiz_times_page', sorteio_id=fluxo['partida_atual']['sorteio_id']))
 
     try:
         presentes = jogador_service.listar_presentes()
@@ -236,7 +236,7 @@ def sortear():
         _salvar_ultimo_sorteio_sessao(sorteio_data)
         undoredo_service.adicionar_sorteio(sorteio_data)
         
-        return redirect(url_for('partida.ver_sorteio', sorteio_id=sorteio_id))
+        return redirect(url_for('juiz.juiz_times_page', sorteio_id=sorteio_id))
     except ValueError as e:
         logger.error(f"Erro ao sortear: {str(e)}")
         return render_template('index.html', erro=str(e)), 400
@@ -346,6 +346,87 @@ def ver_sorteio(sorteio_id):
     except Exception as e:
         logger.error(f"Erro ao visualizar sorteio: {str(e)}")
         return render_template('historico.html', sorteios=[], erro='Erro ao carregar sorteio'), 500
+
+
+@partida_bp.route('/api/sorteio/<int:sorteio_id>/times', methods=['POST'])
+@admin_or_juiz_required
+def atualizar_times_sorteio(sorteio_id):
+    """Atualiza composição dos times de um sorteio (troca manual pelo juiz)."""
+    try:
+        sorteio = historico_service.obter_sorteio(sorteio_id)
+        if not sorteio:
+            return jsonify({'sucesso': False, 'erro': 'Sorteio não encontrado'}), 404
+
+        dados = request.get_json(silent=True) or {}
+        times_recebidos = dados.get('times', [])
+        if not isinstance(times_recebidos, list) or not times_recebidos:
+            return jsonify({'sucesso': False, 'erro': 'Payload de times inválido'}), 400
+
+        times_originais = sorteio.get('times', []) or []
+        if len(times_recebidos) != len(times_originais):
+            return jsonify({'sucesso': False, 'erro': 'Quantidade de times inválida'}), 400
+
+        def _player_key(jogador):
+            player_id = jogador.get('id')
+            if player_id is not None and str(player_id).strip() != '':
+                return str(player_id)
+            return f"{jogador.get('nome', '')}|{jogador.get('nivel', '')}|{jogador.get('posicao', '')}"
+
+        jogadores_por_chave = {}
+        chaves_originais = []
+        tamanhos_originais = []
+        for time in times_originais:
+            jogadores_time = time.get('jogadores', []) or []
+            tamanhos_originais.append(len(jogadores_time))
+            for jogador in jogadores_time:
+                chave = _player_key(jogador)
+                jogadores_por_chave[chave] = jogador
+                chaves_originais.append(chave)
+
+        chaves_recebidas = []
+        times_atualizados = []
+        for idx, time in enumerate(times_recebidos):
+            chaves_time = time.get('jogadores', []) or []
+            if len(chaves_time) != tamanhos_originais[idx]:
+                return jsonify({'sucesso': False, 'erro': 'Quantidade de jogadores por time inválida'}), 400
+
+            jogadores_time = []
+            for chave in chaves_time:
+                chave_norm = str(chave)
+                jogador = jogadores_por_chave.get(chave_norm)
+                if not jogador:
+                    return jsonify({'sucesso': False, 'erro': 'Jogador inválido na troca'}), 400
+                jogadores_time.append(jogador)
+                chaves_recebidas.append(chave_norm)
+
+            times_atualizados.append({
+                'numero': idx + 1,
+                'jogadores': jogadores_time,
+                'soma': sum(int(j.get('nivel', 0) or 0) for j in jogadores_time),
+            })
+
+        if sorted(chaves_recebidas) != sorted(chaves_originais):
+            return jsonify({'sucesso': False, 'erro': 'Os jogadores do sorteio foram alterados de forma inválida'}), 400
+
+        sorteio_atualizado = historico_service.atualizar_times_sorteio(sorteio_id, times_atualizados)
+        if not sorteio_atualizado:
+            return jsonify({'sucesso': False, 'erro': 'Não foi possível salvar as alterações'}), 500
+
+        # Mantém exportação/compartilhamento alinhados com a versão editada.
+        _salvar_ultimo_sorteio_sessao({
+            'sorteio_id': sorteio_atualizado.get('id'),
+            'times': sorteio_atualizado.get('times', []),
+            'num_times': sorteio_atualizado.get('num_times', 0),
+            'somas': sorteio_atualizado.get('pontuacoes', []),
+            'diferenca': sorteio_atualizado.get('diferenca', 0),
+        })
+
+        return jsonify({'sucesso': True, 'sorteio': sorteio_atualizado})
+    except ValueError as e:
+        return jsonify({'sucesso': False, 'erro': str(e)}), 400
+    except Exception as e:
+        logger.error(f"Erro ao atualizar times do sorteio: {str(e)}")
+        return jsonify({'sucesso': False, 'erro': 'Erro ao salvar alterações dos times'}), 500
 
 
 @partida_bp.route('/sorteio/<int:sorteio_id>/compartilhar')

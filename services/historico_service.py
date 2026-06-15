@@ -91,6 +91,39 @@ class HistoricoService:
         """Obtém um sorteio por ID"""
         sorteios = self.listar_sorteios()
         return next((s for s in sorteios if s.get('id') == sorteio_id), None)
+
+    def atualizar_times_sorteio(self, sorteio_id: int, times: List[Dict]) -> Optional[Dict]:
+        """Atualiza os times de um sorteio e recalcula metadados derivados."""
+        dados = self._carregar_raw()
+
+        for idx, sorteio in enumerate(dados):
+            if int(sorteio.get('id', 0) or 0) != int(sorteio_id):
+                continue
+
+            pontuacoes = []
+            total_jogadores = 0
+            for time in times:
+                jogadores = time.get('jogadores', []) or []
+                soma_time = sum(int(j.get('nivel', 0) or 0) for j in jogadores)
+                pontuacoes.append(soma_time)
+                total_jogadores += len(jogadores)
+
+            diferenca = 0
+            if pontuacoes:
+                diferenca = max(pontuacoes) - min(pontuacoes)
+
+            sorteio['times'] = times
+            sorteio['pontuacoes'] = pontuacoes
+            sorteio['diferenca'] = diferenca
+            sorteio['num_times'] = len(times)
+            sorteio['total_jogadores'] = total_jogadores
+            sorteio['data_atualizacao'] = datetime.now().isoformat()
+
+            dados[idx] = sorteio
+            self._salvar(dados)
+            return sorteio
+
+        return None
     
     def deletar_sorteio(self, sorteio_id: int) -> bool:
         """Deleta um sorteio"""

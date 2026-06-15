@@ -44,8 +44,8 @@ def test_judge_navigation_is_present_in_workflow_pages():
     assert "{% include '_judge_nav.html' %}" in voting
     assert "current_section in ['home', 'criar']" in navigation
     assert 'class="judge-nav-shell"' in navigation
-    assert "url_for('partida.ver_sorteio'" in navigation
-    assert "url_for('partida.compartilhar_sorteio'" in navigation
+    assert "url_for('juiz.juiz_times_page'" in navigation
+    assert "url_for('juiz.juiz_compartilhar_page'" in navigation
 
 
 def test_judge_result_only_offers_share_and_voting():

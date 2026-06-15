@@ -120,11 +120,16 @@ class EmailService:
         except requests.HTTPError as exc:
             status_code = exc.response.status_code if exc.response is not None else None
             details = exc.response.text if exc.response is not None else str(exc)
-            logger.warning("Erro HTTP do Resend: %s - %s", status_code, details)
+            logger.warning("Erro HTTP do Resend: %s - %s", status_code, self._redact_sensitive(details))
             return EmailResult(ok=False, error=f"HTTP {status_code}")
         except Exception as exc:
-            logger.error("Erro ao enviar email via Resend: %s", exc)
+            logger.error("Erro ao enviar email via Resend: %s", self._redact_sensitive(str(exc)))
             return EmailResult(ok=False, error=str(exc))
+
+    def _redact_sensitive(self, text: str) -> str:
+        if not text:
+            return text
+        return RedactingFormatter.BEARER_PATTERN.sub('Bearer [REDACTED]', text)
 
     def send_email(self, to_email: str, subject: str, html: str, text: str = "") -> EmailResult:
         from_email = self._resolve_credentials()[1]
@@ -195,3 +200,8 @@ class EmailService:
             "Se voce nao pediu essa alteracao, ignore este email."
         )
         return self.send_email(to_email, subject, html, text)
+
+    def send_reset_token_email(self, to_email: str, nome: str, token: str) -> EmailResult:
+        """Compatibilidade com testes legados que passam token ao invés de URL pronta."""
+        reset_url = f"{self.base_url}/definir-senha?token={token}"
+        return self.send_password_reset_email(to_email=to_email, nome=nome, reset_url=reset_url)

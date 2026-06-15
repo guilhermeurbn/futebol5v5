@@ -1,0 +1,273 @@
+{% extends 'base.html' %}
+
+{% block title %}Cronômetro da Partida{% endblock %}
+
+{% block content %}
+<div class="container page-container-wide judge-workspace-page judge-timer-page">
+    <header class="header">
+        <div class="header-content">
+            {% set brand_title = 'Cronômetro' %}
+            {% set brand_subtitle = 'Controle o tempo da partida em tempo real' %}
+            {% include '_brand_header.html' %}
+        </div>
+    </header>
+
+    <main class="main">
+        {% set current_section = 'cronometro' %}
+        {% set judge_nav_sorteio_id = sorteio_atual_id %}
+        {% include '_judge_nav.html' %}
+
+        {% if erro %}
+        <div class="alert alert-warning" role="alert">{{ erro }}</div>
+        {% endif %}
+
+        <section class="judge-flow-intro judge-flow-intro--compact">
+            <span class="judge-flow-kicker">Sorteio #{{ sorteio_atual_id or '-' }}</span>
+            <h1>Cronômetro da partida</h1>
+            <p>Escolha o tempo, inicie e controle a rodada com toques rápidos.</p>
+        </section>
+
+        <section class="judge-flow-card judge-timer-card">
+            <div class="judge-timer-display" id="judgeTimerDisplay" aria-live="polite">12:00</div>
+
+            <div class="judge-timer-presets" role="group" aria-label="Tempos rápidos">
+                <button type="button" class="judge-timer-preset" data-seconds="600">10 min</button>
+                <button type="button" class="judge-timer-preset is-active" data-seconds="720">12 min</button>
+                <button type="button" class="judge-timer-preset" data-seconds="900">15 min</button>
+                <button type="button" class="judge-timer-preset" data-seconds="1200">20 min</button>
+                <button type="button" class="judge-timer-preset" data-seconds="1500">25 min</button>
+                <button type="button" class="judge-timer-preset judge-timer-preset--custom" id="timerCustomPreset" data-seconds="480">Meu preset: 8 min</button>
+            </div>
+
+            <div class="judge-timer-custom" role="group" aria-label="Preset personalizado">
+                <label for="timerCustomMinutes">Preset personalizado (min)</label>
+                <input id="timerCustomMinutes" type="number" min="1" max="120" step="1" inputmode="numeric" value="8">
+                <button type="button" class="btn btn-secondary" id="timerCustomSave">Salvar e usar</button>
+            </div>
+
+            <div class="judge-timer-controls" role="group" aria-label="Controles do cronômetro">
+                <button type="button" class="btn btn-secondary" id="timerMinus">-1 min</button>
+                <button type="button" class="btn btn-primary" id="timerToggle">Iniciar</button>
+                <button type="button" class="btn btn-secondary" id="timerPlus">+1 min</button>
+                <button type="button" class="btn btn-danger" id="timerReset">Resetar</button>
+            </div>
+
+            <p class="judge-result-hint">Dica: o cronômetro continua salvo mesmo se a página for recarregada.</p>
+        </section>
+    </main>
+</div>
+
+<script>
+(() => {
+    const STORAGE_KEY = 'judge_timer_state_v1';
+    const CUSTOM_PRESET_KEY = 'judge_timer_custom_preset_minutes_v1';
+    const DEFAULT_SECONDS = 12 * 60;
+
+    const display = document.getElementById('judgeTimerDisplay');
+    const toggleButton = document.getElementById('timerToggle');
+    const resetButton = document.getElementById('timerReset');
+    const minusButton = document.getElementById('timerMinus');
+    const plusButton = document.getElementById('timerPlus');
+    const customPresetButton = document.getElementById('timerCustomPreset');
+    const customMinutesInput = document.getElementById('timerCustomMinutes');
+    const customSaveButton = document.getElementById('timerCustomSave');
+    const presetButtons = document.querySelectorAll('.judge-timer-preset');
+
+    let timerId = null;
+    let state = {
+        duration: DEFAULT_SECONDS,
+        remaining: DEFAULT_SECONDS,
+        running: false,
+        lastTick: null,
+    };
+
+    const clamp = (value) => Math.max(0, Number(value || 0));
+    const normalizeCustomMinutes = (value) => {
+        const minutes = Math.round(Number(value || 0));
+        if (!Number.isFinite(minutes)) return 8;
+        return Math.min(120, Math.max(1, minutes));
+    };
+
+    const formatTime = (totalSeconds) => {
+        const value = clamp(totalSeconds);
+        const minutes = Math.floor(value / 60);
+        const seconds = value % 60;
+        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    };
+
+    const saveState = () => {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    };
+
+    const saveCustomPreset = (minutes) => {
+        const safeMinutes = normalizeCustomMinutes(minutes);
+        localStorage.setItem(CUSTOM_PRESET_KEY, String(safeMinutes));
+        customMinutesInput.value = String(safeMinutes);
+        customPresetButton.dataset.seconds = String(safeMinutes * 60);
+        customPresetButton.textContent = `Meu preset: ${safeMinutes} min`;
+    };
+
+    const readCustomPreset = () => {
+        const raw = localStorage.getItem(CUSTOM_PRESET_KEY);
+        const minutes = normalizeCustomMinutes(raw || 8);
+        saveCustomPreset(minutes);
+    };
+
+    const readState = () => {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return;
+            const parsed = JSON.parse(raw);
+            if (!parsed || typeof parsed !== 'object') return;
+
+            state.duration = clamp(parsed.duration || DEFAULT_SECONDS);
+            state.remaining = clamp(parsed.remaining || state.duration || DEFAULT_SECONDS);
+            state.running = Boolean(parsed.running);
+            state.lastTick = parsed.lastTick || null;
+        } catch (_err) {
+            state = {
+                duration: DEFAULT_SECONDS,
+                remaining: DEFAULT_SECONDS,
+                running: false,
+                lastTick: null,
+            };
+        }
+    };
+
+    const applyElapsedIfNeeded = () => {
+        if (!state.running || !state.lastTick) return;
+        const elapsed = Math.floor((Date.now() - Number(state.lastTick)) / 1000);
+        if (elapsed <= 0) return;
+
+        state.remaining = clamp(state.remaining - elapsed);
+        state.lastTick = Date.now();
+
+        if (state.remaining <= 0) {
+            state.running = false;
+            state.lastTick = null;
+        }
+    };
+
+    const refreshUI = () => {
+        display.textContent = formatTime(state.remaining);
+        display.classList.toggle('is-finished', state.remaining === 0);
+        toggleButton.textContent = state.running ? 'Pausar' : 'Iniciar';
+
+        presetButtons.forEach((button) => {
+            const seconds = Number(button.dataset.seconds || 0);
+            button.classList.toggle('is-active', !state.running && state.duration === seconds && state.remaining === seconds);
+        });
+    };
+
+    const stopTicker = () => {
+        if (!timerId) return;
+        window.clearInterval(timerId);
+        timerId = null;
+    };
+
+    const tick = () => {
+        if (!state.running) return;
+        applyElapsedIfNeeded();
+
+        if (state.remaining === 0) {
+            state.running = false;
+            state.lastTick = null;
+            stopTicker();
+        }
+
+        refreshUI();
+        saveState();
+    };
+
+    const startTicker = () => {
+        if (timerId) return;
+        timerId = window.setInterval(tick, 500);
+    };
+
+    const setDuration = (seconds) => {
+        const value = clamp(seconds);
+        state.duration = value;
+        state.remaining = value;
+        state.running = false;
+        state.lastTick = null;
+        stopTicker();
+        refreshUI();
+        saveState();
+    };
+
+    toggleButton.addEventListener('click', () => {
+        if (state.running) {
+            state.running = false;
+            state.lastTick = null;
+            stopTicker();
+        } else {
+            if (state.remaining <= 0) {
+                state.remaining = state.duration || DEFAULT_SECONDS;
+            }
+            state.running = true;
+            state.lastTick = Date.now();
+            startTicker();
+        }
+        refreshUI();
+        saveState();
+    });
+
+    resetButton.addEventListener('click', () => {
+        state.running = false;
+        state.remaining = state.duration || DEFAULT_SECONDS;
+        state.lastTick = null;
+        stopTicker();
+        refreshUI();
+        saveState();
+    });
+
+    minusButton.addEventListener('click', () => {
+        const next = clamp(state.remaining - 60);
+        state.remaining = next;
+        state.duration = Math.max(next, state.duration);
+        if (state.remaining === 0) {
+            state.running = false;
+            state.lastTick = null;
+            stopTicker();
+        }
+        refreshUI();
+        saveState();
+    });
+
+    plusButton.addEventListener('click', () => {
+        state.remaining = clamp(state.remaining + 60);
+        state.duration = Math.max(state.duration, state.remaining);
+        refreshUI();
+        saveState();
+    });
+
+    presetButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+            setDuration(Number(button.dataset.seconds || DEFAULT_SECONDS));
+        });
+    });
+
+    customSaveButton.addEventListener('click', () => {
+        const minutes = normalizeCustomMinutes(customMinutesInput.value);
+        saveCustomPreset(minutes);
+        setDuration(minutes * 60);
+    });
+
+    customMinutesInput.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter') return;
+        event.preventDefault();
+        customSaveButton.click();
+    });
+
+    readCustomPreset();
+    readState();
+    applyElapsedIfNeeded();
+    refreshUI();
+    saveState();
+
+    if (state.running) {
+        startTicker();
+    }
+})();
+</script>
+{% endblock %}

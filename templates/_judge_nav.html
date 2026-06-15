@@ -17,7 +17,7 @@
   {% endif %}
 
   {% if nav_sorteio_id %}
-  <a href="{{ url_for('partida.ver_sorteio', sorteio_id=nav_sorteio_id) }}"
+  <a href="{{ url_for('juiz.juiz_times_page', sorteio_id=nav_sorteio_id) }}"
      class="judge-nav__tab {% if current_section == 'times' %}judge-nav__tab--active{% endif %}"
      {% if current_section == 'times' %}aria-current="page"{% endif %}>
     <span class="judge-nav__icon" aria-hidden="true">⚽</span>
@@ -31,7 +31,7 @@
   {% endif %}
 
   {% if nav_sorteio_id %}
-  <a href="{{ url_for('partida.compartilhar_sorteio', sorteio_id=nav_sorteio_id) }}"
+  <a href="{{ url_for('juiz.juiz_compartilhar_page', sorteio_id=nav_sorteio_id) }}"
      class="judge-nav__tab {% if current_section == 'compartilhar' %}judge-nav__tab--active{% endif %}"
      {% if current_section == 'compartilhar' %}aria-current="page"{% endif %}>
     <span class="judge-nav__icon" aria-hidden="true">↗</span>
@@ -64,5 +64,6 @@
     <span class="judge-nav__icon" aria-hidden="true">◷</span>
     <span class="judge-nav__label">Histórico</span>
   </a>
+
 </nav>
 </div>

@@ -18,6 +18,7 @@
                     <button class="btn btn-danger" type="submit" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; font-weight: 700;">🚪 Sair</button>
                 </form>
                 {% elif auth_user.role == 'juiz' %}
+                <a class="btn btn-secondary judge-timer-shortcut" href="{{ url_for('juiz.juiz_cronometro') }}" aria-label="Abrir cronômetro" title="Cronômetro">⏱</a>
                 <form method="post" action="{{ url_for('jogador.logout') }}" class="logout-form">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button class="btn btn-danger" type="submit">Sair</button>
@@ -52,6 +53,7 @@
                 <button class="btn btn-danger" type="submit" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; font-weight: 700;">🚪 Sair</button>
             </form>
             {% elif auth_user.role == 'juiz' %}
+            <a class="btn btn-secondary judge-timer-shortcut" href="{{ url_for('juiz.juiz_cronometro') }}" aria-label="Abrir cronômetro" title="Cronômetro">⏱</a>
             <form method="post" action="{{ url_for('jogador.logout') }}" class="logout-form">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button class="btn btn-danger" type="submit">Sair</button>

@@ -240,6 +240,8 @@ def criar_app(config_name: str = None) -> Flask:
 
     app.jinja_env.filters['dt_pt'] = dt_pt
     app.jinja_env.filters['dt_pt_hm'] = dt_pt_hm
+    app.jinja_env.filters['parse_iso_date'] = _parse_iso_date
+    app.jinja_env.filters['_parse_iso_date'] = _parse_iso_date
 
     @app.context_processor
     def inject_notificacoes_globais():

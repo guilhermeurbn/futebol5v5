@@ -10,6 +10,7 @@ from services.jogador_service import JogadorService
 from services.juiz_partida_service import JuizPartidaService
 from services.historico_service import HistoricoService
 from services.partida_service import PartidaService
+from services.votacao_service import VotacaoService
 
 juiz_bp = Blueprint('juiz', __name__)
 logger = logging.getLogger(__name__)
@@ -18,6 +19,7 @@ jogador_service = JogadorService()
 juiz_partida_service = JuizPartidaService()
 historico_service = HistoricoService()
 partida_service = PartidaService()
+votacao_service = VotacaoService()
 
 
 # ============================================================
@@ -128,7 +130,7 @@ def _destino_fluxo_juiz(estado):
     votacao_partida_id = partida_atual.get('votacao_partida_id')
 
     if status == 'sorteada' and sorteio_id:
-        return url_for('partida.ver_sorteio', sorteio_id=sorteio_id)
+        return url_for('juiz.juiz_times_page', sorteio_id=sorteio_id)
     if status == 'resultado_registrado' and sorteio_id:
         return url_for('votacao.votacao_admin_page', sorteio_id=sorteio_id)
     if status == 'votacao_aberta' and sorteio_id:
@@ -138,6 +140,41 @@ def _destino_fluxo_juiz(estado):
     if votacao_partida_id:
         return url_for('votacao.votacao_admin_page')
     return None
+
+
+def _salvar_ultimo_sorteio_sessao(payload):
+    session['ultimo_sorteio'] = payload
+    session.modified = True
+
+
+def _resolver_sorteio_juiz(sorteio_id_hint=None):
+    """Resolve sorteio prioritariamente pelo hint, depois fluxo atual, depois último histórico."""
+    sorteio_id = None
+
+    if sorteio_id_hint:
+        try:
+            sorteio_id = int(sorteio_id_hint)
+        except (TypeError, ValueError):
+            sorteio_id = None
+
+    estado = juiz_partida_service.obter_estado()
+    sorteio_fluxo = ((estado.get('partida_atual') or {}).get('sorteio_id'))
+    if not sorteio_id and sorteio_fluxo:
+        try:
+            sorteio_id = int(sorteio_fluxo)
+        except (TypeError, ValueError):
+            sorteio_id = None
+
+    if not sorteio_id:
+        sorteios = historico_service.listar_sorteios() or []
+        if sorteios:
+            sorteio_recente = max(sorteios, key=lambda s: int(s.get('id', 0) or 0))
+            sorteio_id = int(sorteio_recente.get('id', 0) or 0)
+
+    if not sorteio_id:
+        return None, None
+
+    return sorteio_id, historico_service.obter_sorteio(sorteio_id)
 
 
 # ============================================================
@@ -154,6 +191,24 @@ def juiz_historico():
             key=lambda item: int(item.get('id', 0) or 0),
             reverse=True,
         )
+
+        for item in sorteios:
+            sorteio_id = int(item.get('id', 0) or 0)
+            rodada = votacao_service.obter_por_sorteio(sorteio_id) if sorteio_id else None
+            ranking = (rodada or {}).get('ranking') or {}
+            ranking_jogadores = ranking.get('ranking_jogadores') or []
+            ranking_top10 = ranking_jogadores[:10]
+
+            media_geral = 0.0
+            total_rankeados = len(ranking_jogadores)
+            if total_rankeados:
+                soma_medias = sum(float(j.get('nota_media', 0) or 0) for j in ranking_jogadores)
+                media_geral = round(soma_medias / total_rankeados, 2)
+
+            item['ranking_top10'] = ranking_top10
+            item['ranking_media_geral'] = media_geral
+            item['ranking_total_jogadores'] = total_rankeados
+
         estado = juiz_partida_service.obter_estado()
         sorteio_atual_id = ((estado.get('partida_atual') or {}).get('sorteio_id'))
         return render_template(
@@ -169,6 +224,81 @@ def juiz_historico():
             sorteios=[],
             sorteio_atual_id=None,
             erro='Erro ao carregar histórico',
+            usuario=_usuario_logado(),
+        ), 500
+
+
+@juiz_bp.route('/jogar/times', methods=['GET'])
+@juiz_required
+def juiz_times_page():
+    """Tela isolada de times do fluxo do juiz."""
+    try:
+        sorteio_id_hint = request.args.get('sorteio_id', type=int)
+        sorteio_id, sorteio = _resolver_sorteio_juiz(sorteio_id_hint=sorteio_id_hint)
+        if not sorteio:
+            return redirect(url_for('juiz.jogar_page'))
+
+        partida_votacao = votacao_service.obter_por_sorteio(sorteio_id)
+        resultado_partida = _obter_resultado_sorteio(sorteio_id)
+
+        return render_template(
+            'juiz_times.html',
+            sorteio=sorteio,
+            partida_votacao=partida_votacao,
+            resultado_partida=resultado_partida,
+            usuario=_usuario_logado(),
+        )
+    except Exception as e:
+        logger.error(f"Erro ao carregar times do juiz: {str(e)}")
+        return redirect(url_for('juiz.jogar_page'))
+
+
+@juiz_bp.route('/jogar/compartilhar', methods=['GET'])
+@juiz_required
+def juiz_compartilhar_page():
+    """Tela isolada de compartilhamento do fluxo do juiz."""
+    try:
+        sorteio_id_hint = request.args.get('sorteio_id', type=int)
+        sorteio_id, sorteio = _resolver_sorteio_juiz(sorteio_id_hint=sorteio_id_hint)
+        if not sorteio:
+            return redirect(url_for('juiz.jogar_page'))
+
+        _salvar_ultimo_sorteio_sessao({
+            'sorteio_id': sorteio.get('id'),
+            'times': sorteio.get('times', []),
+            'num_times': sorteio.get('num_times', 0),
+            'somas': sorteio.get('pontuacoes', []),
+            'diferenca': sorteio.get('diferenca', 0),
+        })
+
+        return render_template(
+            'juiz_compartilhar.html',
+            sorteio=sorteio,
+            usuario=_usuario_logado(),
+        )
+    except Exception as e:
+        logger.error(f"Erro ao carregar compartilhar do juiz: {str(e)}")
+        return redirect(url_for('juiz.jogar_page'))
+
+
+@juiz_bp.route('/jogar/cronometro', methods=['GET'])
+@juiz_required
+def juiz_cronometro():
+    """Tela de cronometro para controle da partida pelo juiz."""
+    try:
+        estado = _sincronizar_fluxo_juiz()
+        sorteio_atual_id = ((estado.get('partida_atual') or {}).get('sorteio_id'))
+        return render_template(
+            'juiz_cronometro.html',
+            sorteio_atual_id=sorteio_atual_id,
+            usuario=_usuario_logado(),
+        )
+    except Exception as e:
+        logger.error(f"Erro ao carregar cronometro do juiz: {str(e)}")
+        return render_template(
+            'juiz_cronometro.html',
+            sorteio_atual_id=None,
+            erro='Erro ao carregar cronômetro',
             usuario=_usuario_logado(),
         ), 500
 

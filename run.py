@@ -71,6 +71,30 @@ def check_dependencies():
         except ImportError:
             print(f"{VERMELHO}❌ Jinja2 não instalado{RESET}")
             return False
+
+    try:
+        import importlib.metadata
+        limiter_version = importlib.metadata.version("Flask-Limiter")
+        print(f"{VERDE}✅ Flask-Limiter {limiter_version}{RESET}")
+    except Exception:
+        try:
+            import flask_limiter
+            print(f"{VERDE}✅ Flask-Limiter (versão não detectada){RESET}")
+        except ImportError:
+            print(f"{VERMELHO}❌ Flask-Limiter não instalado{RESET}")
+            return False
+
+    try:
+        import importlib.metadata
+        wtf_version = importlib.metadata.version("Flask-WTF")
+        print(f"{VERDE}✅ Flask-WTF {wtf_version}{RESET}")
+    except Exception:
+        try:
+            import flask_wtf
+            print(f"{VERDE}✅ Flask-WTF (versão não detectada){RESET}")
+        except ImportError:
+            print(f"{VERMELHO}❌ Flask-WTF não instalado{RESET}")
+            return False
     
     print()
     return True
@@ -102,7 +126,8 @@ def main():
     # Verificar dependências
     if not check_dependencies():
         print(f"{VERMELHO}Instale as dependências com:{RESET}")
-        print(f"{AMARELO}pip install -r requirements.txt{RESET}\n")
+        print(f"{AMARELO}./start_local.sh{RESET}")
+        print(f"{AMARELO}ou: python -m pip install -r requirements.txt{RESET}\n")
         return 1
     
     # Criar dados de exemplo

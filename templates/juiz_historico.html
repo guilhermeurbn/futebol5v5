@@ -47,6 +47,18 @@
                             <span>{{ item.total_jogadores }} jogadores</span>
                             <span>{{ item.num_times }} times</span>
                             <span>Dif. {{ item.diferenca }}</span>
+                            <button
+                                type="button"
+                                class="judge-draw-history__ranking-btn"
+                                data-ranking-trigger
+                                data-sorteio-id="{{ item.id }}"
+                                data-sorteio-data="{{ item.data|dt_pt_hm }}"
+                                data-media-geral="{{ '%.2f'|format(item.ranking_media_geral or 0) }}"
+                                data-total-jogadores="{{ item.ranking_total_jogadores or 0 }}"
+                                {% if not item.ranking_top10 %}disabled title="Sem ranking para este sorteio"{% endif %}
+                            >
+                                Ver Ranking
+                            </button>
                             {% if item.id == sorteio_atual_id %}
                             <span class="judge-draw-history__current">Atual</span>
                             {% endif %}
@@ -63,6 +75,8 @@
                             {% endfor %}
                         </div>
                     </div>
+
+                    <script id="ranking-data-{{ item.id }}" type="application/json">{{ item.ranking_top10 | tojson }}</script>
                 </details>
                 {% endfor %}
             </div>
@@ -72,4 +86,127 @@
         </section>
     </main>
 </div>
+
+<div class="judge-ranking-modal" id="judgeRankingModal" hidden aria-hidden="true">
+    <div class="judge-ranking-modal__backdrop" data-ranking-close></div>
+    <div class="judge-ranking-modal__panel" role="dialog" aria-modal="true" aria-labelledby="judgeRankingModalTitle">
+        <div class="judge-ranking-modal__header">
+            <div>
+                <small id="judgeRankingModalSorteio">Sorteio</small>
+                <h2 id="judgeRankingModalTitle">Ranking dos jogadores</h2>
+            </div>
+            <button type="button" class="judge-ranking-modal__close" data-ranking-close aria-label="Fechar">✕</button>
+        </div>
+
+        <div class="judge-ranking-modal__summary">
+            <span id="judgeRankingModalMedia">Média geral: 0.00</span>
+            <span id="judgeRankingModalTotal">0 jogador(es)</span>
+        </div>
+
+        <div class="judge-ranking-modal__body">
+            <table class="judge-ranking-modal__table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Jogador</th>
+                        <th>Time</th>
+                        <th>Votos</th>
+                        <th>Média</th>
+                    </tr>
+                </thead>
+                <tbody id="judgeRankingModalBody">
+                    <tr>
+                        <td colspan="5">Sem ranking para este sorteio.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+(() => {
+    const modal = document.getElementById('judgeRankingModal');
+    if (!modal) return;
+
+    const modalSorteio = document.getElementById('judgeRankingModalSorteio');
+    const modalMedia = document.getElementById('judgeRankingModalMedia');
+    const modalTotal = document.getElementById('judgeRankingModalTotal');
+    const modalBody = document.getElementById('judgeRankingModalBody');
+    const triggers = document.querySelectorAll('[data-ranking-trigger]');
+    const closers = modal.querySelectorAll('[data-ranking-close]');
+
+    const closeModal = () => {
+        modal.hidden = true;
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+    };
+
+    const openModal = () => {
+        modal.hidden = false;
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+    };
+
+    const renderRows = (ranking) => {
+        if (!Array.isArray(ranking) || ranking.length === 0) {
+            modalBody.innerHTML = '<tr><td colspan="5">Sem ranking para este sorteio.</td></tr>';
+            return;
+        }
+
+        modalBody.innerHTML = ranking.map((jogador, index) => {
+            const nome = jogador.jogador_nome || 'Jogador';
+            const time = jogador.time_numero ?? '-';
+            const votos = jogador.votos ?? 0;
+            const media = Number(jogador.nota_media ?? 0).toFixed(2);
+
+            return `<tr>
+                <td>${index + 1}</td>
+                <td><strong>${nome}</strong></td>
+                <td>Time ${time}</td>
+                <td>${votos}</td>
+                <td>${media}</td>
+            </tr>`;
+        }).join('');
+    };
+
+    triggers.forEach((button) => {
+        button.addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const sorteioId = button.dataset.sorteioId;
+            const sorteioData = button.dataset.sorteioData || '-';
+            const mediaGeral = button.dataset.mediaGeral || '0.00';
+            const totalJogadores = button.dataset.totalJogadores || '0';
+            const dataEl = document.getElementById(`ranking-data-${sorteioId}`);
+
+            let ranking = [];
+            if (dataEl && dataEl.textContent) {
+                try {
+                    ranking = JSON.parse(dataEl.textContent);
+                } catch (error) {
+                    ranking = [];
+                }
+            }
+
+            modalSorteio.textContent = `Sorteio #${sorteioId} · ${sorteioData}`;
+            modalMedia.textContent = `Média geral: ${mediaGeral}`;
+            modalTotal.textContent = `${totalJogadores} jogador(es)`;
+            renderRows(ranking);
+            openModal();
+        });
+    });
+
+    closers.forEach((closeButton) => {
+        closeButton.addEventListener('click', closeModal);
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !modal.hidden) {
+            closeModal();
+        }
+    });
+})();
+</script>
 {% endblock %}
