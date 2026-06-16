@@ -140,7 +140,8 @@ def test_judge_workspace_has_phone_first_layout():
     stylesheet = (ROOT / 'static' / 'style.css').read_text(encoding='utf-8')
 
     assert '/* Judge workspace: phone-first refinements */' in stylesheet
-    assert 'scroll-snap-type: x proximity;' in stylesheet
+    assert 'grid-template-columns: repeat(5, minmax(0, 1fr));' in stylesheet
+    assert 'font-size: clamp(0.5rem, 2.45vw, 0.66rem);' in stylesheet
     assert 'padding-bottom' not in stylesheet.split(
         '/* Judge workspace: phone-first refinements */', 1
     )[1].split('@media (max-width: 370px)', 1)[0]
