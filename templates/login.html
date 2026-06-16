@@ -7,9 +7,9 @@
 {% block auth_intro_wrapper %}
     <section class="auth-panel auth-panel--intro auth-panel--intro-hero" id="loginIntro">
         {% include '_auth_intro.html' %}
-        <a class="auth-scroll-hint" href="#loginFormPanel" aria-label="Ir para o formulário de login">
+        <button class="auth-scroll-hint" id="loginScrollHint" type="button" aria-label="Ir para o formulário de login">
             <span class="auth-scroll-hint__icon" aria-hidden="true">↓</span>
-        </a>
+        </button>
     </section>
 {% endblock %}
 

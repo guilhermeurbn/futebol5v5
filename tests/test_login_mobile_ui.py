@@ -10,7 +10,7 @@ def test_mobile_login_does_not_force_focus_or_scroll_on_refresh():
 
     assert 'autofocus' not in template
     assert 'history.scrollRestoration = ' in layout
-    assert "navegacao?.type === 'reload'" in layout
+    assert "window.location.hash === '#loginFormPanel'" in layout
     assert 'window.scrollTo(0, 0)' in layout
 
 
@@ -19,7 +19,12 @@ def test_mobile_login_shows_more_content_hint():
     stylesheet = (ROOT / 'static' / 'style.css').read_text(encoding='utf-8')
 
     assert 'Continue para entrar' not in template
-    assert 'href="#loginFormPanel"' in template
+    assert 'id="loginScrollHint"' in template
+    assert 'href="#loginFormPanel"' not in template
+    layout = (ROOT / 'templates' / '_auth_layout.html').read_text(encoding='utf-8')
+    assert 'formulario.scrollIntoView({' in layout
+    assert 'window.setTimeout(function () {' in layout
+    assert '}, 1500);' in layout
     assert 'aria-label="Ir para o formulário de login"' in template
     assert '.auth-scroll-hint {' in stylesheet
     assert '.auth-scroll-hint.is-hidden {' in stylesheet
@@ -27,6 +32,9 @@ def test_mobile_login_shows_more_content_hint():
     assert 'position: fixed;' in stylesheet.rsplit(
         '.auth-scroll-hint {', 1
     )[1].split('}', 1)[0]
+    assert 'top: 72%;' in stylesheet
+    assert 'left: 50%;' in stylesheet
+    assert 'transform: translate(-50%, -50%);' in stylesheet
     assert 'backdrop-filter: blur(20px) saturate(145%);' in stylesheet
 
 
@@ -40,4 +48,4 @@ def test_mobile_login_intro_centers_brand_and_uses_vertical_cards():
     assert '.auth-page--login .auth-preview-grid {' in stylesheet
     assert 'grid-template-columns: 1fr;' in stylesheet
     assert '.auth-page--login .auth-preview-card {' in stylesheet
-    assert 'min-height: 112px;' in stylesheet
+    assert 'min-height: 92px;' in stylesheet

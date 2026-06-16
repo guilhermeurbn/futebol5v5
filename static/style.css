@@ -100,6 +100,68 @@ body {
   font-weight: 400;
 }
 
+/* Responsive hardening: shared across every page and workflow */
+html,
+body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+img,
+svg,
+video,
+canvas,
+iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+button,
+input,
+select,
+textarea {
+  max-width: 100%;
+}
+
+.table-shell,
+.stats-table-shell,
+.surface-table-shell {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  button,
+  .btn,
+  input,
+  select,
+  textarea {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .section-header-actions {
+    width: 100%;
+  }
+
+  .quantity-buttons,
+  .judge-next-actions__buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .nav-tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-delete-modal__actions,
+  .modal-actions {
+    flex-direction: column;
+  }
+}
+
 [hidden] {
   display: none !important;
 }
@@ -9553,16 +9615,16 @@ tbody td code {
       align-content: center;
       column-gap: 0.85rem;
       min-width: 0;
-      min-height: 112px;
-      padding: 1rem;
-      border-radius: 17px;
+      min-height: 92px;
+      padding: 0.78rem;
+      border-radius: 15px;
     }
 
     .auth-page--login .auth-preview-card__icon {
       grid-row: 1 / 3;
       align-self: center;
-      width: 2.35rem;
-      height: 2.35rem;
+      width: 2rem;
+      height: 2rem;
       margin: 0;
     }
 
@@ -9577,17 +9639,17 @@ tbody td code {
       align-self: start;
       margin-top: 0;
       max-width: none;
-      font-size: 0.88rem;
-      line-height: 1.4;
+      font-size: 0.8rem;
+      line-height: 1.28;
       overflow-wrap: anywhere;
     }
 
     .auth-scroll-hint {
       position: fixed;
       z-index: 20;
-      right: 50%;
-      bottom: max(0.85rem, env(safe-area-inset-bottom));
-      transform: translateX(50%);
+      top: 72%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -9613,7 +9675,7 @@ tbody td code {
         inset 0 -1px 0 rgba(255, 255, 255, 0.08);
       backdrop-filter: blur(20px) saturate(145%);
       -webkit-backdrop-filter: blur(20px) saturate(145%);
-      transition: opacity 160ms ease, visibility 160ms ease;
+      transition: opacity 180ms ease, visibility 180ms ease;
     }
 
     .auth-scroll-hint.is-hidden {
@@ -9635,7 +9697,7 @@ tbody td code {
       font-size: 1.271rem;
       position: relative;
       top: -2px;
-      animation: auth-scroll-cue 1.6s ease-in-out infinite;
+      animation: auth-scroll-cue 0.8s ease-in-out infinite;
     }
 
     .auth-page--login .auth-panel--form {
@@ -9756,12 +9818,12 @@ tbody td code {
   }
 
   .auth-page--login .auth-preview-card {
-    min-height: 100px;
-    padding: 0.85rem;
+    min-height: 84px;
+    padding: 0.68rem;
   }
 
   .auth-page--login .auth-preview-card__text {
-    font-size: 0.8rem;
+    font-size: 0.74rem;
   }
 }
 
@@ -11344,6 +11406,18 @@ tbody td code {
   transform: translateY(-1px);
 }
 
+.judge-times-touch-edit-mode .judge-team-player.is-touch-swappable {
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.judge-team-player.is-swap-selected {
+  border-color: rgba(34, 197, 94, 0.58);
+  box-shadow:
+    0 0 0 2px rgba(34, 197, 94, 0.16),
+    0 12px 26px rgba(34, 197, 94, 0.14);
+}
+
 .judge-team-player.is-dragging {
   opacity: 0.45;
 }
@@ -11389,6 +11463,7 @@ tbody td code {
   flex: 0 0 auto;
 }
 
+/* Judge timer: focused controls for phones, desktop layout stays unchanged */
 .judge-timer-card {
   display: grid;
   gap: 1rem;
@@ -12029,6 +12104,21 @@ body.modal-open {
     white-space: nowrap;
   }
 
+  /* Judge navigation: bordered titles that always fit on phones */
+  .judge-workspace-page .judge-nav {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    overflow: visible;
+  }
+
+  .judge-workspace-page .judge-nav__tab {
+    border: 1px solid rgba(167, 139, 250, 0.16);
+  }
+
+  .judge-workspace-page .judge-nav__label {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
   .judge-workspace-page .judge-flow-card,
   .judge-workspace-page .judge-create-panel,
   .judge-workspace-page .judge-flow-intro--compact {
@@ -12036,10 +12126,12 @@ body.modal-open {
     border-radius: 17px;
   }
 
+  /* Judge headings: compact, readable hierarchy on phones */
   .judge-workspace-page .judge-flow-card h1,
   .judge-workspace-page .judge-flow-card h2,
   .judge-workspace-page .judge-create-header h1,
   .judge-workspace-page .judge-create-header h2 {
+    font-size: clamp(1.35rem, 7vw, 1.65rem);
     line-height: 1.15;
   }
 
@@ -12199,7 +12291,8 @@ body.modal-open {
     font-size: 0.62rem;
   }
 
-  .judge-voting-step__header {
+  .judge-workspace-page .judge-voting-step__header {
+    grid-template-columns: 2.2rem minmax(0, 1fr);
     gap: 0.65rem;
   }
 
@@ -12265,6 +12358,49 @@ body.modal-open {
 
   .judge-draw-history__teams {
     grid-template-columns: 1fr;
+  }
+
+  /* Judge creation: thumb-friendly floating draw action on phones */
+  .judge-create-page .judge-create-action {
+    position: fixed;
+    right: max(0.55rem, env(safe-area-inset-right));
+    bottom: max(0.55rem, env(safe-area-inset-bottom));
+    left: max(0.55rem, env(safe-area-inset-left));
+    z-index: 40;
+    opacity: 0.58;
+  }
+
+  .judge-create-page .judge-create-action.is-ready {
+    opacity: 1;
+  }
+
+  .judge-timer-page .judge-timer-presets {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .judge-timer-page .judge-timer-controls {
+    grid-template-areas:
+      "toggle toggle"
+      "minus plus"
+      "reset reset";
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem 1.15rem;
+  }
+
+  .judge-timer-toggle {
+    grid-area: toggle;
+  }
+
+  .judge-timer-adjust--minus {
+    grid-area: minus;
+  }
+
+  .judge-timer-adjust--plus {
+    grid-area: plus;
+  }
+
+  .judge-timer-reset {
+    grid-area: reset;
   }
 }
 

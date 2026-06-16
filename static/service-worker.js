@@ -1,5 +1,5 @@
 // NaTrave Service Worker - Offline Support & Caching Strategy
-const SW_VERSION = '20260615-2';
+const SW_VERSION = '20260615-21';
 const CACHE_NAME = `natrave-v${SW_VERSION}`;
 const RUNTIME_CACHE = `natrave-runtime-v${SW_VERSION}`;
 const IMAGE_CACHE = `natrave-images-v${SW_VERSION}`;
@@ -7,7 +7,7 @@ const IMAGE_CACHE = `natrave-images-v${SW_VERSION}`;
 // URLs que devem estar sempre em cache
 const urlsToCache = [
   '/',
-  '/static/style.css?v=20260615-2',
+  '/static/style.css?v=20260615-21',
   '/static/offline-judge.js',
   '/sortear',
   '/historico'

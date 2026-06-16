@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NaTrave | {% block title %}Auth{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='20260615-2') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='20260615-21') }}">
 </head>
 <body class="auth-page {% block body_class %}{% endblock %}">
     <div class="auth-page__glow auth-page__glow--primary"></div>
@@ -32,21 +32,26 @@
             }
 
             window.addEventListener('pageshow', function () {
-                const navegacao = performance.getEntriesByType?.('navigation')?.[0];
-                if (navegacao?.type === 'reload') {
-                    requestAnimationFrame(function () {
-                        window.scrollTo(0, 0);
-                    });
+                if (window.location.hash === '#loginFormPanel') {
+                    history.replaceState(null, '', window.location.pathname + window.location.search);
                 }
+                requestAnimationFrame(function () {
+                    window.scrollTo(0, 0);
+                });
             });
 
             const indicador = document.querySelector('.auth-scroll-hint');
             const formulario = document.getElementById('loginFormPanel');
-            if (indicador && formulario && 'IntersectionObserver' in window) {
-                const observador = new IntersectionObserver(function (entradas) {
-                    indicador.classList.toggle('is-hidden', entradas[0].isIntersecting);
-                }, { threshold: 0.08 });
-                observador.observe(formulario);
+            if (indicador && formulario) {
+                indicador.addEventListener('click', function () {
+                    formulario.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                });
+                window.setTimeout(function () {
+                    indicador.classList.add('is-hidden');
+                }, 1500);
             }
         })();
     </script>

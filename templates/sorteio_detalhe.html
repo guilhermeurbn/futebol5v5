@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NaTrave | Detalhes do Sorteio</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='20260615-2') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='20260615-21') }}">
 </head>
 <body>
     <div class="container{% if auth_user.role in ['admin', 'super_admin'] %} page-container-wide judge-workspace-page admin-page admin-page--ecosystem{% elif auth_user.role == 'usuario' %} page-container-wide player-workspace-page{% elif auth_user.role == 'juiz' %} page-container-wide judge-workspace-page{% endif %}">

@@ -55,6 +55,15 @@
                 </div>
             </div>
 
+            <div class="judge-create-action" id="acoesSorteio">
+                <div>
+                    <span id="orientacaoSelecao">Escolha 10, 15 ou 20 jogadores.</span>
+                </div>
+                <button class="btn btn-primary" id="btnSortear" type="button" onclick="confirmarSelecao()" disabled>
+                    <span id="btnSortearTexto">Escolha a quantidade</span>
+                </button>
+            </div>
+
             <div class="players-grid judge-players-grid">
                 {% for jogador in todos_jogadores %}
                 <label class="judge-player-option">
@@ -94,14 +103,6 @@
                 {% endfor %}
             </div>
 
-            <div class="judge-create-action" id="acoesSorteio">
-                <div>
-                    <span id="orientacaoSelecao">Escolha 10, 15 ou 20 jogadores.</span>
-                </div>
-                <button class="btn btn-primary" id="btnSortear" type="button" onclick="confirmarSelecao()" disabled>
-                    <span id="btnSortearTexto">Escolha a quantidade</span>
-                </button>
-            </div>
             <div id="mensagemErro" class="alert alert-warning judge-create-error" role="alert" style="display: none;"></div>
         </section>
     </main>

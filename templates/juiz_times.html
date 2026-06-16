@@ -86,10 +86,12 @@
     const guidance = document.querySelector('.judge-draw-guidance p');
     const containers = Array.from(document.querySelectorAll('.judge-team-card__players'));
     const shareAndVoteLinks = Array.from(document.querySelectorAll('.judge-next-actions__buttons--compact a'));
+    const touchEditMode = window.matchMedia('(hover: none), (pointer: coarse)').matches;
 
     let editMode = false;
     let dirty = false;
     let dragSource = null;
+    let selectedPlayer = null;
     let snapshot = [];
 
     function getPlayers() {
@@ -125,10 +127,19 @@
         });
     }
 
+    function clearSelectedPlayer() {
+        if (!selectedPlayer) return;
+        selectedPlayer.classList.remove('is-swap-selected');
+        selectedPlayer.setAttribute('aria-pressed', 'false');
+        selectedPlayer = null;
+    }
+
     function toggleEdit(enabled) {
         editMode = enabled;
         dirty = false;
+        clearSelectedPlayer();
         document.body.classList.toggle('judge-times-edit-mode', enabled);
+        document.body.classList.toggle('judge-times-touch-edit-mode', enabled && touchEditMode);
 
         btnEditar.hidden = enabled;
         btnSalvar.hidden = !enabled;
@@ -142,12 +153,20 @@
         });
 
         getPlayers().forEach((player) => {
-            player.draggable = enabled;
+            player.draggable = enabled && !touchEditMode;
             player.classList.toggle('is-draggable', enabled);
+            player.classList.toggle('is-touch-swappable', enabled && touchEditMode);
+            player.tabIndex = enabled && touchEditMode ? 0 : -1;
+            player.setAttribute('role', enabled && touchEditMode ? 'button' : 'group');
+            player.setAttribute('aria-pressed', 'false');
         });
 
         guidance.textContent = enabled
-            ? 'Modo edição ativo: arraste um jogador e solte sobre outro para trocar de lugar.'
+            ? (
+                touchEditMode
+                    ? 'Toque em um jogador e depois em outro para trocar as posições.'
+                    : 'Modo edição ativo: arraste um jogador e solte sobre outro para trocar de lugar.'
+            )
             : 'Confira os times abaixo. Se estiver tudo certo, use os botões no topo para compartilhar ou iniciar a votação.';
     }
 
@@ -173,10 +192,44 @@
         }, 220);
     }
 
+    function selectPlayerForSwap(player) {
+        if (!editMode || !touchEditMode) return;
+
+        if (!selectedPlayer) {
+            selectedPlayer = player;
+            player.classList.add('is-swap-selected');
+            player.setAttribute('aria-pressed', 'true');
+            guidance.textContent = `${player.querySelector('strong')?.textContent || 'Jogador'} selecionado. Agora toque no jogador que vai trocar de posição.`;
+            return;
+        }
+
+        if (selectedPlayer === player) {
+            clearSelectedPlayer();
+            guidance.textContent = 'Seleção cancelada. Toque em um jogador para começar a troca.';
+            return;
+        }
+
+        const source = selectedPlayer;
+        clearSelectedPlayer();
+        swapPlayers(source, player);
+        updatePositionBadges();
+        enableDirtyState();
+    }
+
     function bindDragAndDrop() {
         getPlayers().forEach((player) => {
+            player.addEventListener('click', () => {
+                selectPlayerForSwap(player);
+            });
+
+            player.addEventListener('keydown', (event) => {
+                if (!touchEditMode || !editMode || !['Enter', ' '].includes(event.key)) return;
+                event.preventDefault();
+                selectPlayerForSwap(player);
+            });
+
             player.addEventListener('dragstart', (event) => {
-                if (!editMode) return;
+                if (!editMode || touchEditMode) return;
                 dragSource = player;
                 player.classList.add('is-dragging');
                 event.dataTransfer.effectAllowed = 'move';
@@ -198,7 +251,7 @@
             });
 
             player.addEventListener('drop', (event) => {
-                if (!editMode || !dragSource || dragSource === player) return;
+                if (!editMode || touchEditMode || !dragSource || dragSource === player) return;
                 event.preventDefault();
                 player.classList.remove('drop-target');
                 swapPlayers(dragSource, player);

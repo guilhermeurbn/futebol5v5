@@ -64,38 +64,42 @@
                             <legend>Time {{ time.numero }}</legend>
                             <p class="judge-result-players">{{ time.jogadores | map(attribute='nome') | join(', ') }}</p>
                             <div class="judge-result-fields">
-                                <label class="judge-result-field">
+                                <div class="judge-result-field">
                                     <span>Vitórias</span>
                                     <div class="judge-result-stepper">
                                         <button type="button" class="judge-result-dec" data-target="vitorias_{{ time.numero }}" data-delta="-1" aria-label="Diminuir vitórias do Time {{ time.numero }}">−</button>
-                                        <input id="vitorias_{{ time.numero }}" type="number" name="vitorias_{{ time.numero }}" min="0" inputmode="numeric" value="{{ resultado_form_values.get('vitorias_' ~ time.numero, '0') }}" required>
+                                        <span class="judge-result-value" data-value-for="vitorias_{{ time.numero }}" aria-live="polite">{{ resultado_form_values.get('vitorias_' ~ time.numero, '0') }}</span>
+                                        <input id="vitorias_{{ time.numero }}" type="hidden" name="vitorias_{{ time.numero }}" value="{{ resultado_form_values.get('vitorias_' ~ time.numero, '0') }}">
                                         <button type="button" class="judge-result-inc" data-target="vitorias_{{ time.numero }}" data-delta="1" aria-label="Aumentar vitórias do Time {{ time.numero }}">+</button>
                                     </div>
-                                </label>
-                                <label class="judge-result-field">
+                                </div>
+                                <div class="judge-result-field">
                                     <span>Empates</span>
                                     <div class="judge-result-stepper">
                                         <button type="button" class="judge-result-dec" data-target="empates_{{ time.numero }}" data-delta="-1" aria-label="Diminuir empates do Time {{ time.numero }}">−</button>
-                                        <input id="empates_{{ time.numero }}" type="number" name="empates_{{ time.numero }}" min="0" inputmode="numeric" value="{{ resultado_form_values.get('empates_' ~ time.numero, '0') }}" required>
+                                        <span class="judge-result-value" data-value-for="empates_{{ time.numero }}" aria-live="polite">{{ resultado_form_values.get('empates_' ~ time.numero, '0') }}</span>
+                                        <input id="empates_{{ time.numero }}" type="hidden" name="empates_{{ time.numero }}" value="{{ resultado_form_values.get('empates_' ~ time.numero, '0') }}">
                                         <button type="button" class="judge-result-inc" data-target="empates_{{ time.numero }}" data-delta="1" aria-label="Aumentar empates do Time {{ time.numero }}">+</button>
                                     </div>
-                                </label>
-                                <label class="judge-result-field">
+                                </div>
+                                <div class="judge-result-field">
                                     <span>Derrotas</span>
                                     <div class="judge-result-stepper">
                                         <button type="button" class="judge-result-dec" data-target="derrotas_{{ time.numero }}" data-delta="-1" aria-label="Diminuir derrotas do Time {{ time.numero }}">−</button>
-                                        <input id="derrotas_{{ time.numero }}" type="number" name="derrotas_{{ time.numero }}" min="0" inputmode="numeric" value="{{ resultado_form_values.get('derrotas_' ~ time.numero, '0') }}" required>
+                                        <span class="judge-result-value" data-value-for="derrotas_{{ time.numero }}" aria-live="polite">{{ resultado_form_values.get('derrotas_' ~ time.numero, '0') }}</span>
+                                        <input id="derrotas_{{ time.numero }}" type="hidden" name="derrotas_{{ time.numero }}" value="{{ resultado_form_values.get('derrotas_' ~ time.numero, '0') }}">
                                         <button type="button" class="judge-result-inc" data-target="derrotas_{{ time.numero }}" data-delta="1" aria-label="Aumentar derrotas do Time {{ time.numero }}">+</button>
                                     </div>
-                                </label>
-                                <label class="judge-result-field">
+                                </div>
+                                <div class="judge-result-field">
                                     <span>Gols</span>
                                     <div class="judge-result-stepper">
                                         <button type="button" class="judge-result-dec" data-target="gols_{{ time.numero }}" data-delta="-1" aria-label="Diminuir gols do Time {{ time.numero }}">−</button>
-                                        <input id="gols_{{ time.numero }}" type="number" name="gols_{{ time.numero }}" min="0" inputmode="numeric" value="{{ resultado_form_values.get('gols_' ~ time.numero, '0') }}" required>
+                                        <span class="judge-result-value" data-value-for="gols_{{ time.numero }}" aria-live="polite">{{ resultado_form_values.get('gols_' ~ time.numero, '0') }}</span>
+                                        <input id="gols_{{ time.numero }}" type="hidden" name="gols_{{ time.numero }}" value="{{ resultado_form_values.get('gols_' ~ time.numero, '0') }}">
                                         <button type="button" class="judge-result-inc" data-target="gols_{{ time.numero }}" data-delta="1" aria-label="Aumentar gols do Time {{ time.numero }}">+</button>
                                     </div>
-                                </label>
+                                </div>
                             </div>
                         </fieldset>
                         {% endfor %}
@@ -261,31 +265,13 @@
         button.addEventListener('click', () => {
             const input = document.getElementById(button.dataset.target);
             if (!input) return;
-            const min = Number(input.min || 0);
+            const valueDisplay = document.querySelector(`[data-value-for="${button.dataset.target}"]`);
+            const min = 0;
             const current = Number(input.value || 0);
             const delta = Number(button.dataset.delta || 0);
             input.value = String(Math.max(min, current + delta));
-            input.focus();
-        });
-    });
-
-    document.querySelectorAll('.judge-result-fields input[type="number"]').forEach((input) => {
-        input.addEventListener('focus', () => input.select());
-        input.addEventListener('keydown', (event) => {
-            if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') {
-                return;
-            }
-            event.preventDefault();
-            const min = Number(input.min || 0);
-            const current = Number(input.value || 0);
-            const delta = event.key === 'ArrowUp' ? 1 : -1;
-            input.value = String(Math.max(min, current + delta));
-        });
-        input.addEventListener('blur', () => {
-            const min = Number(input.min || 0);
-            const value = Number(input.value || 0);
-            if (!Number.isFinite(value) || value < min) {
-                input.value = String(min);
+            if (valueDisplay) {
+                valueDisplay.textContent = input.value;
             }
         });
     });

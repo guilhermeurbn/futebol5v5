@@ -37,9 +37,9 @@ def test_current_stylesheet_version_is_used_by_main_shell():
     base = _read("templates/base.html")
     service_worker = _read("static/service-worker.js")
 
-    assert "style.css', v='20260615-2'" in base
-    assert "service-worker.js?v=20260615-2" in base
-    assert "const SW_VERSION = '20260615-2';" in service_worker
+    assert "style.css', v='20260615-21'" in base
+    assert "service-worker.js?v=20260615-21" in base
+    assert "const SW_VERSION = '20260615-21';" in service_worker
 
 
 def test_own_player_card_opens_private_profile():

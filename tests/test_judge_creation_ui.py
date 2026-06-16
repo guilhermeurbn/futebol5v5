@@ -24,6 +24,9 @@ def test_judge_creation_uses_compact_selection_controls():
     assert template.count('judge-player-option__tag') >= 2
     assert 'id="orientacaoSelecao"' in template
     assert 'id="progressoSelecao"' in template
+    assert template.index('id="acoesSorteio"') < template.index(
+        'class="players-grid judge-players-grid"'
+    )
 
 
 def test_judge_format_color_overrides_generic_quantity_button():
@@ -54,6 +57,20 @@ def test_judge_result_only_offers_share_and_voting():
     assert 'Compartilhar' in template
     assert 'Ir para votações' in template
     assert 'Registrar resultado' not in template
+
+
+def test_judge_team_editing_supports_touch_swap():
+    template = (ROOT / 'templates' / 'juiz_times.html').read_text(encoding='utf-8')
+    stylesheet = (ROOT / 'static' / 'style.css').read_text(encoding='utf-8')
+
+    assert "const touchEditMode = window.matchMedia" in template
+    assert "function selectPlayerForSwap(player)" in template
+    assert "Toque em um jogador e depois em outro" in template
+    assert "player.addEventListener('click'" in template
+    assert "player.addEventListener('keydown'" in template
+    assert "swapPlayers(source, player);" in template
+    assert ".judge-times-touch-edit-mode .judge-team-player.is-touch-swappable" in stylesheet
+    assert ".judge-team-player.is-swap-selected" in stylesheet
 
 
 def test_judge_navigation_has_a_dedicated_times_tab():
@@ -100,6 +117,17 @@ def test_judge_voting_is_presented_as_two_sequential_steps():
     assert 'duracao_horas=12' in routes
 
 
+def test_judge_result_values_are_only_changed_with_stepper_buttons():
+    template = (ROOT / 'templates' / 'votacao_admin.html').read_text(encoding='utf-8')
+
+    assert 'type="number" name="vitorias_{{ time.numero }}"' not in template
+    assert 'type="hidden" name="vitorias_{{ time.numero }}"' in template
+    assert template.count('class="judge-result-value"') == 4
+    assert template.count('class="judge-result-dec"') == 4
+    assert template.count('class="judge-result-inc"') == 4
+    assert 'input.focus()' not in template
+
+
 def test_judge_navigation_stays_below_header_in_document_flow():
     stylesheet = (ROOT / 'static' / 'style.css').read_text(encoding='utf-8')
 
@@ -121,3 +149,20 @@ def test_judge_workspace_has_phone_first_layout():
     assert 'grid-template-columns: repeat(2, minmax(0, 1fr));' in stylesheet
     assert '@media (max-width: 370px)' in stylesheet
     assert 'min-height: 48px;' in stylesheet
+    assert '/* Judge creation: thumb-friendly floating draw action on phones */' in stylesheet
+    assert '.judge-create-page .judge-create-action {' in stylesheet
+    assert 'position: fixed;' in stylesheet
+    assert 'bottom: max(0.55rem, env(safe-area-inset-bottom));' in stylesheet
+    assert 'opacity: 0.58;' in stylesheet
+    assert '.judge-create-page .judge-create-action.is-ready {' in stylesheet
+    assert 'opacity: 1;' in stylesheet
+
+
+def test_judge_phone_titles_use_compact_hierarchy():
+    stylesheet = (ROOT / 'static' / 'style.css').read_text(encoding='utf-8')
+
+    assert '/* Judge headings: compact, readable hierarchy on phones */' in stylesheet
+    assert '.judge-workspace-page .judge-flow-card h1,' in stylesheet
+    assert 'font-size: clamp(1.35rem, 7vw, 1.65rem);' in stylesheet
+    assert '.judge-workspace-page .judge-voting-step__header {' in stylesheet
+    assert 'grid-template-columns: 2.2rem minmax(0, 1fr);' in stylesheet
