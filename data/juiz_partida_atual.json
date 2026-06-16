@@ -1,16 +1,38 @@
 {
-  "status": "idle",
-  "partida_atual": null,
+  "status": "votacao_aberta",
+  "partida_atual": {
+    "status": "votacao_aberta",
+    "criado_por": "2ba4d2a2-6f2b-4a14-a6d1-a50d639ffaf9",
+    "criado_em": "2026-06-16T18:20:46.984188",
+    "quantidade_jogadores": 10,
+    "jogador_ids": [
+      "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+      "e9758009-9214-4cc0-aea0-f365a3381803",
+      "4d113a13-66e9-4625-8d60-8974cea228ef",
+      "fdbe49b3-d73e-4db3-af5f-f23c089b8c38",
+      "cb3d184e-bf39-4638-8563-529bbe20274c",
+      "cea7df59-6699-479b-88a7-e4194af7481b",
+      "355a82e5-2c71-4212-b787-9f0a7d9ca2d0",
+      "70e90819-3eb0-41f6-9d8e-eb1a77040f68",
+      "ce422cf5-f6d1-4693-9bae-345e1ac21f2f",
+      "b17181c2-a4b4-4909-b9d1-ef979faa3063"
+    ],
+    "sorteio_id": 20,
+    "resultado_registrado": true,
+    "resultado_partida_id": 18,
+    "votacao_partida_id": 20,
+    "votacao_aberta": true
+  },
   "ultima_partida_encerrada": {
-    "titulo": "Votação do sorteio #17",
-    "sorteio_id": 17,
-    "partida_id": 17,
-    "encerrado_em": "2026-06-15T20:20:22.201668",
+    "titulo": "Votação do sorteio #19",
+    "sorteio_id": 19,
+    "partida_id": 19,
+    "encerrado_em": "2026-06-16T18:20:45.905107",
     "resultado_resumido": [
       {
         "time_numero": 1,
-        "gols": 2,
-        "vitorias": 3,
+        "gols": 0,
+        "vitorias": 1,
         "empates": 0,
         "derrotas": 0,
         "resultado": "vitoria"
@@ -20,14 +42,34 @@
         "gols": 0,
         "vitorias": 0,
         "empates": 0,
-        "derrotas": 3,
+        "derrotas": 1,
         "resultado": "derrota"
       }
     ],
-    "melhor_jogador": null,
-    "melhor_time": null,
-    "total_votos": 0,
+    "melhor_jogador": {
+      "jogador_nome": "Carlos",
+      "time_numero": 2,
+      "nota_total": 7.0,
+      "votos": 1,
+      "pontos": 7.0,
+      "nota_media": 7.0
+    },
+    "melhor_time": {
+      "time_numero": 2,
+      "nota_total": 27.0,
+      "votos": 5,
+      "nota_media": 5.4
+    },
+    "total_votos": 1,
     "pendentes": [
+      {
+        "user_id": "263d73cf-5a95-44b4-a538-bb4c69ba068e",
+        "username": "lucas_teixeira",
+        "nome_usuario": "Lucas Teixeira",
+        "jogador_nome": "Lucas Teixeira",
+        "time_numero": 1,
+        "externo": false
+      },
       {
         "user_id": "6a5290cd-317b-4764-b1df-6969f849adc5",
         "username": "renan",
@@ -37,10 +79,10 @@
         "externo": false
       },
       {
-        "user_id": "263d73cf-5a95-44b4-a538-bb4c69ba068e",
-        "username": "lucas_teixeira",
-        "nome_usuario": "Lucas Teixeira",
-        "jogador_nome": "Lucas Teixeira",
+        "user_id": "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6",
+        "username": "bacatela",
+        "nome_usuario": "Bacatela",
+        "jogador_nome": "Bacatela",
         "time_numero": 1,
         "externo": false
       },
@@ -57,22 +99,6 @@
         "username": "carlos",
         "nome_usuario": "Carlos",
         "jogador_nome": "Carlos",
-        "time_numero": 1,
-        "externo": false
-      },
-      {
-        "user_id": "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6",
-        "username": "bacatela",
-        "nome_usuario": "Bacatela",
-        "jogador_nome": "Bacatela",
-        "time_numero": 1,
-        "externo": false
-      },
-      {
-        "user_id": "6cb9f4f5-f4ad-4786-8aca-183e88333730",
-        "username": "ramon",
-        "nome_usuario": "Ramon",
-        "jogador_nome": "Ramon",
         "time_numero": 2,
         "externo": false
       },
@@ -85,10 +111,10 @@
         "externo": false
       },
       {
-        "user_id": "19e6a32e-2a20-49a2-81e0-da12aa681505",
-        "username": "alex",
-        "nome_usuario": "Alex",
-        "jogador_nome": "Alex",
+        "user_id": "6cb9f4f5-f4ad-4786-8aca-183e88333730",
+        "username": "ramon",
+        "nome_usuario": "Ramon",
+        "jogador_nome": "Ramon",
         "time_numero": 2,
         "externo": false
       },
@@ -101,14 +127,55 @@
         "externo": false
       },
       {
-        "user_id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033",
-        "username": "guilherme",
-        "nome_usuario": "Guilherme",
-        "jogador_nome": "Guilherme",
+        "user_id": "19e6a32e-2a20-49a2-81e0-da12aa681505",
+        "username": "alex",
+        "nome_usuario": "Alex",
+        "jogador_nome": "Alex",
         "time_numero": 2,
         "externo": false
       }
     ],
-    "ranking_top5": []
+    "ranking_top5": [
+      {
+        "jogador_nome": "Carlos",
+        "time_numero": 2,
+        "nota_total": 7.0,
+        "votos": 1,
+        "pontos": 7.0,
+        "nota_media": 7.0
+      },
+      {
+        "jogador_nome": "Ramon",
+        "time_numero": 2,
+        "nota_total": 7.0,
+        "votos": 1,
+        "pontos": 7.0,
+        "nota_media": 7.0
+      },
+      {
+        "jogador_nome": "Renan",
+        "time_numero": 1,
+        "nota_total": 6.5,
+        "votos": 1,
+        "pontos": 6.5,
+        "nota_media": 6.5
+      },
+      {
+        "jogador_nome": "Lucas Teixeira",
+        "time_numero": 1,
+        "nota_total": 6.0,
+        "votos": 1,
+        "pontos": 6.0,
+        "nota_media": 6.0
+      },
+      {
+        "jogador_nome": "Bacatela",
+        "time_numero": 1,
+        "nota_total": 5.5,
+        "votos": 1,
+        "pontos": 5.5,
+        "nota_media": 5.5
+      }
+    ]
   }
 }

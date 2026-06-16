@@ -123,9 +123,26 @@ def test_judge_result_values_are_only_changed_with_stepper_buttons():
     assert 'type="number" name="vitorias_{{ time.numero }}"' not in template
     assert 'type="hidden" name="vitorias_{{ time.numero }}"' in template
     assert template.count('class="judge-result-value"') == 4
-    assert template.count('class="judge-result-dec"') == 4
-    assert template.count('class="judge-result-inc"') == 4
+    assert template.count('judge-result-dec judge-result-stepper__btn') == 4
+    assert template.count('judge-result-inc judge-result-stepper__btn') == 4
+    assert 'class="judge-result-roster"' in template
+    assert 'V = vitória · E = empate · D = derrota · G = gols' in template
+    assert 'class="judge-result-submit"' in template
     assert 'input.focus()' not in template
+
+
+def test_judge_result_card_is_touch_friendly_on_mobile():
+    stylesheet = (ROOT / 'static' / 'style.css').read_text(encoding='utf-8')
+    phone_rules = stylesheet.split('@media (max-width: 720px)', 1)[1]
+
+    assert '.judge-result-fields {' in phone_rules
+    assert 'grid-template-columns: 1fr;' in phone_rules
+    assert '.judge-result-stepper {' in phone_rules
+    assert 'max-width: 240px;' in phone_rules
+    assert 'margin: 0 auto;' in phone_rules
+    assert 'min-height: 42px;' in phone_rules
+    assert '.judge-result-submit {' in phone_rules
+    assert 'position: sticky;' in phone_rules
 
 
 def test_judge_navigation_stays_below_header_in_document_flow():

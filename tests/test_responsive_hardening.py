@@ -52,7 +52,31 @@ def test_all_standalone_shells_use_current_stylesheet_version():
     )
 
     for template in templates:
-        assert "style.css', v='20260615-21'" in _read(template), template
+        assert "style.css', v='20260616-06'" in _read(template), template
+
+
+def test_all_shells_load_local_datetime_formatter():
+    templates = (
+        "templates/base.html",
+        "templates/_auth_layout.html",
+        "templates/estatisticas.html",
+        "templates/selecionar.html",
+        "templates/sorteio_detalhe.html",
+        "templates/stats_combos.html",
+        "templates/stats_players.html",
+        "templates/stats_times.html",
+        "templates/times.html",
+    )
+    script = _read("static/local-datetime.js")
+    app_py = _read("app.py")
+
+    for template in templates:
+        assert "local-datetime.js', v='20260616-06'" in _read(template), template
+
+    assert "hour12: false" in script
+    assert "hourCycle: 'h23'" in script
+    assert "data-local-datetime" in app_py
+    assert "data-local-date" in app_py
 
 
 def test_judge_navigation_titles_fit_phone_width_inside_bordered_cards():

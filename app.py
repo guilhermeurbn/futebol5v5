@@ -10,6 +10,7 @@ from urllib.parse import quote, urlparse
 from flask import Flask, send_file, request, session, url_for, redirect
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from markupsafe import Markup, escape
 try:
     from flask_wtf import CSRFProtect
     from flask_wtf.csrf import CSRFError, generate_csrf
@@ -34,6 +35,7 @@ from routes import (
     votacao_bp,
 )
 from services.notificacao_service import NotificacaoService
+from services.votacao_service import VotacaoService
 from services.db import auto_seed_on_init
 # Configuração de logging
 logging.basicConfig(
@@ -42,6 +44,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 notificacao_service = NotificacaoService()
+votacao_service = VotacaoService()
 
 
 def _registrar_aliases_jogador(app: Flask) -> None:
@@ -202,8 +205,14 @@ def criar_app(config_name: str = None) -> Flask:
     
     logger.info(f"Aplicação iniciada em modo: {config_name}")
 
-    # Filtros Jinja para formatação de datas no formato PT (DD/MM/YY)
+    # Filtros Jinja para datas: o HTML carrega o ISO e o navegador formata
+    # no fuso local do usuário, sempre em relógio 24h.
     from datetime import datetime
+    try:
+        from zoneinfo import ZoneInfo
+        SERVER_TIMEZONE = ZoneInfo(os.getenv('APP_TIMEZONE', 'Europe/Lisbon'))
+    except Exception:
+        SERVER_TIMEZONE = None
 
     def _parse_iso_date(s: str):
         if not s:
@@ -226,17 +235,32 @@ def criar_app(config_name: str = None) -> Flask:
         except Exception:
             return None
 
-    def dt_pt(value):
+    def _normalizar_datetime_para_cliente(value):
         dt = _parse_iso_date(value)
         if not dt:
+            return None
+        if getattr(dt, 'tzinfo', None) is None and 'T' in str(value) and SERVER_TIMEZONE is not None:
+            dt = dt.replace(tzinfo=SERVER_TIMEZONE)
+        return dt
+
+    def _time_local(value, incluir_hora: bool):
+        dt = _normalizar_datetime_para_cliente(value)
+        if not dt:
             return value
-        return dt.strftime('%d/%m/%y')
+
+        iso_value = dt.isoformat()
+        fallback = dt.strftime('%d/%m/%y às %H:%M') if incluir_hora else dt.strftime('%d/%m/%y')
+        data_attr = 'data-local-datetime' if incluir_hora else 'data-local-date'
+        return Markup(
+            f'<time datetime="{escape(iso_value)}" {data_attr}="{escape(iso_value)}">'
+            f'{escape(fallback)}</time>'
+        )
+
+    def dt_pt(value):
+        return _time_local(value, incluir_hora=False)
 
     def dt_pt_hm(value):
-        dt = _parse_iso_date(value)
-        if not dt:
-            return value
-        return dt.strftime('%d/%m/%y às %H:%M')
+        return _time_local(value, incluir_hora=True)
 
     app.jinja_env.filters['dt_pt'] = dt_pt
     app.jinja_env.filters['dt_pt_hm'] = dt_pt_hm
@@ -247,17 +271,27 @@ def criar_app(config_name: str = None) -> Flask:
     def inject_notificacoes_globais():
         total_notificacoes = 0
         notificacoes_url = None
+        votacao_pendente = None
+        votacao_pendente_url = None
         try:
             if session.get('user_id') and session.get('role') in {'admin', 'super_admin'}:
                 total_notificacoes = notificacao_service.contar_nao_lidas()
                 notificacoes_url = url_for('admin.admin_notificacoes_page')
+            elif session.get('user_id') and session.get('role') == 'usuario':
+                votacao_pendente = votacao_service.obter_pendencia_usuario(session.get('user_id'))
+                if votacao_pendente:
+                    votacao_pendente_url = url_for('votacao.votacao_page')
         except Exception:
             total_notificacoes = 0
             notificacoes_url = None
+            votacao_pendente = None
+            votacao_pendente_url = None
 
         return {
             'total_notificacoes': total_notificacoes,
             'notificacoes_url': notificacoes_url,
+            'votacao_pendente': votacao_pendente,
+            'votacao_pendente_url': votacao_pendente_url,
         }
 
     # Em desenvolvimento, garantir que mudanças em templates sejam recarregadas

@@ -37,9 +37,58 @@ def test_current_stylesheet_version_is_used_by_main_shell():
     base = _read("templates/base.html")
     service_worker = _read("static/service-worker.js")
 
-    assert "style.css', v='20260615-21'" in base
-    assert "service-worker.js?v=20260615-21" in base
-    assert "const SW_VERSION = '20260615-21';" in service_worker
+    assert "style.css', v='20260616-06'" in base
+    assert "service-worker.js?v=20260616-06" in base
+    assert "const SW_VERSION = '20260616-06';" in service_worker
+
+
+def test_player_workspace_navigation_fits_without_mobile_horizontal_scroll():
+    stylesheet = _read("static/style.css")
+    rules = stylesheet.split("@media (max-width: 700px)", 1)[1]
+
+    assert ".player-workspace-page .nav-tabs {" in rules
+    assert "display: grid;" in rules
+    assert "grid-template-columns: repeat(2, minmax(0, 1fr));" in rules
+    assert "overflow-x: visible;" in rules
+    assert ".player-workspace-page .nav-tab {" in rules
+    assert "min-width: 0;" in rules
+    assert "overflow-wrap: anywhere;" in rules
+
+
+def test_player_vote_notification_is_global_and_actionable():
+    base = _read("templates/base.html")
+    app_py = _read("app.py")
+    stylesheet = _read("static/style.css")
+
+    assert "votacao_service.obter_pendencia_usuario(session.get('user_id'))" in app_py
+    assert "votacao_pendente_url = url_for('votacao.votacao_page')" in app_py
+    assert "player-vote-notification" in base
+    assert "data-vote-notification-dismiss" in base
+    assert "}, 5000);" in base
+    assert "pointermove" in base
+    assert "sessionStorage" not in base
+    assert "Votação aberta" in base
+    assert "Minha votação" in base
+    assert ".player-vote-notification {" in stylesheet
+    assert "bottom: 1rem;" in stylesheet
+    assert ".player-vote-notification__dismiss" in stylesheet
+    assert "@media (max-width: 520px)" in stylesheet
+
+
+def test_user_vote_page_is_compact_for_mobile_touch_flow():
+    template = _read("templates/votacao_usuario.html")
+    stylesheet = _read("static/style.css")
+
+    assert "vote-mobile-hero" in template
+    assert "vote-mobile-chips" in template
+    assert "partida.aberta_em|dt_pt_hm" in template
+    assert "partida.fecha_em|dt_pt_hm if partida.fecha_em else 'Sem prazo'" not in template
+    assert "Avalie 5+" in template
+    assert ">Salvar</button>" in template
+    assert "O juiz abriu esta votação" not in template
+    assert ".player-workspace-page .vote-mobile-submit" in stylesheet
+    assert "position: sticky;" in stylesheet
+    assert ".player-workspace-page .votacao-slider::-webkit-slider-thumb" in stylesheet
 
 
 def test_own_player_card_opens_private_profile():

@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NaTrave | Stats Jogadores</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='20260615-21') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='20260616-06') }}">
+    <script src="{{ url_for('static', filename='local-datetime.js', v='20260616-06') }}" defer></script>
 </head>
 <body>
     <div class="container page-container-wide{% if auth_user.role in ['admin', 'super_admin'] %} judge-workspace-page admin-page admin-page--ecosystem{% elif auth_user.role == 'usuario' %} player-workspace-page{% endif %}">

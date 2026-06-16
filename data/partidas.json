@@ -407,5 +407,86 @@
         "gols": 0
       }
     ]
+  },
+  {
+    "id": 16,
+    "sorteio_id": 18,
+    "data": "2026-06-16T17:58:47.613641",
+    "time_vencedor": 1,
+    "gols_times": [
+      0,
+      0
+    ],
+    "notas": "",
+    "times_desempenho": [
+      {
+        "time_numero": 1,
+        "vitorias": 1,
+        "empates": 0,
+        "derrotas": 0,
+        "gols": 0
+      },
+      {
+        "time_numero": 2,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 1,
+        "gols": 0
+      }
+    ]
+  },
+  {
+    "id": 17,
+    "sorteio_id": 19,
+    "data": "2026-06-16T18:11:27.963271",
+    "time_vencedor": 1,
+    "gols_times": [
+      0,
+      0
+    ],
+    "notas": "",
+    "times_desempenho": [
+      {
+        "time_numero": 1,
+        "vitorias": 1,
+        "empates": 0,
+        "derrotas": 0,
+        "gols": 0
+      },
+      {
+        "time_numero": 2,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 1,
+        "gols": 0
+      }
+    ]
+  },
+  {
+    "id": 18,
+    "sorteio_id": 20,
+    "data": "2026-06-16T18:38:08.288389",
+    "time_vencedor": null,
+    "gols_times": [
+      1,
+      1
+    ],
+    "notas": "",
+    "times_desempenho": [
+      {
+        "time_numero": 1,
+        "vitorias": 1,
+        "empates": 1,
+        "derrotas": 1,
+        "gols": 1
+      },
+      {
+        "time_numero": 2,
+        "vitorias": 1,
+        "empates": 1,
+        "derrotas": 1,
+        "gols": 1
+      }
+    ]
   }
 ]

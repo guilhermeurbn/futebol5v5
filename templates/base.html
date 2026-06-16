@@ -8,7 +8,8 @@
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><defs><linearGradient id='g' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%237c3aed;stop-opacity:1' /><stop offset='55%' style='stop-color:%23ec4899;stop-opacity:1' /><stop offset='100%' style='stop-color:%2306b6d4;stop-opacity:1' /></linearGradient></defs><rect fill='url(%23g)' width='180' height='180' rx='44'/><circle cx='90' cy='78' r='48' fill='rgba(255,255,255,0.12)'/><path d='M61 106V60l29 29 29-29v46' fill='none' stroke='white' stroke-width='14' stroke-linecap='round' stroke-linejoin='round'/><rect x='53' y='114' width='74' height='20' rx='10' fill='rgba(255,255,255,0.22)'/><text x='90' y='128' dominant-baseline='middle' text-anchor='middle' font-size='17' font-weight='700' fill='white' font-family='Arial'>5v5</text></svg>">
     <title>NaTrave | {% block title %}Painel{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='20260615-21') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='20260616-06') }}">
+    <script src="{{ url_for('static', filename='local-datetime.js', v='20260616-06') }}" defer></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body class="app-shell {% block body_class %}{% endblock %}">
@@ -39,7 +40,7 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                const serviceWorkerUrl = '/static/service-worker.js?v=20260615-21';
+                const serviceWorkerUrl = '/static/service-worker.js?v=20260616-06';
                 navigator.serviceWorker.register(serviceWorkerUrl, { updateViaCache: 'none' })
                     .then(registration => {
                         registration.update().catch(() => {});
@@ -66,6 +67,82 @@
         </span>
         <span class="admin-notification-fab__count">{{ total_notificacoes }}</span>
     </a>
+    {% endif %}
+    {% if votacao_pendente and votacao_pendente_url %}
+    <aside class="player-vote-notification" role="status" aria-live="polite" data-vote-notification data-vote-notification-id="{{ votacao_pendente.id }}">
+        <span class="player-vote-notification__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+                <path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5" />
+                <path d="M9.8 20a2.4 2.4 0 0 0 4.4 0" />
+            </svg>
+        </span>
+        <span class="player-vote-notification__copy">
+            <strong>Votação aberta</strong>
+            <span>{{ votacao_pendente.titulo or 'Sua partida já pode ser avaliada' }}</span>
+        </span>
+        <a href="{{ votacao_pendente_url }}" class="player-vote-notification__action">Minha votação</a>
+        <button type="button" class="player-vote-notification__dismiss" data-vote-notification-dismiss aria-label="Fechar aviso de votação">×</button>
+    </aside>
+    <script>
+        (function () {
+            const toast = document.querySelector('[data-vote-notification]');
+            if (!toast) return;
+
+            let startX = 0;
+            let currentX = 0;
+            let dragging = false;
+            let dismissed = false;
+
+            function closeToast() {
+                if (dismissed) return;
+                dismissed = true;
+                toast.classList.add('player-vote-notification--closing');
+                window.setTimeout(function () {
+                    toast.remove();
+                }, 220);
+            }
+
+            window.setTimeout(function () {
+                closeToast();
+            }, 5000);
+
+            const dismissButton = toast.querySelector('[data-vote-notification-dismiss]');
+            if (dismissButton) {
+                dismissButton.addEventListener('click', function () {
+                    closeToast();
+                });
+            }
+
+            toast.addEventListener('pointerdown', function (event) {
+                if (event.target.closest('a, button')) return;
+                dragging = true;
+                startX = event.clientX;
+                currentX = 0;
+                toast.setPointerCapture(event.pointerId);
+                toast.classList.add('player-vote-notification--dragging');
+            });
+
+            toast.addEventListener('pointermove', function (event) {
+                if (!dragging) return;
+                currentX = event.clientX - startX;
+                toast.style.transform = 'translateX(' + currentX + 'px)';
+            });
+
+            function finishDrag() {
+                if (!dragging) return;
+                dragging = false;
+                toast.classList.remove('player-vote-notification--dragging');
+                if (Math.abs(currentX) > 90) {
+                    closeToast();
+                    return;
+                }
+                toast.style.transform = '';
+            }
+
+            toast.addEventListener('pointerup', finishDrag);
+            toast.addEventListener('pointercancel', finishDrag);
+        })();
+    </script>
     {% endif %}
     {% block content %}{% endblock %}
 </body>

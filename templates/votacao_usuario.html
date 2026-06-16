@@ -6,8 +6,8 @@
 <div class="container page-container-wide player-workspace-page">
     <header class="header">
         <div class="header-content">
-            {% set brand_title = 'Minha Votacao' %}
-            {% set brand_subtitle = 'Preencha seus numeros na partida' %}
+            {% set brand_title = 'Minha Votação' %}
+            {% set brand_subtitle = 'Avalie a rodada' %}
             {% include '_brand_header.html' %}
         </div>
     </header>
@@ -55,68 +55,43 @@
                 </div>
             </section>
         {% else %}
-            <section class="section">
-                <h2 class="section-title">🗳️ {{ partida.titulo }}</h2>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-label">Seu jogador</div>
-                        <div class="stat-value">{{ participante.jogador_nome }}</div>
+            <section class="section vote-mobile-hero">
+                <div class="vote-mobile-hero__top">
+                    <div>
+                        <div class="section-label">Rodada</div>
+                        <h2 class="section-title">{{ partida.titulo }}</h2>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Seu time</div>
-                        <div class="stat-value">Time {{ participante.time_numero }}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Status</div>
-                        <div class="stat-value">{{ partida.status }}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Prazo</div>
-                        <div class="stat-value">{{ partida.fecha_em|dt_pt_hm if partida.fecha_em else 'Sem prazo' }}</div>
-                    </div>
+                    <span class="vote-mobile-pill">Aberta</span>
                 </div>
+                <div class="vote-mobile-chips">
+                    <span>{{ participante.jogador_nome }}</span>
+                    <span>Time {{ participante.time_numero }}</span>
+                    <span>{{ partida.aberta_em|dt_pt_hm if partida.aberta_em else 'Agora' }}</span>
+                </div>
+                {% if resultado_partida %}
+                <div class="vote-mobile-result">
+                    {% for time in partida.resultado_resumido %}
+                    <span>Time {{ time.time_numero }}: {{ time.gols }} gol{{ '' if time.gols == 1 else 's' }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
             </section>
 
-            <section class="section">
-                <h2 class="section-title">🧩 Contexto da rodada</h2>
-                <div class="surface-panel surface-panel--soft">
-                    <p style="margin-top: 0;">O juiz abriu esta votação para o sorteio #{{ partida.sorteio_id }}. Você precisa votar antes do prazo ou até o juiz encerrar a rodada.</p>
-                    {% if resultado_partida %}
-                        <div class="summary-grid" style="margin-top: 1rem;">
-                            {% for time in partida.resultado_resumido %}
-                            <div class="summary-card summary-card--secondary">
-                                <div class="summary-card__label">Time {{ time.time_numero }}</div>
-                                <div class="summary-card__value">{{ time.gols }} gol{{ '' if time.gols == 1 else 's' }}</div>
-                                <div class="summary-card__subtext">{{ time.vitorias }}V {{ time.empates }}E {{ time.derrotas }}D</div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <div class="alert alert-warning" style="margin-top: 1rem;">
-                            ⚠️ O resultado da partida ainda não foi registrado pelo juiz.
-                        </div>
-                    {% endif %}
-                </div>
-            </section>
-
-            <section class="section">
-                <h2 class="section-title">✍️ Votação de Jogadores</h2>
+            <section class="section vote-mobile-form-section">
                 <form method="post" action="{{ url_for('jogador.votacao_salvar') }}" class="form">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="hidden" name="partida_id" value="{{ partida.id }}">
 
-                    <div class="surface-panel surface-panel--soft votacao-intro">
+                    <div class="votacao-intro">
                         <div class="votacao-intro__header">
                             <div>
-                                <div class="section-label">Como funciona</div>
-                                <h3 class="votacao-intro__title">Dê nota com a barra abaixo</h3>
+                                <div class="section-label">Notas</div>
+                                <h3 class="votacao-intro__title">Avalie 5+</h3>
                             </div>
                             <div class="votacao-progress">
-                                <span class="votacao-progress__label">Notas preenchidas</span>
                                 <span class="votacao-progress__badge"><span id="notas-preenchidas">0</span>/5</span>
                             </div>
                         </div>
-                        <p class="votacao-intro__text">Avalie pelo menos 5 jogadores. Só conta nota maior que zero.</p>
                     </div>
 
                     <div class="votacao-list">
@@ -125,7 +100,7 @@
                             <div class="votacao-card__top">
                                 <div>
                                     <div class="votacao-card__name">{{ j.jogador_nome }}</div>
-                                    <div class="votacao-card__meta">Time {{ j.time_numero }}</div>
+                                    <div class="votacao-card__meta">T{{ j.time_numero }}</div>
                                 </div>
                                 <div class="votacao-card__score" data-score-for="{{ loop.index0 }}">0.0</div>
                             </div>
@@ -149,7 +124,9 @@
                         Você precisa dar nota para pelo menos 5 jogadores.
                     </div>
 
-                    <button class="btn btn-primary" type="submit">Salvar voto</button>
+                    <div class="vote-mobile-submit">
+                        <button class="btn btn-primary" type="submit">Salvar</button>
+                    </div>
                 </form>
             </section>
         {% endif %}

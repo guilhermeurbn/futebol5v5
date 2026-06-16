@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+import app as app_module
 from app import criar_app
 from routes import juiz_routes, partida_routes, votacao_routes
 from services.votacao_service import VotacaoService
@@ -143,6 +144,42 @@ def test_ambiguous_legacy_name_is_not_linked(tmp_path):
     )
 
     assert partida['participantes'][0]['user_id'] is None
+
+
+def test_pending_vote_notification_is_shown_only_until_user_votes(tmp_path, monkeypatch):
+    service = VotacaoService(str(tmp_path / 'votacoes.json'))
+    partida = service.criar_partida(
+        _times(),
+        _usuarios(),
+        'juiz',
+        titulo='Rodada decisiva',
+        sorteio_id=1,
+    )
+    monkeypatch.setattr(app_module, 'votacao_service', service)
+
+    app = criar_app('testing')
+    with app.test_client() as client:
+        with client.session_transaction() as sess:
+            sess['user_id'] = 'u1'
+            sess['username'] = 'user1'
+            sess['nome'] = 'Usuario 1'
+            sess['role'] = 'usuario'
+            sess['senha_temporaria_ativa'] = False
+
+        response = client.get('/')
+        body = response.get_data(as_text=True)
+
+        assert response.status_code == 200
+        assert 'player-vote-notification' in body
+        assert 'Votação aberta' in body
+        assert 'Rodada decisiva' in body
+        assert 'Minha votação' in body
+
+        service.salvar_voto(partida['id'], 'u1', _votos())
+        response = client.get('/')
+
+        assert response.status_code == 200
+        assert 'player-vote-notification' not in response.get_data(as_text=True)
 
 
 def _login_juiz(client):

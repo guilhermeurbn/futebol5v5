@@ -89,7 +89,7 @@
                                 class="judge-draw-history__ranking-btn"
                                 data-ranking-trigger
                                 data-sorteio-id="{{ sorteio.id }}"
-                                data-sorteio-data="{{ sorteio.data|dt_pt_hm }}"
+                                data-sorteio-data="{{ sorteio.data }}"
                                 data-media-geral="{{ '%.2f'|format(sorteio.ranking_media_geral or 0) }}"
                                 data-total-jogadores="{{ sorteio.ranking_total_jogadores or 0 }}"
                                 {% if not sorteio.ranking_top10 %}disabled title="Sem ranking para este sorteio"{% endif %}
@@ -266,7 +266,9 @@
             event.stopPropagation();
 
             const sorteioId = button.dataset.sorteioId;
-            const sorteioData = button.dataset.sorteioData || '-';
+            const sorteioData = window.NaTraveLocalDateTime
+                ? window.NaTraveLocalDateTime.formatDateTime(button.dataset.sorteioData)
+                : (button.dataset.sorteioData || '-');
             const mediaGeral = button.dataset.mediaGeral || '0.00';
             const totalJogadores = button.dataset.totalJogadores || '0';
             const dataEl = document.getElementById(`ranking-data-${sorteioId}`);
