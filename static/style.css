@@ -179,80 +179,6 @@ textarea {
   background: #000000;
 }
 
-[data-app-content] {
-  position: relative;
-  view-transition-name: natrave-content;
-}
-
-body.is-nav-loading [data-app-content] {
-  opacity: 0.985;
-}
-
-body.is-nav-loading [data-app-content]::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(108deg, rgba(0, 0, 0, 0) 26%, rgba(255, 255, 255, 0.028) 50%, rgba(0, 0, 0, 0) 74%);
-  animation: appShellSkeleton 220ms ease-out 1;
-  z-index: 40;
-}
-
-@keyframes appShellSkeleton {
-  from {
-    opacity: 0;
-    transform: translateX(-1.5%);
-  }
-  to {
-    opacity: 0.78;
-    transform: translateX(0%);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  ::view-transition-group(natrave-content) {
-    animation-duration: 220ms;
-    animation-timing-function: cubic-bezier(0.2, 0.75, 0.22, 1);
-  }
-
-  ::view-transition-old(natrave-content),
-  ::view-transition-new(natrave-content) {
-    animation-duration: 220ms;
-    animation-timing-function: cubic-bezier(0.2, 0.75, 0.22, 1);
-    backface-visibility: hidden;
-  }
-
-  ::view-transition-old(natrave-content) {
-    animation-name: natraveOut;
-  }
-
-  ::view-transition-new(natrave-content) {
-    animation-name: natraveIn;
-  }
-}
-
-@keyframes natraveOut {
-  from {
-    opacity: 1;
-    transform: none;
-  }
-  to {
-    opacity: 0.965;
-    transform: none;
-  }
-}
-
-@keyframes natraveIn {
-  from {
-    opacity: 0.965;
-    transform: none;
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
 /* 🎯 Header - Topo com Gradient */
 .header {
   background: #000000;
@@ -3703,6 +3629,35 @@ body.is-nav-loading [data-app-content]::after {
     0 0 0 1px rgba(255, 255, 255, 0.03);
 }
 
+@media (min-width: 701px) {
+  .players-showcase-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "heading actions"
+      "count actions";
+    align-items: start;
+    column-gap: var(--spacing-md);
+    row-gap: 0.4rem;
+  }
+
+  .players-showcase-heading {
+    grid-area: heading;
+  }
+
+  .players-showcase-actions {
+    grid-area: actions;
+    align-self: center;
+    justify-self: end;
+  }
+
+  .players-showcase-count {
+    grid-area: count;
+    position: static;
+    margin-top: 0.15rem;
+  }
+}
+
 .players-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
@@ -6418,17 +6373,20 @@ tbody td code {
 
 
 .profile-page--public .public-profile-shell {
-  width: min(96vw, 1320px);
+  width: 100%;
+  max-width: 1180px;
   margin: var(--spacing-lg) auto;
   border: 0;
   background: transparent;
   box-shadow: none;
   padding: 0;
+  box-sizing: border-box;
 }
 
 .profile-page--public .public-profile-dossier {
   display: grid;
   gap: var(--spacing-lg);
+  width: 100%;
 }
 
 .profile-page--public .public-profile-hero {
@@ -13583,48 +13541,6 @@ body.modal-open {
     left: 22%;
     right: 22%;
     bottom: 6px;
-  }
-
-  body.is-swipe-preview .player-workspace-page .main,
-  body.is-swipe-preview .history-page .main,
-  body.is-swipe-preview .profile-page .main,
-  body.is-swipe-preview .page-index .main {
-    transform: translateX(var(--swipe-offset, 0px)) scale(calc(1 - (var(--swipe-progress, 0) * 0.015)));
-    filter: brightness(calc(1 - (var(--swipe-progress, 0) * 0.06))) saturate(calc(1 - (var(--swipe-progress, 0) * 0.03)));
-    transition: none;
-  }
-
-  body.is-swipe-preview .nav-tabs {
-    transform: translateX(var(--swipe-offset, 0px)) scale(calc(1 - (var(--swipe-progress, 0) * 0.008)));
-    transition: none;
-  }
-
-  body.is-swipe-preview .player-workspace-page .nav-tab.active,
-  body.is-swipe-preview .history-page .nav-tab.active,
-  body.is-swipe-preview .profile-page .nav-tab.active,
-  body.is-swipe-preview .page-index .nav-tab.active {
-    box-shadow:
-      inset 0 0 0 1px rgba(255, 255, 255, 0.08),
-      0 0 0 1px rgba(34, 197, 94, 0.18);
-  }
-
-  body.is-swipe-preview .player-workspace-page::after,
-  body.is-swipe-preview .history-page::after,
-  body.is-swipe-preview .profile-page::after,
-  body.is-swipe-preview .page-index::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    background: linear-gradient(
-      90deg,
-      rgba(0, 0, 0, calc(var(--swipe-progress, 0) * 0.12)),
-      transparent 22%,
-      transparent 78%,
-      rgba(0, 0, 0, calc(var(--swipe-progress, 0) * 0.12))
-    );
-    opacity: 1;
-    z-index: 29;
   }
 
   .player-workspace-page .header {

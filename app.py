@@ -89,10 +89,12 @@ def criar_app(config_name: str = None) -> Flask:
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
     
     # Rate limiting setup
+    # Keep strict protection on sensitive auth endpoints while avoiding
+    # a restrictive global browsing limit for normal logged-in usage.
     limiter = Limiter(
         app=app,
         key_func=get_remote_address,
-        default_limits=["200 per day", "50 per hour"],
+        default_limits=[],
         storage_uri="memory://"
     )
     logger.info("Rate limiter initialized")
