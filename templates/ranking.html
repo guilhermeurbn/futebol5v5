@@ -15,13 +15,13 @@
     <main class="main">
         {% if auth_user.role != 'juiz' %}
         <div class="nav-tabs">
-            <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
+            <a href="{{ url_for('jogador.index') }}" class="nav-tab">Jogadores</a>
             {% if auth_user.role == 'usuario' %}
-            <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab">🗳️ Minha Votação</a>
+            <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab">Votação</a>
             {% endif %}
             {# Link 'Rodada' removido para simplificar a navegação #}
-            <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
-            <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab active">🏅 Ranking</a>
+            <a href="{{ url_for('jogador.historico') }}" class="nav-tab">Histórico</a>
+            <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab active">Ranking</a>
         </div>
         {% endif %}
 

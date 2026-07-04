@@ -10,19 +10,22 @@
     <title>NaTrave | {% block title %}Painel{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='20260616-06') }}">
     <script src="{{ url_for('static', filename='local-datetime.js', v='20260616-06') }}" defer></script>
+    <script src="{{ url_for('static', filename='app-shell-navigation.js', v='20260704-07') }}" defer></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body class="app-shell {% block body_class %}{% endblock %}">
     <script src="{{ url_for('static', filename='offline-judge.js') }}"></script>
     <script>
         // Inject CSRF token into all POST forms automatically (works with Flask-WTF CSRFProtect)
-        (function(){
-            try{
-                const token = "{{ csrf_token() }}";
-                if(!token) return;
-                document.addEventListener('DOMContentLoaded', function(){
-                    document.querySelectorAll('form[method="post"]').forEach(function(f){
-                        if(!f.querySelector('input[name="csrf_token"]')){
+        (function () {
+            function ensureCsrfToken(root) {
+                try {
+                    const token = "{{ csrf_token() }}";
+                    if (!token) return;
+
+                    const scope = root instanceof Element ? root : document;
+                    scope.querySelectorAll('form[method="post"]').forEach(function (f) {
+                        if (!f.querySelector('input[name="csrf_token"]')) {
                             const i = document.createElement('input');
                             i.type = 'hidden';
                             i.name = 'csrf_token';
@@ -30,10 +33,21 @@
                             f.prepend(i);
                         }
                     });
+                } catch (e) {
+                    console.warn('CSRF auto-inject skipped');
+                }
+            }
+
+            window.NaTraveCSRF = Object.assign({}, window.NaTraveCSRF, {
+                ensureFormTokens: ensureCsrfToken
+            });
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function () {
+                    ensureCsrfToken(document);
                 });
-            }catch(e){
-                // If template helper not available, skip silently
-                console.warn('CSRF auto-inject skipped');
+            } else {
+                ensureCsrfToken(document);
             }
         })();
     </script>
@@ -55,6 +69,182 @@
                 });
             });
         }
+    </script>
+
+    <script>
+        (function () {
+            let teardownSwipe = null;
+
+            function normalizePath(href) {
+                try {
+                    return new URL(href, window.location.origin).pathname;
+                } catch (error) {
+                    return href;
+                }
+            }
+
+            function setupMobileDockAndSwipe() {
+                if (typeof teardownSwipe === 'function') {
+                    teardownSwipe();
+                    teardownSwipe = null;
+                }
+
+                const navTabs = document.querySelector('.nav-tabs');
+                if (!navTabs) return;
+
+                const tabs = Array.from(navTabs.querySelectorAll('.nav-tab[href]'));
+                if (tabs.length < 2) return;
+
+                const isMobile = window.matchMedia('(max-width: 700px)').matches;
+                if (!isMobile) return;
+
+                document.body.classList.add('has-mobile-dock');
+                navTabs.style.gridTemplateColumns = 'repeat(' + tabs.length + ', minmax(0, 1fr))';
+
+                let startX = 0;
+                let startY = 0;
+                let startTime = 0;
+                let lastDx = 0;
+                let tracking = false;
+                let rafId = 0;
+                const listeners = [];
+
+                function currentTabIndex() {
+                    const activeTab = navTabs.querySelector('.nav-tab.active');
+                    if (activeTab) {
+                        const activeIndex = tabs.indexOf(activeTab);
+                        if (activeIndex >= 0) return activeIndex;
+                    }
+
+                    const currentPath = normalizePath(window.location.pathname);
+                    const matchedIndex = tabs.findIndex((tab) => normalizePath(tab.href) === currentPath);
+                    return matchedIndex >= 0 ? matchedIndex : 0;
+                }
+
+                function navigateByOffset(offset) {
+                    const nextIndex = currentTabIndex() + offset;
+                    if (nextIndex < 0 || nextIndex >= tabs.length) return;
+                    const nextTab = tabs[nextIndex];
+                    if (nextTab) {
+                        const appShellNav = window.NaTraveAppShellNav;
+                        if (appShellNav && typeof appShellNav.navigateTo === 'function') {
+                            appShellNav.navigateTo(nextTab.href);
+                        } else {
+                            window.location.href = nextTab.href;
+                        }
+                    }
+                }
+
+                function applySwipePreview(dx) {
+                    const maxTranslate = Math.min(window.innerWidth * 0.18, 72);
+                    const dampedDx = Math.max(Math.min(dx, maxTranslate), -maxTranslate);
+                    const progress = Math.min(Math.abs(dampedDx) / maxTranslate, 1);
+                    const previewDirection = Math.sign(dampedDx);
+
+                    document.body.classList.add('is-swipe-preview');
+                    document.body.style.setProperty('--swipe-offset', dampedDx.toFixed(2) + 'px');
+                    document.body.style.setProperty('--swipe-progress', progress.toFixed(3));
+                    document.body.style.setProperty('--swipe-direction', String(previewDirection || 0));
+                }
+
+                function clearSwipePreview() {
+                    document.body.classList.remove('is-swipe-preview');
+                    document.body.style.removeProperty('--swipe-offset');
+                    document.body.style.removeProperty('--swipe-progress');
+                    document.body.style.removeProperty('--swipe-direction');
+                }
+
+                const onTouchStart = function (event) {
+                    const target = event.target;
+                    if (target instanceof Element && target.closest('a, button, input, textarea, select, label, [role="button"], .votacao-slider, .logout-form, .logout-form-auto')) {
+                        tracking = false;
+                        clearSwipePreview();
+                        return;
+                    }
+
+                    if (event.touches.length !== 1) return;
+                    tracking = true;
+                    startX = event.touches[0].clientX;
+                    startY = event.touches[0].clientY;
+                    startTime = Date.now();
+                    lastDx = 0;
+                };
+
+                const onTouchMove = function (event) {
+                    if (!tracking || event.touches.length !== 1) return;
+                    const touch = event.touches[0];
+                    const dx = touch.clientX - startX;
+                    const dy = touch.clientY - startY;
+
+                    if (Math.abs(dx) < 18 || Math.abs(dx) <= Math.abs(dy)) return;
+
+                    lastDx = dx;
+                    if (rafId) return;
+
+                    rafId = window.requestAnimationFrame(function () {
+                        applySwipePreview(lastDx * 0.45);
+                        rafId = 0;
+                    });
+                };
+
+                const onTouchEnd = function (event) {
+                    if (!tracking) return;
+
+                    const touch = event.changedTouches[0];
+                    if (!touch) return;
+
+                    const dx = touch.clientX - startX;
+                    const dy = touch.clientY - startY;
+                    const elapsed = Date.now() - startTime;
+
+                    tracking = false;
+                    if (rafId) {
+                        window.cancelAnimationFrame(rafId);
+                        rafId = 0;
+                    }
+                    clearSwipePreview();
+
+                    if (elapsed > 700) return;
+                    if (Math.abs(dx) < 60) return;
+                    if (Math.abs(dx) <= Math.abs(dy) * 1.2) return;
+
+                    if (dx > 0) {
+                        navigateByOffset(-1);
+                    } else {
+                        navigateByOffset(1);
+                    }
+                };
+
+                document.addEventListener('touchstart', onTouchStart, { passive: true });
+                document.addEventListener('touchmove', onTouchMove, { passive: true });
+                document.addEventListener('touchend', onTouchEnd, { passive: true });
+
+                listeners.push(['touchstart', onTouchStart]);
+                listeners.push(['touchmove', onTouchMove]);
+                listeners.push(['touchend', onTouchEnd]);
+
+                teardownSwipe = function () {
+                    if (rafId) {
+                        window.cancelAnimationFrame(rafId);
+                        rafId = 0;
+                    }
+                    clearSwipePreview();
+                    listeners.forEach(function (entry) {
+                        document.removeEventListener(entry[0], entry[1]);
+                    });
+                };
+            }
+
+            window.NaTraveMobileNav = Object.assign({}, window.NaTraveMobileNav, {
+                refresh: setupMobileDockAndSwipe
+            });
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', setupMobileDockAndSwipe);
+            } else {
+                setupMobileDockAndSwipe();
+            }
+        })();
     </script>
 
     {% if notificacoes_url %}
@@ -144,6 +334,8 @@
         })();
     </script>
     {% endif %}
-    {% block content %}{% endblock %}
+    <div id="app-content" data-app-content>
+        {% block content %}{% endblock %}
+    </div>
 </body>
 </html>

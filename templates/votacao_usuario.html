@@ -6,7 +6,7 @@
 <div class="container page-container-wide player-workspace-page">
     <header class="header">
         <div class="header-content">
-            {% set brand_title = 'Minha Votação' %}
+            {% set brand_title = 'Votação' %}
             {% set brand_subtitle = 'Avalie a rodada' %}
             {% include '_brand_header.html' %}
         </div>
@@ -16,10 +16,10 @@
         <!-- Navigation Tabs -->
         {% if auth_user.role != 'juiz' %}
         <div class="nav-tabs">
-            <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
-            <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab active">🗳️ Minha Votação</a>
-            <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
-            <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">🏅 Ranking</a>
+            <a href="{{ url_for('jogador.index') }}" class="nav-tab">Jogadores</a>
+            <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab active">Votação</a>
+            <a href="{{ url_for('jogador.historico') }}" class="nav-tab">Histórico</a>
+            <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">Ranking</a>
         </div>
         {% endif %}
 
@@ -78,7 +78,7 @@
             </section>
 
             <section class="section vote-mobile-form-section">
-                <form method="post" action="{{ url_for('jogador.votacao_salvar') }}" class="form">
+                <form method="post" action="{{ url_for('jogador.votacao_salvar') }}" class="form" id="votacaoForm" data-votacao-form>
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="hidden" name="partida_id" value="{{ partida.id }}">
 
@@ -134,7 +134,9 @@
 </div>
 
 <script>
-document.querySelector('form')?.addEventListener('submit', function (e) {
+const votacaoForm = document.querySelector('[data-votacao-form]');
+
+votacaoForm?.addEventListener('submit', function (e) {
     const notas = Array.from(document.querySelectorAll('input[name="nota"]'))
         .filter(input => parseFloat(String(input.value || '0').replace(',', '.')) > 0).length;
     const aviso = document.getElementById('aviso-obrigatorios');
@@ -150,7 +152,7 @@ document.querySelector('form')?.addEventListener('submit', function (e) {
 
     if (window.NaTraveOffline && window.NaTraveOffline.isOffline()) {
         e.preventDefault();
-        const form = e.target;
+        const form = e.currentTarget;
         const payload = new URLSearchParams(new FormData(form)).toString();
         window.NaTraveOffline.queueFormSubmission({
             label: 'Voto da partida',

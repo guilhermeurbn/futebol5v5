@@ -21,13 +21,13 @@
             <!-- Navigation Tabs -->
             {% if auth_user.role != 'juiz' %}
             <div class="nav-tabs">
-                <a href="{{ url_for('jogador.index') }}" class="nav-tab active">👥 Jogadores</a>
+                <a href="{{ url_for('jogador.index') }}" class="nav-tab active">Jogadores</a>
                 {% if auth_user.role == 'usuario' %}
-                <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab">🗳️ Minha Votação</a>
+                <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab">Votação</a>
                 {% endif %}
                 {# Link 'Rodada' removido para simplificar a navegação #}
-                <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
-                <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">🏅 Ranking</a>
+                <a href="{{ url_for('jogador.historico') }}" class="nav-tab">Histórico</a>
+                <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">Ranking</a>
             </div>
             {% endif %}
 
@@ -38,11 +38,13 @@
             {% endif %}
 
             <!-- Players Section -->
-            <section class="section">
-                        <div class="section-header">
-                            <h2 class="section-title">👥 Jogadores Cadastrados</h2>
-                    <div class="section-header-actions">
-                        <span class="badge badge-primary">{{ total_jogadores }} jogadores</span>
+            <section class="section players-showcase-section">
+                        <div class="section-header players-showcase-header">
+                            <div class="players-showcase-heading">
+                                <h2 class="section-title players-showcase-title">👥 Jogadores Cadastrados</h2>
+                            </div>
+                    <span class="players-showcase-count" aria-label="{{ total_jogadores }} jogadores cadastrados">{{ total_jogadores }}</span>
+                    <div class="section-header-actions players-showcase-actions">
                         {% if auth_user.role in ['admin', 'super_admin'] %}
                         <button type="button" id="toggleCreatePlayerBtn" class="btn btn-secondary btn-small btn-toggle-create" aria-expanded="false" aria-controls="createPlayerPanel">
                             <span class="toggle-create-icon" aria-hidden="true"></span>
@@ -52,7 +54,7 @@
                         {% if jogadores %}
                         <button type="button" id="toggleSearchBtn" class="btn btn-secondary btn-small btn-toggle-create btn-toggle-search" aria-expanded="false" aria-controls="playersSearchPanel">
                             <span class="toggle-create-icon" aria-hidden="true"></span>
-                            <span>Buscar</span>
+                            <span>Buscar por nome</span>
                         </button>
                         {% endif %}
                     </div>
@@ -181,10 +183,7 @@
                     <!-- Busca -->
                     <section id="playersSearchPanel" class="section players-search-section" hidden>
                         <div class="section-header">
-                            <div>
-                                <h2 class="section-title">🔎 Buscar jogadores</h2>
-                                <p class="section-subtitle">Pesquise e refine a lista sem sair da página.</p>
-                            </div>
+                            <h2 class="section-title">🔎 Buscar por nome</h2>
                             <span id="searchResultsCount" class="badge badge-primary"></span>
                         </div>
 
@@ -195,44 +194,9 @@
                                     type="text"
                                     id="searchInput"
                                     class="form-input"
-                                    placeholder="Buscar pelo nome..."
+                                    placeholder="Digite o nome do jogador..."
                                     autocomplete="off"
                                 >
-                            </div>
-
-                            <div class="form-group">
-                                <label for="tipoFilter" class="form-label">Tipo</label>
-                                <select id="tipoFilter" class="form-input filter-input">
-                                    <option value="">Todos</option>
-                                    <option value="fixo">⭐ Fixo</option>
-                                    <option value="avulso">👤 Avulso</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="posicaoFilter" class="form-label">Posição</label>
-                                <select id="posicaoFilter" class="form-input filter-input">
-                                    <option value="">Todos</option>
-                                    <option value="linha">⚽ Linha</option>
-                                    <option value="goleiro">🧤 Goleiro</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="nivelFilter" class="form-label">Nível</label>
-                                <select id="nivelFilter" class="form-input filter-input">
-                                    <option value="">Todos</option>
-                                    <option value="1">Nível 1</option>
-                                    <option value="2">Nível 2</option>
-                                    <option value="3">Nível 3</option>
-                                    <option value="4">Nível 4</option>
-                                    <option value="5">Nível 5</option>
-                                    <option value="6">Nível 6</option>
-                                    <option value="7">Nível 7</option>
-                                    <option value="8">Nível 8</option>
-                                    <option value="9">Nível 9</option>
-                                    <option value="10">Nível 10</option>
-                                </select>
                             </div>
 
                             <div class="form-group players-search-actions">
@@ -243,11 +207,16 @@
                         </div>
                     </section>
 
-                    <div class="players-grid" id="playersGrid">
+                    <div class="players-grid players-grid--list" id="playersGrid">
                         {% for jogador in jogadores %}
                             {% set nome_partes = jogador.nome.split() %}
                             {% set avatar_text = nome_partes[0][:2] if nome_partes else jogador.nome[:2] %}
-                            <article class="player-card player-card--premium" data-name="{{ jogador.nome|lower }}" data-player-id="{{ jogador.id }}" data-nivel="{{ jogador.nivel }}" data-tipo="{{ jogador.tipo }}" data-posicao="{{ jogador.posicao }}">
+                            {% if auth_user.role == 'usuario' and jogador.owner_user_id == auth_user.id %}
+                                {% set perfil_href = url_for('auth.perfil_page') %}
+                            {% else %}
+                                {% set perfil_href = url_for('jogador.perfil_jogador_publico', jogador_id=jogador.id) %}
+                            {% endif %}
+                            <article class="player-card player-card--highlight player-list-row" data-name="{{ jogador.nome|lower }}" data-player-id="{{ jogador.id }}" data-nivel="{{ jogador.nivel }}" data-tipo="{{ jogador.tipo }}" data-posicao="{{ jogador.posicao }}">
                                 <img class="player-card__bg" src="{{ url_for('static', filename='foto_card_jogador.jpeg') }}" alt="" aria-hidden="true">
                                 <div class="player-card__surface">
                                     <div class="player-card__top">
@@ -305,6 +274,30 @@
                                             {% endif %}
                                         </div>
                                     </div>
+                                </div>
+
+                                <div class="player-list-row__mobile">
+                                    <div class="player-list-row__main">
+                                        <div class="player-card__avatar-shell player-list-row__avatar-shell">
+                                            <div class="player-card__avatar" aria-hidden="true">{{ avatar_text|upper }}</div>
+                                        </div>
+
+                                        <div class="player-list-row__identity">
+                                            <div class="player-list-row__headline">
+                                                <h3 class="player-card__name player-list-row__name">{{ jogador.nome }}</h3>
+                                                <span class="player-list-row__rating">{{ '%.2f'|format(jogador.nivel|float) }}</span>
+                                            </div>
+                                            <div class="player-list-row__meta">
+                                                    <span class="player-list-row__meta-item"><span class="player-list-row__meta-icon" aria-hidden="true">👟</span>{% if jogador.posicao == 'goleiro' %}Goleiro{% elif jogador.posicao == 'defesa' %}Defesa{% elif jogador.posicao == 'meio' %}Meio{% elif jogador.posicao == 'atacante' %}Atacante{% else %}Linha{% endif %}</span>
+                                                    <span class="player-list-row__meta-item"><span class="player-list-row__meta-icon" aria-hidden="true">📊</span>Nível {{ jogador.nivel|int if jogador.nivel == (jogador.nivel|int) else '%.1f'|format(jogador.nivel|float) }}</span>
+                                                    <span class="player-list-row__meta-item"><span class="player-list-row__meta-icon" aria-hidden="true">⭐</span>{{ jogador.stats_card.matches }} partidas</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <a class="player-list-row__link" href="{{ perfil_href }}" aria-label="Abrir perfil de {{ jogador.nome }}">
+                                        <span aria-hidden="true">&rarr;</span>
+                                    </a>
                                 </div>
                             </article>
                         {% endfor %}
@@ -364,11 +357,6 @@
         const playersSearchPanel = document.getElementById('playersSearchPanel');
         const searchResultsCount = document.getElementById('searchResultsCount');
 
-        // ===== FILTROS AVANÇADOS =====
-        const nivelFilter = document.getElementById('nivelFilter');
-        const tipoFilter = document.getElementById('tipoFilter');
-        const posicaoFilter = document.getElementById('posicaoFilter');
-
         if (toggleCreatePlayerBtn && createPlayerPanel) {
             toggleCreatePlayerBtn.addEventListener('click', () => {
                 const aberto = !createPlayerPanel.hidden;
@@ -386,72 +374,21 @@
             return String(valor || '').trim().toLowerCase();
         }
 
-        function atualizarOpcoesDisponiveis() {
-            const contadores = {
-                tipo: {},
-                posicao: {},
-                nivel: {}
-            };
-
-            playerCards.forEach(card => {
-                const tipo = valorNormalizado(card.dataset.tipo);
-                const posicao = valorNormalizado(card.dataset.posicao);
-                const nivel = valorNormalizado(card.dataset.nivel);
-
-                if (tipo) contadores.tipo[tipo] = (contadores.tipo[tipo] || 0) + 1;
-                if (posicao) contadores.posicao[posicao] = (contadores.posicao[posicao] || 0) + 1;
-                if (nivel) contadores.nivel[nivel] = (contadores.nivel[nivel] || 0) + 1;
-            });
-
-            [
-                [tipoFilter, contadores.tipo],
-                [posicaoFilter, contadores.posicao],
-                [nivelFilter, contadores.nivel]
-            ].forEach(([select, contador]) => {
-                if (!select) return;
-                Array.from(select.options).forEach(option => {
-                    if (!option.dataset.label) option.dataset.label = option.textContent;
-                    if (!option.value) {
-                        option.textContent = option.dataset.label;
-                        option.disabled = false;
-                        return;
-                    }
-
-                    const total = contador[valorNormalizado(option.value)] || 0;
-                    option.textContent = `${option.dataset.label} (${total})`;
-                    option.disabled = total === 0;
-                });
-            });
-        }
-
         function aplicarFiltros() {
             const searchTerm = valorNormalizado(searchInput?.value);
-            const nivelSelecionado = valorNormalizado(nivelFilter?.value);
-            const tipoSelecionado = valorNormalizado(tipoFilter?.value);
-            const posicaoSelecionada = valorNormalizado(posicaoFilter?.value);
 
             let visibleCount = 0;
 
             playerCards.forEach(card => {
                 const playerName = valorNormalizado(card.dataset.name);
-                const playerNivel = valorNormalizado(card.dataset.nivel);
-                const playerTipo = valorNormalizado(card.dataset.tipo);
-                const playerPosicao = valorNormalizado(card.dataset.posicao);
-
-                // Aplicar filtros
                 const matchesNome = playerName.includes(searchTerm);
-                const matchesNivel = !nivelSelecionado || playerNivel === nivelSelecionado;
-                const matchesTipo = !tipoSelecionado || playerTipo === tipoSelecionado;
-                const matchesPosicao = !posicaoSelecionada || playerPosicao === posicaoSelecionada;
-
-                const matches = matchesNome && matchesNivel && matchesTipo && matchesPosicao;
+                const matches = matchesNome;
                 
                 card.style.display = matches ? '' : 'none';
                 if (matches) visibleCount++;
             });
 
-            // Atualizar contador
-            if (searchTerm || tipoSelecionado || posicaoSelecionada || nivelSelecionado) {
+            if (searchTerm) {
                 searchResultsCount.textContent = `${visibleCount} resultado${visibleCount !== 1 ? 's' : ''}`;
                 searchResultsCount.style.display = 'block';
             } else {
@@ -461,9 +398,6 @@
 
         function limparFiltros() {
             if (searchInput) searchInput.value = '';
-            if (nivelFilter) nivelFilter.value = '';
-            if (tipoFilter) tipoFilter.value = '';
-            if (posicaoFilter) posicaoFilter.value = '';
             aplicarFiltros();
         }
 
@@ -481,9 +415,6 @@
             });
         }
         if (searchInput) searchInput.addEventListener('input', aplicarFiltros);
-        if (nivelFilter) nivelFilter.addEventListener('change', aplicarFiltros);
-        if (tipoFilter) tipoFilter.addEventListener('change', aplicarFiltros);
-        if (posicaoFilter) posicaoFilter.addEventListener('change', aplicarFiltros);
 
         // Fechar ao focar
         if (searchInput) {
@@ -493,8 +424,6 @@
                 }
             });
         }
-
-        atualizarOpcoesDisponiveis();
 
         {% if auth_user.role == 'admin' %}
             // ===== MODAL DELETE =====

@@ -32,11 +32,11 @@
 {% endblock %}
 
 {% block auth_form %}
-    <form method="post" action="{{ url_for('jogador.cadastro_submit') }}" class="auth-form auth-form--signup-premium">
+    <form method="post" action="{{ url_for('jogador.cadastro_submit') }}" class="auth-form auth-form--signup-balanced">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="nivel" value="5">
 
-        <div class="auth-form-grid auth-form-grid--signup-premium">
+        <div class="auth-form-grid auth-form-grid--signup-balanced">
             <div class="form-group auth-field">
                 <label class="form-label" for="email">Email</label>
                 <div class="auth-input-wrap">
