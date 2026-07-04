@@ -82,15 +82,6 @@
                 {% include '_judge_nav.html' %}
             {% endif %}
 
-            <!-- Navigation Tabs -->
-            {% if auth_user.role != 'juiz' %}
-            <div class="nav-tabs">
-                <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
-                <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
-                <a href="{{ url_for('jogador.estatisticas') }}" class="nav-tab">📊 Estatísticas</a>
-            </div>
-            {% endif %}
-
             <!-- Aviso de Múltiplos Goleiros -->
             {% if tem_aviso %}
             <section class="section">

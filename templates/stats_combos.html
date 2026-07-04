@@ -171,18 +171,6 @@
 
         <!-- Main Content -->
         <main class="main">
-            <!-- Navigation Tabs -->
-            {% if auth_user.role != 'juiz' %}
-            <div class="nav-tabs">
-                <a href="{{ url_for('jogador.index') }}" class="nav-tab">👥 Jogadores</a>
-                <a href="{{ url_for('jogador.historico') }}" class="nav-tab">📜 Histórico</a>
-                <a href="{{ url_for('jogador.estatisticas') }}" class="nav-tab">📊 Estatísticas</a>
-                <a href="{{ url_for('jogador.stats_players') }}" class="nav-tab">🏆 Stats Jogadores</a>
-                <a href="{{ url_for('jogador.stats_times_page') }}" class="nav-tab">🎯 Stats Times</a>
-                <a href="{{ url_for('jogador.stats_combos_page') }}" class="nav-tab active">⭐ Combos</a>
-            </div>
-            {% endif %}
-
             <!-- Stats Overview -->
             <section class="section">
                 <div class="stats-grid">

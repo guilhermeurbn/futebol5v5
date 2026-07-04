@@ -13,17 +13,6 @@
     </header>
 
     <main class="main">
-        {% if usuario.role != 'juiz' %}
-        <div class="nav-tabs">
-            <a href="{{ url_for('jogador.index') }}" class="nav-tab">Jogadores</a>
-            {% if usuario.role == 'usuario' %}
-            <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab">Votação</a>
-            {% endif %}
-            <a href="{{ url_for('jogador.historico') }}" class="nav-tab">Histórico</a>
-            <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">Ranking</a>
-        </div>
-        {% endif %}
-
         <section class="section">
             <h2 class="section-title">✏️ Editar {{ jogador.nome }}</h2>
             <p class="section-subtitle">Atualize os dados do jogador mantendo o padrão visual do sistema.</p>

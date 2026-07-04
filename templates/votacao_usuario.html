@@ -13,16 +13,6 @@
     </header>
 
     <main class="main">
-        <!-- Navigation Tabs -->
-        {% if auth_user.role != 'juiz' %}
-        <div class="nav-tabs">
-            <a href="{{ url_for('jogador.index') }}" class="nav-tab">Jogadores</a>
-            <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab active">Votação</a>
-            <a href="{{ url_for('jogador.historico') }}" class="nav-tab">Histórico</a>
-            <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">Ranking</a>
-        </div>
-        {% endif %}
-
         {% if erro %}
             <div class="alert alert-warning"><strong>⚠️</strong> {{ erro }}</div>
         {% endif %}

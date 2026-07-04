@@ -8,30 +8,137 @@
             </a>
         </div>
 
-        {% if auth_user and auth_user.autenticado %}
-        <div class="auth-actions brand-header__banner-actions">
-            <div class="auth-links">
-                {% if auth_user.role in ['admin', 'super_admin'] %}
-                <a class="btn btn-warning" href="{{ url_for('admin.admin_page') }}" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; font-weight: 700;">⚙️ Admin</a>
-                <form method="post" action="{{ url_for('jogador.logout') }}" class="logout-form" style="margin: 0;">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button class="btn btn-danger" type="submit" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; font-weight: 700;">🚪 Sair</button>
-                </form>
-                {% elif auth_user.role == 'juiz' %}
-                <a class="btn btn-secondary judge-timer-shortcut" href="{{ url_for('juiz.juiz_cronometro') }}" aria-label="Abrir cronômetro" title="Cronômetro">⏱</a>
-                <form method="post" action="{{ url_for('jogador.logout') }}" class="logout-form">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button class="btn btn-danger" type="submit">Sair</button>
-                </form>
+        {% if show_site_footer %}
+        {% set current_path = request.path or '' %}
+        {% set is_admin_role = session.get('role') in ['admin', 'super_admin'] %}
+        {% set is_jogadores = current_path == '/' %}
+        {% set is_perfil = current_path.startswith('/perfil') %}
+        {% set is_votacao = current_path.startswith('/votacao') or current_path.startswith('/admin/votacao') %}
+        {% set is_historico = current_path.startswith('/historico') %}
+        {% set is_ranking = current_path.startswith('/ranking') %}
+        {% set is_admin_page = current_path.startswith('/admin') %}
+        {% set vote_href = url_for('jogador.votacao_page') if session.get('role') == 'usuario' else url_for('votacao.votacao_admin_page') %}
+        <div class="site-topbar" aria-label="Navegação principal">
+            <nav class="site-topbar__nav" aria-label="Navegação principal">
+                <a href="{{ url_for('jogador.index') }}" class="site-topbar__link{% if is_jogadores %} is-active{% endif %}" aria-label="Jogadores" title="Jogadores"{% if is_jogadores %} aria-current="page"{% endif %}>
+                    <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                </a>
+
+                <a href="{{ url_for('auth.perfil_page') }}" class="site-topbar__link{% if is_perfil %} is-active{% endif %}" aria-label="Meu perfil" title="Meu perfil"{% if is_perfil %} aria-current="page"{% endif %}>
+                    <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                        <circle cx="12" cy="8" r="4" />
+                        <path d="M6 21v-1a6 6 0 0 1 12 0v1" />
+                    </svg>
+                </a>
+
+                {% if is_admin_role %}
+                <a href="{{ url_for('admin.admin_page') }}" class="site-topbar__link{% if is_admin_page %} is-active{% endif %}" aria-label="Admin" title="Admin"{% if is_admin_page %} aria-current="page"{% endif %}>
+                    <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                        <path d="M11 10.27 7 3.34" />
+                        <path d="m11 13.73-4 6.93" />
+                        <path d="M12 22v-2" />
+                        <path d="M12 2v2" />
+                        <path d="M14 12h8" />
+                        <path d="m17 20.66-1-1.73" />
+                        <path d="m17 3.34-1 1.73" />
+                        <path d="M2 12h2" />
+                        <path d="m20.66 17-1.73-1" />
+                        <path d="m20.66 7-1.73 1" />
+                        <path d="m3.34 17 1.73-1" />
+                        <path d="m3.34 7 1.73 1" />
+                        <circle cx="12" cy="12" r="2" />
+                        <circle cx="12" cy="12" r="8" />
+                    </svg>
+                </a>
                 {% else %}
-                <a class="btn btn-secondary brand-profile-shortcut" href="{{ url_for('jogador.perfil_page') }}">Meu perfil</a>
-                <form method="post" action="{{ url_for('jogador.logout') }}" class="logout-form">
+                <a href="{{ vote_href }}" class="site-topbar__link{% if is_votacao %} is-active{% endif %}" aria-label="Votação" title="Votação"{% if is_votacao %} aria-current="page"{% endif %}>
+                    <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                        <path d="M9 12 11 14 15 10" />
+                        <path d="M5 3h14" />
+                        <path d="M5 7h14" />
+                        <path d="M7 21h10a2 2 0 0 0 2-2V9H5v10a2 2 0 0 0 2 2Z" />
+                    </svg>
+                </a>
+
+                <a href="{{ url_for('jogador.historico') }}" class="site-topbar__link{% if is_historico %} is-active{% endif %}" aria-label="Histórico" title="Histórico"{% if is_historico %} aria-current="page"{% endif %}>
+                    <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                        <path d="M3 3v5h5" />
+                        <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8" />
+                        <path d="M12 7v5l4 2" />
+                    </svg>
+                </a>
+                {% endif %}
+
+                <a href="{{ url_for('jogador.pagina_ranking') }}" class="site-topbar__link{% if is_ranking %} is-active{% endif %}" aria-label="Ranking" title="Ranking"{% if is_ranking %} aria-current="page"{% endif %}>
+                    <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                        <path d="M8 21h8" />
+                        <path d="M12 17v4" />
+                        <path d="M7 4h10v6a5 5 0 0 1-10 0V4Z" />
+                        <path d="M18 5h3v2a3 3 0 0 1-3 3" />
+                        <path d="M6 5H3v2a3 3 0 0 0 3 3" />
+                    </svg>
+                </a>
+                {% if auth_user and auth_user.autenticado and auth_user.role == 'juiz' %}
+                <a class="site-topbar__link judge-timer-shortcut" href="{{ url_for('juiz.juiz_cronometro') }}" aria-label="Abrir cronômetro" title="Cronômetro">
+                    <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                        <circle cx="12" cy="13" r="8" />
+                        <path d="M12 9v4l2 2" />
+                        <path d="M9 2h6" />
+                    </svg>
+                </a>
+                {% endif %}
+                {% if auth_user and auth_user.autenticado and auth_user.role != 'juiz' %}
+                <span class="brand-profile-shortcut" hidden aria-hidden="true"></span>
+                <form method="post" action="{{ url_for('jogador.logout') }}" class="site-topbar__form">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button class="btn btn-danger" type="submit">Sair</button>
+                    <button type="submit" class="site-topbar__button site-topbar__button--danger" aria-label="Sair" title="Sair">
+                        <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                            <path d="M16 17l5-5-5-5" />
+                            <path d="M21 12H9" />
+                            <path d="M13 5V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h5a2 2 0 0 0 2-2v-1" />
+                        </svg>
+                    </button>
                 </form>
                 {% endif %}
-            </div>
+                    {% if auth_user and auth_user.autenticado and auth_user.role == 'juiz' %}
+                    <form method="post" action="{{ url_for('jogador.logout') }}" class="site-topbar__form">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="site-topbar__button site-topbar__button--danger" aria-label="Sair" title="Sair">
+                            <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                                <path d="M16 17l5-5-5-5" />
+                                <path d="M21 12H9" />
+                                <path d="M13 5V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h5a2 2 0 0 0 2-2v-1" />
+                            </svg>
+                        </button>
+                    </form>
+                    {% endif %}
+            </nav>
         </div>
+
+            {% if auth_user and auth_user.autenticado %}
+            <div class="brand-header__mobile-actions">
+                <div class="auth-links">
+                    {% if auth_user.role == 'juiz' %}
+                    <a class="btn btn-secondary judge-timer-shortcut" href="{{ url_for('juiz.juiz_cronometro') }}" aria-label="Abrir cronômetro" title="Cronômetro">⏱</a>
+                    {% endif %}
+                    <form method="post" action="{{ url_for('jogador.logout') }}" class="logout-form">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="btn btn-danger brand-header__mobile-logout" type="submit" aria-label="Sair" title="Sair">
+                            <svg class="brand-header__mobile-logout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                                <path d="M16 17l5-5-5-5" />
+                                <path d="M21 12H9" />
+                                <path d="M13 5V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h5a2 2 0 0 0 2-2v-1" />
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
         {% endif %}
     </div>
 </div>
@@ -42,30 +149,134 @@
             <img src="{{ url_for('static', filename='logo-natrave-5v5.png') }}" alt="NaTrave 5v5" class="brand-logo-image">
         </a>
     </div>
-    {% if auth_user and auth_user.autenticado %}
-    <div class="auth-actions">
-        <div class="auth-links">
-            {% if auth_user.role in ['admin', 'super_admin'] %}
-            <!-- Admin Dashboard - Minimal buttons -->
-            <a class="btn btn-warning" href="{{ url_for('admin.admin_page') }}" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; font-weight: 700;">⚙️ Admin</a>
-            <form method="post" action="{{ url_for('jogador.logout') }}" class="logout-form" style="margin: 0;">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button class="btn btn-danger" type="submit" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; font-weight: 700;">🚪 Sair</button>
-            </form>
-            {% elif auth_user.role == 'juiz' %}
-            <a class="btn btn-secondary judge-timer-shortcut" href="{{ url_for('juiz.juiz_cronometro') }}" aria-label="Abrir cronômetro" title="Cronômetro">⏱</a>
-            <form method="post" action="{{ url_for('jogador.logout') }}" class="logout-form">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button class="btn btn-danger" type="submit">Sair</button>
-            </form>
+    {% if show_site_footer %}
+    {% set current_path = request.path or '' %}
+    {% set is_admin_role = session.get('role') in ['admin', 'super_admin'] %}
+    {% set is_jogadores = current_path == '/' %}
+    {% set is_perfil = current_path.startswith('/perfil') %}
+    {% set is_votacao = current_path.startswith('/votacao') or current_path.startswith('/admin/votacao') %}
+    {% set is_historico = current_path.startswith('/historico') %}
+    {% set is_ranking = current_path.startswith('/ranking') %}
+    {% set is_admin_page = current_path.startswith('/admin') %}
+    {% set vote_href = url_for('jogador.votacao_page') if session.get('role') == 'usuario' else url_for('votacao.votacao_admin_page') %}
+    <div class="site-topbar" aria-label="Navegação principal">
+        <nav class="site-topbar__nav" aria-label="Navegação principal">
+            <a href="{{ url_for('jogador.index') }}" class="site-topbar__link{% if is_jogadores %} is-active{% endif %}" aria-label="Jogadores" title="Jogadores"{% if is_jogadores %} aria-current="page"{% endif %}>
+                <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+            </a>
+
+            <a href="{{ url_for('auth.perfil_page') }}" class="site-topbar__link{% if is_perfil %} is-active{% endif %}" aria-label="Meu perfil" title="Meu perfil"{% if is_perfil %} aria-current="page"{% endif %}>
+                <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <circle cx="12" cy="8" r="4" />
+                    <path d="M6 21v-1a6 6 0 0 1 12 0v1" />
+                </svg>
+            </a>
+
+            {% if is_admin_role %}
+            <a href="{{ url_for('admin.admin_page') }}" class="site-topbar__link{% if is_admin_page %} is-active{% endif %}" aria-label="Admin" title="Admin"{% if is_admin_page %} aria-current="page"{% endif %}>
+                <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <path d="M11 10.27 7 3.34" />
+                    <path d="m11 13.73-4 6.93" />
+                    <path d="M12 22v-2" />
+                    <path d="M12 2v2" />
+                    <path d="M14 12h8" />
+                    <path d="m17 20.66-1-1.73" />
+                    <path d="m17 3.34-1 1.73" />
+                    <path d="M2 12h2" />
+                    <path d="m20.66 17-1.73-1" />
+                    <path d="m20.66 7-1.73 1" />
+                    <path d="m3.34 17 1.73-1" />
+                    <path d="m3.34 7 1.73 1" />
+                    <circle cx="12" cy="12" r="2" />
+                    <circle cx="12" cy="12" r="8" />
+                </svg>
+            </a>
             {% else %}
-            <!-- Regular User Navigation -->
-            <a class="btn btn-secondary brand-profile-shortcut" href="{{ url_for('jogador.perfil_page') }}">Meu perfil</a>
-            <form method="post" action="{{ url_for('jogador.logout') }}" class="logout-form">
+            <a href="{{ vote_href }}" class="site-topbar__link{% if is_votacao %} is-active{% endif %}" aria-label="Votação" title="Votação"{% if is_votacao %} aria-current="page"{% endif %}>
+                <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <path d="M9 12 11 14 15 10" />
+                    <path d="M5 3h14" />
+                    <path d="M5 7h14" />
+                    <path d="M7 21h10a2 2 0 0 0 2-2V9H5v10a2 2 0 0 0 2 2Z" />
+                </svg>
+            </a>
+
+            <a href="{{ url_for('jogador.historico') }}" class="site-topbar__link{% if is_historico %} is-active{% endif %}" aria-label="Histórico" title="Histórico"{% if is_historico %} aria-current="page"{% endif %}>
+                <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <path d="M3 3v5h5" />
+                    <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8" />
+                    <path d="M12 7v5l4 2" />
+                </svg>
+            </a>
+            {% endif %}
+
+            <a href="{{ url_for('jogador.pagina_ranking') }}" class="site-topbar__link{% if is_ranking %} is-active{% endif %}" aria-label="Ranking" title="Ranking"{% if is_ranking %} aria-current="page"{% endif %}>
+                <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <path d="M8 21h8" />
+                    <path d="M12 17v4" />
+                    <path d="M7 4h10v6a5 5 0 0 1-10 0V4Z" />
+                    <path d="M18 5h3v2a3 3 0 0 1-3 3" />
+                    <path d="M6 5H3v2a3 3 0 0 0 3 3" />
+                </svg>
+            </a>
+            {% if auth_user and auth_user.autenticado and auth_user.role == 'juiz' %}
+            <a class="site-topbar__link judge-timer-shortcut" href="{{ url_for('juiz.juiz_cronometro') }}" aria-label="Abrir cronômetro" title="Cronômetro">
+                <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <circle cx="12" cy="13" r="8" />
+                    <path d="M12 9v4l2 2" />
+                    <path d="M9 2h6" />
+                </svg>
+            </a>
+            {% endif %}
+            {% if auth_user and auth_user.autenticado and auth_user.role != 'juiz' %}
+            <span class="brand-profile-shortcut" hidden aria-hidden="true"></span>
+            <form method="post" action="{{ url_for('jogador.logout') }}" class="site-topbar__form">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button class="btn btn-danger" type="submit">Sair</button>
+                <button type="submit" class="site-topbar__button site-topbar__button--danger" aria-label="Sair" title="Sair">
+                    <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                        <path d="M16 17l5-5-5-5" />
+                        <path d="M21 12H9" />
+                        <path d="M13 5V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h5a2 2 0 0 0 2-2v-1" />
+                    </svg>
+                </button>
             </form>
             {% endif %}
+            {% if auth_user and auth_user.autenticado and auth_user.role == 'juiz' %}
+            <form method="post" action="{{ url_for('jogador.logout') }}" class="site-topbar__form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="site-topbar__button site-topbar__button--danger" aria-label="Sair" title="Sair">
+                    <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                        <path d="M16 17l5-5-5-5" />
+                        <path d="M21 12H9" />
+                        <path d="M13 5V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h5a2 2 0 0 0 2-2v-1" />
+                    </svg>
+                </button>
+            </form>
+            {% endif %}
+        </nav>
+    </div>
+    {% endif %}
+    {% if auth_user and auth_user.autenticado %}
+    <div class="brand-header__mobile-actions">
+        <div class="auth-links">
+            {% if auth_user.role == 'juiz' %}
+            <a class="btn btn-secondary judge-timer-shortcut" href="{{ url_for('juiz.juiz_cronometro') }}" aria-label="Abrir cronômetro" title="Cronômetro">⏱</a>
+            {% endif %}
+            <form method="post" action="{{ url_for('jogador.logout') }}" class="logout-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn btn-danger brand-header__mobile-logout" type="submit" aria-label="Sair" title="Sair">
+                    <svg class="brand-header__mobile-logout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                        <path d="M16 17l5-5-5-5" />
+                        <path d="M21 12H9" />
+                        <path d="M13 5V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h5a2 2 0 0 0 2-2v-1" />
+                    </svg>
+                </button>
+            </form>
         </div>
     </div>
     {% endif %}

@@ -559,19 +559,24 @@ class VotacaoService:
                     "pontos": 0.0,
                     "avaliacoes": 0,
                     "gols": 0,
-                    "assistencias": 0,
                     "vitorias": 0,
+                    "derrotas": 0,
+                    "empates": 0,
                     "destaques": 0,
                 })
                 item["jogos"] += 1
 
+                resultado_time = self._resultado_por_time(resultado, participante.get("time_numero")) if resultado else "empate"
+
                 detalhe = detalhes_resultado.get(nome, {})
                 item["gols"] += int(detalhe.get("gols", 0) or 0)
-                item["assistencias"] += int(detalhe.get("assistencias", 0) or 0)
 
-                time_numero = participante.get("time_numero")
-                if resultado and self._resultado_por_time(resultado, time_numero) == "vitoria":
+                if resultado_time == "vitoria":
                     item["vitorias"] += 1
+                elif resultado_time == "derrota":
+                    item["derrotas"] += 1
+                else:
+                    item["empates"] += 1
 
                 if melhor_jogador and melhor_jogador == nome:
                     item["destaques"] += 1
@@ -587,24 +592,42 @@ class VotacaoService:
                         "pontos": 0.0,
                         "avaliacoes": 0,
                         "gols": 0,
-                        "assistencias": 0,
                         "vitorias": 0,
+                        "derrotas": 0,
+                        "empates": 0,
                         "destaques": 0,
                     })
                     item["avaliacoes"] += 1
                     item["nota_total"] += nota
-                    item["pontos"] += nota
+
+        for item in acumulado.values():
+            avaliacoes = item.get("avaliacoes", 0)
+            jogos = item.get("jogos", 0)
+            vitorias = item.get("vitorias", 0)
+            derrotas = item.get("derrotas", 0)
+            destaques = item.get("destaques", 0)
+            item["nota_media"] = round(item["nota_total"] / avaliacoes, 2) if avaliacoes else 0
+            saldo_resultado = vitorias - derrotas
+            item["saldo_resultado"] = saldo_resultado
+            nota_component = (item["nota_media"] / 10.0) * 50.0
+            jogos_component = (min(jogos, 20) / 20.0) * 15.0
+            saldo_component = 0.0
+            if jogos > 0:
+                saldo_clamped = max(-20, min(20, saldo_resultado))
+                saldo_component = ((saldo_clamped + 20) / 40.0) * 25.0
+            destaque_component = (min(destaques, 5) / 5.0) * 10.0
+
+            item["pontos"] = round(
+                min(100.0, max(0.0, nota_component + jogos_component + saldo_component + destaque_component)),
+                2,
+            )
 
         ranking = sorted(
             acumulado.values(),
-            key=lambda x: (x["pontos"], x["destaques"], x["vitorias"]),
+            key=lambda x: (x["pontos"], x["jogos"], x["vitorias"], x["destaques"]),
             reverse=True
         )
         ranking = ranking[:max(1, int(limite))]
-
-        for item in ranking:
-            avaliacoes = item.get("avaliacoes", 0)
-            item["nota_media"] = round(item["nota_total"] / avaliacoes, 2) if avaliacoes else 0
 
         return {
             "ranking": ranking,

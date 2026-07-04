@@ -12,18 +12,6 @@
         </div>
     </div>
 
-    <!-- Navigation Tabs -->
-    {% if auth_user.role != 'juiz' %}
-    <div class="nav-tabs">
-        <a href="{{ url_for('jogador.index') }}" class="nav-tab">Jogadores</a>
-        {% if auth_user.role == 'usuario' %}
-        <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab">Votação</a>
-        {% endif %}
-        <a href="{{ url_for('jogador.historico') }}" class="nav-tab">Histórico</a>
-        <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">Ranking</a>
-    </div>
-    {% endif %}
-
     <section class="surface-panel surface-panel--soft result-intro">
         <div class="result-intro__header">
             <div>

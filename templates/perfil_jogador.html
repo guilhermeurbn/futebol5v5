@@ -13,17 +13,6 @@
     </header>
 
     <main class="main">
-        {% if usuario.role != 'juiz' %}
-        <div class="nav-tabs">
-            <a href="{{ url_for('jogador.index') }}" class="nav-tab">Jogadores</a>
-            {% if usuario.role == 'usuario' %}
-            <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab">Votação</a>
-            {% endif %}
-            <a href="{{ url_for('jogador.historico') }}" class="nav-tab">Histórico</a>
-            <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">Ranking</a>
-        </div>
-        {% endif %}
-
         {% set nome_partes = jogador.nome.split() %}
         {% set avatar_text = nome_partes[0][:2] if nome_partes else jogador.nome[:2] %}
         {% set total_partidas = stats_jogador.total_partidas if stats_jogador else 0 %}

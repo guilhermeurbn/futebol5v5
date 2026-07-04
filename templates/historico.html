@@ -13,58 +13,16 @@
     </header>
 
     <main class="main">
-        {% if auth_user.role != 'juiz' %}
-        <div class="nav-tabs">
-            <a href="{{ url_for('jogador.index') }}" class="nav-tab">Jogadores</a>
-            {% if auth_user.role == 'usuario' %}
-            <a href="{{ url_for('jogador.votacao_page') }}" class="nav-tab">Votação</a>
-            {% endif %}
-            <a href="{{ url_for('jogador.historico') }}" class="nav-tab active">Histórico</a>
-            <a href="{{ url_for('jogador.pagina_ranking') }}" class="nav-tab">Ranking</a>
-        </div>
-        {% endif %}
-
         {% if erro %}
         <div class="alert alert-warning" role="alert">{{ erro }}</div>
         {% endif %}
 
-        <section class="section">
-            <div class="judge-flow-card judge-draw-history history-page__hero">
-                <div class="judge-flow-card__heading">
-                    <div>
-                        <span class="judge-flow-kicker">Visão consolidada</span>
-                        <h1>Histórico de sorteios</h1>
-                        <p>Cada rodada mostra times, placar e situação da votação sem depender de páginas antigas.</p>
-                    </div>
-                    <span class="judge-history-count">{{ resumo.total_sorteios }}</span>
-                </div>
+        <div class="history-page__accent" aria-hidden="true"></div>
 
-                <div class="stats-grid history-page__summary-grid">
-                    <div class="stat-card">
-                        <div class="stat-label">Sorteios salvos</div>
-                        <div class="stat-value">{{ resumo.total_sorteios }}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Com resultado</div>
-                        <div class="stat-value">{{ resumo.com_resultado }}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Votações abertas</div>
-                        <div class="stat-value">{{ resumo.votacoes_abertas }}</div>
-                    </div>
-                    <div class="stat-card destaque">
-                        <div class="stat-label">Votações encerradas</div>
-                        <div class="stat-value">{{ resumo.votacoes_encerradas }}</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="section">
-            {% if sorteios %}
+        {% if sorteios %}
             <div class="judge-draw-history__list history-page__list">
                 {% for sorteio in sorteios %}
-                <details class="judge-draw-history__item votacao-admin-history-card {% if loop.first %}votacao-admin-history-card--featured{% endif %} {% if sorteio.votacao_encerrada %}votacao-admin-history-card--closed{% elif sorteio.votacao_aberta %}votacao-admin-history-card--open{% endif %}" {% if loop.first %}open{% endif %}>
+                <details class="judge-draw-history__item votacao-admin-history-card {% if loop.first %}votacao-admin-history-card--featured{% endif %} {% if sorteio.votacao_encerrada %}votacao-admin-history-card--closed{% elif sorteio.votacao_aberta %}votacao-admin-history-card--open{% endif %}">
                     <summary class="history-page__summary">
                         <span class="judge-draw-history__identity">
                             <span class="judge-draw-history__number">#{{ sorteio.id }}</span>
@@ -125,13 +83,13 @@
                         <div class="votacao-admin-history-result-grid">
                             {% for item in sorteio.resultado_resumo %}
                             <div class="votacao-admin-history-result-card">
-                                <small>Time {{ item.time_numero }}</small>
-                                <strong>{{ item.gols }} gol{{ '' if item.gols == 1 else 's' }}</strong>
-                                <small>
-                                    {{ item.desempenho.vitorias if item.desempenho else 0 }}V
-                                    {{ item.desempenho.empates if item.desempenho else 0 }}E
-                                    {{ item.desempenho.derrotas if item.desempenho else 0 }}D
-                                </small>
+                                <div class="votacao-admin-history-result-card__label">Time {{ item.time_numero }}</div>
+                                <strong class="votacao-admin-history-result-card__score">{{ item.gols }} gol{{ '' if item.gols == 1 else 's' }}</strong>
+                                <div class="votacao-admin-history-result-card__record">
+                                    <span>{{ item.desempenho.vitorias if item.desempenho else 0 }}V</span>
+                                    <span>{{ item.desempenho.empates if item.desempenho else 0 }}E</span>
+                                    <span>{{ item.desempenho.derrotas if item.desempenho else 0 }}D</span>
+                                </div>
                             </div>
                             {% endfor %}
                         </div>
@@ -143,9 +101,10 @@
 
                         {% if sorteio.votacao_encerrada and sorteio.melhor_jogador %}
                         <div class="votacao-admin-history-ranking-summary">
-                            <span>Mais votado: <strong>{{ sorteio.melhor_jogador.jogador_nome }}</strong></span>
-                            <span>{{ sorteio.melhor_jogador.votos }} voto(s)</span>
-                            <span>Média {{ sorteio.melhor_jogador.nota_media }}</span>
+                            <span class="votacao-admin-history-ranking-summary__label">Mais votado</span>
+                            <strong class="votacao-admin-history-ranking-summary__name">{{ sorteio.melhor_jogador.jogador_nome }}</strong>
+                            <span class="votacao-admin-history-ranking-summary__pill">{{ sorteio.melhor_jogador.votos }} voto(s)</span>
+                            <span class="votacao-admin-history-ranking-summary__pill">Média {{ sorteio.melhor_jogador.nota_media }}</span>
                         </div>
                         {% elif sorteio.votacao_aberta %}
                         <div class="surface-panel surface-panel--soft votacao-admin-history-open-note">
@@ -162,14 +121,13 @@
                 </details>
                 {% endfor %}
             </div>
-            {% else %}
+        {% else %}
             <div class="empty-state">
                 <div class="empty-icon">📜</div>
                 <p>Nenhum sorteio realizado ainda</p>
                 <p class="empty-hint">Assim que uma rodada for criada, ela aparecerá aqui com o resumo completo.</p>
             </div>
-            {% endif %}
-        </section>
+        {% endif %}
     </main>
 
     <footer class="footer">
