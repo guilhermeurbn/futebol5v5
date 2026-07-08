@@ -1,5 +1,5 @@
 {
-  "ultimo_id": 49,
+  "ultimo_id": 50,
   "notificacoes": [],
   "arquivadas": [
     {
@@ -57,6 +57,14 @@
       "tipo": "cadastro",
       "lida": true,
       "criado_em": "2026-06-08T22:24:13.721981"
+    },
+    {
+      "id": 50,
+      "titulo": "Novo cadastro de usuario",
+      "mensagem": "Usuario copilot_nav_test (Copilot Nav Test) acabou de se cadastrar.",
+      "tipo": "cadastro",
+      "lida": true,
+      "criado_em": "2026-07-04T13:16:12.910677"
     }
   ]
 }

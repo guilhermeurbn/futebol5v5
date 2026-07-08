@@ -5,17 +5,12 @@ import os
 from datetime import timedelta
 
 
-def _env_flag(name: str, default: str = '0') -> bool:
-    return os.getenv(name, default).strip().lower() in {'1', 'true', 'yes', 'on'}
-
-
 class Config:
     """Configuração base"""
     DEBUG = False
     TESTING = False
     JSON_SORT_KEYS = False
     PERMANENT_SESSION_LIFETIME = timedelta(hours=2)
-    ENABLE_APP_SHELL = _env_flag('ENABLE_APP_SHELL', '1')
     # Session / cookie security defaults (can be overridden per-environment)
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Strict'

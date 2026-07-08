@@ -240,5 +240,16 @@
     "criado_em": "2026-06-05T11:57:53.809166",
     "ativo": true,
     "senha_temporaria_ativa": false
+  },
+  {
+    "id": "b916183c-d695-4018-9c54-9aa0db8e7924",
+    "email": "copilot.nav.test.20260704@example.com",
+    "username": "copilot_nav_test",
+    "nome": "Copilot Nav Test",
+    "password_hash": "scrypt:32768:8:1$LXDoFnGg4waUJ8Ii$96a62c9106380e6eb9461361efea0665c85186d9f536549ec9be221d5100d640f1d960e9c22a8a7b027e6f776e3a0a8aa514b1ae5634d3fe72999904f7b0fe00",
+    "role": "usuario",
+    "criado_em": "2026-07-04T13:16:12.646349",
+    "ativo": true,
+    "senha_temporaria_ativa": false
   }
 ]

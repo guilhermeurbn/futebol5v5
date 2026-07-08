@@ -4,7 +4,7 @@ Rotas de Administração
 """
 import os
 
-from flask import Blueprint, request, render_template, redirect, url_for, session
+from flask import Blueprint, request, render_template, redirect, url_for, session, jsonify
 from functools import wraps
 import logging
 
@@ -70,6 +70,7 @@ def admin_page():
             usuarios=usuarios,
             notificacoes=notificacoes,
             total_notificacoes=notificacao_service.contar_nao_lidas(),
+            total_usuarios=len(usuarios),
             sucesso=sucesso,
             erro=erro,
             senha_reset=senha_reset,
@@ -78,6 +79,30 @@ def admin_page():
     except Exception as e:
         logger.error(f"Erro ao carregar dashboard admin: {str(e)}")
         return render_template('admin.html', erro='Erro ao carregar dashboard'), 500
+
+
+@admin_bp.route('/api/admin/painel', methods=['GET'])
+@admin_required
+def api_admin_painel():
+    """API: Resumo leve do painel admin."""
+    try:
+        usuarios = auth_service.listar_usuarios()
+        notificacoes = notificacao_service.listar_notificacoes(apenas_nao_lidas=True, limite=15)
+        arquivadas = notificacao_service.listar_arquivadas(limite=10)
+
+        return jsonify({
+            'sucesso': True,
+            'dados': {
+                'total_usuarios': len(usuarios),
+                'total_notificacoes': notificacao_service.contar_nao_lidas(),
+                'usuarios': usuarios,
+                'notificacoes': notificacoes,
+                'arquivadas': arquivadas,
+            }
+        })
+    except Exception as e:
+        logger.error(f"Erro ao retornar painel admin: {str(e)}")
+        return jsonify({'sucesso': False, 'erro': 'Erro ao retornar painel admin'}), 500
 
 
 # ============================================================

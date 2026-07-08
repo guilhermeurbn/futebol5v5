@@ -4,7 +4,7 @@
     <div class="brand-header__banner-center">
         <div class="logo-header brand-header__banner-logo">
             <a href="{{ url_for('juiz.jogar_page') if auth_user and auth_user.role == 'juiz' else url_for('jogador.index') }}" aria-label="Ir para a página inicial" style="display:inline-block;">
-                <img src="{{ url_for('static', filename='logo-natrave-5v5.png') }}" alt="NaTrave 5v5" class="brand-logo-image">
+                <img src="{{ url_for('static', filename='natrave.svg', v='20260708-03') }}" alt="NaTrave 5v5" class="brand-logo-image">
             </a>
         </div>
 
@@ -146,7 +146,7 @@
 <div class="brand-header">
     <div class="logo-header">
         <a href="{{ url_for('juiz.jogar_page') if auth_user and auth_user.role == 'juiz' else url_for('jogador.index') }}" aria-label="Ir para a página inicial" style="display:inline-block;">
-            <img src="{{ url_for('static', filename='logo-natrave-5v5.png') }}" alt="NaTrave 5v5" class="brand-logo-image">
+            <img src="{{ url_for('static', filename='natrave.svg', v='20260708-03') }}" alt="NaTrave 5v5" class="brand-logo-image">
         </a>
     </div>
     {% if show_site_footer %}

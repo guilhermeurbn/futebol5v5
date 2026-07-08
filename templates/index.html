@@ -17,7 +17,7 @@
         </header>
 
         <!-- Main Content -->
-        <main class="main">
+        <main class="main" data-player-shell data-player-api="{{ url_for('jogador.listar_jogadores_api') }}" data-player-stats-api="{{ url_for('stats.api_stats_players') }}" data-player-cache-key="natrave:players:list:v1">
             {% if erro %}
                 <div class="alert alert-warning">
                     <strong>⚠️ Aviso:</strong> {{ erro }}

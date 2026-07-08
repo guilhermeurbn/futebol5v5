@@ -2,7 +2,7 @@
 Rotas do Fluxo do Juiz
 - Criar partida, finalizar partida, seleção de jogadores
 """
-from flask import Blueprint, request, render_template, redirect, url_for, session
+from flask import Blueprint, request, render_template, redirect, url_for, session, jsonify
 from functools import wraps
 import logging
 
@@ -344,6 +344,29 @@ def jogar_page():
     except Exception as e:
         logger.error(f"Erro ao carregar página do juiz: {str(e)}")
         return render_template('juiz_home.html', erro='Erro ao carregar página'), 500
+
+
+@juiz_bp.route('/api/jogar/resumo', methods=['GET'])
+@juiz_required
+def api_jogar_resumo():
+    """API: Resumo leve do painel do juiz."""
+    try:
+        estado_fluxo = _sincronizar_fluxo_juiz()
+        todos_jogadores = jogador_service.listar()
+        ultima_partida = estado_fluxo.get('ultima_partida_encerrada')
+
+        return jsonify({
+            'sucesso': True,
+            'dados': {
+                'total_jogadores': len(todos_jogadores),
+                'total_presentes': len([j for j in todos_jogadores if j.presente]),
+                'status_fluxo': estado_fluxo.get('status'),
+                'ultima_partida': ultima_partida,
+            }
+        })
+    except Exception as e:
+        logger.error(f"Erro ao retornar resumo do juiz: {str(e)}")
+        return jsonify({'sucesso': False, 'erro': 'Erro ao retornar resumo'}), 500
 
 
 # ============================================================

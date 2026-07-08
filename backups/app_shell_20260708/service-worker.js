@@ -1,5 +1,5 @@
 // NaTrave Service Worker - Offline Support & Caching Strategy
-const SW_VERSION = '20260708-01';
+const SW_VERSION = '20260616-06';
 const CACHE_NAME = `natrave-v${SW_VERSION}`;
 const RUNTIME_CACHE = `natrave-runtime-v${SW_VERSION}`;
 const IMAGE_CACHE = `natrave-images-v${SW_VERSION}`;
@@ -9,7 +9,6 @@ const urlsToCache = [
   '/',
   '/static/style.css?v=20260616-06',
   '/static/local-datetime.js?v=20260616-06',
-  '/static/app-shell.js?v=20260708-01',
   '/static/offline-judge.js',
   '/sortear',
   '/historico'
@@ -94,12 +93,6 @@ self.addEventListener('fetch', event => {
     event.respondWith(
       fetch(event.request)
         .then(response => {
-          if (response.status === 200) {
-            const responseToCache = response.clone();
-            caches.open(RUNTIME_CACHE).then(cache => {
-              cache.put(event.request, responseToCache);
-            });
-          }
           return response;
         })
         .catch(() => {

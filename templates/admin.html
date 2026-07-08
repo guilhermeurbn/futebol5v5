@@ -12,7 +12,7 @@
         </div>
     </header>
 
-    <main class="main">
+    <main class="main" data-admin-shell data-admin-api="{{ url_for('admin.api_admin_painel') }}" data-admin-cache-key="natrave:admin:painel:v1">
         {% if sucesso %}
             <div class="admin-feedback admin-feedback--success" role="status">
                 <div class="admin-feedback__icon">✅</div>
@@ -33,13 +33,24 @@
         {% endif %}
 
         {% if total_notificacoes %}
-        <div class="admin-page__notification-hint">O atalho de avisos aparece no canto da tela em todas as páginas.</div>
+        <div class="admin-page__notification-hint" data-admin-notification-hint>O atalho de avisos aparece no canto da tela em todas as páginas.</div>
         {% endif %}
 
         <section class="judge-flow-intro judge-flow-intro--compact admin-page__hero">
             <span class="judge-flow-kicker">Administração central</span>
             <h1>Painel Admin</h1>
             <p>Gerencie usuários, permissões e acessos com o mesmo padrão visual e operacional do fluxo do juiz.</p>
+        </section>
+
+        <section class="section judge-flow-card admin-summary-strip" aria-label="Resumo administrativo">
+            <div class="admin-summary-strip__item">
+                <span class="admin-summary-strip__value" data-admin-total-usuarios>{{ total_usuarios or usuarios|length }}</span>
+                <small>Usuários</small>
+            </div>
+            <div class="admin-summary-strip__item">
+                <span class="admin-summary-strip__value" data-admin-total-notificacoes>{{ total_notificacoes }}</span>
+                <small>Notificações</small>
+            </div>
         </section>
 
         <section class="section judge-flow-card admin-users-section">

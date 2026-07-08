@@ -12,7 +12,7 @@
         </div>
     </header>
 
-    <main class="main">
+    <main class="main" data-judge-shell data-judge-api="{{ url_for('juiz.api_jogar_resumo') }}" data-judge-cache-key="natrave:judge:home:v1">
         {% set current_section = 'criar' %}
         {% include '_judge_nav.html' %}
 
@@ -22,13 +22,20 @@
                     <h1>Criar partida</h1>
                     <p>Selecione os jogadores e sorteie os times.</p>
                 </div>
-                <span class="judge-available-count">{{ total_jogadores }} jogadores disponíveis</span>
+                <span class="judge-available-count" data-judge-total-jogadores>{{ total_jogadores }} jogadores disponíveis</span>
             </div>
             <form method="post" action="{{ url_for('juiz.juiz_criar_partida') }}" class="judge-start-card__form">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button class="btn btn-primary" type="submit">Selecionar jogadores</button>
             </form>
         </section>
+
+        {% if ultima_partida %}
+        <section class="section judge-flow-card" data-judge-last-match>
+            <h2 class="section-title">Última partida</h2>
+            <p class="section-subtitle">{{ ultima_partida.titulo or 'Partida encerrada recentemente' }}</p>
+        </section>
+        {% endif %}
     </main>
 </div>
 {% endblock %}
