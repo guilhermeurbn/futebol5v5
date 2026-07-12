@@ -13,10 +13,6 @@
     </header>
 
     <main class="main">
-        {% set current_section = 'historico' %}
-        {% set judge_nav_sorteio_id = sorteio_atual_id %}
-        {% include '_judge_nav.html' %}
-
         {% if erro %}
         <div class="alert alert-warning" role="alert">{{ erro }}</div>
         {% endif %}

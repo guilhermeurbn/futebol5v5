@@ -2009,6 +2009,110 @@ body.has-site-footer .player-vote-notification {
   backdrop-filter: blur(14px);
 }
 
+/* Floating sorter action (judge create page) */
+.judge-create-page .judge-sort-fab {
+  position: fixed;
+  right: max(0.7rem, env(safe-area-inset-right));
+  bottom: calc(var(--site-footer-height-mobile) + 0.65rem + env(safe-area-inset-bottom));
+  left: auto;
+  width: auto;
+  min-width: min(92vw, 355px);
+  max-width: min(92vw, 355px);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.55rem;
+  padding: 0.52rem;
+  border-radius: 14px;
+  z-index: 45;
+}
+
+.judge-create-page .judge-sort-fab__counter {
+  min-height: 40px;
+  max-width: 175px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.56rem;
+  border-radius: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(8, 8, 10, 0.95);
+  color: #d8dfec;
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.12;
+  text-align: center;
+}
+
+.judge-create-page .judge-sort-fab--minimal {
+  min-width: 0;
+  max-width: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.judge-create-page .judge-sort-fab__ball {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: #0a0a0c;
+  color: #e9edf7;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.32);
+  transition: width 180ms ease, min-width 180ms ease, border-color 180ms ease, background-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
+}
+
+.judge-create-page .judge-sort-fab__ball #btnSortearTexto {
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  transition: font-size 160ms ease, letter-spacing 160ms ease;
+}
+
+.judge-create-page .judge-sort-fab--minimal.is-ready .judge-sort-fab__ball {
+  width: 116px;
+  min-width: 116px;
+  border-color: rgba(34, 197, 94, 0.48);
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: #04220c;
+  box-shadow: 0 12px 26px rgba(13, 87, 41, 0.34), 0 0 0 1px rgba(34, 197, 94, 0.24);
+}
+
+.judge-create-page .judge-sort-fab--minimal.is-ready .judge-sort-fab__ball #btnSortearTexto {
+  font-size: 0.86rem;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+}
+
+.judge-create-page .judge-sort-fab--minimal .judge-sort-fab__ball:disabled {
+  opacity: 0.95;
+  cursor: not-allowed;
+}
+
+.judge-create-page .judge-sort-fab .btn {
+  min-width: 132px;
+  min-height: 42px;
+  padding-inline: 1rem;
+}
+
+.judge-create-page .judge-sort-fab:not(.is-ready) {
+  opacity: 0.95;
+}
+
+.judge-create-page .judge-sort-fab.is-ready {
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.42), 0 0 0 1px rgba(34, 197, 94, 0.25);
+}
+
 .judge-create-action > div strong {
   color: var(--judge-ink);
 }
@@ -14198,14 +14302,41 @@ body.modal-open {
   .judge-create-page .judge-create-action {
     position: fixed;
     right: max(0.55rem, env(safe-area-inset-right));
-    bottom: max(0.55rem, env(safe-area-inset-bottom));
-    left: max(0.55rem, env(safe-area-inset-left));
+    bottom: calc(var(--site-footer-height-mobile) + 0.55rem + env(safe-area-inset-bottom));
+    left: auto;
     z-index: 40;
-    opacity: 0.58;
+    opacity: 0.92;
   }
 
   .judge-create-page .judge-create-action.is-ready {
     opacity: 1;
+  }
+
+  .judge-create-page .judge-sort-fab {
+    min-width: 0;
+    max-width: none;
+    gap: 0;
+    padding: 0;
+  }
+
+  .judge-create-page .judge-sort-fab__ball {
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    min-height: 46px;
+  }
+
+  .judge-create-page .judge-sort-fab--minimal.is-ready .judge-sort-fab__ball {
+    width: 106px;
+    min-width: 106px;
+  }
+
+  .judge-create-page .judge-sort-fab__ball #btnSortearTexto {
+    font-size: 0.98rem;
+  }
+
+  .judge-create-page .judge-sort-fab--minimal.is-ready .judge-sort-fab__ball #btnSortearTexto {
+    font-size: 0.82rem;
   }
 
   .judge-timer-page .judge-timer-presets {
@@ -15546,4 +15677,15 @@ body.modal-open {
   box-shadow:
     0 14px 32px rgba(139, 92, 246, 0.4),
     0 0 0 3px rgba(34, 197, 94, 0.1);
+}
+
+/* Global black background override: apply to all pages */
+html,
+body,
+#app-content,
+.container,
+.page-container-wide,
+.main {
+  background: #000000 !important;
+  background-image: none !important;
 }

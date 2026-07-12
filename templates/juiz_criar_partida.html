@@ -13,10 +13,6 @@
     </header>
 
     <main class="main">
-        {# Navigation Bar #}
-        {% set current_section = 'criar' %}
-        {% include '_judge_nav.html' %}
-
         <section class="judge-flow-card judge-create-panel">
             <div class="judge-create-header">
                 <div>
@@ -55,12 +51,9 @@
                 </div>
             </div>
 
-            <div class="judge-create-action" id="acoesSorteio">
-                <div>
-                    <span id="orientacaoSelecao">Escolha 10, 15 ou 20 jogadores.</span>
-                </div>
-                <button class="btn btn-primary" id="btnSortear" type="button" onclick="confirmarSelecao()" disabled>
-                    <span id="btnSortearTexto">Escolha a quantidade</span>
+            <div class="judge-create-action judge-sort-fab judge-sort-fab--minimal" id="acoesSorteio" aria-live="polite">
+                <button class="btn btn-primary judge-sort-fab__ball" id="btnSortear" type="button" onclick="confirmarSelecao()" disabled>
+                    <span id="btnSortearTexto">-</span>
                 </button>
             </div>
 
@@ -127,7 +120,6 @@ function atualizarContador() {
     const btnSortear = document.getElementById('btnSortear');
     const btnSortearTexto = document.getElementById('btnSortearTexto');
     const metaContador = document.getElementById('metaContador');
-    const orientacao = document.getElementById('orientacaoSelecao');
     const progresso = document.getElementById('progressoSelecao');
     const progressoTrilho = document.getElementById('progressoSelecaoTrilho');
     const btnLimpar = document.getElementById('btnLimpar');
@@ -149,17 +141,13 @@ function atualizarContador() {
     });
 
     if (!quantidadeSelecionada) {
-        btnSortearTexto.textContent = 'Escolha a quantidade';
-        orientacao.textContent = 'Escolha 10, 15 ou 20 jogadores.';
+        btnSortearTexto.textContent = '-';
     } else if (faltam > 0) {
-        btnSortearTexto.textContent = 'Aguardando seleção';
-        orientacao.textContent = `Selecione mais ${faltam} jogador${faltam === 1 ? '' : 'es'}.`;
+        btnSortearTexto.textContent = String(faltam);
     } else if (faltam < 0) {
-        btnSortearTexto.textContent = 'Ajuste a seleção';
-        orientacao.textContent = `Remova ${Math.abs(faltam)} jogador${faltam === -1 ? '' : 'es'}.`;
+        btnSortearTexto.textContent = `+${Math.abs(faltam)}`;
     } else {
-        btnSortearTexto.textContent = `Sortear ${quantidadeSelecionada / 5} times`;
-        orientacao.textContent = 'Tudo pronto para o sorteio.';
+        btnSortearTexto.textContent = 'Sortear';
     }
 }
 

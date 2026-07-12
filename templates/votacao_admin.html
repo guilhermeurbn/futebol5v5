@@ -22,12 +22,6 @@
     </header>
 
     <main class="main">
-        {% if current_user.role == 'juiz' %}
-            {% set current_section = 'votacao' %}
-            {% set judge_nav_sorteio_id = selected_sorteio_id %}
-            {% include '_judge_nav.html' %}
-        {% endif %}
-
         {% if sucesso %}
         <div class="alert alert-success" role="status">{{ sucesso }}</div>
         {% endif %}

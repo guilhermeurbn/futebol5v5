@@ -13,12 +13,6 @@
     </header>
 
     <main class="main">
-        {% if auth_user.role == 'juiz' %}
-            {% set current_section = 'compartilhar' %}
-            {% set judge_nav_sorteio_id = sorteio.id %}
-            {% include '_judge_nav.html' %}
-        {% endif %}
-
         <section class="judge-flow-card judge-share-card">
             <div class="judge-flow-card__heading">
                 <div>

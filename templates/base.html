@@ -191,6 +191,7 @@
 
     {% if show_site_footer %}
     {% set current_path = request.path or '' %}
+    {% set is_judge_role = session.get('role') == 'juiz' %}
     {% set is_admin_role = session.get('role') in ['admin', 'super_admin'] %}
     {% set is_jogadores = current_path == '/' %}
     {% set is_perfil = current_path.startswith('/perfil') %}
@@ -199,8 +200,47 @@
     {% set is_ranking = current_path.startswith('/ranking') %}
     {% set is_admin_page = current_path.startswith('/admin') %}
     {% set vote_href = url_for('jogador.votacao_page') if session.get('role') == 'usuario' else url_for('votacao.votacao_admin_page') %}
-    <footer class="site-footer" role="contentinfo">
+    <footer class="site-footer{% if is_judge_role %} judge-site-footer{% endif %}" role="contentinfo">
         <nav class="site-footer__nav" aria-label="Navegação principal">
+            {% if is_judge_role %}
+            <a href="{{ url_for('juiz.jogar_page') }}" class="site-footer__link{% if current_path.startswith('/jogar') and not current_path.startswith('/jogar/times') and not current_path.startswith('/jogar/compartilhar') and not current_path.startswith('/jogar/historico') and not current_path.startswith('/jogar/cronometro') %} is-active{% endif %}" aria-label="Criar" title="Criar">
+                <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <path d="m14.5 4.5 5 5" />
+                    <path d="M4 20l4.5-1 10-10a2.12 2.12 0 0 0-3-3l-10 10z" />
+                </svg>
+            </a>
+
+            <a href="{{ url_for('juiz.juiz_times_page') }}" class="site-footer__link{% if current_path.startswith('/jogar/times') %} is-active{% endif %}" aria-label="Times" title="Times">
+                <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="m8.5 9 3.5-2 3.5 2v4l-3.5 2-3.5-2z" />
+                </svg>
+            </a>
+
+            <a href="{{ url_for('juiz.juiz_compartilhar_page') }}" class="site-footer__link{% if current_path.startswith('/jogar/compartilhar') %} is-active{% endif %}" aria-label="Compartilhar" title="Compartilhar">
+                <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <path d="M7 17 17 7" />
+                    <path d="M9 7h8v8" />
+                </svg>
+            </a>
+
+            <a href="{{ url_for('votacao.votacao_admin_page') }}" class="site-footer__link{% if current_path.startswith('/admin/votacao') or current_path.startswith('/votacao') %} is-active{% endif %}" aria-label="Votações" title="Votações">
+                <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <path d="M9 12 11 14 15 10" />
+                    <path d="M5 3h14" />
+                    <path d="M5 7h14" />
+                    <path d="M7 21h10a2 2 0 0 0 2-2V9H5v10a2 2 0 0 0 2 2Z" />
+                </svg>
+            </a>
+
+            <a href="{{ url_for('juiz.juiz_historico') }}" class="site-footer__link{% if current_path.startswith('/jogar/historico') %} is-active{% endif %}" aria-label="Histórico" title="Histórico">
+                <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <path d="M3 3v5h5" />
+                    <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8" />
+                    <path d="M12 7v5l4 2" />
+                </svg>
+            </a>
+            {% else %}
             <a href="{{ url_for('jogador.index') }}" class="site-footer__link{% if is_jogadores %} is-active{% endif %}" aria-label="Jogadores" title="Jogadores"{% if is_jogadores %} aria-current="page"{% endif %}>
                 <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
                     <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -264,6 +304,7 @@
                     <path d="M6 5H3v2a3 3 0 0 0 3 3" />
                 </svg>
             </a>
+            {% endif %}
         </nav>
     </footer>
     {% endif %}

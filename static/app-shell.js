@@ -129,9 +129,27 @@
 
   function refreshFooterState(url) {
     const currentPath = url.pathname;
-    document.querySelectorAll('.site-footer__link').forEach(link => {
+    const links = Array.from(document.querySelectorAll('.site-footer__link'));
+
+    // Keep only one active footer item: pick the most specific route match.
+    let bestMatch = null;
+    let bestScore = -1;
+
+    links.forEach(link => {
       const target = new URL(link.href, window.location.origin);
       const active = matchesPath(target.pathname, currentPath);
+
+      if (active) {
+        const score = target.pathname.length;
+        if (score > bestScore) {
+          bestScore = score;
+          bestMatch = link;
+        }
+      }
+    });
+
+    links.forEach(link => {
+      const active = link === bestMatch;
       link.classList.toggle('is-active', active);
 
       if (active) {
