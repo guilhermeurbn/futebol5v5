@@ -2,19 +2,12 @@
 
 <div class="judge-nav-shell">
 <nav class="judge-nav" aria-label="Navegação do Painel do Juiz">
-  {% if nav_sorteio_id and current_section not in ['home', 'criar'] %}
-  <span class="judge-nav__tab judge-nav__tab--disabled" aria-disabled="true" title="Conclua a partida atual antes de criar outra">
-    <span class="judge-nav__icon" aria-hidden="true">🎲</span>
-    <span class="judge-nav__label">Criar</span>
-  </span>
-  {% else %}
   <a href="{{ url_for('juiz.jogar_page') }}"
      class="judge-nav__tab {% if current_section in ['home', 'criar'] %}judge-nav__tab--active{% endif %}"
      {% if current_section in ['home', 'criar'] %}aria-current="page"{% endif %}>
     <span class="judge-nav__icon" aria-hidden="true">🎲</span>
     <span class="judge-nav__label">Criar</span>
   </a>
-  {% endif %}
 
   {% if nav_sorteio_id %}
   <a href="{{ url_for('juiz.juiz_times_page', sorteio_id=nav_sorteio_id) }}"

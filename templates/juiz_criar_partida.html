@@ -52,8 +52,8 @@
             </div>
 
             <div class="judge-create-action judge-sort-fab judge-sort-fab--minimal" id="acoesSorteio" aria-live="polite">
-                <button class="btn btn-primary judge-sort-fab__ball" id="btnSortear" type="button" onclick="confirmarSelecao()" disabled>
-                    <span id="btnSortearTexto">-</span>
+                <button class="judge-sort-action" id="btnSortear" type="button" onclick="confirmarSelecao()" disabled aria-label="Escolha a quantidade de jogadores">
+                    <span class="judge-sort-action__text" id="btnSortearTexto">-</span>
                 </button>
             </div>
 
@@ -142,12 +142,16 @@ function atualizarContador() {
 
     if (!quantidadeSelecionada) {
         btnSortearTexto.textContent = '-';
+        btnSortear.setAttribute('aria-label', 'Escolha a quantidade de jogadores');
     } else if (faltam > 0) {
         btnSortearTexto.textContent = String(faltam);
+        btnSortear.setAttribute('aria-label', `Faltam ${faltam} jogadores para sortear`);
     } else if (faltam < 0) {
         btnSortearTexto.textContent = `+${Math.abs(faltam)}`;
+        btnSortear.setAttribute('aria-label', `${Math.abs(faltam)} jogadores a mais que o permitido`);
     } else {
         btnSortearTexto.textContent = 'Sortear';
+        btnSortear.setAttribute('aria-label', 'Sortear times');
     }
 }
 
@@ -187,7 +191,8 @@ function confirmarSelecao() {
     const btnSortear = document.getElementById('btnSortear');
     const btnSortearTexto = document.getElementById('btnSortearTexto');
     btnSortear.disabled = true;
-    btnSortearTexto.textContent = 'Preparando sorteio...';
+    btnSortearTexto.textContent = '...';
+    btnSortear.setAttribute('aria-label', 'Preparando sorteio');
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
     fetch('/api/presenca', {

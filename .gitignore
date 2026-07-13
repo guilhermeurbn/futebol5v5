@@ -64,6 +64,9 @@ data/*.bak*
 .coverage
 htmlcov/
 
+# Frontend
+node_modules/
+
 # Variáveis de ambiente
 .env
 .env.local

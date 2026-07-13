@@ -13,30 +13,36 @@
     </header>
 
     <main class="main">
-        <section class="judge-flow-card judge-draw-summary">
-            <div class="judge-flow-card__heading">
-                <div>
-                    <span class="judge-flow-kicker">Sorteio #{{ sorteio.id }}</span>
-                    <h1>Times definidos</h1>
-                    <p>{{ sorteio.total_jogadores }} jogadores · {{ sorteio.num_times }} times</p>
-                </div>
-                <div class="judge-next-actions__buttons judge-next-actions__buttons--compact">
-                    <button class="btn btn-secondary" type="button" id="btnEditarTimes">Editar times</button>
-                    <button class="btn btn-primary" type="button" id="btnSalvarTrocas" hidden>Salvar trocas</button>
-                    <button class="btn btn-secondary" type="button" id="btnCancelarTrocas" hidden>Cancelar</button>
-                    <a class="btn btn-secondary" href="{{ url_for('juiz.juiz_compartilhar_page', sorteio_id=sorteio.id) }}">
-                        Compartilhar
-                    </a>
-                    <a class="btn btn-primary" href="{{ url_for('votacao.votacao_admin_page', sorteio_id=sorteio.id) }}">
-                        Ir para votações
-                    </a>
-                </div>
-            </div>
-
+        <div class="judge-teams-toolbar">
             <div class="judge-draw-guidance" role="status" aria-live="polite">
                 <p>Confira os times abaixo. Se estiver tudo certo, use os botões no topo para compartilhar ou iniciar a votação.</p>
             </div>
-        </section>
+            <div class="judge-next-actions__buttons judge-next-actions__buttons--compact">
+                <button class="judge-icon-action judge-icon-action--edit" type="button" id="btnEditarTimes" aria-label="Editar times" title="Editar times">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                        <path d="M12 20h9"></path>
+                        <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+                    </svg>
+                </button>
+                <button class="btn btn-primary" type="button" id="btnSalvarTrocas" hidden>Salvar trocas</button>
+                <button class="btn btn-secondary" type="button" id="btnCancelarTrocas" hidden>Cancelar</button>
+                <a class="judge-icon-action judge-icon-action--share" href="{{ url_for('juiz.juiz_compartilhar_page', sorteio_id=sorteio.id) }}" aria-label="Compartilhar times" title="Compartilhar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                        <circle cx="18" cy="5" r="3"></circle>
+                        <circle cx="6" cy="12" r="3"></circle>
+                        <circle cx="18" cy="19" r="3"></circle>
+                        <path d="m8.6 10.5 6.8-4"></path>
+                        <path d="m8.6 13.5 6.8 4"></path>
+                    </svg>
+                </a>
+                <a class="judge-icon-action judge-icon-action--vote" href="{{ url_for('votacao.votacao_admin_page', sorteio_id=sorteio.id) }}" aria-label="Ir para votações" title="Votações">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                        <path d="m9 11 3 3L22 4"></path>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
 
         <section class="judge-teams-grid" aria-label="Times sorteados">
             {% for time in sorteio.times %}

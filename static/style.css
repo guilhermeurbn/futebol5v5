@@ -1622,7 +1622,7 @@ body.has-site-footer .player-vote-notification {
 }
 
 .judge-clear-button:focus-visible,
-.judge-create-action .btn:focus-visible {
+.judge-create-action .btn:not(.judge-sort-fab__ball):focus-visible {
   outline: 2px solid #22c55e;
   outline-offset: 3px;
 }
@@ -1650,7 +1650,7 @@ body.has-site-footer .player-vote-notification {
   color: #ded3ef;
 }
 
-.judge-create-action .btn:disabled {
+.judge-create-action .btn:disabled:not(.judge-sort-fab__ball) {
   color: #898294;
   background: #25212b;
   box-shadow: none;
@@ -1658,7 +1658,7 @@ body.has-site-footer .player-vote-notification {
   transform: none;
 }
 
-.judge-create-action .btn:disabled:hover {
+.judge-create-action .btn:disabled:hover:not(.judge-sort-fab__ball) {
   background: #25212b;
   box-shadow: none;
   transform: none;
@@ -2012,7 +2012,7 @@ body.has-site-footer .player-vote-notification {
 /* Floating sorter action (judge create page) */
 .judge-create-page .judge-sort-fab {
   position: fixed;
-  right: max(0.7rem, env(safe-area-inset-right));
+  right: calc(max(0px, (100vw - 1180px) / 2) + clamp(1.15rem, 2.5vw, 2rem));
   bottom: calc(var(--site-footer-height-mobile) + 0.65rem + env(safe-area-inset-bottom));
   left: auto;
   width: auto;
@@ -2053,64 +2053,72 @@ body.has-site-footer .player-vote-notification {
   box-shadow: none;
 }
 
-.judge-create-page .judge-sort-fab__ball {
-  width: 48px;
-  height: 48px;
-  min-width: 48px;
-  min-height: 48px;
-  border-radius: 999px;
+.judge-create-page .judge-sort-action {
+  width: 54px;
+  height: 54px;
+  min-width: 54px;
+  min-height: 54px;
+  padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: #0a0a0c;
-  color: #e9edf7;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.32);
-  transition: width 180ms ease, min-width 180ms ease, border-color 180ms ease, background-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
-}
-
-.judge-create-page .judge-sort-fab__ball #btnSortearTexto {
-  font-size: 1rem;
-  font-weight: 900;
-  letter-spacing: 0;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(13, 18, 24, 0.38);
+  color: #ffffff;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(14px) saturate(1.25);
+  -webkit-backdrop-filter: blur(14px) saturate(1.25);
+  overflow: hidden;
   line-height: 1;
-  font-variant-numeric: tabular-nums;
-  transition: font-size 160ms ease, letter-spacing 160ms ease;
+  transform: none;
+  transition: width 160ms ease, min-width 160ms ease, border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
 }
 
-.judge-create-page .judge-sort-fab--minimal.is-ready .judge-sort-fab__ball {
-  width: 116px;
-  min-width: 116px;
-  border-color: rgba(34, 197, 94, 0.48);
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-  color: #04220c;
-  box-shadow: 0 12px 26px rgba(13, 87, 41, 0.34), 0 0 0 1px rgba(34, 197, 94, 0.24);
-}
-
-.judge-create-page .judge-sort-fab--minimal.is-ready .judge-sort-fab__ball #btnSortearTexto {
-  font-size: 0.86rem;
+.judge-create-page .judge-sort-action__text {
+  display: block;
+  color: #ffffff;
+  font-size: 1.05rem;
   font-weight: 900;
-  letter-spacing: 0.01em;
+  line-height: 1;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.38);
 }
 
-.judge-create-page .judge-sort-fab--minimal .judge-sort-fab__ball:disabled {
+.judge-create-page .judge-sort-action.is-ready {
+  width: 88px;
+  min-width: 88px;
+  border-color: rgba(34, 197, 94, 0.42);
+  background: rgba(14, 165, 120, 0.34);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.judge-create-page .judge-sort-action.is-ready .judge-sort-action__text {
+  font-size: 0.76rem;
+}
+
+.judge-create-page .judge-sort-action:disabled {
   opacity: 0.95;
   cursor: not-allowed;
 }
 
-.judge-create-page .judge-sort-fab .btn {
-  min-width: 132px;
-  min-height: 42px;
-  padding-inline: 1rem;
+.judge-create-page .judge-sort-action.is-ready:not(:disabled) {
+  cursor: pointer;
 }
 
 .judge-create-page .judge-sort-fab:not(.is-ready) {
-  opacity: 0.95;
+  opacity: 1;
 }
 
 .judge-create-page .judge-sort-fab.is-ready {
   box-shadow: 0 14px 32px rgba(0, 0, 0, 0.42), 0 0 0 1px rgba(34, 197, 94, 0.25);
+}
+
+.judge-create-page .judge-sort-fab--minimal.is-ready {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .judge-create-action > div strong {
@@ -2138,11 +2146,11 @@ body.has-site-footer .player-vote-notification {
   color: #a7d8c4;
 }
 
-.judge-create-action .btn {
+.judge-create-action .btn:not(.judge-sort-fab__ball) {
   min-width: 190px;
 }
 
-.judge-create-page .judge-create-action .btn:not(:disabled) {
+.judge-create-page .judge-create-action .btn:not(:disabled):not(.judge-sort-fab__ball) {
   border: 1px solid rgba(34, 197, 94, 0.3);
   background: linear-gradient(135deg, #22c55e 0%, #a855f7 58%, #ec4899 100%);
   color: #fff;
@@ -2529,7 +2537,7 @@ body.app-shell-loading {
     flex-direction: column;
   }
 
-  .judge-create-action .btn {
+  .judge-create-action .btn:not(.judge-sort-fab__ball) {
     width: 100%;
     min-width: 0;
   }
@@ -13336,6 +13344,24 @@ tbody td code {
   margin-top: 0.25rem;
 }
 
+.judge-teams-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 0.85rem;
+}
+
+.judge-teams-toolbar .judge-draw-guidance {
+  min-width: 0;
+}
+
+.judge-teams-toolbar .judge-draw-guidance p {
+  margin: 0;
+  color: var(--judge-muted);
+  font-size: 0.82rem;
+}
+
 .judge-next-actions__buttons {
   display: flex;
   gap: 0.65rem;
@@ -13442,6 +13468,63 @@ tbody td code {
 
 .judge-next-actions__buttons--compact {
   gap: 0.5rem;
+}
+
+.judge-next-actions__buttons--compact .judge-icon-action {
+  width: 2.7rem;
+  height: 2.7rem;
+  min-width: 2.7rem;
+  min-height: 2.7rem;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  color: #f8fbff;
+  background: rgba(12, 14, 20, 0.62);
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  text-decoration: none;
+  cursor: pointer;
+  backdrop-filter: blur(14px) saturate(1.25);
+  -webkit-backdrop-filter: blur(14px) saturate(1.25);
+  transition: transform 150ms ease, border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
+}
+
+.judge-next-actions__buttons--compact .judge-icon-action svg {
+  width: 1.12rem;
+  height: 1.12rem;
+}
+
+.judge-next-actions__buttons--compact .judge-icon-action:hover,
+.judge-next-actions__buttons--compact .judge-icon-action:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow:
+    0 14px 30px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  outline: none;
+}
+
+.judge-next-actions__buttons--compact .judge-icon-action--edit {
+  color: #e9ddff;
+  background: rgba(139, 92, 246, 0.18);
+}
+
+.judge-next-actions__buttons--compact .judge-icon-action--share {
+  color: #d7fbff;
+  background: rgba(14, 165, 233, 0.18);
+}
+
+.judge-next-actions__buttons--compact .judge-icon-action--vote {
+  color: #dcfce7;
+  background: rgba(34, 197, 94, 0.2);
+}
+
+.judge-next-actions__buttons--compact .judge-icon-action.is-disabled,
+.judge-next-actions__buttons--compact .judge-icon-action[aria-disabled="true"] {
+  opacity: 0.42;
+  pointer-events: none;
 }
 
 .judge-next-actions__buttons--compact .btn {
@@ -13932,6 +14015,23 @@ body.modal-open {
     flex-direction: column;
   }
 
+  .judge-teams-toolbar {
+    align-items: flex-end;
+    flex-direction: column-reverse;
+    gap: 0.45rem;
+    margin-bottom: 0.7rem;
+  }
+
+  .judge-teams-toolbar .judge-draw-guidance {
+    width: 100%;
+  }
+
+  .judge-teams-toolbar .judge-draw-guidance p {
+    font-size: 0.72rem;
+    line-height: 1.35;
+    text-align: right;
+  }
+
   .judge-next-actions__buttons {
     display: grid;
     grid-template-columns: 1fr;
@@ -14078,8 +14178,10 @@ body.modal-open {
   }
 
   .judge-next-actions__buttons--compact {
+    display: flex;
     width: 100%;
     gap: 0.45rem;
+    justify-content: flex-end;
   }
 
   .judge-next-actions__buttons--compact .btn {
@@ -14088,6 +14190,14 @@ body.modal-open {
     min-height: 2rem;
     padding: 0.45rem 0.6rem;
     font-size: 0.78rem;
+  }
+
+  .judge-next-actions__buttons--compact .judge-icon-action {
+    flex: 0 0 auto;
+    width: 2.65rem;
+    height: 2.65rem;
+    min-width: 2.65rem;
+    min-height: 2.65rem;
   }
 
   .judge-workspace-page .judge-flow-status,
@@ -14163,7 +14273,7 @@ body.modal-open {
     padding: 0.75rem;
   }
 
-  .judge-create-action .btn,
+  .judge-create-action .btn:not(.judge-sort-fab__ball),
   .judge-next-actions__buttons .btn,
   .judge-result-form > .btn,
   .judge-open-vote-form .btn,
@@ -14301,7 +14411,7 @@ body.modal-open {
   /* Judge creation: thumb-friendly floating draw action on phones */
   .judge-create-page .judge-create-action {
     position: fixed;
-    right: max(0.55rem, env(safe-area-inset-right));
+    right: calc(max(0.75rem, env(safe-area-inset-right)) + 1rem);
     bottom: calc(var(--site-footer-height-mobile) + 0.55rem + env(safe-area-inset-bottom));
     left: auto;
     z-index: 40;
@@ -14319,24 +14429,20 @@ body.modal-open {
     padding: 0;
   }
 
-  .judge-create-page .judge-sort-fab__ball {
-    width: 46px;
-    height: 46px;
-    min-width: 46px;
-    min-height: 46px;
+  .judge-create-page .judge-sort-action {
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+    min-height: 52px;
   }
 
-  .judge-create-page .judge-sort-fab--minimal.is-ready .judge-sort-fab__ball {
-    width: 106px;
-    min-width: 106px;
+  .judge-create-page .judge-sort-action.is-ready {
+    width: 84px;
+    min-width: 84px;
   }
 
-  .judge-create-page .judge-sort-fab__ball #btnSortearTexto {
-    font-size: 0.98rem;
-  }
-
-  .judge-create-page .judge-sort-fab--minimal.is-ready .judge-sort-fab__ball #btnSortearTexto {
-    font-size: 0.82rem;
+  .judge-create-page .judge-sort-action.is-ready .judge-sort-action__text {
+    font-size: 0.72rem;
   }
 
   .judge-timer-page .judge-timer-presets {

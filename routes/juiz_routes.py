@@ -309,30 +309,7 @@ def jogar_page():
     """Hub principal do fluxo do juiz"""
     try:
         estado_fluxo = _sincronizar_fluxo_juiz()
-        destino = _destino_fluxo_juiz(estado_fluxo)
-        
-        if destino:
-            return redirect(destino)
-
         todos_jogadores = jogador_service.listar()
-        
-        if estado_fluxo.get('status') == 'selecionando':
-            fixos = [j for j in todos_jogadores if j.tipo == "fixo"]
-            avulsos = [j for j in todos_jogadores if j.tipo == "avulso"]
-            presentes = [j for j in todos_jogadores if j.presente]
-            
-            return render_template(
-                'juiz_criar_partida.html',
-                todos_jogadores=todos_jogadores,
-                fixos=fixos,
-                avulsos=avulsos,
-                presentes=presentes,
-                total_presentes=len(presentes),
-                total_jogadores=len(todos_jogadores),
-                usuario=_usuario_logado(),
-                ultima_partida=estado_fluxo.get('ultima_partida_encerrada')
-            )
-
         ultima_partida = estado_fluxo.get('ultima_partida_encerrada')
         return render_template(
             'juiz_home.html',
