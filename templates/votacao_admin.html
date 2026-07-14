@@ -53,7 +53,7 @@
 
                     <div class="judge-result-grid">
                         {% for time in sorteio_contexto.times %}
-                        <details class="judge-result-team" {% if loop.first %}open{% endif %}>
+                        <details class="judge-result-team">
                             <summary class="judge-result-team__summary">
                                 <span class="judge-result-team__heading">
                                     <span class="judge-result-team__title">Time {{ time.numero }}</span>
@@ -112,7 +112,6 @@
                         {% endfor %}
                     </div>
 
-                    <p class="judge-result-hint">Abra um time, ajuste os números e salve o resultado.</p>
                     <div class="judge-result-submit">
                         <button class="btn btn-primary" type="submit">Salvar resultado</button>
                     </div>

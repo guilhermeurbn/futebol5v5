@@ -12184,16 +12184,16 @@ tbody td code {
   grid-template-columns: auto minmax(0, 1fr) auto;
 }
 
-.judge-voting-step__number {
-  display: grid;
-  place-items: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #22c55e 0%, #a855f7 70%);
-  color: #fff;
-  font-weight: 900;
-}
+  .judge-voting-step__number {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 12px;
+    background: #2c3e50; /* solid professional color */
+    color: #fff;
+    font-weight: 900;
+  }
 
 .judge-voting-step__header p {
   margin: 0.3rem 0 0;
@@ -12608,16 +12608,38 @@ tbody td code {
     bottom: 0.65rem;
     z-index: 5;
     margin: 0.62rem -0.2rem 0;
-    padding: 0.35rem;
-    border: 1px solid rgba(167, 139, 250, 0.14);
-    border-radius: 17px;
-    background: rgba(12, 10, 17, 0.84);
-    backdrop-filter: blur(14px);
+    /* Remove visual rectangle */
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    backdrop-filter: none;
   }
 
   .judge-result-submit .btn {
     width: 100%;
     min-height: 52px;
+  }
+
+  /* Adjust size and spacing of the save button */
+  .judge-result-submit .btn-primary {
+    width: auto;
+    max-width: 180px;
+    min-height: 40px;
+    padding: 0.4rem 0.8rem;
+    margin: 0.6rem auto 0; /* top margin to separate from above element, centered */
+  }
+
+  /* Professional style for the save button */
+  .judge-result-submit .btn-primary {
+    background: #2c3e50;
+    border: 1px solid #2c3e50;
+    color: #fff;
+  }
+
+  .judge-result-submit .btn-primary:hover {
+    background: #1a252f;
+    border-color: #1a252f;
   }
 
   .judge-result-summary span {
@@ -12819,11 +12841,19 @@ tbody td code {
   text-decoration: none;
 }
 
+/* Professional solid button style for voting and share pages */
 .judge-voting-page .btn-primary,
 .judge-share-page .btn-primary {
-  border: 1px solid rgba(34, 197, 94, 0.3);
-  background: linear-gradient(135deg, #22c55e 0%, #a855f7 58%, #ec4899 100%);
+  border: 1px solid #2c3e50;
+  background: #2c3e50;
   color: #fff;
+}
+
+/* Hover state – slightly darker */
+.judge-voting-page .btn-primary:hover,
+.judge-share-page .btn-primary:hover {
+  background: #1a252f;
+  border-color: #1a252f;
 }
 
 .votacao-card__score {
@@ -13199,6 +13229,22 @@ tbody td code {
 
 .judge-workspace-page .btn-primary:hover:not(:disabled) {
   box-shadow: 0 16px 34px rgba(34, 197, 94, 0.18);
+}
+
+/* Ensure the save button in the result form stays neutral (solid) until hovered */
+.judge-result-submit .btn-primary {
+  background: #2c3e50 !important;
+  border: 1px solid #2c3e50 !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  border-radius: 9999px !important; /* fully rounded */
+}
+
+.judge-result-submit .btn-primary:hover {
+  background: #1a252f !important;
+  border-color: #1a252f !important;
+  box-shadow: none !important;
+  border-radius: 9999px !important;
 }
 
 .judge-workspace-page .judge-format-option,
