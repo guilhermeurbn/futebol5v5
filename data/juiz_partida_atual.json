@@ -3,7 +3,7 @@
   "partida_atual": {
     "status": "sorteada",
     "criado_por": "2ba4d2a2-6f2b-4a14-a6d1-a50d639ffaf9",
-    "criado_em": "2026-07-13T14:32:22.028493",
+    "criado_em": "2026-07-14T18:00:00.669918",
     "quantidade_jogadores": 10,
     "jogador_ids": [
       "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
@@ -17,7 +17,7 @@
       "ce422cf5-f6d1-4693-9bae-345e1ac21f2f",
       "b17181c2-a4b4-4909-b9d1-ef979faa3063"
     ],
-    "sorteio_id": 35,
+    "sorteio_id": 37,
     "resultado_registrado": false,
     "resultado_partida_id": null,
     "votacao_partida_id": null,

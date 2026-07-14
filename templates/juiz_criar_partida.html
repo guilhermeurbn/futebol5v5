@@ -202,10 +202,15 @@ function confirmarSelecao() {
     })
     .then(async res => {
         const data = await res.json();
+        if (data.redirect_url) {
+            window.location.href = data.redirect_url;
+            return data;
+        }
         if (!res.ok) throw new Error(data.erro || 'Não foi possível iniciar o sorteio. Tente novamente.');
         return data;
     })
     .then(data => {
+        if (data.redirect_url) return;
         if (data.sucesso) {
             window.location.href = '/sortear';
             return;

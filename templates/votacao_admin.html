@@ -53,11 +53,15 @@
 
                     <div class="judge-result-grid">
                         {% for time in sorteio_contexto.times %}
-                        <fieldset class="judge-result-team">
-                            <legend>
-                                <span>Time {{ time.numero }}</span>
-                                <small>{{ time.jogadores | length }} jogadores</small>
-                            </legend>
+                        <details class="judge-result-team" {% if loop.first %}open{% endif %}>
+                            <summary class="judge-result-team__summary">
+                                <span class="judge-result-team__heading">
+                                    <span class="judge-result-team__title">Time {{ time.numero }}</span>
+                                    <small class="judge-result-team__players-mini">{{ time.jogadores | map(attribute='nome') | join(', ') }}</small>
+                                </span>
+                                <span class="judge-result-team__meta">{{ time.jogadores | length }} jogadores</span>
+                                <span class="judge-result-team__arrow" aria-hidden="true">→</span>
+                            </summary>
                             <details class="judge-result-roster">
                                 <summary>Jogadores</summary>
                                 <p class="judge-result-players">{{ time.jogadores | map(attribute='nome') | join(', ') }}</p>
@@ -65,6 +69,7 @@
                             <div class="judge-result-fields">
                                 <div class="judge-result-field">
                                     <span aria-label="Vitórias">V</span>
+                                    <strong>Vitórias</strong>
                                     <div class="judge-result-stepper">
                                         <button type="button" class="judge-result-dec judge-result-stepper__btn" data-target="vitorias_{{ time.numero }}" data-delta="-1" aria-label="Diminuir vitórias do Time {{ time.numero }}">−</button>
                                         <span class="judge-result-value" data-value-for="vitorias_{{ time.numero }}" aria-live="polite">{{ resultado_form_values.get('vitorias_' ~ time.numero, '0') }}</span>
@@ -74,6 +79,7 @@
                                 </div>
                                 <div class="judge-result-field">
                                     <span aria-label="Empates">E</span>
+                                    <strong>Empates</strong>
                                     <div class="judge-result-stepper">
                                         <button type="button" class="judge-result-dec judge-result-stepper__btn" data-target="empates_{{ time.numero }}" data-delta="-1" aria-label="Diminuir empates do Time {{ time.numero }}">−</button>
                                         <span class="judge-result-value" data-value-for="empates_{{ time.numero }}" aria-live="polite">{{ resultado_form_values.get('empates_' ~ time.numero, '0') }}</span>
@@ -83,6 +89,7 @@
                                 </div>
                                 <div class="judge-result-field">
                                     <span aria-label="Derrotas">D</span>
+                                    <strong>Derrotas</strong>
                                     <div class="judge-result-stepper">
                                         <button type="button" class="judge-result-dec judge-result-stepper__btn" data-target="derrotas_{{ time.numero }}" data-delta="-1" aria-label="Diminuir derrotas do Time {{ time.numero }}">−</button>
                                         <span class="judge-result-value" data-value-for="derrotas_{{ time.numero }}" aria-live="polite">{{ resultado_form_values.get('derrotas_' ~ time.numero, '0') }}</span>
@@ -92,6 +99,7 @@
                                 </div>
                                 <div class="judge-result-field">
                                     <span aria-label="Gols">G</span>
+                                    <strong>Gols</strong>
                                     <div class="judge-result-stepper">
                                         <button type="button" class="judge-result-dec judge-result-stepper__btn" data-target="gols_{{ time.numero }}" data-delta="-1" aria-label="Diminuir gols do Time {{ time.numero }}">−</button>
                                         <span class="judge-result-value" data-value-for="gols_{{ time.numero }}" aria-live="polite">{{ resultado_form_values.get('gols_' ~ time.numero, '0') }}</span>
@@ -100,11 +108,11 @@
                                     </div>
                                 </div>
                             </div>
-                        </fieldset>
+                        </details>
                         {% endfor %}
                     </div>
 
-                    <p class="judge-result-hint">V = vitória · E = empate · D = derrota · G = gols</p>
+                    <p class="judge-result-hint">Abra um time, ajuste os números e salve o resultado.</p>
                     <div class="judge-result-submit">
                         <button class="btn btn-primary" type="submit">Salvar resultado</button>
                     </div>

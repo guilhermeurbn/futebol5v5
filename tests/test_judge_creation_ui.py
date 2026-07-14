@@ -73,6 +73,16 @@ def test_judge_team_editing_supports_touch_swap():
     assert ".judge-team-player.is-swap-selected" in stylesheet
 
 
+def test_judge_team_editing_save_replaces_edit_without_cancel():
+    template = (ROOT / 'templates' / 'juiz_times.html').read_text(encoding='utf-8')
+
+    assert 'id="btnEditarTimes"' in template
+    assert 'id="btnSalvarTrocas"' in template
+    assert 'id="btnCancelarTrocas"' not in template
+    assert "btnSalvar.disabled = false;" in template
+    assert "Nenhuma troca feita. Edição encerrada." in template
+
+
 def test_judge_navigation_has_a_dedicated_times_tab():
     navigation = (ROOT / 'templates' / '_judge_nav.html').read_text(encoding='utf-8')
     stylesheet = (ROOT / 'static' / 'style.css').read_text(encoding='utf-8')
@@ -126,7 +136,9 @@ def test_judge_result_values_are_only_changed_with_stepper_buttons():
     assert template.count('judge-result-dec judge-result-stepper__btn') == 4
     assert template.count('judge-result-inc judge-result-stepper__btn') == 4
     assert 'class="judge-result-roster"' in template
-    assert 'V = vitória · E = empate · D = derrota · G = gols' in template
+    assert 'Abra um time, ajuste os números e salve o resultado.' in template
+    assert 'class="judge-result-team__summary"' in template
+    assert 'class="judge-result-team__arrow"' in template
     assert 'class="judge-result-submit"' in template
     assert 'input.focus()' not in template
 

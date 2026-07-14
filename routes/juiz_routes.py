@@ -142,6 +142,17 @@ def _destino_fluxo_juiz(estado):
     return None
 
 
+def _destino_partida_oficial_aberta(estado):
+    """Retorna destino da partida aberta apenas quando ja existe sorteio."""
+    partida_atual = (estado or {}).get('partida_atual') or {}
+    status = (estado or {}).get('status') or 'idle'
+    if status == 'selecionando':
+        return None
+    if not partida_atual.get('sorteio_id'):
+        return None
+    return _destino_fluxo_juiz(estado)
+
+
 def _salvar_ultimo_sorteio_sessao(payload):
     session['ultimo_sorteio'] = payload
     session.modified = True
@@ -309,6 +320,10 @@ def jogar_page():
     """Hub principal do fluxo do juiz"""
     try:
         estado_fluxo = _sincronizar_fluxo_juiz()
+        destino_aberto = _destino_partida_oficial_aberta(estado_fluxo)
+        if destino_aberto:
+            return redirect(destino_aberto)
+
         todos_jogadores = jogador_service.listar()
         ultima_partida = estado_fluxo.get('ultima_partida_encerrada')
         return render_template(
@@ -355,6 +370,11 @@ def api_jogar_resumo():
 def juiz_criar_partida():
     """Inicia criação de partida"""
     try:
+        estado_fluxo = _sincronizar_fluxo_juiz()
+        destino_aberto = _destino_partida_oficial_aberta(estado_fluxo)
+        if destino_aberto:
+            return redirect(destino_aberto)
+
         jogador_service.limpar_presenca()
         juiz_partida_service.iniciar_partida(session.get('user_id'))
         

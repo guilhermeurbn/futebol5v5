@@ -24,8 +24,7 @@
                         <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
                     </svg>
                 </button>
-                <button class="btn btn-primary" type="button" id="btnSalvarTrocas" hidden>Salvar trocas</button>
-                <button class="btn btn-secondary" type="button" id="btnCancelarTrocas" hidden>Cancelar</button>
+                <button class="btn btn-primary" type="button" id="btnSalvarTrocas" hidden>Salvar</button>
                 <a class="judge-icon-action judge-icon-action--share" href="{{ url_for('juiz.juiz_compartilhar_page', sorteio_id=sorteio.id) }}" aria-label="Compartilhar times" title="Compartilhar">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
                         <circle cx="18" cy="5" r="3"></circle>
@@ -84,7 +83,6 @@
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
     const btnEditar = document.getElementById('btnEditarTimes');
     const btnSalvar = document.getElementById('btnSalvarTrocas');
-    const btnCancelar = document.getElementById('btnCancelarTrocas');
     const guidance = document.querySelector('.judge-draw-guidance p');
     const containers = Array.from(document.querySelectorAll('.judge-team-card__players'));
     const shareAndVoteLinks = Array.from(document.querySelectorAll('.judge-next-actions__buttons--compact a'));
@@ -145,8 +143,7 @@
 
         btnEditar.hidden = enabled;
         btnSalvar.hidden = !enabled;
-        btnCancelar.hidden = !enabled;
-        btnSalvar.disabled = true;
+        btnSalvar.disabled = false;
 
         shareAndVoteLinks.forEach((link) => {
             link.classList.toggle('is-disabled', enabled);
@@ -174,8 +171,7 @@
 
     function enableDirtyState() {
         dirty = true;
-        btnSalvar.disabled = false;
-        guidance.textContent = 'Trocas pendentes. Clique em "Salvar trocas" para confirmar.';
+        guidance.textContent = 'Trocas pendentes. Clique em "Salvar" para confirmar.';
     }
 
     function swapPlayers(a, b) {
@@ -266,6 +262,7 @@
     async function salvarTrocas() {
         if (!dirty) {
             toggleEdit(false);
+            guidance.textContent = 'Nenhuma troca feita. Edição encerrada.';
             return;
         }
 
@@ -300,18 +297,13 @@
             btnSalvar.disabled = false;
             guidance.textContent = error.message || 'Erro ao salvar trocas.';
         } finally {
-            btnSalvar.textContent = 'Salvar trocas';
+            btnSalvar.textContent = 'Salvar';
         }
     }
 
     btnEditar?.addEventListener('click', () => {
         snapshot = captureState();
         toggleEdit(true);
-    });
-
-    btnCancelar?.addEventListener('click', () => {
-        applyState(snapshot);
-        toggleEdit(false);
     });
 
     btnSalvar?.addEventListener('click', salvarTrocas);

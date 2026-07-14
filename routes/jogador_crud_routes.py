@@ -29,6 +29,17 @@ def _is_juiz():
     return session.get('role') == 'juiz'
 
 
+def _destino_partida_oficial_aberta(estado):
+    partida_atual = (estado or {}).get('partida_atual') or {}
+    status = (estado or {}).get('status') or 'idle'
+    sorteio_id = partida_atual.get('sorteio_id')
+    if status == 'selecionando' or not sorteio_id:
+        return None
+    if status in {'resultado_registrado', 'votacao_aberta'} or partida_atual.get('votacao_partida_id'):
+        return url_for('votacao.votacao_admin_page', sorteio_id=sorteio_id)
+    return url_for('juiz.juiz_times_page', sorteio_id=sorteio_id)
+
+
 def _usuario_logado():
     return {
         'id': session.get('user_id'),
@@ -397,9 +408,16 @@ def atualizar_presenca():
         if _is_juiz():
             estado = juiz_partida_service.obter_estado()
             if (estado.get('status') or 'idle') != 'selecionando':
+                destino = _destino_partida_oficial_aberta(estado)
+                if destino:
+                    return jsonify({
+                        'sucesso': False,
+                        'erro': 'Ja existe uma partida aberta. Redirecionando para ela.',
+                        'redirect_url': destino,
+                    }), 409
                 return jsonify({
                     'sucesso': False,
-                    'erro': 'O fluxo do juiz nao esta na etapa de selecao'
+                    'erro': 'O fluxo do juiz nao esta na etapa de selecao',
                 }), 409
 
         dados = request.get_json(silent=True) or {}

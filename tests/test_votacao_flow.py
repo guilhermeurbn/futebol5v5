@@ -316,6 +316,51 @@ def test_judge_history_has_its_own_page(monkeypatch):
     assert body.index('Sorteio #7') < body.index('Sorteio #6')
 
 
+def test_judge_create_redirects_to_open_draw(monkeypatch):
+    app = criar_app('testing')
+    app.config['WTF_CSRF_ENABLED'] = False
+
+    monkeypatch.setattr(
+        juiz_routes,
+        '_sincronizar_fluxo_juiz',
+        lambda: {'status': 'sorteada', 'partida_atual': {'sorteio_id': 23}},
+    )
+
+    def fail_if_started(*_args, **_kwargs):
+        raise AssertionError('nao deve iniciar nova partida com sorteio aberto')
+
+    monkeypatch.setattr(juiz_routes.juiz_partida_service, 'iniciar_partida', fail_if_started)
+    monkeypatch.setattr(juiz_routes.jogador_service, 'limpar_presenca', fail_if_started)
+
+    with app.test_client() as client:
+        _login_juiz(client)
+        response = client.post('/jogar/criar-partida')
+
+    assert response.status_code == 302
+    assert response.headers['Location'].endswith('/jogar/times?sorteio_id=23')
+
+
+def test_judge_create_allows_selection_without_draw(monkeypatch):
+    app = criar_app('testing')
+    app.config['WTF_CSRF_ENABLED'] = False
+
+    monkeypatch.setattr(
+        juiz_routes,
+        '_sincronizar_fluxo_juiz',
+        lambda: {'status': 'selecionando', 'partida_atual': {'sorteio_id': None}},
+    )
+    monkeypatch.setattr(juiz_routes.jogador_service, 'limpar_presenca', lambda: None)
+    monkeypatch.setattr(juiz_routes.juiz_partida_service, 'iniciar_partida', lambda *_args: None)
+    monkeypatch.setattr(juiz_routes.jogador_service, 'listar', lambda: [])
+
+    with app.test_client() as client:
+        _login_juiz(client)
+        response = client.post('/jogar/criar-partida')
+
+    assert response.status_code == 200
+    assert 'Quem vai jogar?' in response.get_data(as_text=True)
+
+
 def test_public_history_renders_inline_round_summary(monkeypatch):
     app = criar_app('testing')
     app.config['WTF_CSRF_ENABLED'] = False
