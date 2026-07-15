@@ -928,5 +928,32 @@
         "gols": 0
       }
     ]
+  },
+  {
+    "id": 35,
+    "sorteio_id": 37,
+    "data": "2026-07-15T01:58:46.301861",
+    "time_vencedor": 1,
+    "gols_times": [
+      0,
+      0
+    ],
+    "notas": "",
+    "times_desempenho": [
+      {
+        "time_numero": 1,
+        "vitorias": 1,
+        "empates": 0,
+        "derrotas": 0,
+        "gols": 0
+      },
+      {
+        "time_numero": 2,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 1,
+        "gols": 0
+      }
+    ]
   }
 ]

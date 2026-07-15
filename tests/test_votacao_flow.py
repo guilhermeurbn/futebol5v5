@@ -620,3 +620,66 @@ def test_judge_result_rejects_unbalanced_wins_and_losses(monkeypatch):
 
     assert response.status_code == 400
     assert 'total de vitórias deve ser igual ao total de derrotas' in response.get_data(as_text=True)
+
+
+def test_judge_last_match_clickable_navigation(monkeypatch):
+    app = criar_app('testing')
+    app.config['WTF_CSRF_ENABLED'] = False
+
+    ultima_partida = {
+        'titulo': 'Votação do sorteio #37',
+        'sorteio_id': 37,
+        'partida_id': 36,
+        'encerrado_em': '2026-07-15T12:31:06.667581',
+        'resultado_resumido': [
+            {'time_numero': 1, 'gols': 3, 'vitorias': 2, 'empates': 0, 'derrotas': 1, 'resultado': 'vitoria'},
+            {'time_numero': 2, 'gols': 1, 'vitorias': 1, 'empates': 0, 'derrotas': 2, 'resultado': 'derrota'},
+        ]
+    }
+
+    # Mock the judge state to have an ultima_partida_encerrada
+    monkeypatch.setattr(
+        juiz_routes.juiz_partida_service,
+        'obter_estado',
+        lambda: {
+            'status': 'idle',
+            'partida_atual': None,
+            'ultima_partida_encerrada': ultima_partida
+        }
+    )
+
+    # Mock list_sorteios to return the matching sorteio so it gets rendered in history
+    sorteios = [
+        {
+            'id': 37,
+            'data': '2026-07-15T12:30:00',
+            'total_jogadores': 10,
+            'num_times': 2,
+            'diferenca': 0,
+            'times': [
+                {'numero': 1, 'jogadores': []},
+                {'numero': 2, 'jogadores': []}
+            ]
+        }
+    ]
+    monkeypatch.setattr(juiz_routes.historico_service, 'listar_sorteios', lambda: sorteios)
+
+    with app.test_client() as client:
+        _login_juiz(client)
+        # Check that the home page displays the card and link correctly
+        response = client.get('/jogar')
+        assert response.status_code == 200
+        body = response.get_data(as_text=True)
+        assert 'judge-last-match-card' in body
+        assert 'href="/jogar/historico?sorteio_id=37#sorteio-37"' in body
+        assert 'Time 1' in body
+        assert '2V' in body
+        assert '3 gol' in body
+
+        # Check that going to the history page with a sorteio_id opens it
+        response_hist = client.get('/jogar/historico?sorteio_id=37')
+        assert response_hist.status_code == 200
+        body_hist = response_hist.get_data(as_text=True)
+        # The history template opens the details item matching the ID and sets correct id attribute
+        assert 'id="sorteio-37"' in body_hist
+        assert 'open' in body_hist

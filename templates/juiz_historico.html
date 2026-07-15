@@ -30,7 +30,7 @@
             {% if sorteios %}
             <div class="judge-draw-history__list">
                 {% for item in sorteios %}
-                <details class="judge-draw-history__item" {% if item.id == sorteio_atual_id %}open{% endif %}>
+                <details class="judge-draw-history__item" {% if item.id == sorteio_atual_id or item.id == sorteio_destaque_id %}open{% endif %} id="sorteio-{{ item.id }}">
                     <summary>
                         <span class="judge-draw-history__identity">
                             <span class="judge-draw-history__number">#{{ item.id }}</span>

@@ -213,7 +213,7 @@
     "id": "2ba4d2a2-6f2b-4a14-a6d1-a50d639ffaf9",
     "username": "juiz",
     "nome": "Juiz",
-    "password_hash": "scrypt:32768:8:1$a2qmbADltSgJNJmy$692b07254e9d538b6a901a38f82a88aefa7599aecc8c26637deebb7723b59222d77881239b366558cf2f01b8bc1ccb37d7961c8e58f1fc69bea49cf1c89882c0",
+    "password_hash": "scrypt:32768:8:1$ed1j2wIlC7jZqXU6$9524c83ce0c7ae67c9812d67d83f1bb190eb5f0280637bb61dc55ff13329f64002b6ca33c2f4c3004d79ac1270070cb5b94bd10cc0f1e0afd335a05fb45ff188",
     "role": "juiz",
     "criado_em": "2026-04-27T19:01:38.011675",
     "ativo": true,

@@ -17,7 +17,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 {% set show_site_footer = session.get('user_id') %}
-<body class="app-shell{% if show_site_footer %} has-site-footer{% endif %} {% block body_class %}{% endblock %}" data-app-shell="{{ 1 if config.get('ENABLE_APP_SHELL') else 0 }}">
+<body class="app-shell{% if show_site_footer %} has-site-footer{% endif %}{% if session.get('role') == 'juiz' %} is-referee-layout{% endif %} {% block body_class %}{% endblock %}" data-app-shell="{{ 1 if config.get('ENABLE_APP_SHELL') else 0 }}">
     <script src="{{ url_for('static', filename='offline-judge.js') }}"></script>
     <script>
         // Inject CSRF token into all POST forms automatically (works with Flask-WTF CSRFProtect)
@@ -240,6 +240,25 @@
                     <path d="M12 7v5l4 2" />
                 </svg>
             </a>
+
+            <a href="{{ url_for('juiz.juiz_cronometro') }}" class="site-footer__link{% if current_path.startswith('/jogar/cronometro') %} is-active{% endif %}" aria-label="Cronômetro" title="Cronômetro">
+                <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <circle cx="12" cy="13" r="8" />
+                    <path d="M12 9v4l2 2" />
+                    <path d="M9 2h6" />
+                </svg>
+            </a>
+
+            <form method="post" action="{{ url_for('jogador.logout') }}" style="display: contents;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="site-footer__link" aria-label="Sair" title="Sair" style="background: none; border: none; padding: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
+                    <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" x2="9" y1="12" y2="12" />
+                    </svg>
+                </button>
+            </form>
             {% else %}
             <a href="{{ url_for('jogador.index') }}" class="site-footer__link{% if is_jogadores %} is-active{% endif %}" aria-label="Jogadores" title="Jogadores"{% if is_jogadores %} aria-current="page"{% endif %}>
                 <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">

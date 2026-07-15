@@ -196,3 +196,32 @@ def test_judge_phone_titles_use_compact_hierarchy():
     assert 'font-size: clamp(1.35rem, 7vw, 1.65rem);' in stylesheet
     assert '.judge-workspace-page .judge-voting-step__header {' in stylesheet
     assert 'grid-template-columns: 2.2rem minmax(0, 1fr);' in stylesheet
+
+
+def test_judge_last_match_clickable_card_and_deep_links():
+    home_template = (ROOT / 'templates' / 'juiz_home.html').read_text(encoding='utf-8')
+    assert "url_for('juiz.juiz_historico', sorteio_id=ultima_partida.sorteio_id)" in home_template
+    assert "class=\"judge-flow-card judge-last-match-card\"" in home_template
+    assert "class=\"judge-flow-card judge-start-card\"" in home_template
+    assert "judge-start-card__header" in home_template
+    assert "judge-start-card__badge" in home_template
+
+    history_template = (ROOT / 'templates' / 'juiz_historico.html').read_text(encoding='utf-8')
+    assert "sorteio_destaque_id" in history_template
+    assert "id=\"sorteio-{{ item.id }}\"" in history_template
+
+    base_template = (ROOT / 'templates' / 'base.html').read_text(encoding='utf-8')
+    assert "session.get('role') == 'juiz'" in base_template
+    assert "is-referee-layout" in base_template
+    assert "url_for('juiz.juiz_cronometro')" in base_template
+    assert "url_for('jogador.logout')" in base_template
+
+    stylesheet = (ROOT / 'static' / 'style.css').read_text(encoding='utf-8')
+    assert ".judge-last-match-card" in stylesheet
+    assert ".judge-draw-history__item:target" in stylesheet
+    assert ".judge-start-card" in stylesheet
+    assert ".judge-start-card__header" in stylesheet
+    assert "body.is-referee-layout" in stylesheet
+    assert "body.is-referee-layout .site-topbar" in stylesheet
+    assert "body.is-referee-layout .site-footer" in stylesheet
+    assert "body.is-referee-layout .site-footer__link" in stylesheet

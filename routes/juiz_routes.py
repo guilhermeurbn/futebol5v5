@@ -197,6 +197,7 @@ def _resolver_sorteio_juiz(sorteio_id_hint=None):
 def juiz_historico():
     """Lista os sorteios anteriores em uma pagina dedicada ao juiz."""
     try:
+        sorteio_destaque_id = request.args.get('sorteio_id', type=int)
         sorteios = sorted(
             historico_service.listar_sorteios() or [],
             key=lambda item: int(item.get('id', 0) or 0),
@@ -226,6 +227,7 @@ def juiz_historico():
             'juiz_historico.html',
             sorteios=sorteios,
             sorteio_atual_id=sorteio_atual_id,
+            sorteio_destaque_id=sorteio_destaque_id,
             usuario=_usuario_logado(),
         )
     except Exception as e:
@@ -234,6 +236,7 @@ def juiz_historico():
             'juiz_historico.html',
             sorteios=[],
             sorteio_atual_id=None,
+            sorteio_destaque_id=None,
             erro='Erro ao carregar histórico',
             usuario=_usuario_logado(),
         ), 500

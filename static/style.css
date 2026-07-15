@@ -15940,3 +15940,428 @@ body,
   background: #000000 !important;
   background-image: none !important;
 }
+
+/* ============================================================
+   Premium Clickable Last Match Card & History Target Styling
+   ============================================================ */
+.judge-last-match-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  text-decoration: none !important;
+  color: inherit;
+  cursor: pointer;
+  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.22s ease, box-shadow 0.22s ease;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--judge-border);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at top left, rgba(139, 92, 246, 0.08), transparent 36%),
+    radial-gradient(circle at top right, rgba(236, 72, 153, 0.06), transparent 30%),
+    linear-gradient(155deg, rgba(255, 255, 255, 0.025), transparent 45%),
+    var(--judge-surface);
+  box-shadow:
+    0 18px 50px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  margin-top: 1.25rem;
+}
+
+.judge-last-match-card:hover,
+.judge-last-match-card:focus-visible {
+  transform: translateY(-3px) scale(1.01);
+  border-color: rgba(139, 92, 246, 0.5);
+  box-shadow: 
+    0 24px 60px rgba(0, 0, 0, 0.45),
+    0 0 15px rgba(139, 92, 246, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.judge-last-match-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.judge-last-match-card__title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--judge-text);
+  margin: 0.15rem 0 0 0 !important;
+  letter-spacing: -0.03em;
+}
+
+.judge-last-match-card__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(139, 92, 246, 0.12);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  color: #c084fc;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.judge-last-match-card__results {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.judge-last-match-card__team {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.25rem 0;
+  font-size: 0.92rem;
+  color: var(--judge-muted);
+}
+
+.judge-last-match-card__team.is-winner {
+  color: var(--judge-text);
+  font-weight: 700;
+}
+
+.judge-last-match-card__team-name {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.judge-last-match-card__team-stats {
+  font-size: 0.88rem;
+}
+
+.judge-last-match-card__team-stats strong {
+  color: var(--judge-text);
+}
+
+.judge-last-match-card__team.is-winner .judge-last-match-card__team-stats strong {
+  color: var(--judge-green);
+}
+
+.stats-sep {
+  opacity: 0.3;
+  margin: 0 0.25rem;
+}
+
+.winner-trophy {
+  font-size: 0.95rem;
+  margin-left: 0.25rem;
+}
+
+.judge-last-match-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.judge-last-match-card__meta {
+  display: flex;
+  align-items: center;
+  color: var(--judge-muted);
+  font-size: 0.8rem;
+}
+
+.judge-last-match-card__date {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: inherit;
+}
+
+.icon-clock {
+  opacity: 0.65;
+}
+
+.judge-last-match-card__action {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--judge-green);
+  transition: transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.judge-last-match-card:hover .judge-last-match-card__action {
+  transform: translateX(4px);
+}
+
+/* Histórico Target scroll-margin and glow highlight */
+.judge-draw-history__item {
+  scroll-margin-top: 6.5rem;
+}
+
+.judge-draw-history__item:target {
+  border-color: rgba(34, 197, 94, 0.6) !important;
+  box-shadow: 
+    0 0 0 1px rgba(34, 197, 94, 0.3),
+    0 12px 36px rgba(34, 197, 94, 0.16);
+  animation: judge-target-highlight 2.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes judge-target-highlight {
+  0% {
+    background: radial-gradient(circle at 50% 50%, rgba(34, 197, 94, 0.15), transparent 70%);
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.5);
+  }
+  100% {
+    background:
+      radial-gradient(circle at top left, rgba(124, 58, 237, 0.08), transparent 34%),
+      radial-gradient(circle at top right, rgba(34, 197, 94, 0.05), transparent 30%),
+      linear-gradient(180deg, rgba(12, 14, 20, 0.96), rgba(7, 9, 13, 0.98));
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+  }
+}
+
+/* ============================================================
+   Premium Styling for Start-Card (Criar Partida)
+   ============================================================ */
+.judge-start-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  text-decoration: none !important;
+  color: inherit;
+  cursor: pointer;
+  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.22s ease, box-shadow 0.22s ease;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--judge-border) !important;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at top left, rgba(34, 197, 94, 0.08), transparent 36%),
+    radial-gradient(circle at top right, rgba(139, 92, 246, 0.06), transparent 30%),
+    linear-gradient(155deg, rgba(255, 255, 255, 0.025), transparent 45%),
+    var(--judge-surface) !important;
+  box-shadow:
+    0 18px 50px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  margin-top: 0;
+}
+
+.judge-start-card:hover,
+.judge-start-card:focus-within {
+  transform: translateY(-3px) scale(1.01);
+  border-color: rgba(34, 197, 94, 0.5) !important;
+  box-shadow: 
+    0 24px 60px rgba(0, 0, 0, 0.45),
+    0 0 15px rgba(34, 197, 94, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.judge-start-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.judge-start-card__title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--judge-text);
+  margin: 0.15rem 0 0 0 !important;
+  letter-spacing: -0.03em;
+}
+
+.judge-start-card__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: #c9f4d5;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.judge-start-card__body {
+  width: 100%;
+}
+
+.judge-start-card__description {
+  color: var(--judge-muted);
+  font-size: 0.95rem;
+  margin: 0 !important;
+  line-height: 1.4;
+}
+
+.judge-start-card__footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 0.85rem;
+  margin-top: 0.25rem;
+  width: 100%;
+}
+
+.judge-start-card__form {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.judge-start-card .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1.25rem;
+  font-weight: 800;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.judge-start-card:hover .btn-primary {
+  transform: scale(1.02);
+}
+
+.judge-start-card:hover .icon-arrow {
+  transform: translateX(3px);
+  transition: transform 0.2s ease;
+}
+
+/* ============================================================
+   Unified Referee Layout (Desktop = Mobile)
+   ============================================================ */
+body.is-referee-layout .site-topbar {
+  display: none !important;
+}
+
+body.is-referee-layout .site-footer {
+  display: block !important;
+}
+
+/* Hide header action buttons entirely for the referee */
+body.is-referee-layout .brand-header__mobile-actions {
+  display: none !important;
+}
+
+body.is-referee-layout #app-content .main {
+  padding-bottom: calc(var(--spacing-xl) + var(--site-footer-height) + env(safe-area-inset-bottom)) !important;
+}
+
+/* Center the logo in the middle of the header */
+body.is-referee-layout .brand-header {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  height: 80px !important;
+  min-height: 80px !important;
+  max-height: 80px !important;
+  position: relative !important;
+  overflow: visible !important;
+}
+
+body.is-referee-layout .logo-header {
+  width: auto !important;
+  height: auto !important;
+  padding: 0 !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 10 !important;
+}
+
+body.is-referee-layout .brand-logo-image {
+  height: clamp(84px, 18vw, 110px) !important;
+  width: auto !important;
+}
+
+/* Adjust footer links for 7 icons layout to prevent overflow on mobile */
+body.is-referee-layout .site-footer__link {
+  width: 3rem !important;
+  height: 3rem !important;
+  border-radius: 12px !important;
+}
+
+body.is-referee-layout .site-footer__icon {
+  width: 1.2rem !important;
+  height: 1.2rem !important;
+}
+
+@media (max-width: 640px) {
+  body.is-referee-layout .site-footer__link {
+    width: 2.65rem !important;
+    height: 2.65rem !important;
+    border-radius: 10px !important;
+  }
+  body.is-referee-layout .site-footer__icon {
+    width: 1.1rem !important;
+    height: 1.1rem !important;
+  }
+}
+
+/* Card de Criar Partida Interativo & Premium */
+.judge-start-card .judge-flow-kicker {
+  color: #22c55e !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  font-size: 0.68rem !important;
+  background: rgba(34, 197, 94, 0.12) !important;
+  padding: 0.25rem 0.55rem !important;
+  border-radius: 6px !important;
+  border: 1px solid rgba(34, 197, 94, 0.25) !important;
+  display: inline-block !important;
+  margin-bottom: 0.35rem !important;
+}
+
+.judge-start-card__title {
+  background: linear-gradient(135deg, #ffffff 40%, #86efac 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  font-weight: 900 !important;
+}
+
+.judge-start-card__description {
+  color: rgba(255, 255, 255, 0.72) !important;
+  font-weight: 400 !important;
+}
+
+.judge-start-card .btn-primary {
+  background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.25) !important;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease, background-color 0.2s ease !important;
+}
+
+.judge-start-card:hover .btn-primary {
+  transform: translateY(-1px) scale(1.03) !important;
+  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.45) !important;
+}
+
+.judge-start-card__badge {
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.1) !important;
+  animation: judge-pulse-badge 2s infinite ease-in-out;
+}
+
+@keyframes judge-pulse-badge {
+  0%, 100% {
+    box-shadow: 0 0 4px rgba(34, 197, 94, 0.1), inset 0 0 0 0px rgba(34, 197, 94, 0);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.25), inset 0 0 0 1px rgba(34, 197, 94, 0.1);
+  }
+}

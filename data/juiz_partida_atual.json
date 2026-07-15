@@ -1,33 +1,22 @@
 {
-  "status": "sorteada",
+  "status": "selecionando",
   "partida_atual": {
-    "status": "sorteada",
+    "status": "selecionando",
     "criado_por": "2ba4d2a2-6f2b-4a14-a6d1-a50d639ffaf9",
-    "criado_em": "2026-07-14T18:00:00.669918",
-    "quantidade_jogadores": 10,
-    "jogador_ids": [
-      "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
-      "e9758009-9214-4cc0-aea0-f365a3381803",
-      "4d113a13-66e9-4625-8d60-8974cea228ef",
-      "fdbe49b3-d73e-4db3-af5f-f23c089b8c38",
-      "cb3d184e-bf39-4638-8563-529bbe20274c",
-      "cea7df59-6699-479b-88a7-e4194af7481b",
-      "355a82e5-2c71-4212-b787-9f0a7d9ca2d0",
-      "70e90819-3eb0-41f6-9d8e-eb1a77040f68",
-      "ce422cf5-f6d1-4693-9bae-345e1ac21f2f",
-      "b17181c2-a4b4-4909-b9d1-ef979faa3063"
-    ],
-    "sorteio_id": 37,
+    "criado_em": "2026-07-15T13:30:04.271067",
+    "quantidade_jogadores": null,
+    "jogador_ids": [],
+    "sorteio_id": null,
     "resultado_registrado": false,
     "resultado_partida_id": null,
     "votacao_partida_id": null,
     "votacao_aberta": false
   },
   "ultima_partida_encerrada": {
-    "titulo": "Votação do sorteio #34",
-    "sorteio_id": 34,
-    "partida_id": 34,
-    "encerrado_em": "2026-07-13T14:30:49.582467",
+    "titulo": "Votação do sorteio #37",
+    "sorteio_id": 37,
+    "partida_id": 36,
+    "encerrado_em": "2026-07-15T12:31:06.667581",
     "resultado_resumido": [
       {
         "time_numero": 1,
@@ -51,10 +40,10 @@
     "total_votos": 0,
     "pendentes": [
       {
-        "user_id": "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7",
-        "username": "carlos",
-        "nome_usuario": "Carlos",
-        "jogador_nome": "Carlos",
+        "user_id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033",
+        "username": "guilherme",
+        "nome_usuario": "Guilherme",
+        "jogador_nome": "Guilherme",
         "time_numero": 1,
         "externo": false
       },
@@ -67,10 +56,10 @@
         "externo": false
       },
       {
-        "user_id": "6a5290cd-317b-4764-b1df-6969f849adc5",
-        "username": "renan",
-        "nome_usuario": "Renan",
-        "jogador_nome": "Renan",
+        "user_id": "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7",
+        "username": "carlos",
+        "nome_usuario": "Carlos",
+        "jogador_nome": "Carlos",
         "time_numero": 1,
         "externo": false
       },
@@ -91,10 +80,10 @@
         "externo": false
       },
       {
-        "user_id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033",
-        "username": "guilherme",
-        "nome_usuario": "Guilherme",
-        "jogador_nome": "Guilherme",
+        "user_id": "6a5290cd-317b-4764-b1df-6969f849adc5",
+        "username": "renan",
+        "nome_usuario": "Renan",
+        "jogador_nome": "Renan",
         "time_numero": 2,
         "externo": false
       },

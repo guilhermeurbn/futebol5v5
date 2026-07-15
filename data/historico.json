@@ -4985,17 +4985,6 @@
         "numero": 2,
         "jogadores": [
           {
-            "nome": "Renan",
-            "nivel": 7.0,
-            "tipo": "fixo",
-            "posicao": "linha",
-            "presente": true,
-            "id": "cb3d184e-bf39-4638-8563-529bbe20274c",
-            "criado_em": "2026-04-27T18:58:36.406589",
-            "owner_user_id": "6a5290cd-317b-4764-b1df-6969f849adc5",
-            "historico_nivel": []
-          },
-          {
             "nome": "André Balada",
             "nivel": 7.0,
             "tipo": "fixo",
@@ -5004,6 +4993,17 @@
             "id": "fdbe49b3-d73e-4db3-af5f-f23c089b8c38",
             "criado_em": "2026-04-27T18:58:36.267786",
             "owner_user_id": "db1314a8-2d4e-4384-829e-8075b1e33737",
+            "historico_nivel": []
+          },
+          {
+            "nome": "Renan",
+            "nivel": 7.0,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "cb3d184e-bf39-4638-8563-529bbe20274c",
+            "criado_em": "2026-04-27T18:58:36.406589",
+            "owner_user_id": "6a5290cd-317b-4764-b1df-6969f849adc5",
             "historico_nivel": []
           },
           {
@@ -5043,10 +5043,11 @@
         "soma": 35.0
       }
     ],
-    "diferenca": 0.0,
+    "diferenca": 0,
     "pontuacoes": [
-      35.0,
-      35.0
-    ]
+      35,
+      35
+    ],
+    "data_atualizacao": "2026-07-15T13:27:44.731365"
   }
 ]
