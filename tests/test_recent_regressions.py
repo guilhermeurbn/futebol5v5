@@ -69,3 +69,10 @@ def test_votacao_admin_post_without_csrf_redirects_to_recovery_page():
     location = response.headers.get('Location', '')
     assert '/admin/votacao' in location
     assert 'erro=' in location
+
+
+def test_juiz_times_template_compiles():
+    app = criar_app('testing')
+
+    with app.app_context():
+        app.jinja_env.get_template('juiz_times.html')

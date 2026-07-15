@@ -115,8 +115,7 @@
 
 <script>
     (() => {
-        const sorteoId = {{ sorteio.id }
-    };
+        const sorteoId = {{ sorteio.id|tojson }};
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
     const btnEditar = document.getElementById('btnEditarTimes');
     const btnSalvar = document.getElementById('btnSalvarTrocas');
