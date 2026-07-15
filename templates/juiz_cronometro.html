@@ -32,9 +32,11 @@
             </div>
 
             <div class="judge-timer-controls" role="group" aria-label="Controles do cronômetro">
-                <button type="button" class="btn btn-secondary judge-timer-adjust judge-timer-adjust--minus" id="timerMinus" aria-label="Retirar um minuto">-1 min</button>
+                <button type="button" class="btn btn-secondary judge-timer-adjust judge-timer-adjust--minus"
+                    id="timerMinus" aria-label="Retirar um minuto">-1 min</button>
                 <button type="button" class="btn btn-primary judge-timer-toggle" id="timerToggle">Iniciar</button>
-                <button type="button" class="btn btn-secondary judge-timer-adjust judge-timer-adjust--plus" id="timerPlus" aria-label="Adicionar um minuto">+1 min</button>
+                <button type="button" class="btn btn-secondary judge-timer-adjust judge-timer-adjust--plus"
+                    id="timerPlus" aria-label="Adicionar um minuto">+1 min</button>
                 <button type="button" class="btn btn-danger judge-timer-reset" id="timerReset">Resetar</button>
             </div>
 
@@ -44,180 +46,180 @@
 </div>
 
 <script>
-(() => {
-    const STORAGE_KEY = 'judge_timer_state_v2';
-    const DEFAULT_SECONDS = 10 * 60;
+    (() => {
+        const STORAGE_KEY = 'judge_timer_state_v2';
+        const DEFAULT_SECONDS = 10 * 60;
 
-    const display = document.getElementById('judgeTimerDisplay');
-    const toggleButton = document.getElementById('timerToggle');
-    const resetButton = document.getElementById('timerReset');
-    const minusButton = document.getElementById('timerMinus');
-    const plusButton = document.getElementById('timerPlus');
-    const presetButtons = document.querySelectorAll('.judge-timer-preset');
+        const display = document.getElementById('judgeTimerDisplay');
+        const toggleButton = document.getElementById('timerToggle');
+        const resetButton = document.getElementById('timerReset');
+        const minusButton = document.getElementById('timerMinus');
+        const plusButton = document.getElementById('timerPlus');
+        const presetButtons = document.querySelectorAll('.judge-timer-preset');
 
-    let timerId = null;
-    let state = {
-        duration: DEFAULT_SECONDS,
-        remaining: DEFAULT_SECONDS,
-        running: false,
-        lastTick: null,
-    };
+        let timerId = null;
+        let state = {
+            duration: DEFAULT_SECONDS,
+            remaining: DEFAULT_SECONDS,
+            running: false,
+            lastTick: null,
+        };
 
-    const clamp = (value) => Math.max(0, Number(value || 0));
+        const clamp = (value) => Math.max(0, Number(value || 0));
 
-    const formatTime = (totalSeconds) => {
-        const value = clamp(totalSeconds);
-        const minutes = Math.floor(value / 60);
-        const seconds = value % 60;
-        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    };
+        const formatTime = (totalSeconds) => {
+            const value = clamp(totalSeconds);
+            const minutes = Math.floor(value / 60);
+            const seconds = value % 60;
+            return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        };
 
-    const saveState = () => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    };
+        const saveState = () => {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        };
 
-    const readState = () => {
-        try {
-            const raw = localStorage.getItem(STORAGE_KEY);
-            if (!raw) return;
-            const parsed = JSON.parse(raw);
-            if (!parsed || typeof parsed !== 'object') return;
+        const readState = () => {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return;
+                const parsed = JSON.parse(raw);
+                if (!parsed || typeof parsed !== 'object') return;
 
-            state.duration = clamp(parsed.duration || DEFAULT_SECONDS);
-            state.remaining = clamp(parsed.remaining || state.duration || DEFAULT_SECONDS);
-            state.running = Boolean(parsed.running);
-            state.lastTick = parsed.lastTick || null;
-        } catch (_err) {
-            state = {
-                duration: DEFAULT_SECONDS,
-                remaining: DEFAULT_SECONDS,
-                running: false,
-                lastTick: null,
-            };
-        }
-    };
+                state.duration = clamp(parsed.duration || DEFAULT_SECONDS);
+                state.remaining = clamp(parsed.remaining || state.duration || DEFAULT_SECONDS);
+                state.running = Boolean(parsed.running);
+                state.lastTick = parsed.lastTick || null;
+            } catch (_err) {
+                state = {
+                    duration: DEFAULT_SECONDS,
+                    remaining: DEFAULT_SECONDS,
+                    running: false,
+                    lastTick: null,
+                };
+            }
+        };
 
-    const applyElapsedIfNeeded = () => {
-        if (!state.running || !state.lastTick) return;
-        const elapsed = Math.floor((Date.now() - Number(state.lastTick)) / 1000);
-        if (elapsed <= 0) return;
+        const applyElapsedIfNeeded = () => {
+            if (!state.running || !state.lastTick) return;
+            const elapsed = Math.floor((Date.now() - Number(state.lastTick)) / 1000);
+            if (elapsed <= 0) return;
 
-        state.remaining = clamp(state.remaining - elapsed);
-        state.lastTick = Date.now();
+            state.remaining = clamp(state.remaining - elapsed);
+            state.lastTick = Date.now();
 
-        if (state.remaining <= 0) {
+            if (state.remaining <= 0) {
+                state.running = false;
+                state.lastTick = null;
+            }
+        };
+
+        const refreshUI = () => {
+            display.textContent = formatTime(state.remaining);
+            display.classList.toggle('is-finished', state.remaining === 0);
+            toggleButton.textContent = state.running ? 'Pausar' : 'Iniciar';
+
+            presetButtons.forEach((button) => {
+                const seconds = Number(button.dataset.seconds || 0);
+                button.classList.toggle('is-active', !state.running && state.duration === seconds && state.remaining === seconds);
+            });
+        };
+
+        const stopTicker = () => {
+            if (!timerId) return;
+            window.clearInterval(timerId);
+            timerId = null;
+        };
+
+        const tick = () => {
+            if (!state.running) return;
+            applyElapsedIfNeeded();
+
+            if (state.remaining === 0) {
+                state.running = false;
+                state.lastTick = null;
+                stopTicker();
+            }
+
+            refreshUI();
+            saveState();
+        };
+
+        const startTicker = () => {
+            if (timerId) return;
+            timerId = window.setInterval(tick, 500);
+        };
+
+        const setDuration = (seconds) => {
+            const value = clamp(seconds);
+            state.duration = value;
+            state.remaining = value;
             state.running = false;
             state.lastTick = null;
-        }
-    };
+            stopTicker();
+            refreshUI();
+            saveState();
+        };
 
-    const refreshUI = () => {
-        display.textContent = formatTime(state.remaining);
-        display.classList.toggle('is-finished', state.remaining === 0);
-        toggleButton.textContent = state.running ? 'Pausar' : 'Iniciar';
+        toggleButton.addEventListener('click', () => {
+            if (state.running) {
+                state.running = false;
+                state.lastTick = null;
+                stopTicker();
+            } else {
+                if (state.remaining <= 0) {
+                    state.remaining = state.duration || DEFAULT_SECONDS;
+                }
+                state.running = true;
+                state.lastTick = Date.now();
+                startTicker();
+            }
+            refreshUI();
+            saveState();
+        });
+
+        resetButton.addEventListener('click', () => {
+            state.running = false;
+            state.remaining = state.duration || DEFAULT_SECONDS;
+            state.lastTick = null;
+            stopTicker();
+            refreshUI();
+            saveState();
+        });
+
+        minusButton.addEventListener('click', () => {
+            const next = clamp(state.remaining - 60);
+            state.remaining = next;
+            state.duration = Math.max(next, state.duration);
+            if (state.remaining === 0) {
+                state.running = false;
+                state.lastTick = null;
+                stopTicker();
+            }
+            refreshUI();
+            saveState();
+        });
+
+        plusButton.addEventListener('click', () => {
+            state.remaining = clamp(state.remaining + 60);
+            state.duration = Math.max(state.duration, state.remaining);
+            refreshUI();
+            saveState();
+        });
 
         presetButtons.forEach((button) => {
-            const seconds = Number(button.dataset.seconds || 0);
-            button.classList.toggle('is-active', !state.running && state.duration === seconds && state.remaining === seconds);
+            button.addEventListener('click', () => {
+                setDuration(Number(button.dataset.seconds || DEFAULT_SECONDS));
+            });
         });
-    };
 
-    const stopTicker = () => {
-        if (!timerId) return;
-        window.clearInterval(timerId);
-        timerId = null;
-    };
-
-    const tick = () => {
-        if (!state.running) return;
+        readState();
         applyElapsedIfNeeded();
-
-        if (state.remaining === 0) {
-            state.running = false;
-            state.lastTick = null;
-            stopTicker();
-        }
-
         refreshUI();
         saveState();
-    };
 
-    const startTicker = () => {
-        if (timerId) return;
-        timerId = window.setInterval(tick, 500);
-    };
-
-    const setDuration = (seconds) => {
-        const value = clamp(seconds);
-        state.duration = value;
-        state.remaining = value;
-        state.running = false;
-        state.lastTick = null;
-        stopTicker();
-        refreshUI();
-        saveState();
-    };
-
-    toggleButton.addEventListener('click', () => {
         if (state.running) {
-            state.running = false;
-            state.lastTick = null;
-            stopTicker();
-        } else {
-            if (state.remaining <= 0) {
-                state.remaining = state.duration || DEFAULT_SECONDS;
-            }
-            state.running = true;
-            state.lastTick = Date.now();
             startTicker();
         }
-        refreshUI();
-        saveState();
-    });
-
-    resetButton.addEventListener('click', () => {
-        state.running = false;
-        state.remaining = state.duration || DEFAULT_SECONDS;
-        state.lastTick = null;
-        stopTicker();
-        refreshUI();
-        saveState();
-    });
-
-    minusButton.addEventListener('click', () => {
-        const next = clamp(state.remaining - 60);
-        state.remaining = next;
-        state.duration = Math.max(next, state.duration);
-        if (state.remaining === 0) {
-            state.running = false;
-            state.lastTick = null;
-            stopTicker();
-        }
-        refreshUI();
-        saveState();
-    });
-
-    plusButton.addEventListener('click', () => {
-        state.remaining = clamp(state.remaining + 60);
-        state.duration = Math.max(state.duration, state.remaining);
-        refreshUI();
-        saveState();
-    });
-
-    presetButtons.forEach((button) => {
-        button.addEventListener('click', () => {
-            setDuration(Number(button.dataset.seconds || DEFAULT_SECONDS));
-        });
-    });
-
-    readState();
-    applyElapsedIfNeeded();
-    refreshUI();
-    saveState();
-
-    if (state.running) {
-        startTicker();
-    }
-})();
+    })();
 </script>
 {% endblock %}

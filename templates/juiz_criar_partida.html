@@ -25,15 +25,18 @@
             <div class="judge-format-picker">
                 <span class="judge-format-picker__label">Quantos jogadores?</span>
                 <div class="judge-format-options" role="group" aria-label="Quantidade de jogadores">
-                    <button class="qty-btn judge-format-option" type="button" onclick="selecionarQuantidade(10)" data-qty="10" aria-pressed="false">
+                    <button class="qty-btn judge-format-option" type="button" onclick="selecionarQuantidade(10)"
+                        data-qty="10" aria-pressed="false">
                         <strong>10</strong>
                         <span>2 times</span>
                     </button>
-                    <button class="qty-btn judge-format-option" type="button" onclick="selecionarQuantidade(15)" data-qty="15" aria-pressed="false">
+                    <button class="qty-btn judge-format-option" type="button" onclick="selecionarQuantidade(15)"
+                        data-qty="15" aria-pressed="false">
                         <strong>15</strong>
                         <span>3 times</span>
                     </button>
-                    <button class="qty-btn judge-format-option" type="button" onclick="selecionarQuantidade(20)" data-qty="20" aria-pressed="false">
+                    <button class="qty-btn judge-format-option" type="button" onclick="selecionarQuantidade(20)"
+                        data-qty="20" aria-pressed="false">
                         <strong>20</strong>
                         <span>4 times</span>
                     </button>
@@ -45,14 +48,17 @@
                     <span>Selecionados</span>
                     <strong><span id="contador">{{ total_presentes }}</span><span id="metaContador"></span></strong>
                 </div>
-                <button class="judge-clear-button" id="btnLimpar" type="button" onclick="limparSelecao()">Limpar seleção</button>
+                <button class="judge-clear-button" id="btnLimpar" type="button" onclick="limparSelecao()">Limpar
+                    seleção</button>
                 <div class="judge-selection-progress" id="progressoSelecaoTrilho" aria-hidden="true">
                     <span id="progressoSelecao"></span>
                 </div>
             </div>
 
-            <div class="judge-create-action judge-sort-fab judge-sort-fab--minimal" id="acoesSorteio" aria-live="polite">
-                <button class="judge-sort-action" id="btnSortear" type="button" onclick="confirmarSelecao()" disabled aria-label="Escolha a quantidade de jogadores">
+            <div class="judge-create-action judge-sort-fab judge-sort-fab--minimal" id="acoesSorteio"
+                aria-live="polite">
+                <button class="judge-sort-action" id="btnSortear" type="button" onclick="confirmarSelecao()" disabled
+                    aria-label="Escolha a quantidade de jogadores">
                     <span class="judge-sort-action__text" id="btnSortearTexto">-</span>
                 </button>
             </div>
@@ -60,22 +66,19 @@
             <div class="players-grid judge-players-grid">
                 {% for jogador in todos_jogadores %}
                 <label class="judge-player-option">
-                    <input
-                        type="checkbox"
-                        class="jogador-checkbox"
-                        data-id="{{ jogador.id }}"
-                        data-nivel="{{ jogador.nivel }}"
-                        data-posicao="{{ jogador.posicao }}"
-                        data-nome="{{ jogador.nome }}"
-                        onchange="atualizarContador()"
-                        {% if jogador.presente %}checked{% endif %}
-                    >
-                    <img class="judge-player-option__bg" src="{{ jogador.foto_url or url_for('static', filename='foto_card_jogador.jpeg') }}" alt="" aria-hidden="true">
+                    <input type="checkbox" class="jogador-checkbox" data-id="{{ jogador.id }}"
+                        data-nivel="{{ jogador.nivel }}" data-posicao="{{ jogador.posicao }}"
+                        data-nome="{{ jogador.nome }}" onchange="atualizarContador()" {% if jogador.presente %}checked{%
+                        endif %}>
+                    <img class="judge-player-option__bg"
+                        src="{{ jogador.foto_url or url_for('static', filename='foto_card_jogador.jpeg') }}" alt=""
+                        aria-hidden="true">
                     <span class="judge-player-option__overlay" aria-hidden="true"></span>
                     <span class="judge-player-option__check" aria-hidden="true"></span>
                     <span class="judge-player-option__surface">
                         <span class="judge-player-option__avatar-shell">
-                            <span class="judge-player-option__avatar" aria-hidden="true">{{ jogador.nome[:2]|upper }}</span>
+                            <span class="judge-player-option__avatar" aria-hidden="true">{{ jogador.nome[:2]|upper
+                                }}</span>
                         </span>
                         <span class="judge-player-option__content">
                             <span class="judge-player-option__identity">
@@ -96,138 +99,140 @@
                 {% endfor %}
             </div>
 
-            <div id="mensagemErro" class="alert alert-warning judge-create-error" role="alert" style="display: none;"></div>
+            <div id="mensagemErro" class="alert alert-warning judge-create-error" role="alert" style="display: none;">
+            </div>
         </section>
     </main>
 </div>
 
 <script>
-const QUANTIDADES_VALIDAS = [10, 15, 20];
-let quantidadeSelecionada = null;
+    const QUANTIDADES_VALIDAS = [10, 15, 20];
+    let quantidadeSelecionada = null;
 
-function atualizarContador() {
-    document.querySelectorAll('.jogador-checkbox').forEach(cb => {
-        const card = cb.closest('.judge-player-option');
-        if (card) {
-            card.classList.toggle('selected', cb.checked);
+    function atualizarContador() {
+        document.querySelectorAll('.jogador-checkbox').forEach(cb => {
+            const card = cb.closest('.judge-player-option');
+            if (card) {
+                card.classList.toggle('selected', cb.checked);
+            }
+        });
+
+        const checkboxes = document.querySelectorAll('.jogador-checkbox:checked');
+        const contador = checkboxes.length;
+        document.getElementById('contador').textContent = contador;
+
+        const btnSortear = document.getElementById('btnSortear');
+        const btnSortearTexto = document.getElementById('btnSortearTexto');
+        const metaContador = document.getElementById('metaContador');
+        const progresso = document.getElementById('progressoSelecao');
+        const progressoTrilho = document.getElementById('progressoSelecaoTrilho');
+        const btnLimpar = document.getElementById('btnLimpar');
+        const acoesSorteio = document.getElementById('acoesSorteio');
+        const completos = quantidadeSelecionada && contador === quantidadeSelecionada;
+        const faltam = quantidadeSelecionada ? quantidadeSelecionada - contador : 0;
+
+        metaContador.textContent = quantidadeSelecionada ? ` de ${quantidadeSelecionada}` : '';
+        progresso.style.width = quantidadeSelecionada
+            ? `${Math.min((contador / quantidadeSelecionada) * 100, 100)}%`
+            : '0%';
+        btnLimpar.disabled = contador === 0;
+        btnSortear.disabled = !completos;
+        progressoTrilho.classList.toggle('is-complete', Boolean(completos));
+        acoesSorteio.classList.toggle('is-ready', Boolean(completos));
+        btnSortear.classList.toggle('is-ready', Boolean(completos));
+
+        document.querySelectorAll('.jogador-checkbox').forEach(cb => {
+            cb.disabled = Boolean(quantidadeSelecionada && contador >= quantidadeSelecionada && !cb.checked);
+        });
+
+        if (!quantidadeSelecionada) {
+            btnSortearTexto.textContent = '-';
+            btnSortear.setAttribute('aria-label', 'Escolha a quantidade de jogadores');
+        } else if (faltam > 0) {
+            btnSortearTexto.textContent = String(faltam);
+            btnSortear.setAttribute('aria-label', `Faltam ${faltam} jogadores para sortear`);
+        } else if (faltam < 0) {
+            btnSortearTexto.textContent = `+${Math.abs(faltam)}`;
+            btnSortear.setAttribute('aria-label', `${Math.abs(faltam)} jogadores a mais que o permitido`);
+        } else {
+            btnSortearTexto.textContent = 'Sortear';
+            btnSortear.setAttribute('aria-label', 'Sortear times');
         }
-    });
-
-    const checkboxes = document.querySelectorAll('.jogador-checkbox:checked');
-    const contador = checkboxes.length;
-    document.getElementById('contador').textContent = contador;
-
-    const btnSortear = document.getElementById('btnSortear');
-    const btnSortearTexto = document.getElementById('btnSortearTexto');
-    const metaContador = document.getElementById('metaContador');
-    const progresso = document.getElementById('progressoSelecao');
-    const progressoTrilho = document.getElementById('progressoSelecaoTrilho');
-    const btnLimpar = document.getElementById('btnLimpar');
-    const acoesSorteio = document.getElementById('acoesSorteio');
-    const completos = quantidadeSelecionada && contador === quantidadeSelecionada;
-    const faltam = quantidadeSelecionada ? quantidadeSelecionada - contador : 0;
-
-    metaContador.textContent = quantidadeSelecionada ? ` de ${quantidadeSelecionada}` : '';
-    progresso.style.width = quantidadeSelecionada
-        ? `${Math.min((contador / quantidadeSelecionada) * 100, 100)}%`
-        : '0%';
-    btnLimpar.disabled = contador === 0;
-    btnSortear.disabled = !completos;
-    progressoTrilho.classList.toggle('is-complete', Boolean(completos));
-    acoesSorteio.classList.toggle('is-ready', Boolean(completos));
-
-    document.querySelectorAll('.jogador-checkbox').forEach(cb => {
-        cb.disabled = Boolean(quantidadeSelecionada && contador >= quantidadeSelecionada && !cb.checked);
-    });
-
-    if (!quantidadeSelecionada) {
-        btnSortearTexto.textContent = '-';
-        btnSortear.setAttribute('aria-label', 'Escolha a quantidade de jogadores');
-    } else if (faltam > 0) {
-        btnSortearTexto.textContent = String(faltam);
-        btnSortear.setAttribute('aria-label', `Faltam ${faltam} jogadores para sortear`);
-    } else if (faltam < 0) {
-        btnSortearTexto.textContent = `+${Math.abs(faltam)}`;
-        btnSortear.setAttribute('aria-label', `${Math.abs(faltam)} jogadores a mais que o permitido`);
-    } else {
-        btnSortearTexto.textContent = 'Sortear';
-        btnSortear.setAttribute('aria-label', 'Sortear times');
-    }
-}
-
-function selecionarQuantidade(quantidade) {
-    quantidadeSelecionada = quantidade;
-
-    document.querySelectorAll('.qty-btn').forEach(btn => {
-        const selecionado = btn.getAttribute('data-qty') === String(quantidadeSelecionada);
-        btn.classList.toggle('selected', selecionado);
-        btn.setAttribute('aria-pressed', String(selecionado));
-    });
-
-    document.getElementById('mensagemErro').style.display = 'none';
-    atualizarContador();
-}
-
-function limparSelecao() {
-    document.querySelectorAll('.jogador-checkbox').forEach(cb => cb.checked = false);
-    document.getElementById('mensagemErro').style.display = 'none';
-    atualizarContador();
-}
-
-function confirmarSelecao() {
-    const checkboxes = document.querySelectorAll('.jogador-checkbox:checked');
-    const ids = Array.from(checkboxes).map(cb => cb.getAttribute('data-id'));
-    const msgErro = document.getElementById('mensagemErro');
-
-    if (!quantidadeSelecionada || ids.length !== quantidadeSelecionada) {
-        msgErro.textContent = quantidadeSelecionada
-            ? `Selecione exatamente ${quantidadeSelecionada} jogadores.`
-            : 'Escolha 10, 15 ou 20 jogadores.';
-        msgErro.style.display = 'block';
-        return;
     }
 
-    msgErro.style.display = 'none';
-    const btnSortear = document.getElementById('btnSortear');
-    const btnSortearTexto = document.getElementById('btnSortearTexto');
-    btnSortear.disabled = true;
-    btnSortearTexto.textContent = '...';
-    btnSortear.setAttribute('aria-label', 'Preparando sorteio');
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    function selecionarQuantidade(quantidade) {
+        quantidadeSelecionada = quantidade;
 
-    fetch('/api/presenca', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
-        body: JSON.stringify({jogador_ids: ids})
-    })
-    .then(async res => {
-        const data = await res.json();
-        if (data.redirect_url) {
-            window.location.href = data.redirect_url;
-            return data;
-        }
-        if (!res.ok) throw new Error(data.erro || 'Não foi possível iniciar o sorteio. Tente novamente.');
-        return data;
-    })
-    .then(data => {
-        if (data.redirect_url) return;
-        if (data.sucesso) {
-            window.location.href = '/sortear';
+        document.querySelectorAll('.qty-btn').forEach(btn => {
+            const selecionado = btn.getAttribute('data-qty') === String(quantidadeSelecionada);
+            btn.classList.toggle('selected', selecionado);
+            btn.setAttribute('aria-pressed', String(selecionado));
+        });
+
+        document.getElementById('mensagemErro').style.display = 'none';
+        atualizarContador();
+    }
+
+    function limparSelecao() {
+        document.querySelectorAll('.jogador-checkbox').forEach(cb => cb.checked = false);
+        document.getElementById('mensagemErro').style.display = 'none';
+        atualizarContador();
+    }
+
+    function confirmarSelecao() {
+        const checkboxes = document.querySelectorAll('.jogador-checkbox:checked');
+        const ids = Array.from(checkboxes).map(cb => cb.getAttribute('data-id'));
+        const msgErro = document.getElementById('mensagemErro');
+
+        if (!quantidadeSelecionada || ids.length !== quantidadeSelecionada) {
+            msgErro.textContent = quantidadeSelecionada
+                ? `Selecione exatamente ${quantidadeSelecionada} jogadores.`
+                : 'Escolha 10, 15 ou 20 jogadores.';
+            msgErro.style.display = 'block';
             return;
         }
-        throw new Error(data.erro || 'Não foi possível iniciar o sorteio. Tente novamente.');
-    })
-    .catch(error => {
-        msgErro.textContent = error.message || 'Não foi possível iniciar o sorteio. Tente novamente.';
-        msgErro.style.display = 'block';
-        atualizarContador();
-    });
-}
 
-if (QUANTIDADES_VALIDAS.includes(document.querySelectorAll('.jogador-checkbox:checked').length)) {
-    selecionarQuantidade(document.querySelectorAll('.jogador-checkbox:checked').length);
-} else {
-    atualizarContador();
-}
+        msgErro.style.display = 'none';
+        const btnSortear = document.getElementById('btnSortear');
+        const btnSortearTexto = document.getElementById('btnSortearTexto');
+        btnSortear.disabled = true;
+        btnSortearTexto.textContent = '...';
+        btnSortear.setAttribute('aria-label', 'Preparando sorteio');
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+        fetch('/api/presenca', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+            body: JSON.stringify({ jogador_ids: ids })
+        })
+            .then(async res => {
+                const data = await res.json();
+                if (data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                    return data;
+                }
+                if (!res.ok) throw new Error(data.erro || 'Não foi possível iniciar o sorteio. Tente novamente.');
+                return data;
+            })
+            .then(data => {
+                if (data.redirect_url) return;
+                if (data.sucesso) {
+                    window.location.href = '/sortear';
+                    return;
+                }
+                throw new Error(data.erro || 'Não foi possível iniciar o sorteio. Tente novamente.');
+            })
+            .catch(error => {
+                msgErro.textContent = error.message || 'Não foi possível iniciar o sorteio. Tente novamente.';
+                msgErro.style.display = 'block';
+                atualizarContador();
+            });
+    }
+
+    if (QUANTIDADES_VALIDAS.includes(document.querySelectorAll('.jogador-checkbox:checked').length)) {
+        selecionarQuantidade(document.querySelectorAll('.jogador-checkbox:checked').length);
+    } else {
+        atualizarContador();
+    }
 </script>
 {% endblock %}

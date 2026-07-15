@@ -1,6 +1,6 @@
 (function () {
   function getLocale() {
-    return (navigator.languages && navigator.languages[0]) || navigator.language || 'pt-BR';
+    return 'pt-BR';
   }
 
   function parseDate(value, dateOnly) {

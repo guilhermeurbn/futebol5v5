@@ -48,7 +48,7 @@ def test_judge_navigation_is_present_in_workflow_pages():
     assert "current_section in ['home', 'criar']" in navigation
     assert 'class="judge-nav-shell"' in navigation
     assert "url_for('juiz.juiz_times_page'" in navigation
-    assert "url_for('juiz.juiz_compartilhar_page'" in navigation
+    assert "url_for('juiz.juiz_historico'" in navigation
 
 
 def test_judge_result_only_offers_share_and_voting():
@@ -225,3 +225,10 @@ def test_judge_last_match_clickable_card_and_deep_links():
     assert "body.is-referee-layout .site-topbar" in stylesheet
     assert "body.is-referee-layout .site-footer" in stylesheet
     assert "body.is-referee-layout .site-footer__link" in stylesheet
+    assert ".judge-teams-page .judge-team-card" in stylesheet
+    assert ".judge-teams-page .judge-teams-toolbar" in stylesheet
+
+    times_template = (ROOT / 'templates' / 'juiz_times.html').read_text(encoding='utf-8')
+    assert "judge-card-edit-btn" in times_template
+    assert "copiarSorteio" in times_template
+    assert "stats.export_sorteio_pdf" in times_template

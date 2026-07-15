@@ -13,34 +13,10 @@
     </header>
 
     <main class="main">
-        <div class="judge-teams-toolbar">
-            <div class="judge-draw-guidance" role="status" aria-live="polite">
-                <p>Confira os times abaixo. Se estiver tudo certo, use os botões no topo para compartilhar ou iniciar a votação.</p>
-            </div>
-            <div class="judge-next-actions__buttons judge-next-actions__buttons--compact">
-                <button class="judge-icon-action judge-icon-action--edit" type="button" id="btnEditarTimes" aria-label="Editar times" title="Editar times">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                        <path d="M12 20h9"></path>
-                        <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
-                    </svg>
-                </button>
-                <button class="btn btn-primary" type="button" id="btnSalvarTrocas" hidden>Salvar</button>
-                <a class="judge-icon-action judge-icon-action--share" href="{{ url_for('juiz.juiz_compartilhar_page', sorteio_id=sorteio.id) }}" aria-label="Compartilhar times" title="Compartilhar">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                        <circle cx="18" cy="5" r="3"></circle>
-                        <circle cx="6" cy="12" r="3"></circle>
-                        <circle cx="18" cy="19" r="3"></circle>
-                        <path d="m8.6 10.5 6.8-4"></path>
-                        <path d="m8.6 13.5 6.8 4"></path>
-                    </svg>
-                </a>
-                <a class="judge-icon-action judge-icon-action--vote" href="{{ url_for('votacao.votacao_admin_page', sorteio_id=sorteio.id) }}" aria-label="Ir para votações" title="Votações">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                        <path d="m9 11 3 3L22 4"></path>
-                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                    </svg>
-                </a>
-            </div>
+        <div style="display: none !important;">
+            <button id="btnEditarTimes"></button>
+            <button id="btnSalvarTrocas"></button>
+            <button id="btnDescartarTimes"></button>
         </div>
 
         <section class="judge-teams-grid" aria-label="Times sorteados">
@@ -54,18 +30,35 @@
                         <span>{{ sorteio.pontuacoes[loop.index0] }} pontos</span>
                         {% endif %}
                     </div>
+                    <button class="judge-card-edit-btn" type="button" aria-label="Editar times" title="Editar times">
+                        <svg class="edit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" style="width: 0.9rem; height: 0.9rem;">
+                            <path d="M12 20h9"></path>
+                            <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+                        </svg>
+                        <svg class="save-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round"
+                            style="width: 0.9rem; height: 0.9rem; display: none;">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                            <polyline points="7 3 7 8 15 8"></polyline>
+                        </svg>
+                        <span class="btn-text">Editar</span>
+                    </button>
                 </div>
 
                 <div class="judge-team-card__players" data-time-numero="{{ time.numero }}">
                     {% for jogador in time.jogadores %}
-                    {% set jogador_key = (jogador.id|string) if jogador.id is defined and jogador.id is not none else (jogador.nome ~ '|' ~ jogador.nivel ~ '|' ~ jogador.posicao) %}
+                    {% set jogador_key = (jogador.id|string) if jogador.id is defined and jogador.id is not none else
+                    (jogador.nome ~ '|' ~ jogador.nivel ~ '|' ~ jogador.posicao) %}
                     <div class="judge-team-player" draggable="false" data-player-key="{{ jogador_key }}">
                         <span class="judge-team-player__position" aria-hidden="true">
                             {{ 'G' if jogador.posicao == 'goleiro' else loop.index }}
                         </span>
                         <span>
                             <strong>{{ jogador.nome }}</strong>
-                            <small>{{ 'Goleiro' if jogador.posicao == 'goleiro' else 'Linha' }} · Nível {{ jogador.nivel }}</small>
+                            <small>{{ 'Goleiro' if jogador.posicao == 'goleiro' else 'Linha' }} · Nível {{ jogador.nivel
+                                }}</small>
                         </span>
                     </div>
                     {% endfor %}
@@ -74,18 +67,72 @@
             {% endfor %}
         </section>
 
+        <section class="judge-flow-card judge-share-vote-card" id="acoes-sorteio">
+            <div class="judge-share-vote-header">
+                <h2>Ações de Sorteio</h2>
+                <p>Compartilhe a lista de times ou inicie a votação de melhor da partida.</p>
+            </div>
+
+            <div class="judge-share-vote-actions">
+                <button class="judge-action-btn judge-action-btn--copy" type="button" id="copiarSorteio"
+                    aria-label="Compartilhar" title="Compartilhar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                        <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                    </svg>
+                    <span><strong id="copiarSorteioTexto">Copiar Times</strong><small>WhatsApp</small></span>
+                </button>
+
+                <a class="judge-action-btn judge-action-btn--pdf" href="{{ url_for('stats.export_sorteio_pdf') }}"
+                    aria-label="Baixar PDF" title="Baixar PDF">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                        <polyline points="14 2 14 8 20 8" />
+                    </svg>
+                    <span><strong>Exportar PDF</strong><small>Visualizar/Imprimir</small></span>
+                </a>
+
+                <a class="judge-action-btn judge-action-btn--vote"
+                    href="{{ url_for('votacao.votacao_admin_page', sorteio_id=sorteio.id) }}"
+                    aria-label="Ir para votações" title="Ir para votações">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="m9 11 3 3L22 4" />
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                    </svg>
+                    <span><strong>Iniciar Votação</strong><small>Melhor do Jogo</small></span>
+                </a>
+            </div>
+            <p class="judge-copy-feedback" id="copiarSorteioStatus" role="status" aria-live="polite"
+                style="margin-top: 0.75rem; text-align: center; font-size: 0.84rem; min-height: 1.25rem; color: #8e8e99;">
+            </p>
+        </section>
+
     </main>
 </div>
 
 <script>
-(() => {
-    const sorteoId = {{ sorteio.id }};
+    (() => {
+        const sorteoId = {{ sorteio.id }
+    };
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
     const btnEditar = document.getElementById('btnEditarTimes');
     const btnSalvar = document.getElementById('btnSalvarTrocas');
-    const guidance = document.querySelector('.judge-draw-guidance p');
+    const btnCancelar = document.getElementById('btnDescartarTimes');
+    const guidanceEl = document.querySelector('.judge-draw-guidance p');
+    const guidance = {
+        set textContent(val) {
+            if (guidanceEl) guidanceEl.textContent = val;
+            else console.log(val);
+        },
+        get textContent() {
+            return guidanceEl ? guidanceEl.textContent : '';
+        }
+    };
     const containers = Array.from(document.querySelectorAll('.judge-team-card__players'));
-    const shareAndVoteLinks = Array.from(document.querySelectorAll('.judge-next-actions__buttons--compact a'));
+    const shareAndVoteLinks = Array.from(document.querySelectorAll('.judge-share-vote-card a, .judge-share-vote-card button'));
     const touchEditMode = window.matchMedia('(hover: none), (pointer: coarse)').matches;
 
     let editMode = false;
@@ -144,6 +191,18 @@
         btnEditar.hidden = enabled;
         btnSalvar.hidden = !enabled;
         btnSalvar.disabled = false;
+        if (btnCancelar) btnCancelar.hidden = !enabled;
+
+        // Toggle card buttons text and SVG icons
+        document.querySelectorAll('.judge-card-edit-btn').forEach((btn) => {
+            const textSpan = btn.querySelector('.btn-text');
+            const editSvg = btn.querySelector('.edit-icon');
+            const saveSvg = btn.querySelector('.save-icon');
+
+            if (textSpan) textSpan.textContent = enabled ? 'Salvar' : 'Editar';
+            if (editSvg) editSvg.style.display = enabled ? 'none' : 'inline-block';
+            if (saveSvg) saveSvg.style.display = enabled ? 'inline-block' : 'none';
+        });
 
         shareAndVoteLinks.forEach((link) => {
             link.classList.toggle('is-disabled', enabled);
@@ -166,7 +225,7 @@
                     ? 'Toque em um jogador e depois em outro para trocar as posições.'
                     : 'Modo edição ativo: arraste um jogador e solte sobre outro para trocar de lugar.'
             )
-            : 'Confira os times abaixo. Se estiver tudo certo, use os botões no topo para compartilhar ou iniciar a votação.';
+            : 'Arraste e solte os jogadores para trocar de time, ou use as ações no final da página.';
     }
 
     function enableDirtyState() {
@@ -301,9 +360,22 @@
         }
     }
 
-    btnEditar?.addEventListener('click', () => {
-        snapshot = captureState();
-        toggleEdit(true);
+    // All card Edit buttons trigger editing
+    document.querySelectorAll('.judge-card-edit-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            if (editMode) {
+                salvarTrocas();
+            } else {
+                snapshot = captureState();
+                toggleEdit(true);
+            }
+        });
+    });
+
+    btnCancelar?.addEventListener('click', () => {
+        toggleEdit(false);
+        applyState(snapshot);
+        guidance.textContent = 'Edição cancelada.';
     });
 
     btnSalvar?.addEventListener('click', salvarTrocas);
@@ -315,8 +387,54 @@
         });
     });
 
+    // WhatsApp Export copying function
+    document.getElementById('copiarSorteio')?.addEventListener('click', async function () {
+        const botao = this;
+        const titulo = document.getElementById('copiarSorteioTexto');
+        const status = document.getElementById('copiarSorteioStatus');
+
+        try {
+            botao.disabled = true;
+            status.textContent = 'Preparando o texto...';
+
+            const resposta = await fetch('{{ url_for("stats.api_export_sorteio_txt") }}', {
+                headers: { 'Accept': 'application/json' }
+            });
+            const dados = await resposta.json();
+            if (!resposta.ok || !dados.sucesso) {
+                throw new Error(dados.erro || 'Não foi possível preparar o sorteio');
+            }
+
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(dados.conteudo);
+            } else {
+                const campo = document.createElement('textarea');
+                campo.value = dados.conteudo;
+                campo.setAttribute('readonly', '');
+                campo.style.position = 'fixed';
+                campo.style.opacity = '0';
+                document.body.appendChild(campo);
+                campo.select();
+                if (!document.execCommand('copy')) {
+                    throw new Error('Não foi possível copiar automaticamente');
+                }
+                campo.remove();
+            }
+
+            if (titulo) titulo.textContent = 'Copiado!';
+            status.textContent = 'Sorteio copiado. Agora é só colar no WhatsApp.';
+            setTimeout(() => {
+                if (titulo) titulo.textContent = 'Copiar Times';
+            }, 2500);
+        } catch (erro) {
+            status.textContent = erro.message;
+        } finally {
+            botao.disabled = false;
+        }
+    });
+
     bindDragAndDrop();
     updatePositionBadges();
-})();
+}) ();
 </script>
 {% endblock %}

@@ -30,7 +30,8 @@
             {% if sorteios %}
             <div class="judge-draw-history__list">
                 {% for item in sorteios %}
-                <details class="judge-draw-history__item" {% if item.id == sorteio_atual_id or item.id == sorteio_destaque_id %}open{% endif %} id="sorteio-{{ item.id }}">
+                <details class="judge-draw-history__item" {% if item.id==sorteio_atual_id or
+                    item.id==sorteio_destaque_id %}open{% endif %} id="sorteio-{{ item.id }}">
                     <summary>
                         <span class="judge-draw-history__identity">
                             <span class="judge-draw-history__number">#{{ item.id }}</span>
@@ -43,16 +44,11 @@
                             <span>{{ item.total_jogadores }} jogadores</span>
                             <span>{{ item.num_times }} times</span>
                             <span>Dif. {{ item.diferenca }}</span>
-                            <button
-                                type="button"
-                                class="judge-draw-history__ranking-btn"
-                                data-ranking-trigger
-                                data-sorteio-id="{{ item.id }}"
-                                data-sorteio-data="{{ item.data }}"
+                            <button type="button" class="judge-draw-history__ranking-btn" data-ranking-trigger
+                                data-sorteio-id="{{ item.id }}" data-sorteio-data="{{ item.data }}"
                                 data-media-geral="{{ '%.2f'|format(item.ranking_media_geral or 0) }}"
-                                data-total-jogadores="{{ item.ranking_total_jogadores or 0 }}"
-                                {% if not item.ranking_top10 %}disabled title="Sem ranking para este sorteio"{% endif %}
-                            >
+                                data-total-jogadores="{{ item.ranking_total_jogadores or 0 }}" {% if not
+                                item.ranking_top10 %}disabled title="Sem ranking para este sorteio" {% endif %}>
                                 Ver Ranking
                             </button>
                             {% if item.id == sorteio_atual_id %}
@@ -72,7 +68,8 @@
                         </div>
                     </div>
 
-                    <script id="ranking-data-{{ item.id }}" type="application/json">{{ item.ranking_top10 | tojson }}</script>
+                    <script id="ranking-data-{{ item.id }}"
+                        type="application/json">{{ item.ranking_top10 | tojson }}</script>
                 </details>
                 {% endfor %}
             </div>
@@ -121,90 +118,90 @@
 </div>
 
 <script>
-(() => {
-    const modal = document.getElementById('judgeRankingModal');
-    if (!modal) return;
+    (() => {
+        const modal = document.getElementById('judgeRankingModal');
+        if (!modal) return;
 
-    const modalSorteio = document.getElementById('judgeRankingModalSorteio');
-    const modalMedia = document.getElementById('judgeRankingModalMedia');
-    const modalTotal = document.getElementById('judgeRankingModalTotal');
-    const modalBody = document.getElementById('judgeRankingModalBody');
-    const triggers = document.querySelectorAll('[data-ranking-trigger]');
-    const closers = modal.querySelectorAll('[data-ranking-close]');
+        const modalSorteio = document.getElementById('judgeRankingModalSorteio');
+        const modalMedia = document.getElementById('judgeRankingModalMedia');
+        const modalTotal = document.getElementById('judgeRankingModalTotal');
+        const modalBody = document.getElementById('judgeRankingModalBody');
+        const triggers = document.querySelectorAll('[data-ranking-trigger]');
+        const closers = modal.querySelectorAll('[data-ranking-close]');
 
-    const closeModal = () => {
-        modal.hidden = true;
-        modal.setAttribute('aria-hidden', 'true');
-        document.body.classList.remove('modal-open');
-    };
+        const closeModal = () => {
+            modal.hidden = true;
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('modal-open');
+        };
 
-    const openModal = () => {
-        modal.hidden = false;
-        modal.setAttribute('aria-hidden', 'false');
-        document.body.classList.add('modal-open');
-    };
+        const openModal = () => {
+            modal.hidden = false;
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('modal-open');
+        };
 
-    const renderRows = (ranking) => {
-        if (!Array.isArray(ranking) || ranking.length === 0) {
-            modalBody.innerHTML = '<tr><td colspan="5">Sem ranking para este sorteio.</td></tr>';
-            return;
-        }
+        const renderRows = (ranking) => {
+            if (!Array.isArray(ranking) || ranking.length === 0) {
+                modalBody.innerHTML = '<tr><td colspan="5">Sem ranking para este sorteio.</td></tr>';
+                return;
+            }
 
-        modalBody.innerHTML = ranking.map((jogador, index) => {
-            const nome = jogador.jogador_nome || 'Jogador';
-            const time = jogador.time_numero ?? '-';
-            const votos = jogador.votos ?? 0;
-            const media = Number(jogador.nota_media ?? 0).toFixed(2);
+            modalBody.innerHTML = ranking.map((jogador, index) => {
+                const nome = jogador.jogador_nome || 'Jogador';
+                const time = jogador.time_numero ?? '-';
+                const votos = jogador.votos ?? 0;
+                const media = Number(jogador.nota_media ?? 0).toFixed(2);
 
-            return `<tr>
+                return `<tr>
                 <td>${index + 1}</td>
                 <td><strong>${nome}</strong></td>
                 <td>Time ${time}</td>
                 <td>${votos}</td>
                 <td>${media}</td>
             </tr>`;
-        }).join('');
-    };
+            }).join('');
+        };
 
-    triggers.forEach((button) => {
-        button.addEventListener('click', (event) => {
-            event.preventDefault();
-            event.stopPropagation();
+        triggers.forEach((button) => {
+            button.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
 
-            const sorteioId = button.dataset.sorteioId;
-            const sorteioData = window.NaTraveLocalDateTime
-                ? window.NaTraveLocalDateTime.formatDateTime(button.dataset.sorteioData)
-                : (button.dataset.sorteioData || '-');
-            const mediaGeral = button.dataset.mediaGeral || '0.00';
-            const totalJogadores = button.dataset.totalJogadores || '0';
-            const dataEl = document.getElementById(`ranking-data-${sorteioId}`);
+                const sorteioId = button.dataset.sorteioId;
+                const sorteioData = window.NaTraveLocalDateTime
+                    ? window.NaTraveLocalDateTime.formatDateTime(button.dataset.sorteioData)
+                    : (button.dataset.sorteioData || '-');
+                const mediaGeral = button.dataset.mediaGeral || '0.00';
+                const totalJogadores = button.dataset.totalJogadores || '0';
+                const dataEl = document.getElementById(`ranking-data-${sorteioId}`);
 
-            let ranking = [];
-            if (dataEl && dataEl.textContent) {
-                try {
-                    ranking = JSON.parse(dataEl.textContent);
-                } catch (error) {
-                    ranking = [];
+                let ranking = [];
+                if (dataEl && dataEl.textContent) {
+                    try {
+                        ranking = JSON.parse(dataEl.textContent);
+                    } catch (error) {
+                        ranking = [];
+                    }
                 }
-            }
 
-            modalSorteio.textContent = `Sorteio #${sorteioId} · ${sorteioData}`;
-            modalMedia.textContent = `Média geral: ${mediaGeral}`;
-            modalTotal.textContent = `${totalJogadores} jogador(es)`;
-            renderRows(ranking);
-            openModal();
+                modalSorteio.textContent = `Sorteio #${sorteioId} · ${sorteioData}`;
+                modalMedia.textContent = `Média geral: ${mediaGeral}`;
+                modalTotal.textContent = `${totalJogadores} jogador(es)`;
+                renderRows(ranking);
+                openModal();
+            });
         });
-    });
 
-    closers.forEach((closeButton) => {
-        closeButton.addEventListener('click', closeModal);
-    });
+        closers.forEach((closeButton) => {
+            closeButton.addEventListener('click', closeModal);
+        });
 
-    document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && !modal.hidden) {
-            closeModal();
-        }
-    });
-})();
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && !modal.hidden) {
+                closeModal();
+            }
+        });
+    })();
 </script>
 {% endblock %}

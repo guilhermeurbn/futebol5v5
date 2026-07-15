@@ -9,8 +9,10 @@
 {% set total_pendentes = [total_participantes - total_votos, 0] | max %}
 {% set resultado_concluido = resultado_partida %}
 {% set rodada_encerrada = rodada_selecionada and rodada_selecionada.status == 'encerrada' %}
-{% set resultado_form_values = resultado_form_values if resultado_form_values is defined and resultado_form_values else {} %}
-{% set ranking_top10 = ranking_top10_encerrada if ranking_top10_encerrada is defined and ranking_top10_encerrada else [] %}
+{% set resultado_form_values = resultado_form_values if resultado_form_values is defined and resultado_form_values else
+{} %}
+{% set ranking_top10 = ranking_top10_encerrada if ranking_top10_encerrada is defined and ranking_top10_encerrada else []
+%}
 
 <div class="container page-container-wide judge-workspace-page judge-voting-page">
     <header class="header">
@@ -46,7 +48,8 @@
                     </span>
                 </div>
 
-                {% if current_user.role == 'juiz' and sorteio_contexto and not resultado_concluido and not rodada_selecionada %}
+                {% if current_user.role == 'juiz' and sorteio_contexto and not resultado_concluido and not
+                rodada_selecionada %}
                 <form method="post" action="{{ url_for('votacao.votacao_resultado_juiz') }}" class="judge-result-form">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="hidden" name="sorteio_id" value="{{ selected_sorteio_id }}">
@@ -57,54 +60,83 @@
                             <summary class="judge-result-team__summary">
                                 <span class="judge-result-team__heading">
                                     <span class="judge-result-team__title">Time {{ time.numero }}</span>
-                                    <small class="judge-result-team__players-mini">{{ time.jogadores | map(attribute='nome') | join(', ') }}</small>
+                                    <small class="judge-result-team__players-mini">{{ time.jogadores |
+                                        map(attribute='nome') | join(', ') }}</small>
                                 </span>
                                 <span class="judge-result-team__meta">{{ time.jogadores | length }} jogadores</span>
                                 <span class="judge-result-team__arrow" aria-hidden="true">→</span>
                             </summary>
-                            <details class="judge-result-roster">
-                                <summary>Jogadores</summary>
-                                <p class="judge-result-players">{{ time.jogadores | map(attribute='nome') | join(', ') }}</p>
-                            </details>
+
                             <div class="judge-result-fields">
                                 <div class="judge-result-field">
                                     <span aria-label="Vitórias">V</span>
                                     <strong>Vitórias</strong>
                                     <div class="judge-result-stepper">
-                                        <button type="button" class="judge-result-dec judge-result-stepper__btn" data-target="vitorias_{{ time.numero }}" data-delta="-1" aria-label="Diminuir vitórias do Time {{ time.numero }}">−</button>
-                                        <span class="judge-result-value" data-value-for="vitorias_{{ time.numero }}" aria-live="polite">{{ resultado_form_values.get('vitorias_' ~ time.numero, '0') }}</span>
-                                        <input id="vitorias_{{ time.numero }}" type="hidden" name="vitorias_{{ time.numero }}" value="{{ resultado_form_values.get('vitorias_' ~ time.numero, '0') }}">
-                                        <button type="button" class="judge-result-inc judge-result-stepper__btn" data-target="vitorias_{{ time.numero }}" data-delta="1" aria-label="Aumentar vitórias do Time {{ time.numero }}">+</button>
+                                        <button type="button" class="judge-result-dec judge-result-stepper__btn"
+                                            data-target="vitorias_{{ time.numero }}" data-delta="-1"
+                                            aria-label="Diminuir vitórias do Time {{ time.numero }}">−</button>
+                                        <span class="judge-result-value" data-value-for="vitorias_{{ time.numero }}"
+                                            aria-live="polite">{{ resultado_form_values.get('vitorias_' ~ time.numero,
+                                            '0') }}</span>
+                                        <input id="vitorias_{{ time.numero }}" type="hidden"
+                                            name="vitorias_{{ time.numero }}"
+                                            value="{{ resultado_form_values.get('vitorias_' ~ time.numero, '0') }}">
+                                        <button type="button" class="judge-result-inc judge-result-stepper__btn"
+                                            data-target="vitorias_{{ time.numero }}" data-delta="1"
+                                            aria-label="Aumentar vitórias do Time {{ time.numero }}">+</button>
                                     </div>
                                 </div>
                                 <div class="judge-result-field">
                                     <span aria-label="Empates">E</span>
                                     <strong>Empates</strong>
                                     <div class="judge-result-stepper">
-                                        <button type="button" class="judge-result-dec judge-result-stepper__btn" data-target="empates_{{ time.numero }}" data-delta="-1" aria-label="Diminuir empates do Time {{ time.numero }}">−</button>
-                                        <span class="judge-result-value" data-value-for="empates_{{ time.numero }}" aria-live="polite">{{ resultado_form_values.get('empates_' ~ time.numero, '0') }}</span>
-                                        <input id="empates_{{ time.numero }}" type="hidden" name="empates_{{ time.numero }}" value="{{ resultado_form_values.get('empates_' ~ time.numero, '0') }}">
-                                        <button type="button" class="judge-result-inc judge-result-stepper__btn" data-target="empates_{{ time.numero }}" data-delta="1" aria-label="Aumentar empates do Time {{ time.numero }}">+</button>
+                                        <button type="button" class="judge-result-dec judge-result-stepper__btn"
+                                            data-target="empates_{{ time.numero }}" data-delta="-1"
+                                            aria-label="Diminuir empates do Time {{ time.numero }}">−</button>
+                                        <span class="judge-result-value" data-value-for="empates_{{ time.numero }}"
+                                            aria-live="polite">{{ resultado_form_values.get('empates_' ~ time.numero,
+                                            '0') }}</span>
+                                        <input id="empates_{{ time.numero }}" type="hidden"
+                                            name="empates_{{ time.numero }}"
+                                            value="{{ resultado_form_values.get('empates_' ~ time.numero, '0') }}">
+                                        <button type="button" class="judge-result-inc judge-result-stepper__btn"
+                                            data-target="empates_{{ time.numero }}" data-delta="1"
+                                            aria-label="Aumentar empates do Time {{ time.numero }}">+</button>
                                     </div>
                                 </div>
                                 <div class="judge-result-field">
                                     <span aria-label="Derrotas">D</span>
                                     <strong>Derrotas</strong>
                                     <div class="judge-result-stepper">
-                                        <button type="button" class="judge-result-dec judge-result-stepper__btn" data-target="derrotas_{{ time.numero }}" data-delta="-1" aria-label="Diminuir derrotas do Time {{ time.numero }}">−</button>
-                                        <span class="judge-result-value" data-value-for="derrotas_{{ time.numero }}" aria-live="polite">{{ resultado_form_values.get('derrotas_' ~ time.numero, '0') }}</span>
-                                        <input id="derrotas_{{ time.numero }}" type="hidden" name="derrotas_{{ time.numero }}" value="{{ resultado_form_values.get('derrotas_' ~ time.numero, '0') }}">
-                                        <button type="button" class="judge-result-inc judge-result-stepper__btn" data-target="derrotas_{{ time.numero }}" data-delta="1" aria-label="Aumentar derrotas do Time {{ time.numero }}">+</button>
+                                        <button type="button" class="judge-result-dec judge-result-stepper__btn"
+                                            data-target="derrotas_{{ time.numero }}" data-delta="-1"
+                                            aria-label="Diminuir derrotas do Time {{ time.numero }}">−</button>
+                                        <span class="judge-result-value" data-value-for="derrotas_{{ time.numero }}"
+                                            aria-live="polite">{{ resultado_form_values.get('derrotas_' ~ time.numero,
+                                            '0') }}</span>
+                                        <input id="derrotas_{{ time.numero }}" type="hidden"
+                                            name="derrotas_{{ time.numero }}"
+                                            value="{{ resultado_form_values.get('derrotas_' ~ time.numero, '0') }}">
+                                        <button type="button" class="judge-result-inc judge-result-stepper__btn"
+                                            data-target="derrotas_{{ time.numero }}" data-delta="1"
+                                            aria-label="Aumentar derrotas do Time {{ time.numero }}">+</button>
                                     </div>
                                 </div>
                                 <div class="judge-result-field">
                                     <span aria-label="Gols">G</span>
                                     <strong>Gols</strong>
                                     <div class="judge-result-stepper">
-                                        <button type="button" class="judge-result-dec judge-result-stepper__btn" data-target="gols_{{ time.numero }}" data-delta="-1" aria-label="Diminuir gols do Time {{ time.numero }}">−</button>
-                                        <span class="judge-result-value" data-value-for="gols_{{ time.numero }}" aria-live="polite">{{ resultado_form_values.get('gols_' ~ time.numero, '0') }}</span>
-                                        <input id="gols_{{ time.numero }}" type="hidden" name="gols_{{ time.numero }}" value="{{ resultado_form_values.get('gols_' ~ time.numero, '0') }}">
-                                        <button type="button" class="judge-result-inc judge-result-stepper__btn" data-target="gols_{{ time.numero }}" data-delta="1" aria-label="Aumentar gols do Time {{ time.numero }}">+</button>
+                                        <button type="button" class="judge-result-dec judge-result-stepper__btn"
+                                            data-target="gols_{{ time.numero }}" data-delta="-1"
+                                            aria-label="Diminuir gols do Time {{ time.numero }}">−</button>
+                                        <span class="judge-result-value" data-value-for="gols_{{ time.numero }}"
+                                            aria-live="polite">{{ resultado_form_values.get('gols_' ~ time.numero, '0')
+                                            }}</span>
+                                        <input id="gols_{{ time.numero }}" type="hidden" name="gols_{{ time.numero }}"
+                                            value="{{ resultado_form_values.get('gols_' ~ time.numero, '0') }}">
+                                        <button type="button" class="judge-result-inc judge-result-stepper__btn"
+                                            data-target="gols_{{ time.numero }}" data-delta="1"
+                                            aria-label="Aumentar gols do Time {{ time.numero }}">+</button>
                                     </div>
                                 </div>
                             </div>
@@ -130,15 +162,18 @@
                 {% endif %}
             </article>
 
-            <article class="judge-flow-card judge-voting-step {% if not resultado_concluido %}is-locked{% elif ativa %}is-active{% elif rodada_encerrada %}is-complete{% endif %}">
+            <article
+                class="judge-flow-card judge-voting-step {% if not resultado_concluido %}is-locked{% elif ativa %}is-active{% elif rodada_encerrada %}is-complete{% endif %}">
                 <div class="judge-voting-step__header">
                     <span class="judge-voting-step__number">2</span>
                     <div>
                         <h2>Votação dos jogadores</h2>
                         <p>Encerra em 12 horas, quando todos votarem ou quando você encerrar.</p>
                     </div>
-                    <span class="judge-flow-status {% if ativa %}is-active{% elif rodada_encerrada %}is-complete{% elif resultado_concluido %}is-available{% else %}is-locked{% endif %}">
-                        {% if ativa %}Aberta{% elif rodada_encerrada %}Encerrada{% elif resultado_concluido %}Pronta{% else %}Bloqueada{% endif %}
+                    <span
+                        class="judge-flow-status {% if ativa %}is-active{% elif rodada_encerrada %}is-complete{% elif resultado_concluido %}is-available{% else %}is-locked{% endif %}">
+                        {% if ativa %}Aberta{% elif rodada_encerrada %}Encerrada{% elif resultado_concluido %}Pronta{%
+                        else %}Bloqueada{% endif %}
                     </span>
                 </div>
 
@@ -157,9 +192,10 @@
                         <span>prazo final</span>
                     </div>
                 </div>
-                <form method="post" action="{{ url_for('votacao.votacao_admin_encerrar', partida_id=ativa.id) }}" onsubmit="return confirm('Encerrar agora? O resultado será publicado e novos votos não serão aceitos.');">
+                <form id="encerrarForm" method="post"
+                    action="{{ url_for('votacao.votacao_admin_encerrar', partida_id=ativa.id) }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button class="btn btn-danger" type="submit">Encerrar votação</button>
+                    <button class="btn btn-danger" type="button" id="btnEncerrarVotacao">Encerrar votação</button>
                 </form>
                 {% elif rodada_encerrada %}
                 <p class="judge-flow-confirmation">Votação encerrada. Veja o resultado abaixo.</p>
@@ -193,7 +229,8 @@
                         <strong>{{ participante.jogador_nome }}</strong>
                         <small>Time {{ participante.time_numero }}</small>
                     </span>
-                    <span class="judge-participant__state {% if participante.user_id in voted_user_ids %}is-done{% endif %}">
+                    <span
+                        class="judge-participant__state {% if participante.user_id in voted_user_ids %}is-done{% endif %}">
                         {{ 'Votou' if participante.user_id in voted_user_ids else 'Pendente' }}
                     </span>
                 </div>
@@ -215,10 +252,12 @@
             <div class="judge-vote-ranking__summary">
                 <div class="judge-vote-ranking__card">
                     <small>Mais votado</small>
-                    <strong>{{ melhor_jogador_encerrada.jogador_nome if melhor_jogador_encerrada else 'Sem dados' }}</strong>
+                    <strong>{{ melhor_jogador_encerrada.jogador_nome if melhor_jogador_encerrada else 'Sem dados'
+                        }}</strong>
                     <span>
                         {% if melhor_jogador_encerrada %}
-                        {{ melhor_jogador_encerrada.votos }} votos · média {{ '%.2f'|format(melhor_jogador_encerrada.nota_media) }}
+                        {{ melhor_jogador_encerrada.votos }} votos · média {{
+                        '%.2f'|format(melhor_jogador_encerrada.nota_media) }}
                         {% else %}
                         Aguardando votos válidos
                         {% endif %}
@@ -264,25 +303,71 @@
         </section>
         {% endif %}
 
+        <!-- Custom Confirmation Modal -->
+        <div id="confirmModal" class="custom-modal-overlay">
+            <div class="custom-modal">
+                <h3>Encerrar votação?</h3>
+                <p>O resultado será publicado e novos votos não serão aceitos.</p>
+                <div class="custom-modal-actions">
+                    <button type="button" id="confirmCancel" class="btn btn-secondary">Voltar</button>
+                    <button type="submit" id="confirmSubmit" form="encerrarForm" class="btn btn-danger">Sim,
+                        encerrar</button>
+                </div>
+            </div>
+        </div>
+
     </main>
 </div>
 
 <script>
-(() => {
-    document.querySelectorAll('.judge-result-inc, .judge-result-dec').forEach((button) => {
-        button.addEventListener('click', () => {
-            const input = document.getElementById(button.dataset.target);
-            if (!input) return;
-            const valueDisplay = document.querySelector(`[data-value-for="${button.dataset.target}"]`);
-            const min = 0;
-            const current = Number(input.value || 0);
-            const delta = Number(button.dataset.delta || 0);
-            input.value = String(Math.max(min, current + delta));
-            if (valueDisplay) {
-                valueDisplay.textContent = input.value;
-            }
+    (() => {
+        document.querySelectorAll('.judge-result-inc, .judge-result-dec').forEach((button) => {
+            button.addEventListener('click', () => {
+                const input = document.getElementById(button.dataset.target);
+                if (!input) return;
+                const valueDisplay = document.querySelector(`[data-value-for="${button.dataset.target}"]`);
+                const min = 0;
+                const current = Number(input.value || 0);
+                const delta = Number(button.dataset.delta || 0);
+                input.value = String(Math.max(min, current + delta));
+                if (valueDisplay) {
+                    valueDisplay.textContent = input.value;
+                }
+            });
         });
-    });
-})();
+
+        const encerrarForm = document.getElementById('encerrarForm');
+        const btnEncerrar = document.getElementById('btnEncerrarVotacao');
+        const confirmModal = document.getElementById('confirmModal');
+        const confirmCancel = document.getElementById('confirmCancel');
+        const confirmSubmit = document.getElementById('confirmSubmit');
+
+        if (btnEncerrar && confirmModal) {
+            btnEncerrar.addEventListener('click', () => {
+                confirmModal.classList.add('is-active');
+            });
+
+            confirmCancel.addEventListener('click', () => {
+                confirmModal.classList.remove('is-active');
+            });
+
+            confirmSubmit.addEventListener('click', () => {
+                confirmModal.classList.remove('is-active');
+            });
+
+            // Prevent background click event from bubbling inside the modal content card
+            const modalContent = confirmModal.querySelector('.custom-modal');
+            if (modalContent) {
+                modalContent.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            }
+
+            // Close on background overlay click
+            confirmModal.addEventListener('click', () => {
+                confirmModal.classList.remove('is-active');
+            });
+        }
+    })();
 </script>
 {% endblock %}

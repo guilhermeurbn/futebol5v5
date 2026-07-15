@@ -955,5 +955,140 @@
         "gols": 0
       }
     ]
+  },
+  {
+    "id": 36,
+    "sorteio_id": 38,
+    "data": "2026-07-16T00:28:20.331363",
+    "time_vencedor": 1,
+    "gols_times": [
+      0,
+      0
+    ],
+    "notas": "",
+    "times_desempenho": [
+      {
+        "time_numero": 1,
+        "vitorias": 1,
+        "empates": 0,
+        "derrotas": 0,
+        "gols": 0
+      },
+      {
+        "time_numero": 2,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 1,
+        "gols": 0
+      }
+    ]
+  },
+  {
+    "id": 37,
+    "sorteio_id": 39,
+    "data": "2026-07-16T00:37:20.075711",
+    "time_vencedor": 1,
+    "gols_times": [
+      0,
+      0
+    ],
+    "notas": "",
+    "times_desempenho": [
+      {
+        "time_numero": 1,
+        "vitorias": 1,
+        "empates": 0,
+        "derrotas": 0,
+        "gols": 0
+      },
+      {
+        "time_numero": 2,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 1,
+        "gols": 0
+      }
+    ]
+  },
+  {
+    "id": 38,
+    "sorteio_id": 40,
+    "data": "2026-07-16T00:40:19.443441",
+    "time_vencedor": null,
+    "gols_times": [
+      0,
+      0
+    ],
+    "notas": "",
+    "times_desempenho": [
+      {
+        "time_numero": 1,
+        "vitorias": 0,
+        "empates": 1,
+        "derrotas": 0,
+        "gols": 0
+      },
+      {
+        "time_numero": 2,
+        "vitorias": 0,
+        "empates": 1,
+        "derrotas": 0,
+        "gols": 0
+      }
+    ]
+  },
+  {
+    "id": 39,
+    "sorteio_id": 41,
+    "data": "2026-07-16T00:46:30.359284",
+    "time_vencedor": 1,
+    "gols_times": [
+      0,
+      0
+    ],
+    "notas": "",
+    "times_desempenho": [
+      {
+        "time_numero": 1,
+        "vitorias": 1,
+        "empates": 0,
+        "derrotas": 0,
+        "gols": 0
+      },
+      {
+        "time_numero": 2,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 1,
+        "gols": 0
+      }
+    ]
+  },
+  {
+    "id": 40,
+    "sorteio_id": 42,
+    "data": "2026-07-16T00:47:40.674576",
+    "time_vencedor": 1,
+    "gols_times": [
+      0,
+      0
+    ],
+    "notas": "",
+    "times_desempenho": [
+      {
+        "time_numero": 1,
+        "vitorias": 1,
+        "empates": 0,
+        "derrotas": 0,
+        "gols": 0
+      },
+      {
+        "time_numero": 2,
+        "vitorias": 0,
+        "empates": 0,
+        "derrotas": 1,
+        "gols": 0
+      }
+    ]
   }
 ]

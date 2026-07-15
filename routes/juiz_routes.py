@@ -252,6 +252,15 @@ def juiz_times_page():
         if not sorteio:
             return redirect(url_for('juiz.jogar_page'))
 
+        # Salva o sorteio na sessão para a API de exportação TXT
+        _salvar_ultimo_sorteio_sessao({
+            'sorteio_id': sorteio.get('id'),
+            'times': sorteio.get('times', []),
+            'num_times': sorteio.get('num_times', 0),
+            'somas': sorteio.get('pontuacoes', []),
+            'diferenca': sorteio.get('diferenca', 0),
+        })
+
         partida_votacao = votacao_service.obter_por_sorteio(sorteio_id)
         resultado_partida = _obter_resultado_sorteio(sorteio_id)
 
@@ -270,29 +279,11 @@ def juiz_times_page():
 @juiz_bp.route('/jogar/compartilhar', methods=['GET'])
 @juiz_required
 def juiz_compartilhar_page():
-    """Tela isolada de compartilhamento do fluxo do juiz."""
-    try:
-        sorteio_id_hint = request.args.get('sorteio_id', type=int)
-        sorteio_id, sorteio = _resolver_sorteio_juiz(sorteio_id_hint=sorteio_id_hint)
-        if not sorteio:
-            return redirect(url_for('juiz.jogar_page'))
-
-        _salvar_ultimo_sorteio_sessao({
-            'sorteio_id': sorteio.get('id'),
-            'times': sorteio.get('times', []),
-            'num_times': sorteio.get('num_times', 0),
-            'somas': sorteio.get('pontuacoes', []),
-            'diferenca': sorteio.get('diferenca', 0),
-        })
-
-        return render_template(
-            'juiz_compartilhar.html',
-            sorteio=sorteio,
-            usuario=_usuario_logado(),
-        )
-    except Exception as e:
-        logger.error(f"Erro ao carregar compartilhar do juiz: {str(e)}")
-        return redirect(url_for('juiz.jogar_page'))
+    """Redireciona para a página de times unificada."""
+    sorteio_id_hint = request.args.get('sorteio_id', type=int)
+    if sorteio_id_hint:
+        return redirect(url_for('juiz.juiz_times_page', sorteio_id=sorteio_id_hint, _anchor='acoes-sorteio'))
+    return redirect(url_for('juiz.juiz_times_page', _anchor='acoes-sorteio'))
 
 
 @juiz_bp.route('/jogar/cronometro', methods=['GET'])
