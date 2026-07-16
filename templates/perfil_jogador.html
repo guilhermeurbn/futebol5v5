@@ -3,7 +3,7 @@
 {% block title %}Perfil de {{ jogador.nome }}{% endblock %}
 
 {% block content %}
-<div class="container profile-page profile-page--public{% if usuario.role in ['admin', 'super_admin'] %} page-container-wide judge-workspace-page admin-page admin-page--ecosystem{% elif usuario.role == 'usuario' %} page-container-wide player-workspace-page{% endif %}">
+<div class="container profile-page profile-page--public page-container-wide player-workspace-page">
     <header class="header">
         <div class="header-content">
             {% set brand_title = jogador.nome %}
@@ -12,184 +12,330 @@
         </div>
     </header>
 
-    <main class="main">
+    <main class="main public-profile-dossier">
+        {# Set context variables #}
         {% set nome_partes = jogador.nome.split() %}
         {% set avatar_text = nome_partes[0][:2] if nome_partes else jogador.nome[:2] %}
-        {% set total_partidas = stats_jogador.total_partidas if stats_jogador else 0 %}
-        {% set total_vitorias = stats_jogador.get('vitórias', 0) if stats_jogador else 0 %}
-        {% set total_derrotas = stats_jogador.derrotas if stats_jogador else 0 %}
-        {% set total_empates = stats_jogador.empates if stats_jogador else 0 %}
-        {% set total_gols = stats_jogador.gols if stats_jogador else 0 %}
-        {% set win_rate = stats_jogador.win_rate if stats_jogador else 0 %}
-        {% set total_assistencias = stats_jogador.assistencias if stats_jogador else 0 %}
-        {% set gols_por_partida = stats_jogador.get('gols_por_partida', 0) if stats_jogador else 0 %}
-        {% set assistencias_por_partida = stats_jogador.get('assistencias_por_partida', 0) if stats_jogador else 0 %}
-        {% set win_rate_safe = 100 if win_rate > 100 else 0 if win_rate < 0 else win_rate %}
-        {% if win_rate_safe >= 75 %}
-            {% set approval_tier = 'Elite' %}
-            {% set approval_tone = 'high' %}
-        {% elif win_rate_safe >= 50 %}
-            {% set approval_tier = 'Competitivo' %}
-            {% set approval_tone = 'mid' %}
-        {% elif win_rate_safe > 0 %}
-            {% set approval_tier = 'Em evolução' %}
-            {% set approval_tone = 'low' %}
-        {% else %}
-            {% set approval_tier = 'Sem base' %}
-            {% set approval_tone = 'base' %}
-        {% endif %}
-        {% set historico_recente = stats_jogador.historico_partidas[:6] if stats_jogador and stats_jogador.historico_partidas else [] %}
-        {% set jogo_destaque = historico_recente[0] if historico_recente else None %}
-        {% set outros_jogos = historico_recente[1:] if historico_recente|length > 1 else [] %}
+        {% set stats = stats_jogador or {} %}
+        {% set total_partidas = stats.get('total_partidas', 0) %}
+        {% set total_gols = stats.get('gols', 0) %}
+        {% set historico_recente = stats.get('historico_partidas', [])[:6] %}
 
-        <section class="section public-profile-shell">
-            <article class="public-profile-dossier" data-player-id="{{ jogador.id }}">
-                <div class="public-profile-hero">
-                    <div class="public-profile-hero__identity">
-                        <div class="public-profile-hero__topbar">
-                            <div>
-                                <div class="section-label public-profile-eyebrow">Match dossier</div>
-                            </div>
-                        </div>
-
-                        <div class="public-profile-hero__main">
-                            <div class="public-profile-avatar-wrap">
-                                <div class="player-card__avatar public-profile-avatar" aria-hidden="true">{{ avatar_text|upper }}</div>
-                            </div>
-
-                            <div class="public-profile-hero__meta">
-                                <div class="public-profile-name-row">
-                                    <h1 class="public-profile-name">{{ jogador.nome }}</h1>
-                                    <span class="public-profile-level">{{ '%.2f'|format(jogador.nivel|float) }}</span>
-                                </div>
-
-                                <div class="public-profile-tags">
-                                    <span class="public-profile-pill public-profile-pill--solid">{% if jogador.tipo == 'fixo' %}Fixo{% else %}Avulso{% endif %}</span>
-                                    <span class="public-profile-pill public-profile-pill--ghost">{% if jogador.posicao == 'goleiro' %}Goleiro{% else %}Linha{% endif %}</span>
-                                </div>
-                            </div>
-                        </div>
+        <div class="premium-profile-header public-profile-hero">
+            <div class="premium-profile-avatar-wrap">
+                <div class="premium-profile-avatar-inner">{{ avatar_text|upper }}</div>
+            </div>
+            <div class="premium-profile-info">
+                <div class="premium-profile-name-row">
+                    <h1 class="premium-profile-name">{{ jogador.nome }}</h1>
+                    <span class="premium-profile-rating-badge">{{ stats.get('nota_media_geral', '7.00') }}</span>
+                </div>
+                <div class="premium-profile-meta-row">
+                    <div class="premium-profile-meta-item">
+                        <svg class="premium-profile-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <span>{% if jogador.tipo == 'fixo' %}Fixo{% else %}Avulso{% endif %}</span>
                     </div>
+                    <div class="premium-profile-meta-item">
+                        <svg class="premium-profile-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 10V4a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v6c0 5.5-4.5 10-10 10S3 15.5 3 10Z"/><path d="M12 3v17"/></svg>
+                        <span>{{ 'Goleiro' if jogador.posicao == 'goleiro' else 'Linha' }}</span>
+                    </div>
+                    <div class="premium-profile-meta-item">
+                        <svg class="premium-profile-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        <span>Nível {{ '%.0f'|format(jogador.nivel|float) }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                    <aside class="public-profile-scoreboard">
-                        <div class="public-profile-approval public-profile-approval--{{ approval_tone }}">
-                            <span class="public-profile-approval__label">Aprovação</span>
-                            <div class="public-profile-approval__headline">
-                                <strong class="public-profile-approval__value">{{ '%.1f'|format(win_rate_safe|float) }}%</strong>
-                                <span class="public-profile-approval__tier">{{ approval_tier }}</span>
-                            </div>
-                            <div class="public-profile-approval__meter" role="img" aria-label="Aprovação {{ '%.1f'|format(win_rate_safe|float) }} por cento">
-                                <span class="public-profile-approval__fill" style="width: {{ win_rate_safe }}%;"></span>
-                            </div>
-                            <span class="public-profile-approval__hint">Taxa de vitórias nas partidas registradas.</span>
-                        </div>
-                    </aside>
+        <nav class="premium-profile-tabs premium-profile-tabs--public" aria-label="Navegação do perfil público">
+            <button class="premium-profile-tab" data-tab-target="mensagem" aria-selected="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                <span>Mensagem</span>
+            </button>
+            <button class="premium-profile-tab is-active" data-tab-target="estatisticas" aria-selected="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="20" x2="18" y2="10"/>
+                    <line x1="12" y1="20" x2="12" y2="4"/>
+                    <line x1="6" y1="20" x2="6" y2="14"/>
+                </svg>
+                <span>Estatísticas</span>
+            </button>
+            <button class="premium-profile-tab" data-tab-target="partidas" aria-selected="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                <span>Partidas</span>
+            </button>
+        </nav>
+
+        {# MENSAGENS TAB #}
+        <div class="premium-profile-tab-content" id="tab-mensagem">
+            <div class="premium-profile-panel">
+                <h2 class="premium-profile-panel-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    Mensagens
+                </h2>
+
+                <div class="premium-profile-empty">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15c0-4.62-3.5-8.22-8-8.22s-8 3.6-8 8.22c0 2.22.8 4.28 2.22 5.86l-.8 2.45 2.5-.82c1.23.63 2.62.97 4.08.97 4.5 0 8-3.6 8-8.22z"/></svg>
+                    <h3>Envio de mensagens offline</h3>
+                    <p>O chat integrado está temporariamente desativado para manutenção. Entre em contato com {{ jogador.nome }} no grupo do WhatsApp.</p>
+                </div>
+            </div>
+        </div>
+
+        {# ESTATISTICAS TAB #}
+        <div class="premium-profile-tab-content is-active" id="tab-estatisticas">
+            <div class="premium-profile-panel">
+                <h2 class="premium-profile-panel-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m18 7-5.5 5.5-2.5-2.5L3 17"/></svg>
+                    Resumo do Jogador
+                </h2>
+                
+                <div class="premium-profile-stats-grid public-profile-kpi-strip">
+                    <div class="premium-profile-stat-card">
+                        <strong class="premium-profile-stat-val">{{ total_partidas }}</strong>
+                        <span class="premium-profile-stat-label">Partidas disputadas</span>
+                    </div>
+                    <div class="premium-profile-stat-card">
+                        <strong class="premium-profile-stat-val">{{ total_gols }}</strong>
+                        <span class="premium-profile-stat-label">Gols marcados</span>
+                    </div>
+                    <div class="premium-profile-stat-card">
+                        <strong class="premium-profile-stat-val premium-profile-stat-val--rating">{{ stats.get('nota_media_geral', '7.00') }}</strong>
+                        <span class="premium-profile-stat-label">Nota média geral</span>
+                    </div>
                 </div>
 
-                <section class="public-profile-kpi-strip">
-                    <article class="stat-card public-profile-kpi public-profile-kpi--featured">
-                        <span class="stat-label">Partidas</span>
-                        <strong class="public-profile-kpi__value">{{ total_partidas }}</strong>
-                        <small class="public-profile-kpi__meta">Base da amostra competitiva</small>
-                    </article>
-                    <article class="stat-card public-profile-kpi">
-                        <span class="stat-label">Vitórias</span>
-                        <strong class="public-profile-kpi__value">{{ total_vitorias }}</strong>
-                        <small class="public-profile-kpi__meta">{{ win_rate }}% de aprovação</small>
-                    </article>
-                    <article class="stat-card public-profile-kpi">
-                        <span class="stat-label">Gols</span>
-                        <strong class="public-profile-kpi__value">{{ total_gols }}</strong>
-                        <small class="public-profile-kpi__meta">{{ gols_por_partida }} por partida</small>
-                    </article>
-                    <article class="stat-card public-profile-kpi">
-                        <span class="stat-label">Assistências</span>
-                        <strong class="public-profile-kpi__value">{{ total_assistencias }}</strong>
-                        <small class="public-profile-kpi__meta">{{ assistencias_por_partida }} por partida</small>
-                    </article>
-                </section>
-
-                <section class="public-profile-recent-section">
-                    <div class="public-profile-section-heading">
-                        <div>
-                            <div class="section-label public-profile-eyebrow">Recorte recente</div>
-                            <h3 class="profile-private-section-title">Jogos recentes</h3>
-                        </div>
-                        <p class="public-profile-section-note">Leitura rápida do impacto do jogador nas últimas rodadas.</p>
+                {% set nivel_val = jogador.nivel|float %}
+                {% set nivel_int = nivel_val|int %}
+                {% set nivel_prox = nivel_int + 1 %}
+                {% set progress_pct = ((nivel_val - nivel_int) * 100)|int %}
+                {% if progress_pct < 0 %}{% set progress_pct = 0 %}{% endif %}
+                
+                <div class="premium-profile-level-progress">
+                    <div class="premium-profile-level-row">
+                        <span>Nível {{ nivel_int }}</span>
+                        <strong>{{ progress_pct }}% para o nível {{ nivel_prox }}</strong>
                     </div>
-
-                    {% set hist = jogador.historico_nivel if jogador.historico_nivel else [] %}
-                    {% if hist %}
-                    <div class="public-profile-evolution">
-                        <div class="public-profile-evolution__head">
-                            <span class="section-label public-profile-eyebrow">Evolução de rating</span>
-                            <strong class="public-profile-evolution__current">{{ '%.2f'|format(jogador.nivel|float) }}</strong>
-                        </div>
-                        <div class="public-profile-evolution__track">
-                            {% for entry in hist[-8:]|reverse %}
-                            <div class="public-profile-evolution__step public-profile-evolution__step--{{ 'up' if entry.nivel_novo > entry.nivel_anterior else 'down' if entry.nivel_novo < entry.nivel_anterior else 'flat' }}">
-                                <span class="public-profile-evolution__val">{{ '%.2f'|format(entry.nivel_novo|float) }}</span>
-                                <span class="public-profile-evolution__arrow">{% if entry.nivel_novo > entry.nivel_anterior %}↑{% elif entry.nivel_novo < entry.nivel_anterior %}↓{% else %}–{% endif %}</span>
-                                <span class="public-profile-evolution__ts">{{ entry.ts[:10] if entry.ts else '' }}</span>
-                            </div>
-                            {% endfor %}
-                        </div>
+                    <div class="premium-profile-level-track">
+                        <div class="premium-profile-level-fill" style="width: {{ progress_pct }}%;"></div>
                     </div>
-                    {% endif %}
+                </div>
+            </div>
 
-                    {% if jogo_destaque %}
-                    <article class="public-profile-match public-profile-match--featured public-profile-match--{{ 'win' if jogo_destaque.resultado == 'vitória' else 'loss' if jogo_destaque.resultado == 'derrota' else 'draw' }}">
-                        <div class="public-profile-match__top">
-                            <div>
-                                <span class="public-profile-match__date">{{ jogo_destaque.data|dt_pt if jogo_destaque.data else 'N/A' }}</span>
-                                <h4>Última atuação registrada</h4>
+            <div class="premium-profile-panel">
+                <h2 class="premium-profile-panel-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    Desempenho
+                </h2>
+
+                <div class="premium-profile-desempenho-grid">
+                    <div class="premium-profile-attributes-list">
+                        {% set attrs = stats.get('atributos') or {'ofensivo': 7.0, 'defensivo': 7.0, 'tecnica': 7.0, 'fisico': 7.0, 'comprometimento': 7.0} %}
+                        
+                        {% for label_attr, key_attr in [('Ofensivo', 'ofensivo'), ('Defensivo', 'defensivo'), ('Técnica', 'tecnica'), ('Físico', 'fisico'), ('Comprometimento', 'comprometimento')] %}
+                        {% set val_attr = attrs.get(key_attr, 7.0) %}
+                        <div class="premium-profile-attr-item">
+                            <div class="premium-profile-attr-labels">
+                                <span class="premium-profile-attr-name">{{ label_attr }}</span>
+                                <span class="premium-profile-attr-val">{{ '%.1f'|format(val_attr|float) }}</span>
                             </div>
-                            <span class="public-profile-result-chip public-profile-result-chip--{{ 'win' if jogo_destaque.resultado == 'vitória' else 'loss' if jogo_destaque.resultado == 'derrota' else 'draw' }}">
-                                {{ jogo_destaque.resultado|capitalize }}
-                            </span>
+                            <div class="premium-profile-attr-track">
+                                <div class="premium-profile-attr-fill" style="width: {{ (val_attr|float * 10)|int }}%;"></div>
+                            </div>
                         </div>
-
-                        <div class="public-profile-match__body">
-                            <div class="public-profile-match__meta-grid">
-                                <div><span>Time</span><strong>{{ jogo_destaque.time_numero }}</strong></div>
-                                <div><span>Posição</span><strong>{{ 'Goleiro' if jogo_destaque.posicao == 'goleiro' else 'Linha' }}</strong></div>
-                                <div><span>Gols</span><strong>{{ jogo_destaque.gols }}</strong></div>
-                                <div><span>Assistências</span><strong>{{ jogo_destaque.assistencias }}</strong></div>
-                            </div>
-                        </div>
-                    </article>
-
-                    {% if outros_jogos %}
-                    <div class="public-profile-match-grid">
-                        {% for jogo in outros_jogos %}
-                        <article class="public-profile-match public-profile-match--compact public-profile-match--{{ 'win' if jogo.resultado == 'vitória' else 'loss' if jogo.resultado == 'derrota' else 'draw' }}">
-                            <div class="public-profile-match__top">
-                                <strong>{{ jogo.data|dt_pt if jogo.data else 'N/A' }}</strong>
-                                <span class="public-profile-match__team">Time {{ jogo.time_numero }}</span>
-                            </div>
-                            <div class="public-profile-match__stats">
-                                <span><b>{{ jogo.gols }}</b> gols</span>
-                                <span><b>{{ jogo.assistencias }}</b> assist.</span>
-                                <span><b>{{ 'GOL' if jogo.posicao == 'goleiro' else 'LIN' }}</b> posição</span>
-                            </div>
-                            <div class="public-profile-match__footer">
-                                <span class="public-profile-result-chip public-profile-result-chip--{{ 'win' if jogo.resultado == 'vitória' else 'loss' if jogo.resultado == 'derrota' else 'draw' }}">{{ jogo.resultado|capitalize }}</span>
-                                <span class="public-profile-match__cards">{{ (jogo.cartoes_amarelos or 0) + (jogo.cartoes_vermelhos or 0) }} cartões</span>
-                            </div>
-                        </article>
                         {% endfor %}
                     </div>
-                    {% endif %}
-                    {% else %}
-                    <div class="public-profile-empty">
-                        <div class="section-label public-profile-eyebrow">Sem histórico</div>
-                        <h3>Nenhuma partida registrada ainda</h3>
-                        <p>Quando este jogador participar das próximas rodadas, o painel vai mostrar impacto ofensivo, disciplina e sequência recente automaticamente.</p>
+
+                    <div class="premium-profile-radar-wrap">
+                        <svg class="premium-profile-radar-svg" viewBox="0 0 200 200">
+                            <!-- Grids -->
+                            {% for r in [25, 45, 62] %}
+                                {% set points = [] %}
+                                {% for i in range(5) %}
+                                    {% if i == 0 %}{% set cx, cy = 100, 100 - r %}
+                                    {% elif i == 1 %}{% set cx, cy = 100 + r * 0.951, 100 - r * 0.309 %}
+                                    {% elif i == 2 %}{% set cx, cy = 100 + r * 0.588, 100 + r * 0.809 %}
+                                    {% elif i == 3 %}{% set cx, cy = 100 - r * 0.588, 100 + r * 0.809 %}
+                                    {% elif i == 4 %}{% set cx, cy = 100 - r * 0.951, 100 - r * 0.309 %}{% endif %}
+                                    {% set _ = points.append(cx|round(1)|string ~ ',' ~ cy|round(1)|string) %}
+                                {% endfor %}
+                                <polygon class="premium-profile-radar-grid" points="{{ points|join(' ') }}" />
+                            {% endfor %}
+
+                            <!-- Eixos -->
+                            {% for i in range(5) %}
+                                {% set r = 62 %}
+                                {% if i == 0 %}{% set tx, ty = 100, 100 - r %}
+                                {% elif i == 1 %}{% set tx, ty = 100 + r * 0.951, 100 - r * 0.309 %}
+                                {% elif i == 2 %}{% set tx, ty = 100 + r * 0.588, 100 + r * 0.809 %}
+                                {% elif i == 3 %}{% set tx, ty = 100 - r * 0.588, 100 + r * 0.809 %}
+                                {% elif i == 4 %}{% set tx, ty = 100 - r * 0.951, 100 - r * 0.309 %}{% endif %}
+                                <line class="premium-profile-radar-axis" x1="100" y1="100" x2="{{ tx|round(1) }}" y2="{{ ty|round(1) }}" />
+                            {% endfor %}
+
+                            <!-- Polígono do jogador -->
+                            {% set val_points = [] %}
+                            {% set r_max = 62 %}
+                            {% set r0 = r_max * (attrs.get('ofensivo', 7.0)|float / 10.0) %}
+                            {% set _ = val_points.append('100,' ~ (100 - r0)|round(1)|string) %}
+                            {% set r1 = r_max * (attrs.get('defensivo', 7.0)|float / 10.0) %}
+                            {% set _ = val_points.append(((100 + r1 * 0.951)|round(1)|string) ~ ',' ~ ((100 - r1 * 0.309)|round(1)|string)) %}
+                            {% set r2 = r_max * (attrs.get('tecnica', 7.0)|float / 10.0) %}
+                            {% set _ = val_points.append(((100 + r2 * 0.588)|round(1)|string) ~ ',' ~ ((100 + r2 * 0.809)|round(1)|string)) %}
+                            {% set r3 = r_max * (attrs.get('fisico', 7.0)|float / 10.0) %}
+                            {% set _ = val_points.append(((100 - r3 * 0.588)|round(1)|string) ~ ',' ~ ((100 + r3 * 0.809)|round(1)|string)) %}
+                            {% set r4 = r_max * (attrs.get('comprometimento', 7.0)|float / 10.0) %}
+                            {% set _ = val_points.append(((100 - r4 * 0.951)|round(1)|string) ~ ',' ~ ((100 - r4 * 0.309)|round(1)|string)) %}
+                            <polygon class="premium-profile-radar-polygon" points="{{ val_points|join(' ') }}" />
+                            
+                            <!-- Rótulos de ícones ajustados para segurança das bordas -->
+                            <text class="premium-profile-radar-label" x="100" y="22">🎯</text>
+                            <text class="premium-profile-radar-label" x="172" y="74">🛡️</text>
+                            <text class="premium-profile-radar-label" x="148" y="162">⚡</text>
+                            <text class="premium-profile-radar-label" x="52" y="162">❤️</text>
+                            <text class="premium-profile-radar-label" x="28" y="74">👟</text>
+                        </svg>
                     </div>
-                    {% endif %}
-                </section>
-            </article>
-        </section>
+                </div>
+            </div>
+
+            <div class="premium-profile-panel public-profile-recent-section">
+                <h2 class="premium-profile-panel-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Últimas Partidas
+                </h2>
+
+                {% if historico_recente %}
+                <div class="premium-profile-match-list">
+                    {% for jogo in historico_recente %}
+                    {% set gols = jogo.get('gols_times') or [0, 0] %}
+                    {% set gols1 = gols[0]|default(0)|int %}
+                    {% set gols2 = gols[1]|default(0)|int %}
+                    <div class="premium-profile-match-card">
+                        {% if jogo.get('resultado', 'empate') == 'vitória' %}
+                        <div class="premium-profile-match-result-badge premium-profile-match-result-badge--win">V</div>
+                        {% elif jogo.get('resultado', 'empate') == 'derrota' %}
+                        <div class="premium-profile-match-result-badge premium-profile-match-result-badge--loss">D</div>
+                        {% else %}
+                        <div class="premium-profile-match-result-badge premium-profile-match-result-badge--draw">E</div>
+                        {% endif %}
+
+                        <div class="premium-profile-match-details">
+                            <div class="premium-profile-match-teams">
+                                Time A {{ gols1 }} <span>x</span> {{ gols2 }} Time B
+                            </div>
+                            <div class="premium-profile-match-date">
+                                {{ jogo.get('data')|dt_pt if jogo.get('data') else 'N/A' }} · Pos: {{ 'Goleiro' if jogo.get('posicao') == 'goleiro' else 'Linha' }}
+                            </div>
+                        </div>
+
+                        <div style="display: flex; align-items: center;">
+                            {% set n_val = jogo.get('nota_partida', '7.0')|float %}
+                            <span class="premium-profile-match-rating-badge {% if n_val >= 7.5 %}premium-profile-match-rating-badge--high{% elif n_val >= 6.0 %}premium-profile-match-rating-badge--mid{% endif %}">
+                                {{ jogo.get('nota_partida', '7.0') }}
+                            </span>
+                            <svg class="premium-profile-match-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="premium-profile-btn-wrap">
+                    <button type="button" class="btn btn-secondary" onclick="document.querySelector('[data-tab-target=partidas]').click();">Ver todas as partidas</button>
+                </div>
+                {% else %}
+                <div class="premium-profile-empty">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                    <h3>Nenhuma partida registrada ainda</h3>
+                    <p>Os jogos recentes e as notas de {{ jogador.nome }} aparecerão aqui quando forem consolidados.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {# PARTIDAS TAB #}
+        <div class="premium-profile-tab-content" id="tab-partidas">
+            <div class="premium-profile-panel">
+                <h2 class="premium-profile-panel-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Histórico Completo
+                </h2>
+
+                {% if stats.get('historico_partidas') %}
+                <div class="premium-profile-match-list premium-profile-match-list-all">
+                    {% for jogo in stats.get('historico_partidas', []) %}
+                    {% set gols = jogo.get('gols_times') or [0, 0] %}
+                    {% set gols1 = gols[0]|default(0)|int %}
+                    {% set gols2 = gols[1]|default(0)|int %}
+                    <div class="premium-profile-match-card">
+                        {% if jogo.get('resultado', 'empate') == 'vitória' %}
+                        <div class="premium-profile-match-result-badge premium-profile-match-result-badge--win">V</div>
+                        {% elif jogo.get('resultado', 'empate') == 'derrota' %}
+                        <div class="premium-profile-match-result-badge premium-profile-match-result-badge--loss">D</div>
+                        {% else %}
+                        <div class="premium-profile-match-result-badge premium-profile-match-result-badge--draw">E</div>
+                        {% endif %}
+
+                        <div class="premium-profile-match-details">
+                            <div class="premium-profile-match-teams">
+                                Time A {{ gols1 }} <span>x</span> {{ gols2 }} Time B
+                            </div>
+                            <div class="premium-profile-match-date">
+                                {{ jogo.get('data')|dt_pt if jogo.get('data') else 'N/A' }} · Gols: {{ jogo.get('gols', 0) }} · Assist: {{ jogo.get('assistencias', 0) }}
+                            </div>
+                        </div>
+
+                        <div style="display: flex; align-items: center;">
+                            {% set n_val = jogo.get('nota_partida', '7.0')|float %}
+                            <span class="premium-profile-match-rating-badge {% if n_val >= 7.5 %}premium-profile-match-rating-badge--high{% elif n_val >= 6.0 %}premium-profile-match-rating-badge--mid{% endif %}">
+                                {{ jogo.get('nota_partida', '7.0') }}
+                            </span>
+                            <svg class="premium-profile-match-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="premium-profile-empty">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                    <h3>Nenhum jogo disponível</h3>
+                    <p>O histórico de partidas do jogador será listado aqui.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
     </main>
 </div>
+
+<script>
+    (() => {
+        // --- GERENCIADOR DE ABAS ---
+        const tabs = document.querySelectorAll('.premium-profile-tab');
+        const contents = document.querySelectorAll('.premium-profile-tab-content');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const target = tab.dataset.tabTarget;
+                
+                tabs.forEach(t => {
+                    t.classList.toggle('is-active', t === tab);
+                    t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
+                });
+                
+                contents.forEach(c => {
+                    const id = c.getAttribute('id');
+                    c.classList.toggle('is-active', id === `tab-${target}`);
+                });
+            });
+        });
+    })();
+</script>
 {% endblock %}

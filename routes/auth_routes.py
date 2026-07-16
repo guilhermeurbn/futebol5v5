@@ -67,6 +67,95 @@ def _is_request_local():
     return remote_addr in {'127.0.0.1', '::1', 'localhost'}
 
 
+def _obter_notas_e_atributos_jogador(jogador, stats_jogador):
+    if not jogador or not stats_jogador:
+        return
+        
+    import hashlib
+    from services.db import load_json_data
+    
+    # 1. Carrega notas das partidas do jogador a partir do histórico de votações
+    votacoes = load_json_data("votacoes_partidas", [])
+    notas_por_partida = {}
+    total_nota = 0.0
+    qtd_votos = 0
+    
+    for partida in votacoes:
+        if partida.get("status") == "encerrada":
+            ranking = partida.get("ranking") or {}
+            ranking_jogadores = ranking.get("ranking_jogadores") or []
+            for r in ranking_jogadores:
+                if r.get("jogador_nome") == jogador.nome:
+                    nota_media = r.get("nota_media", 0)
+                    partida_id = partida.get("id")
+                    notas_por_partida[partida_id] = nota_media
+                    total_nota += nota_media
+                    qtd_votos += 1
+                    break
+                    
+    nota_geral = round(total_nota / qtd_votos, 2) if qtd_votos else 7.0
+    stats_jogador["nota_media_geral"] = f"{nota_geral:.2f}"
+    
+    # Injeta a nota individual e placar real em cada partida no histórico
+    for jogo in stats_jogador.get("historico_partidas", []):
+        partida_id = jogo.get("partida_id")
+        jogo["nota_partida"] = f"{notas_por_partida.get(partida_id, 0.0):.1f}"
+        
+        # Encontrar a partida correspondente no json para pegar os gols reais
+        for partida in votacoes:
+            if partida.get("id") == partida_id:
+                resultado_partida = partida.get("resultado_partida") or {}
+                gols_times = resultado_partida.get("gols_times") or [0, 0]
+                jogo["gols_times"] = gols_times
+                break
+        else:
+            jogo["gols_times"] = [0, 0]
+
+    # 2. Calcula os 5 atributos para o gráfico de radar determinístico
+    h = hashlib.md5(jogador.nome.encode("utf-8")).hexdigest()
+    def get_seed_val(offset, min_val=6.0, max_val=9.5):
+        val = int(h[offset:offset+2], 16) / 255.0
+        return min_val + val * (max_val - min_val)
+
+    posicao = getattr(jogador, 'posicao', 'linha') or 'linha'
+    nivel = float(getattr(jogador, 'nivel', 7.0) or 7.0)
+    
+    # Ofensivo: Maior se for linha, aumenta com gols
+    gols_por_jogo = float(stats_jogador.get("gols_por_partida", 0.0) or 0.0)
+    assist_por_jogo = float(stats_jogador.get("assistencias_por_partida", 0.0) or 0.0)
+    ofensivo_base = 8.0 if posicao == "linha" else 4.0
+    ofensivo_bonus = min(2.0, gols_por_jogo * 1.5 + assist_por_jogo * 1.0)
+    ofensivo = ofensivo_base + ofensivo_bonus
+    ofensivo = ofensivo * 0.6 + get_seed_val(0, 5.0, 9.5) * 0.4
+
+    # Defensivo: Maior se for goleiro
+    defensivo_base = 9.0 if posicao == "goleiro" else 6.0
+    defensivo = defensivo_base * 0.7 + get_seed_val(2, 5.0, 9.5) * 0.3
+
+    # Técnica: Baseado em nível e nota geral
+    tecnica_base = (nivel * 0.6 + nota_geral * 0.4)
+    tecnica = tecnica_base * 0.8 + get_seed_val(4, 6.0, 9.5) * 0.2
+
+    # Físico: Variação ao redor do nível
+    fisico = get_seed_val(6, 6.0, 9.2)
+    if posicao == "goleiro":
+        fisico = fisico * 0.9 + 0.5
+        
+    # Comprometimento: Aumenta levemente com número de partidas jogadas
+    total_jogos = int(stats_jogador.get("total_partidas", 0) or 0)
+    comp_bonus = min(2.0, total_jogos * 0.2)
+    comprometimento = 7.0 + comp_bonus
+    comprometimento = comprometimento * 0.7 + get_seed_val(8, 7.0, 9.8) * 0.3
+
+    stats_jogador["atributos"] = {
+        "ofensivo": round(min(10.0, max(1.0, ofensivo)), 1),
+        "defensivo": round(min(10.0, max(1.0, defensivo)), 1),
+        "tecnica": round(min(10.0, max(1.0, tecnica)), 1),
+        "fisico": round(min(10.0, max(1.0, fisico)), 1),
+        "comprometimento": round(min(10.0, max(1.0, comprometimento)), 1)
+    }
+
+
 # ============================================================
 # CONTEXT PROCESSORS
 # ============================================================
@@ -302,6 +391,9 @@ def perfil_page():
                 stats_jogador.setdefault('ultimos_resultados', {'forma': [], 'pontos': 0, 'partidas': []})
                 stats_jogador.setdefault('mini_dashboard', {'kpis': {}, 'series_ultimos_5': []})
                 stats_jogador.setdefault('planilha_metricas', [])
+                
+                # Calcular e injetar notas e atributos determinísticos
+                _obter_notas_e_atributos_jogador(jogador_proprio, stats_jogador)
     except ValueError as e:
         return render_template(
             'perfil.html',
@@ -345,6 +437,9 @@ def perfil_jogador_publico(jogador_id):
             stats_jogador.setdefault('ultimos_resultados', {'forma': [], 'pontos': 0, 'partidas': []})
             stats_jogador.setdefault('mini_dashboard', {'kpis': {}, 'series_ultimos_5': []})
             stats_jogador.setdefault('planilha_metricas', [])
+            
+            # Calcular e injetar notas e atributos determinísticos
+            _obter_notas_e_atributos_jogador(jogador, stats_jogador)
         except ValueError:
             # Se houver erro ao obter stats, continuar sem elas
             pass
