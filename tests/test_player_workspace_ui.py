@@ -91,14 +91,42 @@ def test_user_vote_page_is_compact_for_mobile_touch_flow():
     assert ".player-workspace-page .votacao-slider::-webkit-slider-thumb" in stylesheet
 
 
-def test_own_player_card_opens_private_profile():
+def test_player_listing_is_alphabetical_and_omits_private_profile_card_action():
     template = _read("templates/index.html")
-    auth_routes = _read("routes/auth_routes.py")
+    jogador_routes = _read("routes/jogador_crud_routes.py")
 
-    assert "jogador.owner_user_id == auth_user.id" in template
-    assert "url_for('auth.perfil_page')" in template
-    assert "Meu perfil" in template
-    assert "jogador.owner_user_id == session.get('user_id')" in auth_routes
+    assert "_preparar_jogadores_para_lista(jogador_service.listar_para_dict())" in jogador_routes
+    assert "_nome_para_ordenacao(jogador.get('nome', ''))" in jogador_routes
+    assert "role == 'usuario'" in jogador_routes
+    assert "jogador.get('owner_user_id') == usuario_id" in jogador_routes
+    assert "Meu perfil" not in template
+    assert "url_for('auth.perfil_page')" not in template
+    assert "url_for('jogador.perfil_jogador_publico', jogador_id=jogador.id)" in template
+
+
+def test_player_listing_filter_tabs_match_card_metadata():
+    template = _read("templates/index.html")
+    app_shell = _read("static/app-shell.js")
+
+    for filter_name in ("all", "fixo", "avulso", "goleiro", "linha"):
+        assert f'data-filter="{filter_name}"' in template
+
+    assert 'data-tipo="{{ jogador.tipo }}"' in template
+    assert 'data-posicao="{{ jogador.posicao }}"' in template
+
+    for expected_branch in (
+        "filterValue === 'all'",
+        "filterValue === 'fixo' && tipo === 'fixo'",
+        "filterValue === 'avulso' && tipo === 'avulso'",
+        "filterValue === 'goleiro' && posicao === 'goleiro'",
+        "filterValue === 'linha' && posicao === 'linha'",
+    ):
+        assert expected_branch in template
+        assert expected_branch in app_shell
+
+    assert "card.style.setProperty('display', 'none', 'important');" in template
+    assert "card.style.setProperty('display', 'none', 'important');" in app_shell
+    assert "card.style.removeProperty('display');" in app_shell
 
 
 def test_private_profile_uses_same_dossier_as_public_profiles():

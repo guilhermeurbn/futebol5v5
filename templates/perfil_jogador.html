@@ -3,7 +3,7 @@
 {% block title %}Perfil de {{ jogador.nome }}{% endblock %}
 
 {% block content %}
-<div class="container profile-page profile-page--public page-container-wide player-workspace-page">
+<div class="container profile-page profile-page--public page-container-wide player-workspace-page" style="background: #000000 !important;">
     <header class="header">
         <div class="header-content">
             {% set brand_title = jogador.nome %}
@@ -195,12 +195,12 @@
                             {% set _ = val_points.append(((100 - r4 * 0.951)|round(1)|string) ~ ',' ~ ((100 - r4 * 0.309)|round(1)|string)) %}
                             <polygon class="premium-profile-radar-polygon" points="{{ val_points|join(' ') }}" />
                             
-                            <!-- Rótulos de ícones ajustados para segurança das bordas -->
-                            <text class="premium-profile-radar-label" x="100" y="22">🎯</text>
-                            <text class="premium-profile-radar-label" x="172" y="74">🛡️</text>
-                            <text class="premium-profile-radar-label" x="148" y="162">⚡</text>
-                            <text class="premium-profile-radar-label" x="52" y="162">❤️</text>
-                            <text class="premium-profile-radar-label" x="28" y="74">👟</text>
+                            <!-- Rótulos do radar com abreviações de texto em vez de emojis -->
+                            <text class="premium-profile-radar-label" x="100" y="24">OFE</text>
+                            <text class="premium-profile-radar-label" x="174" y="78">DEF</text>
+                            <text class="premium-profile-radar-label" x="146" y="160">TÉC</text>
+                            <text class="premium-profile-radar-label" x="54" y="160">FÍS</text>
+                            <text class="premium-profile-radar-label" x="26" y="78">COM</text>
                         </svg>
                     </div>
                 </div>

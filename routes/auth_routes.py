@@ -98,6 +98,8 @@ def _obter_notas_e_atributos_jogador(jogador, stats_jogador):
     
     # Injeta a nota individual e placar real em cada partida no histórico
     for jogo in stats_jogador.get("historico_partidas", []):
+        if not isinstance(jogo, dict):
+            continue
         partida_id = jogo.get("partida_id")
         jogo["nota_partida"] = f"{notas_por_partida.get(partida_id, 0.0):.1f}"
         
@@ -188,7 +190,9 @@ def login_page():
     if session.get('user_id'):
         if session.get('senha_temporaria_ativa'):
             return redirect(url_for('auth.perfil_page'))
-        return redirect(url_for('jogador.index'))
+        if session.get('role') == 'juiz':
+            return redirect(url_for('juiz.jogar_page'))
+        return redirect(url_for('auth.perfil_page'))
     return render_template('login.html')
 
 
@@ -213,7 +217,9 @@ def login_submit():
         session.modified = True
         if session['senha_temporaria_ativa']:
             return redirect(url_for('auth.perfil_page'))
-        return redirect(url_for('jogador.index'))
+        if session.get('role') == 'juiz':
+            return redirect(url_for('juiz.jogar_page'))
+        return redirect(url_for('auth.perfil_page'))
     except ValueError as e:
         return render_template('login.html', erro=str(e)), 400
     except Exception as e:
@@ -224,7 +230,9 @@ def login_submit():
 def cadastro_page():
     """Página de cadastro de novo usuário"""
     if session.get('user_id'):
-        return redirect(url_for('jogador.index'))
+        if session.get('role') == 'juiz':
+            return redirect(url_for('juiz.jogar_page'))
+        return redirect(url_for('auth.perfil_page'))
     return render_template('cadastro.html')
 
 
@@ -291,7 +299,9 @@ def cadastro_submit():
 @auth_bp.route('/recuperar-senha', methods=['GET'])
 def recuperar_senha_page():
     if session.get('user_id'):
-        return redirect(url_for('jogador.index'))
+        if session.get('role') == 'juiz':
+            return redirect(url_for('juiz.jogar_page'))
+        return redirect(url_for('auth.perfil_page'))
     return render_template('recuperar_senha.html')
 
 
@@ -327,7 +337,9 @@ def recuperar_senha_submit():
 @auth_bp.route('/definir-senha', methods=['GET'])
 def definir_senha_page():
     if session.get('user_id'):
-        return redirect(url_for('jogador.index'))
+        if session.get('role') == 'juiz':
+            return redirect(url_for('juiz.jogar_page'))
+        return redirect(url_for('auth.perfil_page'))
 
     token = request.args.get('token', '').strip()
     usuario = auth_service.validar_token_reset(token)
@@ -440,8 +452,11 @@ def perfil_jogador_publico(jogador_id):
             
             # Calcular e injetar notas e atributos determinísticos
             _obter_notas_e_atributos_jogador(jogador, stats_jogador)
-        except ValueError:
-            # Se houver erro ao obter stats, continuar sem elas
+        except Exception as e:
+            # Se houver qualquer erro ao obter stats, logar e continuar sem elas
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Erro ao carregar estatísticas do perfil público: {str(e)}")
             pass
 
         return render_template(

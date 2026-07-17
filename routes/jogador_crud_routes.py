@@ -5,6 +5,7 @@ Rotas de Gerenciamento de Jogadores
 """
 from flask import Blueprint, request, render_template, redirect, url_for, jsonify, session
 from functools import wraps
+import unicodedata
 from routes.commons import login_required
 from services.jogador_service import JogadorService
 from services.jogador_stats_service import JogadorStatsService
@@ -65,15 +66,26 @@ def _jogador_publico(jogador):
     }
 
 
-def _ordenar_jogadores_usuario_primeiro(jogadores):
-    """Coloca primeiro o jogador pertencente ao usuário logado."""
+def _nome_para_ordenacao(nome: str) -> str:
+    """Normaliza nomes para uma ordenacao alfabetica previsivel."""
+    texto = unicodedata.normalize("NFKD", str(nome or ""))
+    sem_acentos = "".join(char for char in texto if not unicodedata.combining(char))
+    return sem_acentos.casefold().strip()
+
+
+def _preparar_jogadores_para_lista(jogadores):
+    """Remove o proprio jogador da lista publica e ordena por nome."""
     usuario_id = session.get('user_id')
-    if not usuario_id:
-        return jogadores
+    role = session.get('role')
+
+    jogadores_filtrados = [
+        jogador for jogador in jogadores
+        if not (role == 'usuario' and usuario_id and jogador.get('owner_user_id') == usuario_id)
+    ]
 
     return sorted(
-        jogadores,
-        key=lambda jogador: 0 if jogador.get('owner_user_id') == usuario_id else 1,
+        jogadores_filtrados,
+        key=lambda jogador: _nome_para_ordenacao(jogador.get('nome', '')),
     )
 
 
@@ -124,7 +136,7 @@ def index():
         return redirect(url_for('juiz.jogar_page'))
 
     try:
-        jogadores = _ordenar_jogadores_usuario_primeiro(jogador_service.listar_para_dict())
+        jogadores = _preparar_jogadores_para_lista(jogador_service.listar_para_dict())
         jogadores_premium = []
 
         for jogador in jogadores:

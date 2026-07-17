@@ -48,6 +48,11 @@ class JogadorStatsService:
             "ts": time.time(),
             "data": data,
         }
+
+    def _chave_cache_stats(self, nome_jogador: str) -> str:
+        """Monta uma chave que evita reaproveitar stats entre fontes diferentes."""
+        chave_nome = self._normalizar_nome(nome_jogador)
+        return f"{self.__class__.__name__}:{id(self)}:{chave_nome}"
     
     def _carregar_partidas(self) -> List[dict]:
         """Carrega dados de partidas"""
@@ -299,7 +304,7 @@ class JogadorStatsService:
             }
         """
         try:
-            chave_cache = self._normalizar_nome(nome_jogador)
+            chave_cache = self._chave_cache_stats(nome_jogador)
             cache_hit = self._obter_stats_em_cache(chave_cache)
             if cache_hit is not None:
                 return cache_hit

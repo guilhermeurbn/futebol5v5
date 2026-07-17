@@ -94,51 +94,19 @@
                 {% endif %}
                 {% if auth_user and auth_user.autenticado and auth_user.role != 'juiz' %}
                 <span class="brand-profile-shortcut" hidden aria-hidden="true"></span>
-                <form method="post" action="{{ url_for('jogador.logout') }}" class="site-topbar__form">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button type="submit" class="site-topbar__button site-topbar__button--danger" aria-label="Sair" title="Sair">
-                        <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                            <path d="M16 17l5-5-5-5" />
-                            <path d="M21 12H9" />
-                            <path d="M13 5V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h5a2 2 0 0 0 2-2v-1" />
-                        </svg>
-                    </button>
-                </form>
                 {% endif %}
-                    {% if auth_user and auth_user.autenticado and auth_user.role == 'juiz' %}
-                    <form method="post" action="{{ url_for('jogador.logout') }}" class="site-topbar__form">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <button type="submit" class="site-topbar__button site-topbar__button--danger" aria-label="Sair" title="Sair">
-                            <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                                <path d="M16 17l5-5-5-5" />
-                                <path d="M21 12H9" />
-                                <path d="M13 5V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h5a2 2 0 0 0 2-2v-1" />
-                            </svg>
-                        </button>
-                    </form>
-                    {% endif %}
             </nav>
         </div>
 
-            {% if auth_user and auth_user.autenticado %}
-            <div class="brand-header__mobile-actions">
-                <div class="auth-links">
-                    {% if auth_user.role == 'juiz' %}
-                    <a class="btn btn-secondary judge-timer-shortcut" href="{{ url_for('juiz.juiz_cronometro') }}" aria-label="Abrir cronômetro" title="Cronômetro">⏱</a>
-                    {% endif %}
-                    <form method="post" action="{{ url_for('jogador.logout') }}" class="logout-form">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <button class="btn btn-danger brand-header__mobile-logout" type="submit" aria-label="Sair" title="Sair">
-                            <svg class="brand-header__mobile-logout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                                <path d="M16 17l5-5-5-5" />
-                                <path d="M21 12H9" />
-                                <path d="M13 5V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h5a2 2 0 0 0 2-2v-1" />
-                            </svg>
-                        </button>
-                    </form>
-                </div>
+        {% if auth_user and auth_user.autenticado %}
+        <div class="brand-header__mobile-actions">
+            <div class="auth-links">
+                {% if auth_user.role == 'juiz' %}
+                <a class="btn btn-secondary judge-timer-shortcut" href="{{ url_for('juiz.juiz_cronometro') }}" aria-label="Abrir cronômetro" title="Cronômetro">⏱</a>
+                {% endif %}
             </div>
-            {% endif %}
+        </div>
+        {% endif %}
         {% endif %}
     </div>
 </div>
@@ -235,28 +203,6 @@
             {% endif %}
             {% if auth_user and auth_user.autenticado and auth_user.role != 'juiz' %}
             <span class="brand-profile-shortcut" hidden aria-hidden="true"></span>
-            <form method="post" action="{{ url_for('jogador.logout') }}" class="site-topbar__form">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="site-topbar__button site-topbar__button--danger" aria-label="Sair" title="Sair">
-                    <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                        <path d="M16 17l5-5-5-5" />
-                        <path d="M21 12H9" />
-                        <path d="M13 5V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h5a2 2 0 0 0 2-2v-1" />
-                    </svg>
-                </button>
-            </form>
-            {% endif %}
-            {% if auth_user and auth_user.autenticado and auth_user.role == 'juiz' %}
-            <form method="post" action="{{ url_for('jogador.logout') }}" class="site-topbar__form">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="site-topbar__button site-topbar__button--danger" aria-label="Sair" title="Sair">
-                    <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                        <path d="M16 17l5-5-5-5" />
-                        <path d="M21 12H9" />
-                        <path d="M13 5V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h5a2 2 0 0 0 2-2v-1" />
-                    </svg>
-                </button>
-            </form>
             {% endif %}
         </nav>
     </div>
@@ -267,16 +213,6 @@
             {% if auth_user.role == 'juiz' %}
             <a class="btn btn-secondary judge-timer-shortcut" href="{{ url_for('juiz.juiz_cronometro') }}" aria-label="Abrir cronômetro" title="Cronômetro">⏱</a>
             {% endif %}
-            <form method="post" action="{{ url_for('jogador.logout') }}" class="logout-form">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button class="btn btn-danger brand-header__mobile-logout" type="submit" aria-label="Sair" title="Sair">
-                    <svg class="brand-header__mobile-logout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                        <path d="M16 17l5-5-5-5" />
-                        <path d="M21 12H9" />
-                        <path d="M13 5V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h5a2 2 0 0 0 2-2v-1" />
-                    </svg>
-                </button>
-            </form>
         </div>
     </div>
     {% endif %}

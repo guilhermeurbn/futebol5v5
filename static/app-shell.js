@@ -282,7 +282,7 @@
       const wins = playerStatsValue(stats, ['vitórias', 'vitorias', 'wins'], 0);
       const matches = playerStatsValue(stats, ['total_partidas', 'matches', 'partidas'], 0);
 
-      const statValues = card.querySelectorAll('.player-card__stat-value');
+      const statValues = card.querySelectorAll('.premium-player-stat-val, .player-card__stat-value');
       if (statValues[0]) statValues[0].textContent = String(wins);
       if (statValues[1]) statValues[1].textContent = String(matches);
 
@@ -823,6 +823,61 @@
     event.preventDefault();
     loadPage(link.href, { replace: false });
   }, true);
+
+  // Delegação de clique para cartões de jogadores (.player-card) integrada com o PWA
+  document.addEventListener('click', event => {
+    const card = event.target.closest('.player-card');
+    if (!card) return;
+
+    if (event.target.closest('a') || event.target.closest('button')) {
+      return;
+    }
+
+    const btn = card.querySelector('.premium-player-card-btn');
+    if (btn) {
+      event.preventDefault();
+      btn.click();
+    }
+  });
+
+  // Delegação de clique para abas de filtros de categoria (.premium-filter-tab)
+  document.addEventListener('click', event => {
+    const tab = event.target.closest('.premium-filter-tab');
+    if (!tab) return;
+
+    event.preventDefault();
+    const filterValue = tab.getAttribute('data-filter');
+
+    // 1. Atualizar classe ativa das abas de filtro
+    document.querySelectorAll('.premium-filter-tab').forEach(t => {
+      t.classList.toggle('is-active', t === tab);
+    });
+
+    // 2. Filtrar os cards de jogadores baseando-se em tipo/posição
+    document.querySelectorAll('.player-card').forEach(card => {
+      const tipo = String(card.getAttribute('data-tipo') || '').trim().toLowerCase();
+      const posicao = String(card.getAttribute('data-posicao') || '').trim().toLowerCase();
+
+      let matches = false;
+      if (filterValue === 'all') {
+        matches = true;
+      } else if (filterValue === 'fixo' && tipo === 'fixo') {
+        matches = true;
+      } else if (filterValue === 'avulso' && tipo === 'avulso') {
+        matches = true;
+      } else if (filterValue === 'goleiro' && posicao === 'goleiro') {
+        matches = true;
+      } else if (filterValue === 'linha' && posicao === 'linha') {
+        matches = true;
+      }
+
+      if (matches) {
+        card.style.removeProperty('display');
+      } else {
+        card.style.setProperty('display', 'none', 'important');
+      }
+    });
+  });
 
   window.addEventListener('popstate', () => {
     loadPage(window.location.href, { replace: true });
