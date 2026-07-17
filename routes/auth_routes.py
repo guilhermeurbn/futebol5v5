@@ -192,6 +192,8 @@ def login_page():
             return redirect(url_for('auth.perfil_page'))
         if session.get('role') == 'juiz':
             return redirect(url_for('juiz.jogar_page'))
+        if session.get('role') in ['admin', 'super_admin']:
+            return redirect(url_for('jogador.index'))
         return redirect(url_for('auth.perfil_page'))
     return render_template('login.html')
 
@@ -219,6 +221,8 @@ def login_submit():
             return redirect(url_for('auth.perfil_page'))
         if session.get('role') == 'juiz':
             return redirect(url_for('juiz.jogar_page'))
+        if session.get('role') in ['admin', 'super_admin']:
+            return redirect(url_for('jogador.index'))
         return redirect(url_for('auth.perfil_page'))
     except ValueError as e:
         return render_template('login.html', erro=str(e)), 400

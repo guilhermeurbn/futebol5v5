@@ -19188,3 +19188,58 @@ html,
   display: block !important;
   line-height: 1.1 !important;
 }
+
+/* Arredondar cantos superiores do rodapé e remover moldura interna */
+.site-footer,
+.site-footer.judge-site-footer {
+  border-top-left-radius: 20px !important;
+  border-top-right-radius: 20px !important;
+  background: #111116 !important; /* Fundo escuro e sólido */
+  padding-top: 0.5rem !important;
+  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom)) !important;
+  border-top: 1px solid #2A2A34 !important;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.6) !important;
+}
+
+.site-footer__nav {
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  padding: 0 !important;
+  height: 100% !important;
+}
+
+.site-footer__link {
+  border-radius: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #8E8E99 !important;
+  opacity: 0.65;
+  transition: color 150ms ease, opacity 150ms ease !important;
+  margin-top: 0.22rem !important; /* Descer um pouco */
+}
+
+.site-footer__link:hover {
+  color: #ffffff !important;
+  opacity: 1 !important;
+  background: transparent !important;
+}
+
+.site-footer__link.is-active {
+  color: #a78bfa !important;
+  opacity: 1 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.site-footer__icon {
+  width: 1.36rem !important; /* Aumentar levemente o tamanho do ícone */
+  height: 1.36rem !important;
+}
+
+.site-footer__label {
+  font-size: 0.66rem !important; /* Aumentar levemente o tamanho da legenda */
+  margin-top: 0.22rem !important;
+}
