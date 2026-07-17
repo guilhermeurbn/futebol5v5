@@ -18939,30 +18939,44 @@ html,
 #tab-gerenciar .votacao-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
   background: #a78bfa !important;
   cursor: pointer;
   transition: transform 0.1s ease;
   box-shadow: 0 0 8px rgba(167, 139, 250, 0.5);
+  border: 10px solid transparent !important;
+  background-clip: padding-box !important;
 }
 
 #createPlayerModal .votacao-slider::-webkit-slider-thumb:active,
 #tab-gerenciar .votacao-slider::-webkit-slider-thumb:active {
-  transform: scale(1.2);
+  transform: scale(1.15) !important;
 }
 
 #createPlayerModal .votacao-slider::-moz-range-thumb,
 #tab-gerenciar .votacao-slider::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
   background: #a78bfa !important;
   cursor: pointer;
   transition: transform 0.1s ease;
-  border: none;
+  border: 10px solid transparent !important;
+  background-clip: padding-box !important;
   box-shadow: 0 0 8px rgba(167, 139, 250, 0.5);
+}
+
+/* Estilização para botões de incremento/decremento nos sliders de nível */
+.slider-step-btn:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(167, 139, 250, 0.4) !important;
+}
+
+.slider-step-btn:active {
+  transform: scale(0.9) !important;
+  background: rgba(167, 139, 250, 0.2) !important;
 }
 
 /* Opções de Tipo/Perfil com comportamento ativo no modal e aba de editar */

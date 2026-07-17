@@ -82,16 +82,20 @@
                                             <label for="nivel" class="form-label" style="margin-bottom: 0;">Nível de Habilidade</label>
                                             <span id="nivelValDisplay" style="font-weight: 800; color: #a78bfa; background: rgba(167, 139, 250, 0.1); padding: 0.2rem 0.6rem; border-radius: 8px; font-size: 0.9rem;">5</span>
                                         </div>
-                                        <input
-                                            type="range"
-                                            id="nivel"
-                                            name="nivel"
-                                            min="1"
-                                            max="10"
-                                            value="5"
-                                            class="votacao-slider"
-                                            style="width: 100%; cursor: pointer;"
-                                        >
+                                        <div class="slider-control-container" style="display: flex; align-items: center; gap: 0.75rem; margin: 0.5rem 0;">
+                                            <button type="button" class="slider-step-btn" id="btnNivelDec" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: #ffffff; font-size: 1.25rem; font-weight: bold; cursor: pointer; user-select: none; transition: all 0.15s ease;">−</button>
+                                            <input
+                                                type="range"
+                                                id="nivel"
+                                                name="nivel"
+                                                min="1"
+                                                max="10"
+                                                value="5"
+                                                class="votacao-slider"
+                                                style="flex: 1; cursor: pointer; margin: 0 !important;"
+                                            >
+                                            <button type="button" class="slider-step-btn" id="btnNivelInc" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: #ffffff; font-size: 1.25rem; font-weight: bold; cursor: pointer; user-select: none; transition: all 0.15s ease;">+</button>
+                                        </div>
                                     </div>
 
                                     <div class="form-group" style="margin-bottom: 2rem;">
@@ -130,11 +134,31 @@
 
                             const slider = createModal.querySelector('#nivel');
                             const display = createModal.querySelector('#nivelValDisplay');
+                            const decBtn = createModal.querySelector('#btnNivelDec');
+                            const incBtn = createModal.querySelector('#btnNivelInc');
+
+                            const updateDisplay = () => {
+                                display.textContent = slider.value;
+                            };
 
                             if (slider && display) {
-                                slider.addEventListener('input', () => {
-                                    display.textContent = slider.value;
-                                });
+                                slider.addEventListener('input', updateDisplay);
+
+                                if (decBtn) {
+                                    decBtn.addEventListener('click', () => {
+                                        const val = Math.max(1, parseInt(slider.value, 10) - 1);
+                                        slider.value = val;
+                                        slider.dispatchEvent(new Event('input'));
+                                    });
+                                }
+
+                                if (incBtn) {
+                                    incBtn.addEventListener('click', () => {
+                                        const val = Math.min(10, parseInt(slider.value, 10) + 1);
+                                        slider.value = val;
+                                        slider.dispatchEvent(new Event('input'));
+                                    });
+                                }
                             }
                         })();
                     </script>

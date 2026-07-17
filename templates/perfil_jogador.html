@@ -354,16 +354,20 @@
                             <label for="edit_nivel" class="form-label" style="margin-bottom: 0;">Nível de Habilidade</label>
                             <span id="editNivelValDisplay" style="font-weight: 800; color: #a78bfa; background: rgba(167, 139, 250, 0.1); padding: 0.2rem 0.6rem; border-radius: 8px; font-size: 0.9rem;">{{ '%.0f'|format(jogador.nivel|float) }}</span>
                         </div>
-                        <input
-                            type="range"
-                            id="edit_nivel"
-                            name="nivel"
-                            min="1"
-                            max="10"
-                            value="{{ '%.0f'|format(jogador.nivel|float) }}"
-                            class="votacao-slider"
-                            style="width: 100%; cursor: pointer;"
-                        >
+                        <div class="slider-control-container" style="display: flex; align-items: center; gap: 0.75rem; margin: 0.5rem 0;">
+                            <button type="button" class="slider-step-btn" id="btnEditNivelDec" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: #ffffff; font-size: 1.25rem; font-weight: bold; cursor: pointer; user-select: none; transition: all 0.15s ease;">−</button>
+                            <input
+                                type="range"
+                                id="edit_nivel"
+                                name="nivel"
+                                min="1"
+                                max="10"
+                                value="{{ '%.0f'|format(jogador.nivel|float) }}"
+                                class="votacao-slider"
+                                style="flex: 1; cursor: pointer; margin: 0 !important;"
+                            >
+                            <button type="button" class="slider-step-btn" id="btnEditNivelInc" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: #ffffff; font-size: 1.25rem; font-weight: bold; cursor: pointer; user-select: none; transition: all 0.15s ease;">+</button>
+                        </div>
                     </div>
 
                     <div class="form-group" style="margin-bottom: 2rem;">
@@ -438,10 +442,31 @@
         // --- CONTROLE DE SLIDER DE EDIÇÃO ---
         const editSlider = document.getElementById('edit_nivel');
         const editDisplay = document.getElementById('editNivelValDisplay');
+        const decBtn = document.getElementById('btnEditNivelDec');
+        const incBtn = document.getElementById('btnEditNivelInc');
+
+        const updateDisplay = () => {
+            editDisplay.textContent = editSlider.value;
+        };
+
         if (editSlider && editDisplay) {
-            editSlider.addEventListener('input', () => {
-                editDisplay.textContent = editSlider.value;
-            });
+            editSlider.addEventListener('input', updateDisplay);
+
+            if (decBtn) {
+                decBtn.addEventListener('click', () => {
+                    const val = Math.max(1, parseInt(editSlider.value, 10) - 1);
+                    editSlider.value = val;
+                    editSlider.dispatchEvent(new Event('input'));
+                });
+            }
+
+            if (incBtn) {
+                incBtn.addEventListener('click', () => {
+                    const val = Math.min(10, parseInt(editSlider.value, 10) + 1);
+                    editSlider.value = val;
+                    editSlider.dispatchEvent(new Event('input'));
+                });
+            }
         }
     })();
 </script>
