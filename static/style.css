@@ -18935,6 +18935,22 @@ html,
   margin: 0.85rem 0 !important;
 }
 
+#createPlayerModal .votacao-slider::-webkit-slider-runnable-track,
+#tab-gerenciar .votacao-slider::-webkit-slider-runnable-track {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  background: transparent !important;
+  border: none !important;
+  height: 6px !important;
+}
+
+#createPlayerModal .votacao-slider::-moz-range-track,
+#tab-gerenciar .votacao-slider::-moz-range-track {
+  background: transparent !important;
+  border: none !important;
+  height: 6px !important;
+}
+
 #createPlayerModal .votacao-slider::-webkit-slider-thumb,
 #tab-gerenciar .votacao-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
