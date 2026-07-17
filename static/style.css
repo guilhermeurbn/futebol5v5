@@ -18928,25 +18928,28 @@ html,
 #tab-gerenciar .votacao-slider {
   appearance: none;
   -webkit-appearance: none;
-  background: rgba(255, 255, 255, 0.08) !important;
-  height: 6px !important;
-  border-radius: 3px !important;
+  background: transparent !important;
+  height: 38px !important;
   outline: none !important;
-  margin: 0.85rem 0 !important;
+  margin: 0 !important;
+  width: 100%;
 }
 
 #createPlayerModal .votacao-slider::-webkit-slider-runnable-track,
 #tab-gerenciar .votacao-slider::-webkit-slider-runnable-track {
   -webkit-appearance: none !important;
   appearance: none !important;
-  background: transparent !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-radius: 3px !important;
   border: none !important;
   height: 6px !important;
+  transition: background 0.2s ease;
 }
 
 #createPlayerModal .votacao-slider::-moz-range-track,
 #tab-gerenciar .votacao-slider::-moz-range-track {
-  background: transparent !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-radius: 3px !important;
   border: none !important;
   height: 6px !important;
 }
@@ -18964,6 +18967,7 @@ html,
   box-shadow: 0 0 8px rgba(167, 139, 250, 0.5);
   border: 10px solid transparent !important;
   background-clip: padding-box !important;
+  margin-top: -17px !important; /* Centraliza verticalmente o thumb de 40px no trilho de 6px */
 }
 
 #createPlayerModal .votacao-slider::-webkit-slider-thumb:active,
