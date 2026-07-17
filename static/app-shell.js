@@ -702,6 +702,14 @@
     currentContent.innerHTML = nextContent.innerHTML;
     rehydrateScripts(currentContent);
 
+    // Swap the site footer to reflect correct page-context order and content
+    const nextFooter = nextDocument.querySelector('.site-footer');
+    const currentFooter = document.querySelector('.site-footer');
+    if (nextFooter && currentFooter) {
+      currentFooter.innerHTML = nextFooter.innerHTML;
+      currentFooter.className = nextFooter.className;
+    }
+
     if (nextDocument.title) {
       document.title = nextDocument.title;
     }
