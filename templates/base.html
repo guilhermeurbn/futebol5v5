@@ -5,9 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#7c3aed">
     <meta name="description" content="NaTrave - Aplicação profissional para sorteio balanceado de times em partidas de futebol 5v5">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://natrave.com.br/">
+    <meta property="og:title" content="NaTrave - Sorteio de Times Futebol 5v5">
+    <meta property="og:description" content="Aplicação profissional para sorteio balanceado de times em partidas de futebol 5v5 com algoritmos de nivelamento e estatísticas detalhadas.">
+    <meta property="og:image" content="{{ url_for('static', filename='logo-natrave-5v5.png', _external=True) }}">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://natrave.com.br/">
+    <meta name="twitter:title" content="NaTrave - Sorteio de Times Futebol 5v5">
+    <meta name="twitter:description" content="Aplicação profissional para sorteio balanceado de times em partidas de futebol 5v5 com algoritmos de nivelamento e estatísticas detalhadas.">
+    <meta name="twitter:image" content="{{ url_for('static', filename='logo-natrave-5v5.png', _external=True) }}">
+
+    <!-- Structured Data (JSON-LD) for Search Engines -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "NaTrave",
+      "alternateName": "NaTrave - Sorteio de Times 5v5",
+      "url": "https://natrave.com.br/",
+      "logo": "{{ url_for('static', filename='logo-natrave-5v5.png', _external=True) }}",
+      "image": "{{ url_for('static', filename='logo-natrave-5v5.png', _external=True) }}",
+      "description": "Aplicação profissional para sorteio balanceado de times em partidas de futebol 5v5 com algoritmos de nivelamento e estatísticas detalhadas.",
+      "applicationCategory": "SportsApplication",
+      "operatingSystem": "All"
+    }
+    </script>
+
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='natrave.svg', v='20260708-03') }}">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><defs><linearGradient id='g' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%237c3aed;stop-opacity:1' /><stop offset='55%' style='stop-color:%23ec4899;stop-opacity:1' /><stop offset='100%' style='stop-color:%2306b6d4;stop-opacity:1' /></linearGradient></defs><rect fill='url(%23g)' width='180' height='180' rx='44'/><circle cx='90' cy='78' r='48' fill='rgba(255,255,255,0.12)'/><path d='M61 106V60l29 29 29-29v46' fill='none' stroke='white' stroke-width='14' stroke-linecap='round' stroke-linejoin='round'/><rect x='53' y='114' width='74' height='20' rx='10' fill='rgba(255,255,255,0.22)'/><text x='90' y='128' dominant-baseline='middle' text-anchor='middle' font-size='17' font-weight='700' fill='white' font-family='Arial'>5v5</text></svg>">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='logo-natrave-5v5.png') }}">
     <title>NaTrave | {% block title %}Painel{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='20260616-06') }}">
     <script src="{{ url_for('static', filename='local-datetime.js', v='20260616-06') }}" defer></script>
