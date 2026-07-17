@@ -15368,60 +15368,149 @@ body.modal-open {
 }
 
 .player-workspace-page .votacao-card {
-  padding: 0.9rem;
+  background: #0d0c13 !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-radius: 20px !important;
+  padding: 1.25rem !important;
+  opacity: 0.78 !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.player-workspace-page .votacao-card.is-active {
+  border-color: rgba(167, 139, 250, 0.58) !important;
+  background: rgba(22, 18, 32, 0.85) !important;
+  box-shadow: 0 10px 30px rgba(139, 92, 246, 0.18) !important;
+  opacity: 1 !important;
+  transform: translateY(-3px) !important;
 }
 
 .player-workspace-page .votacao-card__top {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.85rem;
 }
 
 .player-workspace-page .votacao-card__name {
-  color: var(--player-text);
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.player-workspace-page .votacao-card-team-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #9a95a4;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  transition: all 0.2s ease;
+}
+
+.player-workspace-page .votacao-card.is-active .votacao-card-team-badge {
+  background: rgba(139, 92, 246, 0.08);
+  color: #a78bfa;
+  border-color: rgba(139, 92, 246, 0.12);
 }
 
 .player-workspace-page .votacao-card__score {
   min-width: 3rem;
   padding: 0.38rem 0.58rem;
   border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04) !important;
+  color: #8b8595 !important;
+  font-weight: 800;
+  text-align: center;
+  font-size: 0.88rem;
+  transition: all 0.2s ease;
+}
+
+.player-workspace-page .votacao-card__score.is-active {
+  background: rgba(167, 139, 250, 0.15) !important;
+  color: #c4b5fd !important;
 }
 
 .player-workspace-page .votacao-slider {
-  height: 32px;
-  accent-color: var(--player-green);
+  width: 100%;
+  height: 38px;
+  accent-color: #8b5cf6;
   cursor: pointer;
-}
-
-.player-workspace-page .votacao-slider::-webkit-slider-runnable-track {
-  height: 10px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, rgba(34, 197, 94, 0.72), rgba(139, 92, 246, 0.72), rgba(236, 72, 153, 0.72));
-}
-
-.player-workspace-page .votacao-slider::-webkit-slider-thumb {
-  width: 30px;
-  height: 30px;
-  margin-top: -10px;
-  border: 3px solid #fff;
-  border-radius: 999px;
-  background: var(--player-green);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
+  background: transparent;
   -webkit-appearance: none;
 }
 
+.player-workspace-page .votacao-slider::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  transition: background 0.2s ease;
+}
+
+.player-workspace-page .votacao-slider:active::-webkit-slider-runnable-track {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.player-workspace-page .votacao-slider::-webkit-slider-thumb {
+  width: 24px;
+  height: 24px;
+  margin-top: -9px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  background: #8b5cf6;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+  -webkit-appearance: none;
+  transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease;
+}
+
+.player-workspace-page .votacao-slider:active::-webkit-slider-thumb {
+  transform: scale(1.18);
+  background: #a78bfa;
+}
+
 .player-workspace-page .votacao-slider::-moz-range-track {
-  height: 10px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, rgba(34, 197, 94, 0.72), rgba(139, 92, 246, 0.72), rgba(236, 72, 153, 0.72));
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .player-workspace-page .votacao-slider::-moz-range-thumb {
-  width: 26px;
-  height: 26px;
-  border: 3px solid #fff;
-  border-radius: 999px;
-  background: var(--player-green);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
+  width: 20px;
+  height: 20px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  background: #8b5cf6;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+  transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease;
+}
+
+.player-workspace-page .votacao-slider:active::-moz-range-thumb {
+  transform: scale(1.18);
+  background: #a78bfa;
+}
+
+.player-workspace-page .votacao-progress__badge {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  color: #aaa3b5 !important;
+  font-size: 0.85rem !important;
+  font-weight: 800 !important;
+  padding: 0.5rem 0.9rem !important;
+  border-radius: 12px !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  box-shadow: none !important;
+  transform: none !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.player-workspace-page .votacao-progress__badge.is-complete {
+  background: rgba(16, 185, 129, 0.12) !important;
+  border-color: rgba(16, 185, 129, 0.25) !important;
+  color: #34d399 !important;
 }
 
 .player-workspace-page .votacao-slider-labels {
@@ -16064,9 +16153,20 @@ body.modal-open {
 }
 
 .profile-security-dialog .form-label {
-  margin: 0;
-  color: #ddd8e5;
-  font-size: 0.82rem;
+  margin: 0 0 0.5rem 0 !important;
+  color: #a7f3d0 !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  -webkit-text-fill-color: #a7f3d0 !important;
+  background-clip: initial !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  display: block !important;
 }
 
 .profile-security-dialog .profile-security-input {
@@ -18525,6 +18625,16 @@ body.is-referee-layout .judge-timer-reset:hover {
   font-size: 0.85rem !important;
   font-weight: 700 !important;
   border-radius: 10px !important;
+  background: #22c55e !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2) !important;
+  transition: all 0.2s ease !important;
+}
+
+.premium-player-card-btn:active {
+  transform: scale(0.97) !important;
+  background: #16a34a !important;
 }
 
 .premium-player-admin-actions {
@@ -18723,4 +18833,313 @@ html,
   background-color: transparent !important;
   border-bottom: none !important;
   box-shadow: none !important;
+}
+
+/* ============================================================
+   🎨 REFORMULAÇÃO DOS CARDS E SEÇÕES DA VOTAÇÃO MOBILE
+   ============================================================ */
+
+/* Tornar os containers externos transparentes e sem borda para evitar efeito de "card dentro de card" */
+.player-workspace-page .vote-mobile-hero,
+.player-workspace-page .vote-mobile-form-section {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding-left: 0.25rem !important;
+  padding-right: 0.25rem !important;
+}
+
+/* Remover linhas de gradiente e pseudo-elementos dos containers externos no mobile */
+.player-workspace-page .vote-mobile-hero::before,
+.player-workspace-page .vote-mobile-hero::after,
+.player-workspace-page .vote-mobile-form-section::before,
+.player-workspace-page .vote-mobile-form-section::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Forçar formulários e containers de votação a serem transparentes e sem bordas */
+.player-workspace-page .form,
+.player-workspace-page .votacao-form-container {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* Botão Salvar sóbrio em verde esmeralda premium */
+.player-workspace-page .vote-mobile-submit .btn {
+  background: #22c55e !important;
+  color: #ffffff !important;
+  border: none !important;
+  font-weight: 800 !important;
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.25) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  border-radius: 14px !important;
+}
+
+.player-workspace-page .vote-mobile-submit .btn:active {
+  transform: scale(0.97) !important;
+  background: #16a34a !important;
+}
+/* ============================================================
+   🎨 PREMIUM MODAL DIALOG BUTTONS (ADICIONAR JOGADOR)
+   ============================================================ */
+
+/* Botão de Adicionar (Trigger) em Verde */
+.premium-add-player-btn {
+  background: #22c55e !important;
+  color: #ffffff !important;
+  border: none !important;
+  font-weight: 700 !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.premium-add-player-btn:active {
+  transform: scale(0.96) !important;
+  background: #16a34a !important;
+}
+
+/* Botão Cadastrar (Submit) no Modal */
+.premium-submit-btn {
+  background: #22c55e !important;
+  color: #ffffff !important;
+  border: none !important;
+  font-weight: 800 !important;
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.25) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  border-radius: 14px !important;
+}
+
+.premium-submit-btn:active {
+  transform: scale(0.97) !important;
+  background: #16a34a !important;
+}
+
+/* Range slider específico no modal de adicionar e aba de editar jogador */
+#createPlayerModal .votacao-slider,
+#tab-gerenciar .votacao-slider {
+  appearance: none;
+  -webkit-appearance: none;
+  background: rgba(255, 255, 255, 0.08) !important;
+  height: 6px !important;
+  border-radius: 3px !important;
+  outline: none !important;
+  margin: 0.85rem 0 !important;
+}
+
+#createPlayerModal .votacao-slider::-webkit-slider-thumb,
+#tab-gerenciar .votacao-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #a78bfa !important;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+  box-shadow: 0 0 8px rgba(167, 139, 250, 0.5);
+}
+
+#createPlayerModal .votacao-slider::-webkit-slider-thumb:active,
+#tab-gerenciar .votacao-slider::-webkit-slider-thumb:active {
+  transform: scale(1.2);
+}
+
+#createPlayerModal .votacao-slider::-moz-range-thumb,
+#tab-gerenciar .votacao-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #a78bfa !important;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+  border: none;
+  box-shadow: 0 0 8px rgba(167, 139, 250, 0.5);
+}
+
+/* Opções de Tipo/Perfil com comportamento ativo no modal e aba de editar */
+#createPlayerModal .tipo-option:has(.tipo-radio:checked),
+#createUserModal .tipo-option:has(.tipo-radio:checked),
+#tab-gerenciar .tipo-option:has(.tipo-radio:checked) {
+  background: rgba(167, 139, 250, 0.08) !important;
+  border-color: rgba(167, 139, 250, 0.3) !important;
+}
+
+/* ============================================================
+   🎨 PREMIUM ADMIN USER CARDS & GRID
+   ============================================================ */
+
+.premium-users-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(295px, 1fr));
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.premium-user-card {
+  background: #0e0d15 !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 20px !important;
+  padding: 1.5rem !important;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  position: relative;
+}
+
+.premium-user-card:hover {
+  transform: translateY(-2px) !important;
+  border-color: rgba(167, 139, 250, 0.35) !important;
+  box-shadow: 0 10px 30px rgba(139, 92, 246, 0.1) !important;
+}
+
+.premium-user-card-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+}
+
+.premium-user-card-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(167, 139, 250, 0.1);
+  color: #a78bfa;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  border: 1px solid rgba(167, 139, 250, 0.15);
+}
+
+.premium-user-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.premium-user-card-name {
+  font-size: 1rem !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  margin: 0 !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.premium-user-card-username {
+  font-size: 0.8rem;
+  color: #9a95a4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Badges de Roles */
+.premium-user-card-badge {
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.25rem 0.55rem;
+  border-radius: 8px;
+  letter-spacing: 0.05em;
+}
+
+.premium-user-card-badge.badge-admin {
+  background: rgba(239, 68, 68, 0.1) !important;
+  color: #ef4444 !important;
+  border: 1px solid rgba(239, 68, 68, 0.15);
+}
+
+.premium-user-card-badge.badge-juiz {
+  background: rgba(167, 139, 250, 0.1) !important;
+  color: #a78bfa !important;
+  border: 1px solid rgba(167, 139, 250, 0.15);
+}
+
+.premium-user-card-badge.badge-usuario {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: #e4e2e6 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Detalhes do Usuário */
+.premium-user-card-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  padding-top: 1rem;
+}
+
+.premium-user-card-detail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.82rem;
+  color: #b3aebc;
+}
+
+.premium-user-card-detail-item svg {
+  color: #9a95a4;
+  flex-shrink: 0;
+}
+
+.premium-user-card-detail-item strong {
+  color: #ffffff;
+}
+
+/* Ações dos cards */
+.premium-user-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  padding-top: 1rem;
+}
+
+.premium-user-card-actions form {
+  margin: 0;
+  display: flex;
+}
+
+.premium-user-card-actions .btn {
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  padding: 0.45rem 0.85rem !important;
+  border-radius: 10px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.premium-user-card-actions .btn:hover {
+  transform: scale(1.02) !important;
+}
+
+.premium-user-card-actions .btn:active {
+  transform: scale(0.97) !important;
+}
+
+/* Remover bordas e sombras do container de formulário interno dos modais */
+#createUserModal .form,
+.profile-security-dialog .form {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  padding: 0 !important;
 }

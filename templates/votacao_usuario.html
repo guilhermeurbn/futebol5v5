@@ -45,79 +45,83 @@
                 </div>
             </section>
         {% else %}
-            <section class="section vote-mobile-hero">
-                <div class="vote-mobile-hero__top">
-                    <div>
-                        <div class="section-label">Rodada</div>
-                        <h2 class="section-title">{{ partida.titulo }}</h2>
-                    </div>
-                    <span class="vote-mobile-pill">Aberta</span>
-                </div>
-                <div class="vote-mobile-chips">
-                    <span>{{ participante.jogador_nome }}</span>
-                    <span>Time {{ participante.time_numero }}</span>
-                    <span>{{ partida.aberta_em|dt_pt_hm if partida.aberta_em else 'Agora' }}</span>
-                </div>
-                {% if resultado_partida %}
-                <div class="vote-mobile-result">
-                    {% for time in partida.resultado_resumido %}
-                    <span>Time {{ time.time_numero }}: {{ time.gols }} gol{{ '' if time.gols == 1 else 's' }}</span>
-                    {% endfor %}
-                </div>
-                {% endif %}
-            </section>
-
-            <section class="section vote-mobile-form-section">
-                <form method="post" action="{{ url_for('jogador.votacao_salvar') }}" class="form" id="votacaoForm" data-votacao-form>
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <input type="hidden" name="partida_id" value="{{ partida.id }}">
-
-                    <div class="votacao-intro">
-                        <div class="votacao-intro__header">
-                            <div>
-                                <div class="section-label">Notas</div>
-                                <h3 class="votacao-intro__title">Avalie 5+</h3>
-                            </div>
-                            <div class="votacao-progress">
-                                <span class="votacao-progress__badge"><span id="notas-preenchidas">0</span>/5</span>
-                            </div>
+            <section class="section voting-workspace-panel" style="margin-top: 1rem;">
+                <div class="vote-mobile-hero" style="border: none !important; background: transparent !important; box-shadow: none !important; padding: 0 !important; margin-bottom: 1.5rem;">
+                    <div class="vote-mobile-hero__top">
+                        <div>
+                            <div class="section-label">Rodada</div>
+                            <h2 class="section-title">{{ partida.titulo }}</h2>
                         </div>
+                        <span class="vote-mobile-pill">Aberta</span>
                     </div>
-
-                    <div class="votacao-list">
-                        {% for j in jogadores_votaveis %}
-                        <div class="votacao-card">
-                            <div class="votacao-card__top">
-                                <div>
-                                    <div class="votacao-card__name">{{ j.jogador_nome }}</div>
-                                    <div class="votacao-card__meta">T{{ j.time_numero }}</div>
-                                </div>
-                                <div class="votacao-card__score" data-score-for="{{ loop.index0 }}">0.0</div>
-                            </div>
-
-                            <div class="votacao-slider-wrap">
-                                <input class="votacao-slider" type="range" min="0" max="10" step="0.5" value="0" name="nota" data-score-index="{{ loop.index0 }}">
-                                <div class="votacao-slider-labels">
-                                    <span>0</span>
-                                    <span>5</span>
-                                    <span>10</span>
-                                </div>
-                            </div>
-
-                            <input type="hidden" name="jogador_nome" value="{{ j.jogador_nome }}">
-                            <input type="hidden" name="time_numero" value="{{ j.time_numero }}">
-                        </div>
+                    <div class="vote-mobile-chips">
+                        <span>{{ participante.jogador_nome }}</span>
+                        <span>Time {{ participante.time_numero }}</span>
+                        <span>{{ partida.aberta_em|dt_pt_hm if partida.aberta_em else 'Agora' }}</span>
+                    </div>
+                    {% if resultado_partida %}
+                    <div class="vote-mobile-result">
+                        {% for time in partida.resultado_resumido %}
+                        <span>Time {{ time.time_numero }}: {{ time.gols }} gol{{ '' if time.gols == 1 else 's' }}</span>
                         {% endfor %}
                     </div>
+                    {% endif %}
+                </div>
 
-                    <div id="aviso-obrigatorios" class="alert alert-warning" style="display:none;">
-                        Você precisa dar nota para pelo menos 5 jogadores.
-                    </div>
+                <div class="vote-mobile-form-section" style="border: none !important; background: transparent !important; box-shadow: none !important; padding: 0 !important; margin-top: 1.5rem;">
+                    <form method="post" action="{{ url_for('jogador.votacao_salvar') }}" class="votacao-form-container" id="votacaoForm" data-votacao-form>
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="partida_id" value="{{ partida.id }}">
 
-                    <div class="vote-mobile-submit">
-                        <button class="btn btn-primary" type="submit">Salvar</button>
-                    </div>
-                </form>
+                        <div class="votacao-intro">
+                            <div class="votacao-intro__header">
+                                <div>
+                                    <div class="section-label">Notas</div>
+                                    <h3 class="votacao-intro__title">Avalie 5+ jogadores</h3>
+                                </div>
+                                <div class="votacao-progress">
+                                    <span class="votacao-progress__badge" id="notas-progresso-badge"><span id="notas-preenchidas">0</span>/5</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="votacao-list">
+                            {% for j in jogadores_votaveis %}
+                            <div class="votacao-card" data-card-index="{{ loop.index0 }}">
+                                <div class="votacao-card__top">
+                                    <div>
+                                        <div class="votacao-card__name">{{ j.jogador_nome }}</div>
+                                        <div style="margin-top: 0.45rem;">
+                                            <span class="votacao-card-team-badge">Time {{ j.time_numero }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="votacao-card__score" data-score-for="{{ loop.index0 }}">0.0</div>
+                                </div>
+
+                                <div class="votacao-slider-wrap">
+                                    <input class="votacao-slider" type="range" min="0" max="10" step="0.5" value="0" name="nota" data-score-index="{{ loop.index0 }}">
+                                    <div class="votacao-slider-labels">
+                                        <span>0</span>
+                                        <span>5</span>
+                                        <span>10</span>
+                                    </div>
+                                </div>
+
+                                <input type="hidden" name="jogador_nome" value="{{ j.jogador_nome }}">
+                                <input type="hidden" name="time_numero" value="{{ j.time_numero }}">
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <div id="aviso-obrigatorios" class="alert alert-warning" style="display:none; margin-top: 1rem;">
+                            Você precisa dar nota para pelo menos 5 jogadores.
+                        </div>
+
+                        <div class="vote-mobile-submit">
+                            <button class="btn btn-primary" type="submit">Salvar</button>
+                        </div>
+                    </form>
+                </div>
             </section>
         {% endif %}
     </main>
@@ -126,12 +130,28 @@
 <script>
 const votacaoForm = document.querySelector('[data-votacao-form]');
 
-votacaoForm?.addEventListener('submit', function (e) {
-    const notas = Array.from(document.querySelectorAll('input[name="nota"]'))
-        .filter(input => parseFloat(String(input.value || '0').replace(',', '.')) > 0).length;
-    const aviso = document.getElementById('aviso-obrigatorios');
+function atualizarProgressoGeral() {
+    const notasInputs = Array.from(document.querySelectorAll('input[name="nota"]'));
+    const notasCount = notasInputs.filter(input => parseFloat(String(input.value || '0').replace(',', '.')) > 0).length;
+    
     const contador = document.getElementById('notas-preenchidas');
-    if (contador) contador.textContent = String(notas);
+    if (contador) contador.textContent = String(notasCount);
+
+    const badgeProgresso = document.getElementById('notas-progresso-badge');
+    if (badgeProgresso) {
+        if (notasCount >= 5) {
+            badgeProgresso.classList.add('is-complete');
+        } else {
+            badgeProgresso.classList.remove('is-complete');
+        }
+    }
+}
+
+votacaoForm?.addEventListener('submit', function (e) {
+    const notasInputs = Array.from(document.querySelectorAll('input[name="nota"]'));
+    const notas = notasInputs.filter(input => parseFloat(String(input.value || '0').replace(',', '.')) > 0).length;
+    const aviso = document.getElementById('aviso-obrigatorios');
+    atualizarProgressoGeral();
 
     if (notas < 5) {
         e.preventDefault();
@@ -163,20 +183,47 @@ votacaoForm?.addEventListener('submit', function (e) {
 
 document.querySelectorAll('input[name="nota"]').forEach(input => {
     input.addEventListener('input', () => {
-        const notas = Array.from(document.querySelectorAll('input[name="nota"]'))
-            .filter(el => parseFloat(String(el.value || '0').replace(',', '.')) > 0).length;
-        const contador = document.getElementById('notas-preenchidas');
-        if (contador) contador.textContent = String(notas);
+        atualizarProgressoGeral();
 
-        const score = input.value;
-        const badge = document.querySelector(`[data-score-for="${input.dataset.scoreIndex}"]`);
-        if (badge) badge.textContent = Number(score).toFixed(1);
+        const score = parseFloat(input.value || '0');
+        const index = input.dataset.scoreIndex;
+        const badge = document.querySelector(`[data-score-for="${index}"]`);
+        const card = document.querySelector(`[data-card-index="${index}"]`);
+
+        if (badge) {
+            badge.textContent = score.toFixed(1);
+            if (score > 0) {
+                badge.classList.add('is-active');
+            } else {
+                badge.classList.remove('is-active');
+            }
+        }
+
+        if (card) {
+            if (score > 0) {
+                card.classList.add('is-active');
+            } else {
+                card.classList.remove('is-active');
+            }
+        }
     });
 });
 
+// Inicialização
 document.querySelectorAll('input[name="nota"]').forEach(input => {
-    const badge = document.querySelector(`[data-score-for="${input.dataset.scoreIndex}"]`);
-    if (badge) badge.textContent = Number(input.value || 0).toFixed(1);
+    const score = parseFloat(input.value || '0');
+    const index = input.dataset.scoreIndex;
+    const badge = document.querySelector(`[data-score-for="${index}"]`);
+    const card = document.querySelector(`[data-card-index="${index}"]`);
+
+    if (badge) {
+        badge.textContent = score.toFixed(1);
+        if (score > 0) badge.classList.add('is-active');
+    }
+    if (card && score > 0) {
+        card.classList.add('is-active');
+    }
 });
+atualizarProgressoGeral();
 </script>
 {% endblock %}

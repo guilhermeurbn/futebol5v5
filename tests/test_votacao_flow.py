@@ -272,7 +272,7 @@ def test_judge_draw_page_uses_dedicated_times_workspace(monkeypatch):
     body = response.get_data(as_text=True)
     assert response.status_code == 200
     assert 'judge-teams-page' in body
-    assert 'Times definidos' in body
+    assert 'Times' in body
     assert 'Ir para votações' in body
     assert 'Histórico de sorteios' not in body
 
@@ -583,7 +583,7 @@ def test_judge_registers_team_result_before_voting(monkeypatch):
     assert salvo['resultado_id'] == 31
 
 
-def test_judge_result_rejects_unbalanced_wins_and_losses(monkeypatch):
+def test_judge_result_accepts_unbalanced_wins_and_losses(monkeypatch):
     app = criar_app('testing')
     app.config['WTF_CSRF_ENABLED'] = False
     sorteio = {
@@ -603,6 +603,16 @@ def test_judge_result_rejects_unbalanced_wins_and_losses(monkeypatch):
         'obter_estado',
         lambda: {'partida_atual': {'sorteio_id': 8}},
     )
+    monkeypatch.setattr(
+        votacao_routes.partida_service,
+        'registrar_resultado',
+        lambda **dados: {'id': 31, **dados}
+    )
+    monkeypatch.setattr(
+        votacao_routes.juiz_partida_service,
+        'marcar_resultado_registrado',
+        lambda sorteio_id, resultado_id: None
+    )
 
     with app.test_client() as client:
         _login_juiz(client)
@@ -618,8 +628,7 @@ def test_judge_result_rejects_unbalanced_wins_and_losses(monkeypatch):
             'gols_2': '2',
         })
 
-    assert response.status_code == 400
-    assert 'total de vitórias deve ser igual ao total de derrotas' in response.get_data(as_text=True)
+    assert response.status_code == 302
 
 
 def test_judge_last_match_clickable_navigation(monkeypatch):

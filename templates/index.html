@@ -36,131 +36,108 @@
                     <span class="players-showcase-count" aria-label="{{ total_jogadores }} jogadores cadastrados">{{ total_jogadores }}</span>
                     <div class="section-header-actions players-showcase-actions">
                         {% if auth_user.role in ['admin', 'super_admin'] %}
-                        <button type="button" id="toggleCreatePlayerBtn" class="btn btn-secondary btn-small btn-toggle-create" aria-expanded="false" aria-controls="createPlayerPanel">
-                            <span class="toggle-create-icon" aria-hidden="true"></span>
-                            <span>Jogador</span>
+                        <button type="button" id="toggleCreatePlayerBtn" class="btn premium-add-player-btn" aria-expanded="false" aria-controls="createPlayerModal">
+                            <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width: 16px; height: 16px; margin-right: 0.35rem; color: white;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            <span>Adicionar Jogador</span>
                         </button>
                         {% endif %}
                     </div>
                 </div>
 
                 {% if auth_user.role in ['admin', 'super_admin'] %}
-                    <!-- Player Creation Panel -->
-                    <section id="createPlayerPanel" class="section player-create-section" hidden>
-                        <div class="section-header">
-                            <div>
-                                <h2 class="section-title">Adicionar Jogador</h2>
-                                <p class="section-subtitle">Cadastre um novo jogador ao time preenchendo os dados abaixo.</p>
+                    <!-- Player Creation Modal (Native Dialog) -->
+                    <dialog class="profile-security-dialog" id="createPlayerModal">
+                        <div class="profile-security-dialog__shell" style="padding: 1.75rem 1.5rem;">
+                            <header class="profile-security-dialog__header" style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;">
+                                <div>
+                                    <div class="section-label">Cadastrar</div>
+                                    <h2 style="font-size: 1.4rem; font-weight: 800; color: #ffffff; margin: 0.25rem 0 0.15rem 0;">Novo Jogador</h2>
+                                    <p style="font-size: 0.82rem; color: #9a95a4; margin: 0;">Preencha os dados básicos para adicionar o jogador.</p>
+                                </div>
+                                <button type="button" class="profile-security-dialog__close" id="closeCreatePlayerModalBtn" aria-label="Fechar" style="background: none; border: none; color: #9a95a4; font-size: 1.25rem; cursor: pointer; padding: 0.25rem;">✕</button>
+                            </header>
+
+                            <div class="profile-security-dialog__body">
+                                <form action="{{ url_for('jogador.adicionar_jogador') }}" method="post" class="player-create-form">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <!-- Posição default oculta -->
+                                    <input type="hidden" name="posicao" value="linha">
+
+                                    <div class="form-group" style="margin-bottom: 1.25rem;">
+                                        <label for="nome" class="form-label">Nome do Jogador</label>
+                                        <input
+                                            type="text"
+                                            id="nome"
+                                            name="nome"
+                                            class="form-input"
+                                            placeholder="Digite o nome..."
+                                            required
+                                            minlength="2"
+                                            autocomplete="off"
+                                        >
+                                    </div>
+
+                                    <div class="form-group" style="margin-bottom: 1.25rem;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                            <label for="nivel" class="form-label" style="margin-bottom: 0;">Nível de Habilidade</label>
+                                            <span id="nivelValDisplay" style="font-weight: 800; color: #a78bfa; background: rgba(167, 139, 250, 0.1); padding: 0.2rem 0.6rem; border-radius: 8px; font-size: 0.9rem;">5</span>
+                                        </div>
+                                        <input
+                                            type="range"
+                                            id="nivel"
+                                            name="nivel"
+                                            min="1"
+                                            max="10"
+                                            value="5"
+                                            class="votacao-slider"
+                                            style="width: 100%; cursor: pointer;"
+                                        >
+                                    </div>
+
+                                    <div class="form-group" style="margin-bottom: 2rem;">
+                                        <label class="form-label">Tipo</label>
+                                        <div class="tipo-selector" style="display: flex; gap: 1rem;">
+                                            <label class="tipo-option" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.75rem; cursor: pointer; transition: all 0.2s ease;">
+                                                <input type="radio" name="tipo" value="fixo" class="tipo-radio" required>
+                                                <span class="tipo-label" style="color: #f4f1f8; font-size: 0.85rem; display: flex; align-items: center; gap: 0.35rem;">
+                                                    <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; color: #a78bfa;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                                    Fixo
+                                                </span>
+                                            </label>
+                                            <label class="tipo-option" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.75rem; cursor: pointer; transition: all 0.2s ease;">
+                                                <input type="radio" name="tipo" value="avulso" class="tipo-radio" checked required>
+                                                <span class="tipo-label" style="color: #f4f1f8; font-size: 0.85rem; display: flex; align-items: center; gap: 0.35rem;">
+                                                    <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; color: #a78bfa;"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                                    Avulso
+                                                </span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <button type="submit" class="btn btn-primary premium-submit-btn" style="width: 100%; min-height: 48px;">
+                                            <span>Adicionar Jogador</span>
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
                         </div>
+                    </dialog>
+                    <script>
+                        (() => {
+                            const createModal = document.getElementById('createPlayerModal');
+                            if (!createModal) return;
 
-                        <form action="{{ url_for('jogador.adicionar_jogador') }}" method="post" class="player-create-form">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            const slider = createModal.querySelector('#nivel');
+                            const display = createModal.querySelector('#nivelValDisplay');
 
-                            <div class="form-group player-create-name-group">
-                                <label for="nome" class="form-label">Nome do Jogador</label>
-                                <input
-                                    type="text"
-                                    id="nome"
-                                    name="nome"
-                                    class="form-input"
-                                    placeholder="Digite o nome..."
-                                    required
-                                    minlength="2"
-                                    autocomplete="off"
-                                >
-                            </div>
-
-                            <div class="form-group player-create-level-group">
-                                <label for="nivel" class="form-label">Nível (1-10)</label>
-                                <div class="level-selector">
-                                    <div class="level-buttons">
-                                        <button type="button" class="level-btn" data-nivel="1">1</button>
-                                        <button type="button" class="level-btn" data-nivel="2">2</button>
-                                        <button type="button" class="level-btn" data-nivel="3">3</button>
-                                        <button type="button" class="level-btn" data-nivel="4">4</button>
-                                        <button type="button" class="level-btn" data-nivel="5" data-active>5</button>
-                                        <button type="button" class="level-btn" data-nivel="6">6</button>
-                                        <button type="button" class="level-btn" data-nivel="7">7</button>
-                                        <button type="button" class="level-btn" data-nivel="8">8</button>
-                                        <button type="button" class="level-btn" data-nivel="9">9</button>
-                                        <button type="button" class="level-btn" data-nivel="10">10</button>
-                                    </div>
-                                    <input
-                                        type="hidden"
-                                        id="nivel"
-                                        name="nivel"
-                                        value="5"
-                                    >
-                                </div>
-                            </div>
-
-                            <div class="form-group player-create-type-group">
-                                <label class="form-label">Tipo</label>
-                                <div class="tipo-selector">
-                                    <label class="tipo-option">
-                                        <input type="radio" name="tipo" value="fixo" class="tipo-radio" required>
-                                        <span class="tipo-label">⭐ Fixo</span>
-                                    </label>
-                                    <label class="tipo-option">
-                                        <input type="radio" name="tipo" value="avulso" class="tipo-radio" required>
-                                        <span class="tipo-label">👤 Avulso</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="form-group player-create-position-group">
-                                <label class="form-label">Posição</label>
-                                <div class="posicao-selector">
-                                    <label class="posicao-option">
-                                        <input type="radio" name="posicao" value="linha" class="posicao-radio" required>
-                                        <span class="posicao-label">⚽ Linha</span>
-                                    </label>
-                                    <label class="posicao-option">
-                                        <input type="radio" name="posicao" value="goleiro" class="posicao-radio" required>
-                                        <span class="posicao-label">🧤 Goleiro</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="form-group player-create-actions">
-                                <button type="submit" class="btn btn-primary btn-large">
-                                    <span>Adicionar Jogador</span>
-                                </button>
-                            </div>
-
-                            <script>
-                                (() => {
-                                    const createPanel = document.getElementById('createPlayerPanel');
-                                    if (!createPanel) return;
-
-                                    const nivelBtns = createPanel.querySelectorAll('.level-btn');
-                                    const nivelInput = document.getElementById('nivel');
-
-                                    function atualizarBotaoAtivo(nivel) {
-                                        nivelBtns.forEach(btn => {
-                                            if (btn.getAttribute('data-nivel') === String(nivel)) {
-                                                btn.setAttribute('data-active', '');
-                                            } else {
-                                                btn.removeAttribute('data-active');
-                                            }
-                                        });
-                                    }
-
-                                    nivelBtns.forEach(btn => {
-                                        btn.addEventListener('click', (e) => {
-                                            e.preventDefault();
-                                            const nivel = btn.getAttribute('data-nivel');
-                                            nivelInput.value = nivel;
-                                            atualizarBotaoAtivo(nivel);
-                                        });
-                                    });
-
-                                    atualizarBotaoAtivo(nivelInput.value);
-                                })();
-                            </script>
-                        </form>
-                    </section>
+                            if (slider && display) {
+                                slider.addEventListener('input', () => {
+                                    display.textContent = slider.value;
+                                });
+                            }
+                        })();
+                    </script>
                 {% endif %}
 
                 {% if jogadores %}
@@ -296,20 +273,33 @@
 
     <!-- Scripts -->
     <script>
-        // ===== CONTROLE DE PAINEL DE CRIAÇÃO =====
+        // ===== CONTROLE DO MODAL DE CRIAÇÃO =====
         const toggleCreatePlayerBtn = document.getElementById('toggleCreatePlayerBtn');
-        const createPlayerPanel = document.getElementById('createPlayerPanel');
+        const createPlayerModal = document.getElementById('createPlayerModal');
+        const closeCreatePlayerModalBtn = document.getElementById('closeCreatePlayerModalBtn');
         const nomeJogadorInput = document.getElementById('nome');
 
-        if (toggleCreatePlayerBtn && createPlayerPanel) {
-            toggleCreatePlayerBtn.addEventListener('click', () => {
-                const aberto = !createPlayerPanel.hidden;
-                createPlayerPanel.hidden = aberto;
-                toggleCreatePlayerBtn.setAttribute('aria-expanded', String(!aberto));
-                toggleCreatePlayerBtn.classList.toggle('is-open', !aberto);
+        if (toggleCreatePlayerBtn && createPlayerModal) {
+            const openModal = () => {
+                if (createPlayerModal.hasAttribute('open')) createPlayerModal.removeAttribute('open');
+                if (!createPlayerModal.open) createPlayerModal.showModal();
+                setTimeout(() => {
+                    if (nomeJogadorInput) nomeJogadorInput.focus();
+                }, 100);
+            };
 
-                if (!aberto) {
-                    nomeJogadorInput?.focus();
+            const closeModal = () => {
+                createPlayerModal.close();
+            };
+
+            toggleCreatePlayerBtn.addEventListener('click', openModal);
+            if (closeCreatePlayerModalBtn) {
+                closeCreatePlayerModalBtn.addEventListener('click', closeModal);
+            }
+
+            createPlayerModal.addEventListener('click', (e) => {
+                if (e.target === createPlayerModal) {
+                    closeModal();
                 }
             });
         }

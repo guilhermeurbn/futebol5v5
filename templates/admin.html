@@ -3,7 +3,7 @@
 {% block title %}Admin{% endblock %}
 
 {% block content %}
-<div class="container page-container-wide judge-workspace-page admin-page">
+<div class="container page-container-wide judge-workspace-page admin-page" style="background: #000000 !important; min-height: 100vh; width: 100%;">
     <header class="header">
         <div class="header-content">
             {% set brand_title = 'Painel Admin' %}
@@ -12,191 +12,232 @@
         </div>
     </header>
 
-    <main class="main" data-admin-shell data-admin-api="{{ url_for('admin.api_admin_painel') }}" data-admin-cache-key="natrave:admin:painel:v1">
+    <main class="main" data-admin-shell data-admin-api="{{ url_for('admin.api_admin_painel') }}" data-admin-cache-key="natrave:admin:painel:v1" style="padding-bottom: 3rem;">
         {% if sucesso %}
-            <div class="admin-feedback admin-feedback--success" role="status">
-                <div class="admin-feedback__icon">✅</div>
+            <div class="admin-feedback admin-feedback--success" role="status" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2); border-radius: 12px; padding: 1rem; display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1.5rem;">
+                <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; color: #22c55e; flex-shrink: 0;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                 <div>
-                    <div class="admin-feedback__label">Ação concluída</div>
-                    <div class="admin-feedback__text">{{ sucesso }}</div>
+                    <div style="font-weight: 800; color: #ffffff; font-size: 0.9rem;">Ação concluída</div>
+                    <div style="font-size: 0.8rem; color: #a19da8; margin-top: 0.15rem;">{{ sucesso }}</div>
                 </div>
             </div>
         {% endif %}
         {% if erro %}
-            <div class="admin-feedback admin-feedback--warning" role="alert">
-                <div class="admin-feedback__icon">⚠️</div>
+            <div class="admin-feedback admin-feedback--warning" role="alert" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 12px; padding: 1rem; display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1.5rem;">
+                <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; color: #ef4444; flex-shrink: 0;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                 <div>
-                    <div class="admin-feedback__label">Atenção</div>
-                    <div class="admin-feedback__text">{{ erro }}</div>
+                    <div style="font-weight: 800; color: #ffffff; font-size: 0.9rem;">Atenção</div>
+                    <div style="font-size: 0.8rem; color: #a19da8; margin-top: 0.15rem;">{{ erro }}</div>
                 </div>
             </div>
         {% endif %}
 
-        {% if total_notificacoes %}
-        <div class="admin-page__notification-hint" data-admin-notification-hint>O atalho de avisos aparece no canto da tela em todas as páginas.</div>
-        {% endif %}
-
-        <section class="judge-flow-intro judge-flow-intro--compact admin-page__hero">
+        <section class="judge-flow-intro judge-flow-intro--compact admin-page__hero" style="margin-bottom: 2rem;">
             <span class="judge-flow-kicker">Administração central</span>
-            <h1>Painel Admin</h1>
-            <p>Gerencie usuários, permissões e acessos com o mesmo padrão visual e operacional do fluxo do juiz.</p>
+            <h1 style="font-size: 2.2rem; font-weight: 900; letter-spacing: -0.02em; margin: 0.5rem 0;">Painel Admin</h1>
         </section>
 
-        <section class="section judge-flow-card admin-summary-strip" aria-label="Resumo administrativo">
-            <div class="admin-summary-strip__item">
-                <span class="admin-summary-strip__value" data-admin-total-usuarios>{{ total_usuarios or usuarios|length }}</span>
-                <small>Usuários</small>
-            </div>
-            <div class="admin-summary-strip__item">
-                <span class="admin-summary-strip__value" data-admin-total-notificacoes>{{ total_notificacoes }}</span>
-                <small>Notificações</small>
-            </div>
-        </section>
 
-        <section class="section judge-flow-card admin-users-section">
-            <div class="section-header admin-users-section__header">
+
+        <section class="section voting-workspace-panel" style="padding: 2rem 1.5rem;">
+            <div class="section-header admin-users-section__header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
                 <div>
-                    <h2 class="section-title">📋 Usuários</h2>
-                    <p class="section-subtitle">Gerencie perfis, permissões e acesso em um só lugar.</p>
+                    <h2 class="section-title" style="display: flex; align-items: center; gap: 0.5rem; margin: 0; font-size: 1.4rem;">
+                        <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px; color: #a78bfa;"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        Usuários Cadastrados
+                    </h2>
                 </div>
-                <div class="section-header-actions admin-users-section__actions">
-                    <button type="button" class="btn btn-primary btn-small admin-users-section__add-btn btn-toggle-create" data-toggle-panel="createUserPanel" aria-expanded="false" aria-controls="createUserPanel">
-                        <span class="toggle-create-icon" aria-hidden="true"></span>
-                        <span>Adicionar usuário</span>
+                <div class="section-header-actions">
+                    <button type="button" id="toggleCreateUserBtn" class="btn premium-add-player-btn">
+                        <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width: 16px; height: 16px; margin-right: 0.35rem; color: white;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        <span>Adicionar Usuário</span>
                     </button>
                 </div>
             </div>
 
-            <section class="section judge-flow-card admin-drawer admin-users-section__create" id="createUserPanel" hidden aria-hidden="true" data-panel>
-                <div class="admin-drawer__header">
-                    <div>
-                        <h2 class="section-title" tabindex="-1">Novo usuário</h2>
-                        <p class="section-subtitle">Preencha os dados para liberar acesso ao sistema.</p>
+            <!-- Users Grid List -->
+            <div class="premium-users-grid">
+                {% for u in usuarios %}
+                <div class="premium-user-card" data-user-id="{{ u.id }}">
+                    <div class="premium-user-card-header">
+                        <div class="premium-user-card-avatar">
+                            {% set parts = u.nome.split() %}
+                            {{ parts[0][:2]|upper if parts else u.nome[:2]|upper }}
+                        </div>
+                        <div class="premium-user-card-info">
+                            <h3 class="premium-user-card-name">{{ u.nome }}</h3>
+                            <span class="premium-user-card-username">@{{ u.username }}</span>
+                        </div>
+                        <div class="premium-user-card-badge {% if u.role == 'admin' %}badge-admin{% elif u.role == 'juiz' %}badge-juiz{% else %}badge-usuario{% endif %}">
+                            {{ u.role|upper }}
+                        </div>
+                    </div>
+                    
+                    <div class="premium-user-card-details">
+                        <div class="premium-user-card-detail-item" style="flex-wrap: wrap;">
+                            <div style="display: flex; align-items: center; gap: 0.6rem; width: 100%;">
+                                <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                <span class="admin-user-card__value--email" data-email-display="{{ u.id }}">{{ u.email or '-' }}</span>
+                                <button type="button" class="admin-email-edit-toggle" data-email-toggle="{{ u.id }}" aria-controls="emailEdit-{{ u.id }}" aria-expanded="false" title="Editar email" style="background: none; border: none; cursor: pointer; color: #a78bfa; padding: 0 0.25rem; display: flex; align-items: center;">
+                                    <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 12px; height: 12px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                                </button>
+                            </div>
+                            <form class="admin-email-edit-form" id="emailEdit-{{ u.id }}" data-email-form="{{ u.id }}" method="post" action="{{ url_for('admin.admin_atualizar_email_usuario', user_id=u.id) }}" hidden style="width: 100%; margin-top: 0.5rem;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <div style="display: flex; gap: 0.5rem; width: 100%;">
+                                    <input class="form-input admin-email-edit-input" type="email" name="email" value="{{ u.email or '' }}" placeholder="novoemail@exemplo.com" required style="padding: 0.35rem 0.6rem; font-size: 0.8rem; height: auto; border-radius: 8px; flex: 1;">
+                                    <button type="submit" class="btn btn-primary btn-small" style="padding: 0.35rem 0.75rem !important; font-size: 0.75rem !important; border-radius: 8px !important; background: #22c55e !important; border: none; color: white;">OK</button>
+                                    <button type="button" class="btn btn-secondary btn-small" data-email-cancel="{{ u.id }}" style="padding: 0.35rem 0.75rem !important; font-size: 0.75rem !important; border-radius: 8px !important; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); color: #9a95a4;">X</button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="premium-user-card-detail-item">
+                            <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            <span>Ativo: <strong style="color: {% if u.ativo %}#22c55e{% else %}#ef4444{% endif %};">{{ 'Sim' if u.ativo else 'Não' }}</strong></span>
+                        </div>
+                    </div>
+
+                    <div class="premium-user-card-actions">
+                        <!-- Toggle active status -->
+                        <form method="post" action="{{ url_for('admin.admin_alterar_ativo_usuario', user_id=u.id) }}" onsubmit="return confirm('Tem certeza que deseja {{ 'DESATIVAR' if u.ativo else 'ATIVAR' }} este usuário?');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            {% if u.ativo %}
+                                <input type="hidden" name="acao" value="desativar">
+                                <button class="btn btn-secondary btn-small" type="submit" {% if u.id == usuario.id %}disabled title="Não pode desativar seu próprio usuário"{% endif %} style="background: rgba(239, 68, 68, 0.08) !important; color: #ef4444 !important; border: 1px solid rgba(239, 68, 68, 0.15) !important;">Desativar</button>
+                            {% else %}
+                                <input type="hidden" name="acao" value="ativar">
+                                <button class="btn btn-primary btn-small" type="submit" style="background: rgba(34, 197, 94, 0.08) !important; color: #22c55e !important; border: 1px solid rgba(34, 197, 94, 0.15) !important;">Ativar</button>
+                            {% endif %}
+                        </form>
+
+                        <!-- Reset password -->
+                        <form method="post" action="{{ url_for('admin.admin_resetar_senha_usuario', user_id=u.id) }}" onsubmit="return confirm('Resetar a senha de {{ u.nome }} e gerar uma senha temporária?');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button class="btn btn-secondary btn-small" type="submit" title="Resetar Senha" style="padding: 0.5rem; display: flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.06); color: #a19da8; border-radius: 10px;">
+                                <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            </button>
+                        </form>
+
+                        <!-- Delete button -->
+                        <form method="post" action="{{ url_for('admin.admin_deletar_usuario', user_id=u.id) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button
+                                class="btn btn-secondary btn-small admin-delete-btn"
+                                type="submit"
+                                data-delete-user="{{ u.nome }}"
+                                data-delete-username="{{ u.username }}"
+                                {% if u.id == usuario.id %}disabled title="Não pode deletar sua própria conta"{% endif %}
+                                style="padding: 0.5rem; display: flex; align-items: center; justify-content: center; background: rgba(239, 68, 68, 0.04) !important; border: 1px solid rgba(239, 68, 68, 0.06) !important; color: #ef4444; border-radius: 10px;"
+                            >
+                                <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                            </button>
+                        </form>
                     </div>
                 </div>
-                <form method="post" action="{{ url_for('admin.admin_criar_usuario') }}" class="form admin-form-grid">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <label class="admin-form-field">
-                        <span class="form-label">Email</span>
-                        <input class="form-input" name="email" type="email" placeholder="Email" required>
-                    </label>
-                    <label class="admin-form-field">
-                        <span class="form-label">Nome</span>
-                        <input class="form-input" name="nome" placeholder="Nome" required>
-                    </label>
-                    <label class="admin-form-field">
-                        <span class="form-label">Username</span>
-                        <input class="form-input" name="username" placeholder="Username" required>
-                    </label>
-                    <label class="admin-form-field">
-                        <span class="form-label">Senha</span>
-                        <input class="form-input" name="password" type="password" placeholder="Senha" required>
-                    </label>
-                    <label class="admin-form-field">
-                        <span class="form-label">Perfil</span>
-                        <select class="form-input" name="role">
-                            <option value="admin">admin</option>
-                            <option value="juiz">juiz</option>
-                            <option value="usuario">usuario</option>
-                        </select>
-                    </label>
-                    <div class="admin-form-actions">
-                        <button class="btn btn-primary" type="submit">Salvar novo usuário</button>
-                    </div>
-                </form>
-            </section>
-
-        </section>
-
-        <section class="section judge-flow-card admin-users-mobile" aria-label="Usuários em formato móvel">
-            <h2 class="section-title">📋 Usuários</h2>
-            <div class="admin-users-mobile__list">
-                {% for u in usuarios %}
-                <details class="admin-user-card">
-                    <summary class="admin-user-card__summary">
-                        <div class="admin-user-card__identity">
-                            <div class="admin-user-card__name">{{ u.nome }}</div>
-                            <div class="admin-user-card__meta">@{{ u.username }} • {{ u.role }} • {{ 'sim' if u.ativo else 'não' }}</div>
-                        </div>
-                        <div class="admin-user-card__chevron" aria-hidden="true">⌄</div>
-                    </summary>
-                    <div class="admin-user-card__body">
-                        <div class="admin-user-card__info-grid">
-                            <div class="admin-user-card__info-item admin-user-card__info-item--email">
-                                <div class="admin-user-card__info-head">
-                                    <span class="admin-user-card__label">Email</span>
-                                    <button type="button" class="admin-email-edit-toggle" data-email-toggle="{{ u.id }}" aria-controls="emailEdit-{{ u.id }}" aria-expanded="false" title="Editar email">✏️</button>
-                                </div>
-                                <span class="admin-user-card__value admin-user-card__value--email" data-email-display="{{ u.id }}">{{ u.email or '-' }}</span>
-                                <form class="admin-email-edit-form" id="emailEdit-{{ u.id }}" data-email-form="{{ u.id }}" method="post" action="{{ url_for('admin.admin_atualizar_email_usuario', user_id=u.id) }}" hidden>
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                    <input class="form-input admin-email-edit-input" type="email" name="email" value="{{ u.email or '' }}" placeholder="novoemail@exemplo.com" required>
-                                    <div class="admin-email-edit-actions">
-                                        <button type="submit" class="btn btn-primary btn-small">Salvar</button>
-                                        <button type="button" class="btn btn-secondary btn-small" data-email-cancel="{{ u.id }}">Cancelar</button>
-                                    </div>
-                                </form>
-                            </div>
-                            <div class="admin-user-card__info-item">
-                                <span class="admin-user-card__label">Criado em</span>
-                                <span class="admin-user-card__value">{{ u.criado_em|dt_pt if u.criado_em else '' }}</span>
-                            </div>
-                        </div>
-
-                        <div class="admin-user-card__actions">
-                            <form method="post" action="{{ url_for('admin.admin_alterar_ativo_usuario', user_id=u.id) }}" onsubmit="return confirm('Tem certeza que deseja {{ 'DESATIVAR' if u.ativo else 'ATIVAR' }} este usuário?');">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                {% if u.ativo %}
-                                    <input type="hidden" name="acao" value="desativar">
-                                    <button class="btn btn-danger btn-block" type="submit" {% if u.id == usuario.id %}disabled title="Não pode desativar seu próprio usuário"{% endif %}>Desativar</button>
-                                {% else %}
-                                    <input type="hidden" name="acao" value="ativar">
-                                    <button class="btn btn-success btn-block" type="submit">Ativar</button>
-                                {% endif %}
-                            </form>
-
-                            <form method="post" action="{{ url_for('admin.admin_resetar_senha_usuario', user_id=u.id) }}" onsubmit="return confirm('Resetar a senha de {{ u.nome }} ({{ u.username }}) e gerar uma senha temporária?');">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <button class="btn btn-primary btn-block" type="submit">🔐 Resetar Senha</button>
-                            </form>
-
-                            <form method="post" action="{{ url_for('admin.admin_deletar_usuario', user_id=u.id) }}">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <button
-                                    class="btn btn-warning admin-delete-btn btn-block"
-                                    type="submit"
-                                    data-delete-user="{{ u.nome }}"
-                                    data-delete-username="{{ u.username }}"
-                                    {% if u.id == usuario.id %}disabled title="Não pode deletar sua própria conta"{% endif %}
-                                >🗑️ Deletar</button>
-                            </form>
-                        </div>
-                    </div>
-                </details>
                 {% endfor %}
             </div>
         </section>
 
-        <div class="admin-delete-modal" id="adminDeleteModal" hidden aria-hidden="true">
-            <div class="admin-delete-modal__backdrop" data-delete-close></div>
-            <div class="admin-delete-modal__panel" role="dialog" aria-modal="true" aria-labelledby="adminDeleteModalTitle">
-                <div class="admin-delete-modal__header">
+        <!-- User Creation Modal (Native Dialog - Customized Green Style) -->
+        <dialog class="profile-security-dialog" id="createUserModal" style="border: 1px solid rgba(34, 197, 94, 0.25) !important; background: radial-gradient(circle at top right, rgba(34, 197, 94, 0.12), transparent 36%), rgba(18, 15, 25, 0.99) !important; box-shadow: 0 30px 90px rgba(0, 0, 0, 0.85) !important;">
+            <div class="profile-security-dialog__shell" style="padding: 2.25rem 2rem;">
+                <header class="profile-security-dialog__header" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; border-bottom: none !important; padding: 0 !important;">
                     <div>
-                        <div class="section-label">Atenção</div>
-                        <h3 class="admin-delete-modal__title" id="adminDeleteModalTitle">Confirmar exclusão</h3>
+                        <div class="section-label" style="color: #22c55e !important; background: rgba(34, 197, 94, 0.1) !important; border-radius: 6px; padding: 0.15rem 0.5rem; display: inline-block; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">Acesso</div>
+                        <h2 style="font-size: 1.45rem; font-weight: 900; color: #ffffff; margin: 0.35rem 0 0.15rem 0; letter-spacing: -0.01em;">Adicionar Novo Usuário</h2>
+                        <p style="font-size: 0.82rem; color: #9a95a4; margin: 0;">Preencha os dados de credenciais para cadastrar um novo usuário.</p>
                     </div>
-                    <button type="button" class="admin-delete-modal__close" data-delete-close aria-label="Fechar">✕</button>
+                    <button type="button" class="profile-security-dialog__close" id="closeCreateUserModalBtn" aria-label="Fechar" style="background: none; border: none; color: #9a95a4; font-size: 1.25rem; cursor: pointer; padding: 0.25rem; line-height: 1;">✕</button>
+                </header>
+
+                <div class="profile-security-dialog__body" style="padding: 0 !important;">
+                    <form method="post" action="{{ url_for('admin.admin_criar_usuario') }}" class="form">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        
+                        <div class="form-group" style="margin-bottom: 1.25rem;">
+                            <label class="form-label">Nome Completo</label>
+                            <input class="form-input" name="nome" placeholder="Ex: Guilherme Urbano" required autocomplete="off">
+                        </div>
+                        
+                        <div class="form-group" style="margin-bottom: 1.25rem;">
+                            <label class="form-label">Email</label>
+                            <input class="form-input" name="email" type="email" placeholder="Ex: guilherme@exemplo.com" required autocomplete="off">
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1.25rem; display: flex; gap: 1rem;">
+                            <div style="flex: 1;">
+                                <label class="form-label">Username</label>
+                                <input class="form-input" name="username" placeholder="Username" required autocomplete="off">
+                            </div>
+                            <div style="flex: 1;">
+                                <label class="form-label">Senha</label>
+                                <input class="form-input" name="password" type="password" placeholder="Senha" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 2.25rem;">
+                            <label class="form-label">Perfil de Acesso</label>
+                            <div class="tipo-selector" style="display: flex; gap: 0.75rem;">
+                                <label class="tipo-option" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.4rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.75rem; cursor: pointer; transition: all 0.2s ease;">
+                                    <input type="radio" name="role" value="usuario" class="tipo-radio" checked required>
+                                    <span class="tipo-label" style="color: #f4f1f8; font-size: 0.8rem; display: flex; align-items: center; gap: 0.35rem; white-space: nowrap;">
+                                        <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; color: #22c55e;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                        Usuário
+                                    </span>
+                                </label>
+                                <label class="tipo-option" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.4rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.75rem; cursor: pointer; transition: all 0.2s ease;">
+                                    <input type="radio" name="role" value="juiz" class="tipo-radio" required>
+                                    <span class="tipo-label" style="color: #f4f1f8; font-size: 0.8rem; display: flex; align-items: center; gap: 0.35rem; white-space: nowrap;">
+                                        <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; color: #22c55e;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                        Juiz
+                                    </span>
+                                </label>
+                                <label class="tipo-option" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.4rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.75rem; cursor: pointer; transition: all 0.2s ease;">
+                                    <input type="radio" name="role" value="admin" class="tipo-radio" required>
+                                    <span class="tipo-label" style="color: #f4f1f8; font-size: 0.8rem; display: flex; align-items: center; gap: 0.35rem; white-space: nowrap;">
+                                        <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; color: #22c55e;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                        Admin
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 1.5rem;">
+                            <button class="btn btn-primary premium-submit-btn" type="submit" style="width: 100%; min-height: 48px; background: #22c55e !important; color: white !important; font-weight: 800; border: none; font-size: 0.95rem; cursor: pointer; transition: all 0.2s ease;">
+                                <span>Salvar Usuário</span>
+                            </button>
+                        </div>
+                    </form>
                 </div>
-                <p class="admin-delete-modal__message" id="adminDeleteModalMessage"></p>
-                <div class="admin-delete-modal__actions">
-                    <button type="button" class="btn btn-secondary" data-delete-close>Cancelar</button>
-                    <button type="button" class="btn btn-warning" id="adminDeleteConfirmBtn">Deletar</button>
+            </div>
+        </dialog>
+
+        <!-- Confirmation Delete Modal (Overridden with Dialog layout style) -->
+        <div class="admin-delete-modal" id="adminDeleteModal" hidden aria-hidden="true">
+            <div class="admin-delete-modal__backdrop" data-delete-close style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.76); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999;"></div>
+            <div class="profile-security-dialog" role="dialog" aria-modal="true" aria-labelledby="adminDeleteModalTitle" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10000; display: block; margin: 0; width: min(92vw, 440px);">
+                <div class="profile-security-dialog__shell" style="padding: 1.75rem 1.5rem;">
+                    <header class="profile-security-dialog__header" style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;">
+                        <div>
+                            <div class="section-label" style="color: #ef4444;">Atenção</div>
+                            <h3 id="adminDeleteModalTitle" style="font-size: 1.25rem; font-weight: 800; color: #ffffff; margin: 0.25rem 0 0.15rem 0;">Excluir Usuário</h3>
+                        </div>
+                        <button type="button" class="profile-security-dialog__close" data-delete-close aria-label="Fechar" style="background: none; border: none; color: #9a95a4; font-size: 1.25rem; cursor: pointer; padding: 0.25rem;">✕</button>
+                    </header>
+                    <div class="profile-security-dialog__body">
+                        <p class="admin-delete-modal__message" id="adminDeleteModalMessage" style="font-size: 0.85rem; color: #b3aebc; line-height: 1.4; margin-bottom: 2rem;"></p>
+                        <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                            <button type="button" class="btn btn-secondary" data-delete-close style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.6rem 1.2rem; cursor: pointer; color: #9a95a4;">Cancelar</button>
+                            <button type="button" class="btn" id="adminDeleteConfirmBtn" style="background: #ef4444 !important; color: white !important; border: none; font-weight: 700; border-radius: 12px; padding: 0.6rem 1.2rem; cursor: pointer;">Deletar</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <script>
             (() => {
+                // Modal de deleção
                 const deleteModal = document.getElementById('adminDeleteModal');
                 const deleteMessage = document.getElementById('adminDeleteModalMessage');
                 const deleteConfirmBtn = document.getElementById('adminDeleteConfirmBtn');
@@ -244,41 +285,42 @@
                     }
                 });
 
-                const buttons = document.querySelectorAll('[data-toggle-panel]');
-                buttons.forEach((button) => {
-                    button.addEventListener('click', () => {
-                        const panelId = button.getAttribute('data-toggle-panel');
-                        const panel = document.getElementById(panelId);
-                        if (!panel) return;
-                        const willOpen = panel.hasAttribute('hidden');
-                        panel.hidden = !willOpen ? true : false;
-                        panel.setAttribute('aria-hidden', String(!willOpen));
-                        button.setAttribute('aria-expanded', String(willOpen));
-                        button.classList.toggle('is-open', willOpen);
-                        if (willOpen) {
-                            window.setTimeout(() => {
-                                const focusTarget = panel.querySelector('[tabindex="-1"], input, select, textarea, button');
-                                if (focusTarget) focusTarget.focus();
-                            }, 50);
+                // Modal de criação de usuário (Dialog nativo)
+                const toggleCreateUserBtn = document.getElementById('toggleCreateUserBtn');
+                const createUserModal = document.getElementById('createUserModal');
+                const closeCreateUserModalBtn = document.getElementById('closeCreateUserModalBtn');
+                const nomeUsuarioInput = createUserModal?.querySelector('input[name="nome"]');
+
+                if (toggleCreateUserBtn && createUserModal) {
+                    const openModal = () => {
+                        if (createUserModal.hasAttribute('open')) createUserModal.removeAttribute('open');
+                        if (!createUserModal.open) createUserModal.showModal();
+                        setTimeout(() => {
+                            if (nomeUsuarioInput) nomeUsuarioInput.focus();
+                        }, 100);
+                    };
+
+                    const closeModal = () => {
+                        createUserModal.close();
+                    };
+
+                    toggleCreateUserBtn.addEventListener('click', openModal);
+                    if (closeCreateUserModalBtn) {
+                        closeCreateUserModalBtn.addEventListener('click', closeModal);
+                    }
+
+                    createUserModal.addEventListener('click', (e) => {
+                        if (e.target === createUserModal) {
+                            closeModal();
                         }
                     });
-                });
+                }
 
-                document.querySelectorAll('.admin-user-card').forEach((card) => {
-                    card.addEventListener('toggle', () => {
-                        if (!card.open) return;
-                        document.querySelectorAll('.admin-user-card[open]').forEach((otherCard) => {
-                            if (otherCard !== card) {
-                                otherCard.open = false;
-                            }
-                        });
-                    });
-                });
-
+                // Controle de edição de Email inline
                 document.querySelectorAll('[data-email-toggle]').forEach((button) => {
                     button.addEventListener('click', () => {
                         const userId = button.getAttribute('data-email-toggle');
-                        const form = document.querySelector(`[data-email-form="${userId}"]`);
+                        const form = document.getElementById(`emailEdit-${userId}`);
                         const isHidden = form?.hasAttribute('hidden');
                         if (!form) return;
 
@@ -297,6 +339,20 @@
                         } else {
                             form.setAttribute('hidden', '');
                             button.setAttribute('aria-expanded', 'false');
+                        }
+                    });
+                });
+
+                document.querySelectorAll('[data-email-cancel]').forEach((button) => {
+                    button.addEventListener('click', () => {
+                        const userId = button.getAttribute('data-email-cancel');
+                        const form = document.getElementById(`emailEdit-${userId}`);
+                        const toggleBtn = document.querySelector(`[data-email-toggle="${userId}"]`);
+                        if (form) {
+                            form.setAttribute('hidden', '');
+                        }
+                        if (toggleBtn) {
+                            toggleBtn.setAttribute('aria-expanded', 'false');
                         }
                     });
                 });

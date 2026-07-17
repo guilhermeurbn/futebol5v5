@@ -1,15 +1,11 @@
 {% extends '_auth_layout.html' %}
 
 {% block title %}Cadastro{% endblock %}
-{% block auth_shell_class %}auth-shell--signup-equal{% endblock %}
+{% block auth_shell_class %}auth-shell--single{% endblock %}
 {% block auth_heading_id %}signupHeading{% endblock %}
-{% block auth_form_panel_class %}auth-panel--form--flex{% endblock %}
+{% block auth_form_panel_class %}{% endblock %}
 
-{% block auth_intro_wrapper %}
-    <section class="auth-panel auth-panel--intro auth-panel--intro-hero">
-        {% include '_auth_intro.html' %}
-    </section>
-{% endblock %}
+{% block auth_intro_wrapper %}{% endblock %}
 
 {% block auth_messages %}
     {% if erro %}
@@ -32,11 +28,11 @@
 {% endblock %}
 
 {% block auth_form %}
-    <form method="post" action="{{ url_for('jogador.cadastro_submit') }}" class="auth-form auth-form--signup-balanced">
+    <form method="post" action="{{ url_for('jogador.cadastro_submit') }}" class="auth-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="nivel" value="5">
 
-        <div class="auth-form-grid auth-form-grid--signup-balanced">
+        <div class="auth-form-grid">
             <div class="form-group auth-field">
                 <label class="form-label" for="email">Email</label>
                 <div class="auth-input-wrap">

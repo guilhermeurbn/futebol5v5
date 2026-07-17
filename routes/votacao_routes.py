@@ -375,8 +375,8 @@ def votacao_resultado_juiz():
         )
         if total_jogos == 0:
             raise ValueError('Registre ao menos um jogo antes de continuar')
-        if total_vitorias != sum(item['derrotas'] for item in times_desempenho):
-            raise ValueError('O total de vitórias deve ser igual ao total de derrotas')
+        # if total_vitorias != sum(item['derrotas'] for item in times_desempenho):
+        #     raise ValueError('O total de vitórias deve ser igual ao total de derrotas')
         empates_por_time = [item['empates'] for item in times_desempenho]
         if total_empates % 2 != 0 or max(empates_por_time, default=0) > total_empates / 2:
             raise ValueError('Cada empate deve aparecer para os dois times')

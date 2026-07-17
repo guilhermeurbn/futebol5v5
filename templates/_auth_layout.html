@@ -10,7 +10,7 @@
 <body class="auth-page {% block body_class %}{% endblock %}">
     <header class="auth-global-header" role="banner" aria-label="NaTrave">
         <a href="{{ url_for('auth.login_page') }}" aria-label="Ir para login" style="display:inline-block; line-height:0;">
-            <img src="{{ url_for('static', filename='natrave.svg', v='20260708-03') }}" alt="NaTrave 5v5" class="auth-global-header__logo">
+            <img src="{{ url_for('static', filename='logo-natrave-5v5.png', v='20260717-01') }}" alt="NaTrave 5v5" class="auth-global-header__logo" style="max-height: 48px; width: auto; object-fit: contain;">
         </a>
     </header>
 
@@ -28,11 +28,6 @@
             {% block auth_card_footer %}{% endblock %}
         </section>
     </main>
-
-    <footer class="auth-global-footer" role="contentinfo" aria-label="Rodapé do NaTrave">
-        <span>NaTrave 5v5</span>
-        <small>Experiência mobile estabilizada</small>
-    </footer>
 
     {% block auth_scripts %}{% endblock %}
     <script>
