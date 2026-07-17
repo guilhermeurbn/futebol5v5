@@ -19143,3 +19143,14 @@ html,
   background-color: transparent !important;
   padding: 0 !important;
 }
+
+/* Rótulos de texto sob os ícones do rodapé */
+.site-footer__label {
+  font-size: 0.6rem !important;
+  font-weight: 700 !important;
+  margin-top: 0.2rem !important;
+  text-transform: capitalize !important;
+  letter-spacing: 0.02em !important;
+  display: block !important;
+  line-height: 1.1 !important;
+}
