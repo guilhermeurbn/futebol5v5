@@ -4,7 +4,7 @@
 
 {% block content %}
 {% set current_user = usuario if usuario is defined and usuario else auth_user %}
-{% set total_participantes = ativa.participantes | selectattr('user_id') | list | length if ativa else 0 %}
+{% set total_participantes = ativa.participantes | list | length if ativa else 0 %}
 {% set total_votos = ativa.votos | length if ativa else 0 %}
 {% set total_pendentes = [total_participantes - total_votos, 0] | max %}
 {% set resultado_concluido = resultado_partida %}
@@ -223,15 +223,15 @@
                 <span class="judge-flow-status is-active">{{ total_votos }}/{{ total_participantes }}</span>
             </div>
             <div class="judge-participant-grid">
-                {% for participante in ativa.participantes if participante.user_id %}
+                {% for participante in ativa.participantes %}
                 <div class="judge-participant">
                     <span>
                         <strong>{{ participante.jogador_nome }}</strong>
-                        <small>Time {{ participante.time_numero }}</small>
+                        <small>Time {{ participante.time_numero }}{% if not participante.user_id %} (Sem Usuário){% endif %}</small>
                     </span>
                     <span
-                        class="judge-participant__state {% if participante.user_id in voted_user_ids %}is-done{% endif %}">
-                        {{ 'Votou' if participante.user_id in voted_user_ids else 'Pendente' }}
+                        class="judge-participant__state {% if participante.user_id and participante.user_id in voted_user_ids %}is-done{% endif %}">
+                        {{ 'Votou' if (participante.user_id and participante.user_id in voted_user_ids) else 'Pendente' }}
                     </span>
                 </div>
                 {% endfor %}

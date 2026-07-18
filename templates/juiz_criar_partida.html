@@ -13,17 +13,17 @@
     </header>
 
     <main class="main">
-        <section class="judge-flow-card judge-create-panel">
+        <!-- ETAPA 1: Quantidade de Jogadores -->
+        <section class="judge-flow-card judge-create-panel" id="stepQuantidadeCard">
             <div class="judge-create-header">
                 <div>
-                    <h1>Quem vai jogar?</h1>
-                    <p>Escolha a quantidade e selecione os jogadores.</p>
+                    <span class="judge-flow-kicker" style="color: #4ade80; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.25rem;">Etapa 1</span>
+                    <h1 style="font-size: 1.65rem; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 0.25rem 0;">Quem vai jogar?</h1>
+                    <p style="font-size: 0.85rem; opacity: 0.7; margin: 0;">Selecione a quantidade de jogadores da partida para prosseguir.</p>
                 </div>
-                <span class="judge-available-count">{{ total_jogadores }} jogadores disponíveis</span>
             </div>
 
-            <div class="judge-format-picker">
-                <span class="judge-format-picker__label">Quantos jogadores?</span>
+            <div class="judge-format-picker" style="margin-top: 1.5rem;">
                 <div class="judge-format-options" role="group" aria-label="Quantidade de jogadores">
                     <button class="qty-btn judge-format-option" type="button" onclick="selecionarQuantidade(10)"
                         data-qty="10" aria-pressed="false">
@@ -42,28 +42,30 @@
                     </button>
                 </div>
             </div>
+        </section>
 
-            <div class="judge-selection-toolbar">
+        <!-- ETAPA 2: Lista e Seleção de Jogadores (Revelada ao selecionar quantidade) -->
+        <section class="judge-flow-card judge-create-panel" id="stepJogadoresCard" style="display: none; margin-top: 1.5rem; animation: slideUpFade 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;">
+            <div class="judge-create-header">
+                <div>
+                    <span class="judge-flow-kicker" style="color: #4ade80; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.25rem;">Etapa 2</span>
+                    <h2 style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 0.25rem 0; color: #ffffff;">Selecione os Jogadores</h2>
+                    <p style="font-size: 0.85rem; opacity: 0.7; margin: 0;">Marque os atletas presentes por ordem alfabética.</p>
+                </div>
+                <span class="judge-available-count" style="font-size: 0.8rem; font-weight: 700; border-radius: 8px;">{{ total_jogadores }} disponíveis</span>
+            </div>
+
+            <div class="judge-selection-toolbar" style="margin-top: 1.25rem;">
                 <div class="judge-selection-toolbar__status" aria-live="polite">
                     <span>Selecionados</span>
                     <strong><span id="contador">{{ total_presentes }}</span><span id="metaContador"></span></strong>
                 </div>
-                <button class="judge-clear-button" id="btnLimpar" type="button" onclick="limparSelecao()">Limpar
-                    seleção</button>
+                <button class="judge-clear-button" id="btnLimpar" type="button" onclick="limparSelecao()">Limpar seleção</button>
                 <div class="judge-selection-progress" id="progressoSelecaoTrilho" aria-hidden="true">
                     <span id="progressoSelecao"></span>
                 </div>
             </div>
-
-            <div class="judge-create-action judge-sort-fab judge-sort-fab--minimal" id="acoesSorteio"
-                aria-live="polite">
-                <button class="judge-sort-action" id="btnSortear" type="button" onclick="confirmarSelecao()" disabled
-                    aria-label="Escolha a quantidade de jogadores">
-                    <span class="judge-sort-action__text" id="btnSortearTexto">-</span>
-                </button>
-            </div>
-
-            <div class="players-grid judge-players-grid">
+            <div class="players-grid judge-players-grid" style="margin-top: 1.5rem;">
                 {% for jogador in todos_jogadores %}
                 <label class="judge-player-option">
                     <input type="checkbox" class="jogador-checkbox" data-id="{{ jogador.id }}"
@@ -87,10 +89,18 @@
                             </span>
                             <span class="judge-player-option__tags">
                                 <span class="judge-player-option__tag">
-                                    {{ '⭐ Fixo' if jogador.tipo == 'fixo' else '👤 Avulso' }}
+                                    {% if jogador.tipo == 'fixo' %}
+                                        <svg class="judge-tag-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-right: 4px; color: #a78bfa;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Fixo
+                                    {% else %}
+                                        <svg class="judge-tag-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-right: 4px; color: #cbd5e1;"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Avulso
+                                    {% endif %}
                                 </span>
                                 <span class="judge-player-option__tag judge-player-option__tag--position">
-                                    {{ '🧤 Goleiro' if jogador.posicao == 'goleiro' else '⚽ Linha' }}
+                                    {% if jogador.posicao == 'goleiro' %}
+                                        <svg class="judge-tag-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-right: 4px; color: #34d399;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Goleiro
+                                    {% else %}
+                                        <svg class="judge-tag-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-right: 4px; color: #60a5fa;"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>Linha
+                                    {% endif %}
                                 </span>
                             </span>
                         </span>
@@ -99,11 +109,33 @@
                 {% endfor %}
             </div>
 
-            <div id="mensagemErro" class="alert alert-warning judge-create-error" role="alert" style="display: none;">
+            <div id="mensagemErro" class="alert alert-warning judge-create-error" role="alert" style="display: none; margin-top: 1rem;">
             </div>
         </section>
+
+        <!-- Bolinha do sorteio/countdown posicionada fora do transform da animação -->
+        <div class="judge-create-action judge-sort-fab judge-sort-fab--minimal" id="acoesSorteio"
+            aria-live="polite" style="display: none;">
+            <button class="judge-sort-action" id="btnSortear" type="button" onclick="confirmarSelecao()" disabled
+                aria-label="Selecione os jogadores">
+                <span class="judge-sort-action__text" id="btnSortearTexto">-</span>
+            </button>
+        </div>
     </main>
 </div>
+
+<style>
+    @keyframes slideUpFade {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
 
 <script>
     const QUANTIDADES_VALIDAS = [10, 15, 20];
@@ -161,7 +193,7 @@
     }
 
     function selecionarQuantidade(quantidade) {
-        quantidadeSelecionada = quantidade;
+        quantidadeSelecionada = Math.floor(quantidade);
 
         document.querySelectorAll('.qty-btn').forEach(btn => {
             const selecionado = btn.getAttribute('data-qty') === String(quantidadeSelecionada);
@@ -170,6 +202,17 @@
         });
 
         document.getElementById('mensagemErro').style.display = 'none';
+
+        // Revela o card da Etapa 2 e a bolinha de countdown
+        const stepJogadoresCard = document.getElementById('stepJogadoresCard');
+        if (stepJogadoresCard) {
+            stepJogadoresCard.style.display = 'block';
+        }
+        const acoesSorteio = document.getElementById('acoesSorteio');
+        if (acoesSorteio) {
+            acoesSorteio.style.display = 'flex';
+        }
+
         atualizarContador();
     }
 
@@ -229,8 +272,10 @@
             });
     }
 
-    if (QUANTIDADES_VALIDAS.includes(document.querySelectorAll('.jogador-checkbox:checked').length)) {
-        selecionarQuantidade(document.querySelectorAll('.jogador-checkbox:checked').length);
+    // Inicializa se já houver marcações salvas
+    const marcadosIniciais = document.querySelectorAll('.jogador-checkbox:checked').length;
+    if (QUANTIDADES_VALIDAS.includes(marcadosIniciais)) {
+        selecionarQuantidade(marcadosIniciais);
     } else {
         atualizarContador();
     }

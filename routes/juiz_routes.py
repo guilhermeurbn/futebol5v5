@@ -372,7 +372,7 @@ def juiz_criar_partida():
         jogador_service.limpar_presenca()
         juiz_partida_service.iniciar_partida(session.get('user_id'))
         
-        todos_jogadores = jogador_service.listar()
+        todos_jogadores = sorted(jogador_service.listar(), key=lambda j: j.nome.lower())
         fixos = [j for j in todos_jogadores if j.tipo == "fixo"]
         avulsos = [j for j in todos_jogadores if j.tipo == "avulso"]
         presentes = [j for j in todos_jogadores if j.presente]

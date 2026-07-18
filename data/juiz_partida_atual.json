@@ -2,10 +2,10 @@
   "status": "idle",
   "partida_atual": null,
   "ultima_partida_encerrada": {
-    "titulo": "Votação do sorteio #2",
-    "sorteio_id": 2,
-    "partida_id": 2,
-    "encerrado_em": "2026-07-17T15:01:31.032498",
+    "titulo": "Votação do sorteio #3",
+    "sorteio_id": 3,
+    "partida_id": 3,
+    "encerrado_em": "2026-07-18T01:47:10.051522",
     "resultado_resumido": [
       {
         "time_numero": 1,
@@ -18,10 +18,10 @@
       {
         "time_numero": 2,
         "gols": 0,
-        "vitorias": 0,
+        "vitorias": 1,
         "empates": 0,
         "derrotas": 0,
-        "resultado": "empate"
+        "resultado": "vitoria"
       }
     ],
     "melhor_jogador": null,
@@ -37,34 +37,26 @@
         "externo": false
       },
       {
-        "user_id": "263d73cf-5a95-44b4-a538-bb4c69ba068e",
-        "username": "lucas_teixeira",
-        "nome_usuario": "Lucas Teixeira",
-        "jogador_nome": "Lucas Teixeira",
+        "user_id": "db1314a8-2d4e-4384-829e-8075b1e33737",
+        "username": "andre_balada",
+        "nome_usuario": "André Balada",
+        "jogador_nome": "André Balada",
         "time_numero": 1,
         "externo": false
       },
       {
-        "user_id": "6a5290cd-317b-4764-b1df-6969f849adc5",
-        "username": "renan",
-        "nome_usuario": "Renan",
-        "jogador_nome": "Renan",
+        "user_id": "19e6a32e-2a20-49a2-81e0-da12aa681505",
+        "username": "alex",
+        "nome_usuario": "Alex",
+        "jogador_nome": "Alex",
         "time_numero": 1,
         "externo": false
       },
       {
-        "user_id": "6cb9f4f5-f4ad-4786-8aca-183e88333730",
-        "username": "ramon",
-        "nome_usuario": "Ramon",
-        "jogador_nome": "Ramon",
-        "time_numero": 1,
-        "externo": false
-      },
-      {
-        "user_id": "96304901-a961-4c0d-b7d4-f93f4203dca3",
-        "username": "lucas",
-        "nome_usuario": "lucas",
-        "jogador_nome": "lucas",
+        "user_id": "93377df9-a1dd-429a-a48f-e6bafb2e8254",
+        "username": "edmo",
+        "nome_usuario": "Edmo",
+        "jogador_nome": "Edmo",
         "time_numero": 1,
         "externo": false
       },
@@ -77,14 +69,6 @@
         "externo": false
       },
       {
-        "user_id": "db1314a8-2d4e-4384-829e-8075b1e33737",
-        "username": "andre_balada",
-        "nome_usuario": "André Balada",
-        "jogador_nome": "André Balada",
-        "time_numero": 2,
-        "externo": false
-      },
-      {
         "user_id": "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6",
         "username": "bacatela",
         "nome_usuario": "Bacatela",
@@ -93,18 +77,26 @@
         "externo": false
       },
       {
-        "user_id": "2faa1197-c93f-4239-b490-4afa38cfa89c",
-        "username": "luan",
-        "nome_usuario": "Luan",
-        "jogador_nome": "Luan",
+        "user_id": "381b5d0f-f140-4bcd-bc95-38744e15df31",
+        "username": "drey",
+        "nome_usuario": "Drey",
+        "jogador_nome": "Drey",
         "time_numero": 2,
         "externo": false
       },
       {
-        "user_id": "19e6a32e-2a20-49a2-81e0-da12aa681505",
-        "username": "alex",
-        "nome_usuario": "Alex",
-        "jogador_nome": "Alex",
+        "user_id": "71fbf7d8-3f8c-4814-80bf-90cc97458a79",
+        "username": "jhon",
+        "nome_usuario": "Jhon",
+        "jogador_nome": "Jhon",
+        "time_numero": 2,
+        "externo": false
+      },
+      {
+        "user_id": "96ee84cb-8e66-47da-ae76-3b7c4e23e2eb",
+        "username": "guisanto",
+        "nome_usuario": "Guilherme Urbano",
+        "jogador_nome": "Guilherme Urbano",
         "time_numero": 2,
         "externo": false
       }

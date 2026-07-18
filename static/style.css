@@ -19243,3 +19243,175 @@ html,
   font-size: 0.66rem !important; /* Aumentar levemente o tamanho da legenda */
   margin-top: 0.22rem !important;
 }
+
+/* ============================================================
+   🎨 MELHORIA VISUAL DO CARD DE CRIAR PARTIDA (JUIZ)
+   ============================================================ */
+/* Os cards de etapas da página (Etapa 1 e Etapa 2) */
+.judge-workspace-page .judge-flow-card.judge-create-panel {
+  background:
+    radial-gradient(circle at top left, rgba(34, 197, 94, 0.08), transparent 36%),
+    radial-gradient(circle at top right, rgba(139, 92, 246, 0.06), transparent 30%),
+    linear-gradient(155deg, rgba(255, 255, 255, 0.025), transparent 45%),
+    var(--judge-surface) !important;
+  border: 1px solid var(--judge-border) !important;
+  border-radius: 22px !important;
+  box-shadow:
+    0 18px 50px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025) !important;
+  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.22s ease, box-shadow 0.22s ease !important;
+}
+
+.judge-workspace-page .judge-flow-card.judge-create-panel:hover {
+  border-color: rgba(34, 197, 94, 0.5) !important;
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.45),
+    0 0 15px rgba(34, 197, 94, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Títulos do cabeçalho */
+.judge-workspace-page .judge-create-panel h1,
+.judge-workspace-page .judge-create-panel h2 {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+}
+
+/* Badge de jogadores disponíveis */
+.judge-workspace-page .judge-create-panel .judge-available-count {
+  border-color: rgba(34, 197, 94, 0.3) !important;
+  background: rgba(34, 197, 94, 0.12) !important;
+  color: #c9f4d5 !important;
+}
+
+/* Rótulo da seleção de quantidade */
+.judge-workspace-page .judge-create-panel .judge-format-picker__label {
+  color: #cbd5e1 !important;
+}
+
+/* Botões de quantidade de jogadores */
+.judge-workspace-page .judge-create-panel .qty-btn.judge-format-option {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid var(--judge-border) !important;
+  color: #cbd5e1 !important;
+  transition: all 0.2s ease !important;
+}
+
+.judge-workspace-page .judge-create-panel .qty-btn.judge-format-option strong {
+  color: #ffffff !important;
+}
+
+.judge-workspace-page .judge-create-panel .qty-btn.judge-format-option:hover {
+  border-color: rgba(34, 197, 94, 0.45) !important;
+  background: rgba(34, 197, 94, 0.06) !important;
+  color: #ffffff !important;
+}
+
+.judge-workspace-page .judge-create-panel .qty-btn.judge-format-option.selected {
+  border-color: #22c55e !important;
+  background: rgba(34, 197, 94, 0.15) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 15px rgba(34, 197, 94, 0.15) !important;
+}
+
+/* Barra de progresso da seleção */
+.judge-workspace-page .judge-create-panel .judge-selection-toolbar__status strong {
+  color: #22c55e !important;
+}
+
+.judge-workspace-page .judge-create-panel .judge-selection-progress {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.judge-workspace-page .judge-create-panel .judge-selection-progress span {
+  background: linear-gradient(90deg, #10b981, #22c55e) !important;
+}
+
+/* Botão Limpar Seleção */
+.judge-workspace-page .judge-create-panel .judge-clear-button {
+  color: #cbd5e1 !important;
+  transition: color 0.15s ease !important;
+}
+
+.judge-workspace-page .judge-create-panel .judge-clear-button:hover:not(:disabled) {
+  color: #f87171 !important;
+}
+
+/* Cards individuais dos jogadores na grade */
+.judge-workspace-page .judge-create-panel .judge-player-option {
+  background: #100e15 !important;
+  border: 1px solid rgba(34, 197, 94, 0.14) !important;
+  border-radius: 16px !important;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.judge-workspace-page .judge-create-panel .judge-player-option:hover:not(:has(.jogador-checkbox:disabled)) {
+  border-color: rgba(34, 197, 94, 0.34) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 12px 28px rgba(6, 4, 10, 0.38) !important;
+}
+
+/* Card selecionado */
+.judge-workspace-page .judge-create-panel .judge-player-option.selected,
+.judge-workspace-page .judge-create-panel .judge-player-option:has(.jogador-checkbox:checked) {
+  border-color: rgba(34, 197, 94, 0.72) !important;
+  background: rgba(34, 197, 94, 0.08) !important;
+  box-shadow: 0 12px 30px rgba(34, 197, 94, 0.14) !important;
+}
+
+/* Avatar e Identidade */
+.judge-workspace-page .judge-create-panel .judge-player-option__avatar-shell {
+  background: rgba(34, 197, 94, 0.08) !important;
+  border: 1px solid rgba(34, 197, 94, 0.25) !important;
+}
+
+.judge-workspace-page .judge-create-panel .judge-player-option__avatar {
+  color: #4ade80 !important;
+}
+
+.judge-workspace-page .judge-create-panel .judge-player-option__identity strong {
+  color: #ffffff !important;
+}
+
+.judge-workspace-page .judge-create-panel .judge-player-option__level {
+  color: #cbd5e1 !important;
+}
+
+/* Tags de fixo/avulso e posição */
+.judge-workspace-page .judge-create-panel .judge-player-option__tag {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #cbd5e1 !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Checkmark indicador de seleção */
+.judge-workspace-page .judge-create-panel .judge-player-option__check {
+  border-color: rgba(255, 255, 255, 0.25) !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+}
+
+.judge-workspace-page .judge-create-panel .judge-player-option.selected .judge-player-option__check,
+.judge-workspace-page .judge-create-panel .judge-player-option:has(.jogador-checkbox:checked) .judge-player-option__check {
+  background: #22c55e !important;
+  border-color: #4ade80 !important;
+}
+
+/* Botão Flutuante (FAB) do Sorteio */
+.judge-workspace-page .judge-create-panel .judge-sort-action {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3) !important;
+  border: none !important;
+}
+
+.judge-workspace-page .judge-create-panel .judge-sort-action:disabled {
+  background: #1a1e1b !important;
+  color: #4d5750 !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  box-shadow: none !important;
+}
+
+/* Camada da bolinha do countdown no topo */
+.judge-workspace-page #acoesSorteio.judge-sort-fab {
+  z-index: 9999 !important;
+}
