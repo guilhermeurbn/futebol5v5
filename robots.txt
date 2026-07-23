@@ -7,4 +7,4 @@ Allow: /favicon-32x32.png
 Allow: /apple-touch-icon.png
 Allow: /android-chrome-192x192.png
 Allow: /android-chrome-512x512.png
-Sitemap: https://natrave.com.br/sitemap.xml
+Sitemap: https://natrave.pt/sitemap.xml

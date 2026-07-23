@@ -201,7 +201,7 @@ R: Se é a primeira vez: SECURITY_AUDIT.md (30 min). Se precisa implementar AGOR
 R: As 3 CRÍTICAS podem ser exploradas para SQL injection, service disruption, e credential theft. Corrija em 24h.
 
 **P: Como reportar uma vulnerabilidade?**  
-R: Envie para security@natrave.com com detalhes. Veja SECURITY_PRODUCTION.md para mais info.
+R: Envie para security@natrave.pt com detalhes. Veja SECURITY_PRODUCTION.md para mais info.
 
 **P: Preciso ler todos os documentos?**  
 R: Não. Leia o que aplica ao seu role (veja "Escolha Seu Caminho" acima).
@@ -238,7 +238,7 @@ R: Procure "Se Algo Quebrar" em SECURITY_QUICK_FIX.md para rollback.
 ## 📞 Ajuda
 
 - **Dúvidas sobre implementação:** Procure no documento relevante ou Slack #security-help
-- **Encontrou vulnerabilidade:** Email security@natrave.com
+- **Encontrou vulnerabilidade:** Email security@natrave.pt
 - **Incidente em produção:** Slack #production-alerts + escalate
 - **Revisão de código:** Peça a um colega + checklist de segurança
 

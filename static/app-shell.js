@@ -832,21 +832,7 @@
     loadPage(link.href, { replace: false });
   }, true);
 
-  // Delegação de clique para cartões de jogadores (.player-card) integrada com o PWA
-  document.addEventListener('click', event => {
-    const card = event.target.closest('.player-card');
-    if (!card) return;
 
-    if (event.target.closest('a') || event.target.closest('button')) {
-      return;
-    }
-
-    const btn = card.querySelector('.premium-player-card-btn');
-    if (btn) {
-      event.preventDefault();
-      btn.click();
-    }
-  });
 
   // Delegação de clique para abas de filtros de categoria (.premium-filter-tab)
   document.addEventListener('click', event => {

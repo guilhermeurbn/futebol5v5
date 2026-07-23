@@ -29,11 +29,10 @@
                 <div class="section-header players-showcase-header">
                     <div class="players-showcase-heading">
                         <h2 class="section-title players-showcase-title">
-                            <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 0.5rem; color: #a78bfa;"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 0.5rem; color: #22c55e;"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                             Jogadores Cadastrados
                         </h2>
                     </div>
-                    <span class="players-showcase-count" aria-label="{{ total_jogadores }} jogadores cadastrados">{{ total_jogadores }}</span>
                     <div class="section-header-actions players-showcase-actions">
                         {% if auth_user.role in ['admin', 'super_admin'] %}
                         <button type="button" id="toggleCreatePlayerBtn" class="btn premium-add-player-btn" aria-expanded="false" aria-controls="createPlayerModal">
@@ -371,24 +370,7 @@
             });
         }
 
-        // ===== DELEGAÇÃO DE CLIQUE PARA ABRIR PERFIL (INLINE COM PROTEÇÃO CONTRA DUPLICAÇÃO) =====
-        if (!window.NaTraveCardClickBound) {
-            window.NaTraveCardClickBound = true;
-            document.addEventListener('click', (e) => {
-                const card = e.target.closest('.player-card');
-                if (!card) return;
 
-                if (e.target.closest('a') || e.target.closest('button')) {
-                    return;
-                }
-
-                const btn = card.querySelector('.premium-player-card-btn');
-                if (btn) {
-                    e.preventDefault();
-                    btn.click();
-                }
-            });
-        }
 
 
 

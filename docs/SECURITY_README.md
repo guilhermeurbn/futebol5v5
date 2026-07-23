@@ -156,7 +156,7 @@ logger.info(f"API call to {service}")  # Não inclui chave
 ## 🚨 Encontrou um Bug de Segurança?
 
 1. **NÃO** divulgue publicamente
-2. **ENVIE** para security@natrave.com
+2. **ENVIE** para security@natrave.pt
 3. **INCLUA:**
    - Arquivo e linha
    - Descrição do problema
@@ -215,7 +215,7 @@ Sugestão: Adicionar whitelist de tabelas permitidas
 
 ## 📞 Contatos
 
-- **Security Issues:** security@natrave.com
+- **Security Issues:** security@natrave.pt
 - **Production Alerts:** Slack #production-alerts
 - **Questions:** Slack #security-help
 - **Escalation:** Tech lead (dentro de 30 min)

@@ -365,7 +365,7 @@ python -c 'import secrets; print(secrets.token_urlsafe(32))'
 
 ### Security Issues (Crítico)
 - **Slack:** #security-incidents
-- **Email:** security@natrave.com
+- **Email:** security@natrave.pt
 - **Escalate para:** Tech Lead dentro de 30 min
 
 ### Production Issues (Urgente)

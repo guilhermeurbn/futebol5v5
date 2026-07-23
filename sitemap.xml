@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-        <loc>https://natrave.com.br/</loc>
+        <loc>https://natrave.pt/</loc>
         <lastmod>2026-07-23</lastmod>
         <changefreq>weekly</changefreq>
         <priority>1.0</priority>
     </url>
     <url>
-        <loc>https://natrave.com.br/login</loc>
+        <loc>https://natrave.pt/login</loc>
         <lastmod>2026-07-23</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://natrave.com.br/cadastro</loc>
+        <loc>https://natrave.pt/cadastro</loc>
         <lastmod>2026-07-23</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://natrave.com.br/recuperar-senha</loc>
+        <loc>https://natrave.pt/recuperar-senha</loc>
         <lastmod>2026-07-23</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.5</priority>

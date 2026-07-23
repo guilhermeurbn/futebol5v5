@@ -319,7 +319,7 @@ for h in logger.handlers:
 1. **Sintaxe Python:** Procurar em `/docs/SECURITY_AUDIT.md` - tem exemplos
 2. **Como fazer commit:** Copiar comandos de exemplo acima
 3. **Erro de teste:** Executar `pytest -v tests/test_db.py` para debug
-4. **Não conseguiu fazer:** Slack #security-help ou security@natrave.com
+4. **Não conseguiu fazer:** Slack #security-help ou security@natrave.pt
 
 ---
 

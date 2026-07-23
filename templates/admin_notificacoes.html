@@ -3,7 +3,7 @@
 {% block title %}Avisos{% endblock %}
 
 {% block content %}
-<div class="container page-container-wide judge-workspace-page admin-page admin-page--ecosystem">
+<div class="container page-container-wide judge-workspace-page admin-page admin-page--ecosystem" style="background: #000000 !important; min-height: 100vh; width: 100%;">
     <header class="header">
         <div class="header-content">
             {% set brand_title = 'Avisos' %}
@@ -13,7 +13,7 @@
     </header>
 
     <main class="main">
-        <section class="section admin-drawer admin-notifications-page">
+        <section class="section admin-notifications-page" style="padding: 2rem 1.5rem;">
             <div class="admin-notifications-hero">
                 <div class="admin-notifications-hero__copy">
                     <div class="section-label">Central de avisos</div>
@@ -35,9 +35,9 @@
 
             {% if notificacoes %}
                 <div class="admin-notifications-page__section-title">Novos avisos</div>
-                <div class="admin-drawer__list admin-notifications-page__list">
+                <div class="admin-notifications-page__list">
                     {% for n in notificacoes %}
-                    <div class="surface-panel surface-panel--accent admin-notification-card admin-notification-card--{{ n.tipo or 'info' }}">
+                    <div class="admin-notification-card admin-notification-card--{{ n.tipo or 'info' }}">
                         <div class="admin-notification-card__topline">
                             <div class="admin-notification-card__title">{{ n.titulo }}</div>
                             <span class="admin-notification-card__badge">{{ (n.tipo or 'info')|upper }}</span>
@@ -47,7 +47,7 @@
                     </div>
                     {% endfor %}
                 </div>
-                <form method="post" action="{{ url_for('admin.admin_limpar_notificacoes') }}" class="admin-drawer__footer">
+                <form method="post" action="{{ url_for('admin.admin_limpar_notificacoes') }}" style="margin-top: 1.5rem; display: flex; justify-content: flex-end;">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button class="btn btn-primary" type="submit">Marcar todas como lidas e arquivar</button>
                 </form>
@@ -63,7 +63,7 @@
                 <div class="admin-notifications-page__section-title admin-notifications-page__section-title--muted">Arquivados</div>
                 <div class="admin-notifications-archive-grid">
                     {% for n in arquivadas %}
-                    <article class="surface-panel admin-notification-archive-card">
+                    <article class="admin-notification-archive-card">
                         <div class="admin-notification-archive-card__topline">
                             <div class="admin-notification-archive-card__title">{{ n.titulo }}</div>
                             <span class="admin-notification-archive-card__badge">LIDO</span>

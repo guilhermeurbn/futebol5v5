@@ -532,7 +532,7 @@ Antes de cada deploy em produção, verificar:
 
 ## 📞 Contatos de Segurança
 
-**Reportar Vulnerabilidade:** security@natrave.com (criar email)  
+**Reportar Vulnerabilidade:** security@natrave.pt (criar email)  
 **Últimas Revisões:** 15/06/2026  
 **Próxima Auditoria Planejada:** 15/09/2026 (trimestral)
 

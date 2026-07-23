@@ -203,7 +203,7 @@ MUI BAIXA  │  Baixo  │ Baixo   │ Baixo   │ Médio   │
 Se encontrar um problema de segurança:
 
 1. **NÃO** poste em issues públicas
-2. **ENVIE** para `security@natrave.com` (TODO: criar)
+2. **ENVIE** para `security@natrave.pt` (TODO: criar)
 3. **INCLUA:**
    - Descrição do problema
    - Arquivo e linha

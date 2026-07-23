@@ -43,7 +43,7 @@ def test_auth_service_email_and_reset_token_roundtrip(tmp_path):
 
 def test_email_service_send_welcome_email(monkeypatch):
     monkeypatch.setenv('RESEND_API_KEY', 're_test_key')
-    monkeypatch.setenv('RESEND_FROM_EMAIL', 'NaTrave <no-reply@natrave.com>')
+    monkeypatch.setenv('RESEND_FROM_EMAIL', 'NaTrave <no-reply@natrave.pt>')
 
     captured = {}
 

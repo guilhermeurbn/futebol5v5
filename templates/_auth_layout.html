@@ -6,21 +6,21 @@
     <meta name="theme-color" content="#7c3aed">
     <meta name="description" content="{% block meta_description %}Acesse a plataforma NaTrave 5v5 para gerenciar suas partidas e sortear times equilibrados.{% endblock %}">
 
-    <link rel="canonical" href="{{ request.url | replace(request.host_url, 'https://natrave.com.br/') }}">
+    <link rel="canonical" href="{{ request.url | replace(request.host_url, 'https://natrave.pt/') }}">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="{{ request.url | replace(request.host_url, 'https://natrave.com.br/') }}">
+    <meta property="og:url" content="{{ request.url | replace(request.host_url, 'https://natrave.pt/') }}">
     <meta property="og:title" content="NaTrave | {% block og_title %}{{ self.title() }}{% endblock %}">
     <meta property="og:description" content="{{ self.meta_description() }}">
-    <meta property="og:image" content="https://natrave.com.br/apple-touch-icon.png">
+    <meta property="og:image" content="https://natrave.pt/apple-touch-icon.png">
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="{{ request.url | replace(request.host_url, 'https://natrave.com.br/') }}">
+    <meta name="twitter:url" content="{{ request.url | replace(request.host_url, 'https://natrave.pt/') }}">
     <meta name="twitter:title" content="NaTrave | {{ self.title() }}">
     <meta name="twitter:description" content="{{ self.meta_description() }}">
-    <meta name="twitter:image" content="https://natrave.com.br/apple-touch-icon.png">
+    <meta name="twitter:image" content="https://natrave.pt/apple-touch-icon.png">
 
     <link rel="icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
