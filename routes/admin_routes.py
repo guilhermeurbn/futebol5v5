@@ -55,6 +55,12 @@ def admin_required(f):
 # ============================================================
 
 @admin_bp.route('/admin', methods=['GET'])
+def admin_redirect():
+    """Redireciona a rota antiga /admin para a lista de jogadores"""
+    return redirect(url_for('jogador_crud.index'))
+
+
+@admin_bp.route('/admin/ajustes', methods=['GET'])
 @admin_required
 def admin_page():
     """Dashboard administrativo"""
