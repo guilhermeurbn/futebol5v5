@@ -213,6 +213,7 @@
 
             <form action="{{ url_for('jogador_crud.editar_jogador_post', jogador_id=jogador.id) }}" method="post" class="player-create-form">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="next" value="{{ next_url or request.args.get('next', '') }}">
 
                 <div class="form-group" style="margin-bottom: 1.25rem;">
                     <label for="edit_nome" class="form-label" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #f4f1f8;">Nome do Jogador</label>
@@ -293,7 +294,7 @@
 
                 <div style="display: flex; gap: 12px; flex-wrap: wrap;">
                     <button class="btn btn-primary premium-submit-btn" type="submit" style="flex: 1; min-height: 48px; border: none; font-weight: 700; border-radius: 12px; cursor: pointer;">Salvar alterações</button>
-                    <a class="btn btn-secondary" href="{{ url_for('auth.perfil_jogador_publico', jogador_id=jogador.id) }}" style="display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); border-radius: 12px; padding: 0.75rem 1.5rem; color: #9a95a4; text-decoration: none; font-weight: 600; transition: all 0.2s ease;">Cancelar</a>
+                    <a class="btn btn-secondary" href="{{ next_url or request.args.get('next', url_for('auth.perfil_jogador_publico', jogador_id=jogador.id)) }}" style="display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); border-radius: 12px; padding: 0.75rem 1.5rem; color: #9a95a4; text-decoration: none; font-weight: 600; transition: all 0.2s ease;">Cancelar</a>
                 </div>
             </form>
         </div>

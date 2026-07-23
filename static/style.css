@@ -19883,3 +19883,204 @@ html,
   gap: 0.3rem;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
 }
+
+/* ============================================================
+   🎨 PREMIUM DELETE MODAL STYLING
+   ============================================================ */
+.delete-modal-premium {
+  backdrop-filter: blur(8px) !important;
+  background: rgba(0, 0, 0, 0.75) !important;
+}
+
+.delete-modal-premium .delete-modal-content {
+  background: #111115 !important;
+  border: 1px solid rgba(239, 68, 68, 0.25) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(239, 68, 68, 0.05) !important;
+  max-width: 420px !important;
+  width: 90% !important;
+  animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.delete-modal-premium .delete-modal-header {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  padding: 1.25rem 1.5rem !important;
+}
+
+.delete-modal-premium .delete-modal-title {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  font-size: 1.15rem !important;
+  font-weight: 600 !important;
+  color: #f3f4f6 !important;
+  margin: 0 !important;
+}
+
+.delete-modal-premium .delete-modal-title .alert-icon {
+  width: 18px !important;
+  height: 18px !important;
+  color: #ef4444 !important;
+  stroke-width: 2.5 !important;
+  margin-right: 0 !important;
+}
+
+.delete-modal-premium .delete-modal-close {
+  color: #9ca3af !important;
+  width: 2rem !important;
+  height: 2rem !important;
+  font-size: inherit !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+}
+
+.delete-modal-premium .delete-modal-close:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #f3f4f6 !important;
+}
+
+.delete-modal-premium .delete-modal-close .lucide-icon {
+  width: 16px !important;
+  height: 16px !important;
+  margin-right: 0 !important;
+}
+
+.delete-modal-premium .delete-modal-body {
+  padding: 1.5rem !important;
+}
+
+.delete-modal-premium .delete-confirmation-text {
+  color: #e5e7eb !important;
+  font-size: 0.95rem !important;
+  margin: 0 0 1.25rem 0 !important;
+  line-height: 1.5 !important;
+}
+
+.delete-modal-premium .delete-confirmation-text strong {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+.delete-modal-premium .delete-warning-box {
+  background: rgba(239, 68, 68, 0.08) !important;
+  border: 1px solid rgba(239, 68, 68, 0.18) !important;
+  border-radius: 10px !important;
+  padding: 0.75rem 1rem !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 0.65rem !important;
+}
+
+.delete-modal-premium .delete-warning-box span {
+  color: #fca5a5 !important;
+  font-size: 0.825rem !important;
+  line-height: 1.4 !important;
+  font-weight: 500 !important;
+  text-align: left !important;
+}
+
+.delete-modal-premium .delete-warning-box .warning-icon {
+  width: 16px !important;
+  height: 16px !important;
+  color: #f87171 !important;
+  flex-shrink: 0 !important;
+  margin-top: 1px !important;
+  margin-right: 0 !important;
+}
+
+.delete-modal-premium .delete-modal-footer {
+  background: rgba(14, 14, 18, 0.95) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+  padding: 1rem 1.5rem !important;
+  gap: 0.75rem !important;
+}
+
+.delete-modal-premium .delete-modal-footer .btn {
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  border-radius: 10px !important;
+  padding: 0.5rem 1rem !important;
+  height: 38px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.35rem !important;
+}
+
+.delete-modal-premium .delete-modal-footer .btn-cancel {
+  background: rgba(16, 185, 129, 0.08) !important;
+  border: 1px solid rgba(16, 185, 129, 0.22) !important;
+  color: #a7f3d0 !important;
+}
+
+.delete-modal-premium .delete-modal-footer .btn-cancel:hover {
+  background: #10b981 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.3) !important;
+  border-color: transparent !important;
+}
+
+.delete-modal-premium .delete-modal-footer .btn-confirm {
+  background: #ef4444 !important;
+  border: none !important;
+  color: #ffffff !important;
+}
+
+.delete-modal-premium .delete-modal-footer .btn-confirm:hover {
+  background: #dc2626 !important;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.3) !important;
+}
+
+.delete-modal-premium .delete-modal-footer .btn-confirm .lucide-icon {
+  width: 14px !important;
+  height: 14px !important;
+  margin-right: 0 !important;
+}
+
+/* Animação para destacar o card após edição */
+@keyframes pulseHighlight {
+  0% {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    border-color: rgba(167, 139, 250, 0.15);
+  }
+  15% {
+    box-shadow: 0 0 25px rgba(34, 197, 94, 0.6) !important;
+    border-color: #10b981 !important;
+    transform: scale(1.02);
+  }
+  85% {
+    box-shadow: 0 0 25px rgba(34, 197, 94, 0.6) !important;
+    border-color: #10b981 !important;
+    transform: scale(1.02);
+  }
+  100% {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    border-color: rgba(167, 139, 250, 0.15);
+  }
+}
+
+.highlight-player-card {
+  animation: pulseHighlight 2s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
+  z-index: 10;
+}
+
+/* Overrides para o painel administrativo: remove a linha roxa no topo e define o texto do título como branco */
+.voting-workspace-panel::before {
+  display: none !important;
+}
+
+.voting-workspace-panel:hover {
+  border-color: rgba(34, 197, 94, 0.35) !important;
+  box-shadow: 0 10px 30px rgba(34, 197, 94, 0.1) !important;
+  transform: translateY(-2px) !important;
+}
+
+.admin-page .section-title {
+  background: none !important;
+  -webkit-text-fill-color: #ffffff !important;
+  color: #ffffff !important;
+}

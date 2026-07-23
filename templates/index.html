@@ -196,7 +196,7 @@
                             {% set nome_partes = jogador.nome.split() %}
                             {% set avatar_text = nome_partes[0][:2] if nome_partes else jogador.nome[:2] %}
                             {% set perfil_href = url_for('jogador.perfil_jogador_publico', jogador_id=jogador.id) %}
-                            <article class="player-card premium-player-card player-list-row" data-name="{{ jogador.nome|lower }}" data-player-id="{{ jogador.id }}" data-nivel="{{ jogador.nivel }}" data-tipo="{{ jogador.tipo }}" data-posicao="{{ jogador.posicao }}">
+                            <article id="player-{{ jogador.id }}" class="player-card premium-player-card player-list-row" data-name="{{ jogador.nome|lower }}" data-player-id="{{ jogador.id }}" data-nivel="{{ jogador.nivel }}" data-tipo="{{ jogador.tipo }}" data-posicao="{{ jogador.posicao }}">
                                 <div class="premium-player-card-inner">
                                     <div class="premium-player-card-header">
                                         <div class="premium-player-avatar-wrap">
@@ -245,8 +245,8 @@
                                         <a class="btn btn-primary premium-player-card-btn" href="{{ perfil_href }}">Ver perfil</a>
                                         {% if auth_user.role == 'admin' %}
                                         <div class="premium-player-admin-actions">
-                                            <a class="btn btn-small btn-secondary" href="{{ url_for('jogador.editar_jogador_page', jogador_id=jogador.id) }}">✏️ Editar</a>
-                                            <button class="btn btn-small btn-danger" onclick="abrirModalDelete('{{ jogador.id }}', '{{ jogador.nome }}')">🗑️ Deletar</button>
+                                            <a class="btn btn-small btn-secondary" href="{{ url_for('jogador.editar_jogador_page', jogador_id=jogador.id, next=url_for('jogador.index') ~ '#player-' ~ jogador.id) }}"><svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Editar</a>
+                                            <button class="btn btn-small btn-danger" onclick="abrirModalDelete('{{ jogador.id }}', '{{ jogador.nome }}')"><svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>Deletar</button>
                                         </div>
                                         {% endif %}
                                     </div>
@@ -266,22 +266,31 @@
 
         <!-- Modal Delete -->
         {% if auth_user.role == 'admin' %}
-        <div id="deleteModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>🗑️ Confirmar exclusão</h2>
-                    <button class="modal-close" onclick="fecharModalDelete()">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <p>Tem certeza que deseja <strong>DELETAR</strong> <strong id="playerNameToDelete">o jogador</strong>?</p>
-                    <p class="modal-warning">⚠️ Essa ação é irreversível e remove o jogador do sistema.</p>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" onclick="fecharModalDelete()">
-                        ❌ Cancelar
+        <div id="deleteModal" class="modal delete-modal-premium">
+            <div class="modal-content delete-modal-content">
+                <div class="modal-header delete-modal-header">
+                    <h2 class="delete-modal-title">
+                        <svg class="lucide-icon alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        Excluir Jogador
+                    </h2>
+                    <button class="modal-close delete-modal-close" onclick="fecharModalDelete()" aria-label="Fechar">
+                        <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                     </button>
-                    <button class="btn btn-danger" onclick="confirmarDelete()">
-                        🗑️ Sim, Deletar
+                </div>
+                <div class="modal-body delete-modal-body">
+                    <p class="delete-confirmation-text">Tem certeza que deseja remover permanentemente o jogador <strong id="playerNameToDelete"></strong>?</p>
+                    <div class="delete-warning-box">
+                        <svg class="lucide-icon warning-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        <span>Esta ação não poderá ser desfeita e todos os dados serão perdidos.</span>
+                    </div>
+                </div>
+                <div class="modal-footer delete-modal-footer">
+                    <button class="btn btn-secondary btn-cancel" onclick="fecharModalDelete()">
+                        Cancelar
+                    </button>
+                    <button class="btn btn-danger btn-confirm" onclick="confirmarDelete()">
+                        <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                        Excluir
                     </button>
                 </div>
             </div>
@@ -420,6 +429,23 @@
         window.addEventListener('offline', () => {
             console.log('[PWA] Modo offline ativado');
             document.body.style.opacity = '0.8';
+        });
+
+        // ===== ROLAGEM E REALCE APÓS EDIÇÃO =====
+        window.addEventListener('DOMContentLoaded', () => {
+            const hash = window.location.hash;
+            if (hash && hash.startsWith('#player-')) {
+                const card = document.querySelector(hash);
+                if (card) {
+                    setTimeout(() => {
+                        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        card.classList.add('highlight-player-card');
+                        setTimeout(() => {
+                            card.classList.remove('highlight-player-card');
+                        }, 2200);
+                    }, 300);
+                }
+            }
         });
     </script>
 {% endblock %}

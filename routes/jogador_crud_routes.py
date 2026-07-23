@@ -303,7 +303,8 @@ def editar_jogador_page(jogador_id):
         if not jogador:
             return redirect(url_for('jogador_crud.index'))
 
-        return render_template('editar_jogador.html', jogador=jogador, usuario=_usuario_logado())
+        next_url = request.args.get('next', '')
+        return render_template('editar_jogador.html', jogador=jogador, usuario=_usuario_logado(), next_url=next_url)
     except Exception as e:
         import logging
         logger = logging.getLogger(__name__)
@@ -319,6 +320,7 @@ def editar_jogador_post(jogador_id):
     nivel = request.form.get('nivel')
     tipo = request.form.get('tipo')
     posicao = request.form.get('posicao')
+    next_url = request.form.get('next') or request.args.get('next', '')
 
     try:
         jogador = jogador_service.atualizar(
@@ -330,16 +332,18 @@ def editar_jogador_post(jogador_id):
         )
         if not jogador:
             return "Jogador não encontrado", 404
+        if next_url:
+            return redirect(next_url)
         return redirect(url_for('auth.perfil_jogador_publico', jogador_id=jogador.id))
     except ValueError as e:
         jogador = jogador_service.obter_por_id(jogador_id)
-        return render_template('editar_jogador.html', jogador=jogador, usuario=_usuario_logado(), erro=str(e)), 400
+        return render_template('editar_jogador.html', jogador=jogador, usuario=_usuario_logado(), erro=str(e), next_url=next_url), 400
     except Exception as e:
         import logging
         logger = logging.getLogger(__name__)
         logger.error(f"Erro ao editar jogador: {str(e)}")
         jogador = jogador_service.obter_por_id(jogador_id)
-        return render_template('editar_jogador.html', jogador=jogador, usuario=_usuario_logado(), erro='Erro ao editar'), 500
+        return render_template('editar_jogador.html', jogador=jogador, usuario=_usuario_logado(), erro='Erro ao editar', next_url=next_url), 500
 
 
 # ============================================================
