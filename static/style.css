@@ -18048,6 +18048,10 @@ body.is-referee-layout .judge-timer-reset:hover {
   grid-template-columns: repeat(3, 1fr);
 }
 
+.premium-profile-tabs--public-admin {
+  grid-template-columns: repeat(4, 1fr);
+}
+
 .premium-profile-tab {
   display: flex;
   flex-direction: column;
