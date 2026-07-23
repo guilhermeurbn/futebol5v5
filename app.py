@@ -168,6 +168,32 @@ def criar_app(config_name: str = None) -> Flask:
             mimetype='application/manifest+json'
         )
 
+    # SEO - Servir Favicons, Manifest, Robots e Sitemap na raiz
+    @app.route('/favicon.ico')
+    @app.route('/favicon-16x16.png')
+    @app.route('/favicon-32x32.png')
+    @app.route('/apple-touch-icon.png')
+    @app.route('/android-chrome-192x192.png')
+    @app.route('/android-chrome-512x512.png')
+    @app.route('/site.webmanifest')
+    @app.route('/robots.txt')
+    @app.route('/sitemap.xml')
+    def serve_seo_files():
+        filename = request.path.lstrip('/')
+        mimetypes = {
+            'ico': 'image/x-icon',
+            'png': 'image/png',
+            'webmanifest': 'application/manifest+json',
+            'txt': 'text/plain',
+            'xml': 'application/xml',
+        }
+        ext = filename.split('.')[-1]
+        mimetype = mimetypes.get(ext, 'application/octet-stream')
+        return send_file(
+            os.path.join(os.path.dirname(__file__), filename),
+            mimetype=mimetype
+        )
+
     @app.after_request
     def add_cache_headers(response):
         content_type = (response.headers.get('Content-Type') or '').lower()
@@ -183,6 +209,22 @@ def criar_app(config_name: str = None) -> Flask:
 
         if request_path in {'/static/style.css', '/static/offline-judge.js'}:
             response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+
+        # Caching para favicons e manifesto
+        if request_path in {
+            '/favicon.ico',
+            '/favicon-16x16.png',
+            '/favicon-32x32.png',
+            '/apple-touch-icon.png',
+            '/android-chrome-192x192.png',
+            '/android-chrome-512x512.png',
+            '/site.webmanifest'
+        }:
+            response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+
+        # Caching para robots.txt e sitemap.xml (24h)
+        if request_path in {'/robots.txt', '/sitemap.xml'}:
+            response.headers['Cache-Control'] = 'public, max-age=86400'
 
         return response
 

@@ -19,15 +19,18 @@
             <button id="btnDescartarTimes"></button>
         </div>
 
+
+
         <section class="judge-teams-grid" aria-label="Times sorteados">
             {% for time in sorteio.times %}
             <article class="judge-team-card">
                 <div class="judge-team-card__header">
-                    <span class="judge-team-card__number">{{ time.numero }}</span>
-                    <div>
-                        <h2>Time {{ time.numero }}</h2>
+                    <span class="judge-team-card__number" style="width: auto; padding: 0 0.85rem; height: 2.25rem; border-radius: 10px; font-size: 0.92rem; white-space: nowrap;">
+                        Time {{ time.numero }}
+                    </span>
+                    <div style="margin-left: 0.4rem;">
                         {% if sorteio.pontuacoes and sorteio.pontuacoes[loop.index0] is defined %}
-                        <span>{{ sorteio.pontuacoes[loop.index0] }} pontos</span>
+                        <span>Nível total: {{ sorteio.pontuacoes[loop.index0] }}</span>
                         {% endif %}
                     </div>
                     <button class="judge-card-edit-btn" type="button" aria-label="Editar times" title="Editar times">
@@ -51,7 +54,7 @@
                     {% for jogador in time.jogadores %}
                     {% set jogador_key = (jogador.id|string) if jogador.id is defined and jogador.id is not none else
                     (jogador.nome ~ '|' ~ jogador.nivel ~ '|' ~ jogador.posicao) %}
-                    <div class="judge-team-player" draggable="false" data-player-key="{{ jogador_key }}">
+                    <div class="judge-team-player" draggable="false" data-player-key="{{ jogador_key }}" data-posicao="{{ jogador.posicao }}" data-nivel="{{ jogador.nivel }}">
                         <span class="judge-team-player__position" aria-hidden="true">
                             {{ 'G' if jogador.posicao == 'goleiro' else loop.index }}
                         </span>
@@ -161,6 +164,24 @@
         updatePositionBadges();
     }
 
+    function updateTeamLevels() {
+        containers.forEach((container) => {
+            let totalNivel = 0;
+            container.querySelectorAll('.judge-team-player').forEach((player) => {
+                const nivel = parseFloat(player.dataset.nivel || 0);
+                totalNivel += nivel;
+            });
+            const formattedNivel = Number.isInteger(totalNivel) ? totalNivel : totalNivel.toFixed(1);
+            const card = container.closest('.judge-team-card');
+            if (card) {
+                const span = card.querySelector('.judge-team-card__header div span');
+                if (span) {
+                    span.textContent = `Nível total: ${formattedNivel}`;
+                }
+            }
+        });
+    }
+
     function updatePositionBadges() {
         containers.forEach((container) => {
             const players = Array.from(container.querySelectorAll('.judge-team-player'));
@@ -171,6 +192,7 @@
                 pos.textContent = info.includes('Goleiro') ? 'G' : String(index + 1);
             });
         });
+        updateTeamLevels();
     }
 
     function clearSelectedPlayer() {
@@ -232,6 +254,84 @@
         guidance.textContent = 'Trocas pendentes. Clique em "Salvar" para confirmar.';
     }
 
+    function showCardWarning(container, message) {
+        const card = container.closest('.judge-team-card');
+        if (!card) return;
+
+        const headerDiv = card.querySelector('.judge-team-card__header > div');
+        if (!headerDiv) return;
+
+        // Remove existing warning if any
+        headerDiv.querySelector('.team-gk-warning')?.remove();
+
+        const warningSpan = document.createElement('span');
+        warningSpan.className = 'team-gk-warning';
+        warningSpan.style.cssText = 'color: #f87171; font-size: 0.75rem; font-weight: 800; display: block; margin-top: 0.15rem;';
+        warningSpan.textContent = message;
+        headerDiv.appendChild(warningSpan);
+
+        warningSpan.animate([
+            { transform: 'translateX(0)' },
+            { transform: 'translateX(-5px)' },
+            { transform: 'translateX(5px)' },
+            { transform: 'translateX(-5px)' },
+            { transform: 'translateX(5px)' },
+            { transform: 'translateX(0)' }
+        ], {
+            duration: 350,
+            easing: 'ease-in-out'
+        });
+
+        setTimeout(() => {
+            warningSpan.style.opacity = '0';
+            warningSpan.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => warningSpan.remove(), 500);
+        }, 3000);
+    }
+
+    function checkAndSwap(a, b) {
+        if (a.parentNode === b.parentNode) {
+            swapPlayers(a, b);
+            updatePositionBadges();
+            enableDirtyState();
+            return true;
+        }
+
+        const teamA = a.parentNode;
+        const teamB = b.parentNode;
+
+        // Count goalkeepers in team A if we replaced a with b
+        let gkCountA = 0;
+        teamA.querySelectorAll('.judge-team-player').forEach(p => {
+            if (p === a) {
+                if (b.dataset.posicao === 'goleiro') gkCountA++;
+            } else {
+                if (p.dataset.posicao === 'goleiro') gkCountA++;
+            }
+        });
+
+        // Count goalkeepers in team B if we replaced b with a
+        let gkCountB = 0;
+        teamB.querySelectorAll('.judge-team-player').forEach(p => {
+            if (p === b) {
+                if (a.dataset.posicao === 'goleiro') gkCountB++;
+            } else {
+                if (p.dataset.posicao === 'goleiro') gkCountB++;
+            }
+        });
+
+        if (gkCountA > 1 || gkCountB > 1) {
+            if (gkCountA > 1) showCardWarning(teamA, '⚠️ Limite de 1 goleiro');
+            if (gkCountB > 1) showCardWarning(teamB, '⚠️ Limite de 1 goleiro');
+            return false;
+        }
+
+        swapPlayers(a, b);
+        updatePositionBadges();
+        enableDirtyState();
+        return true;
+    }
+
     function swapPlayers(a, b) {
         if (!a || !b || a === b) return;
         const marker = document.createElement('span');
@@ -267,9 +367,9 @@
 
         const source = selectedPlayer;
         clearSelectedPlayer();
-        swapPlayers(source, player);
-        updatePositionBadges();
-        enableDirtyState();
+        
+        // swapPlayers(source, player);
+        checkAndSwap(source, player);
     }
 
     function bindDragAndDrop() {
@@ -310,9 +410,7 @@
                 if (!editMode || touchEditMode || !dragSource || dragSource === player) return;
                 event.preventDefault();
                 player.classList.remove('drop-target');
-                swapPlayers(dragSource, player);
-                updatePositionBadges();
-                enableDirtyState();
+                checkAndSwap(dragSource, player);
             });
         });
     }

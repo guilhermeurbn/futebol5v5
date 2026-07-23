@@ -527,5 +527,140 @@
       35.0,
       33.0
     ]
+  },
+  {
+    "id": 4,
+    "data": "2026-07-22T14:16:49.067610",
+    "num_times": 2,
+    "total_jogadores": 10,
+    "times": [
+      {
+        "numero": 1,
+        "jogadores": [
+          {
+            "nome": "Guilherme",
+            "nivel": 7.0,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+            "criado_em": "2026-04-23T23:20:00.000002",
+            "owner_user_id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033",
+            "historico_nivel": []
+          },
+          {
+            "nome": "André Balada",
+            "nivel": 7.0,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "fdbe49b3-d73e-4db3-af5f-f23c089b8c38",
+            "criado_em": "2026-04-27T18:58:36.267786",
+            "owner_user_id": "db1314a8-2d4e-4384-829e-8075b1e33737",
+            "historico_nivel": []
+          },
+          {
+            "nome": "Alex",
+            "nivel": 7.0,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "b17181c2-a4b4-4909-b9d1-ef979faa3063",
+            "criado_em": "2026-04-27T18:58:36.751447",
+            "owner_user_id": "19e6a32e-2a20-49a2-81e0-da12aa681505",
+            "historico_nivel": []
+          },
+          {
+            "nome": "Edmo",
+            "nivel": 7.0,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "8d03d8dc-f18b-4ca3-9ea4-f7776ea89b44",
+            "criado_em": "2026-04-27T18:58:37.095181",
+            "owner_user_id": "93377df9-a1dd-429a-a48f-e6bafb2e8254",
+            "historico_nivel": []
+          },
+          {
+            "nome": "João Pinto",
+            "nivel": 7.0,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "cbed91fb-76f9-4c75-87c4-69ae18f89ef3",
+            "criado_em": "2026-04-27T18:58:37.370182",
+            "owner_user_id": "247a4217-b953-4830-a509-bd21f6727e77",
+            "historico_nivel": []
+          }
+        ],
+        "soma": 35.0
+      },
+      {
+        "numero": 2,
+        "jogadores": [
+          {
+            "nome": "Carlos",
+            "nivel": 7.0,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "e9758009-9214-4cc0-aea0-f365a3381803",
+            "criado_em": "2026-04-27T18:58:36.129568",
+            "owner_user_id": "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7",
+            "historico_nivel": []
+          },
+          {
+            "nome": "Bacatela",
+            "nivel": 7.0,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "cea7df59-6699-479b-88a7-e4194af7481b",
+            "criado_em": "2026-04-27T18:58:36.475618",
+            "owner_user_id": "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6",
+            "historico_nivel": []
+          },
+          {
+            "nome": "Drey",
+            "nivel": 7.0,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "f2fd5577-a8ce-4481-941a-e1faa70a29c5",
+            "criado_em": "2026-04-27T18:58:36.820490",
+            "owner_user_id": "381b5d0f-f140-4bcd-bc95-38744e15df31",
+            "historico_nivel": []
+          },
+          {
+            "nome": "Jhon",
+            "nivel": 7.0,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "2743788c-bbb3-45eb-b344-b031238bcfb9",
+            "criado_em": "2026-04-27T18:58:37.232640",
+            "owner_user_id": "71fbf7d8-3f8c-4814-80bf-90cc97458a79",
+            "historico_nivel": []
+          },
+          {
+            "nome": "Flavio",
+            "nivel": 7.0,
+            "tipo": "fixo",
+            "posicao": "linha",
+            "presente": true,
+            "id": "678cf4ca-cd59-4fc0-8534-adde0bc5ef41",
+            "criado_em": "2026-04-27T18:58:37.439256",
+            "owner_user_id": "8e5e200f-0058-4332-b440-730f93fbcd39",
+            "historico_nivel": []
+          }
+        ],
+        "soma": 35.0
+      }
+    ],
+    "diferenca": 0.0,
+    "pontuacoes": [
+      35.0,
+      35.0
+    ]
   }
 ]

@@ -1,5 +1,5 @@
 {
-  "ultimo_id": 3,
+  "ultimo_id": 4,
   "partidas": [
     {
       "id": 1,
@@ -1861,6 +1861,354 @@
           "empates": 0,
           "derrotas": 0,
           "resultado": "vitoria"
+        }
+      ],
+      "evolucao_nivel": []
+    },
+    {
+      "id": 4,
+      "sorteio_id": 4,
+      "titulo": "Votação do sorteio #4",
+      "status": "encerrada",
+      "criado_em": "2026-07-22T14:16:56.417945",
+      "aberta_em": "2026-07-22T14:16:56.417945",
+      "fecha_em": "2026-07-23T02:16:56.417945",
+      "duracao_horas": 12,
+      "criado_por": "2ba4d2a2-6f2b-4a14-a6d1-a50d639ffaf9",
+      "encerrado_em": "2026-07-22T14:16:59.131928",
+      "encerrado_por": "2ba4d2a2-6f2b-4a14-a6d1-a50d639ffaf9",
+      "encerramento_motivo": "manual",
+      "times": [
+        {
+          "numero": 1,
+          "jogadores": [
+            {
+              "nome": "Guilherme",
+              "nivel": 7.0,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "28bca010-ae01-4aff-b6f5-3e60cb104a6f",
+              "criado_em": "2026-04-23T23:20:00.000002",
+              "owner_user_id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033",
+              "historico_nivel": []
+            },
+            {
+              "nome": "André Balada",
+              "nivel": 7.0,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "fdbe49b3-d73e-4db3-af5f-f23c089b8c38",
+              "criado_em": "2026-04-27T18:58:36.267786",
+              "owner_user_id": "db1314a8-2d4e-4384-829e-8075b1e33737",
+              "historico_nivel": []
+            },
+            {
+              "nome": "Alex",
+              "nivel": 7.0,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "b17181c2-a4b4-4909-b9d1-ef979faa3063",
+              "criado_em": "2026-04-27T18:58:36.751447",
+              "owner_user_id": "19e6a32e-2a20-49a2-81e0-da12aa681505",
+              "historico_nivel": []
+            },
+            {
+              "nome": "Edmo",
+              "nivel": 7.0,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "8d03d8dc-f18b-4ca3-9ea4-f7776ea89b44",
+              "criado_em": "2026-04-27T18:58:37.095181",
+              "owner_user_id": "93377df9-a1dd-429a-a48f-e6bafb2e8254",
+              "historico_nivel": []
+            },
+            {
+              "nome": "João Pinto",
+              "nivel": 7.0,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "cbed91fb-76f9-4c75-87c4-69ae18f89ef3",
+              "criado_em": "2026-04-27T18:58:37.370182",
+              "owner_user_id": "247a4217-b953-4830-a509-bd21f6727e77",
+              "historico_nivel": []
+            }
+          ],
+          "soma": 35.0
+        },
+        {
+          "numero": 2,
+          "jogadores": [
+            {
+              "nome": "Carlos",
+              "nivel": 7.0,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "e9758009-9214-4cc0-aea0-f365a3381803",
+              "criado_em": "2026-04-27T18:58:36.129568",
+              "owner_user_id": "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7",
+              "historico_nivel": []
+            },
+            {
+              "nome": "Bacatela",
+              "nivel": 7.0,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "cea7df59-6699-479b-88a7-e4194af7481b",
+              "criado_em": "2026-04-27T18:58:36.475618",
+              "owner_user_id": "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6",
+              "historico_nivel": []
+            },
+            {
+              "nome": "Drey",
+              "nivel": 7.0,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "f2fd5577-a8ce-4481-941a-e1faa70a29c5",
+              "criado_em": "2026-04-27T18:58:36.820490",
+              "owner_user_id": "381b5d0f-f140-4bcd-bc95-38744e15df31",
+              "historico_nivel": []
+            },
+            {
+              "nome": "Jhon",
+              "nivel": 7.0,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "2743788c-bbb3-45eb-b344-b031238bcfb9",
+              "criado_em": "2026-04-27T18:58:37.232640",
+              "owner_user_id": "71fbf7d8-3f8c-4814-80bf-90cc97458a79",
+              "historico_nivel": []
+            },
+            {
+              "nome": "Flavio",
+              "nivel": 7.0,
+              "tipo": "fixo",
+              "posicao": "linha",
+              "presente": true,
+              "id": "678cf4ca-cd59-4fc0-8534-adde0bc5ef41",
+              "criado_em": "2026-04-27T18:58:37.439256",
+              "owner_user_id": "8e5e200f-0058-4332-b440-730f93fbcd39",
+              "historico_nivel": []
+            }
+          ],
+          "soma": 35.0
+        }
+      ],
+      "participantes": [
+        {
+          "user_id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033",
+          "username": "guilherme",
+          "nome_usuario": "Guilherme",
+          "jogador_nome": "Guilherme",
+          "time_numero": 1,
+          "externo": false
+        },
+        {
+          "user_id": "db1314a8-2d4e-4384-829e-8075b1e33737",
+          "username": "andre_balada",
+          "nome_usuario": "André Balada",
+          "jogador_nome": "André Balada",
+          "time_numero": 1,
+          "externo": false
+        },
+        {
+          "user_id": "19e6a32e-2a20-49a2-81e0-da12aa681505",
+          "username": "alex",
+          "nome_usuario": "Alex",
+          "jogador_nome": "Alex",
+          "time_numero": 1,
+          "externo": false
+        },
+        {
+          "user_id": "93377df9-a1dd-429a-a48f-e6bafb2e8254",
+          "username": "edmo",
+          "nome_usuario": "Edmo",
+          "jogador_nome": "Edmo",
+          "time_numero": 1,
+          "externo": false
+        },
+        {
+          "user_id": "247a4217-b953-4830-a509-bd21f6727e77",
+          "username": "joao_pinto",
+          "nome_usuario": "João Pinto",
+          "jogador_nome": "João Pinto",
+          "time_numero": 1,
+          "externo": false
+        },
+        {
+          "user_id": "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7",
+          "username": "carlos",
+          "nome_usuario": "Carlos",
+          "jogador_nome": "Carlos",
+          "time_numero": 2,
+          "externo": false
+        },
+        {
+          "user_id": "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6",
+          "username": "bacatela",
+          "nome_usuario": "Bacatela",
+          "jogador_nome": "Bacatela",
+          "time_numero": 2,
+          "externo": false
+        },
+        {
+          "user_id": "381b5d0f-f140-4bcd-bc95-38744e15df31",
+          "username": "drey",
+          "nome_usuario": "Drey",
+          "jogador_nome": "Drey",
+          "time_numero": 2,
+          "externo": false
+        },
+        {
+          "user_id": "71fbf7d8-3f8c-4814-80bf-90cc97458a79",
+          "username": "jhon",
+          "nome_usuario": "Jhon",
+          "jogador_nome": "Jhon",
+          "time_numero": 2,
+          "externo": false
+        },
+        {
+          "user_id": null,
+          "username": "",
+          "nome_usuario": "",
+          "jogador_nome": "Flavio",
+          "time_numero": 2,
+          "externo": true
+        }
+      ],
+      "votos": [],
+      "ranking": {
+        "total_votos": 0,
+        "ranking_times": [],
+        "ranking_jogadores": [],
+        "melhor_jogador": null,
+        "melhor_time": null,
+        "participantes_pendentes": [
+          {
+            "user_id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033",
+            "username": "guilherme",
+            "nome_usuario": "Guilherme",
+            "jogador_nome": "Guilherme",
+            "time_numero": 1,
+            "externo": false
+          },
+          {
+            "user_id": "db1314a8-2d4e-4384-829e-8075b1e33737",
+            "username": "andre_balada",
+            "nome_usuario": "André Balada",
+            "jogador_nome": "André Balada",
+            "time_numero": 1,
+            "externo": false
+          },
+          {
+            "user_id": "19e6a32e-2a20-49a2-81e0-da12aa681505",
+            "username": "alex",
+            "nome_usuario": "Alex",
+            "jogador_nome": "Alex",
+            "time_numero": 1,
+            "externo": false
+          },
+          {
+            "user_id": "93377df9-a1dd-429a-a48f-e6bafb2e8254",
+            "username": "edmo",
+            "nome_usuario": "Edmo",
+            "jogador_nome": "Edmo",
+            "time_numero": 1,
+            "externo": false
+          },
+          {
+            "user_id": "247a4217-b953-4830-a509-bd21f6727e77",
+            "username": "joao_pinto",
+            "nome_usuario": "João Pinto",
+            "jogador_nome": "João Pinto",
+            "time_numero": 1,
+            "externo": false
+          },
+          {
+            "user_id": "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7",
+            "username": "carlos",
+            "nome_usuario": "Carlos",
+            "jogador_nome": "Carlos",
+            "time_numero": 2,
+            "externo": false
+          },
+          {
+            "user_id": "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6",
+            "username": "bacatela",
+            "nome_usuario": "Bacatela",
+            "jogador_nome": "Bacatela",
+            "time_numero": 2,
+            "externo": false
+          },
+          {
+            "user_id": "381b5d0f-f140-4bcd-bc95-38744e15df31",
+            "username": "drey",
+            "nome_usuario": "Drey",
+            "jogador_nome": "Drey",
+            "time_numero": 2,
+            "externo": false
+          },
+          {
+            "user_id": "71fbf7d8-3f8c-4814-80bf-90cc97458a79",
+            "username": "jhon",
+            "nome_usuario": "Jhon",
+            "jogador_nome": "Jhon",
+            "time_numero": 2,
+            "externo": false
+          }
+        ]
+      },
+      "resultado_partida": {
+        "id": 4,
+        "sorteio_id": 4,
+        "data": "2026-07-22T14:16:55.563423",
+        "time_vencedor": 1,
+        "gols_times": [
+          0,
+          0
+        ],
+        "notas": "",
+        "times_desempenho": [
+          {
+            "time_numero": 1,
+            "vitorias": 1,
+            "empates": 0,
+            "derrotas": 0,
+            "gols": 0
+          },
+          {
+            "time_numero": 2,
+            "vitorias": 0,
+            "empates": 0,
+            "derrotas": 0,
+            "gols": 0
+          }
+        ]
+      },
+      "resultado_resumido": [
+        {
+          "time_numero": 1,
+          "gols": 0,
+          "vitorias": 1,
+          "empates": 0,
+          "derrotas": 0,
+          "resultado": "vitoria"
+        },
+        {
+          "time_numero": 2,
+          "gols": 0,
+          "vitorias": 0,
+          "empates": 0,
+          "derrotas": 0,
+          "resultado": "empate"
         }
       ],
       "evolucao_nivel": []

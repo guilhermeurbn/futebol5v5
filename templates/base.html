@@ -4,21 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#7c3aed">
-    <meta name="description" content="NaTrave - Aplicação profissional para sorteio balanceado de times em partidas de futebol 5v5">
+    <meta name="description" content="{% block meta_description %}NaTrave 5v5: A aplicação ideal para gerenciar partidas, sortear times equilibrados e acompanhar estatísticas de futebol. Organize seus jogos de forma profissional!{% endblock %}">
     
+    <link rel="canonical" href="{{ request.url | replace(request.host_url, 'https://natrave.com.br/') }}">
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://natrave.com.br/">
-    <meta property="og:title" content="NaTrave - Sorteio de Times Futebol 5v5">
-    <meta property="og:description" content="Aplicação profissional para sorteio balanceado de times em partidas de futebol 5v5 com algoritmos de nivelamento e estatísticas detalhadas.">
-    <meta property="og:image" content="{{ url_for('static', filename='logo-natrave-5v5.png', _external=True) }}">
+    <meta property="og:url" content="{{ request.url | replace(request.host_url, 'https://natrave.com.br/') }}">
+    <meta property="og:title" content="NaTrave | {% block og_title %}{{ self.title() }}{% endblock %}">
+    <meta property="og:description" content="{{ self.meta_description() }}">
+    <meta property="og:image" content="https://natrave.com.br/apple-touch-icon.png">
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="https://natrave.com.br/">
-    <meta name="twitter:title" content="NaTrave - Sorteio de Times Futebol 5v5">
-    <meta name="twitter:description" content="Aplicação profissional para sorteio balanceado de times em partidas de futebol 5v5 com algoritmos de nivelamento e estatísticas detalhadas.">
-    <meta name="twitter:image" content="{{ url_for('static', filename='logo-natrave-5v5.png', _external=True) }}">
+    <meta name="twitter:url" content="{{ request.url | replace(request.host_url, 'https://natrave.com.br/') }}">
+    <meta name="twitter:title" content="NaTrave | {{ self.title() }}">
+    <meta name="twitter:description" content="{{ self.meta_description() }}">
+    <meta name="twitter:image" content="https://natrave.com.br/apple-touch-icon.png">
 
     <!-- Structured Data (JSON-LD) for Search Engines -->
     <script type="application/ld+json">
@@ -28,18 +30,33 @@
       "name": "NaTrave",
       "alternateName": "NaTrave - Sorteio de Times 5v5",
       "url": "https://natrave.com.br/",
-      "logo": "{{ url_for('static', filename='logo-natrave-5v5.png', _external=True) }}",
-      "image": "{{ url_for('static', filename='logo-natrave-5v5.png', _external=True) }}",
+      "logo": "https://natrave.com.br/apple-touch-icon.png",
+      "image": "https://natrave.com.br/apple-touch-icon.png",
       "description": "Aplicação profissional para sorteio balanceado de times em partidas de futebol 5v5 com algoritmos de nivelamento e estatísticas detalhadas.",
       "applicationCategory": "SportsApplication",
       "operatingSystem": "All"
     }
     </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "NaTrave",
+      "url": "https://natrave.com.br/",
+      "logo": "https://natrave.com.br/apple-touch-icon.png",
+      "sameAs": [
+        "https://www.instagram.com/natrave5v5"
+      ]
+    }
+    </script>
 
-    <link rel="manifest" href="/manifest.json">
-    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='natrave.svg', v='20260708-03') }}">
-    <link rel="apple-touch-icon" href="{{ url_for('static', filename='logo-natrave-5v5.png') }}">
-    <title>NaTrave | {% block title %}Painel{% endblock %}</title>
+    <link rel="icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+
+    <title>NaTrave | {% block title %}Organize seus jogos de forma equilibrada{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='20260616-06') }}">
     <script src="{{ url_for('static', filename='local-datetime.js', v='20260616-06') }}" defer></script>
     {% if config.get('ENABLE_APP_SHELL') %}

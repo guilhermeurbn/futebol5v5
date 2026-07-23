@@ -3,7 +3,192 @@
 {% block title %}Editar jogador - {{ jogador.nome }}{% endblock %}
 
 {% block content %}
-<div class="container{% if usuario.role in ['admin', 'super_admin'] %} page-container-wide judge-workspace-page admin-page admin-page--ecosystem{% endif %}" style="max-width: 900px;">
+<style>
+    /* Estilos Premium para a tela de Edição de Jogador */
+    .edit-page-container {
+        background: #000000 !important;
+        min-height: 100vh;
+        width: 100%;
+        padding-bottom: 4rem;
+    }
+    
+    .premium-edit-panel {
+        background: rgba(18, 15, 25, 0.98) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 16px !important;
+        padding: 2.25rem 2rem !important;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5) !important;
+        max-width: 520px;
+        margin: 1.5rem auto 3rem auto;
+    }
+    
+    /* Hover e Checked das caixas de opção em Tema Escuro */
+    .premium-edit-panel .tipo-option, 
+    .premium-edit-panel .posicao-option {
+        background: rgba(255, 255, 255, 0.03) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 12px !important;
+        padding: 0.75rem !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        color: #f4f1f8 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0.5rem !important;
+        flex: 1;
+    }
+    
+    .premium-edit-panel .tipo-option:hover, 
+    .premium-edit-panel .posicao-option:hover {
+        border-color: rgba(167, 139, 250, 0.3) !important;
+        background: rgba(167, 139, 250, 0.04) !important;
+    }
+    
+    .premium-edit-panel .tipo-option:has(.tipo-radio:checked),
+    .premium-edit-panel .posicao-option:has(.posicao-radio:checked) {
+        background: rgba(167, 139, 250, 0.08) !important;
+        border-color: rgba(167, 139, 250, 0.4) !important;
+    }
+
+    .premium-edit-panel .tipo-radio, 
+    .premium-edit-panel .posicao-radio {
+        accent-color: #a78bfa !important;
+        width: 16px !important;
+        height: 16px !important;
+        cursor: pointer !important;
+        margin: 0 !important;
+    }
+
+    .premium-edit-panel .tipo-label, 
+    .premium-edit-panel .posicao-label {
+        color: #f4f1f8 !important;
+        font-size: 0.85rem !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.35rem !important;
+        font-weight: 600 !important;
+        margin: 0 !important;
+        cursor: pointer !important;
+    }
+
+    /* Estilos do Slider de Habilidade */
+    .premium-edit-panel .votacao-slider {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 6px;
+        border-radius: 3px;
+        background: rgba(255, 255, 255, 0.1);
+        outline: none;
+        margin: 0 !important;
+    }
+    
+    .premium-edit-panel .votacao-slider::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 6px;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+    }
+    
+    .premium-edit-panel .votacao-slider::-webkit-slider-thumb {
+        height: 20px;
+        width: 20px;
+        border-radius: 50%;
+        background: #a78bfa;
+        cursor: pointer;
+        -webkit-appearance: none;
+        margin-top: -7px;
+        box-shadow: 0 0 8px rgba(167, 139, 250, 0.5);
+        transition: transform 0.1s ease, background-color 0.1s ease;
+    }
+    
+    .premium-edit-panel .votacao-slider::-webkit-slider-thumb:active {
+        transform: scale(1.2);
+        background: #c084fc;
+    }
+
+    /* 📱 Adaptações responsivas para mobile (sem scroll) */
+    @media (max-width: 600px) {
+        .edit-page-container {
+            padding-bottom: 1rem !important;
+        }
+
+        .edit-page-container .header {
+            display: none !important; /* Esconde cabeçalho padrão */
+        }
+
+        .edit-page-container .mobile-logo-header {
+            display: flex !important; /* Exibe a logo no mobile */
+        }
+
+        .premium-edit-panel {
+            padding: 1.25rem 1rem !important;
+            margin: 0.25rem auto !important; /* Traz o card o mais próximo possível da logo */
+            border-radius: 12px !important;
+        }
+
+        .premium-edit-panel h2 {
+            font-size: 1.2rem !important;
+            margin-bottom: 0.25rem !important;
+        }
+
+        .premium-edit-panel p.subtitle-desc {
+            display: none !important; /* Oculta descrição longa no mobile */
+        }
+
+        .premium-edit-panel .form-group {
+            margin-bottom: 0.75rem !important; /* Reduz espaçamento vertical */
+        }
+
+        .premium-edit-panel .form-label {
+            margin-bottom: 0.25rem !important;
+            font-size: 0.8rem !important;
+        }
+
+        .premium-edit-panel .form-input {
+            padding: 0.5rem 0.75rem !important;
+            font-size: 0.85rem !important;
+            height: 38px !important;
+        }
+
+        .premium-edit-panel .slider-control-container button {
+            width: 32px !important;
+            height: 32px !important;
+            font-size: 1rem !important;
+        }
+
+        .premium-edit-panel .tipo-option, 
+        .premium-edit-panel .posicao-option {
+            padding: 0.5rem !important;
+            border-radius: 8px !important;
+        }
+
+        .premium-edit-panel .tipo-label, 
+        .premium-edit-panel .posicao-label {
+            font-size: 0.75rem !important;
+        }
+
+        .premium-edit-panel .premium-submit-btn,
+        .premium-edit-panel a.btn-secondary {
+            min-height: 40px !important;
+            font-size: 0.85rem !important;
+            padding: 0.5rem 1rem !important;
+            border-radius: 8px !important;
+        }
+    }
+</style>
+
+<div class="container{% if usuario.role in ['admin', 'super_admin'] %} page-container-wide judge-workspace-page admin-page admin-page--ecosystem{% endif %} edit-page-container">
+    <!-- Logotipo compacto para Mobile (posicionado no topo) -->
+    <div class="mobile-logo-header" style="display: none; justify-content: center; align-items: center; padding: 0.75rem 0 0.25rem 0;">
+        <div class="logo-header">
+            <a href="{{ url_for('jogador_crud.index') }}" aria-label="Ir para a página inicial">
+                <img src="{{ url_for('static', filename='natrave.svg', v='20260708-03') }}" alt="NaTrave 5v5" class="brand-logo-image">
+            </a>
+        </div>
+    </div>
+
     <header class="header">
         <div class="header-content">
             {% set brand_title = 'Editar jogador' %}
@@ -12,47 +197,140 @@
         </div>
     </header>
 
-    <main class="main">
-        <section class="section">
-            <h2 class="section-title">✏️ Editar {{ jogador.nome }}</h2>
-            <p class="section-subtitle">Atualize os dados do jogador mantendo o padrão visual do sistema.</p>
+    <main class="main" style="padding-top: 1rem;">
+        <div class="premium-edit-panel">
+            <h2 class="premium-profile-panel-title" style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0; margin-bottom: 0.5rem; font-size: 1.4rem;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 22px; height: 22px; color: #a78bfa;"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                Editar Jogador
+            </h2>
+            <p class="subtitle-desc" style="font-size: 0.85rem; color: #9a95a4; margin-bottom: 2rem; margin-top: 0;">Atualize os dados de {{ jogador.nome }} mantendo o padrão visual premium do sistema.</p>
+
             {% if erro %}
-            <div class="alert alert-danger">{{ erro }}</div>
+            <div class="alert alert-danger" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 12px; padding: 0.75rem 1rem; color: #ef4444; font-size: 0.85rem; margin-bottom: 1.5rem;">
+                {{ erro }}
+            </div>
             {% endif %}
-            <form action="{{ url_for('jogador.editar_jogador_post', jogador_id=jogador.id) }}" method="post" class="form">
+
+            <form action="{{ url_for('jogador_crud.editar_jogador_post', jogador_id=jogador.id) }}" method="post" class="player-create-form">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div class="form-group">
-                    <label class="form-label" for="nome">Nome</label>
-                    <input class="form-input" id="nome" type="text" name="nome" value="{{ jogador.nome }}" minlength="2" required>
+
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                    <label for="edit_nome" class="form-label" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #f4f1f8;">Nome do Jogador</label>
+                    <input
+                        type="text"
+                        id="edit_nome"
+                        name="nome"
+                        class="form-input"
+                        value="{{ jogador.nome }}"
+                        required
+                        minlength="2"
+                        autocomplete="off"
+                        style="width: 100%;"
+                    >
                 </div>
-                <div class="form-group">
-                    <label class="form-label" for="nivel">Nota / Rating</label>
-                    <input class="form-input" id="nivel" type="number" name="nivel"
-                           min="0" max="10" step="0.01"
-                           value="{{ '%.2f'|format(jogador.nivel|float) }}" required>
-                    <small style="color: rgba(148,163,184,0.9); margin-top: 0.3rem; display:block;">0.00 – 10.00 • precisão 0.01 • Nota inicial manual; depois evolui via votação.</small>
+
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <label for="edit_nivel" class="form-label" style="margin-bottom: 0; font-weight: 600; color: #f4f1f8;">Nível de Habilidade</label>
+                        <span id="editNivelValDisplay" style="font-weight: 800; color: #a78bfa; background: rgba(167, 139, 250, 0.1); padding: 0.2rem 0.6rem; border-radius: 8px; font-size: 0.9rem;">{{ '%.1f'|format(jogador.nivel|float) }}</span>
+                    </div>
+                    <div class="slider-control-container" style="display: flex; align-items: center; gap: 0.75rem; margin: 0.5rem 0;">
+                        <button type="button" class="slider-step-btn" id="btnEditNivelDec" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: #ffffff; font-size: 1.25rem; font-weight: bold; cursor: pointer; user-select: none; transition: all 0.15s ease;">−</button>
+                        <input
+                            type="range"
+                            id="edit_nivel"
+                            name="nivel"
+                            min="1"
+                            max="10"
+                            step="0.5"
+                            value="{{ '%.1f'|format(jogador.nivel|float) }}"
+                            class="votacao-slider"
+                            style="flex: 1; cursor: pointer; margin: 0 !important;"
+                        >
+                        <button type="button" class="slider-step-btn" id="btnEditNivelInc" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: #ffffff; font-size: 1.25rem; font-weight: bold; cursor: pointer; user-select: none; transition: all 0.15s ease;">+</button>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label" for="tipo">Tipo</label>
-                    <select class="form-input" id="tipo" name="tipo">
-                        <option value="fixo" {% if jogador.tipo == 'fixo' %}selected{% endif %}>Fixo</option>
-                        <option value="avulso" {% if jogador.tipo == 'avulso' %}selected{% endif %}>Avulso</option>
-                    </select>
+
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                    <label class="form-label" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #f4f1f8;">Tipo</label>
+                    <div class="tipo-selector" style="display: flex; gap: 1rem;">
+                        <label class="tipo-option">
+                            <input type="radio" name="tipo" value="fixo" class="tipo-radio" {% if jogador.tipo == 'fixo' %}checked{% endif %} required>
+                            <span class="tipo-label">
+                                <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; color: #a78bfa;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                Fixo
+                            </span>
+                        </label>
+                        <label class="tipo-option">
+                            <input type="radio" name="tipo" value="avulso" class="tipo-radio" {% if jogador.tipo == 'avulso' %}checked{% endif %} required>
+                            <span class="tipo-label">
+                                <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; color: #a78bfa;"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                Avulso
+                            </span>
+                        </label>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label" for="posicao">Posição</label>
-                    <select class="form-input" id="posicao" name="posicao">
-                        <option value="linha" {% if jogador.posicao == 'linha' %}selected{% endif %}>Linha</option>
-                        <option value="goleiro" {% if jogador.posicao == 'goleiro' %}selected{% endif %}>Goleiro</option>
-                    </select>
+
+                <div class="form-group" style="margin-bottom: 2rem;">
+                    <label class="form-label" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #f4f1f8;">Posição</label>
+                    <div class="posicao-selector" style="display: flex; gap: 1rem;">
+                        <label class="posicao-option">
+                            <input type="radio" name="posicao" value="linha" class="posicao-radio" {% if jogador.posicao == 'linha' %}checked{% endif %} required>
+                            <span class="posicao-label">
+                                <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; color: #a78bfa;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                                Linha
+                            </span>
+                        </label>
+                        <label class="posicao-option">
+                            <input type="radio" name="posicao" value="goleiro" class="posicao-radio" {% if jogador.posicao == 'goleiro' %}checked{% endif %} required>
+                            <span class="posicao-label">
+                                <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; color: #a78bfa;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                Goleiro
+                            </span>
+                        </label>
+                    </div>
                 </div>
 
                 <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                    <button class="btn btn-primary" type="submit">Salvar alterações</button>
-                    <a class="btn btn-secondary" href="{{ url_for('jogador.perfil_jogador_publico', jogador_id=jogador.id) }}">Cancelar</a>
+                    <button class="btn btn-primary premium-submit-btn" type="submit" style="flex: 1; min-height: 48px; border: none; font-weight: 700; border-radius: 12px; cursor: pointer;">Salvar alterações</button>
+                    <a class="btn btn-secondary" href="{{ url_for('auth.perfil_jogador_publico', jogador_id=jogador.id) }}" style="display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); border-radius: 12px; padding: 0.75rem 1.5rem; color: #9a95a4; text-decoration: none; font-weight: 600; transition: all 0.2s ease;">Cancelar</a>
                 </div>
             </form>
-        </section>
+        </div>
     </main>
 </div>
+
+<script>
+    (() => {
+        // --- CONTROLE DE SLIDER DE EDIÇÃO ---
+        const editSlider = document.getElementById('edit_nivel');
+        const editDisplay = document.getElementById('editNivelValDisplay');
+        const decBtn = document.getElementById('btnEditNivelDec');
+        const incBtn = document.getElementById('btnEditNivelInc');
+
+        const updateDisplay = () => {
+            editDisplay.textContent = parseFloat(editSlider.value).toFixed(1);
+        };
+
+        if (editSlider && editDisplay) {
+            editSlider.addEventListener('input', updateDisplay);
+
+            if (decBtn) {
+                decBtn.addEventListener('click', () => {
+                    const val = Math.max(1, parseFloat(editSlider.value) - 0.5);
+                    editSlider.value = val;
+                    editSlider.dispatchEvent(new Event('input'));
+                });
+            }
+
+            if (incBtn) {
+                incBtn.addEventListener('click', () => {
+                    const val = Math.min(10, parseFloat(editSlider.value) + 0.5);
+                    editSlider.value = val;
+                    editSlider.dispatchEvent(new Event('input'));
+                });
+            }
+        }
+    })();
+</script>
 {% endblock %}

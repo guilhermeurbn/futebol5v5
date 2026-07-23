@@ -2,10 +2,10 @@
   "status": "idle",
   "partida_atual": null,
   "ultima_partida_encerrada": {
-    "titulo": "Votação do sorteio #3",
-    "sorteio_id": 3,
-    "partida_id": 3,
-    "encerrado_em": "2026-07-18T01:47:10.051522",
+    "titulo": "Votação do sorteio #4",
+    "sorteio_id": 4,
+    "partida_id": 4,
+    "encerrado_em": "2026-07-22T14:16:59.131928",
     "resultado_resumido": [
       {
         "time_numero": 1,
@@ -18,10 +18,10 @@
       {
         "time_numero": 2,
         "gols": 0,
-        "vitorias": 1,
+        "vitorias": 0,
         "empates": 0,
         "derrotas": 0,
-        "resultado": "vitoria"
+        "resultado": "empate"
       }
     ],
     "melhor_jogador": null,
@@ -61,6 +61,14 @@
         "externo": false
       },
       {
+        "user_id": "247a4217-b953-4830-a509-bd21f6727e77",
+        "username": "joao_pinto",
+        "nome_usuario": "João Pinto",
+        "jogador_nome": "João Pinto",
+        "time_numero": 1,
+        "externo": false
+      },
+      {
         "user_id": "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7",
         "username": "carlos",
         "nome_usuario": "Carlos",
@@ -89,14 +97,6 @@
         "username": "jhon",
         "nome_usuario": "Jhon",
         "jogador_nome": "Jhon",
-        "time_numero": 2,
-        "externo": false
-      },
-      {
-        "user_id": "96ee84cb-8e66-47da-ae76-3b7c4e23e2eb",
-        "username": "guisanto",
-        "nome_usuario": "Guilherme Urbano",
-        "jogador_nome": "Guilherme Urbano",
         "time_numero": 2,
         "externo": false
       }

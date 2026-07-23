@@ -227,7 +227,7 @@
                     {% set gols = jogo.get('gols_times') or [0, 0] %}
                     {% set gols1 = gols[0]|default(0)|int %}
                     {% set gols2 = gols[1]|default(0)|int %}
-                    <div class="premium-profile-match-card">
+                    <a href="{{ url_for('partida.historico') }}#sorteio-{{ jogo.sorteio_id }}" class="premium-profile-match-card">
                         {% if jogo.get('resultado', 'empate') == 'vitória' %}
                         <div class="premium-profile-match-result-badge premium-profile-match-result-badge--win">V</div>
                         {% elif jogo.get('resultado', 'empate') == 'derrota' %}
@@ -252,7 +252,7 @@
                             </span>
                             <svg class="premium-profile-match-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                         </div>
-                    </div>
+                    </a>
                     {% endfor %}
                 </div>
 
@@ -283,7 +283,7 @@
                     {% set gols = jogo.get('gols_times') or [0, 0] %}
                     {% set gols1 = gols[0]|default(0)|int %}
                     {% set gols2 = gols[1]|default(0)|int %}
-                    <div class="premium-profile-match-card">
+                    <a href="{{ url_for('partida.historico') }}#sorteio-{{ jogo.sorteio_id }}" class="premium-profile-match-card">
                         {% if jogo.get('resultado', 'empate') == 'vitória' %}
                         <div class="premium-profile-match-result-badge premium-profile-match-result-badge--win">V</div>
                         {% elif jogo.get('resultado', 'empate') == 'derrota' %}
@@ -308,7 +308,7 @@
                             </span>
                             <svg class="premium-profile-match-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                         </div>
-                    </div>
+                    </a>
                     {% endfor %}
                 </div>
                 {% else %}
@@ -352,7 +352,7 @@
                     <div class="form-group" style="margin-bottom: 1.25rem;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                             <label for="edit_nivel" class="form-label" style="margin-bottom: 0;">Nível de Habilidade</label>
-                            <span id="editNivelValDisplay" style="font-weight: 800; color: #a78bfa; background: rgba(167, 139, 250, 0.1); padding: 0.2rem 0.6rem; border-radius: 8px; font-size: 0.9rem;">{{ '%.0f'|format(jogador.nivel|float) }}</span>
+                            <span id="editNivelValDisplay" style="font-weight: 800; color: #a78bfa; background: rgba(167, 139, 250, 0.1); padding: 0.2rem 0.6rem; border-radius: 8px; font-size: 0.9rem;">{{ '%.1f'|format(jogador.nivel|float) }}</span>
                         </div>
                         <div class="slider-control-container" style="display: flex; align-items: center; gap: 0.75rem; margin: 0.5rem 0;">
                             <button type="button" class="slider-step-btn" id="btnEditNivelDec" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: #ffffff; font-size: 1.25rem; font-weight: bold; cursor: pointer; user-select: none; transition: all 0.15s ease;">−</button>
@@ -362,7 +362,8 @@
                                 name="nivel"
                                 min="1"
                                 max="10"
-                                value="{{ '%.0f'|format(jogador.nivel|float) }}"
+                                step="0.5"
+                                value="{{ '%.1f'|format(jogador.nivel|float) }}"
                                 class="votacao-slider"
                                 style="flex: 1; cursor: pointer; margin: 0 !important;"
                             >
@@ -446,7 +447,7 @@
         const incBtn = document.getElementById('btnEditNivelInc');
 
         const updateDisplay = () => {
-            editDisplay.textContent = editSlider.value;
+            editDisplay.textContent = parseFloat(editSlider.value).toFixed(1);
         };
 
         if (editSlider && editDisplay) {
@@ -454,7 +455,7 @@
 
             if (decBtn) {
                 decBtn.addEventListener('click', () => {
-                    const val = Math.max(1, parseInt(editSlider.value, 10) - 1);
+                    const val = Math.max(1, parseFloat(editSlider.value) - 0.5);
                     editSlider.value = val;
                     editSlider.dispatchEvent(new Event('input'));
                 });
@@ -462,7 +463,7 @@
 
             if (incBtn) {
                 incBtn.addEventListener('click', () => {
-                    const val = Math.min(10, parseInt(editSlider.value, 10) + 1);
+                    const val = Math.min(10, parseFloat(editSlider.value) + 0.5);
                     editSlider.value = val;
                     editSlider.dispatchEvent(new Event('input'));
                 });

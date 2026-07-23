@@ -297,7 +297,7 @@
                     {% set gols = jogo.get('gols_times') or [0, 0] %}
                     {% set gols1 = gols[0]|default(0)|int %}
                     {% set gols2 = gols[1]|default(0)|int %}
-                    <div class="premium-profile-match-card">
+                    <a href="{{ url_for('partida.historico') }}#sorteio-{{ jogo.sorteio_id }}" class="premium-profile-match-card">
                         {% if jogo.get('resultado', 'empate') == 'vitória' %}
                         <div class="premium-profile-match-result-badge premium-profile-match-result-badge--win">V</div>
                         {% elif jogo.get('resultado', 'empate') == 'derrota' %}
@@ -322,7 +322,7 @@
                             </span>
                             <svg class="premium-profile-match-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                         </div>
-                    </div>
+                    </a>
                     {% endfor %}
                 </div>
 
@@ -355,7 +355,7 @@
                     {% set gols = jogo.get('gols_times') or [0, 0] %}
                     {% set gols1 = gols[0]|default(0)|int %}
                     {% set gols2 = gols[1]|default(0)|int %}
-                    <div class="premium-profile-match-card">
+                    <a href="{{ url_for('partida.historico') }}#sorteio-{{ jogo.sorteio_id }}" class="premium-profile-match-card">
                         {% if jogo.get('resultado', 'empate') == 'vitória' %}
                         <div class="premium-profile-match-result-badge premium-profile-match-result-badge--win">V</div>
                         {% elif jogo.get('resultado', 'empate') == 'derrota' %}
@@ -380,7 +380,7 @@
                             </span>
                             <svg class="premium-profile-match-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                         </div>
-                    </div>
+                    </a>
                     {% endfor %}
                 </div>
                 {% else %}

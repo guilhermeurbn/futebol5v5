@@ -22,7 +22,7 @@
         {% if sorteios %}
             <div class="judge-draw-history__list history-page__list">
                 {% for sorteio in sorteios %}
-                <details class="judge-draw-history__item votacao-admin-history-card {% if loop.first %}votacao-admin-history-card--featured{% endif %} {% if sorteio.votacao_encerrada %}votacao-admin-history-card--closed{% elif sorteio.votacao_aberta %}votacao-admin-history-card--open{% endif %}">
+                <details id="sorteio-{{ sorteio.id }}" class="judge-draw-history__item votacao-admin-history-card {% if loop.first %}votacao-admin-history-card--featured{% endif %} {% if sorteio.votacao_encerrada %}votacao-admin-history-card--closed{% elif sorteio.votacao_aberta %}votacao-admin-history-card--open{% endif %}">
                     <summary class="history-page__summary">
                         <span class="judge-draw-history__identity">
                             <span class="judge-draw-history__number">#{{ sorteio.id }}</span>
@@ -257,6 +257,29 @@
             closeModal();
         }
     });
+
+    // Abrir automaticamente o sorteio selecionado via hash na URL
+    const openSorteioFromHash = () => {
+        const hash = window.location.hash;
+        if (hash && hash.startsWith('#sorteio-')) {
+            const el = document.querySelector(hash);
+            if (el && el.tagName === 'DETAILS') {
+                el.setAttribute('open', '');
+                setTimeout(() => {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Adiciona um efeito temporário de destaque/piscar
+                    el.style.boxShadow = '0 0 25px rgba(167, 139, 250, 0.6)';
+                    el.style.borderColor = '#a78bfa';
+                    setTimeout(() => {
+                        el.style.boxShadow = '';
+                        el.style.borderColor = '';
+                    }, 2500);
+                }, 100);
+            }
+        }
+    };
+    window.addEventListener('load', openSorteioFromHash);
+    window.addEventListener('hashchange', openSorteioFromHash);
 })();
 </script>
 {% endblock %}

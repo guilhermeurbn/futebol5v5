@@ -59,6 +59,20 @@ logs/
 /jogadores_payload.json
 data/*.bak*
 
+# Dados ativos locais no diretório data/ (rastreados em data/seeds/)
+data/admin_notificacoes.json
+data/historico.json
+data/jogadores.json
+data/jogadores_payload.json
+data/juiz_partida_atual.json
+data/partidas.json
+data/sorteios_stack.json
+data/users.json
+data/votacoes_partidas.json
+
+# Pasta de Backups
+backups/
+
 # Teste
 .pytest_cache/
 .coverage

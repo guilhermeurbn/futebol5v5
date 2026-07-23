@@ -16,10 +16,13 @@
 
 <div class="container page-container-wide judge-workspace-page judge-voting-page">
     <header class="header">
-        <div class="header-content">
-            {% set brand_title = 'Votações' %}
-            {% set brand_subtitle = 'Conduza a avaliação da partida em duas etapas' %}
-            {% include '_brand_header.html' %}
+        <div class="header-content" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; width: 100%;">
+            <div style="flex: 1; min-width: 200px;">
+                {% set brand_title = 'Votações' %}
+                {% set brand_subtitle = 'Conduza a avaliação da partida em duas etapas' %}
+                {% include '_brand_header.html' %}
+            </div>
+            <span class="judge-sorteio-badge-sutil">Sorteio #{{ selected_sorteio_id or '-' }}</span>
         </div>
     </header>
 
@@ -30,11 +33,6 @@
         {% if erro %}
         <div class="alert alert-warning" role="alert">{{ erro }}</div>
         {% endif %}
-
-        <section class="judge-flow-intro judge-flow-intro--compact">
-            <span class="judge-flow-kicker">Sorteio #{{ selected_sorteio_id or '-' }}</span>
-            <h1>Votação da partida</h1>
-        </section>
 
         <div class="judge-voting-steps">
             <article class="judge-flow-card judge-voting-step {% if resultado_concluido %}is-complete{% endif %}">
@@ -54,7 +52,92 @@
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="hidden" name="sorteio_id" value="{{ selected_sorteio_id }}">
 
-                    <div class="judge-result-grid">
+                    <nav class="judge-tab-nav" aria-label="Abas de preenchimento">
+                        <button type="button" class="judge-tab-btn is-active" data-tab-target="confrontosTab">Lançar Partidas</button>
+                        <button type="button" class="judge-tab-btn" data-tab-target="manualTab">Ajuste Manual</button>
+                    </nav>
+
+                    <div id="confrontosTab" class="judge-tab-content">
+                        <div class="judge-match-logger">
+                            <div class="judge-match-placar-setup">
+                                <div class="judge-match-placar-team">
+                                    <span style="font-size: 0.78rem; font-weight: 800; color: var(--judge-muted); margin-bottom: 0.35rem;">TIME A</span>
+                                    <div class="judge-match-team-selector" id="selectorTimeA" data-selected="1">
+                                        {% for time in sorteio_contexto.times %}
+                                        <button type="button" class="judge-team-select-btn {% if loop.first %}is-active{% endif %}" data-value="{{ time.numero }}">
+                                            Time {{ time.numero }}
+                                        </button>
+                                        {% endfor %}
+                                    </div>
+                                    <!-- Stepper de gols do Time A -->
+                                    <div class="judge-result-stepper" style="margin-top: 0.65rem;">
+                                        <button type="button" class="judge-result-stepper__btn" id="btnDecGolsA">−</button>
+                                        <span class="judge-logger-val" id="valGolsA">0</span>
+                                        <button type="button" class="judge-result-stepper__btn" id="btnIncGolsA">+</button>
+                                    </div>
+                                </div>
+
+                                <div class="judge-match-placar-vs">VS</div>
+
+                                <div class="judge-match-placar-team">
+                                    <span style="font-size: 0.78rem; font-weight: 800; color: var(--judge-muted); margin-bottom: 0.35rem;">TIME B</span>
+                                    <div class="judge-match-team-selector" id="selectorTimeB" data-selected="2">
+                                        {% for time in sorteio_contexto.times %}
+                                        <button type="button" class="judge-team-select-btn {% if loop.index == 2 %}is-active{% endif %}" data-value="{{ time.numero }}">
+                                            Time {{ time.numero }}
+                                        </button>
+                                        {% endfor %}
+                                    </div>
+                                    <!-- Stepper de gols do Time B -->
+                                    <div class="judge-result-stepper" style="margin-top: 0.65rem;">
+                                        <button type="button" class="judge-result-stepper__btn" id="btnDecGolsB">−</button>
+                                        <span class="judge-logger-val" id="valGolsB">0</span>
+                                        <button type="button" class="judge-result-stepper__btn" id="btnIncGolsB">+</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="button" id="btnAddConfronto" class="btn btn-primary" style="align-self: center; width: auto; padding: 0.65rem 1.5rem; font-size: 0.88rem; border-radius: 12px; display: inline-flex; align-items: center; gap: 0.4rem;">
+                                <span>➕</span> Registrar Partida
+                            </button>
+
+                            <!-- Live Standings / Classificação ao vivo -->
+                            <div class="judge-live-standings">
+                                <div class="judge-live-standings__title">
+                                    <span>📊</span> Classificação da Rodada (Parcial)
+                                </div>
+                                <div class="judge-live-standings__table-header">
+                                    <span>Time</span>
+                                    <span style="text-align: center;">V-E-D</span>
+                                    <span style="text-align: center;">Gols</span>
+                                    <span style="text-align: right;">Pts</span>
+                                </div>
+                                <div class="judge-live-standings__list" id="loggerStandingsList">
+                                    <!-- Populated dynamically via JS -->
+                                </div>
+                            </div>
+
+                            <!-- Histórico de Partidas Lançadas -->
+                            <div>
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <div style="font-size: 0.8rem; font-weight: 800; color: var(--judge-muted); display: flex; align-items: center; gap: 0.35rem;">
+                                        <span>🕒</span> Partidas Registradas
+                                    </div>
+                                    <button type="button" id="btnClearConfrontos" class="btn" style="background: none !important; border: none !important; color: #f87171 !important; font-size: 0.78rem !important; font-weight: 700 !important; cursor: pointer; padding: 0.2rem 0.5rem; display: none;">
+                                        Limpar tudo
+                                    </button>
+                                </div>
+                                <div class="judge-logged-matches" id="loggerMatchesList">
+                                    <div class="judge-logged-match-empty">
+                                        Nenhuma partida lançada ainda. Adicione resultados acima.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="manualTab" class="judge-tab-content" style="display: none;">
+                        <div class="judge-result-grid">
                         {% for time in sorteio_contexto.times %}
                         <details class="judge-result-team">
                             <summary class="judge-result-team__summary">
@@ -69,8 +152,10 @@
 
                             <div class="judge-result-fields">
                                 <div class="judge-result-field">
-                                    <span aria-label="Vitórias">V</span>
-                                    <strong>Vitórias</strong>
+                                    <div class="judge-result-field__header">
+                                        <span class="judge-result-badge-mini is-vitoria" aria-label="Vitórias">V</span>
+                                        <strong>Vitórias</strong>
+                                    </div>
                                     <div class="judge-result-stepper">
                                         <button type="button" class="judge-result-dec judge-result-stepper__btn"
                                             data-target="vitorias_{{ time.numero }}" data-delta="-1"
@@ -78,17 +163,17 @@
                                         <span class="judge-result-value" data-value-for="vitorias_{{ time.numero }}"
                                             aria-live="polite">{{ resultado_form_values.get('vitorias_' ~ time.numero,
                                             '0') }}</span>
-                                        <input id="vitorias_{{ time.numero }}" type="hidden"
-                                            name="vitorias_{{ time.numero }}"
-                                            value="{{ resultado_form_values.get('vitorias_' ~ time.numero, '0') }}">
+                                        <input id="vitorias_{{ time.numero }}" type="hidden" name="vitorias_{{ time.numero }}" value="{{ resultado_form_values.get('vitorias_' ~ time.numero, '0') }}">
                                         <button type="button" class="judge-result-inc judge-result-stepper__btn"
                                             data-target="vitorias_{{ time.numero }}" data-delta="1"
                                             aria-label="Aumentar vitórias do Time {{ time.numero }}">+</button>
                                     </div>
                                 </div>
                                 <div class="judge-result-field">
-                                    <span aria-label="Empates">E</span>
-                                    <strong>Empates</strong>
+                                    <div class="judge-result-field__header">
+                                        <span class="judge-result-badge-mini is-empate" aria-label="Empates">E</span>
+                                        <strong>Empates</strong>
+                                    </div>
                                     <div class="judge-result-stepper">
                                         <button type="button" class="judge-result-dec judge-result-stepper__btn"
                                             data-target="empates_{{ time.numero }}" data-delta="-1"
@@ -96,17 +181,17 @@
                                         <span class="judge-result-value" data-value-for="empates_{{ time.numero }}"
                                             aria-live="polite">{{ resultado_form_values.get('empates_' ~ time.numero,
                                             '0') }}</span>
-                                        <input id="empates_{{ time.numero }}" type="hidden"
-                                            name="empates_{{ time.numero }}"
-                                            value="{{ resultado_form_values.get('empates_' ~ time.numero, '0') }}">
+                                        <input id="empates_{{ time.numero }}" type="hidden" name="empates_{{ time.numero }}" value="{{ resultado_form_values.get('empates_' ~ time.numero, '0') }}">
                                         <button type="button" class="judge-result-inc judge-result-stepper__btn"
                                             data-target="empates_{{ time.numero }}" data-delta="1"
                                             aria-label="Aumentar empates do Time {{ time.numero }}">+</button>
                                     </div>
                                 </div>
                                 <div class="judge-result-field">
-                                    <span aria-label="Derrotas">D</span>
-                                    <strong>Derrotas</strong>
+                                    <div class="judge-result-field__header">
+                                        <span class="judge-result-badge-mini is-derrota" aria-label="Derrotas">D</span>
+                                        <strong>Derrotas</strong>
+                                    </div>
                                     <div class="judge-result-stepper">
                                         <button type="button" class="judge-result-dec judge-result-stepper__btn"
                                             data-target="derrotas_{{ time.numero }}" data-delta="-1"
@@ -114,17 +199,17 @@
                                         <span class="judge-result-value" data-value-for="derrotas_{{ time.numero }}"
                                             aria-live="polite">{{ resultado_form_values.get('derrotas_' ~ time.numero,
                                             '0') }}</span>
-                                        <input id="derrotas_{{ time.numero }}" type="hidden"
-                                            name="derrotas_{{ time.numero }}"
-                                            value="{{ resultado_form_values.get('derrotas_' ~ time.numero, '0') }}">
+                                        <input id="derrotas_{{ time.numero }}" type="hidden" name="derrotas_{{ time.numero }}" value="{{ resultado_form_values.get('derrotas_' ~ time.numero, '0') }}">
                                         <button type="button" class="judge-result-inc judge-result-stepper__btn"
                                             data-target="derrotas_{{ time.numero }}" data-delta="1"
                                             aria-label="Aumentar derrotas do Time {{ time.numero }}">+</button>
                                     </div>
                                 </div>
                                 <div class="judge-result-field">
-                                    <span aria-label="Gols">G</span>
-                                    <strong>Gols</strong>
+                                    <div class="judge-result-field__header">
+                                        <span class="judge-result-badge-mini is-gols" aria-label="Gols">G</span>
+                                        <strong>Gols</strong>
+                                    </div>
                                     <div class="judge-result-stepper">
                                         <button type="button" class="judge-result-dec judge-result-stepper__btn"
                                             data-target="gols_{{ time.numero }}" data-delta="-1"
@@ -132,8 +217,7 @@
                                         <span class="judge-result-value" data-value-for="gols_{{ time.numero }}"
                                             aria-live="polite">{{ resultado_form_values.get('gols_' ~ time.numero, '0')
                                             }}</span>
-                                        <input id="gols_{{ time.numero }}" type="hidden" name="gols_{{ time.numero }}"
-                                            value="{{ resultado_form_values.get('gols_' ~ time.numero, '0') }}">
+                                        <input id="gols_{{ time.numero }}" type="hidden" name="gols_{{ time.numero }}" value="{{ resultado_form_values.get('gols_' ~ time.numero, '0') }}">
                                         <button type="button" class="judge-result-inc judge-result-stepper__btn"
                                             data-target="gols_{{ time.numero }}" data-delta="1"
                                             aria-label="Aumentar gols do Time {{ time.numero }}">+</button>
@@ -143,6 +227,7 @@
                         </details>
                         {% endfor %}
                     </div>
+                    </div> <!-- End of manualTab -->
 
                     <div class="judge-result-submit">
                         <button class="btn btn-primary" type="submit">Salvar resultado</button>
@@ -321,8 +406,26 @@
 
 <script>
     (() => {
+        // Tab switching logic
+        const tabBtns = document.querySelectorAll('.judge-tab-btn');
+        const tabContents = document.querySelectorAll('.judge-tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const target = btn.dataset.tabTarget;
+                tabBtns.forEach(b => b.classList.remove('is-active'));
+                tabContents.forEach(c => c.style.display = 'none');
+                
+                btn.classList.add('is-active');
+                const targetEl = document.getElementById(target);
+                if (targetEl) targetEl.style.display = 'block';
+            });
+        });
+
+        // Original Manual Tab stepper controls (protected from zoom)
         document.querySelectorAll('.judge-result-inc, .judge-result-dec').forEach((button) => {
-            button.addEventListener('click', () => {
+            const handleAction = (e) => {
+                e.preventDefault();
                 const input = document.getElementById(button.dataset.target);
                 if (!input) return;
                 const valueDisplay = document.querySelector(`[data-value-for="${button.dataset.target}"]`);
@@ -333,9 +436,304 @@
                 if (valueDisplay) {
                     valueDisplay.textContent = input.value;
                 }
-            });
+            };
+
+            button.addEventListener('touchstart', handleAction, { passive: false });
+            button.addEventListener('click', handleAction);
         });
 
+        // Match logger logic
+        const confrontos = [];
+        const btnDecGolsA = document.getElementById('btnDecGolsA');
+        const btnIncGolsA = document.getElementById('btnIncGolsA');
+        const valGolsA = document.getElementById('valGolsA');
+
+        const btnDecGolsB = document.getElementById('btnDecGolsB');
+        const btnIncGolsB = document.getElementById('btnIncGolsB');
+        const valGolsB = document.getElementById('valGolsB');
+
+        const selectorTimeA = document.getElementById('selectorTimeA');
+        const selectorTimeB = document.getElementById('selectorTimeB');
+        const btnAddConfronto = document.getElementById('btnAddConfronto');
+
+        const matchesList = document.getElementById('loggerMatchesList');
+        const standingsList = document.getElementById('loggerStandingsList');
+
+        let golsA = 0;
+        let golsB = 0;
+
+        const updateLoggerSteppers = () => {
+            if (valGolsA) valGolsA.textContent = golsA;
+            if (valGolsB) valGolsB.textContent = golsB;
+        };
+
+        const setupLoggerStepper = (decBtn, incBtn, valueUpdate, isA) => {
+            if (!decBtn || !incBtn) return;
+            const decHandler = (e) => {
+                e.preventDefault();
+                if (isA) golsA = Math.max(0, golsA - 1);
+                else golsB = Math.max(0, golsB - 1);
+                updateLoggerSteppers();
+            };
+            const incHandler = (e) => {
+                e.preventDefault();
+                if (isA) golsA++;
+                else golsB++;
+                updateLoggerSteppers();
+            };
+            decBtn.addEventListener('click', decHandler);
+            decBtn.addEventListener('touchstart', decHandler, { passive: false });
+            incBtn.addEventListener('click', incHandler);
+            incBtn.addEventListener('touchstart', incHandler, { passive: false });
+        };
+
+        setupLoggerStepper(btnDecGolsA, btnIncGolsA, valGolsA, true);
+        setupLoggerStepper(btnDecGolsB, btnIncGolsB, valGolsB, false);
+
+        // Proactive team select button filtering to prevent choosing the same team
+        function setupTeamSelector(container, isA) {
+            if (!container) return;
+            const buttons = container.querySelectorAll('.judge-team-select-btn');
+            buttons.forEach(btn => {
+                const clickHandler = (e) => {
+                    e.preventDefault();
+                    if (btn.classList.contains('is-disabled')) return;
+                    
+                    buttons.forEach(b => b.classList.remove('is-active'));
+                    btn.classList.add('is-active');
+                    container.dataset.selected = btn.dataset.value;
+                    
+                    resolveSelectorConflict(isA);
+                };
+                btn.addEventListener('click', clickHandler);
+                btn.addEventListener('touchstart', clickHandler, { passive: false });
+            });
+        }
+
+        setupTeamSelector(selectorTimeA, true);
+        setupTeamSelector(selectorTimeB, false);
+
+        function resolveSelectorConflict(isAChanged) {
+            if (!selectorTimeA || !selectorTimeB) return;
+            let valA = Number(selectorTimeA.dataset.selected);
+            let valB = Number(selectorTimeB.dataset.selected);
+
+            const buttonsA = Array.from(selectorTimeA.querySelectorAll('.judge-team-select-btn'));
+            const buttonsB = Array.from(selectorTimeB.querySelectorAll('.judge-team-select-btn'));
+
+            if (valA === valB) {
+                if (isAChanged) {
+                    const nextBtn = buttonsB.find(btn => Number(btn.dataset.value) !== valA);
+                    if (nextBtn) {
+                        buttonsB.forEach(b => b.classList.remove('is-active'));
+                        nextBtn.classList.add('is-active');
+                        selectorTimeB.dataset.selected = nextBtn.dataset.value;
+                        valB = Number(nextBtn.dataset.value);
+                    }
+                } else {
+                    const nextBtn = buttonsA.find(btn => Number(btn.dataset.value) !== valB);
+                    if (nextBtn) {
+                        buttonsA.forEach(b => b.classList.remove('is-active'));
+                        nextBtn.classList.add('is-active');
+                        selectorTimeA.dataset.selected = nextBtn.dataset.value;
+                        valA = Number(nextBtn.dataset.value);
+                    }
+                }
+            }
+
+            buttonsA.forEach(btn => {
+                const val = Number(btn.dataset.value);
+                if (val === valB) {
+                    btn.classList.add('is-disabled');
+                    btn.setAttribute('aria-disabled', 'true');
+                } else {
+                    btn.classList.remove('is-disabled');
+                    btn.removeAttribute('aria-disabled');
+                }
+            });
+
+            buttonsB.forEach(btn => {
+                const val = Number(btn.dataset.value);
+                if (val === valA) {
+                    btn.classList.add('is-disabled');
+                    btn.setAttribute('aria-disabled', 'true');
+                } else {
+                    btn.classList.remove('is-disabled');
+                    btn.removeAttribute('aria-disabled');
+                }
+            });
+        }
+
+        if (selectorTimeA && selectorTimeB) {
+            resolveSelectorConflict(true);
+        }
+
+        // Recalculates stats from matches list and populates form
+        function recalculateStats() {
+            if (!selectorTimeA) return;
+            const teamNumbers = Array.from(selectorTimeA.querySelectorAll('.judge-team-select-btn')).map(btn => Number(btn.dataset.value));
+            
+            const stats = {};
+            teamNumbers.forEach(n => {
+                stats[n] = { vitorias: 0, empates: 0, derrotas: 0, gols: 0, pontos: 0 };
+            });
+
+            confrontos.forEach(conf => {
+                const ta = conf.timeA;
+                const tb = conf.timeB;
+                const ga = conf.golsA;
+                const gb = conf.golsB;
+
+                if (stats[ta]) stats[ta].gols += ga;
+                if (stats[tb]) stats[tb].gols += gb;
+
+                if (ga > gb) {
+                    if (stats[ta]) { stats[ta].vitorias++; stats[ta].pontos += 3; }
+                    if (stats[tb]) { stats[tb].derrotas++; }
+                } else if (ga < gb) {
+                    if (stats[tb]) { stats[tb].vitorias++; stats[tb].pontos += 3; }
+                    if (stats[ta]) { stats[ta].derrotas++; }
+                } else {
+                    if (stats[ta]) { stats[ta].empates++; stats[ta].pontos += 1; }
+                    if (stats[tb]) { stats[tb].empates++; stats[tb].pontos += 1; }
+                }
+            });
+
+            teamNumbers.forEach(n => {
+                const vitInput = document.getElementById(`vitorias_${n}`);
+                const empInput = document.getElementById(`empates_${n}`);
+                const derInput = document.getElementById(`derrotas_${n}`);
+                const golsInput = document.getElementById(`gols_${n}`);
+
+                if (vitInput) vitInput.value = stats[n].vitorias;
+                if (empInput) empInput.value = stats[n].empates;
+                if (derInput) derInput.value = stats[n].derrotas;
+                if (golsInput) golsInput.value = stats[n].gols;
+
+                const vitDisp = document.querySelector(`[data-value-for="vitorias_${n}"]`);
+                const empDisp = document.querySelector(`[data-value-for="empates_${n}"]`);
+                const derDisp = document.querySelector(`[data-value-for="derrotas_${n}"]`);
+                const golsDisp = document.querySelector(`[data-value-for="gols_${n}"]`);
+
+                if (vitDisp) vitDisp.textContent = stats[n].vitorias;
+                if (empDisp) empDisp.textContent = stats[n].empates;
+                if (derDisp) derDisp.textContent = stats[n].derrotas;
+                if (golsDisp) golsDisp.textContent = stats[n].gols;
+            });
+
+            renderStandings(stats);
+            renderLoggedMatches();
+
+            // Toggle "Limpar tudo" visibility
+            const btnClearConfrontos = document.getElementById('btnClearConfrontos');
+            if (btnClearConfrontos) {
+                btnClearConfrontos.style.display = confrontos.length > 0 ? 'inline-block' : 'none';
+            }
+        }
+
+        function renderStandings(stats) {
+            if (!standingsList) return;
+            standingsList.innerHTML = '';
+
+            const sortedTeams = Object.keys(stats).map(n => ({
+                numero: Number(n),
+                ...stats[n]
+            })).sort((x, y) => {
+                if (y.pontos !== x.pontos) return y.pontos - x.pontos;
+                if (y.vitorias !== x.vitorias) return y.vitorias - x.vitorias;
+                return y.gols - x.gols;
+            });
+
+            sortedTeams.forEach((t, index) => {
+                const item = document.createElement('div');
+                item.className = 'judge-live-standings__row';
+                item.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 0.35rem;">
+                        <span class="judge-live-standings__rank">${index + 1}º</span>
+                        <span class="judge-live-standings__name">Time ${t.numero}</span>
+                    </div>
+                    <span class="judge-live-standings__stat-val" style="text-align: center;">${t.vitorias} - ${t.empates} - ${t.derrotas}</span>
+                    <span class="judge-live-standings__stat-val" style="text-align: center;">${t.gols} GP</span>
+                    <span class="judge-live-standings__pts" style="text-align: right;">${t.pontos}</span>
+                `;
+                standingsList.appendChild(item);
+            });
+        }
+
+        function renderLoggedMatches() {
+            if (!matchesList) return;
+            matchesList.innerHTML = '';
+
+            if (confrontos.length === 0) {
+                matchesList.innerHTML = `
+                    <div class="judge-logged-match-empty">
+                        Nenhuma partida lançada ainda. Adicione resultados acima.
+                    </div>
+                `;
+                return;
+            }
+
+            confrontos.forEach((conf, index) => {
+                const item = document.createElement('div');
+                item.className = 'judge-logged-match-item';
+                item.innerHTML = `
+                    <div class="judge-logged-match-details">
+                        <span>Time ${conf.timeA}</span>
+                        <span class="judge-logged-match-score">${conf.golsA} - ${conf.golsB}</span>
+                        <span>Time ${conf.timeB}</span>
+                    </div>
+                    <button type="button" class="judge-logged-match-del" aria-label="Remover partida" title="Remover partida">✕</button>
+                `;
+                
+                item.querySelector('.judge-logged-match-del').addEventListener('click', () => {
+                    confrontos.splice(index, 1);
+                    recalculateStats();
+                });
+                
+                matchesList.appendChild(item);
+            });
+        }
+
+        // Add Clear All handler
+        const btnClearConfrontos = document.getElementById('btnClearConfrontos');
+        if (btnClearConfrontos) {
+            btnClearConfrontos.addEventListener('click', () => {
+                if (confirm('Deseja realmente limpar todas as partidas lançadas?')) {
+                    confrontos.length = 0;
+                    recalculateStats();
+                }
+            });
+        }
+
+        if (btnAddConfronto) {
+            btnAddConfronto.addEventListener('click', () => {
+                const tA = Number(selectorTimeA.dataset.selected);
+                const tB = Number(selectorTimeB.dataset.selected);
+
+                if (tA === tB) {
+                    alert('Erro: Um time não pode jogar contra si mesmo.');
+                    return;
+                }
+
+                confrontos.push({
+                    timeA: tA,
+                    timeB: tB,
+                    golsA: golsA,
+                    golsB: golsB
+                });
+
+                golsA = 0;
+                golsB = 0;
+                updateLoggerSteppers();
+
+                recalculateStats();
+            });
+        }
+
+        // Initialize standings with 0 matches
+        recalculateStats();
+
+        // Modal triggers
         const encerrarForm = document.getElementById('encerrarForm');
         const btnEncerrar = document.getElementById('btnEncerrarVotacao');
         const confirmModal = document.getElementById('confirmModal');

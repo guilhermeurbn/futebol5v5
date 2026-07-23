@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Jogadores{% endblock %}
+{% block title %}Organize seus jogos de forma equilibrada{% endblock %}
 
 {% block body_class %}page-index{% endblock %}
 
@@ -80,7 +80,7 @@
                                     <div class="form-group" style="margin-bottom: 1.25rem;">
                                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                                             <label for="nivel" class="form-label" style="margin-bottom: 0;">Nível de Habilidade</label>
-                                            <span id="nivelValDisplay" style="font-weight: 800; color: #a78bfa; background: rgba(167, 139, 250, 0.1); padding: 0.2rem 0.6rem; border-radius: 8px; font-size: 0.9rem;">5</span>
+                                            <span id="nivelValDisplay" style="font-weight: 800; color: #a78bfa; background: rgba(167, 139, 250, 0.1); padding: 0.2rem 0.6rem; border-radius: 8px; font-size: 0.9rem;">5.0</span>
                                         </div>
                                         <div class="slider-control-container" style="display: flex; align-items: center; gap: 0.75rem; margin: 0.5rem 0;">
                                             <button type="button" class="slider-step-btn" id="btnNivelDec" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: #ffffff; font-size: 1.25rem; font-weight: bold; cursor: pointer; user-select: none; transition: all 0.15s ease;">−</button>
@@ -90,7 +90,8 @@
                                                 name="nivel"
                                                 min="1"
                                                 max="10"
-                                                value="5"
+                                                step="0.5"
+                                                value="5.0"
                                                 class="votacao-slider"
                                                 style="flex: 1; cursor: pointer; margin: 0 !important;"
                                             >
@@ -138,7 +139,7 @@
                             const incBtn = createModal.querySelector('#btnNivelInc');
 
                             const updateDisplay = () => {
-                                display.textContent = slider.value;
+                                display.textContent = parseFloat(slider.value).toFixed(1);
                             };
 
                             if (slider && display) {
@@ -146,7 +147,7 @@
 
                                 if (decBtn) {
                                     decBtn.addEventListener('click', () => {
-                                        const val = Math.max(1, parseInt(slider.value, 10) - 1);
+                                        const val = Math.max(1, parseFloat(slider.value) - 0.5);
                                         slider.value = val;
                                         slider.dispatchEvent(new Event('input'));
                                     });
@@ -154,7 +155,7 @@
 
                                 if (incBtn) {
                                     incBtn.addEventListener('click', () => {
-                                        const val = Math.min(10, parseInt(slider.value, 10) + 1);
+                                        const val = Math.min(10, parseFloat(slider.value) + 0.5);
                                         slider.value = val;
                                         slider.dispatchEvent(new Event('input'));
                                     });

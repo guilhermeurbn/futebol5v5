@@ -3,7 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NaTrave | {% block title %}Auth{% endblock %}</title>
+    <meta name="theme-color" content="#7c3aed">
+    <meta name="description" content="{% block meta_description %}Acesse a plataforma NaTrave 5v5 para gerenciar suas partidas e sortear times equilibrados.{% endblock %}">
+
+    <link rel="canonical" href="{{ request.url | replace(request.host_url, 'https://natrave.com.br/') }}">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.url | replace(request.host_url, 'https://natrave.com.br/') }}">
+    <meta property="og:title" content="NaTrave | {% block og_title %}{{ self.title() }}{% endblock %}">
+    <meta property="og:description" content="{{ self.meta_description() }}">
+    <meta property="og:image" content="https://natrave.com.br/apple-touch-icon.png">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="{{ request.url | replace(request.host_url, 'https://natrave.com.br/') }}">
+    <meta name="twitter:title" content="NaTrave | {{ self.title() }}">
+    <meta name="twitter:description" content="{{ self.meta_description() }}">
+    <meta name="twitter:image" content="https://natrave.com.br/apple-touch-icon.png">
+
+    <link rel="icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+
+    <title>NaTrave | {% block title %}Acesso{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='20260616-06') }}">
     <script src="{{ url_for('static', filename='local-datetime.js', v='20260616-06') }}" defer></script>
 </head>

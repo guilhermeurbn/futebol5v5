@@ -12674,10 +12674,15 @@ tbody td code {
 
 .judge-result-fields {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.5rem;
-  align-items: stretch;
-  padding: 0 1rem 1rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  padding: 0 1rem 1.15rem;
+}
+
+@media (min-width: 768px) {
+  .judge-result-fields {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 .judge-result-fields label {
@@ -12692,32 +12697,65 @@ tbody td code {
 }
 
 .judge-result-field {
-  display: grid;
-  grid-template-columns: 2.3rem minmax(0, 1fr) minmax(128px, auto);
-  gap: 0.55rem;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  min-height: 0;
-  padding: 0.55rem;
-  border: 1px solid rgba(34, 197, 94, 0.12);
-  border-radius: 12px;
-  background: rgba(11, 10, 18, 0.6);
+  gap: 0.65rem;
+  padding: 0.85rem 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
-.judge-result-field>strong {
+.judge-result-field__header {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  justify-content: center;
+}
+
+.judge-result-field strong {
   color: var(--judge-text);
   font-size: 0.86rem;
+  font-weight: 700;
   line-height: 1.1;
 }
 
-.judge-result-field>span {
-  display: inline-grid;
-  place-items: center;
-  width: 2.3rem;
-  height: 2.3rem;
-  border-radius: 999px;
-  color: #f8fafc;
-  background: rgba(139, 92, 246, 0.18);
-  line-height: 1;
+.judge-result-badge-mini {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  font-size: 0.72rem;
+  font-weight: 900;
+  color: #fff;
+}
+
+.judge-result-badge-mini.is-vitoria {
+  background: rgba(34, 197, 94, 0.16);
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  color: #4ade80;
+}
+
+.judge-result-badge-mini.is-empate {
+  background: rgba(156, 163, 175, 0.16);
+  border: 1px solid rgba(156, 163, 175, 0.35);
+  color: #d1d5db;
+}
+
+.judge-result-badge-mini.is-derrota {
+  background: rgba(239, 68, 68, 0.16);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #f87171;
+}
+
+.judge-result-badge-mini.is-gols {
+  background: rgba(139, 92, 246, 0.16);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  color: #a78bfa;
 }
 
 .judge-result-fields input {
@@ -12736,47 +12774,49 @@ tbody td code {
 }
 
 .judge-result-stepper {
-  display: grid;
-  grid-template-columns: 2.25rem 2.5rem 2.25rem;
-  gap: 0.35rem;
+  display: flex;
   align-items: center;
-  justify-content: end;
-}
-
-.judge-result-dec,
-.judge-result-stepper .judge-result-value {
-  display: inline-flex;
-  align-items: center;
+  gap: 0.4rem;
   justify-content: center;
 }
 
 .judge-result-stepper__btn {
-  width: 100%;
-  min-height: 36px;
-  padding: 0 0.55rem;
-  border: 1px solid rgba(34, 197, 94, 0.32);
+  width: 2.3rem;
+  height: 2.3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 10px;
-  background: rgba(34, 197, 94, 0.14);
-  color: #c9f4d5;
-  font-size: 0.78rem;
-  font-weight: 900;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 800;
   cursor: pointer;
-  transition: var(--transition-fast);
+  touch-action: manipulation;
+  user-select: none;
+  transition: all 0.15s ease;
 }
 
-.judge-result-stepper .judge-result-value {
-  min-height: 36px;
-  border: 1px solid rgba(167, 139, 250, 0.18);
+.judge-result-stepper .judge-result-value,
+.judge-logger-val {
+  width: 2.3rem;
+  height: 2.3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 10px;
   color: var(--judge-text);
-  background: rgba(7, 8, 12, 0.78);
+  background: rgba(0, 0, 0, 0.25);
   font-size: 1rem;
   font-weight: 900;
+  user-select: none;
 }
 
 .judge-result-stepper__btn:hover {
-  border-color: rgba(34, 197, 94, 0.52);
-  background: rgba(34, 197, 94, 0.22);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
 }
 
 .judge-result-stepper__btn:focus-visible {
@@ -16402,8 +16442,8 @@ body,
   gap: 1.15rem;
   text-decoration: none !important;
   color: inherit;
-  cursor: pointer;
-  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.22s ease, box-shadow 0.22s ease;
+  cursor: default;
+  transition: border-color 0.22s ease, box-shadow 0.22s ease;
   position: relative;
   overflow: hidden;
   border: 1px solid var(--judge-border);
@@ -16421,12 +16461,10 @@ body,
 
 .judge-last-match-card:hover,
 .judge-last-match-card:focus-visible {
-  transform: translateY(-3px) scale(1.01);
-  border-color: rgba(139, 92, 246, 0.5);
+  border-color: rgba(139, 92, 246, 0.25);
   box-shadow:
-    0 24px 60px rgba(0, 0, 0, 0.45),
-    0 0 15px rgba(139, 92, 246, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    0 24px 60px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .judge-last-match-card__header {
@@ -16545,7 +16583,7 @@ body,
   gap: 0.2rem;
 }
 
-.judge-last-match-card:hover .judge-last-match-card__action {
+.judge-last-match-card__action:hover {
   transform: translateX(4px);
 }
 
@@ -16586,8 +16624,8 @@ body,
   gap: 1.15rem;
   text-decoration: none !important;
   color: inherit;
-  cursor: pointer;
-  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.22s ease, box-shadow 0.22s ease;
+  cursor: default;
+  transition: border-color 0.22s ease, box-shadow 0.22s ease;
   position: relative;
   overflow: hidden;
   border: 1px solid var(--judge-border) !important;
@@ -16605,12 +16643,10 @@ body,
 
 .judge-start-card:hover,
 .judge-start-card:focus-within {
-  transform: translateY(-3px) scale(1.01);
-  border-color: rgba(34, 197, 94, 0.5) !important;
+  border-color: rgba(34, 197, 94, 0.25) !important;
   box-shadow:
-    0 24px 60px rgba(0, 0, 0, 0.45),
-    0 0 15px rgba(34, 197, 94, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    0 24px 60px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .judge-start-card__header {
@@ -16677,12 +16713,15 @@ body,
   transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
-.judge-start-card:hover .btn-primary {
+.judge-start-card .btn-primary:hover {
   transform: scale(1.02);
 }
 
-.judge-start-card:hover .icon-arrow {
+.judge-start-card .btn-primary:hover .icon-arrow {
   transform: translateX(3px);
+}
+
+.judge-start-card .icon-arrow {
   transition: transform 0.2s ease;
 }
 
@@ -16801,7 +16840,7 @@ body.is-referee-layout .site-footer__icon {
   transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease, background-color 0.2s ease !important;
 }
 
-.judge-start-card:hover .btn-primary {
+.judge-start-card .btn-primary:hover {
   transform: translateY(-1px) scale(1.03) !important;
   box-shadow: 0 6px 20px rgba(34, 197, 94, 0.45) !important;
 }
@@ -17102,11 +17141,10 @@ body.is-referee-layout .judge-last-match-card {
 
 body.is-referee-layout .judge-last-match-card:hover,
 body.is-referee-layout .judge-last-match-card:focus-visible {
-  border-color: rgba(34, 197, 94, 0.5) !important;
+  border-color: rgba(34, 197, 94, 0.25) !important;
   box-shadow:
-    0 24px 60px rgba(0, 0, 0, 0.45),
-    0 0 15px rgba(34, 197, 94, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+    0 24px 60px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03) !important;
 }
 
 body.is-referee-layout .judge-last-match-card__badge {
@@ -19414,4 +19452,301 @@ html,
 /* Camada da bolinha do countdown no topo */
 .judge-workspace-page #acoesSorteio.judge-sort-fab {
   z-index: 9999 !important;
+}
+
+/* ============================================================
+   Internal Tab Navigation & Match Logger Confrontos Styling
+   ============================================================ */
+.judge-tab-nav {
+  display: flex;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  padding: 0.25rem;
+  margin: 0 1rem 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.judge-tab-btn {
+  flex: 1;
+  border: none;
+  background: none;
+  color: var(--judge-muted);
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  touch-action: manipulation;
+}
+
+.judge-tab-btn.is-active {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--judge-text);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Logger Container styling */
+.judge-match-logger {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  padding: 0 1rem 1.15rem;
+}
+
+/* Logger Placar panel */
+.judge-match-placar-setup {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.85rem;
+}
+
+@media (min-width: 576px) {
+  .judge-match-placar-setup {
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+  }
+}
+
+.judge-match-placar-team {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
+  padding: 1rem 0.75rem;
+}
+
+.judge-match-placar-team select {
+  width: 100%;
+  max-width: 160px;
+  background: rgba(10, 10, 15, 0.9);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 0.45rem 0.65rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.judge-match-placar-vs {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: var(--judge-muted);
+  text-align: center;
+  align-self: center;
+  opacity: 0.65;
+}
+
+/* Logger List and items */
+.judge-logged-matches {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 0.25rem;
+}
+
+.judge-logged-match-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.88rem;
+}
+
+.judge-logged-match-details {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: var(--judge-text);
+  font-weight: 700;
+}
+
+.judge-logged-match-score {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 0.2rem 0.5rem;
+  font-family: monospace;
+  font-size: 0.95rem;
+  color: #4ade80;
+}
+
+.judge-logged-match-del {
+  border: none;
+  background: none;
+  color: #f87171;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.judge-logged-match-del:hover {
+  background: rgba(239, 68, 68, 0.12);
+  transform: scale(1.1);
+}
+
+.judge-logged-match-empty {
+  text-align: center;
+  color: var(--judge-muted);
+  font-size: 0.8rem;
+  font-style: italic;
+  padding: 1.5rem 0;
+  border: 1px dashed rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+}
+
+/* Live Standings / Classificação ao vivo */
+.judge-live-standings {
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
+  padding: 0.85rem;
+}
+
+.judge-live-standings__title {
+  font-size: 0.84rem;
+  font-weight: 800;
+  color: var(--judge-text);
+  margin-bottom: 0.65rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.judge-live-standings__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.judge-live-standings__table-header {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr 0.8fr;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--judge-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.judge-live-standings__row {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr 0.8fr;
+  align-items: center;
+  padding: 0.65rem 0.75rem;
+  background: rgba(255, 255, 255, 0.01);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  font-size: 0.82rem;
+  transition: background 0.2s ease;
+}
+
+.judge-live-standings__row:last-child {
+  border-bottom: none;
+}
+
+.judge-live-standings__row:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.judge-live-standings__rank {
+  font-weight: 900;
+  color: #10b981;
+  font-size: 0.78rem;
+}
+
+.judge-live-standings__name {
+  color: var(--judge-text);
+  font-weight: 700;
+}
+
+.judge-live-standings__stat-val {
+  color: var(--judge-muted);
+  font-family: monospace;
+  font-size: 0.82rem;
+}
+
+.judge-live-standings__pts {
+  font-weight: 900;
+  color: #4ade80;
+}
+
+/* Premium Segment Control for Team Selection */
+.judge-match-team-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  justify-content: center;
+  width: 100%;
+}
+
+.judge-team-select-btn {
+  flex: 1;
+  min-width: 80px;
+  padding: 0.55rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--judge-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  touch-action: manipulation;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+
+.judge-team-select-btn:hover:not(.is-disabled) {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: var(--judge-text);
+}
+
+.judge-team-select-btn.is-active {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.25) 100%);
+  border-color: #10b981;
+  color: #10b981;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15);
+  transform: translateY(-1px);
+}
+
+.judge-team-select-btn.is-disabled {
+  opacity: 0.22;
+  cursor: not-allowed;
+  border-color: rgba(255, 255, 255, 0.02);
+  background: rgba(0, 0, 0, 0.1);
+  color: var(--judge-muted);
+  pointer-events: none;
+}
+
+/* Subtle Sorteio Badge tag */
+.judge-sorteio-badge-sutil {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--judge-muted);
+  border-radius: 8px;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
 }

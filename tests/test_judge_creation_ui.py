@@ -6,11 +6,12 @@ ROOT = Path(__file__).resolve().parent.parent
 
 def test_judge_home_only_starts_the_creation_flow():
     template = (ROOT / 'templates' / 'juiz_home.html').read_text(encoding='utf-8')
+    base_template = (ROOT / 'templates' / 'base.html').read_text(encoding='utf-8')
 
     assert "url_for('juiz.juiz_criar_partida')" in template
     assert 'Selecionar jogadores' in template
     assert 'class="jogador-checkbox"' not in template
-    assert "{% include '_judge_nav.html' %}" in template
+    assert "session.get('role') == 'juiz'" in base_template
     assert 'target="_blank"' not in template
 
 
@@ -22,10 +23,9 @@ def test_judge_creation_uses_compact_selection_controls():
     assert 'class="judge-player-option__bg"' in template
     assert 'class="judge-player-option__level"' in template
     assert template.count('judge-player-option__tag') >= 2
-    assert 'id="orientacaoSelecao"' in template
     assert 'id="progressoSelecao"' in template
-    assert template.index('id="acoesSorteio"') < template.index(
-        'class="players-grid judge-players-grid"'
+    assert template.index('class="players-grid judge-players-grid"') < template.index(
+        'id="acoesSorteio"'
     )
 
 
@@ -38,17 +38,19 @@ def test_judge_format_color_overrides_generic_quantity_button():
 
 
 def test_judge_navigation_is_present_in_workflow_pages():
-    judge_times = (ROOT / 'templates' / 'juiz_times.html').read_text(encoding='utf-8')
-    voting = (ROOT / 'templates' / 'votacao_admin.html').read_text(encoding='utf-8')
+    base_template = (ROOT / 'templates' / 'base.html').read_text(encoding='utf-8')
     navigation = (ROOT / 'templates' / '_judge_nav.html').read_text(encoding='utf-8')
 
-    assert "{% include '_judge_nav.html' %}" in judge_times
-    assert "{% set current_section = 'times' %}" in judge_times
-    assert "{% include '_judge_nav.html' %}" in voting
+    assert "session.get('role') == 'juiz'" in base_template
+    assert "url_for('juiz.jogar_page')" in base_template
+    assert "url_for('juiz.juiz_times_page')" in base_template
+    assert "url_for('votacao.votacao_admin_page')" in base_template
+    assert "url_for('juiz.juiz_historico')" in base_template
+    assert "url_for('juiz.juiz_cronometro')" in base_template
     assert "current_section in ['home', 'criar']" in navigation
     assert 'class="judge-nav-shell"' in navigation
-    assert "url_for('juiz.juiz_times_page'" in navigation
-    assert "url_for('juiz.juiz_historico'" in navigation
+    assert "url_for('juiz.juiz_times_page', sorteio_id=nav_sorteio_id)" in navigation
+    assert "url_for('juiz.juiz_historico')" in navigation
 
 
 def test_judge_result_only_offers_share_and_voting():
@@ -88,7 +90,7 @@ def test_judge_navigation_has_a_dedicated_times_tab():
     stylesheet = (ROOT / 'static' / 'style.css').read_text(encoding='utf-8')
 
     assert '<span class="judge-nav__label">Times</span>' in navigation
-    assert "current_section == 'compartilhar'" in navigation
+    assert "current_section == 'times'" in navigation
     assert '<span class="judge-nav__label">Histórico</span>' in navigation
     assert "url_for('juiz.juiz_historico')" in navigation
     assert 'grid-template-columns: repeat(5, 1fr);' in stylesheet
@@ -135,8 +137,6 @@ def test_judge_result_values_are_only_changed_with_stepper_buttons():
     assert template.count('class="judge-result-value"') == 4
     assert template.count('judge-result-dec judge-result-stepper__btn') == 4
     assert template.count('judge-result-inc judge-result-stepper__btn') == 4
-    assert 'class="judge-result-roster"' in template
-    assert 'Abra um time, ajuste os números e salve o resultado.' in template
     assert 'class="judge-result-team__summary"' in template
     assert 'class="judge-result-team__arrow"' in template
     assert 'class="judge-result-submit"' in template
@@ -182,8 +182,8 @@ def test_judge_workspace_has_phone_first_layout():
     assert '/* Judge creation: thumb-friendly floating draw action on phones */' in stylesheet
     assert '.judge-create-page .judge-create-action {' in stylesheet
     assert 'position: fixed;' in stylesheet
-    assert 'bottom: max(0.55rem, env(safe-area-inset-bottom));' in stylesheet
-    assert 'opacity: 0.58;' in stylesheet
+    assert 'bottom: calc(var(--site-footer-height-mobile) + 0.55rem + env(safe-area-inset-bottom));' in stylesheet
+    assert 'opacity: 0.92;' in stylesheet
     assert '.judge-create-page .judge-create-action.is-ready {' in stylesheet
     assert 'opacity: 1;' in stylesheet
 

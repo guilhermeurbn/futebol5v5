@@ -74,6 +74,7 @@ def _candidate_paths(relative_path: str):
     root = _repo_root()
     yield root / relative_path
     yield root / "data" / relative_path
+    yield root / "data" / "seeds" / relative_path
 
 
 def _get_cached(namespace: str):
