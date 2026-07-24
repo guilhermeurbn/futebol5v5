@@ -299,6 +299,10 @@ class AuthService:
         tamanho = max(8, int(tamanho))
         return "".join(secrets.choice(self._TEMP_PASSWORD_ALPHABET) for _ in range(tamanho))
 
+    def gerar_senha_temporaria(self, tamanho: int = 10) -> str:
+        """Expõe a geração de senha temporária sem alterar dados persistidos."""
+        return self._gerar_senha_temporaria(tamanho)
+
     def resetar_senha_por_admin(self, user_id: str, executor_id: Optional[str] = None) -> Dict:
         """
         Reseta a senha de um usuario via painel administrativo.
@@ -451,4 +455,14 @@ class AuthService:
         usuarios.pop(indice_alvo)
         self._salvar(usuarios)
         
+        # Deletar jogador(es) associado(s)
+        try:
+            from services.jogador_service import JogadorService
+            jogador_service = JogadorService()
+            linked_players = jogador_service.listar_por_usuario(user_id)
+            for p in linked_players:
+                jogador_service.deletar(p.id)
+        except Exception as e:
+            pass
+            
         return True

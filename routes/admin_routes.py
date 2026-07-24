@@ -11,6 +11,7 @@ import logging
 from services.auth_service import AuthService
 from services.email_service import EmailService
 from services.notificacao_service import NotificacaoService
+from services.jogador_service import JogadorService
 
 admin_bp = Blueprint('admin', __name__)
 logger = logging.getLogger(__name__)
@@ -18,6 +19,7 @@ logger = logging.getLogger(__name__)
 auth_service = AuthService()
 email_service = EmailService()
 notificacao_service = NotificacaoService()
+jogador_service = JogadorService()
 
 
 # ============================================================
@@ -60,12 +62,33 @@ def admin_redirect():
     return redirect(url_for('jogador_crud.index'))
 
 
+def _garantir_e_obter_jogador_vinculado(user, jog_service):
+    if user.get('role') != 'usuario':
+        return None
+    players = jog_service.listar_por_usuario(user['id'])
+    if players:
+        return players[0]
+    try:
+        return jog_service.criar(
+            nome=user['nome'],
+            nivel=5.5,
+            tipo='avulso',
+            posicao='linha',
+            owner_user_id=user['id']
+        )
+    except Exception as e:
+        logger.error(f"Erro ao auto-criar jogador para {user.get('username')}: {e}")
+        return None
+
+
 @admin_bp.route('/admin/ajustes', methods=['GET'])
 @admin_required
 def admin_page():
     """Dashboard administrativo"""
     try:
-        usuarios = auth_service.listar_usuarios()
+        usuarios = sorted(auth_service.listar_usuarios(), key=lambda u: (u.get('nome') or '').lower())
+        for u in usuarios:
+            u['jogador_vinculado'] = _garantir_e_obter_jogador_vinculado(u, jogador_service)
         notificacoes = notificacao_service.listar_notificacoes(apenas_nao_lidas=True, limite=15)
         sucesso = session.pop('admin_sucesso', request.args.get('sucesso', ''))
         erro = session.pop('admin_erro', request.args.get('erro', ''))
@@ -92,7 +115,10 @@ def admin_page():
 def api_admin_painel():
     """API: Resumo leve do painel admin."""
     try:
-        usuarios = auth_service.listar_usuarios()
+        usuarios = sorted(auth_service.listar_usuarios(), key=lambda u: (u.get('nome') or '').lower())
+        for u in usuarios:
+            player = _garantir_e_obter_jogador_vinculado(u, jogador_service)
+            u['jogador_vinculado'] = player.para_dict() if player else None
         notificacoes = notificacao_service.listar_notificacoes(apenas_nao_lidas=True, limite=15)
         arquivadas = notificacao_service.listar_arquivadas(limite=10)
 
@@ -164,7 +190,23 @@ def admin_criar_usuario():
         if not email or '@' not in email:
             raise ValueError('Email deve ser valido')
 
-        auth_service.criar_usuario(email=email, username=username, nome=nome, password=password, role=role)
+        usuario = auth_service.criar_usuario(email=email, username=username, nome=nome, password=password, role=role)
+        if role == 'usuario':
+            try:
+                jogador_service.criar(
+                    nome=nome,
+                    nivel=5.5,
+                    tipo='avulso',
+                    posicao='linha',
+                    owner_user_id=usuario.get('id')
+                )
+            except Exception as e:
+                logger.warning(f"Erro ao criar perfil de jogador para usuario {username}: {e}")
+                try:
+                    auth_service.deletar_usuario(usuario.get('id'))
+                except Exception as rollback_exc:
+                    logger.error(f"Falha ao desfazer usuario {username} apos erro ao criar jogador: {rollback_exc}")
+                raise RuntimeError('Erro ao criar perfil de jogador') from e
         return redirect(url_for('admin.admin_page', sucesso='Usuario criado com sucesso'))
     except ValueError as e:
         logger.warning(f"Erro de validação ao criar usuário: {str(e)}")

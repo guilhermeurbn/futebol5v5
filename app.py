@@ -81,7 +81,28 @@ def criar_app(config_name: str = None) -> Flask:
     if config_name is None:
         config_name = os.getenv('FLASK_ENV', 'development')
     
+    # Limpar o cache do banco em memória para evitar poluição entre testes ou reinicializações
+    try:
+        from services.db import clear_db_cache
+        clear_db_cache()
+    except Exception:
+        pass
+
     app = Flask(__name__)
+    
+    from flask.sessions import SecureCookieSessionInterface
+
+    class CustomSessionInterface(SecureCookieSessionInterface):
+        def get_expiration_time(self, app_obj, session_obj):
+            if session_obj.permanent:
+                from datetime import datetime as dt, timedelta as td, UTC
+                if session_obj.get('remember_me'):
+                    return dt.now(UTC) + td(days=30)
+                return dt.now(UTC) + app_obj.permanent_session_lifetime
+            return None
+
+    app.session_interface = CustomSessionInterface()
+
     config_obj = config_by_name.get(config_name, config_by_name['default'])
     app.config.from_object(config_obj)
 
@@ -156,8 +177,10 @@ def criar_app(config_name: str = None) -> Flask:
     # Auto-seed database se estiver vazio (Railway)
     try:
         auto_seed_on_init()
+        from services.db import executar_migracao_link_usuarios_jogadores
+        executar_migracao_link_usuarios_jogadores()
     except Exception as e:
-        logger.warning(f"Erro ao fazer seed do banco: {e}")
+        logger.warning(f"Erro ao fazer seed ou migração do banco: {e}")
     
     # PWA - Servir manifest.json
     @app.route('/manifest.json')

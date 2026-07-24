@@ -202,6 +202,22 @@
                 closeModal();
             }
         });
+
+        // Abrir automaticamente o sorteio selecionado via hash na URL
+        const openSorteioFromHash = () => {
+            const hash = window.location.hash;
+            if (hash && hash.startsWith('#sorteio-')) {
+                const el = document.querySelector(hash);
+                if (el && el.tagName === 'DETAILS') {
+                    el.setAttribute('open', '');
+                    setTimeout(() => {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                }
+            }
+        };
+        window.addEventListener('load', openSorteioFromHash);
+        window.addEventListener('hashchange', openSorteioFromHash);
     })();
 </script>
 {% endblock %}

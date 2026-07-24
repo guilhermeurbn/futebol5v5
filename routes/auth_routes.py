@@ -195,7 +195,10 @@ def login_page():
         if session.get('role') in ['admin', 'super_admin']:
             return redirect(url_for('jogador.index'))
         return redirect(url_for('auth.perfil_page'))
-    return render_template('login.html')
+    
+    sucesso = request.args.get('sucesso')
+    erro = request.args.get('erro')
+    return render_template('login.html', sucesso=sucesso, erro=erro)
 
 
 @auth_bp.route('/login', methods=['POST'])
@@ -211,6 +214,10 @@ def login_submit():
             return render_template('login.html', erro='Usuario ou senha invalidos'), 401
 
         session.permanent = remember_me
+        if remember_me:
+            session['remember_me'] = True
+        else:
+            session.pop('remember_me', None)
         session['user_id'] = usuario['id']
         session['username'] = usuario['username']
         session['nome'] = usuario['nome']
@@ -248,7 +255,7 @@ def cadastro_submit():
     username = request.form.get('username', '').strip()
     senha = request.form.get('password', '')
     confirmar = request.form.get('confirmar_password', '')
-    nivel = request.form.get('nivel', '5')
+    nivel = request.form.get('nivel', '5.5')
     tipo = request.form.get('tipo', 'avulso')
     posicao = request.form.get('posicao', 'linha')
 
@@ -266,14 +273,32 @@ def cadastro_submit():
             role='usuario'
         )
 
-        # Cada usuário novo já nasce com seu próprio jogador
-        jogador_service.criar(
-            nome=nome,
-            nivel=float(nivel),
-            tipo=tipo,
-            posicao=posicao,
-            owner_user_id=usuario.get('id')
-        )
+        try:
+            nivel_val = float(nivel)
+        except (ValueError, TypeError):
+            nivel_val = 5.5
+
+        # Cada usuário novo já nasce com seu próprio jogador.
+        # Se essa etapa falhar, desfazemos o usuário para evitar conta órfã.
+        try:
+            jogador_service.criar(
+                nome=nome,
+                nivel=nivel_val,
+                tipo=tipo,
+                posicao=posicao,
+                owner_user_id=usuario.get('id')
+            )
+        except Exception as exc:
+            try:
+                auth_service.deletar_usuario(usuario.get('id'))
+            except Exception as rollback_exc:
+                logger.error(
+                    'Falha ao desfazer usuario %s apos erro ao criar jogador: %s',
+                    usuario.get('username'),
+                    rollback_exc,
+                )
+            logger.error('Erro ao criar perfil de jogador para %s: %s', usuario.get('username'), exc)
+            raise RuntimeError('Erro ao criar perfil de jogador') from exc
 
         try:
             email_service.send_welcome_email(
@@ -557,19 +582,15 @@ def teste_email_route():
         return jsonify({'ok': False, 'error': 'Usuario nao encontrado'}), 404
 
     try:
-        dados = auth_service.resetar_senha_por_admin(user_id=usuario.get('id'))
-        # tentar enviar email com a senha temporaria
-        result = None
-        try:
-            result = email_service.send_temporary_password_email(
-                to_email=dados.get('email') or usuario.get('email'),
-                nome=dados.get('nome') or dados.get('username') or 'usuario',
-                username=dados.get('username') or '',
-                senha_temporaria=dados.get('senha_temporaria') or ''
-            )
-        except Exception:
-            # swallow email errors but report
-            return jsonify({'ok': False, 'error': 'Falha ao enviar email'}), 500
+        senha_teste = auth_service.gerar_senha_temporaria()
+        result = email_service.send_temporary_password_email(
+            to_email=usuario.get('email') or email,
+            nome=usuario.get('nome') or usuario.get('username') or 'usuario',
+            username=usuario.get('username') or '',
+            senha_temporaria=senha_teste,
+        )
+        if not result.ok:
+            return jsonify({'ok': False, 'error': result.error or 'Falha ao enviar email'}), 500
 
         return jsonify({'ok': True, 'sent': result.ok, 'message_id': result.message_id})
     except ValueError as e:
@@ -604,3 +625,64 @@ def teste_email_simples():
         return f"Falha ao enviar: {resultado.error}", 500
     except Exception as e:
         return f"Erro interno: {e}", 500
+
+
+@auth_bp.route('/perfil/apagar-conta', methods=['POST'])
+@login_required
+def apagar_conta():
+    """Apaga a conta do usuário logado após validação de palavra-chave e senha"""
+    confirmar_palavra = request.form.get('confirmar_palavra', '').strip().upper()
+    senha = request.form.get('senha', '')
+    user_id = session.get('user_id')
+
+    # 1. Validar a palavra-chave
+    if confirmar_palavra != 'APAGAR':
+        return render_template(
+            'perfil.html',
+            usuario=_usuario_logado(),
+            jogador_proprio=(jogador_service.listar_por_usuario(user_id) or [None])[0],
+            erro_deletar='Você deve digitar a palavra APAGAR para confirmar.'
+        ), 400
+
+    try:
+        # 2. Validar a senha atual
+        user = auth_service.obter_por_id(user_id)
+        if not user:
+            return redirect(url_for('auth.logout'))
+
+        from werkzeug.security import check_password_hash
+        if not check_password_hash(user.get('password_hash', ''), senha):
+            return render_template(
+                'perfil.html',
+                usuario=_usuario_logado(),
+                jogador_proprio=(jogador_service.listar_por_usuario(user_id) or [None])[0],
+                erro_deletar='Senha atual incorreta. Confirmação falhou.'
+            ), 400
+
+        # 3. Executar deleção (passando executor_id=None para evitar a restrição de self-deletion no painel admin)
+        auth_service.deletar_usuario(user_id, executor_id=None)
+
+        # 4. Limpar a sessão
+        session.clear()
+        
+        # Redirecionar para login com mensagem de sucesso
+        return redirect(url_for('auth.login_page', sucesso='Sua conta foi excluída permanentemente.'))
+
+    except ValueError as e:
+        return render_template(
+            'perfil.html',
+            usuario=_usuario_logado(),
+            jogador_proprio=(jogador_service.listar_por_usuario(user_id) or [None])[0],
+            erro_deletar=str(e)
+        ), 400
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Erro ao apagar conta: {str(e)}")
+        return render_template(
+            'perfil.html',
+            usuario=_usuario_logado(),
+            jogador_proprio=(jogador_service.listar_por_usuario(user_id) or [None])[0],
+            erro_deletar='Ocorreu um erro ao processar a exclusão da sua conta.'
+        ), 500
+

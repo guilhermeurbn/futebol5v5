@@ -18,7 +18,7 @@ class JogadorStatsService:
     _cache_stats: Dict[str, Dict] = {}
     _cache_ttl_seconds = 60
     
-    def __init__(self, partidas_arquivo: str = "partidas.json", historico_arquivo: str = "historico.json"):
+    def __init__(self, partidas_arquivo: str = "data/partidas.json", historico_arquivo: str = "data/historico.json"):
         """
         Inicializa o serviço
         

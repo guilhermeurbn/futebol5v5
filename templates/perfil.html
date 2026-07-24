@@ -60,7 +60,7 @@
                 <div class="premium-profile-name-row">
                     <h1 class="premium-profile-name">{% if tem_jogador %}{{ jogador.nome }}{% else %}{{ usuario.nome or usuario.username }}{% endif %}</h1>
                     {% if tem_jogador %}
-                        <span class="premium-profile-rating-badge">{{ stats.get('nota_media_geral', '7.00') }}</span>
+                        <span class="premium-profile-rating-badge">{{ '%.1f'|format(jogador.nivel|float) }}</span>
                     {% endif %}
                 </div>
                 <div class="premium-profile-meta-row">
@@ -77,10 +77,6 @@
                     <div class="premium-profile-meta-item">
                         <svg class="premium-profile-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 10V4a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v6c0 5.5-4.5 10-10 10S3 15.5 3 10Z"/><path d="M12 3v17"/></svg>
                         <span>{{ 'Goleiro' if jogador.posicao == 'goleiro' else 'Linha' }}</span>
-                    </div>
-                    <div class="premium-profile-meta-item">
-                        <svg class="premium-profile-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                        <span>Nível {{ '%.0f'|format(jogador.nivel|float) }}</span>
                     </div>
                     {% endif %}
                 </div>
@@ -192,20 +188,6 @@
                 </div>
 
                 {% set nivel_val = jogador.nivel|float %}
-                {% set nivel_int = nivel_val|int %}
-                {% set nivel_prox = nivel_int + 1 %}
-                {% set progress_pct = ((nivel_val - nivel_int) * 100)|int %}
-                {% if progress_pct < 0 %}{% set progress_pct = 0 %}{% endif %}
-                
-                <div class="premium-profile-level-progress">
-                    <div class="premium-profile-level-row">
-                        <span>Nível {{ nivel_int }}</span>
-                        <strong>{{ progress_pct }}% para o nível {{ nivel_prox }}</strong>
-                    </div>
-                    <div class="premium-profile-level-track">
-                        <div class="premium-profile-level-fill" style="width: {{ progress_pct }}%;"></div>
-                    </div>
-                </div>
             </div>
 
             <div class="premium-profile-panel">
@@ -214,73 +196,30 @@
                     Desempenho
                 </h2>
 
-                <div class="premium-profile-desempenho-grid">
-                    <div class="premium-profile-attributes-list">
-                        {% set attrs = stats.get('atributos') or {'ofensivo': 7.0, 'defensivo': 7.0, 'tecnica': 7.0, 'fisico': 7.0, 'comprometimento': 7.0} %}
-                        
-                        {% for label_attr, key_attr in [('Ofensivo', 'ofensivo'), ('Defensivo', 'defensivo'), ('Técnica', 'tecnica'), ('Físico', 'fisico'), ('Comprometimento', 'comprometimento')] %}
-                        {% set val_attr = attrs.get(key_attr, 7.0) %}
-                        <div class="premium-profile-attr-item">
-                            <div class="premium-profile-attr-labels">
-                                <span class="premium-profile-attr-name">{{ label_attr }}</span>
-                                <span class="premium-profile-attr-val">{{ '%.1f'|format(val_attr|float) }}</span>
-                            </div>
-                            <div class="premium-profile-attr-track">
-                                <div class="premium-profile-attr-fill" style="width: {{ (val_attr|float * 10)|int }}%;"></div>
-                            </div>
+                <div class="premium-profile-attributes-list">
+                    {% set attrs = stats.get('atributos') or {'comprometimento': 7.0} %}
+                    {% set val_comp = attrs.get('comprometimento', 7.0) %}
+                    
+                    <!-- 1. Comprometimento -->
+                    <div class="premium-profile-attr-item">
+                        <div class="premium-profile-attr-labels">
+                            <span class="premium-profile-attr-name">Comprometimento</span>
+                            <span class="premium-profile-attr-val">{{ '%.1f'|format(val_comp|float) }} / 10.0</span>
                         </div>
-                        {% endfor %}
+                        <div class="premium-profile-attr-track">
+                            <div class="premium-profile-attr-fill" style="width: {{ (val_comp|float * 10)|int }}%;"></div>
+                        </div>
                     </div>
 
-                    <div class="premium-profile-radar-wrap">
-                        <svg class="premium-profile-radar-svg" viewBox="0 0 200 200">
-                            <!-- Grids -->
-                            {% for r in [25, 45, 62] %}
-                                {% set points = [] %}
-                                {% for i in range(5) %}
-                                    {% if i == 0 %}{% set cx, cy = 100, 100 - r %}
-                                    {% elif i == 1 %}{% set cx, cy = 100 + r * 0.951, 100 - r * 0.309 %}
-                                    {% elif i == 2 %}{% set cx, cy = 100 + r * 0.588, 100 + r * 0.809 %}
-                                    {% elif i == 3 %}{% set cx, cy = 100 - r * 0.588, 100 + r * 0.809 %}
-                                    {% elif i == 4 %}{% set cx, cy = 100 - r * 0.951, 100 - r * 0.309 %}{% endif %}
-                                    {% set _ = points.append(cx|round(1)|string ~ ',' ~ cy|round(1)|string) %}
-                                {% endfor %}
-                                <polygon class="premium-profile-radar-grid" points="{{ points|join(' ') }}" />
-                            {% endfor %}
-
-                            <!-- Eixos -->
-                            {% for i in range(5) %}
-                                {% set r = 62 %}
-                                {% if i == 0 %}{% set tx, ty = 100, 100 - r %}
-                                {% elif i == 1 %}{% set tx, ty = 100 + r * 0.951, 100 - r * 0.309 %}
-                                {% elif i == 2 %}{% set tx, ty = 100 + r * 0.588, 100 + r * 0.809 %}
-                                {% elif i == 3 %}{% set tx, ty = 100 - r * 0.588, 100 + r * 0.809 %}
-                                {% elif i == 4 %}{% set tx, ty = 100 - r * 0.951, 100 - r * 0.309 %}{% endif %}
-                                <line class="premium-profile-radar-axis" x1="100" y1="100" x2="{{ tx|round(1) }}" y2="{{ ty|round(1) }}" />
-                            {% endfor %}
-
-                            <!-- Polígono do jogador -->
-                            {% set val_points = [] %}
-                            {% set r_max = 62 %}
-                            {% set r0 = r_max * (attrs.get('ofensivo', 7.0)|float / 10.0) %}
-                            {% set _ = val_points.append('100,' ~ (100 - r0)|round(1)|string) %}
-                            {% set r1 = r_max * (attrs.get('defensivo', 7.0)|float / 10.0) %}
-                            {% set _ = val_points.append(((100 + r1 * 0.951)|round(1)|string) ~ ',' ~ ((100 - r1 * 0.309)|round(1)|string)) %}
-                            {% set r2 = r_max * (attrs.get('tecnica', 7.0)|float / 10.0) %}
-                            {% set _ = val_points.append(((100 + r2 * 0.588)|round(1)|string) ~ ',' ~ ((100 + r2 * 0.809)|round(1)|string)) %}
-                            {% set r3 = r_max * (attrs.get('fisico', 7.0)|float / 10.0) %}
-                            {% set _ = val_points.append(((100 - r3 * 0.588)|round(1)|string) ~ ',' ~ ((100 + r3 * 0.809)|round(1)|string)) %}
-                            {% set r4 = r_max * (attrs.get('comprometimento', 7.0)|float / 10.0) %}
-                            {% set _ = val_points.append(((100 - r4 * 0.951)|round(1)|string) ~ ',' ~ ((100 - r4 * 0.309)|round(1)|string)) %}
-                            <polygon class="premium-profile-radar-polygon" points="{{ val_points|join(' ') }}" />
-                            
-                            <!-- Rótulos do radar com abreviações de texto em vez de emojis -->
-                            <text class="premium-profile-radar-label" x="100" y="24">OFE</text>
-                            <text class="premium-profile-radar-label" x="174" y="78">DEF</text>
-                            <text class="premium-profile-radar-label" x="146" y="160">TÉC</text>
-                            <text class="premium-profile-radar-label" x="54" y="160">FÍS</text>
-                            <text class="premium-profile-radar-label" x="26" y="78">COM</text>
-                        </svg>
+                    <!-- 2. Progresso -->
+                    <div class="premium-profile-attr-item">
+                        <div class="premium-profile-attr-labels">
+                            <span class="premium-profile-attr-name">Progresso</span>
+                            <span class="premium-profile-attr-val">{{ '%.1f'|format(nivel_val) }} / 10.0</span>
+                        </div>
+                        <div class="premium-profile-attr-track">
+                            <div class="premium-profile-attr-fill" style="width: {{ (nivel_val * 10)|int }}%;"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -297,7 +236,7 @@
                     {% set gols = jogo.get('gols_times') or [0, 0] %}
                     {% set gols1 = gols[0]|default(0)|int %}
                     {% set gols2 = gols[1]|default(0)|int %}
-                    <a href="{{ url_for('partida.historico') }}#sorteio-{{ jogo.sorteio_id }}" class="premium-profile-match-card">
+                    <a href="{% if auth_user and auth_user.role == 'juiz' %}{{ url_for('juiz.juiz_historico') }}{% else %}{{ url_for('partida.historico') }}{% endif %}#sorteio-{{ jogo.sorteio_id }}" class="premium-profile-match-card">
                         {% if jogo.get('resultado', 'empate') == 'vitória' %}
                         <div class="premium-profile-match-result-badge premium-profile-match-result-badge--win">V</div>
                         {% elif jogo.get('resultado', 'empate') == 'derrota' %}
@@ -355,7 +294,7 @@
                     {% set gols = jogo.get('gols_times') or [0, 0] %}
                     {% set gols1 = gols[0]|default(0)|int %}
                     {% set gols2 = gols[1]|default(0)|int %}
-                    <a href="{{ url_for('partida.historico') }}#sorteio-{{ jogo.sorteio_id }}" class="premium-profile-match-card">
+                    <a href="{% if auth_user and auth_user.role == 'juiz' %}{{ url_for('juiz.juiz_historico') }}{% else %}{{ url_for('partida.historico') }}{% endif %}#sorteio-{{ jogo.sorteio_id }}" class="premium-profile-match-card">
                         {% if jogo.get('resultado', 'empate') == 'vitória' %}
                         <div class="premium-profile-match-result-badge premium-profile-match-result-badge--win">V</div>
                         {% elif jogo.get('resultado', 'empate') == 'derrota' %}
@@ -423,16 +362,18 @@
 
             <div style="margin-top: 1.5rem;">
                 <h2 class="premium-profile-panel-title">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
-                    Sair da Conta
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+                    Ações de Conta
                 </h2>
-                <p style="color: #aaa3b5; font-size: 0.85rem; margin-top: 0; margin-bottom: 1.25rem;">Deseja desconectar sua conta deste dispositivo?</p>
+                <p style="color: #aaa3b5; font-size: 0.85rem; margin-top: 0; margin-bottom: 1.25rem;">Desconecte-se de sua sessão ou apague sua conta permanentemente.</p>
                 
-                <div class="premium-profile-btn-wrap">
-                    <form method="post" action="{{ url_for('auth.logout') }}" style="width: 100%; display: flex; justify-content: center;">
+                <div class="premium-profile-btn-wrap" style="display: flex; gap: 1rem; width: 100%; justify-content: center; flex-wrap: wrap;">
+                    <form method="post" action="{{ url_for('auth.logout') }}" style="display: flex; justify-content: center; width: 100%; max-width: 220px;">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <button class="btn btn-primary" type="submit" style="background: linear-gradient(135deg, #ef4444, #991b1b) !important; border-color: rgba(239, 68, 68, 0.3) !important; color: white !important; width: 100%; max-width: 280px;">Sair do aplicativo</button>
+                        <button class="btn btn-secondary" type="submit" style="width: 100%;">Sair do aplicativo</button>
                     </form>
+                    
+                    <button class="btn btn-primary" type="button" data-open-delete-dialog style="background: linear-gradient(135deg, #ef4444, #b91c1c) !important; border-color: rgba(239, 68, 68, 0.3) !important; color: white !important; width: 100%; max-width: 220px;">Apagar conta</button>
                 </div>
             </div>
         </div>
@@ -535,6 +476,64 @@
     </div>
 </dialog>
 
+{# DIALOG DE DELETAR CONTA #}
+<dialog
+    class="profile-security-dialog"
+    id="deleteAccountDialog"
+    aria-labelledby="deleteDialogTitle"
+    aria-describedby="deleteDialogDescription"
+    data-auto-open="{{ 'true' if erro_deletar else 'false' }}"
+    {% if erro_deletar %}open{% endif %}
+>
+    <div class="profile-security-dialog__shell">
+        <header class="profile-security-dialog__header">
+            <div>
+                <span class="section-label" style="color: #ef4444;">Perigo - Ação Irreversível</span>
+                <h2 id="deleteDialogTitle" style="color: #ef4444;">Apagar Conta</h2>
+                <p id="deleteDialogDescription">
+                    Todos os seus dados de jogador, histórico de partidas e progresso serão removidos permanentemente.
+                </p>
+            </div>
+            <button type="button" class="profile-security-dialog__close" data-close-delete-dialog aria-label="Fechar exclusão de conta">✕</button>
+        </header>
+
+        <div class="profile-security-dialog__body">
+            {% if erro_deletar %}
+            <div class="profile-security-dialog__error" role="alert" aria-live="assertive" tabindex="-1">
+                {{ erro_deletar }}
+            </div>
+            {% endif %}
+
+            <form method="post" action="{{ url_for('auth.apagar_conta') }}" class="form" id="deleteAccountForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <div class="form-group profile-security-field">
+                    <p style="color: #ccc; font-size: 0.9rem; margin-bottom: 0.75rem;">
+                        Para confirmar, digite <strong style="color: #ef4444; user-select: none;">APAGAR</strong> no campo abaixo:
+                    </p>
+                    <input class="form-input" id="confirmar_exclusao_palavra" name="confirmar_palavra" type="text" required placeholder="Digite APAGAR" autocomplete="off" style="background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.1); color: #fff; width: 100%; border-radius: 8px; padding: 0.75rem;">
+                </div>
+
+                <div class="form-group profile-security-field" style="margin-top: 1.25rem;">
+                    <label class="form-label" for="deletar_senha">Digite sua senha atual para confirmar a identidade:</label>
+                    <div class="profile-security-input">
+                        <input class="form-input" id="deletar_senha" name="senha" type="password" required autocomplete="current-password">
+                        <button type="button" class="profile-password-toggle" data-password-toggle="deletar_senha" aria-label="Mostrar senha" aria-controls="deletar_senha" aria-pressed="false">
+                            <svg class="profile-password-toggle__show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path><circle cx="12" cy="12" r="2.5"></circle></svg>
+                            <svg class="profile-password-toggle__hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m3 3 18 18"></path><path d="M10.6 6.1A9.7 9.7 0 0 1 12 6c6 0 9.5 6 9.5 6a15.8 15.8 0 0 1-2.1 2.8"></path><path d="M6.6 6.7C4 8.4 2.5 12 2.5 12s3.5 6 9.5 6a9.8 9.8 0 0 0 3-.5"></path></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <footer class="profile-security-dialog__actions" style="margin-top: 2rem;">
+                    <button class="btn btn-secondary" type="button" data-close-delete-dialog>Cancelar</button>
+                    <button class="btn btn-primary" id="btnConfirmarExclusao" type="submit" disabled style="background: linear-gradient(135deg, #ef4444, #b91c1c) !important; border-color: rgba(239, 68, 68, 0.3) !important; color: white !important;">Apagar Conta Permanentemente</button>
+                </footer>
+            </form>
+        </div>
+    </div>
+</dialog>
+
 {% if usuario.senha_temporaria_ativa %}
 <form id="profileLogoutForm" method="post" action="{{ url_for('auth.logout') }}" hidden>
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -560,8 +559,21 @@
                     const id = c.getAttribute('id');
                     c.classList.toggle('is-active', id === `tab-${target}`);
                 });
+
+                // Salva a aba ativa na URL hash sem pular/rolar a página
+                history.replaceState(null, null, `#tab-${target}`);
             });
         });
+
+        // Restaurar aba ativa a partir do hash na URL
+        const hash = window.location.hash;
+        if (hash && hash.startsWith('#tab-')) {
+            const activeTabTarget = hash.replace('#tab-', '');
+            const matchingTab = Array.from(tabs).find(t => t.dataset.tabTarget === activeTabTarget);
+            if (matchingTab) {
+                matchingTab.click();
+            }
+        }
 
         // --- DIALOG ALTERAR SENHA ---
         const dialog = document.getElementById('passwordDialog');
@@ -607,14 +619,15 @@
             opener.focus();
         });
 
-        dialog.querySelectorAll('[data-password-toggle]').forEach((button) => {
+        document.querySelectorAll('[data-password-toggle]').forEach((button) => {
             button.addEventListener('click', () => {
                 const input = document.getElementById(button.dataset.passwordToggle);
                 if (!input) return;
 
                 const showing = input.type === 'text';
                 input.type = showing ? 'password' : 'text';
-                button.setAttribute('aria-label', `${showing ? 'Mostrar' : 'Ocultar'} ${input.labels[0].textContent.toLowerCase()}`);
+                const labelText = input.labels && input.labels[0] ? input.labels[0].textContent.toLowerCase() : 'senha';
+                button.setAttribute('aria-label', `${showing ? 'Mostrar' : 'Ocultar'} ${labelText}`);
                 button.setAttribute('aria-pressed', String(!showing));
             });
         });
@@ -635,6 +648,49 @@
 
         if (dialog.dataset.autoOpen === 'true') {
             openDialog();
+        }
+
+        // --- DIALOG DELETAR CONTA ---
+        const deleteDialog = document.getElementById('deleteAccountDialog');
+        const deleteOpener = document.querySelector('[data-open-delete-dialog]');
+        const deleteForm = document.getElementById('deleteAccountForm');
+        const confirmWordInput = document.getElementById('confirmar_exclusao_palavra');
+        const confirmBtn = document.getElementById('btnConfirmarExclusao');
+
+        if (deleteDialog && deleteOpener && deleteForm) {
+            const openDeleteDialog = () => {
+                if (deleteDialog.hasAttribute('open')) deleteDialog.removeAttribute('open');
+                if (!deleteDialog.open) deleteDialog.showModal();
+                document.body.classList.add('modal-open');
+                confirmWordInput.focus();
+            };
+
+            const closeDeleteDialog = () => {
+                deleteDialog.close();
+            };
+
+            deleteOpener.addEventListener('click', openDeleteDialog);
+            deleteDialog.querySelectorAll('[data-close-delete-dialog]').forEach((button) => {
+                button.addEventListener('click', closeDeleteDialog);
+            });
+            deleteDialog.addEventListener('click', (event) => {
+                if (event.target === deleteDialog) closeDeleteDialog();
+            });
+            deleteDialog.addEventListener('close', () => {
+                document.body.classList.remove('modal-open');
+                deleteForm.reset();
+                confirmBtn.disabled = true;
+                deleteOpener.focus();
+            });
+
+            // Dupla validação: habilitar botão se digitou "APAGAR"
+            confirmWordInput.addEventListener('input', () => {
+                confirmBtn.disabled = confirmWordInput.value.trim().toUpperCase() !== 'APAGAR';
+            });
+
+            if (deleteDialog.dataset.autoOpen === 'true') {
+                openDeleteDialog();
+            }
         }
     })();
 </script>

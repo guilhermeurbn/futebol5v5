@@ -30,7 +30,7 @@
 {% block auth_form %}
     <form method="post" action="{{ url_for('jogador.cadastro_submit') }}" class="auth-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="hidden" name="nivel" value="5">
+        <input type="hidden" name="nivel" value="5.5">
 
         <div class="auth-form-grid">
             <div class="form-group auth-field">

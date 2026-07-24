@@ -28,7 +28,7 @@
             <div class="premium-profile-info">
                 <div class="premium-profile-name-row">
                     <h1 class="premium-profile-name">{{ jogador.nome }}</h1>
-                    <span class="premium-profile-rating-badge">{{ stats.get('nota_media_geral', '7.00') }}</span>
+                    <span class="premium-profile-rating-badge">{{ '%.1f'|format(jogador.nivel|float) }}</span>
                 </div>
                 <div class="premium-profile-meta-row">
                     <div class="premium-profile-meta-item">
@@ -39,10 +39,7 @@
                         <svg class="premium-profile-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 10V4a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v6c0 5.5-4.5 10-10 10S3 15.5 3 10Z"/><path d="M12 3v17"/></svg>
                         <span>{{ 'Goleiro' if jogador.posicao == 'goleiro' else 'Linha' }}</span>
                     </div>
-                    <div class="premium-profile-meta-item">
-                        <svg class="premium-profile-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                        <span>Nível {{ '%.0f'|format(jogador.nivel|float) }}</span>
-                    </div>
+
                 </div>
             </div>
         </div>
@@ -119,23 +116,7 @@
                         <strong class="premium-profile-stat-val premium-profile-stat-val--rating">{{ stats.get('nota_media_geral', '7.00') }}</strong>
                         <span class="premium-profile-stat-label">Nota média geral</span>
                     </div>
-                </div>
-
-                {% set nivel_val = jogador.nivel|float %}
-                {% set nivel_int = nivel_val|int %}
-                {% set nivel_prox = nivel_int + 1 %}
-                {% set progress_pct = ((nivel_val - nivel_int) * 100)|int %}
-                {% if progress_pct < 0 %}{% set progress_pct = 0 %}{% endif %}
-                
-                <div class="premium-profile-level-progress">
-                    <div class="premium-profile-level-row">
-                        <span>Nível {{ nivel_int }}</span>
-                        <strong>{{ progress_pct }}% para o nível {{ nivel_prox }}</strong>
-                    </div>
-                    <div class="premium-profile-level-track">
-                        <div class="premium-profile-level-fill" style="width: {{ progress_pct }}%;"></div>
-                    </div>
-                </div>
+                               {% set nivel_val = jogador.nivel|float %}
             </div>
 
             <div class="premium-profile-panel">
@@ -144,73 +125,30 @@
                     Desempenho
                 </h2>
 
-                <div class="premium-profile-desempenho-grid">
-                    <div class="premium-profile-attributes-list">
-                        {% set attrs = stats.get('atributos') or {'ofensivo': 7.0, 'defensivo': 7.0, 'tecnica': 7.0, 'fisico': 7.0, 'comprometimento': 7.0} %}
-                        
-                        {% for label_attr, key_attr in [('Ofensivo', 'ofensivo'), ('Defensivo', 'defensivo'), ('Técnica', 'tecnica'), ('Físico', 'fisico'), ('Comprometimento', 'comprometimento')] %}
-                        {% set val_attr = attrs.get(key_attr, 7.0) %}
-                        <div class="premium-profile-attr-item">
-                            <div class="premium-profile-attr-labels">
-                                <span class="premium-profile-attr-name">{{ label_attr }}</span>
-                                <span class="premium-profile-attr-val">{{ '%.1f'|format(val_attr|float) }}</span>
-                            </div>
-                            <div class="premium-profile-attr-track">
-                                <div class="premium-profile-attr-fill" style="width: {{ (val_attr|float * 10)|int }}%;"></div>
-                            </div>
+                <div class="premium-profile-attributes-list">
+                    {% set attrs = stats.get('atributos') or {'comprometimento': 7.0} %}
+                    {% set val_comp = attrs.get('comprometimento', 7.0) %}
+                    
+                    <!-- 1. Comprometimento -->
+                    <div class="premium-profile-attr-item">
+                        <div class="premium-profile-attr-labels">
+                            <span class="premium-profile-attr-name">Comprometimento</span>
+                            <span class="premium-profile-attr-val">{{ '%.1f'|format(val_comp|float) }} / 10.0</span>
                         </div>
-                        {% endfor %}
+                        <div class="premium-profile-attr-track">
+                            <div class="premium-profile-attr-fill" style="width: {{ (val_comp|float * 10)|int }}%;"></div>
+                        </div>
                     </div>
 
-                    <div class="premium-profile-radar-wrap">
-                        <svg class="premium-profile-radar-svg" viewBox="0 0 200 200">
-                            <!-- Grids -->
-                            {% for r in [25, 45, 62] %}
-                                {% set points = [] %}
-                                {% for i in range(5) %}
-                                    {% if i == 0 %}{% set cx, cy = 100, 100 - r %}
-                                    {% elif i == 1 %}{% set cx, cy = 100 + r * 0.951, 100 - r * 0.309 %}
-                                    {% elif i == 2 %}{% set cx, cy = 100 + r * 0.588, 100 + r * 0.809 %}
-                                    {% elif i == 3 %}{% set cx, cy = 100 - r * 0.588, 100 + r * 0.809 %}
-                                    {% elif i == 4 %}{% set cx, cy = 100 - r * 0.951, 100 - r * 0.309 %}{% endif %}
-                                    {% set _ = points.append(cx|round(1)|string ~ ',' ~ cy|round(1)|string) %}
-                                {% endfor %}
-                                <polygon class="premium-profile-radar-grid" points="{{ points|join(' ') }}" />
-                            {% endfor %}
-
-                            <!-- Eixos -->
-                            {% for i in range(5) %}
-                                {% set r = 62 %}
-                                {% if i == 0 %}{% set tx, ty = 100, 100 - r %}
-                                {% elif i == 1 %}{% set tx, ty = 100 + r * 0.951, 100 - r * 0.309 %}
-                                {% elif i == 2 %}{% set tx, ty = 100 + r * 0.588, 100 + r * 0.809 %}
-                                {% elif i == 3 %}{% set tx, ty = 100 - r * 0.588, 100 + r * 0.809 %}
-                                {% elif i == 4 %}{% set tx, ty = 100 - r * 0.951, 100 - r * 0.309 %}{% endif %}
-                                <line class="premium-profile-radar-axis" x1="100" y1="100" x2="{{ tx|round(1) }}" y2="{{ ty|round(1) }}" />
-                            {% endfor %}
-
-                            <!-- Polígono do jogador -->
-                            {% set val_points = [] %}
-                            {% set r_max = 62 %}
-                            {% set r0 = r_max * (attrs.get('ofensivo', 7.0)|float / 10.0) %}
-                            {% set _ = val_points.append('100,' ~ (100 - r0)|round(1)|string) %}
-                            {% set r1 = r_max * (attrs.get('defensivo', 7.0)|float / 10.0) %}
-                            {% set _ = val_points.append(((100 + r1 * 0.951)|round(1)|string) ~ ',' ~ ((100 - r1 * 0.309)|round(1)|string)) %}
-                            {% set r2 = r_max * (attrs.get('tecnica', 7.0)|float / 10.0) %}
-                            {% set _ = val_points.append(((100 + r2 * 0.588)|round(1)|string) ~ ',' ~ ((100 + r2 * 0.809)|round(1)|string)) %}
-                            {% set r3 = r_max * (attrs.get('fisico', 7.0)|float / 10.0) %}
-                            {% set _ = val_points.append(((100 - r3 * 0.588)|round(1)|string) ~ ',' ~ ((100 + r3 * 0.809)|round(1)|string)) %}
-                            {% set r4 = r_max * (attrs.get('comprometimento', 7.0)|float / 10.0) %}
-                            {% set _ = val_points.append(((100 - r4 * 0.951)|round(1)|string) ~ ',' ~ ((100 - r4 * 0.309)|round(1)|string)) %}
-                            <polygon class="premium-profile-radar-polygon" points="{{ val_points|join(' ') }}" />
-                            
-                            <!-- Rótulos do radar com abreviações de texto em vez de emojis -->
-                            <text class="premium-profile-radar-label" x="100" y="24">OFE</text>
-                            <text class="premium-profile-radar-label" x="174" y="78">DEF</text>
-                            <text class="premium-profile-radar-label" x="146" y="160">TÉC</text>
-                            <text class="premium-profile-radar-label" x="54" y="160">FÍS</text>
-                            <text class="premium-profile-radar-label" x="26" y="78">COM</text>
-                        </svg>
+                    <!-- 2. Progresso -->
+                    <div class="premium-profile-attr-item">
+                        <div class="premium-profile-attr-labels">
+                            <span class="premium-profile-attr-name">Progresso</span>
+                            <span class="premium-profile-attr-val">{{ '%.1f'|format(nivel_val) }} / 10.0</span>
+                        </div>
+                        <div class="premium-profile-attr-track">
+                            <div class="premium-profile-attr-fill" style="width: {{ (nivel_val * 10)|int }}%;"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -227,7 +165,7 @@
                     {% set gols = jogo.get('gols_times') or [0, 0] %}
                     {% set gols1 = gols[0]|default(0)|int %}
                     {% set gols2 = gols[1]|default(0)|int %}
-                    <a href="{{ url_for('partida.historico') }}#sorteio-{{ jogo.sorteio_id }}" class="premium-profile-match-card">
+                    <a href="{% if auth_user and auth_user.role == 'juiz' %}{{ url_for('juiz.juiz_historico') }}{% else %}{{ url_for('partida.historico') }}{% endif %}#sorteio-{{ jogo.sorteio_id }}" class="premium-profile-match-card">
                         {% if jogo.get('resultado', 'empate') == 'vitória' %}
                         <div class="premium-profile-match-result-badge premium-profile-match-result-badge--win">V</div>
                         {% elif jogo.get('resultado', 'empate') == 'derrota' %}
@@ -283,7 +221,7 @@
                     {% set gols = jogo.get('gols_times') or [0, 0] %}
                     {% set gols1 = gols[0]|default(0)|int %}
                     {% set gols2 = gols[1]|default(0)|int %}
-                    <a href="{{ url_for('partida.historico') }}#sorteio-{{ jogo.sorteio_id }}" class="premium-profile-match-card">
+                    <a href="{% if auth_user and auth_user.role == 'juiz' %}{{ url_for('juiz.juiz_historico') }}{% else %}{{ url_for('partida.historico') }}{% endif %}#sorteio-{{ jogo.sorteio_id }}" class="premium-profile-match-card">
                         {% if jogo.get('resultado', 'empate') == 'vitória' %}
                         <div class="premium-profile-match-result-badge premium-profile-match-result-badge--win">V</div>
                         {% elif jogo.get('resultado', 'empate') == 'derrota' %}
@@ -437,8 +375,21 @@
                     const id = c.getAttribute('id');
                     c.classList.toggle('is-active', id === `tab-${target}`);
                 });
+
+                // Salva a aba ativa na URL hash sem pular/rolar a página
+                history.replaceState(null, null, `#tab-${target}`);
             });
         });
+
+        // Restaurar aba ativa a partir do hash na URL
+        const hash = window.location.hash;
+        if (hash && hash.startsWith('#tab-')) {
+            const activeTabTarget = hash.replace('#tab-', '');
+            const matchingTab = Array.from(tabs).find(t => t.dataset.tabTarget === activeTabTarget);
+            if (matchingTab) {
+                matchingTab.click();
+            }
+        }
 
         // --- CONTROLE DE SLIDER DE EDIÇÃO ---
         const editSlider = document.getElementById('edit_nivel');

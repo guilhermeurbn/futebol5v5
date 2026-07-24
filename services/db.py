@@ -277,3 +277,74 @@ def auto_seed_on_init() -> None:
         print(f"[DB] ✓ POST-SEED: {len(jogadores_data)} players, {len(usuarios_data)} users loaded successfully")
     else:
         print(f"[DB] ✗ POST-SEED validation failed: players={len(jogadores_data)}, users={len(usuarios_data)}")
+
+
+def executar_migracao_link_usuarios_jogadores() -> None:
+    """
+    Realiza a vinculação de usuários e jogadores pelo nome e
+    limpa aqueles que não possuem correspondência (paridade).
+    """
+    status = load_json_data("migration_user_player_link_done", None)
+    if status and isinstance(status, dict) and status.get("done"):
+        print("[MIGRATION] User-Player link migration already executed.")
+        return
+
+    print("[MIGRATION] Running User-Player link and cleanup migration...")
+    usuarios = load_json_data("users", [])
+    jogadores = load_json_data("jogadores", [])
+
+    # Indexar jogadores por nome limpo e lowercase
+    jogadores_por_nome = {}
+    for j in jogadores:
+        if isinstance(j, dict):
+            nome = (j.get("nome") or "").strip().lower()
+            if nome:
+                jogadores_por_nome[nome] = j
+
+    # Indexar usuários por nome limpo e lowercase
+    usuarios_por_nome = {}
+    for u in usuarios:
+        if isinstance(u, dict):
+            nome = (u.get("nome") or "").strip().lower()
+            if nome:
+                usuarios_por_nome[nome] = u
+
+    # Encontrar as paridades
+    matched_user_ids = set()
+    matched_player_ids = set()
+
+    for nome, u in usuarios_por_nome.items():
+        if nome in jogadores_por_nome:
+            j = jogadores_por_nome[nome]
+            j["owner_user_id"] = u["id"]
+            matched_user_ids.add(u["id"])
+            matched_player_ids.add(j["id"])
+
+    # Filtrar usuários e jogadores sem paridade
+    # Manter usuários admin/juiz por segurança
+    novos_usuarios = []
+    for u in usuarios:
+        if not isinstance(u, dict):
+            continue
+        if u.get("id") in matched_user_ids or u.get("role") in ["admin", "super_admin", "juiz"]:
+            novos_usuarios.append(u)
+
+    novos_jogadores = []
+    for j in jogadores:
+        if not isinstance(j, dict):
+            continue
+        if j.get("id") in matched_player_ids:
+            novos_jogadores.append(j)
+
+    save_json_data("users", novos_usuarios)
+    save_json_data("jogadores", novos_jogadores)
+    save_json_data("migration_user_player_link_done", {"done": True})
+    print(f"[MIGRATION] Finished: kept {len(novos_usuarios)} users and {len(novos_jogadores)} players.")
+
+
+def clear_db_cache() -> None:
+    """Limpa o cache em memória do banco."""
+    global _cache
+    _cache.clear()
+
+

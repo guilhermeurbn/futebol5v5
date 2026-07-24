@@ -32,8 +32,14 @@ def test_login_with_remember_me_sets_permanent_session(monkeypatch):
         with client.session_transaction() as sess:
             assert sess.permanent is True
             assert sess['user_id'] == 'user-remember'
+            assert sess.get('remember_me') is True
 
     assert response.status_code == 302
+    
+    # Verify the Set-Cookie header has an Expires attribute (signaling a permanent cookie)
+    cookie_headers = response.headers.getlist('Set-Cookie')
+    has_expires = any('Expires=' in h or 'expires=' in h or 'Max-Age=' in h for h in cookie_headers)
+    assert has_expires, "Permanent session must set cookie Expires/Max-Age header"
 
 
 def test_login_without_remember_me_uses_browser_session(monkeypatch):

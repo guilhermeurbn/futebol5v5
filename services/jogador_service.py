@@ -240,12 +240,27 @@ class JogadorService:
             True se deletado, False se não encontrado
         """
         dados = self._carregar_raw()
-        dados_filtrados = [j for j in dados if j["id"] != jogador_id]
         
-        if len(dados_filtrados) == len(dados):
+        # Encontrar o jogador para obter o owner_user_id
+        alvo = next((j for j in dados if j["id"] == jogador_id), None)
+        if not alvo:
             return False
-        
+            
+        owner_user_id = alvo.get("owner_user_id")
+        dados_filtrados = [j for j in dados if j["id"] != jogador_id]
         self._salvar(dados_filtrados)
+        
+        # Deletar o usuário associado, se houver
+        if owner_user_id:
+            try:
+                from services.auth_service import AuthService
+                auth_service = AuthService()
+                user = auth_service.obter_por_id(owner_user_id)
+                if user:
+                    auth_service.deletar_usuario(owner_user_id)
+            except Exception as e:
+                pass
+                
         return True
     
     def contar(self) -> int:
