@@ -421,8 +421,8 @@ def test_public_history_renders_inline_round_summary(monkeypatch):
     body = response.get_data(as_text=True)
     assert response.status_code == 200
     assert 'Sorteio #11' in body
-    assert 'Resultado lançado' in body
-    assert 'Status da votação: encerrada' in body
+    assert 'Resultado lançado' not in body
+    assert 'Status da votação: encerrada' not in body
     assert 'Ver ranking' in body
     assert 'Ver resultado' not in body
 

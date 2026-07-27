@@ -8,139 +8,701 @@
 {% block auth_intro_wrapper %}{% endblock %}
 
 {% block auth_messages %}
-    {% if erro %}
-        <div class="auth-message auth-message--warning" role="alert" aria-live="assertive">
-            <strong>⚠️</strong>
-            <span>{{ erro }}</span>
-        </div>
-    {% endif %}
+{% if erro %}
+<div class="auth-message auth-message--warning" role="alert" aria-live="assertive">
+    <strong>⚠️</strong>
+    <span>{{ erro }}</span>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block auth_card_header %}
-    <div class="auth-card-header">
-        <div class="section-label">Cadastro</div>
-        <h2 id="signupHeading" class="auth-card-title auth-card-title--login">
-            <span class="auth-card-title__icon" aria-hidden="true">🆕</span>
-            <span>Novo usuário</span>
-        </h2>
-        <p class="auth-card-subtitle">Crie seu acesso com perfil de jogador.</p>
-    </div>
+<div class="auth-card-header">
+    <h2 id="signupHeading" class="auth-card-title auth-card-title--login">
+        <span>Cadastro</span>
+    </h2>
+    <p class="auth-card-subtitle">Crie sua conta para começar</p>
+</div>
 {% endblock %}
 
 {% block auth_form %}
-    <form method="post" action="{{ url_for('jogador.cadastro_submit') }}" class="auth-form">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="hidden" name="nivel" value="5.5">
+<form method="post" action="{{ url_for('jogador.cadastro_submit') }}" class="auth-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="nivel" value="5.5">
 
-        <div class="auth-form-grid">
-            <div class="form-group auth-field">
-                <label class="form-label" for="email">Email</label>
-                <div class="auth-input-wrap">
-                    <span class="auth-input-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="5" width="18" height="14" rx="2" />
-                            <path d="m4 7 8 6 8-6" />
-                        </svg>
-                    </span>
-                    <input class="form-input auth-input" id="email" name="email" type="email" placeholder="Digite seu email" required autocomplete="email" autofocus>
+    <div class="auth-form-grid">
+        <div class="form-group auth-field">
+            <label class="form-label" for="email">Email</label>
+            <div class="auth-input-container">
+                <div class="auth-icon-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                        stroke-linejoin="round" style="width: 18px; height: 18px;">
+                        <rect x="3" y="5" width="18" height="14" rx="2" />
+                        <path d="m4 7 8 6 8-6" />
+                    </svg>
+                </div>
+                <div class="auth-input-wrap" id="email-wrap">
+                    <input class="form-input auth-input" id="email" name="email" type="email"
+                        placeholder="Digite seu email" required autocomplete="email" autofocus>
+                    <span class="auth-input-status" id="email-status"></span>
                 </div>
             </div>
-
-            <div class="form-group auth-field">
-                <label class="form-label" for="nome">Nome</label>
-                <div class="auth-input-wrap">
-                    <span class="auth-input-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20 21a8 8 0 0 0-16 0" />
-                            <circle cx="12" cy="8" r="4" />
-                        </svg>
-                    </span>
-                    <input class="form-input auth-input" id="nome" name="nome" type="text" placeholder="Digite seu nome" required minlength="2" autocomplete="name">
-                </div>
-            </div>
-
-            <div class="form-group auth-field auth-form-grid--full">
-                <label class="form-label" for="username">Usuário</label>
-                <div class="auth-input-wrap">
-                    <span class="auth-input-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20 21a8 8 0 0 0-16 0" />
-                            <circle cx="12" cy="8" r="4" />
-                        </svg>
-                    </span>
-                    <input class="form-input auth-input" id="username" name="username" type="text" placeholder="Digite seu usuário" required minlength="3" autocomplete="username">
-                </div>
-            </div>
-
-            <div class="form-group auth-field">
-                <label class="form-label" for="password">Senha</label>
-                <div class="auth-input-wrap">
-                    <span class="auth-input-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="4" y="10" width="16" height="10" rx="2" />
-                            <path d="M8 10V7a4 4 0 0 1 8 0v3" />
-                        </svg>
-                    </span>
-                    <input class="form-input auth-input" id="password" name="password" type="password" placeholder="Crie uma senha" required minlength="6" autocomplete="new-password">
-                </div>
-            </div>
-
-            <div class="form-group auth-field">
-                <label class="form-label" for="confirmar_password">Confirmar senha</label>
-                <div class="auth-input-wrap">
-                    <span class="auth-input-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="4" y="10" width="16" height="10" rx="2" />
-                            <path d="M8 10V7a4 4 0 0 1 8 0v3" />
-                        </svg>
-                    </span>
-                    <input class="form-input auth-input" id="confirmar_password" name="confirmar_password" type="password" placeholder="Repita sua senha" required minlength="6" autocomplete="new-password">
-                </div>
-            </div>
-
-            <div class="auth-choice-block auth-form-grid--full">
-                <p class="auth-choice-block__label">Tipo de jogador</p>
-                <div class="auth-choice-grid" role="radiogroup" aria-label="Tipo de jogador">
-                    <label class="auth-choice-option">
-                        <input type="radio" name="tipo" value="fixo" class="auth-choice-option__input" required>
-                        <span class="auth-choice-option__check" aria-hidden="true"></span>
-                        <span class="auth-choice-option__title">Fixo</span>
-                        <span class="auth-choice-option__hint">Presença frequente</span>
-                    </label>
-                    <label class="auth-choice-option">
-                        <input type="radio" name="tipo" value="avulso" class="auth-choice-option__input" checked required>
-                        <span class="auth-choice-option__check" aria-hidden="true"></span>
-                        <span class="auth-choice-option__title">Avulso</span>
-                        <span class="auth-choice-option__hint">Participação flexível</span>
-                    </label>
-                </div>
-            </div>
-
-            <div class="auth-choice-block auth-form-grid--full">
-                <p class="auth-choice-block__label">Posição</p>
-                <div class="auth-choice-grid" role="radiogroup" aria-label="Posição de jogo">
-                    <label class="auth-choice-option">
-                        <input type="radio" name="posicao" value="linha" class="auth-choice-option__input" checked required>
-                        <span class="auth-choice-option__check" aria-hidden="true"></span>
-                        <span class="auth-choice-option__title">Linha</span>
-                        <span class="auth-choice-option__hint">Atua na linha</span>
-                    </label>
-                    <label class="auth-choice-option">
-                        <input type="radio" name="posicao" value="goleiro" class="auth-choice-option__input" required>
-                        <span class="auth-choice-option__check" aria-hidden="true"></span>
-                        <span class="auth-choice-option__title">Gol</span>
-                        <span class="auth-choice-option__hint">Atua no gol</span>
-                    </label>
-                </div>
-            </div>
-
-            <button class="btn btn-primary auth-submit auth-form-grid--full" type="submit">Criar conta</button>
+            <span class="auth-field-helper" id="email-helper"></span>
         </div>
-    </form>
+
+        <div class="form-group auth-field">
+            <label class="form-label" for="nome">Nome</label>
+            <div class="auth-input-container">
+                <div class="auth-icon-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                        stroke-linejoin="round" style="width: 18px; height: 18px;">
+                        <path d="M20 21a8 8 0 0 0-16 0" />
+                        <circle cx="12" cy="8" r="4" />
+                    </svg>
+                </div>
+                <div class="auth-input-wrap" id="nome-wrap">
+                    <input class="form-input auth-input" id="nome" name="nome" type="text"
+                        placeholder="Ex: Guilherme Urbano" required
+                        pattern="^[A-Za-zÀ-ÖØ-öø-ÿ]+(?:\s+[A-Za-zÀ-ÖØ-öø-ÿ]+)+$"
+                        title="Por favor, digite seu nome e sobrenome." autocomplete="name">
+                    <span class="auth-input-status" id="nome-status"></span>
+                </div>
+            </div>
+            <span class="auth-field-helper" id="nome-helper"></span>
+        </div>
+
+        <div class="form-group auth-field auth-form-grid--full">
+            <label class="form-label" for="username">Usuário</label>
+            <div class="auth-input-container">
+                <div class="auth-icon-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                        stroke-linejoin="round" style="width: 18px; height: 18px;">
+                        <path d="M20 21a8 8 0 0 0-16 0" />
+                        <circle cx="12" cy="8" r="4" />
+                    </svg>
+                </div>
+                <div class="auth-input-wrap" id="username-wrap">
+                    <input class="form-input auth-input" id="username" name="username" type="text"
+                        placeholder="Digite seu usuário" required minlength="3" autocomplete="username">
+                    <span class="auth-input-status" id="username-status"></span>
+                </div>
+            </div>
+            <span class="auth-field-helper" id="username-helper"></span>
+        </div>
+
+        <div class="form-group auth-field">
+            <label class="form-label" for="password">Senha</label>
+            <div class="auth-input-container">
+                <div class="auth-icon-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                        stroke-linejoin="round" style="width: 18px; height: 18px;">
+                        <rect x="4" y="10" width="16" height="10" rx="2" />
+                        <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                    </svg>
+                </div>
+                <div class="auth-input-wrap">
+                    <input class="form-input auth-input" id="password" name="password" type="password"
+                        placeholder="Crie uma senha" required minlength="6" autocomplete="new-password">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group auth-field">
+            <label class="form-label" for="confirmar_password">Confirmar senha</label>
+            <div class="auth-input-container">
+                <div class="auth-icon-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                        stroke-linejoin="round" style="width: 18px; height: 18px;">
+                        <rect x="4" y="10" width="16" height="10" rx="2" />
+                        <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                    </svg>
+                </div>
+                <div class="auth-input-wrap">
+                    <input class="form-input auth-input" id="confirmar_password" name="confirmar_password"
+                        type="password" placeholder="Repita sua senha" required minlength="6"
+                        autocomplete="new-password">
+                </div>
+            </div>
+        </div>
+
+        <div class="auth-choice-block auth-form-grid--full">
+            <p class="auth-choice-block__label">Tipo de jogador</p>
+            <div class="auth-choice-grid" role="radiogroup" aria-label="Tipo de jogador">
+                <label class="auth-choice-option">
+                    <input type="radio" name="tipo" value="fixo" class="auth-choice-option__input" required>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" style="width: 16px; height: 16px;">
+                        <circle cx="12" cy="12" r="10" />
+                        <circle cx="12" cy="12" r="4" />
+                    </svg>
+                    <span>Fixo</span>
+                </label>
+                <label class="auth-choice-option">
+                    <input type="radio" name="tipo" value="avulso" class="auth-choice-option__input" checked required>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" style="width: 16px; height: 16px;">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                    <span>Avulso</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="auth-choice-block auth-form-grid--full">
+            <p class="auth-choice-block__label">Posição</p>
+            <div class="auth-choice-grid" role="radiogroup" aria-label="Posição de jogo">
+                <label class="auth-choice-option">
+                    <input type="radio" name="posicao" value="linha" class="auth-choice-option__input" checked required>
+                    <span>Linha</span>
+                </label>
+                <label class="auth-choice-option">
+                    <input type="radio" name="posicao" value="goleiro" class="auth-choice-option__input" required>
+                    <span>Gol</span>
+                </label>
+            </div>
+        </div>
+
+        <button class="btn btn-primary auth-submit auth-form-grid--full" type="submit">Criar conta</button>
+    </div>
+</form>
 {% endblock %}
 
 {% block auth_card_footer %}
-    <div class="auth-card-footer">
-        <p class="auth-link-text">Já tem conta? <a href="{{ url_for('jogador.login_page') }}" class="text-accent-link">Entrar</a></p>
-    </div>
+<div class="auth-card-footer">
+    <p class="auth-link-text">Já tem conta? <a href="{{ url_for('jogador.login_page') }}" class="text-accent-link"
+            style="color: #a3e635 !important; font-weight: 700;">Entrar</a></p>
+</div>
+{% endblock %}
+
+{% block auth_scripts %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap');
+
+    html, body {
+        overflow: hidden !important;
+        height: 100% !important;
+        width: 100% !important;
+        position: fixed !important;
+        inset: 0 !important;
+    }
+    .auth-page {
+        height: 100% !important;
+        overflow: hidden !important;
+        position: fixed !important;
+        inset: 0 !important;
+    }
+
+    .auth-panel--form {
+        transform: translateY(-50px) !important;
+    }
+
+    .form-label {
+        margin-bottom: 2px !important;
+    }
+
+    .auth-card-header {
+        text-align: center;
+        margin-bottom: 1.15rem !important;
+    }
+
+    .auth-card-title {
+        justify-content: center;
+        font-family: 'Outfit', sans-serif;
+        font-size: 2.1rem;
+        font-weight: 800;
+        letter-spacing: -0.025em;
+        background: linear-gradient(135deg, #ffffff 40%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+    }
+
+    .auth-card-subtitle {
+        text-align: center;
+        font-family: 'Outfit', sans-serif;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.65);
+        font-size: 0.9rem;
+        margin-top: 0.25rem;
+    }
+
+    /* Tighten grid gap and form groups */
+    .auth-form-grid {
+        gap: 0.65rem !important;
+    }
+
+    .form-group {
+        margin-bottom: 0 !important;
+    }
+
+    /* Icon Box and Input side-by-side */
+    .auth-input-container {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        margin-top: 0.35rem;
+    }
+
+    .auth-icon-box {
+        width: 3.15rem;
+        height: 3.15rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.02);
+        flex-shrink: 0;
+        color: rgba(255, 255, 255, 0.6);
+        transition: border-color 0.2s, color 0.2s;
+    }
+
+    .auth-input-wrap {
+        flex: 1;
+        position: relative;
+    }
+
+    .auth-input-wrap .auth-input {
+        width: 100% !important;
+        height: 3.15rem !important;
+        border-radius: 12px !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        background: rgba(255, 255, 255, 0.01) !important;
+        color: #ffffff !important;
+        padding-left: 1rem !important;
+        padding-right: 2.75rem !important;
+        font-size: 0.92rem !important;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .auth-input-wrap .auth-input::placeholder {
+        color: rgba(255, 255, 255, 0.35) !important;
+    }
+
+    /* When input is focused, style the icon box too! */
+    .auth-input-container:focus-within .auth-icon-box {
+        border-color: #a78bfa;
+        color: #a78bfa;
+    }
+
+    /* Status icon positioning */
+    .auth-input-status {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.5rem;
+        height: 1.5rem;
+        pointer-events: none;
+        z-index: 5;
+    }
+
+    /* Password eye button positioning */
+    .password-toggle-btn {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(255, 255, 255, 0.45);
+        z-index: 10;
+        transition: color 0.2s;
+    }
+
+    /* Error/Success classes */
+    .auth-input-wrap.input-error input {
+        border-color: rgba(239, 68, 68, 0.5) !important;
+        box-shadow: 0 0 10px rgba(239, 68, 68, 0.15) !important;
+    }
+
+    .auth-input-wrap.input-success input {
+        border-color: rgba(34, 197, 94, 0.5) !important;
+        box-shadow: 0 0 10px rgba(34, 197, 94, 0.15) !important;
+    }
+
+    /* Collapse empty helper text slots entirely to save vertical space */
+    .auth-field-helper {
+        font-size: 0.78rem;
+        margin-top: 0;
+        display: block;
+        min-height: 0;
+        height: 0;
+        overflow: hidden;
+        transition: all 0.2s ease;
+    }
+
+    .auth-field-helper.error,
+    .auth-field-helper.success {
+        min-height: 1.1rem;
+        height: auto;
+        margin-top: 0.25rem;
+    }
+
+    .auth-field-helper.error {
+        color: #ef4444 !important;
+    }
+
+    .auth-field-helper.success {
+        color: #22c55e !important;
+    }
+
+    /* Choice Blocks styling */
+    .auth-choice-block {
+        margin-top: 0.25rem !important;
+        gap: 0.35rem !important;
+    }
+
+    .auth-choice-block__label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 0.25rem !important;
+    }
+
+    .auth-choice-grid {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .auth-choice-option {
+        flex: 1;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border-radius: 14px;
+        padding: 0.85rem 1rem;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        cursor: pointer;
+        color: #ffffff;
+        transition: all 0.2s ease;
+        user-select: none;
+    }
+
+    .auth-choice-option:hover {
+        border-color: rgba(255, 255, 255, 0.25);
+        background: rgba(255, 255, 255, 0.04);
+    }
+
+    .auth-choice-option__input {
+        display: none !important;
+    }
+
+    /* Active checked state: Lime Green background, Dark text! */
+    .auth-choice-option:has(input:checked) {
+        background: #a3e635 !important;
+        /* lime green */
+        color: #000000 !important;
+        border-color: #a3e635 !important;
+        font-weight: 700;
+    }
+
+    .auth-choice-option:has(input:checked) svg {
+        stroke: #000000 !important;
+    }
+
+    /* Submit Button */
+    .auth-submit {
+        margin-top: 0.65rem !important;
+        height: 3.15rem;
+        border-radius: 12px;
+        background: #6d28d9 !important;
+        /* solid purple */
+        font-weight: 700;
+        font-size: 0.95rem;
+        transition: background-color 0.2s;
+    }
+
+    .auth-submit:hover:not(:disabled) {
+        background: #5b21b6 !important;
+    }
+
+    /* Spinner */
+    @keyframes auth-spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .auth-spinner {
+        animation: auth-spin 0.6s linear infinite;
+        color: #a78bfa;
+    }
+
+    /* Mobile responsive compacting */
+    @media (max-width: 640px) {
+        .auth-page {
+            padding-top: calc(var(--mobile-auth-header-height) + 0.5rem) !important;
+            padding-bottom: 1.5rem !important;
+        }
+
+        .auth-panel--form {
+            padding: 1.25rem 1rem !important;
+        }
+
+        .auth-card-header {
+            margin-bottom: 1rem !important;
+        }
+
+        .auth-card-title {
+            font-size: 1.5rem !important;
+        }
+
+        .auth-card-subtitle {
+            font-size: 0.82rem !important;
+        }
+
+        .auth-input-container {
+            gap: 0.5rem !important;
+        }
+
+        .auth-icon-box {
+            width: 2.75rem !important;
+            height: 2.75rem !important;
+        }
+
+        .auth-input-wrap .auth-input {
+            height: 2.75rem !important;
+            font-size: 0.85rem !important;
+        }
+
+        .auth-choice-option {
+            padding: 0.7rem 0.5rem !important;
+            font-size: 0.85rem !important;
+            border-radius: 12px !important;
+        }
+
+        .auth-submit {
+            height: 2.75rem !important;
+            font-size: 0.9rem !important;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const emailInput = document.getElementById('email');
+        const nomeInput = document.getElementById('nome');
+        const usernameInput = document.getElementById('username');
+
+        const emailWrap = document.getElementById('email-wrap');
+        const nomeWrap = document.getElementById('nome-wrap');
+        const usernameWrap = document.getElementById('username-wrap');
+
+        const emailStatus = document.getElementById('email-status');
+        const nomeStatus = document.getElementById('nome-status');
+        const usernameStatus = document.getElementById('username-status');
+
+        const emailHelper = document.getElementById('email-helper');
+        const nomeHelper = document.getElementById('nome-helper');
+        const usernameHelper = document.getElementById('username-helper');
+
+        const submitBtn = document.querySelector('.auth-submit');
+
+        const states = {
+            nome: false,
+            email: false,
+            username: false
+        };
+
+        const icons = {
+            loading: `<svg class="auth-spinner" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>`,
+            success: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+            error: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`
+        };
+
+        function updateSubmitButton() {
+            const isValid = states.nome && states.email && states.username;
+            if (isValid) {
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+                submitBtn.style.cursor = 'pointer';
+            } else {
+                submitBtn.disabled = true;
+                submitBtn.style.opacity = '0.6';
+                submitBtn.style.cursor = 'not-allowed';
+            }
+        }
+
+        // Debounce Helper
+        function debounce(fn, delay) {
+            let timeout;
+            return function (...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => fn.apply(this, args), delay);
+            };
+        }
+
+        // Name local validation
+        function validateName() {
+            const val = nomeInput.value.trim();
+            if (!val) {
+                nomeWrap.className = 'auth-input-wrap';
+                nomeStatus.innerHTML = '';
+                nomeHelper.innerHTML = '';
+                nomeHelper.className = 'auth-field-helper';
+                states.nome = false;
+                updateSubmitButton();
+                return;
+            }
+
+            if (val.length < 2) {
+                nomeWrap.className = 'auth-input-wrap input-error';
+                nomeStatus.innerHTML = icons.error;
+                nomeHelper.textContent = 'O nome deve ter ao menos 2 caracteres.';
+                nomeHelper.className = 'auth-field-helper error';
+                states.nome = false;
+            } else {
+                const partes = val.split(/\s+/);
+                if (partes.length < 2) {
+                    nomeWrap.className = 'auth-input-wrap input-error';
+                    nomeStatus.innerHTML = icons.error;
+                    nomeHelper.textContent = 'Por favor, insira o seu nome e sobrenome.';
+                    nomeHelper.className = 'auth-field-helper error';
+                    states.nome = false;
+                } else {
+                    nomeWrap.className = 'auth-input-wrap input-success';
+                    nomeStatus.innerHTML = icons.success;
+                    nomeHelper.textContent = 'Nome válido.';
+                    nomeHelper.className = 'auth-field-helper success';
+                    states.nome = true;
+                }
+            }
+            updateSubmitButton();
+        }
+
+        // Email async validation
+        const validateEmailAsync = debounce(async () => {
+            const val = emailInput.value.trim();
+            if (!val) {
+                emailWrap.className = 'auth-input-wrap';
+                emailStatus.innerHTML = '';
+                emailHelper.innerHTML = '';
+                emailHelper.className = 'auth-field-helper';
+                states.email = false;
+                updateSubmitButton();
+                return;
+            }
+
+            if (!val.includes('@')) {
+                emailWrap.className = 'auth-input-wrap input-error';
+                emailStatus.innerHTML = icons.error;
+                emailHelper.textContent = 'Informe um email válido.';
+                emailHelper.className = 'auth-field-helper error';
+                states.email = false;
+                updateSubmitButton();
+                return;
+            }
+
+            // Show spinner
+            emailStatus.innerHTML = icons.loading;
+            emailHelper.innerHTML = '';
+
+            try {
+                const res = await fetch(`/api/auth/check-email?email=${encodeURIComponent(val)}`);
+                const data = await res.json();
+
+                if (data.exists) {
+                    emailWrap.className = 'auth-input-wrap input-error';
+                    emailStatus.innerHTML = icons.error;
+                    emailHelper.textContent = 'Este e-mail já está em uso.';
+                    emailHelper.className = 'auth-field-helper error';
+                    states.email = false;
+                } else {
+                    emailWrap.className = 'auth-input-wrap input-success';
+                    emailStatus.innerHTML = icons.success;
+                    emailHelper.textContent = 'E-mail disponível.';
+                    emailHelper.className = 'auth-field-helper success';
+                    states.email = true;
+                }
+            } catch (e) {
+                emailStatus.innerHTML = '';
+                emailHelper.textContent = 'Erro ao verificar e-mail.';
+                emailHelper.className = 'auth-field-helper error';
+                states.email = false;
+            }
+            updateSubmitButton();
+        }, 500);
+
+        // Username async validation
+        const validateUsernameAsync = debounce(async () => {
+            const val = usernameInput.value.trim();
+            if (!val) {
+                usernameWrap.className = 'auth-input-wrap';
+                usernameStatus.innerHTML = '';
+                usernameHelper.innerHTML = '';
+                usernameHelper.className = 'auth-field-helper';
+                states.username = false;
+                updateSubmitButton();
+                return;
+            }
+
+            if (val.length < 3) {
+                usernameWrap.className = 'auth-input-wrap input-error';
+                usernameStatus.innerHTML = icons.error;
+                usernameHelper.textContent = 'O usuário deve ter ao menos 3 caracteres.';
+                usernameHelper.className = 'auth-field-helper error';
+                states.username = false;
+                updateSubmitButton();
+                return;
+            }
+
+            // Show spinner
+            usernameStatus.innerHTML = icons.loading;
+            usernameHelper.innerHTML = '';
+
+            try {
+                const res = await fetch(`/api/auth/check-username?username=${encodeURIComponent(val)}`);
+                const data = await res.json();
+
+                if (data.exists) {
+                    usernameWrap.className = 'auth-input-wrap input-error';
+                    usernameStatus.innerHTML = icons.error;
+                    usernameHelper.textContent = 'Este nome de usuário já está em uso. Por favor, escolha outro.';
+                    usernameHelper.className = 'auth-field-helper error';
+                    states.username = false;
+                } else {
+                    usernameWrap.className = 'auth-input-wrap input-success';
+                    usernameStatus.innerHTML = icons.success;
+                    usernameHelper.textContent = 'Usuário disponível.';
+                    usernameHelper.className = 'auth-field-helper success';
+                    states.username = true;
+                }
+            } catch (e) {
+                usernameStatus.innerHTML = '';
+                usernameHelper.textContent = 'Erro ao verificar usuário.';
+                usernameHelper.className = 'auth-field-helper error';
+                states.username = false;
+            }
+            updateSubmitButton();
+        }, 500);
+
+        // Listeners
+        nomeInput.addEventListener('input', validateName);
+        emailInput.addEventListener('input', validateEmailAsync);
+        usernameInput.addEventListener('input', validateUsernameAsync);
+
+        // Initial triggers if fields are pre-filled (browser autofill)
+        setTimeout(() => {
+            if (nomeInput.value) validateName();
+            if (emailInput.value) validateEmailAsync();
+            if (usernameInput.value) validateUsernameAsync();
+        }, 400);
+    });
+</script>
 {% endblock %}

@@ -99,7 +99,7 @@
                                     <div class="player-item">
                                         <span class="player-name">
                                             {% if jogador.posicao == 'goleiro' %}🧤{% else %}⚽{% endif %}
-                                            {{ jogador.nome }}
+                                            {{ jogador.nome | abreviar_nome }}
                                         </span>
                                         <span class="player-level">Nível {{ jogador.nivel }}</span>
                                     </div>
@@ -153,7 +153,7 @@
                     <div class="summary-grid">
                         <div class="summary-card summary-card--primary">
                             <div class="summary-card__label">Mais votado</div>
-                            <div class="summary-card__value summary-card__value--large">{{ melhor_jogador.jogador_nome }}</div>
+                            <div class="summary-card__value summary-card__value--large">{{ melhor_jogador.jogador_nome | abreviar_nome }}</div>
                             <div class="summary-card__subtext">{{ melhor_jogador.votos }} votos • média {{ melhor_jogador.nota_media }}</div>
                         </div>
                         <div class="summary-card summary-card--secondary">
@@ -179,7 +179,7 @@
                                 {% for jogador in ranking_top10 %}
                                     <tr>
                                         <td>{{ loop.index }}</td>
-                                        <td><strong>{{ jogador.jogador_nome }}</strong></td>
+                                        <td><strong>{{ jogador.jogador_nome | abreviar_nome }}</strong></td>
                                         <td>Time {{ jogador.time_numero }}</td>
                                         <td>{{ jogador.votos }}</td>
                                         <td>{{ jogador.nota_media }}</td>

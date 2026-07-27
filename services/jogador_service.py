@@ -8,6 +8,17 @@ from models.jogadores import Jogador
 from services.db import load_json_data, save_json_data
 
 
+def abreviar_nome(nome: str) -> str:
+    if not nome:
+        return ""
+    partes = [p for p in nome.strip().split() if p]
+    if len(partes) <= 1:
+        return nome
+    first_name = partes[0]
+    last_name_initial = partes[1][0].upper()
+    return f"{first_name} {last_name_initial}."
+
+
 class JogadorService:
     """Serviço para gerenciar jogadores - com suporte a Postgres via db.py"""
     
@@ -80,7 +91,7 @@ class JogadorService:
     def criar(
         self,
         nome: str,
-        nivel: int,
+        nivel: float = 5.5,
         tipo: str = "avulso",
         posicao: str = "linha",
         owner_user_id: Optional[str] = None
@@ -90,20 +101,20 @@ class JogadorService:
         
         Args:
             nome: Nome do jogador
-            nivel: Nível de habilidade (1-10)
+            nivel: Nível de habilidade (1.0-10.0)
             tipo: 'fixo' ou 'avulso'
             posicao: 'linha' ou 'goleiro'
             
         Returns:
             Jogador criado
         """
-        # Validar nível (float 0.0-10.0)
+        # Validar nível (float 1.0-10.0, múltiplos de 0.1)
         try:
-            nivel = round(float(nivel), 2)
+            nivel = round(float(nivel), 1)
         except (TypeError, ValueError):
             raise ValueError(f"Nível inválido: deve ser um número, recebido: {nivel}")
-        if not (0.0 <= nivel <= 10.0):
-            raise ValueError(f"Nível deve estar entre 0.0 e 10.0, recebido: {nivel}")
+        if not (1.0 <= nivel <= 10.0):
+            raise ValueError(f"Nível deve estar entre 1.0 e 10.0, recebido: {nivel}")
         
         jogador = Jogador(
             nome=nome.strip(),
@@ -201,6 +212,7 @@ class JogadorService:
         motivo: str = "votacao",
         nivel_anterior: Optional[float] = None,
         nota_media: Optional[float] = None,
+        novo_nivel_preciso: Optional[float] = None,
     ) -> Optional['Jogador']:
         """Aplica evolução de nível baseada em votação e registra histórico."""
         from datetime import datetime
@@ -210,8 +222,13 @@ class JogadorService:
             return None
 
         item = dados[indice]
-        nivel_ant = nivel_anterior if nivel_anterior is not None else float(item.get("nivel", 5))
-        novo_nivel_clamped = round(max(0.0, min(10.0, float(novo_nivel))), 2)
+        nivel_ant = nivel_anterior if nivel_anterior is not None else float(item.get("nivel", 5.5))
+        novo_nivel_clamped = round(max(1.0, min(10.0, float(novo_nivel))), 1)
+
+        # Se novo_nivel_preciso não for fornecido, usar o novo_nivel como fallback
+        if novo_nivel_preciso is None:
+            novo_nivel_preciso = novo_nivel_clamped
+        novo_nivel_preciso_clamped = round(max(1.0, min(10.0, float(novo_nivel_preciso))), 4)
 
         historico = list(item.get("historico_nivel") or [])
         historico.append({
@@ -224,6 +241,7 @@ class JogadorService:
         historico = historico[-50:]  # manter últimos 50 registros
 
         item["nivel"] = novo_nivel_clamped
+        item["nivel_preciso"] = novo_nivel_preciso_clamped
         item["historico_nivel"] = historico
         dados[indice] = item
         self._salvar(dados)

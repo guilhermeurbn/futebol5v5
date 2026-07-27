@@ -264,6 +264,12 @@ def cadastro_submit():
     if senha != confirmar:
         return render_template('cadastro.html', erro='A confirmacao de senha nao confere'), 400
 
+    if not nome or len(nome) < 2:
+        return render_template('cadastro.html', erro='Nome deve ter ao menos 2 caracteres'), 400
+    nome_partes = [p for p in nome.split() if p]
+    if len(nome_partes) < 2:
+        return render_template('cadastro.html', erro='Por favor, digite seu nome e sobrenome.'), 400
+
     try:
         usuario = auth_service.criar_usuario(
             email=email,
@@ -320,7 +326,12 @@ def cadastro_submit():
             sucesso='Cadastro realizado com sucesso! Entre com seu usuario e senha.'
         )
     except ValueError as e:
-        return render_template('cadastro.html', erro=str(e)), 400
+        msg = str(e)
+        if msg == "Username ja existe":
+            msg = "Este nome de usuário já está em uso. Por favor, escolha outro."
+        elif msg == "Email ja existe":
+            msg = "Este e-mail já está em uso. Por favor, escolha outro."
+        return render_template('cadastro.html', erro=msg), 400
     except Exception as e:
         return render_template('cadastro.html', erro='Erro ao criar usuario'), 500
 
@@ -488,11 +499,16 @@ def perfil_jogador_publico(jogador_id):
             logger.error(f"Erro ao carregar estatísticas do perfil público: {str(e)}")
             pass
 
+        owner_user = None
+        if jogador.owner_user_id:
+            owner_user = auth_service.obter_por_id(jogador.owner_user_id)
+
         return render_template(
             'perfil_jogador.html',
             jogador=jogador,
             stats_jogador=stats_jogador,
-            usuario=_usuario_logado()
+            usuario=_usuario_logado(),
+            owner_user=owner_user
         )
     except Exception as e:
         import logging
@@ -685,4 +701,44 @@ def apagar_conta():
             jogador_proprio=(jogador_service.listar_por_usuario(user_id) or [None])[0],
             erro_deletar='Ocorreu um erro ao processar a exclusão da sua conta.'
         ), 500
+
+
+@auth_bp.route('/api/auth/check-email', methods=['GET'])
+def check_email():
+    email = request.args.get('email', '').strip().lower()
+    if not email:
+        return jsonify({'exists': False, 'valid': False, 'mensagem': 'E-mail vazio.'})
+    if '@' not in email:
+        return jsonify({'exists': False, 'valid': False, 'mensagem': 'E-mail inválido.'})
+    
+    try:
+        usuarios = auth_service.listar_usuarios()
+        exists = any((u.get('email') or '').strip().lower() == email for u in usuarios)
+        return jsonify({
+            'exists': exists,
+            'valid': True,
+            'mensagem': 'Este e-mail já está em uso.' if exists else 'E-mail disponível.'
+        })
+    except Exception as e:
+        return jsonify({'exists': False, 'valid': False, 'mensagem': 'Erro ao verificar e-mail.'}), 500
+
+
+@auth_bp.route('/api/auth/check-username', methods=['GET'])
+def check_username():
+    username = request.args.get('username', '').strip().lower()
+    if not username:
+        return jsonify({'exists': False, 'valid': False, 'mensagem': 'Nome de usuário vazio.'})
+    if len(username) < 3:
+        return jsonify({'exists': False, 'valid': False, 'mensagem': 'O nome de usuário deve ter ao menos 3 caracteres.'})
+    
+    try:
+        usuarios = auth_service.listar_usuarios()
+        exists = any((u.get('username') or '').strip().lower() == username for u in usuarios)
+        return jsonify({
+            'exists': exists,
+            'valid': True,
+            'mensagem': 'Este nome de usuário já está em uso. Por favor, escolha outro.' if exists else 'Nome de usuário disponível.'
+        })
+    except Exception as e:
+        return jsonify({'exists': False, 'valid': False, 'mensagem': 'Erro ao verificar usuário.'}), 500
 

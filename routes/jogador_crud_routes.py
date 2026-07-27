@@ -191,9 +191,16 @@ def criar_jogador_api():
     """API: Cria novo jogador"""
     try:
         dados = request.get_json(silent=True) or {}
+        nome = dados.get('nome', '').strip()
+        if not nome or len(nome) < 2:
+            raise ValueError('Nome deve ter ao menos 2 caracteres')
+        nome_partes = [p for p in nome.split() if p]
+        if len(nome_partes) < 2:
+            raise ValueError('Por favor, insira o nome e sobrenome do jogador.')
+
         jogador = jogador_service.criar(
-            nome=dados.get('nome'),
-            nivel=float(dados.get('nivel', 5.0)),
+            nome=nome,
+            nivel=float(dados.get('nivel', 5.5)),
             tipo=dados.get('tipo', 'avulso'),
             posicao=dados.get('posicao', 'linha')
         )
@@ -217,7 +224,12 @@ def adicionar_jogador():
     """Formulário: Adiciona novo jogador"""
     try:
         nome = request.form.get('nome', '').strip()
-        nivel = float(request.form.get('nivel', 5.0))
+        if not nome or len(nome) < 2:
+            raise ValueError('Nome deve ter ao menos 2 caracteres')
+        nome_partes = [p for p in nome.split() if p]
+        if len(nome_partes) < 2:
+            raise ValueError('Por favor, insira o nome e sobrenome do jogador.')
+        nivel = float(request.form.get('nivel', 5.5))
         tipo = request.form.get('tipo', '').strip()
         posicao = request.form.get('posicao', '').strip()
 
@@ -317,6 +329,11 @@ def editar_jogador_page(jogador_id):
 def editar_jogador_post(jogador_id):
     """Form handler: atualiza jogador via form (admin)"""
     nome = request.form.get('nome', '').strip()
+    if not nome or len(nome) < 2:
+        raise ValueError('Nome deve ter ao menos 2 caracteres')
+    nome_partes = [p for p in nome.split() if p]
+    if len(nome_partes) < 2:
+        raise ValueError('Por favor, insira o nome e sobrenome do jogador.')
     nivel = request.form.get('nivel')
     tipo = request.form.get('tipo')
     posicao = request.form.get('posicao')

@@ -224,7 +224,8 @@
                         class="form-input"
                         value="{{ jogador.nome }}"
                         required
-                        minlength="2"
+                        pattern="^[A-Za-zÀ-ÖØ-öø-ÿ]+(?:\s+[A-Za-zÀ-ÖØ-öø-ÿ]+)+$"
+                        title="Por favor, insira o nome e sobrenome do jogador."
                         autocomplete="off"
                         style="width: 100%;"
                     >

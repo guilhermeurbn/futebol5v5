@@ -3,6 +3,57 @@
 {% block title %}Admin{% endblock %}
 
 {% block content %}
+<style>
+    .auth-input-container {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        margin-top: 0.35rem;
+    }
+    .auth-input-wrap {
+        flex: 1;
+        position: relative;
+    }
+    .auth-input-status {
+        position: absolute;
+        right: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.5rem;
+        height: 1.5rem;
+        pointer-events: none;
+        z-index: 5;
+    }
+    .auth-input-wrap.input-error .form-input {
+        border-color: rgba(239, 68, 68, 0.5) !important;
+        box-shadow: 0 0 10px rgba(239, 68, 68, 0.15) !important;
+    }
+    .auth-input-wrap.input-success .form-input {
+        border-color: rgba(34, 197, 94, 0.5) !important;
+        box-shadow: 0 0 10px rgba(34, 197, 94, 0.15) !important;
+    }
+    .auth-field-helper {
+        font-size: 0.78rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+    .auth-field-helper.error {
+        color: #ef4444 !important;
+    }
+    .auth-field-helper.success {
+        color: #22c55e !important;
+    }
+    .auth-spinner {
+        animation: auth-spin 0.6s linear infinite;
+        color: #a78bfa;
+    }
+    @keyframes auth-spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
 <div class="container page-container-wide judge-workspace-page admin-page" style="background: #000000 !important; min-height: 100vh; width: 100%;">
     <header class="header">
         <div class="header-content">
@@ -188,18 +239,30 @@
                         
                         <div class="form-group" style="margin-bottom: 1.25rem;">
                             <label class="form-label">Nome Completo</label>
-                            <input class="form-input" name="nome" placeholder="Ex: Guilherme Urbano" required autocomplete="off">
+                            <div class="auth-input-wrap" id="admin-nome-wrap">
+                                <input class="form-input" id="admin-nome" name="nome" placeholder="Ex: Guilherme Urbano" required autocomplete="off" pattern="^[A-Za-zÀ-ÖØ-öø-ÿ]+(?:\s+[A-Za-zÀ-ÖØ-öø-ÿ]+)+$" title="Por favor, insira o nome e sobrenome.">
+                                <span class="auth-input-status" id="admin-nome-status"></span>
+                            </div>
+                            <div class="auth-field-helper" id="admin-nome-helper"></div>
                         </div>
                         
                         <div class="form-group" style="margin-bottom: 1.25rem;">
                             <label class="form-label">Email</label>
-                            <input class="form-input" name="email" type="email" placeholder="Ex: guilherme@exemplo.com" required autocomplete="off">
+                            <div class="auth-input-wrap" id="admin-email-wrap">
+                                <input class="form-input" id="admin-email" name="email" type="email" placeholder="Ex: guilherme@exemplo.com" required autocomplete="off">
+                                <span class="auth-input-status" id="admin-email-status"></span>
+                            </div>
+                            <div class="auth-field-helper" id="admin-email-helper"></div>
                         </div>
 
                         <div class="form-group" style="margin-bottom: 1.25rem; display: flex; gap: 1rem;">
                             <div style="flex: 1;">
                                 <label class="form-label">Username</label>
-                                <input class="form-input" name="username" placeholder="Username" required autocomplete="off">
+                                <div class="auth-input-wrap" id="admin-username-wrap">
+                                    <input class="form-input" id="admin-username" name="username" placeholder="Username" required autocomplete="off">
+                                    <span class="auth-input-status" id="admin-username-status"></span>
+                                </div>
+                                <div class="auth-field-helper" id="admin-username-helper"></div>
                             </div>
                             <div style="flex: 1;">
                                 <label class="form-label">Senha</label>
@@ -357,8 +420,8 @@
                     <div class="profile-security-dialog__body">
                         <p class="admin-delete-modal__message" id="adminDeleteModalMessage" style="font-size: 0.85rem; color: #b3aebc; line-height: 1.4; margin-bottom: 2rem;"></p>
                         <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-                            <button type="button" class="btn btn-secondary" data-delete-close style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.6rem 1.2rem; cursor: pointer; color: #9a95a4;">Cancelar</button>
-                            <button type="button" class="btn" id="adminDeleteConfirmBtn" style="background: #ef4444 !important; color: white !important; border: none; font-weight: 700; border-radius: 12px; padding: 0.6rem 1.2rem; cursor: pointer;">Deletar</button>
+                            <button type="button" class="btn btn-secondary" data-delete-close style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.6rem 1.2rem; cursor: pointer; color: #9a95a4;">NÃO</button>
+                            <button type="button" class="btn" id="adminDeleteConfirmBtn" style="background: #ef4444 !important; color: white !important; border: none; font-weight: 700; border-radius: 12px; padding: 0.6rem 1.2rem; cursor: pointer;">SIM</button>
                         </div>
                     </div>
                 </div>
@@ -383,7 +446,7 @@
                 const openDeleteModal = (form, userName, userUsername) => {
                     if (!deleteModal || !deleteMessage || !deleteConfirmBtn) return;
                     pendingDeleteForm = form;
-                    deleteMessage.textContent = `Tem certeza que deseja Deletar o usuário ${userName} (${userUsername})? Essa ação é irreversível.`;
+                    deleteMessage.textContent = `Deseja excluir @${userUsername}?`;
                     deleteModal.hidden = false;
                     deleteModal.setAttribute('aria-hidden', 'false');
                     deleteConfirmBtn.focus();
@@ -526,6 +589,7 @@
                         
                         filterTabs.forEach(t => t.classList.toggle('is-active', t === tab));
                         applyFilters();
+                    });
                 });
 
                 // Toggle para exibição da senha
@@ -546,6 +610,204 @@
                         }
                     });
                 }
+
+                // Dynamic verification logic for User creation modal
+                const adminEmailInput = document.getElementById('admin-email');
+                const adminNomeInput = document.getElementById('admin-nome');
+                const adminUsernameInput = document.getElementById('admin-username');
+
+                const adminEmailWrap = document.getElementById('admin-email-wrap');
+                const adminNomeWrap = document.getElementById('admin-nome-wrap');
+                const adminUsernameWrap = document.getElementById('admin-username-wrap');
+
+                const adminEmailStatus = document.getElementById('admin-email-status');
+                const adminNomeStatus = document.getElementById('admin-nome-status');
+                const adminUsernameStatus = document.getElementById('admin-username-status');
+
+                const adminEmailHelper = document.getElementById('admin-email-helper');
+                const adminNomeHelper = document.getElementById('admin-nome-helper');
+                const adminUsernameHelper = document.getElementById('admin-username-helper');
+
+                const adminSubmitBtn = document.querySelector('.premium-submit-btn');
+
+                const adminStates = {
+                    nome: false,
+                    email: false,
+                    username: false
+                };
+
+                const adminIcons = {
+                    loading: `<svg class="auth-spinner" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>`,
+                    success: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+                    error: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`
+                };
+
+                function updateAdminSubmitButton() {
+                    const isValid = adminStates.nome && adminStates.email && adminStates.username;
+                    if (adminSubmitBtn) {
+                        adminSubmitBtn.disabled = !isValid;
+                        adminSubmitBtn.style.opacity = isValid ? '1' : '0.6';
+                        adminSubmitBtn.style.cursor = isValid ? 'pointer' : 'not-allowed';
+                    }
+                }
+
+                function debounce(fn, delay) {
+                    let timeout;
+                    return function (...args) {
+                        clearTimeout(timeout);
+                        timeout = setTimeout(() => fn.apply(this, args), delay);
+                    };
+                }
+
+                function validateAdminName() {
+                    const val = adminNomeInput.value.trim();
+                    if (!val) {
+                        adminNomeWrap.className = 'auth-input-wrap';
+                        adminNomeStatus.innerHTML = '';
+                        adminNomeHelper.innerHTML = '';
+                        adminNomeHelper.className = 'auth-field-helper';
+                        adminStates.nome = false;
+                        updateAdminSubmitButton();
+                        return;
+                    }
+
+                    if (val.length < 2) {
+                        adminNomeWrap.className = 'auth-input-wrap input-error';
+                        adminNomeStatus.innerHTML = adminIcons.error;
+                        adminNomeHelper.textContent = 'O nome deve ter ao menos 2 caracteres.';
+                        adminNomeHelper.className = 'auth-field-helper error';
+                        adminStates.nome = false;
+                    } else {
+                        const partes = val.split(/\s+/);
+                        if (partes.length < 2) {
+                            adminNomeWrap.className = 'auth-input-wrap input-error';
+                            adminNomeStatus.innerHTML = adminIcons.error;
+                            adminNomeHelper.textContent = 'Por favor, insira o seu nome e sobrenome.';
+                            adminNomeHelper.className = 'auth-field-helper error';
+                            adminStates.nome = false;
+                        } else {
+                            adminNomeWrap.className = 'auth-input-wrap input-success';
+                            adminNomeStatus.innerHTML = adminIcons.success;
+                            adminNomeHelper.textContent = 'Nome válido.';
+                            adminNomeHelper.className = 'auth-field-helper success';
+                            adminStates.nome = true;
+                        }
+                    }
+                    updateAdminSubmitButton();
+                }
+
+                const validateAdminEmailAsync = debounce(async () => {
+                    const val = adminEmailInput.value.trim();
+                    if (!val) {
+                        adminEmailWrap.className = 'auth-input-wrap';
+                        adminEmailStatus.innerHTML = '';
+                        adminEmailHelper.innerHTML = '';
+                        adminEmailHelper.className = 'auth-field-helper';
+                        adminStates.email = false;
+                        updateAdminSubmitButton();
+                        return;
+                    }
+
+                    if (!val.includes('@')) {
+                        adminEmailWrap.className = 'auth-input-wrap input-error';
+                        adminEmailStatus.innerHTML = adminIcons.error;
+                        adminEmailHelper.textContent = 'Informe um email válido.';
+                        adminEmailHelper.className = 'auth-field-helper error';
+                        adminStates.email = false;
+                        updateAdminSubmitButton();
+                        return;
+                    }
+
+                    adminEmailStatus.innerHTML = adminIcons.loading;
+                    adminEmailHelper.innerHTML = '';
+
+                    try {
+                        const res = await fetch(`/api/auth/check-email?email=${encodeURIComponent(val)}`);
+                        const data = await res.json();
+
+                        if (data.exists) {
+                            adminEmailWrap.className = 'auth-input-wrap input-error';
+                            adminEmailStatus.innerHTML = adminIcons.error;
+                            adminEmailHelper.textContent = 'Este e-mail já está em uso.';
+                            adminEmailHelper.className = 'auth-field-helper error';
+                            adminStates.email = false;
+                        } else {
+                            adminEmailWrap.className = 'auth-input-wrap input-success';
+                            adminEmailStatus.innerHTML = adminIcons.success;
+                            adminEmailHelper.textContent = 'E-mail disponível.';
+                            adminEmailHelper.className = 'auth-field-helper success';
+                            adminStates.email = true;
+                        }
+                    } catch (e) {
+                        adminEmailStatus.innerHTML = '';
+                        adminEmailHelper.textContent = 'Erro ao verificar e-mail.';
+                        adminEmailHelper.className = 'auth-field-helper error';
+                        adminStates.email = false;
+                    }
+                    updateAdminSubmitButton();
+                }, 500);
+
+                const validateAdminUsernameAsync = debounce(async () => {
+                    const val = adminUsernameInput.value.trim();
+                    if (!val) {
+                        adminUsernameWrap.className = 'auth-input-wrap';
+                        adminUsernameStatus.innerHTML = '';
+                        adminUsernameHelper.innerHTML = '';
+                        adminUsernameHelper.className = 'auth-field-helper';
+                        adminStates.username = false;
+                        updateAdminSubmitButton();
+                        return;
+                    }
+
+                    if (val.length < 3) {
+                        adminUsernameWrap.className = 'auth-input-wrap input-error';
+                        adminUsernameStatus.innerHTML = adminIcons.error;
+                        adminUsernameHelper.textContent = 'O usuário deve ter ao menos 3 caracteres.';
+                        adminUsernameHelper.className = 'auth-field-helper error';
+                        adminStates.username = false;
+                        updateAdminSubmitButton();
+                        return;
+                    }
+
+                    adminUsernameStatus.innerHTML = adminIcons.loading;
+                    adminUsernameHelper.innerHTML = '';
+
+                    try {
+                        const res = await fetch(`/api/auth/check-username?username=${encodeURIComponent(val)}`);
+                        const data = await res.json();
+
+                        if (data.exists) {
+                            adminUsernameWrap.className = 'auth-input-wrap input-error';
+                            adminUsernameStatus.innerHTML = adminIcons.error;
+                            adminUsernameHelper.textContent = 'Este nome de usuário já está em uso. Por favor, escolha outro.';
+                            adminUsernameHelper.className = 'auth-field-helper error';
+                            adminStates.username = false;
+                        } else {
+                            adminUsernameWrap.className = 'auth-input-wrap input-success';
+                            adminUsernameStatus.innerHTML = adminIcons.success;
+                            adminUsernameHelper.textContent = 'Usuário disponível.';
+                            adminUsernameHelper.className = 'auth-field-helper success';
+                            adminStates.username = true;
+                        }
+                    } catch (e) {
+                        adminUsernameStatus.innerHTML = '';
+                        adminUsernameHelper.textContent = 'Erro ao verificar usuário.';
+                        adminUsernameHelper.className = 'auth-field-helper error';
+                        adminStates.username = false;
+                    }
+                    updateAdminSubmitButton();
+                }, 500);
+
+                if (adminNomeInput) adminNomeInput.addEventListener('input', validateAdminName);
+                if (adminEmailInput) adminEmailInput.addEventListener('input', validateAdminEmailAsync);
+                if (adminUsernameInput) adminUsernameInput.addEventListener('input', validateAdminUsernameAsync);
+
+                // Initial triggers if inputs are pre-filled (browser autofill)
+                setTimeout(() => {
+                    if (adminNomeInput && adminNomeInput.value) validateAdminName();
+                    if (adminEmailInput && adminEmailInput.value) validateAdminEmailAsync();
+                    if (adminUsernameInput && adminUsernameInput.value) validateAdminUsernameAsync();
+                }, 400);
             })();
         </script>
 

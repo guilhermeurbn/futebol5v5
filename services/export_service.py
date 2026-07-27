@@ -6,6 +6,7 @@ import io
 from datetime import datetime
 from typing import List, Dict
 from models.jogadores import Jogador
+from services.jogador_service import abreviar_nome
 
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
@@ -155,7 +156,7 @@ class ExportService:
             linhas.append(f"*Time {idx}*")
             for jogador in jogadores:
                 marcador = "🧤" if jogador.posicao == "goleiro" else "•"
-                linhas.append(f"{marcador} {jogador.nome}")
+                linhas.append(f"{marcador} {abreviar_nome(jogador.nome)}")
             linhas.append("")
 
         total_jogadores = sum(len(time) for time in times)
@@ -245,7 +246,7 @@ class ExportService:
             linhas = [['Nome', 'Nível', 'Tipo', 'Posição']]
             for jogador in time:
                 linhas.append([
-                    jogador.nome,
+                    abreviar_nome(jogador.nome),
                     str(jogador.nivel),
                     'Fixo' if jogador.tipo == 'fixo' else 'Avulso',
                     'Goleiro' if jogador.posicao == 'goleiro' else 'Linha'

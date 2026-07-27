@@ -15,8 +15,7 @@
   function formatDate(date, locale) {
     return new Intl.DateTimeFormat(locale, {
       day: '2-digit',
-      month: '2-digit',
-      year: '2-digit'
+      month: '2-digit'
     }).format(date);
   }
 
@@ -43,7 +42,7 @@
     scope.querySelectorAll('[data-local-datetime]').forEach(function (element) {
       const date = parseDate(element.getAttribute('data-local-datetime'), false);
       if (!date) return;
-      element.textContent = formatDate(date, locale) + ' ' + formatTime(date, locale);
+      element.textContent = formatTime(date, locale) + ' ' + formatDate(date, locale);
       element.setAttribute('title', Intl.DateTimeFormat().resolvedOptions().timeZone || '');
     });
   }
@@ -54,7 +53,7 @@
       const date = parseDate(value, false);
       if (!date) return value || '';
       const locale = getLocale();
-      return formatDate(date, locale) + ' ' + formatTime(date, locale);
+      return formatTime(date, locale) + ' ' + formatDate(date, locale);
     },
     formatDate: function (value) {
       const date = parseDate(value, true);

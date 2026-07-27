@@ -316,7 +316,7 @@ def criar_app(config_name: str = None) -> Flask:
             return value
 
         iso_value = dt.isoformat()
-        fallback = dt.strftime('%d/%m/%y às %H:%M') if incluir_hora else dt.strftime('%d/%m/%y')
+        fallback = dt.strftime('%H:%M %d/%m') if incluir_hora else dt.strftime('%d/%m')
         data_attr = 'data-local-datetime' if incluir_hora else 'data-local-date'
         return Markup(
             f'<time datetime="{escape(iso_value)}" {data_attr}="{escape(iso_value)}">'
@@ -333,6 +333,24 @@ def criar_app(config_name: str = None) -> Flask:
     app.jinja_env.filters['dt_pt_hm'] = dt_pt_hm
     app.jinja_env.filters['parse_iso_date'] = _parse_iso_date
     app.jinja_env.filters['_parse_iso_date'] = _parse_iso_date
+
+    from services.jogador_service import abreviar_nome
+
+    def abreviar_nomes_lista(jogadores: list) -> str:
+        nomes_abrev = []
+        for j in jogadores:
+            if isinstance(j, dict):
+                nome = j.get('nome') or j.get('jogador_nome', '')
+            elif isinstance(j, str):
+                nome = j
+            else:
+                nome = getattr(j, 'nome', '')
+            if nome:
+                nomes_abrev.append(abreviar_nome(nome))
+        return ", ".join(nomes_abrev)
+
+    app.jinja_env.filters['abreviar_nome'] = abreviar_nome
+    app.jinja_env.filters['abreviar_nomes_lista'] = abreviar_nomes_lista
 
     @app.context_processor
     def inject_notificacoes_globais():

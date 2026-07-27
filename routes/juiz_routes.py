@@ -204,22 +204,8 @@ def juiz_historico():
             reverse=True,
         )
 
-        for item in sorteios:
-            sorteio_id = int(item.get('id', 0) or 0)
-            rodada = votacao_service.obter_por_sorteio(sorteio_id) if sorteio_id else None
-            ranking = (rodada or {}).get('ranking') or {}
-            ranking_jogadores = ranking.get('ranking_jogadores') or []
-            ranking_top10 = ranking_jogadores[:10]
-
-            media_geral = 0.0
-            total_rankeados = len(ranking_jogadores)
-            if total_rankeados:
-                soma_medias = sum(float(j.get('nota_media', 0) or 0) for j in ranking_jogadores)
-                media_geral = round(soma_medias / total_rankeados, 2)
-
-            item['ranking_top10'] = ranking_top10
-            item['ranking_media_geral'] = media_geral
-            item['ranking_total_jogadores'] = total_rankeados
+        from routes.partida_routes import _enriquecer_sorteio_historico
+        sorteios = [_enriquecer_sorteio_historico(item) for item in sorteios]
 
         estado = juiz_partida_service.obter_estado()
         sorteio_atual_id = ((estado.get('partida_atual') or {}).get('sorteio_id'))

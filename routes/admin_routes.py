@@ -190,6 +190,12 @@ def admin_criar_usuario():
         if not email or '@' not in email:
             raise ValueError('Email deve ser valido')
 
+        if not nome or len(nome) < 2:
+            raise ValueError('Nome deve ter ao menos 2 caracteres')
+        nome_partes = [p for p in nome.strip().split() if p]
+        if len(nome_partes) < 2:
+            raise ValueError('Por favor, insira o nome e sobrenome.')
+
         usuario = auth_service.criar_usuario(email=email, username=username, nome=nome, password=password, role=role)
         if role == 'usuario':
             try:
@@ -211,7 +217,12 @@ def admin_criar_usuario():
     except ValueError as e:
         logger.warning(f"Erro de validação ao criar usuário: {str(e)}")
         usuarios = auth_service.listar_usuarios()
-        return render_template('admin.html', usuarios=usuarios, erro=str(e), usuario=_usuario_logado()), 400
+        msg = str(e)
+        if msg == "Username ja existe":
+            msg = "Este nome de usuário já está em uso. Por favor, escolha outro."
+        elif msg == "Email ja existe":
+            msg = "Este e-mail já está em uso. Por favor, escolha outro."
+        return render_template('admin.html', usuarios=usuarios, erro=msg, usuario=_usuario_logado()), 400
     except Exception as e:
         logger.error(f"Erro ao criar usuário: {str(e)}")
         usuarios = auth_service.listar_usuarios()

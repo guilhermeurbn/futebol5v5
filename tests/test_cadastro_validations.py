@@ -123,7 +123,7 @@ def test_cadastro_route_rejects_repeated_email(tmp_path, monkeypatch):
 
     body = response.get_data(as_text=True)
     assert response.status_code == 400
-    assert 'Email ja existe' in body
+    assert 'Este e-mail já está em uso.' in body
 
 
 def test_cadastro_route_rejects_repeated_username(tmp_path, monkeypatch):
@@ -135,7 +135,7 @@ def test_cadastro_route_rejects_repeated_username(tmp_path, monkeypatch):
 
     body = response.get_data(as_text=True)
     assert response.status_code == 400
-    assert 'Username ja existe' in body
+    assert 'Este nome de usuário já está em uso.' in body
 
 
 def test_cadastro_route_success_creates_user_player_email_and_notification(tmp_path, monkeypatch):

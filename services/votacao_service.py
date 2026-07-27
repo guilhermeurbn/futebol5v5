@@ -348,7 +348,10 @@ class VotacaoService:
         return alvo
 
     def _normalizar_nota(self, valor: float) -> float:
-        nota = max(0.0, min(10.0, float(valor)))
+        nota = float(valor)
+        if nota <= 0.0:
+            return 0.0
+        nota = max(0.5, min(10.0, nota))
         return round(nota * 2) / 2
 
     def _participantes_permitidos(self, partida: Dict) -> Dict[str, Dict]:
@@ -488,11 +491,13 @@ class VotacaoService:
                     "nota_total": 0.0,
                     "votos": 0,
                     "pontos": 0.0,
+                    "notas_lista": [],
                 })
 
                 stats["nota_total"] += nota
                 stats["votos"] += 1
                 stats["pontos"] += nota
+                stats["notas_lista"].append(nota)
 
                 t = times.setdefault(time, {
                     "time_numero": time,

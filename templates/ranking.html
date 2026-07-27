@@ -51,7 +51,7 @@
                         <article class="ranking-spotlight ranking-spotlight--{{ loop.index0 + 1 }}">
                             <div class="ranking-spotlight__rank {{ rank_badge_class }}">{% if loop.index0 == 0 %}🥇{% elif loop.index0 == 1 %}🥈{% else %}🥉{% endif %}</div>
                             <div class="ranking-spotlight__content">
-                                <div class="ranking-spotlight__name">{{ item.jogador_nome }}</div>
+                                <div class="ranking-spotlight__name">{{ item.jogador_nome | abreviar_nome }}</div>
                                 <div class="ranking-spotlight__meta">{{ item.jogos }} jogos • {{ item.vitorias }} vitórias • {{ item.derrotas }} derrotas</div>
                                 <div class="ranking-spotlight__stats">
                                     <span>{{ item.destaques }} destaques</span>
@@ -72,7 +72,7 @@
                         <article class="ranking-row-card">
                             <div class="ranking-row-card__rank {{ rank_badge_class }}">{{ loop.index + 3 }}</div>
                             <div class="ranking-row-card__content">
-                                <div class="ranking-row-card__name">{{ item.jogador_nome }}</div>
+                                <div class="ranking-row-card__name">{{ item.jogador_nome | abreviar_nome }}</div>
                                 <div class="ranking-row-card__meta">{{ item.jogos }} jogos • {{ item.vitorias }} vitórias • {{ item.gols }} gols</div>
                             </div>
                             <div class="ranking-row-card__score">
@@ -106,7 +106,7 @@
                                 <td>
                                     {% if loop.index0 == 0 %}🥇{% elif loop.index0 == 1 %}🥈{% elif loop.index0 == 2 %}🥉{% else %}{{ loop.index }}{% endif %}
                                 </td>
-                                <td style="font-weight: 600;">{{ item.jogador_nome }}</td>
+                                <td style="font-weight: 600;">{{ item.jogador_nome | abreviar_nome }}</td>
                                 <td class="text-center" style="font-weight: 700;">{{ item.pontos }}</td>
                                 <td class="text-center">{{ item.jogos }}</td>
                                 <td class="text-center">{{ item.gols }}</td>

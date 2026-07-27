@@ -59,7 +59,7 @@
                             {{ 'G' if jogador.posicao == 'goleiro' else loop.index }}
                         </span>
                         <span>
-                            <strong>{{ jogador.nome }}</strong>
+                            <strong>{{ jogador.nome | abreviar_nome }}</strong>
                             <small>{{ 'Goleiro' if jogador.posicao == 'goleiro' else 'Linha' }} · Nível {{ jogador.nivel
                                 }}</small>
                         </span>

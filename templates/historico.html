@@ -35,12 +35,6 @@
                         <span class="judge-draw-history__meta history-page__meta">
                             <span>{{ sorteio.total_jogadores }} jogadores</span>
                             <span>{{ sorteio.num_times }} times</span>
-                            <span>Dif. {{ sorteio.diferenca }}</span>
-                            {% if sorteio.resultado_partida %}
-                            <span class="history-page__status history-page__status--result">Resultado lançado</span>
-                            {% else %}
-                            <span class="history-page__status">Sem resultado</span>
-                            {% endif %}
                             {% if sorteio.votacao_encerrada %}
                             <button
                                 type="button"
@@ -63,56 +57,108 @@
                     </summary>
 
                     <div class="judge-draw-history__body history-page__body">
-                        <div class="votacao-admin-history-meta">
-                            <span>Última atualização da rodada: {{ sorteio.resultado_partida.data|dt_pt_hm if sorteio.resultado_partida else sorteio.data|dt_pt_hm }}</span>
-                            {% if sorteio.partida_votacao %}
-                            <span>Status da votação: {{ sorteio.partida_votacao.status }}</span>
+                        {% if sorteio.resultado_resumo %}
+                        <div class="history-match-scoreboard">
+                            {% if sorteio.resultado_resumo|length == 2 %}
+                                <div class="scoreboard-vs">
+                                    <div class="scoreboard-team">
+                                        <span class="scoreboard-team-name">Time {{ sorteio.resultado_resumo[0].time_numero }}</span>
+                                    </div>
+                                    <div class="scoreboard-score-wrapper">
+                                        <span class="scoreboard-score">{{ sorteio.resultado_resumo[0].gols }}</span>
+                                        <span class="scoreboard-divider">×</span>
+                                        <span class="scoreboard-score">{{ sorteio.resultado_resumo[1].gols }}</span>
+                                    </div>
+                                    <div class="scoreboard-team text-right">
+                                        <span class="scoreboard-team-name">Time {{ sorteio.resultado_resumo[1].time_numero }}</span>
+                                    </div>
+                                </div>
+                                <div class="scoreboard-stats">
+                                    <div class="scoreboard-team-record-pill">
+                                        {{ sorteio.resultado_resumo[0].desempenho.vitorias if sorteio.resultado_resumo[0].desempenho else 0 }}V - 
+                                        {{ sorteio.resultado_resumo[0].desempenho.empates if sorteio.resultado_resumo[0].desempenho else 0 }}E - 
+                                        {{ sorteio.resultado_resumo[0].desempenho.derrotas if sorteio.resultado_resumo[0].desempenho else 0 }}D
+                                    </div>
+                                    <div class="scoreboard-label">Placar Final</div>
+                                    <div class="scoreboard-team-record-pill text-right">
+                                        {{ sorteio.resultado_resumo[1].desempenho.vitorias if sorteio.resultado_resumo[1].desempenho else 0 }}V - 
+                                        {{ sorteio.resultado_resumo[1].desempenho.empates if sorteio.resultado_resumo[1].desempenho else 0 }}E - 
+                                        {{ sorteio.resultado_resumo[1].desempenho.derrotas if sorteio.resultado_resumo[1].desempenho else 0 }}D
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="scoreboard-grid">
+                                    {% for item in sorteio.resultado_resumo %}
+                                        <div class="scoreboard-grid-item">
+                                            <span class="grid-item-team">Time {{ item.time_numero }}</span>
+                                            <span class="grid-item-score">{{ item.gols }} Gols</span>
+                                            <span class="grid-item-record">
+                                                {{ item.desempenho.vitorias if item.desempenho else 0 }}V - 
+                                                {{ item.desempenho.empates if item.desempenho else 0 }}E - 
+                                                {{ item.desempenho.derrotas if item.desempenho else 0 }}D
+                                            </span>
+                                        </div>
+                                    {% endfor %}
+                                </div>
                             {% endif %}
                         </div>
-
-                        <div class="judge-draw-history__teams history-page__teams">
-                            {% for time in sorteio.times %}
-                            <div>
-                                <strong>Time {{ time.numero }}</strong>
-                                <span>{{ time.jogadores | map(attribute='nome') | join(', ') }}</span>
-                            </div>
-                            {% endfor %}
-                        </div>
-
-                        {% if sorteio.resultado_resumo %}
-                        <div class="votacao-admin-history-result-grid">
-                            {% for item in sorteio.resultado_resumo %}
-                            <div class="votacao-admin-history-result-card">
-                                <div class="votacao-admin-history-result-card__label">Time {{ item.time_numero }}</div>
-                                <strong class="votacao-admin-history-result-card__score">{{ item.gols }} gol{{ '' if item.gols == 1 else 's' }}</strong>
-                                <div class="votacao-admin-history-result-card__record">
-                                    <span>{{ item.desempenho.vitorias if item.desempenho else 0 }}V</span>
-                                    <span>{{ item.desempenho.empates if item.desempenho else 0 }}E</span>
-                                    <span>{{ item.desempenho.derrotas if item.desempenho else 0 }}D</span>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        {% else %}
-                        <div class="surface-panel surface-panel--soft votacao-admin-history-open-note">
-                            <p class="hero-empty__text">O sorteio foi salvo, mas ainda não há placar registrado para essa rodada.</p>
-                        </div>
                         {% endif %}
+
+                        <div class="history-page__teams-compact">
+                            {% for time in sorteio.times %}
+                                <div class="history-team-row">
+                                    <div class="history-team-header">
+                                        <span class="history-team-name">Time {{ time.numero }}</span>
+                                    </div>
+                                    <div class="history-team-players">
+                                        <div class="players-dots-list">
+                                            {% for jogador in time.jogadores %}
+                                                {% set j_nome = '' %}
+                                                {% set j_id = '' %}
+                                                
+                                                {% if jogador is string %}
+                                                    {% set j_nome = jogador %}
+                                                {% elif jogador is mapping %}
+                                                    {% set j_nome = jogador.nome or jogador.jogador_nome or '' %}
+                                                    {% set j_id = jogador.id or '' %}
+                                                {% else %}
+                                                    {% set j_nome = jogador.nome or '' %}
+                                                    {% set j_id = jogador.id or '' %}
+                                                {% endif %}
+                                                
+                                                {% if j_nome %}
+                                                    {% set parts = j_nome.split(' ') %}
+                                                    {% set initials = (parts[0][0] | default('')) + (parts[1][0] | default('')) if parts|length > 1 else parts[0][0:2] | default('') %}
+                                                    {% if not initials %}
+                                                        {% set initials = j_nome[0:2] %}
+                                                    {% endif %}
+                                                    
+                                                    {% set profile_url = url_for('auth.perfil_jogador_publico', jogador_id=j_id) if j_id else '#' %}
+                                                    <button type="button" class="player-dot-btn" 
+                                                            data-player-id="{{ j_id }}" 
+                                                            data-player-name="{{ j_nome }}"
+                                                            data-player-url="{{ profile_url }}"
+                                                            title="{{ j_nome }}">
+                                                        {{ initials | upper }}
+                                                    </button>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
 
                         {% if sorteio.votacao_encerrada and sorteio.melhor_jogador %}
                         <div class="votacao-admin-history-ranking-summary">
                             <span class="votacao-admin-history-ranking-summary__label">Mais votado</span>
-                            <strong class="votacao-admin-history-ranking-summary__name">{{ sorteio.melhor_jogador.jogador_nome }}</strong>
+                            <strong class="votacao-admin-history-ranking-summary__name">{{ sorteio.melhor_jogador.jogador_nome | abreviar_nome }}</strong>
                             <span class="votacao-admin-history-ranking-summary__pill">{{ sorteio.melhor_jogador.votos }} voto(s)</span>
                             <span class="votacao-admin-history-ranking-summary__pill">Média {{ sorteio.melhor_jogador.nota_media }}</span>
                         </div>
                         {% elif sorteio.votacao_aberta %}
                         <div class="surface-panel surface-panel--soft votacao-admin-history-open-note">
                             <p class="hero-empty__text">A votação dessa rodada está aberta. O ranking final aparece aqui quando for encerrada.</p>
-                        </div>
-                        {% elif sorteio.partida_votacao %}
-                        <div class="surface-panel surface-panel--soft votacao-admin-history-open-note">
-                            <p class="hero-empty__text">A rodada existe, mas ainda não há ranking consolidado disponível.</p>
                         </div>
                         {% endif %}
                     </div>
@@ -202,8 +248,14 @@
             return;
         }
 
+        const abbreviateName = (name) => {
+            if (!name) return "";
+            const parts = name.trim().split(/\s+/);
+            if (parts.length <= 1) return name;
+            return `${parts[0]} ${parts[1][0].toUpperCase()}.`;
+        };
         modalBody.innerHTML = ranking.map((jogador, index) => {
-            const nome = jogador.jogador_nome || 'Jogador';
+            const nome = abbreviateName(jogador.jogador_nome) || 'Jogador';
             const time = jogador.time_numero ?? '-';
             const votos = jogador.votos ?? 0;
             const media = Number(jogador.nota_media ?? 0).toFixed(2);
@@ -255,6 +307,66 @@
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape' && !modal.hidden) {
             closeModal();
+        }
+    });
+
+    let activeBalloon = null;
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.player-dot-btn');
+        if (btn) {
+            e.stopPropagation();
+            if (activeBalloon) {
+                activeBalloon.remove();
+            }
+            const playerId = btn.getAttribute('data-player-id');
+            const playerName = btn.getAttribute('data-player-name');
+            const playerUrl = btn.getAttribute('data-player-url');
+
+            const balloon = document.createElement('div');
+            balloon.className = 'player-profile-balloon';
+            balloon.innerHTML = `
+                <div class="player-profile-balloon__text">Deseja ver o perfil de <strong>${playerName}</strong>?</div>
+                <div class="player-profile-balloon__actions">
+                    <a href="${playerUrl}" class="player-profile-balloon__btn player-profile-balloon__btn--confirm">Sim</a>
+                    <button type="button" class="player-profile-balloon__btn player-profile-balloon__btn--cancel">Não</button>
+                </div>
+                <div class="player-profile-balloon__arrow"></div>
+            `;
+            document.body.appendChild(balloon);
+
+            const rect = btn.getBoundingClientRect();
+            const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+            balloon.style.left = `${rect.left + rect.width / 2 + scrollLeft}px`;
+            balloon.style.top = `${rect.top + scrollTop - 8}px`;
+
+            activeBalloon = balloon;
+
+            balloon.querySelector('.player-profile-balloon__btn--cancel').addEventListener('click', () => {
+                balloon.remove();
+                activeBalloon = null;
+            });
+            return;
+        }
+
+        if (activeBalloon && !e.target.closest('.player-profile-balloon')) {
+            activeBalloon.remove();
+            activeBalloon = null;
+        }
+    });
+
+    window.addEventListener('scroll', () => {
+        if (activeBalloon) {
+            activeBalloon.remove();
+            activeBalloon = null;
+        }
+    }, { passive: true });
+
+    window.addEventListener('resize', () => {
+        if (activeBalloon) {
+            activeBalloon.remove();
+            activeBalloon = null;
         }
     });
 

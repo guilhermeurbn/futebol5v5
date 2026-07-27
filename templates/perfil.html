@@ -57,11 +57,14 @@
                 <div class="premium-profile-avatar-inner">{{ avatar_text|upper }}</div>
             </div>
             <div class="premium-profile-info">
-                <div class="premium-profile-name-row">
-                    <h1 class="premium-profile-name">{% if tem_jogador %}{{ jogador.nome }}{% else %}{{ usuario.nome or usuario.username }}{% endif %}</h1>
-                    {% if tem_jogador %}
-                        <span class="premium-profile-rating-badge">{{ '%.1f'|format(jogador.nivel|float) }}</span>
-                    {% endif %}
+                <div class="premium-profile-name-row" style="display: flex; flex-direction: column; align-items: flex-start; gap: 0.25rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <h1 class="premium-profile-name">{% if tem_jogador %}{{ jogador.nome }}{% else %}{{ usuario.nome or usuario.username }}{% endif %}</h1>
+                        {% if tem_jogador %}
+                            <span class="premium-profile-rating-badge">{{ '%.1f'|format(jogador.nivel|float) }}</span>
+                        {% endif %}
+                    </div>
+                    <span class="premium-profile-username-tag" style="font-size: 0.9rem; color: #a78bfa; font-weight: 500; font-family: monospace;">@{{ usuario.username }}</span>
                 </div>
                 <div class="premium-profile-meta-row">
                     <div class="premium-profile-meta-item">

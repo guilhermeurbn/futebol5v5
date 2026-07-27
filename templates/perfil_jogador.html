@@ -3,7 +3,8 @@
 {% block title %}Perfil de {{ jogador.nome }}{% endblock %}
 
 {% block content %}
-<div class="container profile-page profile-page--public page-container-wide player-workspace-page" style="background: #000000 !important;">
+<div class="container profile-page profile-page--public page-container-wide player-workspace-page"
+    style="background: #000000 !important;">
     <header class="header">
         <div class="header-content">
             {% set brand_title = jogador.nome %}
@@ -26,17 +27,33 @@
                 <div class="premium-profile-avatar-inner">{{ avatar_text|upper }}</div>
             </div>
             <div class="premium-profile-info">
-                <div class="premium-profile-name-row">
-                    <h1 class="premium-profile-name">{{ jogador.nome }}</h1>
-                    <span class="premium-profile-rating-badge">{{ '%.1f'|format(jogador.nivel|float) }}</span>
+                <div class="premium-profile-name-row"
+                    style="display: flex; flex-direction: column; align-items: flex-start; gap: 0.25rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <h1 class="premium-profile-name">{{ jogador.nome }}</h1>
+                        <span class="premium-profile-rating-badge">{{ '%.1f'|format(jogador.nivel|float) }}</span>
+                    </div>
+                    {% if owner_user %}
+                    <span class="premium-profile-username-tag"
+                        style="font-size: 0.9rem; color: #a78bfa; font-weight: 500; font-family: monospace;">@{{
+                        owner_user.username }}</span>
+                    {% endif %}
                 </div>
                 <div class="premium-profile-meta-row">
                     <div class="premium-profile-meta-item">
-                        <svg class="premium-profile-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <svg class="premium-profile-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                        </svg>
                         <span>{% if jogador.tipo == 'fixo' %}Fixo{% else %}Avulso{% endif %}</span>
                     </div>
                     <div class="premium-profile-meta-item">
-                        <svg class="premium-profile-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 10V4a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v6c0 5.5-4.5 10-10 10S3 15.5 3 10Z"/><path d="M12 3v17"/></svg>
+                        <svg class="premium-profile-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <path d="M3 10V4a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v6c0 5.5-4.5 10-10 10S3 15.5 3 10Z" />
+                            <path d="M12 3v17" />
+                        </svg>
                         <span>{{ 'Goleiro' if jogador.posicao == 'goleiro' else 'Linha' }}</span>
                     </div>
 
@@ -44,35 +61,42 @@
             </div>
         </div>
 
-        <nav class="premium-profile-tabs {% if auth_user and auth_user.role in ['admin', 'super_admin'] %}premium-profile-tabs--public-admin{% else %}premium-profile-tabs--public{% endif %}" aria-label="Navegação do perfil público">
+        <nav class="premium-profile-tabs {% if auth_user and auth_user.role in ['admin', 'super_admin'] %}premium-profile-tabs--public-admin{% else %}premium-profile-tabs--public{% endif %}"
+            aria-label="Navegação do perfil público">
             <button class="premium-profile-tab" data-tab-target="mensagem" aria-selected="false">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                 </svg>
                 <span>Mensagem</span>
             </button>
             <button class="premium-profile-tab is-active" data-tab-target="estatisticas" aria-selected="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="20" x2="18" y2="10"/>
-                    <line x1="12" y1="20" x2="12" y2="4"/>
-                    <line x1="6" y1="20" x2="6" y2="14"/>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <line x1="18" y1="20" x2="18" y2="10" />
+                    <line x1="12" y1="20" x2="12" y2="4" />
+                    <line x1="6" y1="20" x2="6" y2="14" />
                 </svg>
                 <span>Estatísticas</span>
             </button>
             <button class="premium-profile-tab" data-tab-target="partidas" aria-selected="false">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                    <line x1="16" y1="2" x2="16" y2="6"/>
-                    <line x1="8" y1="2" x2="8" y2="6"/>
-                    <line x1="3" y1="10" x2="21" y2="10"/>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
                 </svg>
                 <span>Partidas</span>
             </button>
             {% if auth_user and auth_user.role in ['admin', 'super_admin'] %}
             <button class="premium-profile-tab" data-tab-target="gerenciar" aria-selected="false">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" style="width: 18px; height: 18px;">
                     <circle cx="12" cy="12" r="3"></circle>
-                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z">
+                    </path>
                 </svg>
                 <span>Gerenciar</span>
             </button>
@@ -83,14 +107,22 @@
         <div class="premium-profile-tab-content" id="tab-mensagem">
             <div class="premium-profile-panel">
                 <h2 class="premium-profile-panel-title">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                    </svg>
                     Mensagens
                 </h2>
 
                 <div class="premium-profile-empty">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15c0-4.62-3.5-8.22-8-8.22s-8 3.6-8 8.22c0 2.22.8 4.28 2.22 5.86l-.8 2.45 2.5-.82c1.23.63 2.62.97 4.08.97 4.5 0 8-3.6 8-8.22z"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path
+                            d="M21 15c0-4.62-3.5-8.22-8-8.22s-8 3.6-8 8.22c0 2.22.8 4.28 2.22 5.86l-.8 2.45 2.5-.82c1.23.63 2.62.97 4.08.97 4.5 0 8-3.6 8-8.22z" />
+                    </svg>
                     <h3>Envio de mensagens offline</h3>
-                    <p>O chat integrado está temporariamente desativado para manutenção. Entre em contato com {{ jogador.nome }} no grupo do WhatsApp.</p>
+                    <p>O chat integrado está temporariamente desativado para manutenção. Entre em contato com {{
+                        jogador.nome }} no grupo do WhatsApp.</p>
                 </div>
             </div>
         </div>
@@ -99,10 +131,14 @@
         <div class="premium-profile-tab-content is-active" id="tab-estatisticas">
             <div class="premium-profile-panel">
                 <h2 class="premium-profile-panel-title">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m18 7-5.5 5.5-2.5-2.5L3 17"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M3 3v18h18" />
+                        <path d="m18 7-5.5 5.5-2.5-2.5L3 17" />
+                    </svg>
                     Resumo do Jogador
                 </h2>
-                
+
                 <div class="premium-profile-stats-grid public-profile-kpi-strip">
                     <div class="premium-profile-stat-card">
                         <strong class="premium-profile-stat-val">{{ total_partidas }}</strong>
@@ -113,245 +149,320 @@
                         <span class="premium-profile-stat-label">Gols marcados</span>
                     </div>
                     <div class="premium-profile-stat-card">
-                        <strong class="premium-profile-stat-val premium-profile-stat-val--rating">{{ stats.get('nota_media_geral', '7.00') }}</strong>
+                        <strong class="premium-profile-stat-val premium-profile-stat-val--rating">{{
+                            stats.get('nota_media_geral', '7.00') }}</strong>
                         <span class="premium-profile-stat-label">Nota média geral</span>
                     </div>
-                               {% set nivel_val = jogador.nivel|float %}
-            </div>
-
-            <div class="premium-profile-panel">
-                <h2 class="premium-profile-panel-title">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    Desempenho
-                </h2>
-
-                <div class="premium-profile-attributes-list">
-                    {% set attrs = stats.get('atributos') or {'comprometimento': 7.0} %}
-                    {% set val_comp = attrs.get('comprometimento', 7.0) %}
-                    
-                    <!-- 1. Comprometimento -->
-                    <div class="premium-profile-attr-item">
-                        <div class="premium-profile-attr-labels">
-                            <span class="premium-profile-attr-name">Comprometimento</span>
-                            <span class="premium-profile-attr-val">{{ '%.1f'|format(val_comp|float) }} / 10.0</span>
-                        </div>
-                        <div class="premium-profile-attr-track">
-                            <div class="premium-profile-attr-fill" style="width: {{ (val_comp|float * 10)|int }}%;"></div>
-                        </div>
-                    </div>
-
-                    <!-- 2. Progresso -->
-                    <div class="premium-profile-attr-item">
-                        <div class="premium-profile-attr-labels">
-                            <span class="premium-profile-attr-name">Progresso</span>
-                            <span class="premium-profile-attr-val">{{ '%.1f'|format(nivel_val) }} / 10.0</span>
-                        </div>
-                        <div class="premium-profile-attr-track">
-                            <div class="premium-profile-attr-fill" style="width: {{ (nivel_val * 10)|int }}%;"></div>
-                        </div>
-                    </div>
+                    {% set nivel_val = jogador.nivel|float %}
                 </div>
-            </div>
 
-            <div class="premium-profile-panel public-profile-recent-section">
-                <h2 class="premium-profile-panel-title">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    Últimas Partidas
-                </h2>
+                <div class="premium-profile-panel">
+                    <h2 class="premium-profile-panel-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                        Desempenho
+                    </h2>
 
-                {% if historico_recente %}
-                <div class="premium-profile-match-list">
-                    {% for jogo in historico_recente %}
-                    {% set gols = jogo.get('gols_times') or [0, 0] %}
-                    {% set gols1 = gols[0]|default(0)|int %}
-                    {% set gols2 = gols[1]|default(0)|int %}
-                    <a href="{% if auth_user and auth_user.role == 'juiz' %}{{ url_for('juiz.juiz_historico') }}{% else %}{{ url_for('partida.historico') }}{% endif %}#sorteio-{{ jogo.sorteio_id }}" class="premium-profile-match-card">
-                        {% if jogo.get('resultado', 'empate') == 'vitória' %}
-                        <div class="premium-profile-match-result-badge premium-profile-match-result-badge--win">V</div>
-                        {% elif jogo.get('resultado', 'empate') == 'derrota' %}
-                        <div class="premium-profile-match-result-badge premium-profile-match-result-badge--loss">D</div>
-                        {% else %}
-                        <div class="premium-profile-match-result-badge premium-profile-match-result-badge--draw">E</div>
-                        {% endif %}
+                    <div class="premium-profile-attributes-list">
+                        {% set attrs = stats.get('atributos') or {'comprometimento': 7.0} %}
+                        {% set val_comp = attrs.get('comprometimento', 7.0) %}
 
-                        <div class="premium-profile-match-details">
-                            <div class="premium-profile-match-teams">
-                                Time A {{ gols1 }} <span>x</span> {{ gols2 }} Time B
+                        <!-- 1. Comprometimento -->
+                        <div class="premium-profile-attr-item">
+                            <div class="premium-profile-attr-labels">
+                                <span class="premium-profile-attr-name">Comprometimento</span>
+                                <span class="premium-profile-attr-val">{{ '%.1f'|format(val_comp|float) }} / 10.0</span>
                             </div>
-                            <div class="premium-profile-match-date">
-                                {{ jogo.get('data')|dt_pt if jogo.get('data') else 'N/A' }} · Pos: {{ 'Goleiro' if jogo.get('posicao') == 'goleiro' else 'Linha' }}
+                            <div class="premium-profile-attr-track">
+                                <div class="premium-profile-attr-fill" style="width: {{ (val_comp|float * 10)|int }}%;">
+                                </div>
                             </div>
                         </div>
 
-                        <div style="display: flex; align-items: center;">
-                            {% set n_val = jogo.get('nota_partida', '7.0')|float %}
-                            <span class="premium-profile-match-rating-badge {% if n_val >= 7.5 %}premium-profile-match-rating-badge--high{% elif n_val >= 6.0 %}premium-profile-match-rating-badge--mid{% endif %}">
-                                {{ jogo.get('nota_partida', '7.0') }}
-                            </span>
-                            <svg class="premium-profile-match-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-                        </div>
-                    </a>
-                    {% endfor %}
-                </div>
-
-                <div class="premium-profile-btn-wrap">
-                    <button type="button" class="btn btn-secondary" onclick="document.querySelector('[data-tab-target=partidas]').click();">Ver todas as partidas</button>
-                </div>
-                {% else %}
-                <div class="premium-profile-empty">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-                    <h3>Nenhuma partida registrada ainda</h3>
-                    <p>Os jogos recentes e as notas de {{ jogador.nome }} aparecerão aqui quando forem consolidados.</p>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-
-        {# PARTIDAS TAB #}
-        <div class="premium-profile-tab-content" id="tab-partidas">
-            <div class="premium-profile-panel">
-                <h2 class="premium-profile-panel-title">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    Histórico Completo
-                </h2>
-
-                {% if stats.get('historico_partidas') %}
-                <div class="premium-profile-match-list premium-profile-match-list-all">
-                    {% for jogo in stats.get('historico_partidas', []) %}
-                    {% set gols = jogo.get('gols_times') or [0, 0] %}
-                    {% set gols1 = gols[0]|default(0)|int %}
-                    {% set gols2 = gols[1]|default(0)|int %}
-                    <a href="{% if auth_user and auth_user.role == 'juiz' %}{{ url_for('juiz.juiz_historico') }}{% else %}{{ url_for('partida.historico') }}{% endif %}#sorteio-{{ jogo.sorteio_id }}" class="premium-profile-match-card">
-                        {% if jogo.get('resultado', 'empate') == 'vitória' %}
-                        <div class="premium-profile-match-result-badge premium-profile-match-result-badge--win">V</div>
-                        {% elif jogo.get('resultado', 'empate') == 'derrota' %}
-                        <div class="premium-profile-match-result-badge premium-profile-match-result-badge--loss">D</div>
-                        {% else %}
-                        <div class="premium-profile-match-result-badge premium-profile-match-result-badge--draw">E</div>
-                        {% endif %}
-
-                        <div class="premium-profile-match-details">
-                            <div class="premium-profile-match-teams">
-                                Time A {{ gols1 }} <span>x</span> {{ gols2 }} Time B
+                        <!-- 2. Progresso -->
+                        <div class="premium-profile-attr-item">
+                            <div class="premium-profile-attr-labels">
+                                <span class="premium-profile-attr-name">Progresso</span>
+                                <span class="premium-profile-attr-val">{{ '%.1f'|format(nivel_val) }} / 10.0</span>
                             </div>
-                            <div class="premium-profile-match-date">
-                                {{ jogo.get('data')|dt_pt if jogo.get('data') else 'N/A' }} · Gols: {{ jogo.get('gols', 0) }} · Assist: {{ jogo.get('assistencias', 0) }}
+                            <div class="premium-profile-attr-track">
+                                <div class="premium-profile-attr-fill" style="width: {{ (nivel_val * 10)|int }}%;">
+                                </div>
                             </div>
                         </div>
-
-                        <div style="display: flex; align-items: center;">
-                            {% set n_val = jogo.get('nota_partida', '7.0')|float %}
-                            <span class="premium-profile-match-rating-badge {% if n_val >= 7.5 %}premium-profile-match-rating-badge--high{% elif n_val >= 6.0 %}premium-profile-match-rating-badge--mid{% endif %}">
-                                {{ jogo.get('nota_partida', '7.0') }}
-                            </span>
-                            <svg class="premium-profile-match-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-                        </div>
-                    </a>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <div class="premium-profile-empty">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-                    <h3>Nenhum jogo disponível</h3>
-                    <p>O histórico de partidas do jogador será listado aqui.</p>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-
-        {# GERENCIAR TAB (EDITAR E REMOVER) #}
-        {% if auth_user and auth_user.role in ['admin', 'super_admin'] %}
-        <div class="premium-profile-tab-content" id="tab-gerenciar">
-            <div class="premium-profile-panel">
-                <h2 class="premium-profile-panel-title">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-                    Editar Jogador
-                </h2>
-
-                <form action="{{ url_for('jogador_crud.editar_jogador_post', jogador_id=jogador.id) }}" method="post" class="player-create-form" style="max-width: 480px; margin-top: 1.5rem;">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <!-- Posição default oculta -->
-                    <input type="hidden" name="posicao" value="{{ jogador.posicao }}">
-
-                    <div class="form-group" style="margin-bottom: 1.25rem;">
-                        <label for="edit_nome" class="form-label">Nome do Jogador</label>
-                        <input
-                            type="text"
-                            id="edit_nome"
-                            name="nome"
-                            class="form-input"
-                            value="{{ jogador.nome }}"
-                            required
-                            minlength="2"
-                            autocomplete="off"
-                        >
                     </div>
+                </div>
 
-                    <div class="form-group" style="margin-bottom: 1.25rem;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                            <label for="edit_nivel" class="form-label" style="margin-bottom: 0;">Nível de Habilidade</label>
-                            <span id="editNivelValDisplay" style="font-weight: 800; color: #a78bfa; background: rgba(167, 139, 250, 0.1); padding: 0.2rem 0.6rem; border-radius: 8px; font-size: 0.9rem;">{{ '%.1f'|format(jogador.nivel|float) }}</span>
-                        </div>
-                        <div class="slider-control-container" style="display: flex; align-items: center; gap: 0.75rem; margin: 0.5rem 0;">
-                            <button type="button" class="slider-step-btn" id="btnEditNivelDec" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: #ffffff; font-size: 1.25rem; font-weight: bold; cursor: pointer; user-select: none; transition: all 0.15s ease;">−</button>
-                            <input
-                                type="range"
-                                id="edit_nivel"
-                                name="nivel"
-                                min="1"
-                                max="10"
-                                step="0.5"
-                                value="{{ '%.1f'|format(jogador.nivel|float) }}"
-                                class="votacao-slider"
-                                style="flex: 1; cursor: pointer; margin: 0 !important;"
-                            >
-                            <button type="button" class="slider-step-btn" id="btnEditNivelInc" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: #ffffff; font-size: 1.25rem; font-weight: bold; cursor: pointer; user-select: none; transition: all 0.15s ease;">+</button>
-                        </div>
-                    </div>
+                <div class="premium-profile-panel public-profile-recent-section">
+                    <h2 class="premium-profile-panel-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                            <line x1="16" y1="2" x2="16" y2="6" />
+                            <line x1="8" y1="2" x2="8" y2="6" />
+                            <line x1="3" y1="10" x2="21" y2="10" />
+                        </svg>
+                        Últimas Partidas
+                    </h2>
 
-                    <div class="form-group" style="margin-bottom: 2rem;">
-                        <label class="form-label">Tipo</label>
-                        <div class="tipo-selector" style="display: flex; gap: 1rem;">
-                            <label class="tipo-option" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.75rem; cursor: pointer; transition: all 0.2s ease;">
-                                <input type="radio" name="tipo" value="fixo" class="tipo-radio" {% if jogador.tipo == 'fixo' %}checked{% endif %} required>
-                                <span class="tipo-label" style="color: #f4f1f8; font-size: 0.85rem; display: flex; align-items: center; gap: 0.35rem;">
-                                    <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; color: #a78bfa;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                                    Fixo
+                    {% if historico_recente %}
+                    <div class="premium-profile-match-list">
+                        {% for jogo in historico_recente %}
+                        {% set gols = jogo.get('gols_times') or [0, 0] %}
+                        {% set gols1 = gols[0]|default(0)|int %}
+                        {% set gols2 = gols[1]|default(0)|int %}
+                        <a href="{% if auth_user and auth_user.role == 'juiz' %}{{ url_for('juiz.juiz_historico') }}{% else %}{{ url_for('partida.historico') }}{% endif %}#sorteio-{{ jogo.sorteio_id }}"
+                            class="premium-profile-match-card">
+                            {% if jogo.get('resultado', 'empate') == 'vitória' %}
+                            <div class="premium-profile-match-result-badge premium-profile-match-result-badge--win">V
+                            </div>
+                            {% elif jogo.get('resultado', 'empate') == 'derrota' %}
+                            <div class="premium-profile-match-result-badge premium-profile-match-result-badge--loss">D
+                            </div>
+                            {% else %}
+                            <div class="premium-profile-match-result-badge premium-profile-match-result-badge--draw">E
+                            </div>
+                            {% endif %}
+
+                            <div class="premium-profile-match-details">
+                                <div class="premium-profile-match-teams">
+                                    Time A {{ gols1 }} <span>x</span> {{ gols2 }} Time B
+                                </div>
+                                <div class="premium-profile-match-date">
+                                    {{ jogo.get('data')|dt_pt if jogo.get('data') else 'N/A' }} · Pos: {{ 'Goleiro' if
+                                    jogo.get('posicao') == 'goleiro' else 'Linha' }}
+                                </div>
+                            </div>
+
+                            <div style="display: flex; align-items: center;">
+                                {% set n_val = jogo.get('nota_partida', '7.0')|float %}
+                                <span
+                                    class="premium-profile-match-rating-badge {% if n_val >= 7.5 %}premium-profile-match-rating-badge--high{% elif n_val >= 6.0 %}premium-profile-match-rating-badge--mid{% endif %}">
+                                    {{ jogo.get('nota_partida', '7.0') }}
                                 </span>
-                            </label>
-                            <label class="tipo-option" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.75rem; cursor: pointer; transition: all 0.2s ease;">
-                                <input type="radio" name="tipo" value="avulso" class="tipo-radio" {% if jogador.tipo == 'avulso' %}checked{% endif %} required>
-                                <span class="tipo-label" style="color: #f4f1f8; font-size: 0.85rem; display: flex; align-items: center; gap: 0.35rem;">
-                                    <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; color: #a78bfa;"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                                    Avulso
-                                </span>
-                            </label>
-                        </div>
+                                <svg class="premium-profile-match-chevron" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2.5">
+                                    <polyline points="9 18 15 12 9 6" />
+                                </svg>
+                            </div>
+                        </a>
+                        {% endfor %}
                     </div>
 
-                    <div class="form-group">
-                        <button type="submit" class="btn btn-primary premium-submit-btn" style="width: 100%; min-height: 48px;">
-                            <span>Salvar Alterações</span>
+                    <div class="premium-profile-btn-wrap">
+                        <button type="button" class="btn btn-secondary"
+                            onclick="document.querySelector('[data-tab-target=partidas]').click();">Ver todas as
+                            partidas</button>
+                    </div>
+                    {% else %}
+                    <div class="premium-profile-empty">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="8" y1="12" x2="16" y2="12" />
+                        </svg>
+                        <h3>Nenhuma partida registrada ainda</h3>
+                        <p>Os jogos recentes e as notas de {{ jogador.nome }} aparecerão aqui quando forem consolidados.
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {# PARTIDAS TAB #}
+            <div class="premium-profile-tab-content" id="tab-partidas">
+                <div class="premium-profile-panel">
+                    <h2 class="premium-profile-panel-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                            <line x1="16" y1="2" x2="16" y2="6" />
+                            <line x1="8" y1="2" x2="8" y2="6" />
+                            <line x1="3" y1="10" x2="21" y2="10" />
+                        </svg>
+                        Histórico Completo
+                    </h2>
+
+                    {% if stats.get('historico_partidas') %}
+                    <div class="premium-profile-match-list premium-profile-match-list-all">
+                        {% for jogo in stats.get('historico_partidas', []) %}
+                        {% set gols = jogo.get('gols_times') or [0, 0] %}
+                        {% set gols1 = gols[0]|default(0)|int %}
+                        {% set gols2 = gols[1]|default(0)|int %}
+                        <a href="{% if auth_user and auth_user.role == 'juiz' %}{{ url_for('juiz.juiz_historico') }}{% else %}{{ url_for('partida.historico') }}{% endif %}#sorteio-{{ jogo.sorteio_id }}"
+                            class="premium-profile-match-card">
+                            {% if jogo.get('resultado', 'empate') == 'vitória' %}
+                            <div class="premium-profile-match-result-badge premium-profile-match-result-badge--win">V
+                            </div>
+                            {% elif jogo.get('resultado', 'empate') == 'derrota' %}
+                            <div class="premium-profile-match-result-badge premium-profile-match-result-badge--loss">D
+                            </div>
+                            {% else %}
+                            <div class="premium-profile-match-result-badge premium-profile-match-result-badge--draw">E
+                            </div>
+                            {% endif %}
+
+                            <div class="premium-profile-match-details">
+                                <div class="premium-profile-match-teams">
+                                    Time A {{ gols1 }} <span>x</span> {{ gols2 }} Time B
+                                </div>
+                                <div class="premium-profile-match-date">
+                                    {{ jogo.get('data')|dt_pt if jogo.get('data') else 'N/A' }} · Gols: {{
+                                    jogo.get('gols', 0) }} · Assist: {{ jogo.get('assistencias', 0) }}
+                                </div>
+                            </div>
+
+                            <div style="display: flex; align-items: center;">
+                                {% set n_val = jogo.get('nota_partida', '7.0')|float %}
+                                <span
+                                    class="premium-profile-match-rating-badge {% if n_val >= 7.5 %}premium-profile-match-rating-badge--high{% elif n_val >= 6.0 %}premium-profile-match-rating-badge--mid{% endif %}">
+                                    {{ jogo.get('nota_partida', '7.0') }}
+                                </span>
+                                <svg class="premium-profile-match-chevron" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2.5">
+                                    <polyline points="9 18 15 12 9 6" />
+                                </svg>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="premium-profile-empty">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="8" y1="12" x2="16" y2="12" />
+                        </svg>
+                        <h3>Nenhum jogo disponível</h3>
+                        <p>O histórico de partidas do jogador será listado aqui.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {# GERENCIAR TAB (EDITAR E REMOVER) #}
+            {% if auth_user and auth_user.role in ['admin', 'super_admin'] %}
+            <div class="premium-profile-tab-content" id="tab-gerenciar">
+                <div class="premium-profile-panel">
+                    <h2 class="premium-profile-panel-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20h9" />
+                            <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                        </svg>
+                        Editar Jogador
+                    </h2>
+
+                    <form action="{{ url_for('jogador_crud.editar_jogador_post', jogador_id=jogador.id) }}"
+                        method="post" class="player-create-form" style="max-width: 480px; margin-top: 1.5rem;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <!-- Posição default oculta -->
+                        <input type="hidden" name="posicao" value="{{ jogador.posicao }}">
+
+                        <div class="form-group" style="margin-bottom: 1.25rem;">
+                            <label for="edit_nome" class="form-label">Nome do Jogador</label>
+                            <input type="text" id="edit_nome" name="nome" class="form-input" value="{{ jogador.nome }}"
+                                required minlength="2" autocomplete="off">
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1.25rem;">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                <label for="edit_nivel" class="form-label" style="margin-bottom: 0;">Nível de
+                                    Habilidade</label>
+                                <span id="editNivelValDisplay"
+                                    style="font-weight: 800; color: #a78bfa; background: rgba(167, 139, 250, 0.1); padding: 0.2rem 0.6rem; border-radius: 8px; font-size: 0.9rem;">{{
+                                    '%.1f'|format(jogador.nivel|float) }}</span>
+                            </div>
+                            <div class="slider-control-container"
+                                style="display: flex; align-items: center; gap: 0.75rem; margin: 0.5rem 0;">
+                                <button type="button" class="slider-step-btn" id="btnEditNivelDec"
+                                    style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: #ffffff; font-size: 1.25rem; font-weight: bold; cursor: pointer; user-select: none; transition: all 0.15s ease;">−</button>
+                                <input type="range" id="edit_nivel" name="nivel" min="1" max="10" step="0.5"
+                                    value="{{ '%.1f'|format(jogador.nivel|float) }}" class="votacao-slider"
+                                    style="flex: 1; cursor: pointer; margin: 0 !important;">
+                                <button type="button" class="slider-step-btn" id="btnEditNivelInc"
+                                    style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: #ffffff; font-size: 1.25rem; font-weight: bold; cursor: pointer; user-select: none; transition: all 0.15s ease;">+</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 2rem;">
+                            <label class="form-label">Tipo</label>
+                            <div class="tipo-selector" style="display: flex; gap: 1rem;">
+                                <label class="tipo-option"
+                                    style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.75rem; cursor: pointer; transition: all 0.2s ease;">
+                                    <input type="radio" name="tipo" value="fixo" class="tipo-radio" {% if
+                                        jogador.tipo=='fixo' %}checked{% endif %} required>
+                                    <span class="tipo-label"
+                                        style="color: #f4f1f8; font-size: 0.85rem; display: flex; align-items: center; gap: 0.35rem;">
+                                        <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                                            style="width: 14px; height: 14px; color: #a78bfa;">
+                                            <polygon
+                                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                                            </polygon>
+                                        </svg>
+                                        Fixo
+                                    </span>
+                                </label>
+                                <label class="tipo-option"
+                                    style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.75rem; cursor: pointer; transition: all 0.2s ease;">
+                                    <input type="radio" name="tipo" value="avulso" class="tipo-radio" {% if
+                                        jogador.tipo=='avulso' %}checked{% endif %} required>
+                                    <span class="tipo-label"
+                                        style="color: #f4f1f8; font-size: 0.85rem; display: flex; align-items: center; gap: 0.35rem;">
+                                        <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                                            style="width: 14px; height: 14px; color: #a78bfa;">
+                                            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                                            <circle cx="12" cy="7" r="4"></circle>
+                                        </svg>
+                                        Avulso
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary premium-submit-btn"
+                                style="width: 100%; min-height: 48px;">
+                                <span>Salvar Alterações</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="premium-profile-panel"
+                    style="border-color: rgba(239, 68, 68, 0.3); background: radial-gradient(circle at top right, rgba(239, 68, 68, 0.08), transparent 36%), rgba(18, 15, 25, 0.98); margin-top: 2rem;">
+                    <h2 class="premium-profile-panel-title" style="color: #ef4444;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                            stroke-linecap="round" stroke-linejoin="round"
+                            style="color: #ef4444; width: 22px; height: 22px; vertical-align: middle; margin-right: 0.5rem;">
+                            <path d="M3 6h18" />
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                            <line x1="10" y1="11" x2="10" y2="17" />
+                            <line x1="14" y1="11" x2="14" y2="17" />
+                        </svg>
+                        Área de Perigo
+                    </h2>
+                    <p style="font-size: 0.85rem; color: #9a95a4; margin-bottom: 1.5rem;">Uma vez removido, todas as
+                        estatísticas e histórico do jogador serão perdidos permanentemente.</p>
+
+                    <form action="{{ url_for('jogador_crud.deletar_jogador_form', jogador_id=jogador.id) }}"
+                        method="get"
+                        onsubmit="return confirm('Deseja realmente remover este jogador permanentemente?');">
+                        <button type="submit" class="btn"
+                            style="background: #ef4444 !important; color: white !important; border: none; font-weight: 700; border-radius: 12px; padding: 0.75rem 1.5rem; transition: transform 0.2s ease; cursor: pointer;">
+                            Remover Jogador permanentemente
                         </button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
-
-            <div class="premium-profile-panel" style="border-color: rgba(239, 68, 68, 0.3); background: radial-gradient(circle at top right, rgba(239, 68, 68, 0.08), transparent 36%), rgba(18, 15, 25, 0.98); margin-top: 2rem;">
-                <h2 class="premium-profile-panel-title" style="color: #ef4444;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #ef4444; width: 22px; height: 22px; vertical-align: middle; margin-right: 0.5rem;"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                    Área de Perigo
-                </h2>
-                <p style="font-size: 0.85rem; color: #9a95a4; margin-bottom: 1.5rem;">Uma vez removido, todas as estatísticas e histórico do jogador serão perdidos permanentemente.</p>
-                
-                <form action="{{ url_for('jogador_crud.deletar_jogador_form', jogador_id=jogador.id) }}" method="get" onsubmit="return confirm('Deseja realmente remover este jogador permanentemente?');">
-                    <button type="submit" class="btn" style="background: #ef4444 !important; color: white !important; border: none; font-weight: 700; border-radius: 12px; padding: 0.75rem 1.5rem; transition: transform 0.2s ease; cursor: pointer;">
-                        Remover Jogador permanentemente
-                    </button>
-                </form>
-            </div>
-        </div>
-        {% endif %}
+            {% endif %}
 
     </main>
 </div>
@@ -361,16 +472,16 @@
         // --- GERENCIADOR DE ABAS ---
         const tabs = document.querySelectorAll('.premium-profile-tab');
         const contents = document.querySelectorAll('.premium-profile-tab-content');
-        
+
         tabs.forEach(tab => {
             tab.addEventListener('click', () => {
                 const target = tab.dataset.tabTarget;
-                
+
                 tabs.forEach(t => {
                     t.classList.toggle('is-active', t === tab);
                     t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
                 });
-                
+
                 contents.forEach(c => {
                     const id = c.getAttribute('id');
                     c.classList.toggle('is-active', id === `tab-${target}`);
