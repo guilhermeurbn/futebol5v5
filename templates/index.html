@@ -73,7 +73,7 @@
                     </div>
                     <div class="section-header-actions players-showcase-actions">
                         {% if auth_user.role in ['admin', 'super_admin'] %}
-                        <button type="button" id="toggleCreatePlayerBtn" class="btn premium-add-player-btn" aria-expanded="false" aria-controls="createPlayerModal">
+                        <button type="button" id="toggleCreatePlayerBtn" class="btn premium-add-player-btn" aria-expanded="false" aria-controls="createPlayerModal" onclick="const m = document.getElementById('createPlayerModal'); if (m) { m.showModal(); const inp = m.querySelector('#player-nome'); if (inp) setTimeout(() => inp.focus(), 100); }">
                             <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width: 16px; height: 16px; margin-right: 0.35rem; color: white;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                             <span>Adicionar Jogador</span>
                         </button>
@@ -91,15 +91,12 @@
                                     <h2 style="font-size: 1.4rem; font-weight: 800; color: #ffffff; margin: 0.25rem 0 0.15rem 0;">Novo Jogador</h2>
                                     <p style="font-size: 0.82rem; color: #9a95a4; margin: 0;">Preencha os dados básicos para adicionar o jogador.</p>
                                 </div>
-                                <button type="button" class="profile-security-dialog__close" id="closeCreatePlayerModalBtn" aria-label="Fechar" style="background: none; border: none; color: #9a95a4; font-size: 1.25rem; cursor: pointer; padding: 0.25rem;">✕</button>
+                                <button type="button" class="profile-security-dialog__close" id="closeCreatePlayerModalBtn" aria-label="Fechar" style="background: none; border: none; color: #9a95a4; font-size: 1.25rem; cursor: pointer; padding: 0.25rem;" onclick="document.getElementById('createPlayerModal')?.close();">✕</button>
                             </header>
 
                             <div class="profile-security-dialog__body">
                                 <form action="{{ url_for('jogador.adicionar_jogador') }}" method="post" class="player-create-form">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                    <!-- Posição default oculta -->
-                                    <input type="hidden" name="posicao" value="linha">
-
                                     <div class="form-group" style="margin-bottom: 1.25rem;">
                                         <label for="player-nome" class="form-label">Nome do Jogador</label>
                                         <div class="auth-input-wrap" id="player-nome-wrap">
@@ -141,7 +138,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="form-group" style="margin-bottom: 2rem;">
+                                    <div class="form-group" style="margin-bottom: 1.25rem;">
                                         <label class="form-label">Tipo</label>
                                         <div class="tipo-selector" style="display: flex; gap: 1rem;">
                                             <label class="tipo-option" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.75rem; cursor: pointer; transition: all 0.2s ease;">
@@ -156,6 +153,26 @@
                                                 <span class="tipo-label" style="color: #f4f1f8; font-size: 0.85rem; display: flex; align-items: center; gap: 0.35rem;">
                                                     <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; color: #a78bfa;"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                                                     Avulso
+                                                </span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" style="margin-bottom: 2rem;">
+                                        <label class="form-label">Posição</label>
+                                        <div class="tipo-selector" style="display: flex; gap: 1rem;">
+                                            <label class="tipo-option" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.75rem; cursor: pointer; transition: all 0.2s ease;">
+                                                <input type="radio" name="posicao" value="linha" class="tipo-radio" checked required>
+                                                <span class="tipo-label" style="color: #f4f1f8; font-size: 0.85rem; display: flex; align-items: center; gap: 0.35rem;">
+                                                    <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; color: #a78bfa;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="2" x2="12" y2="22"></line></svg>
+                                                    Linha
+                                                </span>
+                                            </label>
+                                            <label class="tipo-option" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.75rem; cursor: pointer; transition: all 0.2s ease;">
+                                                <input type="radio" name="posicao" value="goleiro" class="tipo-radio" required>
+                                                <span class="tipo-label" style="color: #f4f1f8; font-size: 0.85rem; display: flex; align-items: center; gap: 0.35rem;">
+                                                    <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; color: #a78bfa;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                                    Goleiro
                                                 </span>
                                             </label>
                                         </div>
@@ -422,7 +439,7 @@
         const toggleCreatePlayerBtn = document.getElementById('toggleCreatePlayerBtn');
         const createPlayerModal = document.getElementById('createPlayerModal');
         const closeCreatePlayerModalBtn = document.getElementById('closeCreatePlayerModalBtn');
-        const nomeJogadorInput = document.getElementById('nome');
+        const nomeJogadorInput = document.getElementById('player-nome');
 
         if (toggleCreatePlayerBtn && createPlayerModal) {
             const openModal = () => {

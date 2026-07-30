@@ -7098,6 +7098,12 @@ tbody td code {
   background: #000000 !important;
 }
 
+.profile-page--public.profile-page {
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
 .profile-page--self.profile-page {
   max-width: none;
 }
@@ -7884,6 +7890,12 @@ tbody td code {
   display: grid;
   gap: var(--spacing-lg);
   width: 100%;
+}
+
+.profile-page--public .premium-profile-tab-content,
+.profile-page--public .premium-profile-panel {
+  width: 100%;
+  min-width: 0;
 }
 
 .profile-page--public .public-profile-hero {
@@ -18362,6 +18374,11 @@ body.is-referee-layout .judge-timer-reset:hover {
   gap: 0.75rem;
 }
 
+.profile-page--public .premium-profile-match-list {
+  width: 100%;
+  align-items: stretch;
+}
+
 .premium-profile-match-card {
   display: flex;
   align-items: center;
@@ -18373,6 +18390,11 @@ body.is-referee-layout .judge-timer-reset:hover {
   transition: all 0.2s ease;
   text-decoration: none;
   color: inherit;
+}
+
+.profile-page--public .premium-profile-match-card {
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .premium-profile-match-card:hover {

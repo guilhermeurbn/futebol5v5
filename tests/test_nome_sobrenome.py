@@ -70,6 +70,36 @@ def test_admin_criar_usuario_nome_sobrenome_required(monkeypatch):
         assert 'Por favor, insira o nome e sobrenome.' in response.get_data(as_text=True)
 
 
+def test_admin_criar_usuario_posicao_goleiro(monkeypatch):
+    import uuid
+    uniq = str(uuid.uuid4())[:8]
+    app = criar_app('testing')
+    app.config['WTF_CSRF_ENABLED'] = False
+
+    monkeypatch.setattr(admin_routes, '_usuario_logado', lambda: {'id': 'admin', 'role': 'admin', 'autenticado': True})
+    
+    with app.test_client() as client:
+        with client.session_transaction() as sess:
+            sess['user_id'] = 'admin'
+            sess['role'] = 'admin'
+
+        response = client.post('/admin/usuarios', data={
+            'nome': f'Guilherme Goleiro {uniq}',
+            'email': f'gui_goleiro_{uniq}@test.com',
+            'username': f'guigoleiro{uniq}',
+            'password': 'password123',
+            'role': 'usuario',
+            'posicao': 'goleiro',
+        })
+        assert response.status_code == 302 # Redirects to admin page
+        
+        from services.db import load_json_data
+        jogadores = load_json_data('jogadores', [])
+        player = [j for j in jogadores if j.get('nome') == f'Guilherme Goleiro {uniq}']
+        assert len(player) >= 1
+        assert player[-1].get('posicao') == 'goleiro'
+
+
 def test_jogador_api_nome_sobrenome_required(monkeypatch):
     app = criar_app('testing')
     app.config['WTF_CSRF_ENABLED'] = False

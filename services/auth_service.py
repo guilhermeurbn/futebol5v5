@@ -438,9 +438,13 @@ class AuthService:
         if not alvo:
             raise ValueError("Usuario nao encontrado")
         
-        # Não permitir deletar a si mesmo
-        if executor_id and user_id == executor_id:
-            raise ValueError("Voce nao pode deletar sua propria conta")
+        # Não permitir deletar a si mesmo (e administradores não podem deletar sua própria conta)
+        if executor_id:
+            if user_id == executor_id:
+                raise ValueError("Voce nao pode deletar sua propria conta")
+        else:
+            if alvo.get("role") in ["super_admin", "admin"]:
+                raise ValueError("Administradores nao podem deletar sua propria conta")
         
         # Verificar se é o último admin/super_admin
         if alvo.get("role") in ["super_admin", "admin"]:

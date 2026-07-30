@@ -111,3 +111,30 @@ def test_delete_account_success(monkeypatch):
         # Session should be empty
         with client.session_transaction() as sess:
             assert 'user_id' not in sess
+
+
+def test_delete_account_admin_fails(monkeypatch):
+    app = criar_app('testing')
+    app.config['WTF_CSRF_ENABLED'] = False
+    
+    admin_user = _fake_user()
+    admin_user['role'] = 'admin'
+    
+    monkeypatch.setattr(auth_routes.auth_service, 'obter_por_id', lambda uid: admin_user)
+    monkeypatch.setattr('werkzeug.security.check_password_hash', lambda h, p: True)
+
+    with app.test_client() as client:
+        with client.session_transaction() as sess:
+            sess['user_id'] = 'user-delete-test'
+            sess['username'] = 'deleteme'
+            sess['nome'] = 'Delete Me'
+            sess['role'] = 'admin'
+
+        response = client.post('/perfil/apagar-conta', data={
+            'confirmar_palavra': 'APAGAR',
+            'senha': 'correctpassword',
+        })
+        
+        assert response.status_code == 400
+        body = response.get_data(as_text=True)
+        assert 'Administradores não podem excluir sua própria conta.' in body

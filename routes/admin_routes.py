@@ -196,6 +196,10 @@ def admin_criar_usuario():
         if len(nome_partes) < 2:
             raise ValueError('Por favor, insira o nome e sobrenome.')
 
+        posicao = request.form.get('posicao', 'linha').strip().lower()
+        if posicao not in ['linha', 'goleiro']:
+            posicao = 'linha'
+
         usuario = auth_service.criar_usuario(email=email, username=username, nome=nome, password=password, role=role)
         if role == 'usuario':
             try:
@@ -203,7 +207,7 @@ def admin_criar_usuario():
                     nome=nome,
                     nivel=5.5,
                     tipo='avulso',
-                    posicao='linha',
+                    posicao=posicao,
                     owner_user_id=usuario.get('id')
                 )
             except Exception as e:

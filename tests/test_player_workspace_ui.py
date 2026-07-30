@@ -167,3 +167,18 @@ def test_header_profile_shortcut_has_visible_emphasis():
 
     assert header.count("brand-profile-shortcut") == 2
     assert ".auth-links .brand-profile-shortcut {" in stylesheet
+
+
+def test_unified_public_profile_route_resolution():
+    """Testa que rotas como /perfil_alex ou /perfil/alex resolvem o perfil do jogador usando o template unificado"""
+    from app import app
+    with app.test_client() as client:
+        with client.session_transaction() as sess:
+            sess['user_id'] = 'user-admin-1'
+            sess['role'] = 'admin'
+
+        res = client.get('/perfil_alex', follow_redirects=True)
+        assert res.status_code == 200
+        assert b'perfil' in res.data.lower()
+
+

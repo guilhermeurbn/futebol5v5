@@ -6,6 +6,7 @@
   const CONTENT_SELECTOR = '[data-app-content]';
   const LOADER_ID = 'app-shell-loader';
   const prefetched = new Set();
+  const pageCache = new Map();
   let navigationToken = 0;
   const CACHE_PREFIX = 'natrave:app-shell:';
 
@@ -725,12 +726,56 @@
     return typeof document.startViewTransition === 'function' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 
+  async function revalidateInBackground(targetUrl, token) {
+    try {
+      const response = await fetch(targetUrl.href, {
+        credentials: 'same-origin',
+        headers: { 'X-Requested-With': 'fetch' }
+      });
+      if (response.ok) {
+        const html = await response.text();
+        pageCache.set(targetUrl.href, { html, timestamp: Date.now() });
+        if (token === navigationToken && window.location.pathname === targetUrl.pathname) {
+          const nextDocument = new DOMParser().parseFromString(html, 'text/html');
+          updateShell(nextDocument, targetUrl);
+        }
+      }
+    } catch (err) {
+      // Ignore background errors
+    }
+  }
+
   async function loadPage(url, options) {
     const targetUrl = normalizeUrl(url);
     const token = ++navigationToken;
     const replace = Boolean(options && options.replace);
 
-    setLoading(true);
+    // Instant tab navigation from cache
+    const cachedItem = pageCache.get(targetUrl.href);
+    if (cachedItem && cachedItem.html) {
+      try {
+        const nextDocument = new DOMParser().parseFromString(cachedItem.html, 'text/html');
+        if (updateShell(nextDocument, targetUrl)) {
+          const state = { path: targetUrl.pathname + targetUrl.search };
+          if (replace) {
+            history.replaceState(state, '', targetUrl.href);
+          } else {
+            history.pushState(state, '', targetUrl.href);
+          }
+          revalidateInBackground(targetUrl, token);
+          return;
+        }
+      } catch (err) {
+        // Fallback to network fetch if parsing fails
+      }
+    }
+
+    // Delayed loader: only show full-screen loader if fetch takes > 150ms
+    const loadingTimer = setTimeout(() => {
+      if (token === navigationToken) {
+        setLoading(true);
+      }
+    }, 150);
 
     try {
       const response = await fetch(targetUrl.href, {
@@ -740,6 +785,8 @@
         }
       });
 
+      clearTimeout(loadingTimer);
+
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
@@ -748,6 +795,8 @@
       if (token !== navigationToken) {
         return;
       }
+
+      pageCache.set(targetUrl.href, { html, timestamp: Date.now() });
 
       const nextDocument = new DOMParser().parseFromString(html, 'text/html');
       const rendered = () => {
@@ -773,6 +822,7 @@
     } catch (error) {
       window.location.assign(targetUrl.href);
     } finally {
+      clearTimeout(loadingTimer);
       if (token === navigationToken) {
         setLoading(false);
       }
@@ -792,28 +842,37 @@
     return Array.from(urls);
   }
 
-  function prefetchUrl(href) {
-    if (prefetched.has(href)) return;
-    prefetched.add(href);
-    fetch(href, {
-      credentials: 'same-origin',
-      headers: {
-        'X-Requested-With': 'prefetch'
+  async function prefetchUrl(href) {
+    const targetUrl = normalizeUrl(href);
+    if (prefetched.has(targetUrl.href)) return;
+    prefetched.add(targetUrl.href);
+    try {
+      const response = await fetch(targetUrl.href, {
+        credentials: 'same-origin',
+        headers: {
+          'X-Requested-With': 'prefetch'
+        }
+      });
+      if (response.ok) {
+        const html = await response.text();
+        pageCache.set(targetUrl.href, { html, timestamp: Date.now() });
       }
-    }).catch(() => {});
+    } catch (err) {
+      // Ignore prefetch errors
+    }
   }
 
   function schedulePrefetch() {
     const run = () => {
-      collectPrefetchTargets().slice(0, 6).forEach(prefetchUrl);
+      collectPrefetchTargets().slice(0, 10).forEach(prefetchUrl);
     };
 
     if ('requestIdleCallback' in window) {
-      window.requestIdleCallback(run, { timeout: 1500 });
+      window.requestIdleCallback(run, { timeout: 800 });
       return;
     }
 
-    window.setTimeout(run, 600);
+    window.setTimeout(run, 200);
   }
 
   function boot() {
@@ -821,6 +880,27 @@
     runPageHooks();
     schedulePrefetch();
   }
+
+  // Pre-fetch on hover or touch for instant feedback
+  document.addEventListener('pointerenter', event => {
+    const link = event.target.closest && event.target.closest('a[href]');
+    if (link && shouldHandleLink(link, event)) {
+      prefetchUrl(link.href);
+    }
+  }, true);
+
+  document.addEventListener('touchstart', event => {
+    const link = event.target.closest && event.target.closest('a[href]');
+    if (link && shouldHandleLink(link, event)) {
+      prefetchUrl(link.href);
+    }
+  }, { passive: true });
+
+  // Clear cache when user submits a form so newly created data displays immediately
+  document.addEventListener('submit', () => {
+    pageCache.clear();
+    prefetched.clear();
+  }, true);
 
   document.addEventListener('click', event => {
     const link = event.target.closest('a[href]');

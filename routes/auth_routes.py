@@ -470,45 +470,109 @@ def perfil_page():
     )
 
 
-@auth_bp.route('/jogadores/<jogador_id>/perfil', methods=['GET'])
-@login_required
-def perfil_jogador_publico(jogador_id):
-    """Visualiza perfil público de outro jogador"""
-    try:
-        jogador = jogador_service.obter_por_id(jogador_id)
-        if not jogador:
-            return redirect(url_for('jogador.index'))
-        if jogador.owner_user_id == session.get('user_id'):
-            return redirect(url_for('auth.perfil_page'))
+def _obter_perfil_publico_dados(identifier):
+    """Localiza jogador e usuario por ID, username ou slug de nome."""
+    if not identifier:
+        return None, None
 
-        stats_jogador = None
+    identifier_clean = str(identifier).strip().lower().removeprefix('perfil_').removeprefix('@')
+    
+    # 1. Tentar por ID de jogador
+    jogador = None
+    try:
+        jogador = jogador_service.obter_por_id(identifier)
+    except Exception:
+        jogador = None
+
+    owner_user = None
+
+    # 2. Se encontrou por ID, buscar o usuario dono
+    if jogador:
+        if jogador.owner_user_id:
+            try:
+                owner_user = auth_service.obter_por_id(jogador.owner_user_id)
+            except Exception:
+                pass
+        return jogador, owner_user
+
+    # 3. Tentar por username de usuario
+    try:
+        usuarios = auth_service.listar_usuarios()
+        for u in usuarios:
+            uname = (u.get('username') or '').strip().lower()
+            uid = str(u.get('id', '')).strip().lower()
+            unome = (u.get('nome') or '').strip().lower()
+            if uname == identifier_clean or uid == identifier_clean or unome == identifier_clean:
+                owner_user = u
+                meus = jogador_service.listar_por_usuario(u.get('id'))
+                if meus:
+                    jogador = meus[0]
+                break
+    except Exception:
+        pass
+
+    # 4. Tentar por nome de jogador ou primeiro nome
+    if not jogador:
         try:
-            stats_jogador = jogador_stats_service.obter_stats_jogador(jogador.nome)
-            stats_jogador.setdefault('efficiency', {})
-            stats_jogador.setdefault('discipline', {})
-            stats_jogador.setdefault('ultimos_resultados', {'forma': [], 'pontos': 0, 'partidas': []})
-            stats_jogador.setdefault('mini_dashboard', {'kpis': {}, 'series_ultimos_5': []})
-            stats_jogador.setdefault('planilha_metricas', [])
-            
-            # Calcular e injetar notas e atributos determinísticos
-            _obter_notas_e_atributos_jogador(jogador, stats_jogador)
-        except Exception as e:
-            # Se houver qualquer erro ao obter stats, logar e continuar sem elas
-            import logging
-            logger = logging.getLogger(__name__)
-            logger.error(f"Erro ao carregar estatísticas do perfil público: {str(e)}")
+            todos_jogadores = jogador_service.listar_todos()
+            for j in todos_jogadores:
+                j_nome_clean = j.nome.strip().lower().replace(' ', '_')
+                j_primeiro_nome = j.nome.strip().split()[0].lower()
+                if j.id == identifier or j_nome_clean == identifier_clean or j_primeiro_nome == identifier_clean:
+                    jogador = j
+                    if j.owner_user_id and not owner_user:
+                        try:
+                            owner_user = auth_service.obter_por_id(j.owner_user_id)
+                        except Exception:
+                            pass
+                    break
+        except Exception:
             pass
 
-        owner_user = None
-        if jogador.owner_user_id:
-            owner_user = auth_service.obter_por_id(jogador.owner_user_id)
+    return jogador, owner_user
+
+
+@auth_bp.route('/jogadores/<jogador_id>/perfil', methods=['GET'])
+@auth_bp.route('/perfil_<jogador_id>', methods=['GET'])
+@auth_bp.route('/perfil/<jogador_id>', methods=['GET'])
+@login_required
+def perfil_jogador_publico(jogador_id):
+    """Visualiza perfil público de outro jogador de forma unificada e inteligente"""
+    try:
+        jogador, owner_user = _obter_perfil_publico_dados(jogador_id)
+        if not jogador and not owner_user:
+            return redirect(url_for('jogador.index'))
+
+        current_user = _usuario_logado()
+        current_user_id = session.get('user_id')
+
+        target_user_id = owner_user.get('id') if owner_user else (jogador.owner_user_id if jogador else None)
+        is_self = bool(current_user_id and target_user_id and str(current_user_id) == str(target_user_id))
+
+        stats_jogador = None
+        if jogador:
+            try:
+                stats_jogador = jogador_stats_service.obter_stats_jogador(jogador.nome)
+                stats_jogador.setdefault('efficiency', {})
+                stats_jogador.setdefault('discipline', {})
+                stats_jogador.setdefault('ultimos_resultados', {'forma': [], 'pontos': 0, 'partidas': []})
+                stats_jogador.setdefault('mini_dashboard', {'kpis': {}, 'series_ultimos_5': []})
+                stats_jogador.setdefault('planilha_metricas', [])
+                
+                # Calcular e injetar notas e atributos determinísticos
+                _obter_notas_e_atributos_jogador(jogador, stats_jogador)
+            except Exception as e:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Erro ao carregar estatísticas do perfil público: {str(e)}")
 
         return render_template(
-            'perfil_jogador.html',
-            jogador=jogador,
+            'perfil.html',
+            jogador_proprio=jogador,
             stats_jogador=stats_jogador,
-            usuario=_usuario_logado(),
-            owner_user=owner_user
+            usuario=current_user,
+            target_user=owner_user,
+            is_self=is_self
         )
     except Exception as e:
         import logging
@@ -665,6 +729,14 @@ def apagar_conta():
         user = auth_service.obter_por_id(user_id)
         if not user:
             return redirect(url_for('auth.logout'))
+
+        if user.get('role') in ['admin', 'super_admin']:
+            return render_template(
+                'perfil.html',
+                usuario=_usuario_logado(),
+                jogador_proprio=(jogador_service.listar_por_usuario(user_id) or [None])[0],
+                erro_deletar='Administradores não podem excluir sua própria conta.'
+            ), 400
 
         from werkzeug.security import check_password_hash
         if not check_password_hash(user.get('password_hash', ''), senha):

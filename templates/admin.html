@@ -282,6 +282,26 @@
                             </div>
                         </div>
 
+                        <div class="form-group" style="margin-bottom: 1.5rem;" id="posicao-form-group">
+                            <label class="form-label">Posição do Jogador</label>
+                            <div class="tipo-selector" style="display: flex; gap: 0.75rem;">
+                                <label class="tipo-option" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.4rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.75rem; cursor: pointer; transition: all 0.2s ease;">
+                                    <input type="radio" name="posicao" value="linha" class="tipo-radio" checked required>
+                                    <span class="tipo-label" style="color: #f4f1f8; font-size: 0.8rem; display: flex; align-items: center; gap: 0.35rem; white-space: nowrap;">
+                                        <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; color: #22c55e;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="2" x2="12" y2="22"></line></svg>
+                                        Linha
+                                    </span>
+                                </label>
+                                <label class="tipo-option" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.4rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.75rem; cursor: pointer; transition: all 0.2s ease;">
+                                    <input type="radio" name="posicao" value="goleiro" class="tipo-radio" required>
+                                    <span class="tipo-label" style="color: #f4f1f8; font-size: 0.8rem; display: flex; align-items: center; gap: 0.35rem; white-space: nowrap;">
+                                        <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; color: #22c55e;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                        Goleiro
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
                         <div class="form-group" style="margin-bottom: 2.25rem;">
                             <label class="form-label">Perfil de Acesso</label>
                             <div class="tipo-selector" style="display: flex; gap: 0.75rem;">
@@ -507,6 +527,19 @@
                             closeModal();
                         }
                     });
+
+                    const roleRadios = createUserModal.querySelectorAll('input[name="role"]');
+                    const posicaoGroup = createUserModal.querySelector('#posicao-form-group');
+                    const updatePosicaoVisibility = () => {
+                        const activeRole = createUserModal.querySelector('input[name="role"]:checked')?.value;
+                        if (posicaoGroup) {
+                            posicaoGroup.style.display = activeRole === 'usuario' ? 'block' : 'none';
+                        }
+                    };
+                    roleRadios.forEach(radio => {
+                        radio.addEventListener('change', updatePosicaoVisibility);
+                    });
+                    updatePosicaoVisibility();
                 }
 
                 // Controle de edição de Email inline
