@@ -16,6 +16,7 @@ from services.historico_service import HistoricoService
 from services.export_service import ExportService
 from services.sugestoes_service import SugestoesService
 from services.ranking_service import RankingService
+from services.temporada_service import TemporadaService
 from services.votacao_service import VotacaoService
 from services.jogador_service import JogadorService
 
@@ -27,6 +28,7 @@ historico_service = HistoricoService()
 export_service = ExportService()
 sugestoes_service = SugestoesService()
 ranking_service = RankingService()
+temporada_service = TemporadaService()
 votacao_service = VotacaoService()
 jogador_service = JogadorService()
 
@@ -478,12 +480,76 @@ def api_sugestoes_combinadas():
 # RANKING DE JOGADORES
 # ============================================================
 
+def _gerar_exemplos_demonstracao():
+    return {
+        'ranking': [
+            {
+                'jogador_nome': 'Alex Silva',
+                'pontos': 88.50,
+                'jogos': 12,
+                'gols': 14,
+                'vitorias': 9,
+                'derrotas': 2,
+                'empates': 1,
+                'destaques': 3,
+                'nota_media': 8.75,
+            },
+            {
+                'jogador_nome': 'Bruno Santos',
+                'pontos': 82.20,
+                'jogos': 10,
+                'gols': 11,
+                'vitorias': 7,
+                'derrotas': 2,
+                'empates': 1,
+                'destaques': 2,
+                'nota_media': 8.40,
+            },
+            {
+                'jogador_nome': 'Carlos Mendes',
+                'pontos': 75.40,
+                'jogos': 9,
+                'gols': 8,
+                'vitorias': 6,
+                'derrotas': 3,
+                'empates': 0,
+                'destaques': 1,
+                'nota_media': 7.90,
+            },
+        ],
+        'total_partidas': 12,
+        'total_votos': 36,
+        'total_jogadores': 3,
+        'is_exemplo': True,
+    }
+
+
 @stats_bp.route('/ranking')
 def pagina_ranking():
-    """Página de ranking geral de jogadores"""
+    """Página de ranking de jogadores com suporte a temporada e geral"""
     try:
-        dados = votacao_service.ranking_jogadores_geral(50)
-        return render_template('ranking.html', dados=dados, usuario=_usuario_logado())
+        tipo = request.args.get('tipo', 'temporada')
+        temporada = temporada_service.obter_temporada_ativa()
+
+        if tipo == 'temporada' and temporada:
+            dados = votacao_service.ranking_jogadores_geral(
+                limite=50,
+                data_inicio=temporada.get('data_inicio'),
+                data_fim=temporada.get('data_fim')
+            )
+        else:
+            dados = votacao_service.ranking_jogadores_geral(limite=50)
+
+        if not dados.get('ranking'):
+            dados = _gerar_exemplos_demonstracao()
+
+        return render_template(
+            'ranking.html',
+            dados=dados,
+            temporada=temporada,
+            tipo_ranking=tipo,
+            usuario=_usuario_logado()
+        )
     except Exception as e:
         logger.error(f"Erro ao carregar ranking: {str(e)}")
         return render_template('ranking.html', dados=[], erro='Erro ao carregar ranking'), 500
@@ -491,14 +557,29 @@ def pagina_ranking():
 
 @stats_bp.route('/api/ranking/geral')
 def api_ranking_geral():
-    """API: Ranking geral de jogadores"""
+    """API: Ranking de jogadores (temporada ou geral)"""
     try:
         limite = request.args.get('limite', 50, type=int)
-        dados = votacao_service.ranking_jogadores_geral(limite)
-        
+        tipo = request.args.get('tipo', 'temporada')
+        temporada = temporada_service.obter_temporada_ativa()
+
+        if tipo == 'temporada' and temporada:
+            dados = votacao_service.ranking_jogadores_geral(
+                limite=limite,
+                data_inicio=temporada.get('data_inicio'),
+                data_fim=temporada.get('data_fim')
+            )
+        else:
+            dados = votacao_service.ranking_jogadores_geral(limite=limite)
+
+        if not dados.get('ranking'):
+            dados = _gerar_exemplos_demonstracao()
+
         return jsonify({
             'sucesso': True,
-            'dados': dados
+            'dados': dados,
+            'temporada': temporada,
+            'tipo': tipo
         })
     except Exception as e:
         logger.error(f"Erro ao retornar ranking: {str(e)}")

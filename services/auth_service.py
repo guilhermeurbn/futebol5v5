@@ -177,6 +177,8 @@ class AuthService:
             raise ValueError("Email ja existe")
         if any((u.get("username") or "").lower() == username for u in usuarios):
             raise ValueError("Username ja existe")
+        if nome and any((u.get("nome") or "").strip().lower() == nome.lower() for u in usuarios):
+            raise ValueError("Ja existe um usuario cadastrado com este nome")
 
         novo = {
             "id": str(uuid.uuid4()),

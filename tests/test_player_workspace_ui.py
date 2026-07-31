@@ -182,3 +182,17 @@ def test_unified_public_profile_route_resolution():
         assert b'perfil' in res.data.lower()
 
 
+def test_private_profile_lightbulb_guide_modal():
+    template = _read("templates/perfil.html")
+    stylesheet = _read("static/style.css")
+
+    assert "profile-guide-trigger" in template
+    assert 'id="openProfileGuideBtn"' in template
+    assert 'id="profileGuideModal"' in template
+    assert "Sorteio Inteligente de Times" in template
+    assert "Sistema Inteligente de Confiabilidade" in template
+    assert ".profile-guide-trigger {" in stylesheet
+    assert ".profile-guide-modal {" in stylesheet
+
+
+

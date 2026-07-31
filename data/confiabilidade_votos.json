@@ -1,0 +1,54 @@
+{
+  "evaluators": {
+    "u1": {
+      "reliability": 0.9293,
+      "total_votos": 16
+    },
+    "u2": {
+      "reliability": 0.9293,
+      "total_votos": 16
+    },
+    "u3_hater": {
+      "reliability": 0.6908,
+      "total_votos": 16
+    }
+  },
+  "relationships": {
+    "u1:Alex": {
+      "match_count": 8,
+      "cumulative_offset": 28.0
+    },
+    "u2:Alex": {
+      "match_count": 8,
+      "cumulative_offset": 28.0
+    },
+    "u3_hater:Alex": {
+      "match_count": 8,
+      "cumulative_offset": -56.0
+    },
+    "u1:Bruno": {
+      "match_count": 8,
+      "cumulative_offset": 0.0
+    },
+    "u2:Bruno": {
+      "match_count": 8,
+      "cumulative_offset": 0.0
+    },
+    "u3_hater:Bruno": {
+      "match_count": 8,
+      "cumulative_offset": 0.0
+    }
+  },
+  "target_baselines": {
+    "Alex": {
+      "sum_scores": 136.0,
+      "count": 24,
+      "historical_avg": 5.67
+    },
+    "Bruno": {
+      "sum_scores": 168.0,
+      "count": 24,
+      "historical_avg": 7.0
+    }
+  }
+}

@@ -85,27 +85,32 @@
                                 </div>
                                 <div class="scoreboard-stats">
                                     <div class="scoreboard-team-record-pill">
-                                        {{ item.resultado_resumo[0].desempenho.vitorias if item.resultado_resumo[0].desempenho else 0 }}V - 
-                                        {{ item.resultado_resumo[0].desempenho.empates if item.resultado_resumo[0].desempenho else 0 }}E - 
-                                        {{ item.resultado_resumo[0].desempenho.derrotas if item.resultado_resumo[0].desempenho else 0 }}D
+                                        {% set v0 = item.resultado_resumo[0].desempenho.vitorias if item.resultado_resumo[0].desempenho else 0 %}
+                                        {% set e0 = item.resultado_resumo[0].desempenho.empates if item.resultado_resumo[0].desempenho else 0 %}
+                                        {% set d0 = item.resultado_resumo[0].desempenho.derrotas if item.resultado_resumo[0].desempenho else 0 %}
+                                        <strong>{{ v0 }} Vitóri{{ 'a' if v0 == 1 else 'as' }}</strong>
+                                        <span style="display: block; font-size: 0.65rem; color: rgba(255,255,255,0.4); margin-top: 2px;">{{ item.resultado_resumo[0].gols }}G - {{ d0 }}D - {{ e0 }}E</span>
                                     </div>
                                     <div class="scoreboard-label">Placar Final</div>
                                     <div class="scoreboard-team-record-pill text-right">
-                                        {{ item.resultado_resumo[1].desempenho.vitorias if item.resultado_resumo[1].desempenho else 0 }}V - 
-                                        {{ item.resultado_resumo[1].desempenho.empates if item.resultado_resumo[1].desempenho else 0 }}E - 
-                                        {{ item.resultado_resumo[1].desempenho.derrotas if item.resultado_resumo[1].desempenho else 0 }}D
+                                        {% set v1 = item.resultado_resumo[1].desempenho.vitorias if item.resultado_resumo[1].desempenho else 0 %}
+                                        {% set e1 = item.resultado_resumo[1].desempenho.empates if item.resultado_resumo[1].desempenho else 0 %}
+                                        {% set d1 = item.resultado_resumo[1].desempenho.derrotas if item.resultado_resumo[1].desempenho else 0 %}
+                                        <strong>{{ v1 }} Vitóri{{ 'a' if v1 == 1 else 'as' }}</strong>
+                                        <span style="display: block; font-size: 0.65rem; color: rgba(255,255,255,0.4); margin-top: 2px;">{{ item.resultado_resumo[1].gols }}G - {{ d1 }}D - {{ e1 }}E</span>
                                     </div>
                                 </div>
                             {% else %}
                                 <div class="scoreboard-grid">
                                     {% for r in item.resultado_resumo %}
+                                        {% set v_item = r.desempenho.vitorias if r.desempenho else 0 %}
+                                        {% set e_item = r.desempenho.empates if r.desempenho else 0 %}
+                                        {% set d_item = r.desempenho.derrotas if r.desempenho else 0 %}
                                         <div class="scoreboard-grid-item">
                                             <span class="grid-item-team">Time {{ r.time_numero }}</span>
-                                            <span class="grid-item-score">{{ r.gols }} Gols</span>
+                                            <span class="grid-item-score">{{ v_item }} Vitóri{{ 'a' if v_item == 1 else 'as' }}</span>
                                             <span class="grid-item-record">
-                                                {{ r.desempenho.vitorias if r.desempenho else 0 }}V - 
-                                                {{ r.desempenho.empates if r.desempenho else 0 }}E - 
-                                                {{ r.desempenho.derrotas if r.desempenho else 0 }}D
+                                                {{ r.gols }}G - {{ d_item }}D - {{ e_item }}E
                                             </span>
                                         </div>
                                     {% endfor %}
@@ -283,8 +288,8 @@
                 const sorteioData = window.NaTraveLocalDateTime
                     ? window.NaTraveLocalDateTime.formatDateTime(button.dataset.sorteioData)
                     : (button.dataset.sorteioData || '-');
-                const mediaGeral = button.dataset.mediaGeral || '0.00';
-                const totalJogadores = button.dataset.totalJogadores || '0';
+                const mediaGeralAttr = button.dataset.mediaGeral || '0.00';
+                const totalJogadoresAttr = button.dataset.totalJogadores || '0';
                 const dataEl = document.getElementById(`ranking-data-${sorteioId}`);
 
                 let ranking = [];
@@ -296,9 +301,19 @@
                     }
                 }
 
+                let mediaGeralNum = Number(mediaGeralAttr);
+                if ((!mediaGeralNum || mediaGeralNum === 0) && Array.isArray(ranking) && ranking.length > 0) {
+                    const validNotas = ranking.map(j => Number(j.nota_media || 0)).filter(n => n > 0);
+                    if (validNotas.length > 0) {
+                        mediaGeralNum = validNotas.reduce((a, b) => a + b, 0) / validNotas.length;
+                    }
+                }
+                const displayMedia = (mediaGeralNum || 0).toFixed(2);
+                const displayTotal = (Array.isArray(ranking) && ranking.length > 0) ? ranking.length : totalJogadoresAttr;
+
                 modalSorteio.textContent = `Sorteio #${sorteioId} · ${sorteioData}`;
-                modalMedia.textContent = `Média geral: ${mediaGeral}`;
-                modalTotal.textContent = `${totalJogadores} jogador(es)`;
+                modalMedia.textContent = `Média geral: ${displayMedia}`;
+                modalTotal.textContent = `${displayTotal} jogador(es)`;
                 renderRows(ranking);
                 openModal();
             });

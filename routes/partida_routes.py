@@ -301,9 +301,19 @@ def _enriquecer_sorteio_historico(sorteio):
     partida_votacao = votacao_service.obter_por_sorteio(sorteio_id)
     ranking = ((partida_votacao or {}).get('ranking') or {})
     ranking_jogadores = ranking.get('ranking_jogadores') or []
-    ranking_top10 = ranking_jogadores[:10]
+    ranking_top10 = ranking_jogadores  # Return all players in ranking without truncation
     melhor_jogador = ranking.get('melhor_jogador')
     status_votacao = (partida_votacao or {}).get('status') or 'nao_iniciada'
+
+    media_geral = float(ranking.get('media_geral') or 0.0)
+    if not media_geral and ranking_jogadores:
+        votados = [float(j.get('nota_media') or 0) for j in ranking_jogadores if int(j.get('votos') or 0) > 0 or float(j.get('nota_media') or 0) > 0]
+        if votados:
+            media_geral = round(sum(votados) / len(votados), 2)
+        else:
+            todas_notas = [float(j.get('nota_media') or 0) for j in ranking_jogadores if float(j.get('nota_media') or 0) > 0]
+            if todas_notas:
+                media_geral = round(sum(todas_notas) / len(todas_notas), 2)
 
     resultado_resumo = []
     if resultado_partida:
@@ -327,8 +337,8 @@ def _enriquecer_sorteio_historico(sorteio):
         'votacao_encerrada': status_votacao == 'encerrada',
         'votacao_aberta': status_votacao == 'aberta',
         'ranking_top10': ranking_top10,
-        'ranking_total_jogadores': ranking.get('total_jogadores') or len(ranking_jogadores),
-        'ranking_media_geral': ranking.get('media_geral') or 0,
+        'ranking_total_jogadores': len(ranking_jogadores) or ranking.get('total_jogadores') or 0,
+        'ranking_media_geral': media_geral,
         'melhor_jogador': melhor_jogador,
     })
     return item
@@ -379,7 +389,7 @@ def ver_sorteio(sorteio_id):
         melhor_jogador = None
 
         if partida_votacao and partida_votacao.get('ranking'):
-            ranking_top10 = partida_votacao['ranking'].get('ranking_jogadores', [])[:10]
+            ranking_top10 = partida_votacao['ranking'].get('ranking_jogadores', [])
             melhor_jogador = partida_votacao['ranking'].get('melhor_jogador')
 
         if _is_juiz():

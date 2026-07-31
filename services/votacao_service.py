@@ -8,6 +8,7 @@ import unicodedata
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 from services.db import load_json_data, save_json_data
+from services.voto_confiabilidade_service import VotoConfiabilidadeService
 
 
 class VotacaoService:
@@ -15,6 +16,7 @@ class VotacaoService:
 
     def __init__(self, arquivo: str = "data/votacoes_partidas.json"):
         self.arquivo = arquivo
+        self.confiabilidade_service = VotoConfiabilidadeService()
         self._garantir_arquivo()
 
     def _garantir_arquivo(self) -> None:
@@ -479,45 +481,79 @@ class VotacaoService:
         jogadores = {}
         times = {}
 
+        # Avaliar confiabilidade dos votos
+        avaliacao_confiabilidade = self.confiabilidade_service.avaliar_pesos_partida(votos, partida.get("participantes"))
+        mapa_pesos = avaliacao_confiabilidade.get("mapa_pesos", {})
+
         for voto in votos:
+            eval_id = str(voto.get("user_id") or voto.get("username") or "anonimo")
             for voto_jogador in voto.get("votos", []):
                 nome = voto_jogador.get("jogador_nome", "Jogador")
                 time = voto_jogador.get("time_numero")
                 nota = self._normalizar_nota(voto_jogador.get("nota", 0))
 
+                peso = float(mapa_pesos.get(eval_id, {}).get(nome, 1.0))
+                nota_ponderada = nota * peso
+
                 stats = jogadores.setdefault(nome, {
                     "jogador_nome": nome,
                     "time_numero": time,
                     "nota_total": 0.0,
+                    "soma_pesos": 0.0,
                     "votos": 0,
                     "pontos": 0.0,
                     "notas_lista": [],
                 })
 
-                stats["nota_total"] += nota
+                stats["nota_total"] += nota_ponderada
+                stats["soma_pesos"] += peso
                 stats["votos"] += 1
-                stats["pontos"] += nota
+                stats["pontos"] += nota_ponderada
                 stats["notas_lista"].append(nota)
 
                 t = times.setdefault(time, {
                     "time_numero": time,
                     "nota_total": 0.0,
+                    "soma_pesos": 0.0,
                     "votos": 0,
                 })
-                t["nota_total"] += nota
+                t["nota_total"] += nota_ponderada
+                t["soma_pesos"] += peso
                 t["votos"] += 1
+
+        for participante in partida.get("participantes", []):
+            nome = participante.get("nome") or participante.get("jogador_nome")
+            time = participante.get("time_numero")
+            if nome and nome not in jogadores:
+                jogadores[nome] = {
+                    "jogador_nome": nome,
+                    "time_numero": time,
+                    "nota_total": 0.0,
+                    "soma_pesos": 0.0,
+                    "votos": 0,
+                    "pontos": 0.0,
+                    "notas_lista": [],
+                }
 
         ranking_jogadores = sorted(jogadores.values(), key=lambda x: (x["pontos"], x["votos"]), reverse=True)
         ranking_times = sorted(times.values(), key=lambda x: (x["nota_total"], x["votos"]), reverse=True)
 
-        melhor_jogador = ranking_jogadores[0] if ranking_jogadores else None
-        melhor_time = ranking_times[0] if ranking_times else None
-
         for item in ranking_jogadores:
-            item["nota_media"] = round(item["nota_total"] / item["votos"], 2) if item["votos"] else 0
+            if item.get("soma_pesos") and item["soma_pesos"] > 0:
+                item["nota_media"] = round(item["nota_total"] / item["soma_pesos"], 2)
+                item["confiabilidade_media"] = round(item["soma_pesos"] / item["votos"], 4)
+            else:
+                item["nota_media"] = round(item["nota_total"] / item["votos"], 2) if item["votos"] else 0
+                item["confiabilidade_media"] = 1.0
 
         for item in ranking_times:
-            item["nota_media"] = round(item["nota_total"] / item["votos"], 2) if item["votos"] else 0
+            if item.get("soma_pesos") and item["soma_pesos"] > 0:
+                item["nota_media"] = round(item["nota_total"] / item["soma_pesos"], 2)
+            else:
+                item["nota_media"] = round(item["nota_total"] / item["votos"], 2) if item["votos"] else 0
+
+        melhor_jogador = ranking_jogadores[0] if ranking_jogadores else None
+        melhor_time = ranking_times[0] if ranking_times else None
 
         pendentes = []
         votos_ids = {v.get("user_id") for v in votos if v.get("user_id")}
@@ -526,8 +562,22 @@ class VotacaoService:
             if user_id and user_id not in votos_ids:
                 pendentes.append(participante)
 
+        total_jogadores = len(ranking_jogadores)
+        votados = [item for item in ranking_jogadores if item.get("votos", 0) > 0 or item.get("nota_media", 0) > 0]
+        if votados:
+            soma_medias = sum(item["nota_media"] for item in votados)
+            media_geral = round(soma_medias / len(votados), 2)
+        else:
+            media_geral = 0.0
+
+        if partida.get("status") == "encerrada":
+            self.confiabilidade_service.atualizar_historico(avaliacao_confiabilidade)
+
         return {
             "total_votos": len(votos),
+            "total_jogadores": total_jogadores,
+            "media_geral": media_geral,
+            "confiabilidade_media_rodada": avaliacao_confiabilidade.get("confiabilidade_media_rodada", 1.0),
             "ranking_times": ranking_times,
             "ranking_jogadores": ranking_jogadores,
             "melhor_jogador": melhor_jogador,
@@ -535,10 +585,30 @@ class VotacaoService:
             "participantes_pendentes": pendentes,
         }
 
-    def ranking_jogadores_geral(self, limite: int = 50) -> Dict:
-        """Retorna classificacao geral de jogadores usando rodadas encerradas."""
+    def ranking_jogadores_geral(self, limite: int = 50, data_inicio: Optional[str] = None, data_fim: Optional[str] = None) -> Dict:
+        """Retorna classificacao de jogadores usando rodadas encerradas no intervalo especificado."""
         partidas = self.listar()
         encerradas = [p for p in partidas if p.get("status") == "encerrada"]
+
+        if data_inicio and data_fim:
+            try:
+                dt_ini = datetime.fromisoformat(data_inicio)
+                dt_fim = datetime.fromisoformat(data_fim)
+                filtradas = []
+                for p in encerradas:
+                    data_str = p.get("data") or p.get("encerrado_em") or p.get("criado_em")
+                    if data_str:
+                        try:
+                            p_dt = datetime.fromisoformat(data_str)
+                            if dt_ini <= p_dt <= dt_fim:
+                                filtradas.append(p)
+                        except Exception:
+                            filtradas.append(p)
+                    else:
+                        filtradas.append(p)
+                encerradas = filtradas
+            except Exception as e:
+                logger.error(f"Erro ao filtrar partidas por data no ranking: {str(e)}")
 
         acumulado = {}
         total_votos = 0

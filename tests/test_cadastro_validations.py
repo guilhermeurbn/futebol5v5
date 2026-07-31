@@ -155,3 +155,18 @@ def test_cadastro_route_success_creates_user_player_email_and_notification(tmp_p
     assert jogador_service.criados[0]['posicao'] == 'linha'
     assert email_service.enviados[0]['to_email'] == 'novo@example.com'
     assert notificacao_service.notificacoes[0]['tipo'] == 'cadastro'
+
+
+def test_prevent_duplicate_user_and_player_names(tmp_path):
+    from services.jogador_service import JogadorService
+    auth_service = AuthService(arquivo=str(tmp_path / "users.json"))
+    jog_service = JogadorService(arquivo=str(tmp_path / "jogadores.json"))
+
+    auth_service.criar_usuario(email="u1@example.com", username="user1", nome="Carlos Silva", password="password123")
+    with pytest.raises(ValueError, match="Ja existe um usuario cadastrado com este nome"):
+        auth_service.criar_usuario(email="u2@example.com", username="user2", nome="carlos silva", password="password123")
+
+    jog_service.criar(nome="Marcos Pereira", nivel=7.0, tipo="avulso", posicao="linha")
+    with pytest.raises(ValueError, match="Já existe um jogador cadastrado com o nome 'Marcos Pereira'"):
+        jog_service.criar(nome="marcos pereira", nivel=8.0, tipo="fixo", posicao="goleiro")
+

@@ -15,11 +15,87 @@
     </header>
 
     <main class="main" data-ranking-shell data-ranking-api="{{ url_for('stats.api_ranking_geral', limite=50) }}" data-ranking-cache-key="natrave:ranking:geral:v1">
-        <section class="section ranking-hero">
+        {% if temporada %}
+        <section class="section season-hero-card" style="background: linear-gradient(135deg, #181824 0%, #0d0d12 100%); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 20px; padding: 1.5rem; margin-bottom: 2rem; position: relative; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.5);">
+            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem;">
+                <div>
+                    <div style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.8rem; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 20px; color: #f59e0b; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.6rem;">
+                        <span>🏆</span> COMPETIÇÃO OFICIAL DA TEMPORADA
+                    </div>
+                    <h2 style="font-size: 1.6rem; font-weight: 800; color: #ffffff; margin: 0 0 0.4rem 0;">{{ temporada.nome }}</h2>
+                    <p style="font-size: 0.9rem; color: #d1d5db; margin: 0;">
+                        Período: <strong>{{ temporada.data_inicio_fmt }}</strong> até <strong>{{ temporada.data_fim_fmt }}</strong> (2 meses de competição)
+                    </p>
+                </div>
+
+                <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 1rem 1.25rem; text-align: center; min-width: 180px;">
+                    <div style="font-size: 0.75rem; color: #9ca3af; font-weight: 600; text-transform: uppercase; margin-bottom: 0.2rem;">
+                        {% if temporada.status_tempo == 'futura' %}Começa em{% elif temporada.status_tempo == 'em_andamento' %}Tempo Restante{% else %}Status{% endif %}
+                    </div>
+                    <div style="font-size: 1.5rem; font-weight: 800; color: #f59e0b;">
+                        {% if temporada.status_tempo == 'futura' %}
+                            {{ temporada.dias_para_inicio }} dia(s)
+                        {% elif temporada.status_tempo == 'em_andamento' %}
+                            {{ temporada.dias_restantes }} dia(s)
+                        {% else %}
+                            Encerrada
+                        {% endif %}
+                    </div>
+                    <div style="font-size: 0.7rem; color: #6b7280; margin-top: 0.2rem;">
+                        {% if temporada.status_tempo == 'futura' %}
+                            Início na próxima terça-feira!
+                        {% elif temporada.status_tempo == 'em_andamento' %}
+                            Duração total: 61 dias
+                        {% else %}
+                            Edição concluída
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Banner do Prêmio do 1º Colocado -->
+            <div style="margin-top: 1.25rem; padding: 0.85rem 1rem; background: rgba(245, 158, 11, 0.08); border-left: 4px solid #f59e0b; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+                <div style="font-size: 0.875rem; color: #fef08a;">
+                    <strong>🎁 Prêmio do 1º Lugar:</strong> {{ temporada.descricao_premio }}
+                </div>
+                <div style="font-size: 0.8rem; color: #d1d5db;">
+                    Líder ganha o título oficial de Campeão da Temporada!
+                </div>
+            </div>
+
+            <!-- Barra de Progresso da Temporada -->
+            {% if temporada.status_tempo == 'em_andamento' %}
+            <div style="margin-top: 1rem;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #9ca3af; margin-bottom: 0.35rem;">
+                    <span>Progresso da Competição</span>
+                    <span>{{ temporada.progresso_pct }}% concluído</span>
+                </div>
+                <div style="height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; overflow: hidden;">
+                    <div style="height: 100%; width: {{ temporada.progresso_pct }}%; background: linear-gradient(90deg, #f59e0b, #10b981); border-radius: 3px;"></div>
+                </div>
+            </div>
+            {% endif %}
+        </section>
+        {% endif %}
+
+        <div class="season-ranking-tabs" style="display: flex; gap: 0.75rem; margin-bottom: 1.5rem;">
+            <a href="{{ url_for('stats.pagina_ranking', tipo='temporada') }}" 
+               class="btn {% if tipo_ranking != 'geral' %}btn-primary{% else %}btn-secondary{% endif %}"
+               style="border-radius: 12px; font-weight: 700; padding: 0.6rem 1.25rem;">
+                🏆 Temporada Atual
+            </a>
+            <a href="{{ url_for('stats.pagina_ranking', tipo='geral') }}" 
+               class="btn {% if tipo_ranking == 'geral' %}btn-primary{% else %}btn-secondary{% endif %}"
+               style="border-radius: 12px; font-weight: 700; padding: 0.6rem 1.25rem;">
+                📜 Histórico Geral
+            </a>
+        </div>
+
+        <section class="section ranking-hero" style="padding-top: 0.5rem;">
             <div class="ranking-hero__heading">
                 <div>
-                    <span class="section-label">Classificação geral</span>
-                    <h1 class="ranking-hero__title">Ranking de Jogadores</h1>
+                    <span class="section-label">{% if tipo_ranking == 'geral' %}Classificação Histórica Geral{% else %}Classificação da Temporada{% endif %}</span>
+                    <h1 class="ranking-hero__title">{% if tipo_ranking == 'geral' %}Ranking Histórico Geral{% else %}Ranking da Temporada #1{% endif %}</h1>
                     <p class="section-subtitle ranking-hero__subtitle">Visão consolidada de desempenho, participação e evolução da temporada.</p>
                 </div>
             </div>
@@ -42,6 +118,15 @@
 
         <section class="section">
             <h2 class="section-title">🏆 Classificação</h2>
+            {% if dados.get('is_exemplo') %}
+            <div class="alert alert-info" style="background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.3); color: #93c5fd; border-radius: 12px; padding: 0.85rem 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 0.6rem;">
+                    <span style="font-size: 1.2rem;">💡</span>
+                    <span><strong>Modo de Demonstração:</strong> Como a Temporada #1 inicia na próxima terça-feira (04/08), os registros abaixo são exemplos ilustrativos de como o ranking ficará configurado.</span>
+                </div>
+                <span class="badge" style="background: #2563eb; color: #ffffff; padding: 0.35rem 0.75rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem;">PRÉVIA ILUSTRATIVA</span>
+            </div>
+            {% endif %}
             {% if dados.ranking %}
                 <div class="ranking-mobile-list" aria-label="Ranking completo em cards para mobile">
                     <div class="ranking-mobile-list__section">

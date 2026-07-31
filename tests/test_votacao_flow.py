@@ -692,3 +692,41 @@ def test_judge_last_match_clickable_navigation(monkeypatch):
         # The history template opens the details item matching the ID and sets correct id attribute
         assert 'id="sorteio-37"' in body_hist
         assert 'open' in body_hist
+
+
+def test_historico_ranking_includes_all_players_and_valid_media(monkeypatch):
+    """Garante que todos os jogadores (ex: 20 jogadores) sao exibidos no ranking do historico e que a media geral nao eh 0.0"""
+    from routes.partida_routes import _enriquecer_sorteio_historico
+
+    ranking_20_jogadores = [
+        {
+            'jogador_nome': f'Jogador {i}',
+            'time_numero': (i % 4) + 1,
+            'votos': 2,
+            'pontos': 16.0,
+            'nota_total': 16.0,
+            'nota_media': 8.0,
+        }
+        for i in range(1, 21)
+    ]
+
+    mock_sorteio = {'id': 99, 'total_jogadores': 20, 'num_times': 4}
+    mock_votacao = {
+        'status': 'encerrada',
+        'ranking': {
+            'ranking_jogadores': ranking_20_jogadores,
+            'media_geral': 8.0,
+            'total_jogadores': 20,
+            'melhor_jogador': ranking_20_jogadores[0],
+        }
+    }
+
+    monkeypatch.setattr('routes.partida_routes._obter_resultado_sorteio', lambda sid: None)
+    monkeypatch.setattr('routes.partida_routes.votacao_service.obter_por_sorteio', lambda sid: mock_votacao)
+
+    resultado = _enriquecer_sorteio_historico(mock_sorteio)
+
+    assert len(resultado['ranking_top10']) == 20
+    assert resultado['ranking_total_jogadores'] == 20
+    assert resultado['ranking_media_geral'] == 8.0
+

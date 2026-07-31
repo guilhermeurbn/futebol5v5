@@ -116,14 +116,21 @@ class JogadorService:
         if not (1.0 <= nivel <= 10.0):
             raise ValueError(f"Nível deve estar entre 1.0 e 10.0, recebido: {nivel}")
         
+        nome_clean = nome.strip()
+        nome_lower = nome_clean.lower()
+        dados = self._carregar_raw()
+        for p in dados:
+            if (p.get("nome") or "").strip().lower() == nome_lower:
+                nome_existente = p.get("nome") or nome_clean
+                raise ValueError(f"Já existe um jogador cadastrado com o nome '{nome_existente}'.")
+
         jogador = Jogador(
-            nome=nome.strip(),
+            nome=nome_clean,
             nivel=nivel,
             tipo=tipo,
             posicao=posicao,
             owner_user_id=owner_user_id
         )
-        dados = self._carregar_raw()
         dados.append(jogador.para_dict())
         self._salvar(dados)
         return jogador
@@ -156,8 +163,16 @@ class JogadorService:
 
         jogador_existente = Jogador.do_dict(dados[indice])
 
-        # Validate optional fields
-        novo_nome = nome.strip() if isinstance(nome, str) and nome.strip() else jogador_existente.nome
+        if isinstance(nome, str) and nome.strip():
+            nome_clean = nome.strip()
+            nome_lower = nome_clean.lower()
+            for item in dados:
+                if item.get("id") != jogador_id and (item.get("nome") or "").strip().lower() == nome_lower:
+                    nome_existente = item.get("nome") or nome_clean
+                    raise ValueError(f"Já existe outro jogador cadastrado com o nome '{nome_existente}'.")
+            novo_nome = nome_clean
+        else:
+            novo_nome = jogador_existente.nome
 
         if nivel is not None:
             try:
