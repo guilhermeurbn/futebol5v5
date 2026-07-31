@@ -1,10 +1,10 @@
 {
   "temporada_ativa": {
     "id": 1,
-    "nome": "Temporada #1 - Edição de Prêmios 🏆",
+    "nome": "Temporada #1 - Competição Ativa",
     "data_inicio": "2026-08-04T00:00:00",
     "data_fim": "2026-10-04T23:59:59",
-    "descricao_premio": "🏆 1º Lugar: Prêmio Especial da Temporada NaTrave!",
+    "descricao_premio": "",
     "ativa": true
   },
   "historico_temporadas": []

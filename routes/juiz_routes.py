@@ -304,6 +304,9 @@ def jogar_page():
         if destino_aberto:
             return redirect(destino_aberto)
 
+        from services.presenca_service import PresencaService
+        ps = PresencaService()
+
         todos_jogadores = jogador_service.listar()
         ultima_partida = estado_fluxo.get('ultima_partida_encerrada')
         return render_template(
@@ -311,7 +314,9 @@ def jogar_page():
             todos_jogadores=todos_jogadores,
             total_jogadores=len(todos_jogadores),
             ultima_partida=ultima_partida,
-            usuario=_usuario_logado()
+            usuario=_usuario_logado(),
+            proxima_terca_data=PresencaService.proxima_terca_feira(),
+            presenca_resumo=ps.obter_resumo()
         )
     except Exception as e:
         logger.error(f"Erro ao carregar página do juiz: {str(e)}")

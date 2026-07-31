@@ -7,6 +7,7 @@ import os
 import unicodedata
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
+from services.jogador_service import JogadorService
 from services.db import load_json_data, save_json_data
 from services.voto_confiabilidade_service import VotoConfiabilidadeService
 
@@ -17,6 +18,7 @@ class VotacaoService:
     def __init__(self, arquivo: str = "data/votacoes_partidas.json"):
         self.arquivo = arquivo
         self.confiabilidade_service = VotoConfiabilidadeService()
+        self.jogador_service = JogadorService()
         self._garantir_arquivo()
 
     def _garantir_arquivo(self) -> None:
@@ -610,14 +612,18 @@ class VotacaoService:
             except Exception as e:
                 logger.error(f"Erro ao filtrar partidas por data no ranking: {str(e)}")
 
-        acumulado = {}
+        acumulado: Dict[str, Dict] = {}
         total_votos = 0
 
         for partida in encerradas:
             votos = partida.get("votos", [])
             total_votos += len(votos)
 
-            participantes = {p.get("jogador_nome"): p for p in partida.get("participantes", []) if p.get("jogador_nome")}
+            participantes = {
+                p.get("jogador_nome"): p
+                for p in partida.get("participantes", [])
+                if p.get("jogador_nome")
+            }
             resultado = partida.get("resultado_partida") or {}
             detalhes_resultado = {
                 item.get("nome"): item
@@ -642,7 +648,6 @@ class VotacaoService:
                 item["jogos"] += 1
 
                 resultado_time = self._resultado_por_time(resultado, participante.get("time_numero")) if resultado else "empate"
-
                 detalhe = detalhes_resultado.get(nome, {})
                 item["gols"] += int(detalhe.get("gols", 0) or 0)
 
@@ -675,6 +680,23 @@ class VotacaoService:
                     item["avaliacoes"] += 1
                     item["nota_total"] += nota
 
+        for jogador in self.jogador_service.listar_para_dict():
+            nome = (jogador.get("nome") or "").strip()
+            if not nome:
+                continue
+            acumulado.setdefault(nome, {
+                "jogador_nome": nome,
+                "jogos": 0,
+                "nota_total": 0.0,
+                "pontos": 0.0,
+                "avaliacoes": 0,
+                "gols": 0,
+                "vitorias": 0,
+                "derrotas": 0,
+                "empates": 0,
+                "destaques": 0,
+            })
+
         for item in acumulado.values():
             avaliacoes = item.get("avaliacoes", 0)
             jogos = item.get("jogos", 0)
@@ -699,8 +721,14 @@ class VotacaoService:
 
         ranking = sorted(
             acumulado.values(),
-            key=lambda x: (x["pontos"], x["jogos"], x["vitorias"], x["destaques"]),
-            reverse=True
+            key=lambda x: (
+                -float(x.get("nota_media", 0) or 0),
+                -float(x.get("pontos", 0) or 0),
+                -int(x.get("jogos", 0) or 0),
+                -int(x.get("vitorias", 0) or 0),
+                -int(x.get("destaques", 0) or 0),
+                str(x.get("jogador_nome", "")).lower(),
+            ),
         )
         ranking = ranking[:max(1, int(limite))]
 

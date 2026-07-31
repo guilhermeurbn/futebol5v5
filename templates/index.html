@@ -576,5 +576,30 @@
                 }
             }
         });
+
+        async function responderPresenca(status) {
+            const alertEl = document.getElementById('rsvpStatusAlert');
+            try {
+                const resp = await fetch("{{ url_for('stats.api_presenca_responder') }}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: status })
+                });
+                const data = await resp.json();
+                if (data.sucesso) {
+                    alertEl.style.display = 'block';
+                    alertEl.style.color = '#10b981';
+                    alertEl.innerHTML = ` Presença atualizada com sucesso (${data.resumo.total_confirmados} confirmados)!`;
+                } else {
+                    alertEl.style.display = 'block';
+                    alertEl.style.color = '#ef4444';
+                    alertEl.innerText = data.erro || 'Erro ao registrar presença.';
+                }
+            } catch(err) {
+                alertEl.style.display = 'block';
+                alertEl.style.color = '#ef4444';
+                alertEl.innerText = 'Erro de conexão ao salvar presença.';
+            }
+        }
     </script>
 {% endblock %}

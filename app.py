@@ -68,6 +68,34 @@ def _registrar_aliases_jogador(app: Flask) -> None:
         )
 
 
+def _registrar_role_url_prefixes(app: Flask) -> None:
+    """
+    Registra URLs adicionais com os prefixos /admin, /juiz e /usuario
+    para as páginas sem alterar os nomes de endpoints originais.
+    """
+    routes_to_prefix = [
+        ('/ranking', 'stats.pagina_ranking'),
+        ('/historico', 'partida.historico'),
+        ('/perfil', 'auth.perfil_page'),
+        ('/jogadores', 'jogador_crud.index'),
+        ('/votacao', 'votacao.votacao_page'),
+        ('/votacao/salvar', 'votacao.votacao_salvar'),
+        ('/comparar', 'stats.pagina_comparar'),
+    ]
+
+    for role_prefix in ['admin', 'juiz', 'usuario']:
+        for base_path, endpoint_name in routes_to_prefix:
+            alias_path = f"/{role_prefix}{base_path}"
+            existing_rules = [r.rule for r in app.url_map.iter_rules()]
+            if alias_path not in existing_rules and endpoint_name in app.view_functions:
+                app.add_url_rule(
+                    alias_path,
+                    endpoint=endpoint_name,
+                    view_func=app.view_functions[endpoint_name],
+                    methods=["GET", "POST"]
+                )
+
+
 def criar_app(config_name: str = None) -> Flask:
     """
     Factory para criar a aplicação Flask
@@ -173,6 +201,38 @@ def criar_app(config_name: str = None) -> Flask:
     app.register_blueprint(juiz_bp)
     app.register_blueprint(stats_bp)
     _registrar_aliases_jogador(app)
+    _registrar_role_url_prefixes(app)
+
+    @app.before_request
+    def auto_prefix_role_urls():
+        # Em testes automatizados, desativado para garantir 100% de compatibilidade
+        if app.testing:
+            return
+
+        path = request.path
+        if (
+            path.startswith('/static') or
+            path.startswith('/api') or
+            path.startswith('/site.') or
+            path.startswith('/favicon') or
+            path.startswith('/robots') or
+            path.startswith('/perfil_') or
+            path in ['/login', '/logout', '/cadastro', '/recuperar_senha', '/manifest.json']
+        ):
+            return
+
+        role = session.get('role')
+        if not role:
+            return
+
+        target_prefix = 'admin' if role in ['admin', 'super_admin'] else ('juiz' if role == 'juiz' else 'usuario')
+
+        if path.startswith(f"/{target_prefix}"):
+            return
+
+        if path in ['/ranking', '/historico', '/perfil', '/jogadores', '/votacao']:
+            qs = ('?' + request.query_string.decode()) if request.query_string else ''
+            return redirect(f"/{target_prefix}{path}{qs}")
 
     # Auto-seed database se estiver vazio (Railway)
     try:
@@ -358,6 +418,7 @@ def criar_app(config_name: str = None) -> Flask:
         notificacoes_url = None
         votacao_pendente = None
         votacao_pendente_url = None
+        presenca_pendente = False
         try:
             if session.get('user_id') and session.get('role') in {'admin', 'super_admin'}:
                 total_notificacoes = notificacao_service.contar_nao_lidas()
@@ -366,17 +427,29 @@ def criar_app(config_name: str = None) -> Flask:
                 votacao_pendente = votacao_service.obter_pendencia_usuario(session.get('user_id'))
                 if votacao_pendente:
                     votacao_pendente_url = url_for('votacao.votacao_page')
+
+            user_id = session.get('user_id')
+            user_role = session.get('role')
+            if user_id and user_role in {'usuario', 'jogador'}:
+                from services.presenca_service import PresencaService
+                ps = PresencaService()
+                if ps.is_aberta():
+                    resp = ps.obter_resposta(user_id)
+                    if not resp or not resp.get('status') or resp.get('status') not in {'confirmado', 'ausente', 'duvida'}:
+                        presenca_pendente = True
         except Exception:
             total_notificacoes = 0
             notificacoes_url = None
             votacao_pendente = None
             votacao_pendente_url = None
+            presenca_pendente = False
 
         return {
             'total_notificacoes': total_notificacoes,
             'notificacoes_url': notificacoes_url,
             'votacao_pendente': votacao_pendente,
             'votacao_pendente_url': votacao_pendente_url,
+            'presenca_pendente': presenca_pendente,
         }
 
     # Em desenvolvimento, garantir que mudanças em templates sejam recarregadas

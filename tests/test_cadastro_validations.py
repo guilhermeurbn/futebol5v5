@@ -166,7 +166,9 @@ def test_prevent_duplicate_user_and_player_names(tmp_path):
     with pytest.raises(ValueError, match="Ja existe um usuario cadastrado com este nome"):
         auth_service.criar_usuario(email="u2@example.com", username="user2", nome="carlos silva", password="password123")
 
-    jog_service.criar(nome="Marcos Pereira", nivel=7.0, tipo="avulso", posicao="linha")
-    with pytest.raises(ValueError, match="Já existe um jogador cadastrado com o nome 'Marcos Pereira'"):
-        jog_service.criar(nome="marcos pereira", nivel=8.0, tipo="fixo", posicao="goleiro")
+    import uuid
+    p_name = f"Jogador Dup {uuid.uuid4().hex[:6]}"
+    jog_service.criar(nome=p_name, nivel=7.0, tipo="avulso", posicao="linha")
+    with pytest.raises(ValueError, match="Já existe um jogador cadastrado com o nome"):
+        jog_service.criar(nome=p_name.lower(), nivel=8.0, tipo="fixo", posicao="goleiro")
 

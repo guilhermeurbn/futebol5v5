@@ -85,7 +85,12 @@
 
             <!-- Times Section -->
             <section class="section">
-                <h2 class="section-title">⚽ Times</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                    <h2 class="section-title" style="margin: 0;">⚽ Times</h2>
+                    <button type="button" onclick="compartilharWhatsApp()" class="btn btn-secondary" style="background: #25D366; color: #ffffff; border: none; font-weight: 700; border-radius: 12px; padding: 0.5rem 1.1rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);">
+                        <span>📱</span> Enviar no WhatsApp
+                    </button>
+                </div>
 
                 <div class="times-container num-{{ sorteio.num_times }}">
                     {% for time in sorteio.times %}
@@ -206,5 +211,29 @@
             <p>⚽ NaTrave • Desenvolvido por Guilherme Urbano com ❤️</p>
         </footer>
     </div>
+</div>
+
+<script>
+function compartilharWhatsApp() {
+    let texto = "⚽ *NATRAVE 5V5 - TIMES SORTEADOS* 🏆\n";
+    texto += "🎲 *Sorteio #{{ sorteio.id }}*\n";
+    texto += "----------------------------------------\n\n";
+
+    {% for time in sorteio.times %}
+    texto += "🟢 *TIME {{ time.numero }}*\n";
+    {% for jogador in time.jogadores %}
+    texto += "• {{ jogador.nome }}{% if jogador.posicao == 'goleiro' %} (Goleiro 🧤){% endif %}\n";
+    {% endfor %}
+    texto += "\n";
+    {% endfor %}
+
+    texto += "----------------------------------------\n";
+    texto += "🔗 *Confira no site:* " + window.location.href;
+
+    const url = "https://api.whatsapp.com/send?text=" + encodeURIComponent(texto);
+    window.open(url, '_blank');
+}
+</script>
+{% endblock %}
 </body>
 </html>

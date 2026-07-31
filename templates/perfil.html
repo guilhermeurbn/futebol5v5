@@ -109,7 +109,7 @@
                 </svg>
                 <span>Mensagem</span>
             </button>
-            <button class="premium-profile-tab {% if tem_jogador and is_self %}is-active{% endif %}" data-tab-target="estatisticas" aria-selected="{% if tem_jogador and is_self %}true{% else %}false{% endif %}" {% if not tem_jogador %}style="display:none;"{% endif %}>
+            <button class="premium-profile-tab {% if aba_ativa == 'estatisticas' %}is-active{% endif %}" data-tab-target="estatisticas" aria-selected="{% if aba_ativa == 'estatisticas' %}true{% else %}false{% endif %}" {% if not tem_jogador %}style="display:none;"{% endif %}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
                     <line x1="18" y1="20" x2="18" y2="10"/>
                     <line x1="12" y1="20" x2="12" y2="4"/>
@@ -117,7 +117,7 @@
                 </svg>
                 <span>Estatísticas</span>
             </button>
-            <button class="premium-profile-tab {% if tem_jogador and not is_self %}is-active{% endif %}" data-tab-target="partidas" aria-selected="{% if tem_jogador and not is_self %}true{% else %}false{% endif %}" {% if not tem_jogador %}style="display:none;"{% endif %}>
+            <button class="premium-profile-tab {% if aba_ativa == 'partidas' %}is-active{% endif %}" data-tab-target="partidas" aria-selected="{% if aba_ativa == 'partidas' %}true{% else %}false{% endif %}" {% if not tem_jogador %}style="display:none;"{% endif %}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
                     <line x1="16" y1="2" x2="16" y2="6"/>
@@ -126,8 +126,19 @@
                 </svg>
                 <span>Partidas</span>
             </button>
+            {% if tem_jogador %}
+            <button class="premium-profile-tab {% if aba_ativa == 'duelo' %}is-active{% endif %}" data-tab-target="duelo" aria-selected="{% if aba_ativa == 'duelo' %}true{% else %}false{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
+                    <path d="M14.5 17.5L3 6V3h3l11.5 11.5"/>
+                    <path d="M13 19l6-6"/>
+                    <path d="M16 16l4 4"/>
+                    <path d="M19 21l2-2"/>
+                </svg>
+                <span>Duelo X1</span>
+            </button>
+            {% endif %}
             {% if is_self or (auth_user and auth_user.role in ['admin', 'super_admin']) %}
-            <button class="premium-profile-tab {% if not tem_jogador %}is-active{% endif %}" data-tab-target="mais" aria-selected="{% if not tem_jogador %}true{% else %}false{% endif %}">
+            <button class="premium-profile-tab {% if aba_ativa == 'mais' %}is-active{% endif %}" data-tab-target="mais" aria-selected="{% if aba_ativa == 'mais' %}true{% else %}false{% endif %}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
                     <circle cx="12" cy="12" r="1"/>
                     <circle cx="19" cy="12" r="1"/>
@@ -186,7 +197,7 @@
 
         {# ESTATISTICAS TAB #}
         {% if tem_jogador %}
-        <div class="premium-profile-tab-content {% if tem_jogador and is_self %}is-active{% endif %}" id="tab-estatisticas" {% if not (tem_jogador and is_self) %}hidden{% endif %}>
+        <div class="premium-profile-tab-content {% if aba_ativa == 'estatisticas' %}is-active{% endif %}" id="tab-estatisticas" {% if aba_ativa != 'estatisticas' %}hidden{% endif %}>
             <div class="premium-profile-panel">
                 <h2 class="premium-profile-panel-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m18 7-5.5 5.5-2.5-2.5L3 17"/></svg>
@@ -302,7 +313,87 @@
 
         {# PARTIDAS TAB #}
         {% if tem_jogador %}
-        <div class="premium-profile-tab-content {% if tem_jogador and not is_self %}is-active{% endif %}" id="tab-partidas" {% if not (tem_jogador and not is_self) %}hidden{% endif %}>
+        <div class="premium-profile-tab-content {% if aba_ativa == 'partidas' %}is-active{% endif %}" id="tab-partidas" {% if aba_ativa != 'partidas' %}hidden{% endif %}>
+            <!-- Card: Próxima Partida & Presença -->
+            {% set lista_aberta = (presenca_resumo and presenca_resumo.get('status_lista') == 'aberta') %}
+            {% if lista_aberta %}
+            <div class="premium-profile-panel" style="margin-bottom: 1.5rem; border: 1px solid rgba(34, 197, 94, 0.25); background: linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(12, 10, 17, 0.98));">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        <div style="font-size: 0.75rem; font-weight: 700; color: #22c55e; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.4rem;">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                            <span>PRÓXIMA PARTIDA</span>
+                        </div>
+                        <h2 style="font-size: 1.25rem; font-weight: 800; color: #ffffff; margin: 0 0 0.2rem 0;">
+                            {{ presenca_resumo.get('titulo') or 'Terça-feira • Próxima Rodada' }}
+                        </h2>
+                        <div style="font-size: 0.85rem; color: #94a3b8;">
+                            {% if presenca_resumo and presenca_resumo.get('total_confirmados') %}
+                            <strong>{{ presenca_resumo.get('total_confirmados') }}</strong> jogador(es) confirmados
+                            {% else %}
+                            Lista de presença aberta pelo juiz
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if is_self %}
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.4rem;">
+                        <span style="font-size: 0.75rem; color: #94a3b8; font-weight: 600;">Sua Presença:</span>
+                        {% set st = presenca_usuario.get('status') if presenca_usuario else 'pendente' %}
+                        <div style="display: flex; gap: 0.4rem;">
+                            <button type="button" onclick="responderPresencaPerfil('confirmado')" 
+                                    style="border: none; font-weight: 700; border-radius: 8px; padding: 0.45rem 1rem; cursor: pointer; font-size: 0.85rem; transition: all 0.15s ease; {% if st == 'confirmado' %}background: #22c55e; color: #000000; box-shadow: 0 0 14px rgba(34,197,94,0.45);{% else %}background: rgba(255,255,255,0.06); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.15);{% endif %}">
+                                Sim
+                            </button>
+                            <button type="button" onclick="responderPresencaPerfil('ausente')" 
+                                    style="border: none; font-weight: 700; border-radius: 8px; padding: 0.45rem 1rem; cursor: pointer; font-size: 0.85rem; transition: all 0.15s ease; {% if st == 'ausente' %}background: #ef4444; color: #ffffff; box-shadow: 0 0 14px rgba(239,68,68,0.45);{% else %}background: rgba(255,255,255,0.06); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.15);{% endif %}">
+                                Não
+                            </button>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if presenca_resumo and presenca_resumo.get('confirmados') %}
+                <div style="border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 0.85rem; margin-top: 0.75rem;">
+                    <div style="font-size: 0.78rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 0.6rem; letter-spacing: 0.05em;">Jogadores Confirmados</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;">
+                        {% for c in presenca_resumo.get('confirmados', []) %}
+                        <a href="{{ url_for('auth.perfil_jogador_publico', jogador_id=c.get('user_id')) }}" 
+                           title="{{ c.get('nome') }}"
+                           style="width: 38px; height: 38px; border-radius: 50%; background: #181823; border: 2px solid #22c55e; color: #ffffff; font-weight: 800; font-size: 0.82rem; display: flex; align-items: center; justify-content: center; text-decoration: none; box-shadow: 0 0 10px rgba(34, 197, 94, 0.25); transition: transform 0.15s ease;"
+                           onmouseover="this.style.transform='scale(1.15)';" onmouseout="this.style.transform='scale(1)';">
+                            {{ c.get('nome')[:2]|upper }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="premium-profile-panel" style="margin-bottom: 1.5rem; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(18, 18, 23, 0.95); text-align: center; padding: 1.75rem 1.25rem;">
+                <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.25); color: #22c55e; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.6rem auto;">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                </div>
+                <h3 style="font-size: 1.15rem; font-weight: 800; color: #ffffff; margin: 0 0 0.4rem 0;">PRÓXIMA PARTIDA</h3>
+                <div style="font-size: 0.85rem; color: #cbd5e1; font-weight: 600; display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(255, 255, 255, 0.05); padding: 0.4rem 0.9rem; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.12);">
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #f59e0b;"></span>
+                    À espera do juiz abrir a próxima partida
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Card: Histórico Completo -->
             <div class="premium-profile-panel">
                 <h2 class="premium-profile-panel-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -354,8 +445,58 @@
         </div>
         {% endif %}
 
+        {# DUELO TAB #}
+        {% if tem_jogador %}
+        <div class="premium-profile-tab-content {% if aba_ativa == 'duelo' %}is-active{% endif %}" id="tab-duelo" {% if aba_ativa != 'duelo' %}hidden{% endif %}>
+            <div class="premium-profile-panel" style="border: 1px solid rgba(34, 197, 94, 0.25); background: rgba(18, 18, 23, 0.95); border-radius: 20px; padding: 1.5rem;">
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 1rem;">
+                    <div>
+                        <div style="font-size: 0.75rem; font-weight: 700; color: #22c55e; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.2rem; display: flex; align-items: center; gap: 0.4rem;">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#22c55e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14.5 17.5L3 6V3h3l11.5 11.5"/>
+                                <path d="M13 19l6-6"/>
+                                <path d="M16 16l4 4"/>
+                                <path d="M19 21l2-2"/>
+                            </svg>
+                            <span>CONFRONTO DIRETO X1</span>
+                        </div>
+                        <h2 style="font-size: 1.3rem; font-weight: 800; color: #ffffff; margin: 0;">Duelo de Desempenho</h2>
+                    </div>
+
+                    <!-- Seletor Fluido de Oponente -->
+                    <div style="min-width: 240px; flex: 1; max-width: 340px;">
+                        <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #94a3b8; margin-bottom: 0.35rem; text-transform: uppercase;">Escolha o Adversário:</label>
+                        <select id="dueloOponenteSelect" onchange="carregarDueloPerfil(this.value, '{{ jogador.id }}')" 
+                                style="background: #121217; color: #ffffff; border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 12px; padding: 0.65rem 1rem; width: 100%; font-size: 0.9rem; font-weight: 700; cursor: pointer; outline: none; box-shadow: 0 4px 14px rgba(0,0,0,0.3);">
+                            <option value="" disabled selected>Selecione um oponente...</option>
+                            {% for j in todos_jogadores_duelo|default([]) %}
+                            {% if j.id != jogador.id %}
+                            <option value="{{ j.id }}">{{ j.nome }} (⭐ {{ '%.1f'|format(j.nivel|float) }})</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Container do Duelo Renderizado Dinamicamente -->
+                <div id="dueloArenaContainer">
+                    <div style="text-align: center; padding: 2.5rem 1rem; color: #94a3b8;">
+                        <svg viewBox="0 0 24 24" width="42" height="42" fill="none" stroke="#22c55e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 0.75rem auto; opacity: 0.8;">
+                            <path d="M14.5 17.5L3 6V3h3l11.5 11.5"/>
+                            <path d="M13 19l6-6"/>
+                            <path d="M16 16l4 4"/>
+                            <path d="M19 21l2-2"/>
+                        </svg>
+                        <h3 style="color: #ffffff; font-weight: 700; font-size: 1.1rem; margin-bottom: 0.3rem;">Selecione um jogador acima</h3>
+                        <p style="font-size: 0.85rem; margin: 0; color: #94a3b8;">Compare estatísticas, nível técnico, taxa de vitória e o histórico de confrontos diretos.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
         {# MAIS TAB #}
-        <div class="premium-profile-tab-content {% if not tem_jogador %}is-active{% endif %} premium-profile-panel profile-account-access" id="tab-mais" {% if tem_jogador %}hidden{% endif %}>
+        <div class="premium-profile-tab-content {% if aba_ativa == 'mais' %}is-active{% endif %} premium-profile-panel profile-account-access" id="tab-mais" {% if aba_ativa != 'mais' %}hidden{% endif %}>
             <div>
                 <h2 class="premium-profile-panel-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -590,15 +731,20 @@
             });
         });
 
-        // Restaurar aba ativa a partir do hash na URL
-        const hash = window.location.hash;
-        if (hash && hash.startsWith('#tab-')) {
-            const activeTabTarget = hash.replace('#tab-', '');
-            const matchingTab = Array.from(tabs).find(t => t.dataset.tabTarget === activeTabTarget);
-            if (matchingTab) {
-                matchingTab.click();
+        // Restaurar aba ativa a partir do hash na URL (e escutar mudanças de hash na mesma página)
+        const ativarAbaPorHash = () => {
+            const hash = window.location.hash;
+            if (hash && hash.startsWith('#tab-')) {
+                const activeTabTarget = hash.replace('#tab-', '');
+                const matchingTab = Array.from(tabs).find(t => t.dataset.tabTarget === activeTabTarget);
+                if (matchingTab) {
+                    matchingTab.click();
+                }
             }
-        }
+        };
+
+        ativarAbaPorHash();
+        window.addEventListener('hashchange', ativarAbaPorHash);
 
         // --- DIALOG ALTERAR SENHA ---
         const dialog = document.getElementById('passwordDialog');
@@ -808,6 +954,128 @@
         }
     });
 })();
+
+async function responderPresencaPerfil(status) {
+    try {
+        const token = "{{ csrf_token() }}";
+        const resp = await fetch("{{ url_for('stats.api_presenca_responder') }}", {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'X-CSRFToken': token
+            },
+            body: JSON.stringify({ status: status, csrf_token: token })
+        });
+        const data = await resp.json();
+        if (data.sucesso) {
+            window.location.reload();
+        } else {
+            console.error("Erro ao registrar presença:", data.erro);
+            alert(data.erro || "Erro ao registrar presença.");
+        }
+    } catch(e) {
+        console.error("Erro ao alterar presença:", e);
+        alert("Erro de comunicação ao alterar presença.");
+    }
+}
+
+async function carregarDueloPerfil(oponenteId, jogadorId) {
+    const container = document.getElementById('dueloArenaContainer');
+    if (!container || !oponenteId || !jogadorId) return;
+
+    container.innerHTML = `
+        <div style="text-align: center; padding: 2.5rem 1rem; color: #22c55e;">
+            <div style="font-size: 1rem; font-weight: 700;">Carregando dados do duelo...</div>
+        </div>
+    `;
+
+    try {
+        const resp = await fetch(`/api/comparar?j1=${jogadorId}&j2=${oponenteId}`);
+        const data = await resp.json();
+
+        if (!data.sucesso) {
+            container.innerHTML = `<div style="color:#ef4444; padding:1.5rem; text-align:center; font-weight:700;">${data.erro || 'Erro ao carregar duelo.'}</div>`;
+            return;
+        }
+
+        const j1 = data.j1;
+        const j2 = data.j2;
+        const conf = data.confronto_direto;
+
+        container.innerHTML = `
+            <!-- Placa do Duelo -->
+            <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; align-items: center; margin-bottom: 1.5rem;">
+                <!-- Player 1 -->
+                <div style="background: #121217; border: 1px solid rgba(34, 197, 94, 0.35); border-radius: 16px; padding: 1.25rem; text-align: center; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
+                    <div style="width: 56px; height: 56px; border-radius: 50%; background: #181823; border: 2px solid #22c55e; color: #ffffff; font-size: 1.3rem; font-weight: 800; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem auto;">
+                        ${(j1.jogador_nome || '').substring(0,2).toUpperCase()}
+                    </div>
+                    <h3 style="font-size: 1.1rem; font-weight: 800; color: #ffffff; margin: 0 0 0.2rem 0;">${j1.jogador_nome}</h3>
+                    <div style="font-size: 0.82rem; color: #22c55e; font-weight: 700;">⭐ Nível ${parseFloat(j1.nivel).toFixed(1)}</div>
+                </div>
+
+                <!-- VS Badge -->
+                <div style="text-align: center;">
+                    <span style="background: #22c55e; color: #000000; font-weight: 900; font-size: 0.9rem; padding: 0.45rem 0.85rem; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 0 14px rgba(34, 197, 94, 0.4);">VS</span>
+                </div>
+
+                <!-- Player 2 -->
+                <div style="background: #121217; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 1.25rem; text-align: center; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
+                    <div style="width: 56px; height: 56px; border-radius: 50%; background: #181823; border: 2px solid rgba(255, 255, 255, 0.3); color: #ffffff; font-size: 1.3rem; font-weight: 800; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem auto;">
+                        ${(j2.jogador_nome || '').substring(0,2).toUpperCase()}
+                    </div>
+                    <h3 style="font-size: 1.1rem; font-weight: 800; color: #ffffff; margin: 0 0 0.2rem 0;">${j2.jogador_nome}</h3>
+                    <div style="font-size: 0.82rem; color: #94a3b8; font-weight: 700;">⭐ Nível ${parseFloat(j2.nivel).toFixed(1)}</div>
+                </div>
+            </div>
+
+            <!-- Métricas Comparativas -->
+            <div style="background: #121217; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 1.25rem; margin-bottom: 1.5rem;">
+                <h4 style="font-size: 0.82rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 1rem; text-align: center; letter-spacing: 0.05em;">Comparativo de Atributos</h4>
+                
+                <!-- Win Rate Bar -->
+                <div style="margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; color: #ffffff; margin-bottom: 0.35rem;">
+                        <span style="color: #22c55e;">${j1.pct_vitorias}% Vitórias</span>
+                        <span style="color: #94a3b8;">Aproveitamento</span>
+                        <span style="color: #cbd5e1;">${j2.pct_vitorias}% Vitórias</span>
+                    </div>
+                    <div style="height: 8px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; display: flex;">
+                        <div style="width: ${j1.pct_vitorias}%; background: #22c55e; height: 100%;"></div>
+                        <div style="width: ${100 - j1.pct_vitorias}%; background: rgba(255,255,255,0.12); height: 100%;"></div>
+                    </div>
+                </div>
+
+                <!-- Goals Comparison -->
+                <div style="display: flex; justify-content: space-between; padding: 0.65rem 0; border-top: 1px solid rgba(255,255,255,0.05); font-size: 0.88rem;">
+                    <span style="font-weight: 800; color: #22c55e;">${j1.gols} Gols</span>
+                    <span style="color: #94a3b8; font-weight: 600;">Total de Gols</span>
+                    <span style="font-weight: 800; color: #ffffff;">${j2.gols} Gols</span>
+                </div>
+
+                <!-- Rating Avg Comparison -->
+                <div style="display: flex; justify-content: space-between; padding: 0.65rem 0; border-top: 1px solid rgba(255,255,255,0.05); font-size: 0.88rem;">
+                    <span style="font-weight: 800; color: #22c55e;">${parseFloat(j1.nota_media || 0).toFixed(2)}</span>
+                    <span style="color: #94a3b8; font-weight: 600;">Nota Média</span>
+                    <span style="font-weight: 800; color: #ffffff;">${parseFloat(j2.nota_media || 0).toFixed(2)}</span>
+                </div>
+            </div>
+
+            <!-- Retrospecto de Confrontos Diretos -->
+            <div style="background: rgba(34, 197, 94, 0.06); border: 1px solid rgba(34, 197, 94, 0.22); border-radius: 16px; padding: 1.25rem; text-align: center;">
+                <h4 style="font-size: 0.82rem; font-weight: 700; color: #22c55e; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.05em;">Retrospecto em Campo</h4>
+                <div style="font-size: 1.1rem; font-weight: 800; color: #ffffff; margin-bottom: 0.4rem;">
+                    ${conf.vitorias_j1} Vitórias de ${j1.jogador_nome} • ${conf.empates_confronto} Empates • ${conf.vitorias_j2} Vitórias de ${j2.jogador_nome}
+                </div>
+                <div style="font-size: 0.82rem; color: #94a3b8;">
+                    Jogaram juntos no mesmo time em <strong>${conf.jogos_juntos}</strong> partidas (${conf.vitorias_juntos} vitórias da equipe).
+                </div>
+            </div>
+        `;
+    } catch(e) {
+        container.innerHTML = `<div style="color:#ef4444; padding:1.5rem; text-align:center; font-weight:700;">Erro ao conectar ao servidor.</div>`;
+    }
+}
 </script>
 {% endif %}
 {% endblock %}

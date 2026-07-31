@@ -461,12 +461,38 @@ def perfil_page():
         estado_fluxo = juiz_partida_service.obter_estado()
         partida_juiz_em_andamento = estado_fluxo.get('partida_atual')
     
+    presenca_resumo = None
+    presenca_usuario = None
+    try:
+        from services.presenca_service import PresencaService
+        ps = PresencaService()
+        presenca_resumo = ps.obter_resumo()
+        if session.get('user_id'):
+            presenca_usuario = ps.obter_resposta(session.get('user_id'))
+    except Exception:
+        pass
+
+    todos_jogadores_duelo = []
+    try:
+        todos_jogadores_duelo = jogador_service.listar_para_dict() or []
+    except Exception:
+        pass
+
+    aba_ativa = request.args.get('tab', '').strip().lower()
+    if aba_ativa not in ['estatisticas', 'partidas', 'duelo', 'mais']:
+        aba_ativa = 'estatisticas' if jogador_proprio else 'mais'
+
     return render_template(
         'perfil.html',
         usuario=_usuario_logado(),
         jogador_proprio=jogador_proprio,
         stats_jogador=stats_jogador,
-        partida_juiz_em_andamento=partida_juiz_em_andamento
+        partida_juiz_em_andamento=partida_juiz_em_andamento,
+        presenca_resumo=presenca_resumo,
+        presenca_usuario=presenca_usuario,
+        todos_jogadores_duelo=todos_jogadores_duelo,
+        aba_ativa=aba_ativa,
+        is_self=True
     )
 
 
@@ -566,13 +592,38 @@ def perfil_jogador_publico(jogador_id):
                 logger = logging.getLogger(__name__)
                 logger.error(f"Erro ao carregar estatísticas do perfil público: {str(e)}")
 
+        presenca_resumo = None
+        presenca_usuario = None
+        try:
+            from services.presenca_service import PresencaService
+            ps = PresencaService()
+            presenca_resumo = ps.obter_resumo()
+            if session.get('user_id'):
+                presenca_usuario = ps.obter_resposta(session.get('user_id'))
+        except Exception:
+            pass
+
+        todos_jogadores_duelo = []
+        try:
+            todos_jogadores_duelo = jogador_service.listar_para_dict() or []
+        except Exception:
+            pass
+
+        aba_ativa = request.args.get('tab', '').strip().lower()
+        if aba_ativa not in ['estatisticas', 'partidas', 'duelo', 'mais']:
+            aba_ativa = 'estatisticas' if (is_self and jogador) else ('partidas' if jogador else 'mais')
+
         return render_template(
             'perfil.html',
             jogador_proprio=jogador,
             stats_jogador=stats_jogador,
             usuario=current_user,
             target_user=owner_user,
-            is_self=is_self
+            is_self=is_self,
+            presenca_resumo=presenca_resumo,
+            presenca_usuario=presenca_usuario,
+            todos_jogadores_duelo=todos_jogadores_duelo,
+            aba_ativa=aba_ativa
         )
     except Exception as e:
         import logging

@@ -19,6 +19,8 @@ from services.ranking_service import RankingService
 from services.temporada_service import TemporadaService
 from services.votacao_service import VotacaoService
 from services.jogador_service import JogadorService
+from services.comparador_service import ComparadorService
+from services.presenca_service import PresencaService
 
 stats_bp = Blueprint('stats', __name__)
 logger = logging.getLogger(__name__)
@@ -31,6 +33,8 @@ ranking_service = RankingService()
 temporada_service = TemporadaService()
 votacao_service = VotacaoService()
 jogador_service = JogadorService()
+comparador_service = ComparadorService()
+presenca_service = PresencaService()
 
 
 # ============================================================
@@ -526,7 +530,7 @@ def _gerar_exemplos_demonstracao():
 
 @stats_bp.route('/ranking')
 def pagina_ranking():
-    """Página de ranking de jogadores com suporte a temporada e geral"""
+    """Página de ranking de jogadores com suporte a competição e geral"""
     try:
         tipo = request.args.get('tipo', 'temporada')
         temporada = temporada_service.obter_temporada_ativa()
@@ -537,11 +541,11 @@ def pagina_ranking():
                 data_inicio=temporada.get('data_inicio'),
                 data_fim=temporada.get('data_fim')
             )
+            # Atualizar temporada com o número real de partidas disputadas neste período
+            total_partidas_periodo = dados.get('total_partidas', 0)
+            temporada = temporada_service.obter_temporada_ativa(total_partidas_periodo=total_partidas_periodo)
         else:
             dados = votacao_service.ranking_jogadores_geral(limite=50)
-
-        if not dados.get('ranking'):
-            dados = _gerar_exemplos_demonstracao()
 
         return render_template(
             'ranking.html',
@@ -552,7 +556,7 @@ def pagina_ranking():
         )
     except Exception as e:
         logger.error(f"Erro ao carregar ranking: {str(e)}")
-        return render_template('ranking.html', dados=[], erro='Erro ao carregar ranking'), 500
+        return render_template('ranking.html', dados={'ranking': []}, erro='Erro ao carregar ranking'), 500
 
 
 @stats_bp.route('/api/ranking/geral')
@@ -569,21 +573,52 @@ def api_ranking_geral():
                 data_inicio=temporada.get('data_inicio'),
                 data_fim=temporada.get('data_fim')
             )
+            total_partidas_periodo = dados.get('total_partidas', 0)
+            temporada = temporada_service.obter_temporada_ativa(total_partidas_periodo=total_partidas_periodo)
         else:
             dados = votacao_service.ranking_jogadores_geral(limite=limite)
-
-        if not dados.get('ranking'):
-            dados = _gerar_exemplos_demonstracao()
 
         return jsonify({
             'sucesso': True,
             'dados': dados,
             'temporada': temporada,
-            'tipo': tipo
+            'tipo_ranking': tipo
         })
     except Exception as e:
-        logger.error(f"Erro ao retornar ranking: {str(e)}")
-        return jsonify({'sucesso': False, 'erro': 'Erro ao retornar ranking'}), 500
+        logger.error(f"Erro na API de ranking: {str(e)}")
+        return jsonify({'sucesso': False, 'erro': 'Erro ao carregar ranking'}), 500
+
+
+@stats_bp.route('/api/competicao/abrir', methods=['POST'])
+@login_required
+def api_competicao_abrir():
+    """API: Abre uma nova competição zerada (definida por número de partidas ou meses)"""
+    user = _usuario_logado()
+    if not user or user.get('role') not in ['admin', 'super_admin']:
+        return jsonify({'sucesso': False, 'erro': 'Apenas administradores podem abrir competições'}), 403
+
+    dados = request.get_json(silent=True) or request.form
+    nome = (dados.get('nome') or '').strip()
+    tipo_duracao = (dados.get('tipo_duracao') or 'meses').strip().lower()
+
+    try:
+        valor_duracao = int(dados.get('valor_duracao') or 2)
+    except (ValueError, TypeError):
+        valor_duracao = 2
+
+    if not nome:
+        nome = f"Competição NaTrave ({valor_duracao} meses)"
+
+    try:
+        nova_comp = temporada_service.abrir_nova_competicao(
+            nome=nome,
+            tipo_duracao=tipo_duracao,
+            valor_duracao=valor_duracao
+        )
+        return jsonify({'sucesso': True, 'competicao': nova_comp})
+    except Exception as e:
+        logger.error(f"Erro ao abrir nova competição: {str(e)}")
+        return jsonify({'sucesso': False, 'erro': 'Erro interno ao abrir competição'}), 500
 
 
 @stats_bp.route('/api/ranking/periodo/<int:dias>')
@@ -596,3 +631,101 @@ def api_ranking_periodo(dias):
 def api_ranking_stats():
     """API: Stats do ranking (desativado)"""
     return jsonify({'sucesso': False, 'erro': 'Endpoint desativado'}), 410
+
+
+@stats_bp.route('/comparar', methods=['GET'])
+def pagina_comparar():
+    """Página de Comparação Direta X1 entre 2 jogadores"""
+    todos = jogador_service.listar_para_dict()
+    if not todos:
+        todos = []
+
+    j1_id = request.args.get('j1')
+    j2_id = request.args.get('j2')
+
+    if not j1_id and len(todos) > 0:
+        j1_id = todos[0].get('id')
+    if not j2_id and len(todos) > 1:
+        j2_id = todos[1].get('id')
+    elif not j2_id and len(todos) > 0:
+        j2_id = todos[0].get('id')
+
+    comparacao = None
+    if j1_id and j2_id:
+        comparacao = comparador_service.comparar(j1_id, j2_id)
+
+    resumo_presenca = presenca_service.obter_resumo()
+    resposta_user = presenca_service.obter_resposta(session.get('user_id')) if session.get('user_id') else None
+
+    return render_template(
+        'comparar.html',
+        todos_jogadores=todos,
+        j1_id=j1_id,
+        j2_id=j2_id,
+        comparacao=comparacao,
+        resumo_presenca=resumo_presenca,
+        resposta_user=resposta_user
+    )
+
+
+@stats_bp.route('/api/comparar', methods=['GET'])
+def api_comparar():
+    """API: Retorna comparativo em JSON entre dois jogadores para o Duelo X1"""
+    j1_id = request.args.get('j1')
+    j2_id = request.args.get('j2')
+    if not j1_id or not j2_id:
+        return jsonify({'sucesso': False, 'erro': 'Informe j1 e j2'}), 400
+
+    res = comparador_service.comparar(j1_id, j2_id)
+    return jsonify(res)
+
+
+@stats_bp.route('/api/presenca/responder', methods=['POST'])
+def api_presenca_responder():
+    """API: Jogador responde confirmação de presença (Vou/Não Vou/Dúvida)"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'sucesso': False, 'erro': 'Faça login para confirmar presença'}), 401
+
+    dados = request.get_json(silent=True) or request.form
+    status = dados.get('status')
+    try:
+        res = presenca_service.registrar_resposta(user_id, status)
+        resumo = presenca_service.obter_resumo()
+        return jsonify({'sucesso': True, 'resposta': res, 'resumo': resumo})
+    except ValueError as ve:
+        return jsonify({'sucesso': False, 'erro': str(ve)}), 400
+    except Exception as e:
+        logger.error(f"Erro ao registrar presença: {str(e)}")
+        return jsonify({'sucesso': False, 'erro': 'Erro interno ao registrar presença'}), 500
+
+
+@stats_bp.route('/api/presenca/resumo', methods=['GET'])
+def api_presenca_resumo():
+    """API: Retorna resumo da lista de presenças pré-jogo"""
+    resumo = presenca_service.obter_resumo()
+    nomes_confirmados = presenca_service.obter_nomes_confirmados()
+    return jsonify({'sucesso': True, 'resumo': resumo, 'confirmados_nomes': nomes_confirmados})
+
+
+@stats_bp.route('/api/presenca/abrir', methods=['POST'])
+def api_presenca_abrir():
+    """API: Juiz/Admin abre a lista de presença pré-jogo"""
+    role = session.get('role')
+    if role not in ['juiz', 'admin', 'super_admin']:
+        return jsonify({'sucesso': False, 'erro': 'Apenas Juiz ou Admin podem abrir a lista'}), 403
+
+    dados = request.get_json(silent=True) or request.form
+    titulo = dados.get('titulo', 'Próxima Pelada')
+    res = presenca_service.abrir_lista(titulo=titulo)
+    return jsonify({'sucesso': True, 'dados': res})
+
+@stats_bp.route('/api/presenca/fechar', methods=['POST'])
+def api_presenca_fechar():
+    """API: Juiz/Admin fecha a lista de presença pré-jogo"""
+    role = session.get('role')
+    if role not in ['juiz', 'admin', 'super_admin']:
+        return jsonify({'sucesso': False, 'erro': 'Apenas Juiz ou Admin podem fechar a lista'}), 403
+
+    res = presenca_service.fechar_lista()
+    return jsonify({'sucesso': True, 'dados': res})

@@ -17,10 +17,14 @@
         {% set is_historico = current_path.startswith('/historico') %}
         {% set is_ranking = current_path.startswith('/ranking') %}
         {% set is_admin_page = current_path.startswith('/admin') %}
-        {% set vote_href = url_for('jogador.votacao_page') if session.get('role') == 'usuario' else url_for('votacao.votacao_admin_page') %}
+        {% set role_prefix = '/admin' if is_admin_role else ('/juiz' if session.get('role') == 'juiz' else '/usuario') %}
+        {% set href_perfil = role_prefix ~ '/perfil' %}
+        {% set href_ranking = role_prefix ~ '/ranking' %}
+        {% set href_historico = role_prefix ~ '/historico' %}
+        {% set href_jogadores = role_prefix ~ '/jogadores' if is_admin_role or session.get('role') == 'juiz' else url_for('jogador.index') %}
         <div class="site-topbar" aria-label="Navegação principal">
             <nav class="site-topbar__nav" aria-label="Navegação principal">
-                <a href="{{ url_for('jogador.index') }}" class="site-topbar__link{% if is_jogadores %} is-active{% endif %}" aria-label="Jogadores" title="Jogadores"{% if is_jogadores %} aria-current="page"{% endif %}>
+                <a href="{{ href_jogadores }}" class="site-topbar__link{% if is_jogadores %} is-active{% endif %}" aria-label="Jogadores" title="Jogadores"{% if is_jogadores %} aria-current="page"{% endif %}>
                     <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
                         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
                         <circle cx="9" cy="7" r="4" />
@@ -29,7 +33,7 @@
                     </svg>
                 </a>
 
-                <a href="{{ url_for('auth.perfil_page') }}" class="site-topbar__link{% if is_perfil %} is-active{% endif %}" aria-label="Meu perfil" title="Meu perfil"{% if is_perfil %} aria-current="page"{% endif %}>
+                <a href="{{ href_perfil }}" class="site-topbar__link{% if is_perfil %} is-active{% endif %}" aria-label="Meu perfil" title="Meu perfil"{% if is_perfil %} aria-current="page"{% endif %}>
                     <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
                         <circle cx="12" cy="8" r="4" />
                         <path d="M6 21v-1a6 6 0 0 1 12 0v1" />
@@ -65,7 +69,7 @@
                     </svg>
                 </a>
 
-                <a href="{{ url_for('jogador.historico') }}" class="site-topbar__link{% if is_historico %} is-active{% endif %}" aria-label="Histórico" title="Histórico"{% if is_historico %} aria-current="page"{% endif %}>
+                <a href="{{ href_historico }}" class="site-topbar__link{% if is_historico %} is-active{% endif %}" aria-label="Histórico" title="Histórico"{% if is_historico %} aria-current="page"{% endif %}>
                     <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
                         <path d="M3 3v5h5" />
                         <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8" />
@@ -74,7 +78,7 @@
                 </a>
                 {% endif %}
 
-                <a href="{{ url_for('jogador.pagina_ranking') }}" class="site-topbar__link{% if is_ranking %} is-active{% endif %}" aria-label="Ranking" title="Ranking"{% if is_ranking %} aria-current="page"{% endif %}>
+                <a href="{{ href_ranking }}" class="site-topbar__link{% if is_ranking %} is-active{% endif %}" aria-label="Ranking" title="Ranking"{% if is_ranking %} aria-current="page"{% endif %}>
                     <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
                         <path d="M8 21h8" />
                         <path d="M12 17v4" />
@@ -118,18 +122,14 @@
         </a>
     </div>
     {% if show_site_footer %}
-    {% set current_path = request.path or '' %}
-    {% set is_admin_role = session.get('role') in ['admin', 'super_admin'] %}
-    {% set is_jogadores = current_path == '/' %}
-    {% set is_perfil = current_path.startswith('/perfil') %}
-    {% set is_votacao = current_path.startswith('/votacao') or current_path.startswith('/admin/votacao') %}
-    {% set is_historico = current_path.startswith('/historico') %}
-    {% set is_ranking = current_path.startswith('/ranking') %}
-    {% set is_admin_page = current_path.startswith('/admin') %}
-    {% set vote_href = url_for('jogador.votacao_page') if session.get('role') == 'usuario' else url_for('votacao.votacao_admin_page') %}
+    {% set role_prefix_2 = '/admin' if is_admin_role else ('/juiz' if session.get('role') == 'juiz' else '/usuario') %}
+    {% set href_perfil_2 = role_prefix_2 ~ '/perfil' %}
+    {% set href_ranking_2 = role_prefix_2 ~ '/ranking' %}
+    {% set href_historico_2 = role_prefix_2 ~ '/historico' %}
+    {% set href_jogadores_2 = role_prefix_2 ~ '/jogadores' if is_admin_role or session.get('role') == 'juiz' else url_for('jogador.index') %}
     <div class="site-topbar" aria-label="Navegação principal">
         <nav class="site-topbar__nav" aria-label="Navegação principal">
-            <a href="{{ url_for('jogador.index') }}" class="site-topbar__link{% if is_jogadores %} is-active{% endif %}" aria-label="Jogadores" title="Jogadores"{% if is_jogadores %} aria-current="page"{% endif %}>
+            <a href="{{ href_jogadores_2 }}" class="site-topbar__link{% if is_jogadores %} is-active{% endif %}" aria-label="Jogadores" title="Jogadores"{% if is_jogadores %} aria-current="page"{% endif %}>
                 <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
                     <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
                     <circle cx="9" cy="7" r="4" />
@@ -138,7 +138,7 @@
                 </svg>
             </a>
 
-            <a href="{{ url_for('auth.perfil_page') }}" class="site-topbar__link{% if is_perfil %} is-active{% endif %}" aria-label="Meu perfil" title="Meu perfil"{% if is_perfil %} aria-current="page"{% endif %}>
+            <a href="{{ href_perfil_2 }}" class="site-topbar__link{% if is_perfil %} is-active{% endif %}" aria-label="Meu perfil" title="Meu perfil"{% if is_perfil %} aria-current="page"{% endif %}>
                 <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
                     <circle cx="12" cy="8" r="4" />
                     <path d="M6 21v-1a6 6 0 0 1 12 0v1" />
@@ -174,7 +174,7 @@
                 </svg>
             </a>
 
-            <a href="{{ url_for('jogador.historico') }}" class="site-topbar__link{% if is_historico %} is-active{% endif %}" aria-label="Histórico" title="Histórico"{% if is_historico %} aria-current="page"{% endif %}>
+            <a href="{{ href_historico_2 }}" class="site-topbar__link{% if is_historico %} is-active{% endif %}" aria-label="Histórico" title="Histórico"{% if is_historico %} aria-current="page"{% endif %}>
                 <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
                     <path d="M3 3v5h5" />
                     <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8" />
@@ -183,7 +183,7 @@
             </a>
             {% endif %}
 
-            <a href="{{ url_for('jogador.pagina_ranking') }}" class="site-topbar__link{% if is_ranking %} is-active{% endif %}" aria-label="Ranking" title="Ranking"{% if is_ranking %} aria-current="page"{% endif %}>
+            <a href="{{ href_ranking_2 }}" class="site-topbar__link{% if is_ranking %} is-active{% endif %}" aria-label="Ranking" title="Ranking"{% if is_ranking %} aria-current="page"{% endif %}>
                 <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
                     <path d="M8 21h8" />
                     <path d="M12 17v4" />
