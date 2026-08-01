@@ -23,11 +23,11 @@
                 <div style="display: grid; gap: 0.55rem; max-width: 44rem;">
                     <div style="display: inline-flex; align-items: center; gap: 0.45rem; width: fit-content; padding: 0.3rem 0.7rem; border-radius: 999px; border: 1px solid rgba(34, 197, 94, 0.24); background: rgba(34, 197, 94, 0.08); color: #bbf7d0; font-size: 0.74rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;">
                         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6"/><path d="M5 6h14"/><path d="M7 6v14h10V6"/><path d="M10 12h4"/></svg>
-                        Competição ativa
+                        COMPETIÇÃO OFICIAL DA TEMPORADA
                     </div>
                     <div>
-                        <h2 style="margin: 0; color: #ffffff; font-size: clamp(1.4rem, 2.8vw, 2rem); font-weight: 850; letter-spacing: -0.03em;">{{ competencia_titulo }}</h2>
-                        <p style="margin: 0.35rem 0 0; color: #94a3b8; font-size: 0.92rem; line-height: 1.5;">{{ competencia_subtitulo }}</p>
+                        <h2 style="margin: 0; color: #ffffff; font-size: clamp(1.4rem, 2.8vw, 2rem); font-weight: 850; letter-spacing: -0.03em;">{% if tipo_ranking == 'geral' %}Ranking Histórico Geral{% else %}{{ competencia_titulo }}{% endif %}</h2>
+                        <p style="margin: 0.35rem 0 0; color: #94a3b8; font-size: 0.92rem; line-height: 1.5;">{% if tipo_ranking == 'geral' %}Classificação acumulada com todos os jogos e votos de todas as temporadas.{% else %}{{ competencia_subtitulo }}{% endif %}</p>
                     </div>
                     {% if temporada %}
                     <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; color: #cbd5e1; font-size: 0.82rem;">

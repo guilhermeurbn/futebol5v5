@@ -18,10 +18,32 @@
         {% endif %}
 
         {% if not partida %}
-            <section class="section">
-                <h2 class="section-title">📭 Sem partida aberta</h2>
-                <p>Nenhuma partida ativa para voto. Aguarde o Juiz abrir uma rodada.</p>
-        </section>
+            <div style="max-width: 720px; margin: 2rem auto 4rem auto; padding: 0 1rem;">
+                <div style="background: rgba(18, 18, 23, 0.96); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 24px; padding: 2.8rem 2rem; text-align: center; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.1rem;">
+                    
+                    <div style="width: 68px; height: 68px; border-radius: 20px; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); color: #22c55e; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 24px rgba(34, 197, 94, 0.18);">
+                        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="4" width="20" height="16" rx="2"/>
+                            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                        </svg>
+                    </div>
+
+                    <div style="display: grid; gap: 0.45rem; max-width: 480px;">
+                        <h2 style="font-size: 1.5rem; font-weight: 850; color: #ffffff; margin: 0; letter-spacing: -0.025em;">Sem partida aberta para votação</h2>
+                        <p style="font-size: 0.92rem; color: #94a3b8; margin: 0; line-height: 1.6;">
+                            Nenhuma rodada está aguardando seu voto neste momento. Assim que a partida for encerrada pelo Juiz, as avaliações da rodada ficarão disponíveis nesta área.
+                        </p>
+                    </div>
+
+                    <div style="display: inline-flex; align-items: center; gap: 0.55rem; padding: 0.55rem 1.2rem; background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.22); border-radius: 999px; color: #bbf7d0; font-size: 0.83rem; font-weight: 700; margin-top: 0.4rem;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        <span>Aguardando o Juiz finalizar a rodada</span>
+                    </div>
+                </div>
+            </div>
         {% elif voto %}
             <section class="section">
                 <div class="surface-panel surface-panel--accent">

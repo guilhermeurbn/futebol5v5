@@ -359,8 +359,16 @@ def editar_jogador_post(jogador_id):
         import logging
         logger = logging.getLogger(__name__)
         logger.error(f"Erro ao editar jogador: {str(e)}")
-        jogador = jogador_service.obter_por_id(jogador_id)
-        return render_template('editar_jogador.html', jogador=jogador, usuario=_usuario_logado(), erro='Erro ao editar', next_url=next_url), 500
+        return render_template('editar_jogador.html', jogador=None, usuario=_usuario_logado(), erro="Erro interno", next_url=next_url), 500
+
+
+@jogador_bp.route('/perfil/<jogador_id>', methods=['GET'])
+@jogador_bp.route('/jogadores/<jogador_id>/perfil', methods=['GET'])
+@login_required
+def perfil_jogador_publico(jogador_id):
+    """Alias para visualização de perfil público de jogador"""
+    from routes.auth_routes import perfil_jogador_publico as auth_perfil_publico
+    return auth_perfil_publico(jogador_id)
 
 
 # ============================================================

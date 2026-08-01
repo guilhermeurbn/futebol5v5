@@ -2,7 +2,7 @@
 Rotas de Autenticação
 - Login, logout, cadastro, perfil e alteração de senha
 """
-from flask import Blueprint, request, render_template, redirect, url_for, session, jsonify
+from flask import Blueprint, request, render_template, redirect, url_for, session, jsonify, flash
 from functools import wraps
 import logging
 import os
@@ -478,8 +478,20 @@ def perfil_page():
     except Exception:
         pass
 
+    mensagens_nao_lidas = []
+    mensagens_lidas = []
+    tem_mensagens_nao_lidas = False
+    try:
+        from services.mensagem_service import MensagemService
+        msg_svc = MensagemService()
+        current_uid = session.get('user_id')
+        tem_mensagens_nao_lidas = msg_svc.tem_mensagens_nao_lidas(current_uid)
+        mensagens_nao_lidas, mensagens_lidas = msg_svc.obter_mensagens_separadas(current_uid)
+    except Exception:
+        pass
+
     aba_ativa = request.args.get('tab', '').strip().lower()
-    if aba_ativa not in ['estatisticas', 'partidas', 'duelo', 'mais']:
+    if aba_ativa not in ['mensagem', 'estatisticas', 'partidas', 'duelo', 'mais']:
         aba_ativa = 'estatisticas' if jogador_proprio else 'mais'
 
     return render_template(
@@ -492,65 +504,62 @@ def perfil_page():
         presenca_usuario=presenca_usuario,
         todos_jogadores_duelo=todos_jogadores_duelo,
         aba_ativa=aba_ativa,
+        mensagens_diretas=mensagens_nao_lidas,
+        mensagens_nao_lidas=mensagens_nao_lidas,
+        mensagens_lidas=mensagens_lidas,
+        tem_mensagens_nao_lidas=tem_mensagens_nao_lidas,
         is_self=True
     )
 
 
 def _obter_perfil_publico_dados(identifier):
-    """Localiza jogador e usuario por ID, username ou slug de nome."""
+    """Auxiliar para carregar o modelo de jogador e usuario do perfil publico"""
     if not identifier:
         return None, None
-
-    identifier_clean = str(identifier).strip().lower().removeprefix('perfil_').removeprefix('@')
-    
-    # 1. Tentar por ID de jogador
+    identifier_str = str(identifier).strip()
+    identifier_clean = identifier_str.lower().removeprefix('perfil_').removeprefix('@')
     jogador = None
+    owner_user = None
+
+    # 1. Tentar buscar jogador por ID (inteiro ou string)
     try:
-        jogador = jogador_service.obter_por_id(identifier)
+        if identifier_clean.isdigit():
+            jogador = jogador_service.obter_por_id(int(identifier_clean))
+        if not jogador:
+            jogador = jogador_service.obter_por_id(identifier_str)
     except Exception:
         jogador = None
 
-    owner_user = None
+    # Se achou o jogador, tentar achar o usuario dono
+    if jogador and jogador.owner_user_id:
+        try:
+            owner_user = auth_service.obter_por_id(jogador.owner_user_id)
+        except Exception:
+            pass
 
-    # 2. Se encontrou por ID, buscar o usuario dono
-    if jogador:
-        if jogador.owner_user_id:
-            try:
-                owner_user = auth_service.obter_por_id(jogador.owner_user_id)
-            except Exception:
-                pass
-        return jogador, owner_user
+    # 2. Tentar buscar usuario por username ou id
+    if not owner_user:
+        try:
+            owner_user = auth_service.obter_por_username(identifier_clean)
+            if not owner_user and identifier_clean.isdigit():
+                owner_user = auth_service.obter_por_id(identifier_clean)
+        except Exception:
+            pass
+        if owner_user and not jogador:
+            meus = jogador_service.listar_por_usuario(owner_user.get('id'))
+            jogador = meus[0] if meus else None
 
-    # 3. Tentar por username de usuario
-    try:
-        usuarios = auth_service.listar_usuarios()
-        for u in usuarios:
-            uname = (u.get('username') or '').strip().lower()
-            uid = str(u.get('id', '')).strip().lower()
-            unome = (u.get('nome') or '').strip().lower()
-            if uname == identifier_clean or uid == identifier_clean or unome == identifier_clean:
-                owner_user = u
-                meus = jogador_service.listar_por_usuario(u.get('id'))
-                if meus:
-                    jogador = meus[0]
-                break
-    except Exception:
-        pass
-
-    # 4. Tentar por nome de jogador ou primeiro nome
+    # 3. Tentar por nome de jogador
     if not jogador:
         try:
-            todos_jogadores = jogador_service.listar_todos()
-            for j in todos_jogadores:
-                j_nome_clean = j.nome.strip().lower().replace(' ', '_')
-                j_primeiro_nome = j.nome.strip().split()[0].lower()
-                if j.id == identifier or j_nome_clean == identifier_clean or j_primeiro_nome == identifier_clean:
+            todos = jogador_service.listar_todos()
+            for j in todos:
+                j_nome = (j.nome or "").strip().lower()
+                j_nome_slug = j_nome.replace(" ", "_")
+                if j_nome == identifier_clean or j_nome_slug == identifier_clean:
                     jogador = j
                     if j.owner_user_id and not owner_user:
-                        try:
-                            owner_user = auth_service.obter_por_id(j.owner_user_id)
-                        except Exception:
-                            pass
+                        owner_user = auth_service.obter_por_id(j.owner_user_id)
                     break
         except Exception:
             pass
@@ -610,8 +619,23 @@ def perfil_jogador_publico(jogador_id):
             pass
 
         aba_ativa = request.args.get('tab', '').strip().lower()
-        if aba_ativa not in ['estatisticas', 'partidas', 'duelo', 'mais']:
+        if aba_ativa not in ['mensagem', 'estatisticas', 'partidas', 'duelo', 'mais']:
             aba_ativa = 'estatisticas' if (is_self and jogador) else ('partidas' if jogador else 'mais')
+
+        mensagens_nao_lidas = []
+        mensagens_lidas = []
+        tem_mensagens_nao_lidas = False
+        try:
+            from services.mensagem_service import MensagemService
+            msg_svc = MensagemService()
+            tem_mensagens_nao_lidas = msg_svc.tem_mensagens_nao_lidas(current_user_id)
+
+            if is_self:
+                mensagens_nao_lidas, mensagens_lidas = msg_svc.obter_mensagens_separadas(current_user_id)
+            elif target_user_id:
+                mensagens_nao_lidas, mensagens_lidas = msg_svc.obter_mensagens_separadas(current_user_id)
+        except Exception:
+            pass
 
         return render_template(
             'perfil.html',
@@ -623,13 +647,100 @@ def perfil_jogador_publico(jogador_id):
             presenca_resumo=presenca_resumo,
             presenca_usuario=presenca_usuario,
             todos_jogadores_duelo=todos_jogadores_duelo,
-            aba_ativa=aba_ativa
+            aba_ativa=aba_ativa,
+            mensagens_diretas=mensagens_nao_lidas,
+            mensagens_nao_lidas=mensagens_nao_lidas,
+            mensagens_lidas=mensagens_lidas,
+            tem_mensagens_nao_lidas=tem_mensagens_nao_lidas
         )
     except Exception as e:
         import logging
         logger = logging.getLogger(__name__)
         logger.error(f"Erro ao carregar perfil público: {str(e)}")
         return redirect(url_for('jogador.index'))
+
+
+@auth_bp.route('/perfil/enviar-mensagem', methods=['POST'])
+@login_required
+def perfil_enviar_mensagem():
+    """Envia uma mensagem direta para um jogador através da aba de mensagens do perfil"""
+    try:
+        current_user = _usuario_logado()
+        current_user_id = str(session.get('user_id'))
+        remetente_nome = (current_user.get('nome') if current_user else None) or (current_user.get('username') if current_user else None) or "Atleta"
+
+        destinatario_raw = request.form.get('destinatario_id', '').strip()
+        destinatario_nome = request.form.get('destinatario_nome', '').strip()
+        conteudo = request.form.get('conteudo', '').strip()
+
+        if not destinatario_raw or not conteudo:
+            flash('Por favor, digite uma mensagem válida.', 'erro')
+            return redirect(request.referrer or url_for('auth.perfil_page'))
+
+        # Normalizar destinatario_id para o user_id do jogador
+        destinatario_id = destinatario_raw
+        if destinatario_raw.isdigit():
+            try:
+                j = jogador_service.obter_por_id(int(destinatario_raw))
+                if j and j.owner_user_id:
+                    destinatario_id = str(j.owner_user_id)
+                if j and not destinatario_nome:
+                    destinatario_nome = j.nome
+            except Exception:
+                pass
+
+        if not destinatario_nome:
+            try:
+                u = auth_service.obter_por_id(destinatario_id)
+                if u:
+                    destinatario_nome = u.get('nome') or u.get('username') or "Atleta"
+            except Exception:
+                destinatario_nome = "Atleta"
+
+        from services.mensagem_service import MensagemService
+        msg_svc = MensagemService()
+        msg_svc.enviar_mensagem(
+            remetente_id=current_user_id,
+            remetente_nome=remetente_nome,
+            destinatario_id=destinatario_id,
+            destinatario_nome=destinatario_nome,
+            conteudo=conteudo
+        )
+
+        flash(f'Mensagem enviada para {destinatario_nome} com sucesso!', 'sucesso')
+        
+        # Redirecionar mantendo a aba mensagem ativa
+        ref = request.referrer or url_for('auth.perfil_page')
+        if 'tab=' not in ref:
+            sep = '&' if '?' in ref else '?'
+            ref = f"{ref}{sep}tab=mensagem"
+        return redirect(ref)
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Erro ao enviar mensagem direta no perfil: {str(e)}")
+        flash('Erro ao enviar mensagem. Tente novamente.', 'erro')
+        return redirect(request.referrer or url_for('auth.perfil_page'))
+
+
+@auth_bp.route('/perfil/marcar-lida/<int:msg_id>', methods=['POST'])
+@login_required
+def perfil_marcar_mensagem_lida(msg_id):
+    """Marca uma mensagem específica como lida e a move para a área de histórico de lidas"""
+    try:
+        current_user_id = session.get('user_id')
+        from services.mensagem_service import MensagemService
+        msg_svc = MensagemService()
+        msg_svc.marcar_mensagem_individual_como_lida(msg_id, current_user_id)
+        flash('Mensagem movida para as lidas!', 'sucesso')
+    except Exception as e:
+        logger.error(f"Erro ao marcar mensagem como lida: {str(e)}")
+    
+    ref = request.referrer or url_for('auth.perfil_page')
+    if 'tab=' not in ref:
+        sep = '&' if '?' in ref else '?'
+        ref = f"{ref}{sep}tab=mensagem"
+    return redirect(ref)
 
 
 @auth_bp.route('/perfil/senha', methods=['POST'])
@@ -864,4 +975,10 @@ def check_username():
         })
     except Exception as e:
         return jsonify({'exists': False, 'valid': False, 'mensagem': 'Erro ao verificar usuário.'}), 500
+
+
+@auth_bp.route('/configuracoes')
+def configuracoes_page():
+    """Página dedicada de configurações, guia de funcionamento, termos de uso e privacidade."""
+    return render_template('configuracoes.html', usuario=_usuario_logado())
 

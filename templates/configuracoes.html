@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+
+{% block title %}Configurações & Informações Legais{% endblock %}
+
+{% block content %}
+<div class="configuracoes-page-wrapper" style="background: radial-gradient(circle at 80% 10%, rgba(34, 197, 94, 0.07), transparent 45%), #000000; min-height: 100vh; width: 100%; color: #ffffff; padding-bottom: clamp(7rem, 12vh, 11rem); overflow-y: auto;">
+    
+    <!-- Top Header Sticky Nav -->
+    <header class="configuracoes-header" style="position: sticky; top: 0; z-index: 100; background: rgba(0, 0, 0, 0.88); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid rgba(34, 197, 94, 0.18); padding: 1.1rem 1.25rem;">
+        <div style="max-width: 920px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
+            
+            <!-- Seta para voltar -->
+            <a href="javascript:history.back()" 
+               class="btn-back-link"
+               style="display: inline-flex; align-items: center; gap: 0.55rem; color: #22c55e; font-weight: 800; font-size: 0.88rem; text-decoration: none; background: rgba(34, 197, 94, 0.1); padding: 0.55rem 1.15rem; border-radius: 999px; border: 1px solid rgba(34, 197, 94, 0.28); box-shadow: 0 0 16px rgba(34, 197, 94, 0.15); transition: all 0.22s ease;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                <span>Voltar</span>
+            </a>
+
+            <div style="display: flex; align-items: center; gap: 0.45rem; color: #94a3b8; font-size: 0.82rem; font-weight: 700; background: rgba(255,255,255,0.04); padding: 0.4rem 0.8rem; border-radius: 999px; border: 1px solid rgba(255,255,255,0.08);">
+                <span>NaTrave 5v5</span>
+                <span style="color: rgba(255,255,255,0.2);">•</span>
+                <span style="color: #22c55e; font-weight: 800;">{{ app_version }}</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main style="max-width: 920px; margin: 1.8rem auto 0 auto; padding: 0 1.25rem;">
+        
+        <!-- Page Title & Hero Card -->
+        <div style="background: linear-gradient(135deg, rgba(18, 28, 22, 0.95), rgba(10, 16, 13, 0.98)); border: 1px solid rgba(34, 197, 94, 0.38); border-left: 5px solid #22c55e; border-radius: 20px; padding: 1.35rem 1.6rem; margin-bottom: 1.5rem; box-shadow: 0 0 24px rgba(34, 197, 94, 0.16), 0 10px 30px rgba(0, 0, 0, 0.65);">
+            <div style="display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.3rem 0.8rem; background: rgba(34, 197, 94, 0.18); border: 1px solid rgba(34, 197, 94, 0.5); border-radius: 999px; color: #4ade80; font-size: 0.74rem; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.55rem; text-shadow: 0 0 10px rgba(34, 197, 94, 0.3);">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                <span>CONFIGURAÇÕES DO SISTEMA</span>
+            </div>
+            <h1 style="font-size: clamp(1.45rem, 3vw, 1.95rem); font-weight: 900; color: #ffffff; margin: 0 0 0.4rem 0; letter-spacing: -0.025em; text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);">Configurações & Informações</h1>
+            <p style="font-size: 0.94rem; color: #e2e8f0; font-weight: 600; margin: 0; line-height: 1.5;">Diretrizes de funcionamento, regras da liga e privacidade.</p>
+        </div>
+
+        <!-- Accordions Container -->
+        <div style="display: grid; gap: 0.9rem;">
+            
+            <!-- Item 1: Funcionamento do App -->
+            <div class="config-accordion-card" style="background: rgba(18, 18, 23, 0.95); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; overflow: hidden; transition: all 0.25 ease;">
+                <button type="button" onclick="toggleConfigAccordion(this)" style="width: 100%; background: none; border: none; padding: 1.15rem 1.4rem; color: #ffffff; display: flex; align-items: center; justify-content: space-between; gap: 1rem; cursor: pointer; text-align: left;">
+                    <div style="display: flex; align-items: center; gap: 0.85rem; font-size: 1rem; font-weight: 800; color: #f8fafc;">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#22c55e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12A10 10 0 1 1 12 2a10 10 0 0 1 10 10z"/><polygon points="12 6 15 9 14 13 10 13 9 9 12 6"/></svg>
+                        <span>Funcionamento do App & Sorteio Inteligente</span>
+                    </div>
+                    <div class="accordion-icon-wrap" style="width: 32px; height: 32px; border-radius: 50%; background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.25s ease;">
+                        <svg class="accordion-arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s ease;">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                </button>
+                <div class="accordion-content" style="display: none; padding: 0 1.4rem 1.4rem 1.4rem; color: #cbd5e1; font-size: 0.9rem; line-height: 1.65; border-top: 1px solid rgba(255,255,255,0.06);">
+                    <p style="margin-top: 1rem; margin-bottom: 0.6rem;">O <strong>NaTrave 5v5</strong> é a plataforma oficial de gestão técnica e apuração das rodadas da liga. O sistema automatiza o ciclo completo de cada partida:</p>
+                    <ul style="padding-left: 1.2rem; margin: 0; display: grid; gap: 0.45rem;">
+                        <li><strong>Presença Pré-Jogo:</strong> A lista de presença é aberta dinamicamente para que cada atleta confirme ou decline com antecedência.</li>
+                        <li><strong>Algoritmo de Equilíbrio:</strong> O sorteio divide os elencos de forma equilibrada com base nas notas (estrelas) e distribui os goleiros e jogadores de linha.</li>
+                        <li><strong>Cronômetro & Placar ao Vivo:</strong> O juiz controla o tempo de jogo e anota os gols em tempo real.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Item 2: Votações e Confiabilidade -->
+            <div class="config-accordion-card" style="background: rgba(18, 18, 23, 0.95); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; overflow: hidden; transition: all 0.25s ease;">
+                <button type="button" onclick="toggleConfigAccordion(this)" style="width: 100%; background: none; border: none; padding: 1.15rem 1.4rem; color: #ffffff; display: flex; align-items: center; justify-content: space-between; gap: 1rem; cursor: pointer; text-align: left;">
+                    <div style="display: flex; align-items: center; gap: 0.85rem; font-size: 1rem; font-weight: 800; color: #f8fafc;">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#22c55e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        <span>Sistema de Votações & Sistema Inteligente de Confiabilidade</span>
+                    </div>
+                    <div class="accordion-icon-wrap" style="width: 32px; height: 32px; border-radius: 50%; background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.25s ease;">
+                        <svg class="accordion-arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s ease;">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                </button>
+                <div class="accordion-content" style="display: none; padding: 0 1.4rem 1.4rem 1.4rem; color: #cbd5e1; font-size: 0.9rem; line-height: 1.65; border-top: 1px solid rgba(255,255,255,0.06);">
+                    <p style="margin-top: 1rem; margin-bottom: 0.6rem;">Após o apito final, os participantes avaliam a atuação de cada companheiro atribuindo notas de 1 a 10.</p>
+                    <p style="margin: 0.4rem 0;">O NaTrave aplica um <strong>Sistema Inteligente de Confiabilidade</strong> exclusivo:</p>
+                    <ul style="padding-left: 1.2rem; margin: 0; display: grid; gap: 0.45rem;">
+                        <li><strong>Preservação Integral:</strong> Nenhum voto é deletado ou descartado.</li>
+                        <li><strong>Consenso Estatístico:</strong> Votos com variações extremas isoladas têm seu peso estatístico suavizado pelo algoritmo de consenso.</li>
+                        <li><strong>Nota Transparente:</strong> A média ponderada final reflete fielmente o desempenho real do atleta.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Item 3: Evolução de Nível Técnico & Rankings -->
+            <div class="config-accordion-card" style="background: rgba(18, 18, 23, 0.95); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; overflow: hidden; transition: all 0.25s ease;">
+                <button type="button" onclick="toggleConfigAccordion(this)" style="width: 100%; background: none; border: none; padding: 1.15rem 1.4rem; color: #ffffff; display: flex; align-items: center; justify-content: space-between; gap: 1rem; cursor: pointer; text-align: left;">
+                    <div style="display: flex; align-items: center; gap: 0.85rem; font-size: 1rem; font-weight: 800; color: #f8fafc;">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#22c55e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                        <span>Evolução de Nível Técnico & Ranking Oficial</span>
+                    </div>
+                    <div class="accordion-icon-wrap" style="width: 32px; height: 32px; border-radius: 50%; background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.25s ease;">
+                        <svg class="accordion-arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s ease;">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                </button>
+                <div class="accordion-content" style="display: none; padding: 0 1.4rem 1.4rem 1.4rem; color: #cbd5e1; font-size: 0.9rem; line-height: 1.65; border-top: 1px solid rgba(255,255,255,0.06);">
+                    <p style="margin-top: 1rem; margin-bottom: 0.6rem;">O nível técnico de cada jogador é dinâmico e recalculado ao término de cada rodada encerrada.</p>
+                    <p style="margin: 0;">As estatísticas combinam saldo de vitórias, frequência de partidas, gols marcados e notas médias para computar a pontuação oficial do <strong>Ranking da Competição Ativa</strong> e do <strong>Histórico Geral</strong>.</p>
+                </div>
+            </div>
+
+            <!-- Item 4: Termos de Uso & Regras da Liga -->
+            <div class="config-accordion-card" style="background: rgba(18, 18, 23, 0.95); border: 1px solid rgba(34, 197, 94, 0.25); border-radius: 16px; overflow: hidden; transition: all 0.25s ease;">
+                <button type="button" onclick="toggleConfigAccordion(this)" style="width: 100%; background: none; border: none; padding: 1.15rem 1.4rem; color: #ffffff; display: flex; align-items: center; justify-content: space-between; gap: 1rem; cursor: pointer; text-align: left;">
+                    <div style="display: flex; align-items: center; gap: 0.85rem; font-size: 1rem; font-weight: 800; color: #f8fafc;">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#22c55e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        <span>Termos de Uso & Regras da Liga</span>
+                    </div>
+                    <div class="accordion-icon-wrap" style="width: 32px; height: 32px; border-radius: 50%; background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.25s ease;">
+                        <svg class="accordion-arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s ease;">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                </button>
+                <div class="accordion-content" style="display: none; padding: 0 1.4rem 1.4rem 1.4rem; color: #cbd5e1; font-size: 0.9rem; line-height: 1.65; border-top: 1px solid rgba(255,255,255,0.06);">
+                    <p style="margin-top: 1rem; margin-bottom: 0.6rem;">Ao se cadastrar no NaTrave 5v5, o atleta adere aos regulamentos da comunidade:</p>
+                    <ul style="padding-left: 1.2rem; margin: 0; display: grid; gap: 0.45rem;">
+                        <li><strong>Confirmação de Presença:</strong> As confirmações (Sim/Não) devem ser efetuadas até a abertura do sorteio oficial.</li>
+                        <li><strong>Fair Play & Desportivismo:</strong> Atitudes antidesportivas dentro de campo ou tentativas de prejudicar colegas nas notas sujeitam o jogador a suspensões.</li>
+                        <li><strong>Decisão da Juizagem:</strong> Os placares e ocorrências registradas pela mesa da arbitragem são soberanos.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Item 5: Política de Privacidade & LGPD -->
+            <div class="config-accordion-card" style="background: rgba(18, 18, 23, 0.95); border: 1px solid rgba(34, 197, 94, 0.25); border-radius: 16px; overflow: hidden; transition: all 0.25s ease;">
+                <button type="button" onclick="toggleConfigAccordion(this)" style="width: 100%; background: none; border: none; padding: 1.15rem 1.4rem; color: #ffffff; display: flex; align-items: center; justify-content: space-between; gap: 1rem; cursor: pointer; text-align: left;">
+                    <div style="display: flex; align-items: center; gap: 0.85rem; font-size: 1rem; font-weight: 800; color: #f8fafc;">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#22c55e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        <span>Política de Privacidade & LGPD</span>
+                    </div>
+                    <div class="accordion-icon-wrap" style="width: 32px; height: 32px; border-radius: 50%; background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.25s ease;">
+                        <svg class="accordion-arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s ease;">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                </button>
+                <div class="accordion-content" style="display: none; padding: 0 1.4rem 1.4rem 1.4rem; color: #cbd5e1; font-size: 0.9rem; line-height: 1.65; border-top: 1px solid rgba(255,255,255,0.06);">
+                    <p style="margin-top: 1rem; margin-bottom: 0.6rem;">O NaTrave 5v5 respeita rigorosamente a privacidade e proteção de dados pessoais:</p>
+                    <ul style="padding-left: 1.2rem; margin: 0; display: grid; gap: 0.45rem;">
+                        <li><strong>Dados Cadastrais:</strong> Credenciais de e-mail, senhas encriptadas e contatos são de acesso restrito e seguro.</li>
+                        <li><strong>Anonimato dos Votos:</strong> A identidade dos avaliadores em cada voto individual é estritamente confidencial e nunca divulgada publicamente.</li>
+                        <li><strong>Direito do Titular:</strong> O atleta pode editar suas preferências ou solicitar a exclusão de sua conta no painel de perfil.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Item 6: Conta & Segurança -->
+            <div class="config-accordion-card" style="background: rgba(18, 18, 23, 0.95); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; overflow: hidden; transition: all 0.25s ease;">
+                <button type="button" onclick="toggleConfigAccordion(this)" style="width: 100%; background: none; border: none; padding: 1.15rem 1.4rem; color: #ffffff; display: flex; align-items: center; justify-content: space-between; gap: 1rem; cursor: pointer; text-align: left;">
+                    <div style="display: flex; align-items: center; gap: 0.85rem; font-size: 1rem; font-weight: 800; color: #f8fafc;">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#22c55e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <span>Gerenciamento de Conta & Segurança</span>
+                    </div>
+                    <div class="accordion-icon-wrap" style="width: 32px; height: 32px; border-radius: 50%; background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.25s ease;">
+                        <svg class="accordion-arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s ease;">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                </button>
+                <div class="accordion-content" style="display: none; padding: 0 1.4rem 1.4rem 1.4rem; color: #cbd5e1; font-size: 0.9rem; line-height: 1.65; border-top: 1px solid rgba(255,255,255,0.06);">
+                    <p style="margin-top: 1rem; margin-bottom: 0;">No seu Perfil de Atleta você pode personalizar o nome de exibição, foto, alterar sua senha e encerrar sua sessão com total segurança.</p>
+                </div>
+            </div>
+
+            <!-- Item 7: Sobre a Plataforma -->
+            <div class="config-accordion-card" style="background: rgba(18, 18, 23, 0.95); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 16px; overflow: hidden; transition: all 0.25s ease;">
+                <button type="button" onclick="toggleConfigAccordion(this)" style="width: 100%; background: none; border: none; padding: 1.15rem 1.4rem; color: #ffffff; display: flex; align-items: center; justify-content: space-between; gap: 1rem; cursor: pointer; text-align: left;">
+                    <div style="display: flex; align-items: center; gap: 0.85rem; font-size: 1rem; font-weight: 800; color: #f8fafc;">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#22c55e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        <span>Sobre o NaTrave 5v5</span>
+                    </div>
+                    <div class="accordion-icon-wrap" style="width: 32px; height: 32px; border-radius: 50%; background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.25s ease;">
+                        <svg class="accordion-arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s ease;">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                </button>
+                <div class="accordion-content" style="display: none; padding: 0 1.4rem 1.4rem 1.4rem; color: #cbd5e1; font-size: 0.9rem; line-height: 1.65; border-top: 1px solid rgba(255,255,255,0.06);">
+                    <p style="margin-top: 1rem; margin-bottom: 0.4rem; font-weight: 800; color: #ffffff;">NaTrave 5v5 • Versão {{ app_version_num }}</p>
+                    <div style="background: rgba(34, 197, 94, 0.06); border-left: 3px solid #22c55e; padding: 0.85rem 1rem; border-radius: 10px; margin: 0.6rem 0;">
+                        <p style="margin: 0; color: #f1f5f9; font-size: 0.92rem; font-style: italic; line-height: 1.55;">
+                            "Eu desenvolvi esse aplicativo pois queria que o nosso futebol fosse cada vez mais equilibrado, justo e competitivo para todos os atletas."
+                        </p>
+                    </div>
+                    <p style="margin: 0.5rem 0 0 0; color: #64748b; font-size: 0.82rem;">Desenvolvido por Guilherme Urbano • Todos os direitos reservados.</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<script>
+function toggleConfigAccordion(btn) {
+    const card = btn.closest('.config-accordion-card');
+    const content = card.querySelector('.accordion-content');
+    const arrow = card.querySelector('.accordion-arrow');
+    const iconWrap = card.querySelector('.accordion-icon-wrap');
+    
+    const isVisible = content.style.display === 'block';
+
+    if (isVisible) {
+        content.style.display = 'none';
+        arrow.style.transform = 'rotate(0deg)';
+        card.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+        card.style.background = 'rgba(18, 18, 23, 0.95)';
+        card.style.borderLeft = '1px solid rgba(255, 255, 255, 0.08)';
+        if (iconWrap) iconWrap.style.background = 'rgba(34, 197, 94, 0.08)';
+    } else {
+        content.style.display = 'block';
+        arrow.style.transform = 'rotate(180deg)';
+        card.style.borderColor = 'rgba(34, 197, 94, 0.45)';
+        card.style.borderLeft = '4px solid #22c55e';
+        card.style.background = 'rgba(18, 24, 20, 0.98)';
+        if (iconWrap) iconWrap.style.background = 'rgba(34, 197, 94, 0.22)';
+    }
+}
+</script>
+{% endblock %}

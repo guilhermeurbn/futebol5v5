@@ -190,7 +190,7 @@ def criar_app(config_name: str = None) -> Flask:
     app.register_blueprint(auth_bp)
     
     # Apply rate limiting to auth endpoints (after blueprint registration)
-    app.view_functions['auth.login_submit'] = limiter.limit("5/minute")(app.view_functions['auth.login_submit'])
+    app.view_functions['auth.login_submit'] = limiter.limit("10/hour")(app.view_functions['auth.login_submit'])
     app.view_functions['auth.cadastro_submit'] = limiter.limit("3/hour")(app.view_functions['auth.cadastro_submit'])
     app.view_functions['auth.recuperar_senha_submit'] = limiter.limit("3/hour")(app.view_functions['auth.recuperar_senha_submit'])
     
@@ -444,12 +444,26 @@ def criar_app(config_name: str = None) -> Flask:
             votacao_pendente_url = None
             presenca_pendente = False
 
+        # Versão dinâmica do app
+        version_str = "1.0.0"
+        try:
+            version_file = os.path.join(app.root_path, 'data', 'version.json')
+            if os.path.exists(version_file):
+                with open(version_file, 'r', encoding='utf-8') as f:
+                    vdata = json.load(f)
+                    version_str = vdata.get('version', '1.0.0')
+        except Exception:
+            pass
+        formatted_version = f"v{version_str}" if not version_str.startswith('v') else version_str
+
         return {
             'total_notificacoes': total_notificacoes,
             'notificacoes_url': notificacoes_url,
             'votacao_pendente': votacao_pendente,
             'votacao_pendente_url': votacao_pendente_url,
             'presenca_pendente': presenca_pendente,
+            'app_version': formatted_version,
+            'app_version_num': version_str,
         }
 
     # Em desenvolvimento, garantir que mudanças em templates sejam recarregadas

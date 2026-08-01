@@ -605,9 +605,7 @@ class VotacaoService:
                             if dt_ini <= p_dt <= dt_fim:
                                 filtradas.append(p)
                         except Exception:
-                            filtradas.append(p)
-                    else:
-                        filtradas.append(p)
+                            pass
                 encerradas = filtradas
             except Exception as e:
                 logger.error(f"Erro ao filtrar partidas por data no ranking: {str(e)}")
@@ -680,22 +678,23 @@ class VotacaoService:
                     item["avaliacoes"] += 1
                     item["nota_total"] += nota
 
-        for jogador in self.jogador_service.listar_para_dict():
-            nome = (jogador.get("nome") or "").strip()
-            if not nome:
-                continue
-            acumulado.setdefault(nome, {
-                "jogador_nome": nome,
-                "jogos": 0,
-                "nota_total": 0.0,
-                "pontos": 0.0,
-                "avaliacoes": 0,
-                "gols": 0,
-                "vitorias": 0,
-                "derrotas": 0,
-                "empates": 0,
-                "destaques": 0,
-            })
+        if not (data_inicio and data_fim):
+            for jogador in self.jogador_service.listar_para_dict():
+                nome = (jogador.get("nome") or "").strip()
+                if not nome:
+                    continue
+                acumulado.setdefault(nome, {
+                    "jogador_nome": nome,
+                    "jogos": 0,
+                    "nota_total": 0.0,
+                    "pontos": 0.0,
+                    "avaliacoes": 0,
+                    "gols": 0,
+                    "vitorias": 0,
+                    "derrotas": 0,
+                    "empates": 0,
+                    "destaques": 0,
+                })
 
         for item in acumulado.values():
             avaliacoes = item.get("avaliacoes", 0)

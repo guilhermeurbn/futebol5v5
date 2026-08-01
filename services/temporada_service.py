@@ -23,7 +23,9 @@ class TemporadaService:
         if os.path.exists(self.data_file):
             try:
                 with open(self.data_file, 'r', encoding='utf-8') as f:
-                    return json.load(f)
+                    content = f.read().strip()
+                    if content:
+                        return json.loads(content)
             except Exception as e:
                 logger.error(f"Erro ao carregar temporadas.json: {str(e)}")
         
@@ -31,10 +33,10 @@ class TemporadaService:
         padrao = {
             "temporada_ativa": {
                 "id": 1,
-                "nome": "Temporada #1 - Competição Ativa",
+                "nome": "Temporada #1 - Edição de Prêmios 🏆",
                 "data_inicio": "2026-08-04T00:00:00",
                 "data_fim": "2026-10-04T23:59:59",
-                "descricao_premio": "",
+                "descricao_premio": "🏆 1º Lugar: Prêmio Especial da Temporada NaTrave!",
                 "ativa": True
             },
             "historico_temporadas": []
