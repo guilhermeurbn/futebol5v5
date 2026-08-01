@@ -45,10 +45,10 @@
         {% endif %}
 
         {# Set context variables #}
-        {% set tem_jogador = jogador_proprio is not none %}
+        {% set jogador = jogador_proprio if (jogador_proprio is defined and jogador_proprio) else (jogador if (jogador is defined and jogador) else None) %}
+        {% set tem_jogador = jogador is not none %}
         {% set stats = stats_jogador or {} %}
         {% if tem_jogador %}
-        {% set jogador = jogador_proprio %}
         {% set nome_partes = jogador.nome.split() %}
         {% set avatar_text = nome_partes[0][:2] if nome_partes else jogador.nome[:2] %}
         {% set total_partidas = stats.get('total_partidas', 0) %}
@@ -167,7 +167,6 @@
                 </svg>
                 <span>Partidas</span>
             </button>
-            {% if tem_jogador %}
             <button class="premium-profile-tab {% if aba_ativa == 'duelo' %}is-active{% endif %}"
                 data-tab-target="duelo" aria-selected="{% if aba_ativa == 'duelo' %}true{% else %}false{% endif %}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -179,7 +178,6 @@
                 </svg>
                 <span>Duelo X1</span>
             </button>
-            {% endif %}
             {% if is_self or (auth_user and auth_user.role in ['admin', 'super_admin']) %}
             <button class="premium-profile-tab {% if aba_ativa == 'mais' %}is-active{% endif %}" data-tab-target="mais"
                 aria-selected="{% if aba_ativa == 'mais' %}true{% else %}false{% endif %}">
@@ -654,7 +652,6 @@
         {% endif %}
 
         {# DUELO TAB #}
-        {% if tem_jogador %}
         <div class="premium-profile-tab-content {% if aba_ativa == 'duelo' %}is-active{% endif %}" id="tab-duelo" {% if
             aba_ativa !='duelo' %}hidden{% endif %}>
             <div class="premium-profile-panel"
@@ -678,16 +675,20 @@
                     </div>
 
                     <!-- Seletor Fluido de Oponente -->
+                    {% set current_jog_identifier = (jogador.id if (jogador and jogador.id is defined) else (jogador.get('id') if (jogador and jogador.get is defined) else (jogador.nome if (jogador and jogador.nome is defined) else (usuario.nome if (usuario and usuario.nome is defined) else session.get('user_id', ''))))) %}
                     <div style="min-width: 240px; flex: 1; max-width: 340px;">
                         <label
                             style="display: block; font-size: 0.78rem; font-weight: 700; color: #94a3b8; margin-bottom: 0.35rem; text-transform: uppercase;">Escolha
                             o Adversário:</label>
-                        <select id="dueloOponenteSelect" onchange="carregarDueloPerfil(this.value, '{{ jogador.id }}')"
+                        <select id="dueloOponenteSelect" data-jogador-id="{{ current_jog_identifier }}" onchange="carregarDueloPerfil(this.value, this.getAttribute('data-jogador-id') || '{{ current_jog_identifier }}')"
                             style="background: #121217; color: #ffffff; border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 12px; padding: 0.65rem 1rem; width: 100%; font-size: 0.9rem; font-weight: 700; cursor: pointer; outline: none; box-shadow: 0 4px 14px rgba(0,0,0,0.3);">
                             <option value="" disabled selected>Selecione um oponente...</option>
                             {% for j in todos_jogadores_duelo|default([]) %}
-                            {% if j.id != jogador.id %}
-                            <option value="{{ j.id }}">{{ j.nome }} (⭐ {{ '%.1f'|format(j.nivel|float) }})</option>
+                            {% set j_id = j.id if j.id is defined else (j.get('id') if j.get is defined else '') %}
+                            {% set j_nome = j.nome if j.nome is defined else (j.get('nome') if j.get is defined else '') %}
+                            {% set j_nivel = j.nivel if j.nivel is defined else (j.get('nivel') if j.get is defined else 5.5) %}
+                            {% if j_id|string != current_jog_identifier|string and j_nome|string|lower != current_jog_identifier|string|lower %}
+                            <option value="{{ j_id if j_id else j_nome }}">{{ j_nome }} (⭐ {{ '%.1f'|format(j_nivel|float) }})</option>
                             {% endif %}
                             {% endfor %}
                         </select>
@@ -713,7 +714,6 @@
                 </div>
             </div>
         </div>
-        {% endif %}
 
         {# MAIS TAB #}
         <div class="premium-profile-tab-content {% if aba_ativa == 'mais' %}is-active{% endif %} premium-profile-panel profile-account-access"
@@ -1009,6 +1009,19 @@
 
                 // Salva a aba ativa na URL hash sem pular/rolar a página
                 history.replaceState(null, null, `#${targetId}`);
+
+                if (target === 'duelo') {
+                    const select = document.getElementById('dueloOponenteSelect');
+                    if (select && select.options.length > 1 && (select.selectedIndex <= 0 || !document.getElementById('dueloArenaContainer')?.querySelector('.premium-profile-panel'))) {
+                        for (let i = 0; i < select.options.length; i++) {
+                            if (select.options[i].value) {
+                                select.selectedIndex = i;
+                                select.dispatchEvent(new Event('change'));
+                                break;
+                            }
+                        }
+                    }
+                }
             });
         });
 
@@ -1145,9 +1158,7 @@
             }
         }
     })();
-</script>
 
-{% if is_self %}
     async function responderPresencaPerfil(status) {
         try {
             const token = "{{ csrf_token() }}";
@@ -1173,8 +1184,32 @@
     }
 
     async function carregarDueloPerfil(oponenteId, jogadorId) {
+        const select = document.getElementById('dueloOponenteSelect');
+        if ((!jogadorId || jogadorId === 'None' || jogadorId === 'undefined' || jogadorId === '') && select) {
+            jogadorId = select.dataset.jogadorId;
+        }
         const container = document.getElementById('dueloArenaContainer');
-        if (!container || !oponenteId || !jogadorId) return;
+        if (!container) return;
+
+        if (!oponenteId || !jogadorId || oponenteId === 'None' || jogadorId === 'None') {
+            container.innerHTML = `
+                <div style="text-align: center; padding: 2.5rem 1rem; color: #94a3b8;">
+                    <svg viewBox="0 0 24 24" width="42" height="42" fill="none" stroke="#22c55e" stroke-width="1.8"
+                        stroke-linecap="round" stroke-linejoin="round"
+                        style="margin: 0 auto 0.75rem auto; opacity: 0.8;">
+                        <path d="M14.5 17.5L3 6V3h3l11.5 11.5" />
+                        <path d="M13 19l6-6" />
+                        <path d="M16 16l4 4" />
+                        <path d="M19 21l2-2" />
+                    </svg>
+                    <h3 style="color: #ffffff; font-weight: 700; font-size: 1.1rem; margin-bottom: 0.3rem;">
+                        Selecione um jogador acima</h3>
+                    <p style="font-size: 0.85rem; margin: 0; color: #94a3b8;">Compare estatísticas, nível técnico,
+                        taxa de vitória e o histórico de confrontos diretos.</p>
+                </div>
+            `;
+            return;
+        }
 
         container.innerHTML = `
         <div style="text-align: center; padding: 2.5rem 1rem; color: #22c55e;">
@@ -1183,7 +1218,7 @@
     `;
 
         try {
-            const resp = await fetch(`/api/comparar?j1=${jogadorId}&j2=${oponenteId}`);
+            const resp = await fetch(`/api/comparar?j1=${encodeURIComponent(jogadorId)}&j2=${encodeURIComponent(oponenteId)}`);
             const data = await resp.json();
 
             if (!data.sucesso) {
@@ -1270,5 +1305,4 @@
         }
     }
 </script>
-{% endif %}
 {% endblock %}

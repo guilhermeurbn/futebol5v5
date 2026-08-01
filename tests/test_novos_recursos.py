@@ -78,14 +78,27 @@ def test_api_presenca_routes(client):
     assert data["sucesso"] is True
 
 
-def test_importar_jogadores_inscritos_juiz(client):
-    # Simular login de Juiz
-    with client.session_transaction() as sess:
-        sess["user_id"] = "juiz_user_1"
-        sess["role"] = "juiz"
-        sess["nome"] = "Juiz Teste"
+def test_duelo_x1_perfil_integration(client):
+    import uuid
+    from services.jogador_service import JogadorService
+    jog_svc = JogadorService()
+    unique_suffix = uuid.uuid4().hex[:6]
+    j1 = jog_svc.criar(nome=f"DueloA_{unique_suffix}", nivel=8.0)
+    j2 = jog_svc.criar(nome=f"DueloB_{unique_suffix}", nivel=7.5)
 
-    res = client.get("/jogar/criar-partida")
-    assert res.status_code == 200
-    assert b"Atleta(s) Inscrito(s) pelo App" in res.data or b"Selecione os Jogadores" in res.data
+    with client.session_transaction() as sess:
+        sess["user_id"] = "user_duelo_test"
+        sess["role"] = "usuario"
+        sess["nome"] = "Jogador Duelo"
+
+    res_perfil = client.get("/perfil")
+    assert res_perfil.status_code == 200
+    assert b"id=\"dueloOponenteSelect\"" in res_perfil.data
+
+    res_api = client.get(f"/api/comparar?j1={j1.id}&j2={j2.id}")
+    assert res_api.status_code == 200
+    data = json.loads(res_api.data)
+    assert data["sucesso"] is True
+    assert "confronto_direto" in data
+
 

@@ -16,11 +16,40 @@ class ComparadorService:
         self.jogador_service = jogador_service or JogadorService()
         self.votacao_service = votacao_service or VotacaoService()
 
-    def _obter_jogador(self, identificador: str) -> Optional[Dict[str, Any]]:
+    def _obter_jogador(self, identificador: Any) -> Optional[Dict[str, Any]]:
+        if not identificador:
+            return None
+        id_str = str(identificador).strip().lower()
         jogadores = self.jogador_service.listar_para_dict()
         for j in jogadores:
-            if j.get("id") == identificador or (j.get("nome") or "").strip().lower() == identificador.strip().lower():
+            j_id_str = str(j.get("id", "")).strip().lower()
+            j_owner_str = str(j.get("owner_user_id", "")).strip().lower()
+            j_nome_str = (j.get("nome") or "").strip().lower()
+            if id_str in (j_id_str, j_owner_str, j_nome_str):
                 return j
+
+        # Se não achou na lista de jogadores, tentar buscar nos usuários do AuthService
+        try:
+            from services.auth_service import AuthService
+            auth_service = AuthService()
+            user = auth_service.obter_por_id(id_str) or auth_service.obter_por_username(id_str)
+            if user:
+                u_id = user.get("id")
+                u_nome = user.get("nome") or user.get("username") or "Atleta"
+                for j in jogadores:
+                    if str(j.get("owner_user_id", "")) == str(u_id):
+                        return j
+                return {
+                    "id": u_id,
+                    "nome": u_nome,
+                    "nivel": 5.5,
+                    "posicao": "linha",
+                    "tipo": "avulso",
+                    "owner_user_id": u_id
+                }
+        except Exception:
+            pass
+
         return None
 
     def comparar(self, id1: str, id2: str) -> Dict[str, Any]:
