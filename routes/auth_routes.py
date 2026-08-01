@@ -492,7 +492,7 @@ def perfil_page():
 
     aba_ativa = request.args.get('tab', '').strip().lower()
     if aba_ativa not in ['mensagem', 'estatisticas', 'partidas', 'duelo', 'mais']:
-        aba_ativa = 'partidas'
+        aba_ativa = 'partidas' if jogador_proprio else 'mensagem'
 
     return render_template(
         'perfil.html',

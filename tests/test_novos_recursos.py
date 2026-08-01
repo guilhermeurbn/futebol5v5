@@ -83,7 +83,7 @@ def test_duelo_x1_perfil_integration(client):
     from services.jogador_service import JogadorService
     jog_svc = JogadorService()
     unique_suffix = uuid.uuid4().hex[:6]
-    j1 = jog_svc.criar(nome=f"DueloA_{unique_suffix}", nivel=8.0)
+    j1 = jog_svc.criar(nome=f"DueloA_{unique_suffix}", nivel=8.0, owner_user_id="user_duelo_test")
     j2 = jog_svc.criar(nome=f"DueloB_{unique_suffix}", nivel=7.5)
 
     with client.session_transaction() as sess:

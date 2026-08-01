@@ -142,10 +142,10 @@
                     style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 8px #22c55e; display: inline-block; margin-left: 0.35rem;"></span>
                 {% endif %}
             </button>
+            {% if tem_jogador %}
             <button class="premium-profile-tab {% if aba_ativa == 'estatisticas' %}is-active{% endif %}"
                 data-tab-target="estatisticas"
-                aria-selected="{% if aba_ativa == 'estatisticas' %}true{% else %}false{% endif %}" {% if not tem_jogador
-                %}style="display:none;" {% endif %}>
+                aria-selected="{% if aba_ativa == 'estatisticas' %}true{% else %}false{% endif %}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                     stroke-linejoin="round" style="width: 20px; height: 20px;">
                     <line x1="18" y1="20" x2="18" y2="10" />
@@ -156,8 +156,7 @@
             </button>
             <button class="premium-profile-tab {% if aba_ativa == 'partidas' %}is-active{% endif %}"
                 data-tab-target="partidas"
-                aria-selected="{% if aba_ativa == 'partidas' %}true{% else %}false{% endif %}" {% if not tem_jogador
-                %}style="display:none;" {% endif %}>
+                aria-selected="{% if aba_ativa == 'partidas' %}true{% else %}false{% endif %}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                     stroke-linejoin="round" style="width: 20px; height: 20px;">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
@@ -178,6 +177,7 @@
                 </svg>
                 <span>Duelo X1</span>
             </button>
+            {% endif %}
             {% if is_self or (auth_user and auth_user.role in ['admin', 'super_admin']) %}
             <button class="premium-profile-tab {% if aba_ativa == 'mais' %}is-active{% endif %}" data-tab-target="mais"
                 aria-selected="{% if aba_ativa == 'mais' %}true{% else %}false{% endif %}">
@@ -342,8 +342,8 @@
             </div>
         </div>
 
-        {# ESTATISTICAS TAB #}
         {% if tem_jogador %}
+        {# ESTATISTICAS TAB #}
         <div class="premium-profile-tab-content {% if aba_ativa == 'estatisticas' %}is-active{% endif %}"
             id="tab-estatisticas" {% if aba_ativa !='estatisticas' %}hidden{% endif %}>
             <div class="premium-profile-panel">
@@ -366,13 +366,12 @@
                         <span class="premium-profile-stat-label">Gols marcados</span>
                     </div>
                     <div class="premium-profile-stat-card">
-                        <strong class="premium-profile-stat-val premium-profile-stat-val--rating">{{
-                            stats.get('nota_media_geral', '7.00') }}</strong>
-                        <span class="premium-profile-stat-label">Nota média geral</span>
+                        <strong class="premium-profile-stat-val">{{ '%.2f'|format(stats.get('nota_media', 0)|float) }}</strong>
+                        <span class="premium-profile-stat-label">Nota Média</span>
                     </div>
                 </div>
 
-                {% set nivel_val = jogador.nivel|float %}
+                {% set nivel_val = (jogador.nivel|float) if (tem_jogador and jogador and jogador.nivel is defined) else 5.5 %}
             </div>
 
             <div class="premium-profile-panel">
@@ -485,10 +484,8 @@
                 {% endif %}
             </div>
         </div>
-        {% endif %}
 
         {# PARTIDAS TAB #}
-        {% if tem_jogador %}
         <div class="premium-profile-tab-content {% if aba_ativa == 'partidas' %}is-active{% endif %}" id="tab-partidas"
             {% if aba_ativa !='partidas' %}hidden{% endif %}>
             <!-- Card: Próxima Partida & Presença -->
@@ -649,7 +646,6 @@
                 {% endif %}
             </div>
         </div>
-        {% endif %}
 
         {# DUELO TAB #}
         <div class="premium-profile-tab-content {% if aba_ativa == 'duelo' %}is-active{% endif %}" id="tab-duelo" {% if
@@ -714,6 +710,7 @@
                 </div>
             </div>
         </div>
+        {% endif %}
 
         {# MAIS TAB #}
         <div class="premium-profile-tab-content {% if aba_ativa == 'mais' %}is-active{% endif %} premium-profile-panel profile-account-access"
