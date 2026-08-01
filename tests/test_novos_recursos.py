@@ -76,3 +76,16 @@ def test_api_presenca_routes(client):
     assert res_resumo.status_code == 200
     data = json.loads(res_resumo.data)
     assert data["sucesso"] is True
+
+
+def test_importar_jogadores_inscritos_juiz(client):
+    # Simular login de Juiz
+    with client.session_transaction() as sess:
+        sess["user_id"] = "juiz_user_1"
+        sess["role"] = "juiz"
+        sess["nome"] = "Juiz Teste"
+
+    res = client.get("/jogar/criar-partida")
+    assert res.status_code == 200
+    assert b"Atleta(s) Inscrito(s) pelo App" in res.data or b"Selecione os Jogadores" in res.data
+

@@ -1,0 +1,105 @@
+{
+  "ultimo_id": 10,
+  "mensagens": [
+    {
+      "id": 1,
+      "remetente_id": "0d2e29f6-ddc4-4328-a971-d49157356f8f",
+      "remetente_nome": "Guilherme Urbano",
+      "destinatario_id": "19e6a32e-2a20-49a2-81e0-da12aa681505",
+      "destinatario_nome": "Alex",
+      "conteudo": "coe",
+      "criado_em": "2026-08-01T01:16:12.696731",
+      "lida": false
+    },
+    {
+      "id": 2,
+      "remetente_id": "0d2e29f6-ddc4-4328-a971-d49157356f8f",
+      "remetente_nome": "Guilherme Urbano",
+      "destinatario_id": "19e6a32e-2a20-49a2-81e0-da12aa681505",
+      "destinatario_nome": "Alex",
+      "conteudo": "coe",
+      "criado_em": "2026-08-01T01:16:46.299508",
+      "lida": false
+    },
+    {
+      "id": 3,
+      "remetente_id": "0d2e29f6-ddc4-4328-a971-d49157356f8f",
+      "remetente_nome": "Guilherme Urbano",
+      "destinatario_id": "19e6a32e-2a20-49a2-81e0-da12aa681505",
+      "destinatario_nome": "Alex",
+      "conteudo": "coe",
+      "criado_em": "2026-08-01T01:17:22.228948",
+      "lida": false
+    },
+    {
+      "id": 4,
+      "remetente_id": "19e6a32e-2a20-49a2-81e0-da12aa681505",
+      "remetente_nome": "Alex",
+      "destinatario_id": "0d2e29f6-ddc4-4328-a971-d49157356f8f",
+      "destinatario_nome": "Guilherme Urbano",
+      "conteudo": "coe",
+      "criado_em": "2026-08-01T01:20:12.277387",
+      "lida": true
+    },
+    {
+      "id": 5,
+      "remetente_id": "0d2e29f6-ddc4-4328-a971-d49157356f8f",
+      "remetente_nome": "Guilherme Urbano",
+      "destinatario_id": "19e6a32e-2a20-49a2-81e0-da12aa681505",
+      "destinatario_nome": "Alex",
+      "conteudo": "coe",
+      "criado_em": "2026-08-01T01:25:07.940089",
+      "lida": false
+    },
+    {
+      "id": 6,
+      "remetente_id": "0d2e29f6-ddc4-4328-a971-d49157356f8f",
+      "remetente_nome": "Guilherme Urbano",
+      "destinatario_id": "19e6a32e-2a20-49a2-81e0-da12aa681505",
+      "destinatario_nome": "Alex",
+      "conteudo": "coe",
+      "criado_em": "2026-08-01T01:36:14.501324",
+      "lida": false
+    },
+    {
+      "id": 7,
+      "remetente_id": "19e6a32e-2a20-49a2-81e0-da12aa681505",
+      "remetente_nome": "Alex",
+      "destinatario_id": "0d2e29f6-ddc4-4328-a971-d49157356f8f",
+      "destinatario_nome": "Guilherme Urbano",
+      "conteudo": "coe",
+      "criado_em": "2026-08-01T01:36:44.518290",
+      "lida": true
+    },
+    {
+      "id": 8,
+      "remetente_id": "0d2e29f6-ddc4-4328-a971-d49157356f8f",
+      "remetente_nome": "Guilherme Urbano",
+      "destinatario_id": "19e6a32e-2a20-49a2-81e0-da12aa681505",
+      "destinatario_nome": "Alex",
+      "conteudo": "coe",
+      "criado_em": "2026-08-01T01:37:01.691281",
+      "lida": false
+    },
+    {
+      "id": 9,
+      "remetente_id": "0d2e29f6-ddc4-4328-a971-d49157356f8f",
+      "remetente_nome": "Guilherme Urbano",
+      "destinatario_id": "19e6a32e-2a20-49a2-81e0-da12aa681505",
+      "destinatario_nome": "Alex",
+      "conteudo": "coe",
+      "criado_em": "2026-08-01T13:32:28.870405",
+      "lida": false
+    },
+    {
+      "id": 10,
+      "remetente_id": "0d2e29f6-ddc4-4328-a971-d49157356f8f",
+      "remetente_nome": "Guilherme Urbano",
+      "destinatario_id": "19e6a32e-2a20-49a2-81e0-da12aa681505",
+      "destinatario_nome": "Alex",
+      "conteudo": "coe",
+      "criado_em": "2026-08-01T13:55:57.528124",
+      "lida": false
+    }
+  ]
+}

@@ -348,6 +348,18 @@
         }, 220);
     }
 
+    let lastHapticTarget = null;
+
+    function triggerHaptic(pattern = 10) {
+        try {
+            if ('vibrate' in navigator && typeof navigator.vibrate === 'function') {
+                navigator.vibrate(pattern);
+            }
+        } catch (e) {
+            // Silently handle browsers without permission/gesture
+        }
+    }
+
     function selectPlayerForSwap(player) {
         if (!editMode || !touchEditMode) return;
 
@@ -355,25 +367,131 @@
             selectedPlayer = player;
             player.classList.add('is-swap-selected');
             player.setAttribute('aria-pressed', 'true');
+            triggerHaptic(20);
             guidance.textContent = `${player.querySelector('strong')?.textContent || 'Jogador'} selecionado. Agora toque no jogador que vai trocar de posição.`;
             return;
         }
 
         if (selectedPlayer === player) {
             clearSelectedPlayer();
+            triggerHaptic(10);
             guidance.textContent = 'Seleção cancelada. Toque em um jogador para começar a troca.';
             return;
         }
 
         const source = selectedPlayer;
         clearSelectedPlayer();
-        
+        triggerHaptic([15, 30, 15]);
         // swapPlayers(source, player);
         checkAndSwap(source, player);
     }
 
+    // Touch Drag & Drop (Touch Screen Hold & Drag Support)
+    let touchDragSource = null;
+    let touchGhost = null;
+
+    function bindTouchEvents(player) {
+        player.addEventListener('touchstart', (e) => {
+            if (!editMode) return;
+            touchDragSource = player;
+
+            const touch = e.touches[0];
+            if (!touch) return;
+
+            // Criar elemento fantasma flutuante
+            touchGhost = player.cloneNode(true);
+            touchGhost.classList.add('touch-drag-ghost');
+            touchGhost.style.cssText = `
+                position: fixed;
+                left: ${touch.clientX - 60}px;
+                top: ${touch.clientY - 30}px;
+                width: ${player.offsetWidth}px;
+                pointer-events: none;
+                z-index: 9999;
+                opacity: 0.9;
+                transform: scale(1.06);
+                box-shadow: 0 12px 32px rgba(34, 197, 94, 0.4), 0 0 16px rgba(0,0,0,0.8);
+                border: 2px solid #22c55e;
+                border-radius: 12px;
+                background: #120e1c;
+            `;
+            document.body.appendChild(touchGhost);
+            player.classList.add('is-dragging');
+            triggerHaptic(25);
+        }, { passive: true });
+
+        player.addEventListener('touchmove', (e) => {
+            if (!editMode || !touchDragSource || !touchGhost) return;
+            const touch = e.touches[0];
+            if (!touch) return;
+
+            if (e.cancelable) e.preventDefault();
+
+            // Atualizar posição do elemento fantasma sob o dedo
+            touchGhost.style.left = `${touch.clientX - 60}px`;
+            touchGhost.style.top = `${touch.clientY - 30}px`;
+
+            // Detectar qual card está sob o dedo
+            const elUnderFinger = document.elementFromPoint(touch.clientX, touch.clientY);
+            const targetPlayer = elUnderFinger?.closest('.judge-team-player');
+
+            if (targetPlayer && targetPlayer !== touchDragSource) {
+                if (lastHapticTarget !== targetPlayer) {
+                    lastHapticTarget = targetPlayer;
+                    getPlayers().forEach((item) => item.classList.remove('drop-target'));
+                    targetPlayer.classList.add('drop-target');
+                    triggerHaptic(12); // Vibração suave ao rolar por cima do jogador
+                }
+            } else if (!targetPlayer) {
+                if (lastHapticTarget) {
+                    lastHapticTarget = null;
+                    getPlayers().forEach((item) => item.classList.remove('drop-target'));
+                }
+            }
+        }, { passive: false });
+
+        player.addEventListener('touchend', () => {
+            if (!editMode || !touchDragSource) return;
+
+            if (touchGhost) {
+                touchGhost.remove();
+                touchGhost = null;
+            }
+
+            player.classList.remove('is-dragging');
+
+            if (lastHapticTarget && lastHapticTarget !== touchDragSource) {
+                const target = lastHapticTarget;
+                lastHapticTarget = null;
+                getPlayers().forEach((item) => item.classList.remove('drop-target'));
+                triggerHaptic([15, 30, 15]); // Vibração dupla ao soltar
+                checkAndSwap(touchDragSource, target);
+            } else {
+                lastHapticTarget = null;
+                getPlayers().forEach((item) => item.classList.remove('drop-target'));
+            }
+
+            touchDragSource = null;
+        });
+
+        player.addEventListener('touchcancel', () => {
+            if (touchGhost) {
+                touchGhost.remove();
+                touchGhost = null;
+            }
+            if (touchDragSource) {
+                touchDragSource.classList.remove('is-dragging');
+            }
+            touchDragSource = null;
+            lastHapticTarget = null;
+            getPlayers().forEach((item) => item.classList.remove('drop-target'));
+        });
+    }
+
     function bindDragAndDrop() {
         getPlayers().forEach((player) => {
+            bindTouchEvents(player);
+
             player.addEventListener('click', () => {
                 selectPlayerForSwap(player);
             });
@@ -387,22 +505,34 @@
             player.addEventListener('dragstart', (event) => {
                 if (!editMode || touchEditMode) return;
                 dragSource = player;
+                lastHapticTarget = player;
                 player.classList.add('is-dragging');
                 event.dataTransfer.effectAllowed = 'move';
+                triggerHaptic(25);
             });
 
             player.addEventListener('dragend', () => {
                 player.classList.remove('is-dragging');
+                lastHapticTarget = null;
                 getPlayers().forEach((item) => item.classList.remove('drop-target'));
             });
 
             player.addEventListener('dragover', (event) => {
                 if (!editMode || !dragSource || dragSource === player) return;
                 event.preventDefault();
-                player.classList.add('drop-target');
+
+                if (lastHapticTarget !== player) {
+                    lastHapticTarget = player;
+                    getPlayers().forEach((item) => item.classList.remove('drop-target'));
+                    player.classList.add('drop-target');
+                    triggerHaptic(12); // Vibração suave de sequência ao passar por cima
+                }
             });
 
             player.addEventListener('dragleave', () => {
+                if (lastHapticTarget === player) {
+                    lastHapticTarget = null;
+                }
                 player.classList.remove('drop-target');
             });
 
@@ -410,6 +540,7 @@
                 if (!editMode || touchEditMode || !dragSource || dragSource === player) return;
                 event.preventDefault();
                 player.classList.remove('drop-target');
+                triggerHaptic([15, 30, 15]); // Vibração de confirmação ao soltar
                 checkAndSwap(dragSource, player);
             });
         });
@@ -534,4 +665,52 @@
     updatePositionBadges();
 }) ();
 </script>
+
+<style>
+    .judge-team-player {
+        transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease, border-color 0.18s ease !important;
+    }
+
+    .judge-team-player.is-dragging {
+        opacity: 0.5;
+        transform: scale(0.96) !important;
+    }
+
+    .judge-team-player.drop-target {
+        transform: scale(1.05) translateY(-4px) !important;
+        box-shadow: 0 8px 24px rgba(34, 197, 94, 0.4), 0 0 16px rgba(34, 197, 94, 0.3) !important;
+        border-color: #22c55e !important;
+        animation: sequenceHoverPulse 0.35s ease-in-out infinite alternate !important;
+        z-index: 10;
+    }
+
+    .judge-team-player.just-swapped {
+        animation: swapHapticPulse 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+    }
+
+    @keyframes sequenceHoverPulse {
+        0% {
+            transform: scale(1.04) translateY(-3px);
+            border-color: #22c55e;
+        }
+        100% {
+            transform: scale(1.07) translateY(-5px);
+            border-color: #4ade80;
+            box-shadow: 0 10px 28px rgba(34, 197, 94, 0.5);
+        }
+    }
+
+    @keyframes swapHapticPulse {
+        0% {
+            transform: scale(0.95);
+        }
+        50% {
+            transform: scale(1.08);
+            border-color: #22c55e;
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+</style>
 {% endblock %}

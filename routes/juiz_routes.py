@@ -350,7 +350,7 @@ def api_jogar_resumo():
 # CRIAR PARTIDA
 # ============================================================
 
-@juiz_bp.route('/jogar/criar-partida', methods=['POST'])
+@juiz_bp.route('/jogar/criar-partida', methods=['GET', 'POST'])
 @juiz_required
 def juiz_criar_partida():
     """Inicia criação de partida"""
@@ -360,12 +360,32 @@ def juiz_criar_partida():
         if destino_aberto:
             return redirect(destino_aberto)
 
-        jogador_service.limpar_presenca()
-        juiz_partida_service.iniciar_partida(session.get('user_id'))
+        if request.method == 'POST':
+            jogador_service.limpar_presenca()
+            juiz_partida_service.iniciar_partida(session.get('user_id'))
         
         todos_jogadores = sorted(jogador_service.listar(), key=lambda j: j.nome.lower())
         fixos = [j for j in todos_jogadores if j.tipo == "fixo"]
         avulsos = [j for j in todos_jogadores if j.tipo == "avulso"]
+
+        # Carregar inscrições de presença confirmadas via app
+        from services.presenca_service import PresencaService
+        ps = PresencaService()
+        presenca_resumo = ps.obter_resumo()
+        confirmados_respostas = presenca_resumo.get("confirmados", [])
+
+        confirmados_ids = []
+        for c in confirmados_respostas:
+            u_id = str(c.get("user_id", ""))
+            u_nome = (c.get("nome") or "").strip().lower()
+            for j in todos_jogadores:
+                j_owner = str(j.owner_user_id) if j.owner_user_id else ""
+                j_nome = (j.nome or "").strip().lower()
+                if (u_id and j_owner and u_id == j_owner) or (u_nome and u_nome == j_nome):
+                    if j.id not in confirmados_ids:
+                        confirmados_ids.append(j.id)
+                    break
+
         presentes = [j for j in todos_jogadores if j.presente]
 
         return render_template(
@@ -376,6 +396,9 @@ def juiz_criar_partida():
             presentes=presentes,
             total_presentes=len(presentes),
             total_jogadores=len(todos_jogadores),
+            confirmados_ids=confirmados_ids,
+            total_confirmados_inscritos=len(confirmados_ids),
+            presenca_resumo=presenca_resumo,
             usuario=_usuario_logado()
         )
     except Exception as e:

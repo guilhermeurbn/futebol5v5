@@ -492,7 +492,7 @@ def perfil_page():
 
     aba_ativa = request.args.get('tab', '').strip().lower()
     if aba_ativa not in ['mensagem', 'estatisticas', 'partidas', 'duelo', 'mais']:
-        aba_ativa = 'estatisticas' if jogador_proprio else 'mais'
+        aba_ativa = 'partidas'
 
     return render_template(
         'perfil.html',
@@ -620,7 +620,7 @@ def perfil_jogador_publico(jogador_id):
 
         aba_ativa = request.args.get('tab', '').strip().lower()
         if aba_ativa not in ['mensagem', 'estatisticas', 'partidas', 'duelo', 'mais']:
-            aba_ativa = 'estatisticas' if (is_self and jogador) else ('partidas' if jogador else 'mais')
+            aba_ativa = 'partidas'
 
         mensagens_nao_lidas = []
         mensagens_lidas = []
@@ -706,6 +706,12 @@ def perfil_enviar_mensagem():
             destinatario_nome=destinatario_nome,
             conteudo=conteudo
         )
+
+        # Ao responder a mensagem, marca automaticamente todas as mensagens pendentes recebidas deste atleta como lidas/arquivadas
+        try:
+            msg_svc.marcar_como_lidas(destinatario_id=current_user_id, remetente_id=destinatario_id)
+        except Exception as exc:
+            logger.warning(f"Erro ao marcar mensagens como lidas ao responder: {exc}")
 
         flash(f'Mensagem enviada para {destinatario_nome} com sucesso!', 'sucesso')
         

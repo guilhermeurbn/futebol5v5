@@ -1,15 +1,8 @@
 {
-  "respostas": {
-    "0d2e29f6-ddc4-4328-a971-d49157356f8f": {
-      "user_id": "0d2e29f6-ddc4-4328-a971-d49157356f8f",
-      "nome": "Guilherme Urbano",
-      "status": "confirmado",
-      "atualizado_em": "2026-07-31T14:26:59.001020"
-    }
-  },
+  "respostas": {},
   "partida_alvo_id": null,
-  "status_lista": "aberta",
+  "status_lista": "fechada",
   "titulo": "Próxima Pelada",
   "data_jogo": "Terça-feira, 04/08/2026",
-  "aberta_em": "2026-07-31T13:58:53.883119"
+  "aberta_em": "2026-08-01T13:33:05.277748"
 }

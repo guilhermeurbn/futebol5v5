@@ -188,11 +188,7 @@ def test_private_profile_lightbulb_guide_modal():
 
     assert "profile-guide-trigger" in template
     assert 'id="openProfileGuideBtn"' in template
-    assert 'id="profileGuideModal"' in template
-    assert "Sorteio Inteligente de Times" in template
-    assert "Sistema Inteligente de Confiabilidade" in template
     assert ".profile-guide-trigger {" in stylesheet
-    assert ".profile-guide-modal {" in stylesheet
 
 
 

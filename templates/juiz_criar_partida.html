@@ -64,6 +64,25 @@
                 <span class="judge-available-count" style="font-size: 0.8rem; font-weight: 700; border-radius: 8px;">{{ total_jogadores }} disponíveis</span>
             </div>
 
+            {% if total_confirmados_inscritos is defined and total_confirmados_inscritos > 0 %}
+            <div style="background: rgba(10, 8, 18, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.85rem 1.1rem; margin-top: 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 0.65rem;">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <polyline points="16 11 18 13 22 9"/>
+                    </svg>
+                    <span style="font-size: 0.88rem; font-weight: 600; color: #f1f5f9;">
+                        {{ total_confirmados_inscritos }} atleta(s) confirmados pelo app
+                    </span>
+                </div>
+                <button type="button" onclick="usarJogadoresInscritos()" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.28); color: #22c55e; font-weight: 700; padding: 0.45rem 0.9rem; border-radius: 8px; font-size: 0.82rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem; transition: all 0.2s ease;">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <span>Usar confirmados</span>
+                </button>
+            </div>
+            {% endif %}
+
             <div class="judge-selection-toolbar" style="margin-top: 1.25rem;">
                 <div class="judge-selection-toolbar__status" aria-live="polite">
                     <span>Selecionados</span>
@@ -158,7 +177,51 @@
 
 <script>
     const QUANTIDADES_VALIDAS = [10, 15, 20];
+    const INSCRITOS_IDS = {{ confirmados_ids|default([])|tojson }};
     let quantidadeSelecionada = null;
+
+    function usarJogadoresInscritos() {
+        if (!INSCRITOS_IDS || INSCRITOS_IDS.length === 0) {
+            alert("Nenhum jogador inscrito encontrado na lista de presença.");
+            return;
+        }
+
+        // Se a quantidade de jogadores da partida ainda não foi escolhida na Etapa 1
+        if (!quantidadeSelecionada) {
+            let sugerido = 10;
+            if (INSCRITOS_IDS.length > 15) {
+                sugerido = 20;
+            } else if (INSCRITOS_IDS.length > 10) {
+                sugerido = 15;
+            }
+            selecionarQuantidade(sugerido);
+        }
+
+        let marcados = 0;
+        document.querySelectorAll('.jogador-checkbox').forEach(cb => {
+            const idNum = parseInt(cb.dataset.id, 10);
+            const idStr = String(cb.dataset.id);
+            const ehInscrito = INSCRITOS_IDS.includes(idNum) || INSCRITOS_IDS.includes(idStr);
+
+            if (ehInscrito) {
+                cb.checked = true;
+                marcados++;
+            }
+        });
+
+        atualizarContador();
+
+        // Feedback visual
+        const msgErro = document.getElementById('mensagemErro');
+        if (msgErro) {
+            msgErro.style.display = 'block';
+            msgErro.className = 'alert alert-success judge-create-error';
+            msgErro.style.background = 'rgba(34, 197, 94, 0.12)';
+            msgErro.style.borderColor = 'rgba(34, 197, 94, 0.3)';
+            msgErro.style.color = '#4ade80';
+            msgErro.innerHTML = `<strong>⚽ Sucesso:</strong> ${marcados} jogador(es) inscritos pelo app marcado(s) automaticamente! Complete a seleção escolhendo o restante.`;
+        }
+    }
 
     function atualizarContador() {
         document.querySelectorAll('.jogador-checkbox').forEach(cb => {
