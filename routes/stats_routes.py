@@ -594,7 +594,7 @@ def api_ranking_geral():
 def api_competicao_abrir():
     """API: Abre uma nova competição zerada (definida por número de partidas ou meses)"""
     user = _usuario_logado()
-    if not user or user.get('role') not in ['admin', 'super_admin']:
+    if not user or user.get('role') not in ['admin']:
         return jsonify({'sucesso': False, 'erro': 'Apenas administradores podem abrir competições'}), 403
 
     dados = request.get_json(silent=True) or request.form
@@ -712,7 +712,7 @@ def api_presenca_resumo():
 def api_presenca_abrir():
     """API: Juiz/Admin abre a lista de presença pré-jogo"""
     role = session.get('role')
-    if role not in ['juiz', 'admin', 'super_admin']:
+    if role not in ['juiz', 'admin', 'admin']:
         return jsonify({'sucesso': False, 'erro': 'Apenas Juiz ou Admin podem abrir a lista'}), 403
 
     dados = request.get_json(silent=True) or request.form
@@ -724,7 +724,7 @@ def api_presenca_abrir():
 def api_presenca_fechar():
     """API: Juiz/Admin fecha a lista de presença pré-jogo"""
     role = session.get('role')
-    if role not in ['juiz', 'admin', 'super_admin']:
+    if role not in ['juiz', 'admin', 'admin']:
         return jsonify({'sucesso': False, 'erro': 'Apenas Juiz ou Admin podem fechar a lista'}), 403
 
     res = presenca_service.fechar_lista()

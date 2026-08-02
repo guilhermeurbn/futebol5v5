@@ -98,8 +98,7 @@
                 <label class="judge-player-option">
                     <input type="checkbox" class="jogador-checkbox" data-id="{{ jogador.id }}"
                         data-nivel="{{ jogador.nivel }}" data-posicao="{{ jogador.posicao }}"
-                        data-nome="{{ jogador.nome }}" onchange="atualizarContador()" {% if jogador.presente %}checked{%
-                        endif %}>
+                        data-nome="{{ jogador.nome }}" onchange="atualizarContador()" {% if jogador.presente %}checked{% endif %}>
                     <img class="judge-player-option__bg"
                         src="{{ jogador.foto_url or url_for('static', filename='foto_card_jogador.jpeg') }}" alt=""
                         aria-hidden="true">

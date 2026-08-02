@@ -177,14 +177,14 @@ VotacaoService.encerrar_e_apurar
 
 Os perfis atuais sao:
 
-- `super_admin`
+- `admin`
 - `admin`
 - `juiz`
 - `usuario`
 
 Regras gerais:
 
-- `admin` e `super_admin` tem acesso total
+- `admin` e `admin` tem acesso total
 - `juiz` tem acesso ao fluxo operacional do jogo
 - `usuario` participa da votacao e ve seu proprio contexto
 

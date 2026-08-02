@@ -64,15 +64,27 @@
 
         <div class="premium-profile-header public-profile-hero" style="position: relative;">
             {% if is_self %}
-            <a href="{{ url_for('auth.configuracoes_page') }}" class="profile-guide-trigger" id="openProfileGuideBtn"
-                title="Configurações & Preferências" aria-label="Configurações & Preferências">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path
-                        d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-                    <circle cx="12" cy="12" r="3" />
-                </svg>
-            </a>
+            <div style="position: absolute; top: 1rem; right: 1rem; display: flex; align-items: center; gap: 0.5rem; z-index: 10;">
+                <a href="{{ url_for('auth.editar_perfil_page') }}" class="profile-guide-trigger" id="openEditProfileBtn"
+                    title="Editar Perfil (Nome, E-mail, Senha)" aria-label="Editar Perfil"
+                    style="position: relative; top: 0; right: 0; background: rgba(34, 197, 94, 0.14); border: 1px solid rgba(34, 197, 94, 0.4); color: #22c55e;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 20h9" />
+                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                    </svg>
+                </a>
+                <a href="{{ url_for('auth.configuracoes_page') }}" class="profile-guide-trigger" id="openProfileGuideBtn"
+                    title="Configurações & Preferências" aria-label="Configurações & Preferências"
+                    style="position: relative; top: 0; right: 0;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                        <circle cx="12" cy="12" r="3" />
+                    </svg>
+                </a>
+            </div>
             {% endif %}
             <div class="premium-profile-avatar-wrap">
                 <div class="premium-profile-avatar-inner">{{ avatar_text|upper }}</div>
@@ -107,7 +119,7 @@
                         <span>
                             {% set p_role = perfil_user.role if perfil_user.role is defined else perfil_user.get('role')
                             %}
-                            {% if p_role == 'super_admin' %}Super Admin
+                            {% if p_role == 'admin' %}Admin
                             {% elif p_role == 'admin' %}Admin
                             {% elif p_role == 'juiz' %}Juiz
                             {% else %}{% if tem_jogador %}{% if jogador.tipo == 'fixo' %}Fixo{% else %}Avulso{% endif
@@ -142,7 +154,6 @@
                     style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 8px #22c55e; display: inline-block; margin-left: 0.35rem;"></span>
                 {% endif %}
             </button>
-            {% if tem_jogador %}
             <button class="premium-profile-tab {% if aba_ativa == 'estatisticas' %}is-active{% endif %}"
                 data-tab-target="estatisticas"
                 aria-selected="{% if aba_ativa == 'estatisticas' %}true{% else %}false{% endif %}">
@@ -177,8 +188,7 @@
                 </svg>
                 <span>Duelo X1</span>
             </button>
-            {% endif %}
-            {% if is_self or (auth_user and auth_user.role in ['admin', 'super_admin']) %}
+            {% if is_self or (auth_user and auth_user.role in ['admin']) %}
             <button class="premium-profile-tab {% if aba_ativa == 'mais' %}is-active{% endif %}" data-tab-target="mais"
                 aria-selected="{% if aba_ativa == 'mais' %}true{% else %}false{% endif %}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -342,7 +352,6 @@
             </div>
         </div>
 
-        {% if tem_jogador %}
         {# ESTATISTICAS TAB #}
         <div class="premium-profile-tab-content {% if aba_ativa == 'estatisticas' %}is-active{% endif %}"
             id="tab-estatisticas" {% if aba_ativa !='estatisticas' %}hidden{% endif %}>
@@ -710,7 +719,6 @@
                 </div>
             </div>
         </div>
-        {% endif %}
 
         {# MAIS TAB #}
         <div class="premium-profile-tab-content {% if aba_ativa == 'mais' %}is-active{% endif %} premium-profile-panel profile-account-access"
@@ -731,7 +739,7 @@
                 <div class="premium-profile-cred-row">
                     <span class="premium-profile-cred-label">Nível de Acesso</span>
                     <span class="premium-profile-cred-value">
-                        {% if usuario.role == 'super_admin' %}Super Admin
+                        {% if usuario.role == 'admin' %}Admin
                         {% elif usuario.role == 'admin' %}Admin
                         {% elif usuario.role == 'juiz' %}Juiz
                         {% else %}Jogador{% endif %}
@@ -765,7 +773,7 @@
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button class="btn btn-secondary" type="submit" style="width: 100%;">Sair do aplicativo</button>
                     </form>
-                    {% if usuario.role not in ['admin', 'super_admin'] %}
+                    {% if usuario.role not in ['admin'] %}
                     <button class="btn btn-primary" type="button" data-open-delete-dialog
                         style="background: linear-gradient(135deg, #ef4444, #b91c1c) !important; border-color: rgba(239, 68, 68, 0.3) !important; color: white !important; width: 100%; max-width: 220px;">Apagar
                         conta</button>

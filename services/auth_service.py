@@ -353,10 +353,10 @@ class AuthService:
         if executor_id and user_id == executor_id and not ativo:
             raise ValueError("Voce nao pode desativar seu proprio usuario")
 
-        if alvo.get("role") in ["super_admin", "admin"] and not ativo:
+        if alvo.get("role") in ['admin'] and not ativo:
             privilegiados_ativos = [
                 u for u in usuarios
-                if u.get("role") in ["super_admin", "admin"] and u.get("ativo", True)
+                if u.get("role") in ['admin'] and u.get("ativo", True)
             ]
             if alvo.get("ativo", True) and len(privilegiados_ativos) <= 1:
                 raise ValueError("Nao e possivel desativar o ultimo usuario com acesso total")
@@ -410,6 +410,64 @@ class AuthService:
             "ativo": alvo.get("ativo", True),
             "criado_em": alvo.get("criado_em"),
         }
+
+    def atualizar_perfil_usuario(
+        self,
+        user_id: str,
+        email: Optional[str] = None,
+        username: Optional[str] = None,
+        nome: Optional[str] = None
+    ) -> Dict:
+        """
+        Atualiza dados cadastrais (email, username, nome) do próprio usuário.
+        """
+        usuarios = self._carregar()
+        alvo = None
+        for u in usuarios:
+            if u.get("id") == user_id:
+                alvo = u
+                break
+
+        if not alvo:
+            raise ValueError("Usuário não encontrado")
+
+        if email is not None:
+            email_clean = email.strip().lower()
+            if not email_clean or "@" not in email_clean:
+                raise ValueError("E-mail deve ser válido")
+            if any((u.get("email") or "").strip().lower() == email_clean and u.get("id") != user_id for u in usuarios):
+                raise ValueError("Este e-mail já está em uso por outra conta.")
+            alvo["email"] = email_clean
+
+        if username is not None:
+            uname_clean = username.strip().lower()
+            if not uname_clean or len(uname_clean) < 3:
+                raise ValueError("Nome de usuário deve ter ao menos 3 caracteres")
+            if any((u.get("username") or "").strip().lower() == uname_clean and u.get("id") != user_id for u in usuarios):
+                raise ValueError("Este nome de usuário já está em uso por outra conta.")
+            alvo["username"] = uname_clean
+
+        if nome is not None:
+            nome_clean = nome.strip()
+            if len(nome_clean) < 2:
+                raise ValueError("Nome deve ter ao menos 2 caracteres")
+            nome_partes = [p for p in nome_clean.split() if p]
+            if len(nome_partes) < 2:
+                raise ValueError("Por favor, insira o nome e sobrenome.")
+            alvo["nome"] = nome_clean
+            
+            # Sincronizar nome do atleta vinculado se existir
+            try:
+                from services.jogador_service import JogadorService
+                jog_svc = JogadorService()
+                linked_players = jog_svc.listar_por_usuario(user_id)
+                for p in linked_players:
+                    jog_svc.atualizar(p.id, nome=nome_clean)
+            except Exception:
+                pass
+
+        self._salvar(usuarios)
+        return alvo
     
     def deletar_usuario(self, user_id: str, executor_id: Optional[str] = None) -> bool:
         """
@@ -445,14 +503,14 @@ class AuthService:
             if user_id == executor_id:
                 raise ValueError("Voce nao pode deletar sua propria conta")
         else:
-            if alvo.get("role") in ["super_admin", "admin"]:
+            if alvo.get("role") in ['admin']:
                 raise ValueError("Administradores nao podem deletar sua propria conta")
         
-        # Verificar se é o último admin/super_admin
-        if alvo.get("role") in ["super_admin", "admin"]:
+        # Verificar se é o último admin/admin
+        if alvo.get("role") in ['admin']:
             privilegiados_ativos = [
                 u for u in usuarios
-                if u.get("role") in ["super_admin", "admin"] and u.get("id") != user_id
+                if u.get("role") in ['admin'] and u.get("id") != user_id
             ]
             if len(privilegiados_ativos) == 0:
                 raise ValueError("Nao e possivel deletar o ultimo usuario com acesso total")

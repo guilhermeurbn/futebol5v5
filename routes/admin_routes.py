@@ -38,7 +38,7 @@ def _usuario_logado():
 
 
 def _is_admin():
-    return session.get('role') in ['super_admin', 'admin']
+    return session.get('role') in ['admin']
 
 
 def admin_required(f):

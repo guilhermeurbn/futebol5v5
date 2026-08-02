@@ -21,7 +21,7 @@ O NaTrave cobre o fluxo completo de uma pelada organizada:
 
 ## Funcionalidades Atuais
 
-- Autenticacao com perfis `super_admin`, `admin`, `juiz` e `usuario`
+- Autenticacao com perfis `admin`, `admin`, `juiz` e `usuario`
 - Reset simples de senha por `admin` com senha temporaria
 - Cadastro de jogadores com nome, nivel, tipo e posicao
 - Fluxo dedicado para o `juiz` em `/jogar`
@@ -64,7 +64,7 @@ Resumo do comportamento:
 
 ### Perfis de acesso
 
-- `super_admin`: acesso total
+- `admin`: acesso total
 - `admin`: gestao completa do sistema e dos usuarios
 - `juiz`: acesso ao fluxo operacional do jogo e da votacao da rodada
 - `usuario`: acesso ao proprio perfil e a votacao quando participa de uma partida

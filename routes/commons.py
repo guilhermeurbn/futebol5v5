@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 def _is_admin():
     """Verifica se usuário é admin"""
-    return session.get('role') in ['super_admin', 'admin']
+    return session.get('role') in ['admin']
 
 
 def _is_juiz():

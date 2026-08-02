@@ -8,7 +8,7 @@
     <script src="{{ url_for('static', filename='local-datetime.js', v='20260616-06') }}" defer></script>
 </head>
 <body>
-    <div class="container{% if auth_user.role in ['admin', 'super_admin'] %} page-container-wide judge-workspace-page admin-page admin-page--ecosystem{% elif auth_user.role == 'usuario' %} page-container-wide player-workspace-page{% endif %}">
+    <div class="container{% if auth_user.role in ['admin'] %} page-container-wide judge-workspace-page admin-page admin-page--ecosystem{% elif auth_user.role == 'usuario' %} page-container-wide player-workspace-page{% endif %}">
         <!-- Header -->
         <header class="header">
             <div class="header-content">

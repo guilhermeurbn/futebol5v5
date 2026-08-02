@@ -23,7 +23,7 @@ juiz_partida_service = JuizPartidaService()
 # ============================================================
 
 def _is_admin():
-    return session.get('role') in ['super_admin', 'admin']
+    return session.get('role') in ['admin']
 
 
 def _is_juiz():

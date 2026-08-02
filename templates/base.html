@@ -262,7 +262,7 @@
     {% if show_site_footer %}
     {% set current_path = request.path or '' %}
     {% set is_judge_role = session.get('role') == 'juiz' %}
-    {% set is_admin_role = session.get('role') in ['admin', 'super_admin'] %}
+    {% set is_admin_role = session.get('role') in ['admin'] %}
     {% set is_jogadores = current_path == '/' %}
     {% set is_perfil = current_path.startswith('/perfil') %}
     {% set is_votacao = current_path.startswith('/votacao') or current_path.startswith('/admin/votacao') %}

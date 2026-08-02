@@ -3,7 +3,7 @@
 {% block title %}Histórico de Sorteios{% endblock %}
 
 {% block content %}
-<div class="container page-container-wide history-page{% if auth_user.role in ['admin', 'super_admin'] %} judge-workspace-page admin-page admin-page--ecosystem{% elif auth_user.role == 'usuario' %} player-workspace-page{% elif auth_user.role == 'juiz' %} judge-workspace-page{% endif %}" style="background:#000000; min-height:100vh; width:100%;">
+<div class="container page-container-wide history-page{% if auth_user.role in ['admin'] %} judge-workspace-page admin-page admin-page--ecosystem{% elif auth_user.role == 'usuario' %} player-workspace-page{% elif auth_user.role == 'juiz' %} judge-workspace-page{% endif %}" style="background:#000000; min-height:100vh; width:100%;">
     <header class="header">
         <div class="header-content">
             {% set brand_title = 'Histórico' %}

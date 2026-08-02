@@ -225,7 +225,7 @@ def criar_app(config_name: str = None) -> Flask:
         if not role:
             return
 
-        target_prefix = 'admin' if role in ['admin', 'super_admin'] else ('juiz' if role == 'juiz' else 'usuario')
+        target_prefix = 'admin' if role in ['admin'] else ('juiz' if role == 'juiz' else 'usuario')
 
         if path.startswith(f"/{target_prefix}"):
             return
@@ -420,7 +420,7 @@ def criar_app(config_name: str = None) -> Flask:
         votacao_pendente_url = None
         presenca_pendente = False
         try:
-            if session.get('user_id') and session.get('role') in {'admin', 'super_admin'}:
+            if session.get('user_id') and session.get('role') in {'admin'}:
                 total_notificacoes = notificacao_service.contar_nao_lidas()
                 notificacoes_url = url_for('admin.admin_notificacoes_page')
             elif session.get('user_id') and session.get('role') == 'usuario':

@@ -63,7 +63,7 @@
     </style>
 </head>
 <body>
-    <div class="container{% if auth_user.role in ['admin', 'super_admin'] %} page-container-wide judge-workspace-page admin-page admin-page--ecosystem{% elif auth_user.role == 'usuario' %} page-container-wide player-workspace-page{% elif auth_user.role == 'juiz' %} page-container-wide judge-workspace-page{% endif %}">
+    <div class="container{% if auth_user.role in ['admin'] %} page-container-wide judge-workspace-page admin-page admin-page--ecosystem{% elif auth_user.role == 'usuario' %} page-container-wide player-workspace-page{% elif auth_user.role == 'juiz' %} page-container-wide judge-workspace-page{% endif %}">
         <!-- Header -->
         <header class="header">
             <div class="header-content">
@@ -141,7 +141,7 @@
 
             <!-- Actions -->
             <section class="section">
-                {% if auth_user.role in ['admin', 'super_admin', 'juiz'] %}
+                {% if auth_user.role in ['admin', 'admin', 'juiz'] %}
                 <div class="surface-panel surface-panel--soft times-workflow-panel" style="margin-bottom: 1rem;">
                     <div class="section-label">Sorteio concluído</div>
                     <h2 class="section-title times-workflow-panel__title" style="margin-top: 0;">Times prontos</h2>

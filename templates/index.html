@@ -43,7 +43,7 @@
         color: #22c55e !important;
     }
 </style>
-    <div class="container profile-page{% if auth_user.role in ['admin', 'super_admin'] %} page-container-wide judge-workspace-page admin-page admin-page--ecosystem{% elif auth_user.role == 'usuario' %} page-container-wide player-workspace-page{% endif %}" style="background: #000000 !important; min-height:100vh; width:100%;">
+    <div class="container profile-page{% if auth_user.role in ['admin'] %} page-container-wide judge-workspace-page admin-page admin-page--ecosystem{% elif auth_user.role == 'usuario' %} page-container-wide player-workspace-page{% endif %}" style="background: #000000 !important; min-height:100vh; width:100%;">
         <!-- Header -->
         <header class="header">
             <div class="header-content">
@@ -72,7 +72,7 @@
                         </h2>
                     </div>
                     <div class="section-header-actions players-showcase-actions">
-                        {% if auth_user.role in ['admin', 'super_admin'] %}
+                        {% if auth_user.role in ['admin'] %}
                         <button type="button" id="toggleCreatePlayerBtn" class="btn premium-add-player-btn" aria-expanded="false" aria-controls="createPlayerModal" onclick="const m = document.getElementById('createPlayerModal'); if (m) { m.showModal(); const inp = m.querySelector('#player-nome'); if (inp) setTimeout(() => inp.focus(), 100); }">
                             <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width: 16px; height: 16px; margin-right: 0.35rem; color: white;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                             <span>Adicionar Jogador</span>
@@ -81,7 +81,7 @@
                     </div>
                 </div>
 
-                {% if auth_user.role in ['admin', 'super_admin'] %}
+                {% if auth_user.role in ['admin'] %}
                     <!-- Player Creation Modal (Native Dialog) -->
                     <dialog class="profile-security-dialog" id="createPlayerModal">
                         <div class="profile-security-dialog__shell" style="padding: 1.75rem 1.5rem;">

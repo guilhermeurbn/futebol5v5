@@ -96,7 +96,7 @@ Observacao:
 
 ## 7) Perfis de acesso
 
-- `super_admin`: acesso total
+- `admin`: acesso total
 - `admin`: administracao geral
 - `juiz`: fluxo operacional do jogo
 - `usuario`: perfil proprio e votacao quando participante

@@ -40,7 +40,7 @@ def _usuario_logado():
 
 
 def _is_admin():
-    return session.get('role') in ['super_admin', 'admin']
+    return session.get('role') in ['admin']
 
 
 def _is_juiz():
@@ -192,7 +192,7 @@ def login_page():
             return redirect(url_for('auth.perfil_page'))
         if session.get('role') == 'juiz':
             return redirect(url_for('juiz.jogar_page'))
-        if session.get('role') in ['admin', 'super_admin']:
+        if session.get('role') in ['admin']:
             return redirect(url_for('jogador.index'))
         return redirect(url_for('auth.perfil_page'))
     
@@ -228,7 +228,7 @@ def login_submit():
             return redirect(url_for('auth.perfil_page'))
         if session.get('role') == 'juiz':
             return redirect(url_for('juiz.jogar_page'))
-        if session.get('role') in ['admin', 'super_admin']:
+        if session.get('role') in ['admin']:
             return redirect(url_for('jogador.index'))
         return redirect(url_for('auth.perfil_page'))
     except ValueError as e:
@@ -431,21 +431,32 @@ def perfil_page():
     partida_juiz_em_andamento = None
     
     try:
-        if not _is_admin():
-            meus = jogador_service.listar_por_usuario(session.get('user_id'))
-            jogador_proprio = meus[0] if meus else None
+        current_uid = session.get('user_id')
+        current_nome = session.get('nome')
+        current_uname = session.get('username')
+
+        meus = jogador_service.listar_por_usuario(current_uid) if current_uid else []
+        if not meus and current_uid:
+            j_by_id = jogador_service.obter_por_id(current_uid)
+            j_by_nome = jogador_service.obter_por_nome(current_nome) if (current_nome and not j_by_id) else None
+            j_by_uname = jogador_service.obter_por_nome(current_uname) if (current_uname and not j_by_id and not j_by_nome) else None
+            j_found = j_by_id or j_by_nome or j_by_uname
+            if j_found:
+                meus = [j_found]
+
+        jogador_proprio = meus[0] if meus else None
+        
+        # Obter estatísticas do jogador
+        if jogador_proprio:
+            stats_jogador = jogador_stats_service.obter_stats_jogador(jogador_proprio.nome)
+            stats_jogador.setdefault('efficiency', {})
+            stats_jogador.setdefault('discipline', {})
+            stats_jogador.setdefault('ultimos_resultados', {'forma': [], 'pontos': 0, 'partidas': []})
+            stats_jogador.setdefault('mini_dashboard', {'kpis': {}, 'series_ultimos_5': []})
+            stats_jogador.setdefault('planilha_metricas', [])
             
-            # Obter estatísticas do jogador
-            if jogador_proprio:
-                stats_jogador = jogador_stats_service.obter_stats_jogador(jogador_proprio.nome)
-                stats_jogador.setdefault('efficiency', {})
-                stats_jogador.setdefault('discipline', {})
-                stats_jogador.setdefault('ultimos_resultados', {'forma': [], 'pontos': 0, 'partidas': []})
-                stats_jogador.setdefault('mini_dashboard', {'kpis': {}, 'series_ultimos_5': []})
-                stats_jogador.setdefault('planilha_metricas', [])
-                
-                # Calcular e injetar notas e atributos determinísticos
-                _obter_notas_e_atributos_jogador(jogador_proprio, stats_jogador)
+            # Calcular e injetar notas e atributos determinísticos
+            _obter_notas_e_atributos_jogador(jogador_proprio, stats_jogador)
     except ValueError as e:
         return render_template(
             'perfil.html',
@@ -749,6 +760,16 @@ def perfil_marcar_mensagem_lida(msg_id):
     return redirect(ref)
 
 
+@auth_bp.route('/editar-perfil', methods=['GET'])
+@login_required
+def editar_perfil_page():
+    """Página dedicada de edição de perfil e dados pessoais"""
+    return render_template(
+        'editar_perfil.html',
+        usuario=_usuario_logado()
+    )
+
+
 @auth_bp.route('/perfil/senha', methods=['POST'])
 @login_required
 def perfil_alterar_senha():
@@ -760,9 +781,9 @@ def perfil_alterar_senha():
 
     if nova_senha != confirmar_senha:
         return render_template(
-            'perfil.html',
+            'editar_perfil.html',
             usuario=_usuario_logado(),
-            erro_senha='A confirmacao de senha nao confere'
+            erro_senha='A confirmação de senha não confere'
         ), 400
 
     try:
@@ -775,17 +796,14 @@ def perfil_alterar_senha():
         session['senha_temporaria_ativa'] = False
         session.modified = True
         return render_template(
-            'perfil.html',
+            'editar_perfil.html',
             usuario=_usuario_logado(),
-            jogador_proprio=(jogador_service.listar_por_usuario(session.get('user_id')) or [None])[0],
             sucesso_senha='Senha alterada com sucesso!'
         )
     except ValueError as e:
-        jogador_proprio = (jogador_service.listar_por_usuario(session.get('user_id')) or [None])[0]
         return render_template(
-            'perfil.html',
+            'editar_perfil.html',
             usuario=_usuario_logado(),
-            jogador_proprio=jogador_proprio,
             erro_senha=str(e)
         ), 400
     except Exception as e:
@@ -793,9 +811,51 @@ def perfil_alterar_senha():
         logger = logging.getLogger(__name__)
         logger.error(f"Erro ao alterar senha: {str(e)}")
         return render_template(
-            'perfil.html',
+            'editar_perfil.html',
             usuario=_usuario_logado(),
             erro_senha='Erro ao alterar senha'
+        ), 500
+
+
+@auth_bp.route('/perfil/editar', methods=['POST'])
+@login_required
+def perfil_editar_dados():
+    """Edita e-mail, username ou nome do usuário logado"""
+    user_id = session.get('user_id')
+    email = request.form.get('email')
+    username = request.form.get('username')
+    nome = request.form.get('nome')
+
+    try:
+        updated = auth_service.atualizar_perfil_usuario(
+            user_id=user_id,
+            email=email if email is not None and email.strip() else None,
+            username=username if username is not None and username.strip() else None,
+            nome=nome if nome is not None and nome.strip() else None
+        )
+        if updated.get('username'):
+            session['username'] = updated.get('username')
+        if updated.get('nome'):
+            session['nome'] = updated.get('nome')
+        session.modified = True
+
+        return render_template(
+            'editar_perfil.html',
+            usuario=_usuario_logado(),
+            sucesso_perfil='Dados do perfil atualizados com sucesso!'
+        )
+    except ValueError as e:
+        return render_template(
+            'editar_perfil.html',
+            usuario=_usuario_logado(),
+            erro_perfil=str(e)
+        ), 400
+    except Exception as e:
+        logger.error(f"Erro ao editar perfil: {str(e)}")
+        return render_template(
+            'editar_perfil.html',
+            usuario=_usuario_logado(),
+            erro_perfil='Erro ao atualizar perfil'
         ), 500
 
 
@@ -898,7 +958,7 @@ def apagar_conta():
         if not user:
             return redirect(url_for('auth.logout'))
 
-        if user.get('role') in ['admin', 'super_admin']:
+        if user.get('role') in ['admin']:
             return render_template(
                 'perfil.html',
                 usuario=_usuario_logado(),
