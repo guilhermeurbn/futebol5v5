@@ -398,6 +398,24 @@ class JogadorService:
             target_jogador = jogadores_usuario[0]
             target_id = target_jogador.get("id")
             target_nome = target_jogador.get("nome") or usuario_destino.get("nome")
+
+            # Transferir nota (nível e histórico de evolução) do avulso para o perfil do usuário
+            for idx, j in enumerate(dados_jogadores):
+                if j.get("id") == target_id:
+                    # Atualiza nível se o avulso tiver nível diferente de 5.5 ou se o target for 5.5
+                    if avulso.get("nivel") and (float(j.get("nivel", 5.5)) == 5.5 or float(avulso.get("nivel", 5.5)) != 5.5):
+                        j["nivel"] = float(avulso.get("nivel"))
+                    if avulso.get("nivel_preciso") and (j.get("nivel_preciso") in [None, 5.5] or float(avulso.get("nivel_preciso", 5.5)) != 5.5):
+                        j["nivel_preciso"] = float(avulso.get("nivel_preciso"))
+
+                    # Mesclar histórico de nível
+                    hist_target = list(j.get("historico_nivel") or [])
+                    hist_avulso = list(avulso.get("historico_nivel") or [])
+                    hist_combinado = hist_target + hist_avulso
+                    hist_combinado.sort(key=lambda x: x.get("ts", ""))
+                    j["historico_nivel"] = hist_combinado[-50:]
+                    break
+
             # Remover o perfil avulso antigo da lista de jogadores
             dados_jogadores = [j for j in dados_jogadores if j.get("id") != jogador_avulso_id]
         else:
@@ -446,7 +464,7 @@ class JogadorService:
         if partidas_alteradas:
             partida_service._salvar(partidas_dados)
 
-        # 3. Atualizar votacoes_partidas.json
+        # 3. Atualizar votacoes_partidas.json (Times, Participantes para poder votar, e Resultados)
         votacao_service = VotacaoService()
         votacoes_dados = votacao_service._carregar()
         votacoes_alteradas = False
@@ -460,6 +478,16 @@ class JogadorService:
                         j["owner_user_id"] = usuario_destino_id
                         j["tipo"] = "fixo"
                         votacoes_alteradas = True
+
+            # Habilitar permissão para votar se o avulso estava entre os participantes
+            for part in p_votacao.get("participantes", []):
+                if norm(part.get("jogador_nome", "")) == norm_nome_avulso or part.get("user_id") == usuario_destino_id:
+                    part["user_id"] = usuario_destino_id
+                    part["username"] = usuario_destino.get("username", "")
+                    part["nome_usuario"] = usuario_destino.get("nome", "")
+                    part["jogador_nome"] = target_nome
+                    part["externo"] = False
+                    votacoes_alteradas = True
 
             res_apuracao = p_votacao.get("resultado_apuracao")
             if res_apuracao and isinstance(res_apuracao, dict):
