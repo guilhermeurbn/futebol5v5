@@ -94,9 +94,11 @@ def admin_page():
         erro = session.pop('admin_erro', request.args.get('erro', ''))
         senha_reset = session.pop('admin_senha_reset', None)
         
+        jogadores_avulsos = [j.para_dict() if hasattr(j, 'para_dict') else j for j in jogador_service.listar() if j.tipo == 'avulso' or not j.owner_user_id]
         return render_template(
             'admin.html',
             usuarios=usuarios,
+            jogadores_avulsos=jogadores_avulsos,
             notificacoes=notificacoes,
             total_notificacoes=notificacao_service.contar_nao_lidas(),
             total_usuarios=len(usuarios),
@@ -332,5 +334,34 @@ def admin_deletar_usuario(user_id):
     except Exception as e:
         logger.error(f"Erro ao deletar usuário: {str(e)}")
         return redirect(url_for('admin.admin_page', erro='Erro ao deletar usuário'))
+
+
+@admin_bp.route('/admin/jogadores/sincronizar', methods=['POST'])
+@admin_required
+def admin_sincronizar_jogador():
+    """Sincroniza um jogador avulso com uma conta de usuário cadastrado."""
+    try:
+        jogador_avulso_id = request.form.get('jogador_avulso_id', '').strip()
+        usuario_destino_id = request.form.get('usuario_destino_id', '').strip()
+
+        if not jogador_avulso_id or not usuario_destino_id:
+            raise ValueError('Selecione o jogador avulso e o usuário de destino.')
+
+        resultado = jogador_service.sincronizar_jogador_avulso(
+            jogador_avulso_id=jogador_avulso_id,
+            usuario_destino_id=usuario_destino_id
+        )
+
+        session['admin_sucesso'] = f"Jogador '{resultado['nome_avulso']}' sincronizado com sucesso para '{resultado['usuario_destino']}'!"
+        return redirect(url_for('admin.admin_page'))
+    except ValueError as e:
+        logger.warning(f"Erro de validação ao sincronizar jogador: {str(e)}")
+        session['admin_erro'] = str(e)
+        return redirect(url_for('admin.admin_page'))
+    except Exception as e:
+        logger.error(f"Erro ao sincronizar jogador: {str(e)}")
+        session['admin_erro'] = f"Erro ao sincronizar jogador: {str(e)}"
+        return redirect(url_for('admin.admin_page'))
+
 
 

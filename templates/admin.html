@@ -221,6 +221,60 @@
             </div>
         </section>
 
+        <!-- Seção: Sincronização de Jogadores Avulsos (Minimalista) -->
+        <section class="section voting-workspace-panel" style="padding: 1.25rem 1.5rem; margin-top: 1.75rem; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 16px;">
+            <div style="margin-bottom: 1rem;">
+                <h2 style="display: flex; align-items: center; gap: 0.4rem; margin: 0; font-size: 1.1rem; font-weight: 700; color: #ffffff;">
+                    <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px; color: #a78bfa;"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+                    Sincronizar Jogador Avulso
+                </h2>
+                <p style="font-size: 0.78rem; color: rgba(255, 255, 255, 0.5); margin: 0.2rem 0 0 0;">
+                    Vincule um jogador convidado a uma conta cadastrada para migrar todo seu histórico de jogos.
+                </p>
+            </div>
+
+            <form method="post" action="{{ url_for('admin.admin_sincronizar_jogador') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div style="display: flex; gap: 0.85rem; flex-wrap: wrap; align-items: flex-end;">
+                    <div style="flex: 1; min-width: 220px;">
+                        <label style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255, 255, 255, 0.5); font-weight: 600; margin-bottom: 0.35rem; display: block;">
+                            Jogador Avulso
+                        </label>
+                        <select name="jogador_avulso_id" required class="form-input" style="width: 100%; height: 40px; border-radius: 10px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: #ffffff; padding: 0 0.75rem; font-size: 0.85rem;">
+                            <option value="" disabled selected>Selecione o avulso...</option>
+                            {% for j in jogadores_avulsos %}
+                                <option value="{{ j.id }}">👤 {{ j.nome }} (Nível {{ j.nivel }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div style="display: flex; align-items: center; justify-content: center; height: 40px; color: rgba(255, 255, 255, 0.3);">
+                        <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </div>
+
+                    <div style="flex: 1; min-width: 220px;">
+                        <label style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255, 255, 255, 0.5); font-weight: 600; margin-bottom: 0.35rem; display: block;">
+                            Conta de Destino
+                        </label>
+                        <select name="usuario_destino_id" required class="form-input" style="width: 100%; height: 40px; border-radius: 10px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: #ffffff; padding: 0 0.75rem; font-size: 0.85rem;">
+                            <option value="" disabled selected>Selecione a conta...</option>
+                            {% for u in usuarios %}
+                                <option value="{{ u.id }}">⭐ {{ u.nome }} (@{{ u.username }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <button type="submit" class="btn" style="height: 40px; padding: 0 1.1rem; background: rgba(124, 58, 237, 0.85) !important; color: #ffffff !important; font-weight: 700; font-size: 0.85rem; border-radius: 10px; border: 1px solid rgba(167, 139, 250, 0.3); cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.2s ease;">
+                            <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 15px; height: 15px;"><path d="M21.5 2v6h-6"/><path d="M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                            <span>Sincronizar</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </section>
+
         <!-- User Creation Modal (Native Dialog - Customized Green Style) -->
         <dialog class="profile-security-dialog" id="createUserModal" style="border: 1px solid rgba(34, 197, 94, 0.25) !important; background: radial-gradient(circle at top right, rgba(34, 197, 94, 0.12), transparent 36%), rgba(18, 15, 25, 0.99) !important; box-shadow: 0 30px 90px rgba(0, 0, 0, 0.85) !important;">
             <div class="profile-security-dialog__shell" style="padding: 2.25rem 2rem;">

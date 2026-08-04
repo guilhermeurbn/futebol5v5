@@ -360,3 +360,125 @@ class JogadorService:
     def contar_presentes(self) -> int:
         """Retorna número de jogadores presentes"""
         return sum(1 for item in self._carregar_raw() if item.get("presente"))
+
+    def sincronizar_jogador_avulso(self, jogador_avulso_id: str, usuario_destino_id: str) -> dict:
+        """
+        Sincroniza/mescla um jogador avulso a uma conta de usuário cadastrado,
+        atualizando também todo o histórico de sorteios, partidas e votações.
+        """
+        import unicodedata
+        from services.auth_service import AuthService
+        from services.historico_service import HistoricoService
+        from services.partida_service import PartidaService
+        from services.votacao_service import VotacaoService
+        from services.jogador_stats_service import JogadorStatsService
+
+        def norm(s: str) -> str:
+            if not s:
+                return ""
+            s_clean = unicodedata.normalize('NFKD', s).encode('ASCII', 'ignore').decode('utf-8')
+            return s_clean.strip().lower()
+
+        dados_jogadores = self._carregar_raw()
+        avulso = next((j for j in dados_jogadores if j.get("id") == jogador_avulso_id), None)
+        if not avulso:
+            raise ValueError("Jogador avulso não encontrado")
+
+        auth_service = AuthService()
+        usuario_destino = auth_service.obter_por_id(usuario_destino_id)
+        if not usuario_destino:
+            raise ValueError("Usuário de destino não encontrado")
+
+        nome_avulso = avulso.get("nome", "")
+        norm_nome_avulso = norm(nome_avulso)
+
+        # Verificar se o usuário destino já possui um perfil de jogador
+        jogadores_usuario = [j for j in dados_jogadores if j.get("owner_user_id") == usuario_destino_id]
+        if jogadores_usuario:
+            target_jogador = jogadores_usuario[0]
+            target_id = target_jogador.get("id")
+            target_nome = target_jogador.get("nome") or usuario_destino.get("nome")
+            # Remover o perfil avulso antigo da lista de jogadores
+            dados_jogadores = [j for j in dados_jogadores if j.get("id") != jogador_avulso_id]
+        else:
+            target_id = avulso.get("id")
+            target_nome = usuario_destino.get("nome") or avulso.get("nome")
+            # Atualizar o perfil avulso para pertencer ao usuário
+            for idx, j in enumerate(dados_jogadores):
+                if j.get("id") == jogador_avulso_id:
+                    dados_jogadores[idx]["owner_user_id"] = usuario_destino_id
+                    dados_jogadores[idx]["tipo"] = "fixo"
+                    dados_jogadores[idx]["nome"] = target_nome
+
+        self._salvar(dados_jogadores)
+
+        # 1. Atualizar historico.json (Sorteios)
+        historico_service = HistoricoService()
+        historico_dados = historico_service._carregar_raw()
+        historico_alterado = False
+
+        for sorteio in historico_dados:
+            for time in sorteio.get("times", []):
+                for j in time.get("jogadores", []):
+                    j_id = j.get("id")
+                    j_nome = j.get("nome", "")
+                    if j_id == jogador_avulso_id or (norm(j_nome) == norm_nome_avulso and not j.get("owner_user_id")):
+                        j["id"] = target_id
+                        j["nome"] = target_nome
+                        j["owner_user_id"] = usuario_destino_id
+                        j["tipo"] = "fixo"
+                        historico_alterado = True
+
+        if historico_alterado:
+            historico_service._salvar(historico_dados)
+
+        # 2. Atualizar partidas.json
+        partida_service = PartidaService()
+        partidas_dados = partida_service._carregar_raw()
+        partidas_alteradas = False
+
+        for partida in partidas_dados:
+            for detalhe in partida.get("jogadores_detalhes", []) or []:
+                if norm(detalhe.get("nome", "")) == norm_nome_avulso:
+                    detalhe["nome"] = target_nome
+                    partidas_alteradas = True
+
+        if partidas_alteradas:
+            partida_service._salvar(partidas_dados)
+
+        # 3. Atualizar votacoes_partidas.json
+        votacao_service = VotacaoService()
+        votacoes_dados = votacao_service._carregar()
+        votacoes_alteradas = False
+
+        for p_votacao in votacoes_dados.get("partidas", []):
+            for time in p_votacao.get("times", []):
+                for j in time.get("jogadores", []):
+                    if j.get("id") == jogador_avulso_id or norm(j.get("nome", "")) == norm_nome_avulso:
+                        j["id"] = target_id
+                        j["nome"] = target_nome
+                        j["owner_user_id"] = usuario_destino_id
+                        j["tipo"] = "fixo"
+                        votacoes_alteradas = True
+
+            res_apuracao = p_votacao.get("resultado_apuracao")
+            if res_apuracao and isinstance(res_apuracao, dict):
+                for rank_item in res_apuracao.get("ranking_jogadores", []) or []:
+                    if rank_item.get("id") == jogador_avulso_id or norm(rank_item.get("nome", "")) == norm_nome_avulso:
+                        rank_item["id"] = target_id
+                        rank_item["nome"] = target_nome
+                        votacoes_alteradas = True
+
+        if votacoes_alteradas:
+            votacao_service._salvar(votacoes_dados)
+
+        # 4. Invalidar cache de estatísticas
+        JogadorStatsService.invalidar_cache_stats()
+
+        return {
+            "sucesso": True,
+            "nome_avulso": nome_avulso,
+            "usuario_destino": usuario_destino.get("nome"),
+            "target_jogador_id": target_id
+        }
+
