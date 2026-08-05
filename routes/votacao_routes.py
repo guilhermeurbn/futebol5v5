@@ -91,7 +91,13 @@ def _obter_resultado_sorteio(sorteio_id):
 
 def _resumo_ranking_encerrado(rodada):
     ranking = (rodada or {}).get('ranking') or {}
-    ranking_jogadores = ranking.get('ranking_jogadores') or []
+    ranking_jogadores = list(ranking.get('ranking_jogadores') or [])
+    if ranking_jogadores:
+        ranking_jogadores = sorted(
+            ranking_jogadores,
+            key=lambda x: (float(x.get('nota_media') or 0), float(x.get('pontos') or 0), int(x.get('votos') or 0)),
+            reverse=True
+        )
 
     media_geral = float(ranking.get('media_geral') or 0.0)
     if not media_geral and ranking_jogadores:
@@ -99,11 +105,13 @@ def _resumo_ranking_encerrado(rodada):
         if votados:
             media_geral = round(sum(votados) / len(votados), 2)
 
+    melhor_jog = ranking_jogadores[0] if ranking_jogadores else ranking.get('melhor_jogador')
+
     return {
         'ranking_jogadores': ranking_jogadores,
         'ranking_top10': ranking_jogadores,
         'media_geral': media_geral,
-        'melhor_jogador': ranking.get('melhor_jogador'),
+        'melhor_jogador': melhor_jog,
         'total_jogadores': len(ranking_jogadores),
     }
 

@@ -300,9 +300,15 @@ def _enriquecer_sorteio_historico(sorteio):
     resultado_partida = _obter_resultado_sorteio(sorteio_id)
     partida_votacao = votacao_service.obter_por_sorteio(sorteio_id)
     ranking = ((partida_votacao or {}).get('ranking') or {})
-    ranking_jogadores = ranking.get('ranking_jogadores') or []
+    ranking_jogadores = list(ranking.get('ranking_jogadores') or [])
+    if ranking_jogadores:
+        ranking_jogadores = sorted(
+            ranking_jogadores,
+            key=lambda x: (float(x.get('nota_media') or 0), float(x.get('pontos') or 0), int(x.get('votos') or 0)),
+            reverse=True
+        )
     ranking_top10 = ranking_jogadores  # Return all players in ranking without truncation
-    melhor_jogador = ranking.get('melhor_jogador')
+    melhor_jogador = ranking_jogadores[0] if ranking_jogadores else ranking.get('melhor_jogador')
     status_votacao = (partida_votacao or {}).get('status') or 'nao_iniciada'
 
     media_geral = float(ranking.get('media_geral') or 0.0)
