@@ -1,0 +1,252 @@
+{
+  "clubes": [
+    {
+      "id": "clube_default",
+      "codigo": "NAT-5V5",
+      "nome": "Clube NaTrave 5v5 Principal",
+      "localizacao": "Brasil",
+      "modalidade": "5v5",
+      "logo_url": null,
+      "dono_id": "u1",
+      "criado_em": "2026-01-01T00:00:00",
+      "membros": [
+        {
+          "user_id": "u1",
+          "role": "admin",
+          "entrou_em": "2026-01-01T00:00:00"
+        }
+      ]
+    },
+    {
+      "id": "clube_1785949827510",
+      "codigo": "NAT-Q6R1",
+      "nome": "Clube Teste Pytest",
+      "localizacao": "Curitiba, PR",
+      "modalidade": "5v5",
+      "logo_url": null,
+      "dono_id": "u1",
+      "criado_em": "2026-08-05T18:10:27.510456",
+      "membros": [
+        {
+          "user_id": "u1",
+          "role": "admin",
+          "entrou_em": "2026-08-05T18:10:27.510458"
+        }
+      ]
+    },
+    {
+      "id": "clube_1785949848655",
+      "codigo": "NAT-JAS7",
+      "nome": "Clube Teste Pytest",
+      "localizacao": "Curitiba, PR",
+      "modalidade": "5v5",
+      "logo_url": null,
+      "dono_id": "u1",
+      "criado_em": "2026-08-05T18:10:48.655049",
+      "membros": [
+        {
+          "user_id": "u1",
+          "role": "admin",
+          "entrou_em": "2026-08-05T18:10:48.655051"
+        }
+      ]
+    },
+    {
+      "id": "clube_1785949977691",
+      "codigo": "NAT-NBQT",
+      "nome": "Clube Teste Pytest",
+      "localizacao": "Curitiba, PR",
+      "modalidade": "5v5",
+      "logo_url": null,
+      "dono_id": "u1",
+      "criado_em": "2026-08-05T18:12:57.691225",
+      "membros": [
+        {
+          "user_id": "u1",
+          "role": "admin",
+          "entrou_em": "2026-08-05T18:12:57.691227"
+        }
+      ]
+    },
+    {
+      "id": "clube_1785951128267",
+      "codigo": "NAT-SVMQ",
+      "nome": "Clube Teste Pytest",
+      "localizacao": "Curitiba, PR",
+      "modalidade": "5v5",
+      "logo_url": null,
+      "dono_id": "u1",
+      "criado_em": "2026-08-05T18:32:08.267302",
+      "membros": [
+        {
+          "user_id": "u1",
+          "role": "admin",
+          "entrou_em": "2026-08-05T18:32:08.267304"
+        }
+      ]
+    },
+    {
+      "id": "clube_1785951148842",
+      "codigo": "NAT-UF9E",
+      "nome": "Clube Teste Pytest",
+      "localizacao": "Curitiba, PR",
+      "modalidade": "5v5",
+      "logo_url": null,
+      "dono_id": "u1",
+      "criado_em": "2026-08-05T18:32:28.842304",
+      "membros": [
+        {
+          "user_id": "u1",
+          "role": "admin",
+          "entrou_em": "2026-08-05T18:32:28.842306"
+        }
+      ]
+    },
+    {
+      "id": "clube_1785951510348",
+      "codigo": "NAT-59B2",
+      "nome": "Clube Teste Pytest",
+      "localizacao": "Curitiba, PR",
+      "modalidade": "5v5",
+      "logo_url": null,
+      "dono_id": "u1",
+      "criado_em": "2026-08-05T18:38:30.348630",
+      "membros": [
+        {
+          "user_id": "u1",
+          "role": "admin",
+          "entrou_em": "2026-08-05T18:38:30.348633"
+        }
+      ]
+    },
+    {
+      "id": "clube_1785951510441",
+      "codigo": "NAT-YX7A",
+      "nome": "Pelada dos Amigos Unificados FC",
+      "localizacao": "Belo Horizonte, MG",
+      "modalidade": "5v5",
+      "logo_url": null,
+      "dono_id": "3dc39321-53f4-42d6-a87c-4edd058a059c",
+      "criado_em": "2026-08-05T18:38:30.441129",
+      "membros": [
+        {
+          "user_id": "3dc39321-53f4-42d6-a87c-4edd058a059c",
+          "role": "admin",
+          "entrou_em": "2026-08-05T18:38:30.441130"
+        }
+      ]
+    },
+    {
+      "id": "clube_1785951649440",
+      "codigo": "NAT-S862",
+      "nome": "peladinha",
+      "localizacao": "olivais",
+      "modalidade": "5v5",
+      "logo_url": null,
+      "dono_id": "1702c235-80db-46cb-bfb8-30f108ea6ea9",
+      "criado_em": "2026-08-05T18:40:49.440756",
+      "membros": [
+        {
+          "user_id": "1702c235-80db-46cb-bfb8-30f108ea6ea9",
+          "role": "admin",
+          "entrou_em": "2026-08-05T18:40:49.440759"
+        }
+      ]
+    },
+    {
+      "id": "clube_1785952074006",
+      "codigo": "NAT-QZ0Z",
+      "nome": "Clube Teste Pytest",
+      "localizacao": "Curitiba, PR",
+      "modalidade": "5v5",
+      "logo_url": null,
+      "dono_id": "u1",
+      "criado_em": "2026-08-05T18:47:54.006069",
+      "membros": [
+        {
+          "user_id": "u1",
+          "role": "admin",
+          "entrou_em": "2026-08-05T18:47:54.006071"
+        }
+      ]
+    },
+    {
+      "id": "clube_1785952110520",
+      "codigo": "NAT-Q8LH",
+      "nome": "Clube Teste Pytest",
+      "localizacao": "Curitiba, PR",
+      "modalidade": "5v5",
+      "logo_url": null,
+      "dono_id": "u1",
+      "criado_em": "2026-08-05T18:48:30.520170",
+      "membros": [
+        {
+          "user_id": "u1",
+          "role": "admin",
+          "entrou_em": "2026-08-05T18:48:30.520172"
+        }
+      ]
+    },
+    {
+      "id": "clube_1785952150797_116b",
+      "codigo": "NAT-B95C",
+      "nome": "Clube Teste Pytest",
+      "localizacao": "Curitiba, PR",
+      "modalidade": "5v5",
+      "logo_url": null,
+      "dono_id": "u1",
+      "criado_em": "2026-08-05T18:49:10.797415",
+      "membros": [
+        {
+          "user_id": "u1",
+          "role": "admin",
+          "entrou_em": "2026-08-05T18:49:10.797418"
+        }
+      ]
+    },
+    {
+      "id": "clube_1785952150890_1c10",
+      "codigo": "NAT-5UHH",
+      "nome": "Pelada dos Amigos Unificados FC",
+      "localizacao": "Belo Horizonte, MG",
+      "modalidade": "5v5",
+      "logo_url": null,
+      "dono_id": "ba4b11a6-ae92-47e6-bf21-51ec283a153d",
+      "criado_em": "2026-08-05T18:49:10.890079",
+      "membros": [
+        {
+          "user_id": "ba4b11a6-ae92-47e6-bf21-51ec283a153d",
+          "role": "admin",
+          "entrou_em": "2026-08-05T18:49:10.890080"
+        }
+      ]
+    },
+    {
+      "id": "clube_1785952447119_a0e5",
+      "codigo": "NAT-2N7L",
+      "nome": "peladinhaa",
+      "localizacao": "olivais",
+      "modalidade": "5v5",
+      "logo_url": null,
+      "dono_id": "1702c235-80db-46cb-bfb8-30f108ea6ea9",
+      "criado_em": "2026-08-05T18:54:07.119695",
+      "membros": [
+        {
+          "user_id": "1702c235-80db-46cb-bfb8-30f108ea6ea9",
+          "role": "admin",
+          "entrou_em": "2026-08-05T18:54:07.119703"
+        },
+        {
+          "user_id": "77e22bc3-caf5-49c9-90eb-09aa83e1cad9",
+          "role": "jogador",
+          "entrou_em": "2026-08-05T18:55:33.397032"
+        },
+        {
+          "user_id": "e5369426-8836-4e76-9e3c-5445829b249e",
+          "role": "jogador",
+          "entrou_em": "2026-08-05T19:03:17.656778"
+        }
+      ]
+    }
+  ]
+}

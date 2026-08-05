@@ -1,0 +1,30 @@
+{
+  "appId": "com.natrave.app",
+  "appName": "NaTrave 5v5",
+  "webDir": "static",
+  "server": {
+    "url": "https://natrave.pt",
+    "cleartext": true,
+    "androidScheme": "https",
+    "iosScheme": "https",
+    "allowNavigation": [
+      "natrave.pt",
+      "*.natrave.pt",
+      "*.railway.app",
+      "*.cloudflare.com"
+    ]
+  },
+  "plugins": {
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#121217",
+      "overlaysWebView": true
+    },
+    "Keyboard": {
+      "resize": "body",
+      "style": "DARK",
+      "resizeOnKeyboardDeviceOption": true
+    },
+    "Haptics": {}
+  }
+}

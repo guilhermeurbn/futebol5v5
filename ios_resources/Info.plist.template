@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Informações Básicas do App -->
+    <key>CFBundleDevelopmentRegion</key>
+    <string>pt-BR</string>
+    <key>CFBundleDisplayName</key>
+    <string>NaTrave 5v5</string>
+    <key>CFBundleExecutable</key>
+    <string>$(EXECUTABLE_NAME)</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.natrave.app</string>
+    <key>CFBundleName</key>
+    <string>NaTrave 5v5</string>
+
+    <!-- Descrições de Permissões para Revisor da Apple -->
+    <key>NSCameraUsageDescription</key>
+    <string>O NaTrave solicita acesso à câmera para você tirar e atualizar sua foto de perfil.</string>
+    
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>O NaTrave solicita acesso à sua galeria de fotos para você selecionar a foto do seu perfil.</string>
+    
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>O NaTrave precisa de permissão para salvar comprovantes e imagens de partidas no seu dispositivo.</string>
+
+    <!-- Aparência Nativa escuro -->
+    <key>UIStatusBarStyle</key>
+    <string>UIStatusBarStyleDarkContent</string>
+    <key>UIViewControllerBasedStatusBarAppearance</key>
+    <true/>
+</dict>
+</plist>

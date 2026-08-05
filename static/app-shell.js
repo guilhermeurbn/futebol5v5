@@ -10,6 +10,33 @@
   let navigationToken = 0;
   const CACHE_PREFIX = 'natrave:app-shell:';
 
+  // Haptic Feedback utilitário para iOS (Capacitor / Mobile Web)
+  window.triggerHapticFeedback = function (type) {
+    type = type || 'light';
+    try {
+      if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics) {
+        if (type === 'success') {
+          window.Capacitor.Plugins.Haptics.notification({ type: 'SUCCESS' });
+        } else if (type === 'warning') {
+          window.Capacitor.Plugins.Haptics.notification({ type: 'WARNING' });
+        } else {
+          window.Capacitor.Plugins.Haptics.impact({ style: type.toUpperCase() });
+        }
+      } else if (navigator.vibrate) {
+        navigator.vibrate(type === 'success' ? [15, 30, 15] : 10);
+      }
+    } catch (e) {
+      // Ignora silenciosamente se não suportado
+    }
+  };
+
+  document.addEventListener('click', function (e) {
+    const target = e.target.closest('.btn, button, .nav-tab, .bottom-nav-item');
+    if (target) {
+      window.triggerHapticFeedback('light');
+    }
+  }, { passive: true });
+
   function getContent(root) {
     return (root || document).querySelector(CONTENT_SELECTOR);
   }
@@ -815,7 +842,7 @@
 
       if (shouldUseViewTransition()) {
         const transition = document.startViewTransition(rendered);
-        await transition.finished.catch(() => {});
+        await transition.finished.catch(() => { });
       } else {
         rendered();
       }
