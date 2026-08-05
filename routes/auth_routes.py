@@ -298,6 +298,10 @@ def completar_email_submit():
     except Exception as exc:
         logger.error(f"Erro ao salvar e-mail obrigatorio para usuario {user_id}: {exc}")
         return render_template('completar_email.html', erro='Erro ao salvar e-mail. Tente novamente.'), 500
+@auth_bp.route('/privacidade', methods=['GET'])
+def privacidade_page():
+    """Página pública de Política de Privacidade (Exigência Apple App Store)"""
+    return render_template('privacidade.html')
 
 
 

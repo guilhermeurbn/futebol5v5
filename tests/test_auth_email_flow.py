@@ -169,3 +169,15 @@ def test_completar_email_obrigatorio_flow():
     auth_svc.deletar_usuario(usuario['id'])
 
 
+def test_privacidade_public_access():
+    from app import criar_app
+    app = criar_app()
+    app.config['TESTING'] = True
+    client = app.test_client()
+
+    response = client.get('/privacidade')
+    assert response.status_code == 200
+    assert 'Política de Privacidade' in response.data.decode('utf-8')
+
+
+

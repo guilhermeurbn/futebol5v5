@@ -1,0 +1,41 @@
+{% extends '_auth_layout.html' %}
+
+{% block title %}Política de Privacidade{% endblock %}
+{% block auth_shell_class %}auth-shell--single{% endblock %}
+{% block auth_form_panel_class %}auth-panel--recovery{% endblock %}
+{% block auth_heading_id %}privacidadeHeading{% endblock %}
+
+{% block auth_card_header %}
+    <div class="auth-card-header">
+        <div class="section-label" style="color: #a78bfa !important; background: rgba(124, 58, 237, 0.1) !important;">Transparência</div>
+        <h2 id="privacidadeHeading" class="auth-card-title auth-card-title--login">
+            <span class="auth-card-title__icon" aria-hidden="true">🛡️</span>
+            <span>Política de Privacidade</span>
+        </h2>
+        <p class="auth-card-subtitle">Saiba como protegemos seus dados na plataforma NaTrave 5v5.</p>
+    </div>
+{% endblock %}
+
+{% block auth_messages %}{% endblock %}
+
+{% block auth_form %}
+    <div class="privacy-policy-content" style="color: #cbd5e1; font-size: 0.85rem; line-height: 1.6; max-height: 380px; overflow-y: auto; padding-right: 0.5rem; border-radius: 12px; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); padding: 1.1rem; margin-bottom: 1.25rem;">
+        <h4 style="color: #ffffff; font-size: 0.95rem; margin: 0 0 0.5rem 0; font-weight: 700;">1. Coleta de Informações</h4>
+        <p style="margin-bottom: 1rem;">Coletamos apenas as informações necessárias para o funcionamento dos sorteios e estatísticas do futebol: seu nome, nome de usuário (username), endereço de e-mail e dados de partidas disputadas (gols, assistências e notas de avaliação).</p>
+
+        <h4 style="color: #ffffff; font-size: 0.95rem; margin: 1rem 0 0.5rem 0; font-weight: 700;">2. Uso dos Dados</h4>
+        <p style="margin-bottom: 1rem;">Seus dados são utilizados exclusivamente para compor os rankings da liga, calcular seu nível de habilidade e enviar notificações sobre partidas ativas e recuperação de senha. Não vendemos nem compartilhamos seus dados com terceiros.</p>
+
+        <h4 style="color: #ffffff; font-size: 0.95rem; margin: 1rem 0 0.5rem 0; font-weight: 700;">3. Exclusão de Conta e Dados</h4>
+        <p style="margin-bottom: 1rem;">Você possui total controle sobre suas informações. A qualquer momento, você pode excluir sua conta e remover seus dados de acesso diretamente na aba <strong>Perfil &gt; Apagar Conta</strong> no próprio aplicativo.</p>
+
+        <h4 style="color: #ffffff; font-size: 0.95rem; margin: 1rem 0 0.5rem 0; font-weight: 700;">4. Contato</h4>
+        <p style="margin: 0;">Em caso de dúvidas sobre nossa Política de Privacidade, entre em contato conosco através do e-mail de suporte da plataforma.</p>
+    </div>
+{% endblock %}
+
+{% block auth_card_footer %}
+    <div class="auth-card-footer">
+        <p class="auth-link-text"><a href="{{ url_for('auth.login_page') }}" class="text-accent-link">← Voltar para Login</a></p>
+    </div>
+{% endblock %}

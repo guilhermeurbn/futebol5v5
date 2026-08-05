@@ -7,6 +7,32 @@
 /* ============================================================
    1️⃣  VARIÁVEIS CSS - Sistema de Design
    ============================================================ */
+/* iOS Safe Area & Mobile Native Enhancements */
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+}
+
+body {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button, .btn, .nav-tab, .bottom-nav-item, .auth-scroll-hint {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.bottom-nav, .mobile-bottom-nav, .site-nav-mobile {
+  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+.navbar-top, .auth-global-header {
+  padding-top: calc(0.5rem + env(safe-area-inset-top, 0px)) !important;
+}
+
 :root {
   /* 🎭 Paleta de Cores Principal */
   --primary: #7c3aed;
