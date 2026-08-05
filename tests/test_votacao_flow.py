@@ -23,10 +23,14 @@ def _usuarios():
     ]
 
 
-def _votos():
+def _votos(for_user_id='u1', extra_names=None):
+    user_num = int(for_user_id.replace('u', '')) if str(for_user_id).startswith('u') else 1
+    candidatos = [f'Jogador {idx}' for idx in range(1, 6) if idx != user_num]
+    if extra_names:
+        candidatos.extend(extra_names)
     return [
-        {'jogador_nome': f'Jogador {idx}', 'time_numero': 1, 'nota': 8}
-        for idx in range(1, 6)
+        {'jogador_nome': nome, 'time_numero': 1, 'nota': 8}
+        for nome in candidatos
     ]
 
 
@@ -56,7 +60,7 @@ def test_voting_closes_when_every_eligible_player_votes(tmp_path):
     )
 
     for idx in range(1, 6):
-        service.salvar_voto(partida['id'], f'u{idx}', _votos())
+        service.salvar_voto(partida['id'], f'u{idx}', _votos(f'u{idx}'))
 
     encerrada = service.obter_partida(partida['id'])
     assert encerrada['status'] == 'encerrada'
@@ -91,7 +95,7 @@ def test_orphan_user_links_do_not_block_automatic_close(tmp_path):
     )
 
     for idx in range(1, 6):
-        service.salvar_voto(partida['id'], f'u{idx}', _votos())
+        service.salvar_voto(partida['id'], f'u{idx}', _votos(f'u{idx}', extra_names=['Externo']))
 
     encerrada = service.obter_partida(partida['id'])
     externo = next(p for p in encerrada['participantes'] if p['jogador_nome'] == 'Externo')
@@ -175,7 +179,7 @@ def test_pending_vote_notification_is_shown_only_until_user_votes(tmp_path, monk
         assert 'Rodada decisiva' in body
         assert 'Minha votação' in body
 
-        service.salvar_voto(partida['id'], 'u1', _votos())
+        service.salvar_voto(partida['id'], 'u1', _votos('u1'))
         response = client.get('/')
 
         assert response.status_code == 200
@@ -729,4 +733,28 @@ def test_historico_ranking_includes_all_players_and_valid_media(monkeypatch):
     assert len(resultado['ranking_top10']) == 20
     assert resultado['ranking_total_jogadores'] == 20
     assert resultado['ranking_media_geral'] == 8.0
+
+
+def test_anti_self_vote_validation(tmp_path):
+    import pytest
+    service = VotacaoService(str(tmp_path / 'votacoes.json'))
+    partida = service.criar_partida(
+        _times(),
+        _usuarios(),
+        'juiz',
+        sorteio_id=1,
+        duracao_horas=12,
+    )
+
+    votos_com_si_mesmo = [
+        {'jogador_nome': 'Jogador 1', 'time_numero': 1, 'nota': 10},
+        {'jogador_nome': 'Jogador 2', 'time_numero': 1, 'nota': 8},
+        {'jogador_nome': 'Jogador 3', 'time_numero': 1, 'nota': 8},
+        {'jogador_nome': 'Jogador 4', 'time_numero': 1, 'nota': 8},
+        {'jogador_nome': 'Jogador 5', 'time_numero': 1, 'nota': 8},
+    ]
+
+    with pytest.raises(ValueError, match="Você não pode votar em si mesmo"):
+        service.salvar_voto(partida['id'], 'u1', votos_com_si_mesmo)
+
 

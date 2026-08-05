@@ -227,7 +227,15 @@ def votacao_page():
             None
         )
         voto = votacao_service.obter_voto_usuario(partida.get('id'), session.get('user_id'))
-        jogadores_votaveis = partida.get('participantes', [])
+        
+        current_user_id = session.get('user_id')
+        meu_nome = (participante.get('jogador_nome') if participante else '').strip()
+
+        # Remove o próprio usuário/jogador das opções de voto (Anti-Self-Vote)
+        jogadores_votaveis = [
+            p for p in partida.get('participantes', [])
+            if p.get('user_id') != current_user_id and (p.get('jogador_nome') or '').strip() != meu_nome
+        ]
         resultado_partida = partida.get('resultado_partida')
         
         return render_template(
@@ -507,6 +515,15 @@ def votacao_admin_criar():
         
         if _is_juiz():
             juiz_partida_service.marcar_votacao_aberta(sorteio.get('id'), partida.get('id'))
+
+        # Dispara e-mail de votação aberta APENAS para os participantes da partida
+        try:
+            from services.email_service import EmailService
+            email_svc = EmailService()
+            participantes = partida.get('participantes', [])
+            email_svc.notify_votacao_aberta(participantes, partida_titulo=titulo)
+        except Exception as exc:
+            logger.warning(f"Erro ao disparar e-mails de votação aberta: {exc}")
         
         if _is_juiz():
             return redirect(url_for('votacao.votacao_admin_page', sorteio_id=sorteio.get('id'), sucesso='Votacao aberta com sucesso.'))
@@ -549,6 +566,16 @@ def votacao_admin_encerrar(partida_id):
     try:
         partida_encerrada = votacao_service.encerrar_e_apurar(partida_id, session.get('user_id'))
         
+        # Dispara e-mail de ranking disponível para todos os jogadores
+        try:
+            from services.email_service import EmailService
+            from services.jogador_service import JogadorService
+            email_svc = EmailService()
+            todos_jogadores = JogadorService().listar()
+            email_svc.notify_ranking_disponivel(todos_jogadores, partida_titulo=partida_encerrada.get('titulo', 'Ranking Atualizado'))
+        except Exception as exc:
+            logger.warning(f"Erro ao disparar e-mails de ranking disponível: {exc}")
+
         if _is_juiz():
             from services.jogador_service import JogadorService
             jogador_service = JogadorService()

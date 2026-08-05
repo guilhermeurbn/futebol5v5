@@ -64,7 +64,7 @@ def test_player_vote_notification_is_global_and_actionable():
     assert "votacao_pendente_url = url_for('votacao.votacao_page')" in app_py
     assert "player-vote-notification" in base
     assert "data-vote-notification-dismiss" in base
-    assert "}, 5000);" in base
+    assert "}, 7000);" in base
     assert "pointermove" in base
     assert "sessionStorage" not in base
     assert "Votação aberta" in base

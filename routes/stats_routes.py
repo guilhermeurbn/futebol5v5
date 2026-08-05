@@ -716,8 +716,18 @@ def api_presenca_abrir():
         return jsonify({'sucesso': False, 'erro': 'Apenas Juiz ou Admin podem abrir a lista'}), 403
 
     dados = request.get_json(silent=True) or request.form
-    titulo = dados.get('titulo', 'Próxima Pelada')
+    titulo = dados.get('titulo', 'Rodada da Próxima Terça-Feira')
     res = presenca_service.abrir_lista(titulo=titulo)
+
+    try:
+        from services.email_service import EmailService
+        from services.jogador_service import JogadorService
+        email_svc = EmailService()
+        jogadores = JogadorService().listar()
+        email_svc.notify_presenca_aberta(jogadores, data_rodada=titulo)
+    except Exception as exc:
+        logger.warning(f"Erro ao disparar e-mails de presença aberta: {exc}")
+
     return jsonify({'sucesso': True, 'dados': res})
 
 @stats_bp.route('/api/presenca/fechar', methods=['POST'])

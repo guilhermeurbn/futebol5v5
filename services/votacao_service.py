@@ -331,6 +331,14 @@ class VotacaoService:
         dados["ultimo_id"] = ultimo_id
         dados.setdefault("partidas", []).append(partida)
         self._salvar(dados)
+
+        try:
+            from services.email_service import EmailService
+            EmailService().notify_votacao_aberta(participantes, partida_titulo=partida.get('titulo', 'Votação da Partida'))
+        except Exception as _exc:
+            import logging
+            logging.getLogger(__name__).warning("Falha ao disparar e-mail de votação aberta: %s", _exc)
+
         return partida
 
     def atualizar_resultado_da_rodada(self, sorteio_id: int, resultado_partida: Dict) -> Optional[Dict]:
@@ -396,8 +404,24 @@ class VotacaoService:
         extras = votos_extras or []
         permitidos = self._participantes_permitidos(alvo)
 
-        if len(obrigatorios) < 5 or len(obrigatorios) > 5:
-            raise ValueError("Voce deve votar em exatamente 5 jogadores obrigatorios")
+        # Anti-Self-Vote: Impede que o usuário vote em seu próprio perfil
+        meu_jogador_nome = None
+        for p in alvo.get("participantes", []):
+            if p.get("user_id") == user_id:
+                meu_jogador_nome = (p.get("jogador_nome") or "").strip()
+                break
+
+        if meu_jogador_nome:
+            for item in (obrigatorios + extras):
+                nome = (item.get("jogador_nome") or "").strip()
+                if nome and nome == meu_jogador_nome:
+                    raise ValueError("Você não pode votar em si mesmo")
+
+        permitidos_sem_mim = [p for p in permitidos if p != meu_jogador_nome]
+        qtd_esperada = min(5, len(permitidos_sem_mim))
+
+        if len(obrigatorios) != qtd_esperada:
+            raise ValueError(f"Voce deve votar em exatamente {qtd_esperada} jogadores obrigatorios")
 
         nomes = set()
         todos = []
@@ -431,8 +455,8 @@ class VotacaoService:
                 "obrigatorio": False,
             })
 
-        if len([v for v in todos if v.get("obrigatorio")]) < 5:
-            raise ValueError("Voce deve votar em pelo menos 5 jogadores")
+        if len([v for v in todos if v.get("obrigatorio")]) < qtd_esperada:
+            raise ValueError(f"Voce deve votar em pelo menos {qtd_esperada} jogadores")
 
         voto_existente = self.obter_voto_usuario(partida_id, user_id)
         if voto_existente:
@@ -476,6 +500,14 @@ class VotacaoService:
 
         self._encerrar_partida_obj(alvo, encerrado_por, motivo="manual")
         self._salvar(dados)
+
+        try:
+            from services.email_service import EmailService
+            EmailService().notify_ranking_disponivel(partida_titulo=alvo.get('titulo', 'Ranking Atualizado'))
+        except Exception as _exc:
+            import logging
+            logging.getLogger(__name__).warning("Falha ao disparar e-mail de ranking disponível: %s", _exc)
+
         return alvo
 
     def _apurar_ranking(self, partida: Dict) -> Dict:

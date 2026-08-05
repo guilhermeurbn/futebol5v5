@@ -68,41 +68,68 @@
             </section>
         {% else %}
             <section class="section voting-workspace-panel" style="margin-top: 1rem;">
-                <div class="vote-mobile-hero" style="border: none !important; background: transparent !important; box-shadow: none !important; padding: 0 !important; margin-bottom: 1.5rem;">
-                    <div class="vote-mobile-hero__top">
+                
+                <!-- Hero Header Card da Votação -->
+                <div class="vote-mobile-hero" style="background: linear-gradient(145deg, rgba(24, 24, 36, 0.95), rgba(14, 14, 22, 0.98)); border: 1px solid rgba(34, 197, 94, 0.25); border-radius: 20px; padding: 1.25rem; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); backdrop-filter: blur(16px); position: relative; overflow: hidden; margin-bottom: 1.25rem;">
+                    
+                    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.85rem;">
                         <div>
-                            <div class="section-label">Rodada</div>
-                            <h2 class="section-title">{{ partida.titulo }}</h2>
+                            <div style="font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #4ade80; display: inline-flex; align-items: center; gap: 0.35rem;">
+                                <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 13px; height: 13px; color: #4ade80;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                Rodada
+                            </div>
+                            <h2 style="font-size: 1.3rem; font-weight: 900; color: #ffffff; margin-top: 0.2rem; margin-bottom: 0; line-height: 1.25; letter-spacing: -0.01em;">{{ partida.titulo }}</h2>
                         </div>
-                        <span class="vote-mobile-pill">Aberta</span>
+                        <span style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(34, 197, 94, 0.12); border: 1px solid rgba(34, 197, 94, 0.3); color: #4ade80; font-weight: 800; font-size: 0.78rem; padding: 0.35rem 0.8rem; border-radius: 20px; flex-shrink: 0;">
+                            <span style="width: 7px; height: 7px; border-radius: 50%; background: #4ade80;"></span>
+                            Aberta
+                        </span>
                     </div>
-                    <div class="vote-mobile-chips">
-                        <span>{{ participante.jogador_nome }}</span>
-                        <span>Time {{ participante.time_numero }}</span>
-                        <span>{{ partida.aberta_em|dt_pt_hm if partida.aberta_em else 'Agora' }}</span>
+
+                    <!-- Meta Badges -->
+                    <div class="vote-mobile-chips" style="display: flex; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 0.85rem;">
+                        <span style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #f8fafc; font-size: 0.78rem; font-weight: 700; padding: 0.3rem 0.7rem; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.35rem;">
+                            <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 12px; height: 12px; color: #a78bfa;"><path d="M19 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            {{ participante.jogador_nome }}
+                        </span>
+                        <span style="background: rgba(34, 197, 94, 0.12); border: 1px solid rgba(34, 197, 94, 0.3); color: #4ade80; font-size: 0.78rem; font-weight: 800; padding: 0.3rem 0.7rem; border-radius: 10px;">
+                            Time {{ participante.time_numero }}
+                        </span>
+                        <span style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); color: #94a3b8; font-size: 0.78rem; font-weight: 600; padding: 0.3rem 0.7rem; border-radius: 10px;">
+                            🕒 {{ partida.aberta_em|dt_pt_hm if partida.aberta_em else 'Agora' }}
+                        </span>
                     </div>
+
+                    <!-- Resumo dos Gols da Partida -->
                     {% if resultado_partida %}
-                    <div class="vote-mobile-result">
+                    <div style="background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 0.65rem 0.85rem; display: flex; align-items: center; justify-content: space-around; gap: 0.5rem; margin-top: 0.5rem;">
                         {% for time in partida.resultado_resumido %}
-                        <span>Time {{ time.time_numero }}: {{ time.gols }} gol{{ '' if time.gols == 1 else 's' }}</span>
+                        <div style="display: flex; align-items: center; gap: 0.4rem;">
+                            <span style="font-size: 0.78rem; font-weight: 700; color: #94a3b8;">Time {{ time.time_numero }}:</span>
+                            <span style="font-size: 0.88rem; font-weight: 900; color: #ffffff; background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.3); padding: 0.15rem 0.55rem; border-radius: 8px;">{{ time.gols }} gol{{ '' if time.gols == 1 else 's' }}</span>
+                        </div>
                         {% endfor %}
                     </div>
                     {% endif %}
                 </div>
 
-                <div class="vote-mobile-form-section" style="border: none !important; background: transparent !important; box-shadow: none !important; padding: 0 !important; margin-top: 1.5rem;">
+                <div class="vote-mobile-form-section" style="border: none !important; background: transparent !important; box-shadow: none !important; padding: 0 !important; margin-top: 1rem;">
                     <form method="post" action="{{ url_for('jogador.votacao_salvar') }}" class="votacao-form-container" id="votacaoForm" data-votacao-form>
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="partida_id" value="{{ partida.id }}">
 
-                        <div class="votacao-intro">
-                            <div class="votacao-intro__header">
+                        <!-- Card de Instrução e Progresso das Notas -->
+                        <div class="votacao-intro" style="background: rgba(22, 22, 30, 0.85); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 1.1rem; box-shadow: 0 4px 20px rgba(0,0,0,0.25); backdrop-filter: blur(12px); margin-bottom: 1.25rem;">
+                            <div class="votacao-intro__header" style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;">
                                 <div>
-                                    <div class="section-label">Notas</div>
-                                    <h3 class="votacao-intro__title">Avalie 5+ jogadores</h3>
+                                    <div style="font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #a78bfa; display: flex; align-items: center; gap: 0.3rem;">
+                                        <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 12px; height: 12px; color: #a78bfa;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                        Avaliação
+                                    </div>
+                                    <h3 class="votacao-intro__title" style="font-size: 1.15rem; font-weight: 800; color: #ffffff; margin-top: 0.2rem; margin-bottom: 0;">Avalie 5+ jogadores</h3>
                                 </div>
                                 <div class="votacao-progress">
-                                    <span class="votacao-progress__badge" id="notas-progresso-badge"><span id="notas-preenchidas">0</span>/5</span>
+                                    <span class="votacao-progress__badge" id="notas-progresso-badge" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(16, 185, 129, 0.1)); border: 1px solid rgba(34, 197, 94, 0.35); color: #4ade80; font-weight: 800; font-size: 0.95rem; padding: 0.35rem 0.85rem; border-radius: 12px; display: inline-flex; align-items: center; gap: 0.2rem;"><span id="notas-preenchidas">0</span>/5</span>
                                 </div>
                             </div>
                         </div>
@@ -120,8 +147,8 @@
                                     <div class="votacao-card__score" data-score-for="{{ loop.index0 }}">0.0</div>
                                 </div>
 
-                                <div class="votacao-slider-wrap">
-                                    <input class="votacao-slider" type="range" min="0" max="10" step="0.5" value="0" name="nota" data-score-index="{{ loop.index0 }}">
+                                <div class="votacao-slider-wrap" style="touch-action: manipulation; -webkit-tap-highlight-color: transparent;">
+                                    <input class="votacao-slider" type="range" min="0" max="10" step="0.5" value="0" name="nota" data-score-index="{{ loop.index0 }}" style="touch-action: manipulation; cursor: pointer; -webkit-tap-highlight-color: transparent;">
                                     <div class="votacao-slider-labels">
                                         <span>0</span>
                                         <span>5</span>
@@ -203,8 +230,8 @@ votacaoForm?.addEventListener('submit', function (e) {
     }
 });
 
-document.querySelectorAll('input[name="nota"]').forEach(input => {
-    input.addEventListener('input', () => {
+function bindSliderEvents(input) {
+    const updateHandler = () => {
         atualizarProgressoGeral();
 
         const score = parseFloat(input.value || '0');
@@ -228,11 +255,17 @@ document.querySelectorAll('input[name="nota"]').forEach(input => {
                 card.classList.remove('is-active');
             }
         }
-    });
-});
+    };
 
-// Inicialização
+    ['input', 'change', 'pointermove', 'touchmove', 'click'].forEach(evt => {
+        input.addEventListener(evt, updateHandler, { passive: true });
+    });
+}
+
+// Inicialização imediata de todos os sliders
 document.querySelectorAll('input[name="nota"]').forEach(input => {
+    bindSliderEvents(input);
+
     const score = parseFloat(input.value || '0');
     const index = input.dataset.scoreIndex;
     const badge = document.querySelector(`[data-score-for="${index}"]`);

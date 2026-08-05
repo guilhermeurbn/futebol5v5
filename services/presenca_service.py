@@ -90,6 +90,13 @@ class PresencaService:
         self.dados["aberta_em"] = datetime.now().isoformat()
         self.dados["respostas"] = {}
         self._salvar_dados()
+
+        try:
+            from services.email_service import EmailService
+            EmailService().notify_presenca_aberta(data_rodada=self.dados["titulo"])
+        except Exception as _exc:
+            logger.warning(f"Falha ao disparar e-mail de presença aberta: {_exc}")
+
         return self.dados
 
     def fechar_lista(self) -> Dict[str, Any]:

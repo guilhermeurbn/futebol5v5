@@ -1,13 +1,15 @@
 """
-Servico de email baseado na API do Resend.
+Serviço de email baseado na API do Resend com templates totalmente pretos (dark theme premium)
+e resolução estrita de URLs de produção (sem links para localhost).
 """
 import json
 import logging
 import os
 import re
+import threading
 from pathlib import Path
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, List, Dict, Any
 
 import requests
 
@@ -37,8 +39,50 @@ class EmailResult:
     error: Optional[str] = None
 
 
+def resolve_public_base_url(custom_base: Optional[str] = None) -> str:
+    """
+    Garante que nenhuma URL enviada por e-mail contenha 'localhost' ou '127.0.0.1'.
+    Retorna a URL base de produção configurada ou o fallback seguro https://natrave.pt.
+    """
+    url = (custom_base or "").strip()
+    if not url or "localhost" in url or "127.0.0.1" in url:
+        url = (os.getenv("APP_BASE_URL") or os.getenv("PUBLIC_URL") or os.getenv("RAILWAY_PUBLIC_DOMAIN") or "").strip()
+
+    if not url or "localhost" in url or "127.0.0.1" in url:
+        try:
+            from flask import request, has_request_context
+            if has_request_context() and request.host:
+                host = request.host
+                if "localhost" not in host and "127.0.0.1" not in host:
+                    scheme = request.scheme or "https"
+                    url = f"{scheme}://{host}"
+        except Exception:
+            pass
+
+    if not url or "localhost" in url or "127.0.0.1" in url:
+        url = "https://natrave.pt"
+
+    if not url.startswith("http"):
+        url = "https://" + url
+
+    return url.rstrip("/")
+
+
+def sanitize_email_url(url: str, base_url: str) -> str:
+    """Substitui qualquer referência a localhost/127.0.0.1 pela base_url pública de produção."""
+    if not url:
+        return f"{base_url}/login"
+    if "localhost" in url or "127.0.0.1" in url:
+        match = re.search(r'https?://[^/]+(.*)', url)
+        if match:
+            path = match.group(1)
+            return f"{base_url}{path}"
+        return base_url
+    return url
+
+
 class EmailService:
-    """Envia emails transacionais usando Resend."""
+    """Envia emails transacionais usando Resend com design profissional dark theme."""
 
     _DEFAULT_SECRETS_PATH = Path(__file__).resolve().parent.parent / '.secrets' / 'resend.json'
 
@@ -50,7 +94,10 @@ class EmailService:
     ) -> None:
         self._api_key = (api_key or "").strip() if api_key is not None else ""
         self._from_email = (from_email or "").strip() if from_email is not None else ""
-        self.base_url = (base_url if base_url is not None else os.getenv("APP_BASE_URL", "http://localhost:5051")).rstrip("/")
+        self.base_url = resolve_public_base_url(base_url)
+
+    def get_clean_base_url(self, override_url: Optional[str] = None) -> str:
+        return resolve_public_base_url(override_url or self.base_url)
 
     def _load_secrets_file(self) -> tuple[str, str]:
         secrets_path = os.getenv('RESEND_SECRETS_FILE', str(self._DEFAULT_SECRETS_PATH)).strip()
@@ -158,9 +205,11 @@ class EmailService:
         cta_text: str = "Acessar NaTrave",
         cta_url: str = "",
     ) -> str:
-        login_url = cta_url or f"{self.base_url}/login"
+        clean_base = self.get_clean_base_url()
+        raw_cta = cta_url or f"{clean_base}/login"
+        final_cta_url = sanitize_email_url(raw_cta, clean_base)
 
-        # Construct 3 Steps Section
+        # Construct Steps Section
         steps_html = ""
         if steps:
             items_html = ""
@@ -170,22 +219,22 @@ class EmailService:
                 <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: {margin_bottom}px;">
                     <tr>
                         <td width="32" valign="top" style="padding-right: 12px;">
-                            <div style="width: 26px; height: 26px; border-radius: 50%; background-color: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); color: #10b981; font-size: 13px; font-weight: 700; text-align: center; line-height: 24px;">{step_num}</div>
+                            <div style="width: 26px; height: 26px; border-radius: 50%; background-color: rgba(34, 197, 94, 0.18) !important; border: 1px solid rgba(34, 197, 94, 0.4) !important; color: #4ade80 !important; font-size: 13px; font-weight: 800; text-align: center; line-height: 24px;">{step_num}</div>
                         </td>
                         <td valign="top">
-                            <p style="margin: 0; font-size: 14px; font-weight: 600; color: #f4f4f5; line-height: 1.4;">{step_title}</p>
-                            <p style="margin: 2px 0 0 0; font-size: 13px; color: #a1a1aa; line-height: 1.4;">{step_desc}</p>
+                            <p style="margin: 0; font-size: 14px; font-weight: 700; color: #f4f4f5 !important; line-height: 1.4;">{step_title}</p>
+                            <p style="margin: 2px 0 0 0; font-size: 13px; color: #a1a1aa !important; line-height: 1.4;">{step_desc}</p>
                         </td>
                     </tr>
                 </table>
                 """
 
             steps_html = f"""
-            <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 28px; background-color: #16161e; border: 1px solid #27272a; border-radius: 14px; padding: 24px;">
+            <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 28px; background-color: #181824 !important; border: 1px solid #27273a !important; border-radius: 14px; padding: 22px;">
                 <tr>
                     <td>
-                        <p style="margin: 0 0 16px 0; font-size: 13px; font-weight: 700; color: #ffffff; text-transform: uppercase; letter-spacing: 0.05em;">
-                            <span style="color: #10b981; margin-right: 6px;">📋</span> {steps_title}
+                        <p style="margin: 0 0 16px 0; font-size: 12px; font-weight: 800; color: #ffffff !important; text-transform: uppercase; letter-spacing: 0.06em;">
+                            <span style="color: #4ade80 !important; margin-right: 6px;">📋</span> {steps_title}
                         </p>
                         {items_html}
                     </td>
@@ -197,16 +246,16 @@ class EmailService:
         security_html = ""
         if security_text:
             security_html = f"""
-            <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: rgba(245, 158, 11, 0.05); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 12px; padding: 18px 20px;">
+            <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: rgba(245, 158, 11, 0.05) !important; border: 1px solid rgba(245, 158, 11, 0.25) !important; border-radius: 12px; padding: 18px 20px;">
                 <tr>
                     <td valign="top" width="24" style="padding-right: 12px; font-size: 16px; line-height: 1;">
                         🛡️
                     </td>
                     <td valign="top">
-                        <p style="margin: 0 0 4px 0; font-size: 13px; font-weight: 700; color: #f59e0b;">
+                        <p style="margin: 0 0 4px 0; font-size: 13px; font-weight: 700; color: #fbbf24 !important;">
                             {security_title}
                         </p>
-                        <p style="margin: 0; font-size: 12px; color: #d4d4d8; line-height: 1.55;">
+                        <p style="margin: 0; font-size: 12px; color: #d4d4d8 !important; line-height: 1.55;">
                             {security_text}
                         </p>
                     </td>
@@ -220,13 +269,13 @@ class EmailService:
             <tr>
                 <td align="center">
                     <!--[if mso]>
-                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{login_url}" style="height:48px;v-text-anchor:middle;width:240px;" arcsize="20%" stroke="f" fillcolor="#10b981">
+                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{final_cta_url}" style="height:50px;v-text-anchor:middle;width:240px;" arcsize="20%" stroke="f" fillcolor="#22c55e">
                         <w:anchorlock/>
                         <center style="color:#09090b;font-family:sans-serif;font-size:15px;font-weight:bold;">{cta_text}</center>
                     </v:roundrect>
                     <![endif]-->
                     <!--[if !mso]><!-->
-                    <a href="{login_url}" target="_blank" style="display: inline-block; padding: 14px 32px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 15px; font-weight: 700; color: #09090b; text-decoration: none; border-radius: 10px; background-color: #10b981; border: 1px solid #10b981; text-align: center; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);">
+                    <a href="{final_cta_url}" target="_blank" style="display: inline-block; padding: 15px 36px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 15px; font-weight: 800; color: #09090b !important; text-decoration: none; border-radius: 12px; background-color: #22c55e !important; border: 1px solid #22c55e !important; text-align: center; box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);">
                         {cta_text}
                     </a>
                     <!--<![endif]-->
@@ -236,70 +285,83 @@ class EmailService:
         """
 
         return f"""<!DOCTYPE html>
-<html lang="pt-BR" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<html lang="pt-BR" xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="x-apple-disable-message-reformatting">
-    <meta name="color-scheme" content="dark">
-    <meta name="supported-color-schemes" content="dark">
+    <meta name="color-scheme" content="only dark">
+    <meta name="supported-color-schemes" content="only dark">
     <title>{title}</title>
-    <!--[if mso]>
-    <noscript>
-        <xml>
-            <o:OfficeDocumentSettings>
-                <o:PixelsPerInch>96</o:PixelsPerInch>
-            </o:OfficeDocumentSettings>
-        </xml>
-    </noscript>
-    <![endif]-->
+    <style>
+        :root {{
+            color-scheme: only dark !important;
+            supported-color-schemes: only dark !important;
+        }}
+        html, body {{
+            background-color: #09090b !important;
+            color: #f4f4f5 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+        }}
+        @media (prefers-color-scheme: light) {{
+            body, table, td, div, p, span, a {{
+                background-color: #09090b !important;
+                color: #f4f4f5 !important;
+            }}
+        }}
+        @media (prefers-color-scheme: dark) {{
+            body, table, td, div, p, span, a {{
+                background-color: #09090b !important;
+                color: #f4f4f5 !important;
+            }}
+        }}
+    </style>
 </head>
-<body style="margin: 0; padding: 0; width: 100% !important; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; background-color: #09090b; color: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-    <!--[if !mso]><!-->
+<body style="margin: 0; padding: 0; width: 100% !important; background-color: #09090b !important; color: #f4f4f5 !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
     <div style="display:none;font-size:1px;color:#09090b;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;">
         {preheader}
     </div>
-    <!--<![endif]-->
-    <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #09090b; width: 100%;">
+    <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #09090b !important; width: 100%;">
         <tr>
-            <td align="center" style="padding: 40px 16px;">
+            <td align="center" style="padding: 40px 16px; background-color: #09090b !important;">
                 <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; width: 100%; margin: 0 auto;">
                     
-                    <!-- HEADER LOGO -->
+                    <!-- NATRAVE OFFICIAL LOGO HEADER -->
                     <tr>
                         <td align="center" style="padding-bottom: 28px;">
                             <table role="presentation" border="0" cellspacing="0" cellpadding="0">
                                 <tr>
-                                    <td style="background-color: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 9999px; padding: 8px 18px;">
-                                        <span style="display: inline-block; width: 8px; height: 8px; background-color: #10b981; border-radius: 50%; vertical-align: middle; margin-right: 8px;"></span>
-                                        <span style="font-size: 13px; font-weight: 700; color: #10b981; letter-spacing: 0.1em; text-transform: uppercase; vertical-align: middle;">NATRAVE 5V5</span>
+                                    <td style="background-color: rgba(34, 197, 94, 0.12) !important; border: 1px solid rgba(34, 197, 94, 0.3) !important; border-radius: 9999px; padding: 10px 24px;">
+                                        <span style="display: inline-block; width: 9px; height: 9px; background-color: #22c55e !important; border-radius: 50%; vertical-align: middle; margin-right: 10px; box-shadow: 0 0 8px #22c55e;"></span>
+                                        <span style="font-size: 14px; font-weight: 900; color: #ffffff !important; letter-spacing: 0.15em; text-transform: uppercase; vertical-align: middle;">NATRAVE <span style="color: #22c55e !important;">5V5</span></span>
                                     </td>
                                 </tr>
                             </table>
                         </td>
                     </tr>
 
-                    <!-- CARD CONTAINER -->
+                    <!-- MAIN CARD CONTAINER -->
                     <tr>
-                        <td style="background-color: #121217; border: 1px solid #27272a; border-radius: 20px; padding: 40px 36px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);">
+                        <td style="background-color: #121217 !important; border: 1px solid #27272a !important; border-radius: 20px; padding: 38px 32px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.65);">
                             
                             <!-- BADGE -->
-                            <table role="presentation" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 16px;">
+                            <table role="presentation" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 18px;">
                                 <tr>
-                                    <td style="font-size: 11px; font-weight: 800; color: #10b981; letter-spacing: 0.12em; text-transform: uppercase; background-color: rgba(16, 185, 129, 0.1); border-radius: 6px; padding: 4px 10px; border: 1px solid rgba(16, 185, 129, 0.2);">
+                                    <td style="font-size: 11px; font-weight: 800; color: #10b981 !important; letter-spacing: 0.12em; text-transform: uppercase; background-color: rgba(16, 185, 129, 0.15) !important; border-radius: 6px; padding: 5px 12px; border: 1px solid rgba(16, 185, 129, 0.35) !important;">
                                         {badge_text}
                                     </td>
                                 </tr>
                             </table>
 
                             <!-- TITLE -->
-                            <h1 style="margin: 0 0 16px 0; font-size: 26px; font-weight: 700; color: #ffffff; line-height: 1.25; letter-spacing: -0.02em;">
+                            <h1 style="margin: 0 0 16px 0; font-size: 25px; font-weight: 800; color: #ffffff !important; line-height: 1.25; letter-spacing: -0.02em;">
                                 {title}
                             </h1>
 
                             <!-- SUBTITLE / INTRO TEXT -->
-                            <div style="font-size: 15px; line-height: 1.6; color: #a1a1aa; margin-bottom: 28px;">
+                            <div style="font-size: 15px; line-height: 1.6; color: #a1a1aa !important; margin-bottom: 28px;">
                                 {subtitle}
                             </div>
 
@@ -321,13 +383,13 @@ class EmailService:
                     <!-- FOOTER -->
                     <tr>
                         <td align="center" style="padding-top: 32px; padding-bottom: 16px; text-align: center;">
-                            <p style="margin: 0 0 8px 0; font-size: 13px; font-weight: 600; color: #71717a;">
+                            <p style="margin: 0 0 8px 0; font-size: 13px; font-weight: 700; color: #71717a !important;">
                                 NaTrave 5v5 &bull; Gestão Inteligente de Futebol
                             </p>
-                            <p style="margin: 0 0 8px 0; font-size: 12px; color: #52525b; line-height: 1.5;">
-                                Este e-mail transacional foi enviado para <span style="color: #a1a1aa;">{to_email}</span>.<br>Por favor, não responda diretamente a esta mensagem.
+                            <p style="margin: 0 0 8px 0; font-size: 12px; color: #52525b !important; line-height: 1.5;">
+                                Este e-mail transacional foi enviado para <span style="color: #a1a1aa !important;">{to_email}</span>.<br>Por favor, não responda diretamente a esta mensagem.
                             </p>
-                            <p style="margin: 0; font-size: 11px; color: #3f3f46;">
+                            <p style="margin: 0; font-size: 11px; color: #3f3f46 !important;">
                                 &copy; 2026 NaTrave 5v5. Todos os direitos reservados.
                             </p>
                         </td>
@@ -340,18 +402,21 @@ class EmailService:
 </body>
 </html>"""
 
+    # ==================== SERVIÇOS DE E-MAIL LEGADOS / AUTENTICAÇÃO ====================
+
     def send_welcome_email(self, to_email: str, nome: str, username: str) -> EmailResult:
         subject = "Bem-vindo ao NaTrave 5v5"
+        clean_base = self.get_clean_base_url()
 
         highlight_card_html = f"""
         <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 28px;">
             <tr>
-                <td style="background-color: #16161e; border: 1px solid #27272a; border-radius: 12px; padding: 20px 24px;">
-                    <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 700; color: #10b981; letter-spacing: 0.08em; text-transform: uppercase;">
+                <td style="background-color: #181824; border: 1px solid #27273a; border-radius: 14px; padding: 20px 24px;">
+                    <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 800; color: #4ade80; letter-spacing: 0.08em; text-transform: uppercase;">
                         👤 Detalhes da sua Conta
                     </p>
-                    <p style="margin: 0; font-size: 15px; color: #ffffff; font-weight: 600;">
-                        Nome de usuário: <span style="font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; color: #10b981; font-size: 16px;">@{username}</span>
+                    <p style="margin: 0; font-size: 15px; color: #ffffff; font-weight: 700;">
+                        Nome de usuário: <span style="font-family: 'SFMono-Regular', Consolas, monospace; color: #4ade80; font-size: 16px;">@{username}</span>
                     </p>
                 </td>
             </tr>
@@ -380,31 +445,32 @@ class EmailService:
             security_title="Segurança da Conta",
             security_text=security_text,
             cta_text="Acessar NaTrave",
-            cta_url=f"{self.base_url}/login",
+            cta_url=f"{clean_base}/login",
         )
 
         text = (
             f"Olá, {nome}!\n\n"
             f"Sua conta no NaTrave 5v5 foi criada com sucesso.\n"
             f"Usuário registrado: {username}\n\n"
-            f"Acesse agora: {self.base_url}/login"
+            f"Acesse agora: {clean_base}/login"
         )
         return self.send_email(to_email, subject, html, text)
 
     def send_temporary_password_email(self, to_email: str, nome: str, username: str, senha_temporaria: str) -> EmailResult:
         subject = "Sua senha temporária no NaTrave 5v5"
+        clean_base = self.get_clean_base_url()
 
         highlight_card_html = f"""
         <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 28px;">
             <tr>
-                <td style="background-color: #061c14; border: 1px solid #10b981; border-radius: 12px; padding: 22px 24px; text-align: center;">
-                    <p style="margin: 0 0 8px 0; font-size: 12px; font-weight: 700; color: #34d399; letter-spacing: 0.08em; text-transform: uppercase;">
+                <td style="background-color: #061c14; border: 1px solid #22c55e; border-radius: 14px; padding: 22px 24px; text-align: center;">
+                    <p style="margin: 0 0 8px 0; font-size: 12px; font-weight: 800; color: #4ade80; letter-spacing: 0.08em; text-transform: uppercase;">
                         🔑 Sua Senha Temporária
                     </p>
-                    <div style="font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace; font-size: 26px; font-weight: 700; color: #ffffff; letter-spacing: 3px; background-color: #0d281e; border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 12px 18px; margin: 6px 0 0 0; display: inline-block; word-break: break-all;">
+                    <div style="font-family: 'SFMono-Regular', Consolas, monospace; font-size: 26px; font-weight: 800; color: #ffffff; letter-spacing: 3px; background-color: #0d281e; border: 1px solid rgba(34, 197, 94, 0.4); border-radius: 10px; padding: 12px 20px; margin: 6px 0 0 0; display: inline-block; word-break: break-all;">
                         {senha_temporaria}
                     </div>
-                    <p style="margin: 10px 0 0 0; font-size: 12px; color: #6ee7b7;">
+                    <p style="margin: 10px 0 0 0; font-size: 12px; color: #a7f3d0;">
                         Copie a senha acima para realizar o seu login temporário.
                     </p>
                 </td>
@@ -414,14 +480,13 @@ class EmailService:
 
         steps = [
             ("1", "Acesse a plataforma", "Clique no botão verde \"Acessar NaTrave\" abaixo para ir à tela de login."),
-            ("2", "Faça login com a senha temporária", f"Insira seu usuário (<strong>{username}</strong>) e a senha em destaque no card acima."),
-            ("3", "Cadastre uma nova senha definitiva", "Ao entrar, você será direcionado para cadastrar sua nova senha pessoal e segura."),
+            ("2", "Faça login com a senha temporária", f"Insira seu usuário (<strong>{username}</strong>) e a senha em destaque acima."),
+            ("3", "Cadastre uma nova senha definitiva", "Ao entrar, você será direcionado para cadastrar sua nova senha pessoal."),
         ]
 
         security_text = (
             "Por motivos de segurança, esta senha temporária é de uso provisório e único. "
-            "Recomendamos efetuar o login e alterar sua senha imediatamente. "
-            "Se você não solicitou esta redefinição, entre em contato imediatamente com os administradores do sistema."
+            "Recomendamos efetuar o login e alterar sua senha imediatamente."
         )
 
         html = self._build_email_html(
@@ -436,33 +501,31 @@ class EmailService:
             security_title="Aviso de Segurança",
             security_text=security_text,
             cta_text="Acessar NaTrave",
-            cta_url=f"{self.base_url}/login",
+            cta_url=f"{clean_base}/login",
         )
 
         text = (
             f"Olá, {nome}.\n\n"
             f"Sua senha temporária no NaTrave 5v5 para a conta {username} é:\n"
             f"{senha_temporaria}\n\n"
-            "Passos para utilizar:\n"
-            f"1. Acesse {self.base_url}/login\n"
-            f"2. Faça login com o usuário '{username}' e a senha temporária '{senha_temporaria}'\n"
-            "3. Altere para sua nova senha no seu perfil.\n\n"
-            "Por motivos de segurança, efetue a troca imediatamente."
+            f"Acesse: {clean_base}/login"
         )
         return self.send_email(to_email, subject, html, text)
 
     def send_password_reset_email(self, to_email: str, nome: str, reset_url: str) -> EmailResult:
         subject = "Redefina sua senha no NaTrave 5v5"
+        clean_base = self.get_clean_base_url()
+        safe_reset_url = sanitize_email_url(reset_url, clean_base)
 
         highlight_card_html = f"""
         <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 28px;">
             <tr>
-                <td style="background-color: #16161e; border: 1px solid #27272a; border-radius: 12px; padding: 18px 22px;">
-                    <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 700; color: #a1a1aa; letter-spacing: 0.05em; text-transform: uppercase;">
+                <td style="background-color: #181824; border: 1px solid #27273a; border-radius: 14px; padding: 18px 22px;">
+                    <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 800; color: #a1a1aa; letter-spacing: 0.05em; text-transform: uppercase;">
                         🔗 Link de Redefinição
                     </p>
-                    <p style="margin: 0; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; font-size: 12px; color: #10b981; word-break: break-all;">
-                        {reset_url}
+                    <p style="margin: 0; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12px; color: #4ade80; word-break: break-all;">
+                        {safe_reset_url}
                     </p>
                 </td>
             </tr>
@@ -470,14 +533,14 @@ class EmailService:
         """
 
         steps = [
-            ("1", "Clique no botão de acesso", "Clique em \"Acessar NaTrave\" abaixo ou acesse o link de redefinição exibido."),
+            ("1", "Clique no botão de acesso", "Clique em \"Acessar NaTrave\" abaixo para ir à tela de redefinição."),
             ("2", "Cadastre a nova senha", "Escolha uma nova senha forte com combinação de letras e números."),
-            ("3", "Faça login com a nova senha", "Após salvar a alteração, faça seu login normalmente com as novas credenciais."),
+            ("3", "Faça login com a nova senha", "Após salvar, faça seu login normalmente com as novas credenciais."),
         ]
 
         security_text = (
             "Este link de redefinição de senha é seguro e temporário. "
-            "Se você não solicitou a redefinição de senha, fique tranquilo: nenhuma alteração foi realizada em sua conta."
+            "Se você não solicitou a redefinição de senha, nenhuma alteração foi realizada em sua conta."
         )
 
         html = self._build_email_html(
@@ -492,17 +555,259 @@ class EmailService:
             security_title="Aviso de Segurança",
             security_text=security_text,
             cta_text="Acessar NaTrave",
-            cta_url=reset_url,
+            cta_url=safe_reset_url,
         )
 
         text = (
             f"Olá, {nome}.\n\n"
-            f"Use este link para redefinir sua senha no NaTrave 5v5:\n{reset_url}\n\n"
+            f"Use este link para redefinir sua senha no NaTrave 5v5:\n{safe_reset_url}\n\n"
             "Se você não solicitou esta alteração, ignore este e-mail."
         )
         return self.send_email(to_email, subject, html, text)
 
     def send_reset_token_email(self, to_email: str, nome: str, token: str) -> EmailResult:
-        """Compatibilidade com testes legados que passam token ao invés de URL pronta."""
-        reset_url = f"{self.base_url}/definir-senha?token={token}"
+        clean_base = self.get_clean_base_url()
+        reset_url = f"{clean_base}/definir-senha?token={token}"
         return self.send_password_reset_email(to_email=to_email, nome=nome, reset_url=reset_url)
+
+    # ==================== NOVOS SERVIÇOS DE NOTIFICAÇÃO DA PARTIDA ====================
+
+    def send_presenca_aberta_email(self, to_email: str, nome: str, data_rodada: str = "Próxima Terça-Feira") -> EmailResult:
+        """Envia e-mail informando que a lista de presença para a rodada de terça está aberta."""
+        subject = f"⚽ Rodada Aberta: Confirme sua presença para {data_rodada}!"
+        clean_base = self.get_clean_base_url()
+        cta_url = f"{clean_base}/presenca"
+
+        highlight_card_html = f"""
+        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 28px;">
+            <tr>
+                <td style="background-color: #061c14; border: 1px solid #22c55e; border-radius: 14px; padding: 22px 24px;">
+                    <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 800; color: #4ade80; letter-spacing: 0.08em; text-transform: uppercase;">
+                        📅 Rodada de Futebol
+                    </p>
+                    <p style="margin: 0 0 4px 0; font-size: 18px; color: #ffffff; font-weight: 800;">
+                        {data_rodada}
+                    </p>
+                    <p style="margin: 0; font-size: 13px; color: #a7f3d0; line-height: 1.4;">
+                        A lista de confirmação de presença já está aberta! Acesse o app e garanta sua vaga.
+                    </p>
+                </td>
+            </tr>
+        </table>
+        """
+
+        steps = [
+            ("1", "Acesse a lista de presença", "Clique no botão verde \"Confirmar Presença\" abaixo para acessar a plataforma."),
+            ("2", "Selecione seu status", "Marque \"Confirmado\", \"Ausente\" ou \"Dúvida\" para informar a organização."),
+            ("3", "Acompanhe os sorteios", "Fique atento aos horários de sorteio das equipes para a partida."),
+        ]
+
+        html = self._build_email_html(
+            to_email=to_email,
+            preheader=f"A rodada da {data_rodada} já está aberta para inscrição de presença. Confirme agora no NaTrave 5v5!",
+            badge_text="INSCRIÇÃO DE PRESENÇA ABERTA",
+            title=f"Rodada Aberta: {data_rodada}",
+            subtitle=f"Olá, <strong style=\"color:#ffffff;\">{nome}</strong>! A lista de inscrição para a rodada de futebol da <strong style=\"color:#4ade80;\">{data_rodada}</strong> já está aberta oficialmente.",
+            highlight_card_html=highlight_card_html,
+            steps=steps,
+            steps_title="Como confirmar sua presença",
+            security_title="Importante",
+            security_text="A confirmação prévia é essencial para que a organização realize o sorteio equilibrado dos times.",
+            cta_text="Confirmar Presença",
+            cta_url=cta_url,
+        )
+
+        text = (
+            f"Olá, {nome}!\n\n"
+            f"A rodada da {data_rodada} já está aberta para inscrição de presença no NaTrave 5v5!\n\n"
+            f"Confirme sua vaga agora: {cta_url}"
+        )
+        return self.send_email(to_email, subject, html, text)
+
+    def send_votacao_aberta_email(self, to_email: str, nome: str, partida_titulo: str = "Votação da Partida") -> EmailResult:
+        """Envia e-mail de votação aberta EXCLUSIVAMENTE para os participantes da partida."""
+        subject = "⭐ Votação Aberta: Avalie seus companheiros de partida!"
+        clean_base = self.get_clean_base_url()
+        cta_url = f"{clean_base}/votacao"
+
+        highlight_card_html = f"""
+        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 28px;">
+            <tr>
+                <td style="background-color: #181028; border: 1px solid #a78bfa; border-radius: 14px; padding: 22px 24px;">
+                    <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 800; color: #c084fc; letter-spacing: 0.08em; text-transform: uppercase;">
+                        ⭐ Avaliação da Partida
+                    </p>
+                    <p style="margin: 0 0 4px 0; font-size: 18px; color: #ffffff; font-weight: 800;">
+                        {partida_titulo}
+                    </p>
+                    <p style="margin: 0; font-size: 13px; color: #e9d5ff; line-height: 1.4;">
+                        Sua partida foi finalizada! A votação para avaliar o desempenho dos atletas já está disponível.
+                    </p>
+                </td>
+            </tr>
+        </table>
+        """
+
+        steps = [
+            ("1", "Acesse a área de votação", "Clique no botão verde \"Votar Agora\" para abrir diretamente a tela de avaliação."),
+            ("2", "Avalie seus companheiros", "Atribua notas de 0 a 10 para pelo menos 5 jogadores da rodada."),
+            ("3", "Envie seus votos", "Seus votos serão computados no ranking oficial da temporada."),
+        ]
+
+        html = self._build_email_html(
+            to_email=to_email,
+            preheader=f"Olá {nome}! A votação para a partida {partida_titulo} já está aberta. Avalie seus companheiros no NaTrave 5v5!",
+            badge_text="VOTAÇÃO DA PARTIDA ABERTA",
+            title="Avalie os Jogadores da Rodada",
+            subtitle=f"Olá, <strong style=\"color:#ffffff;\">{nome}</strong>! A sua partida <strong style=\"color:#a78bfa;\">{partida_titulo}</strong> foi encerrada e a votação pós-jogo já está liberada exclusivamente para os participantes.",
+            highlight_card_html=highlight_card_html,
+            steps=steps,
+            steps_title="3 passos para registrar suas notas",
+            security_title="Regra de Votação",
+            security_text="Suas avaliações são confidenciais e contribuem diretamente para a pontuação e estatísticas dos atletas.",
+            cta_text="Votar Agora",
+            cta_url=cta_url,
+        )
+
+        text = (
+            f"Olá, {nome}!\n\n"
+            f"A votação para a partida '{partida_titulo}' já está aberta no NaTrave 5v5!\n\n"
+            f"Avalie seus companheiros agora: {cta_url}"
+        )
+        return self.send_email(to_email, subject, html, text)
+
+    def send_ranking_disponivel_email(self, to_email: str, nome: str, partida_titulo: str = "Ranking Atualizado") -> EmailResult:
+        """Envia e-mail informando que a apuração terminou e o novo ranking está disponível."""
+        subject = "🏆 Ranking Atualizado: Confira as novas posições e estatísticas!"
+        clean_base = self.get_clean_base_url()
+        cta_url = f"{clean_base}/#ranking"
+
+        highlight_card_html = f"""
+        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 28px;">
+            <tr>
+                <td style="background-color: #1c190f; border: 1px solid #f59e0b; border-radius: 14px; padding: 22px 24px;">
+                    <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 800; color: #fbbf24; letter-spacing: 0.08em; text-transform: uppercase;">
+                        🏆 Classificação Geral
+                    </p>
+                    <p style="margin: 0 0 4px 0; font-size: 18px; color: #ffffff; font-weight: 800;">
+                        {partida_titulo}
+                    </p>
+                    <p style="margin: 0; font-size: 13px; color: #fde68a; line-height: 1.4;">
+                        A apuração das notas da rodada foi concluída! Confira seu desempenho e nova colocação na tabela.
+                    </p>
+                </td>
+            </tr>
+        </table>
+        """
+
+        steps = [
+            ("1", "Acesse o Ranking", "Clique no botão \"Ver Ranking\" para visualizar a tabela de classificação atualizada."),
+            ("2", "Confira seu Desempenho", "Veja suas notas, gols, vitórias e evolução de nível."),
+            ("3", "Acompanhe as estatísticas", "Compare suas estatísticas com os outros atletas da temporada."),
+        ]
+
+        html = self._build_email_html(
+            to_email=to_email,
+            preheader="O ranking do NaTrave 5v5 foi atualizado! Veja sua nova posição na tabela.",
+            badge_text="RANKING DA TEMPORADA DISPONÍVEL",
+            title="Ranking da Rodada Atualizado",
+            subtitle=f"Olá, <strong style=\"color:#ffffff;\">{nome}</strong>! As avaliações da partida <strong style=\"color:#fbbf24;\">{partida_titulo}</strong> foram apuradas e o ranking geral foi atualizado.",
+            highlight_card_html=highlight_card_html,
+            steps=steps,
+            steps_title="O que você pode conferir agora",
+            security_title="Estatísticas da Temporada",
+            security_text="O ranking é atualizado automaticamente ao final da apuração de cada rodada.",
+            cta_text="Ver Ranking Completo",
+            cta_url=cta_url,
+        )
+
+        text = (
+            f"Olá, {nome}!\n\n"
+            f"O ranking da temporada no NaTrave 5v5 foi atualizado após a apuração da partida '{partida_titulo}'!\n\n"
+            f"Confira a tabela completa agora: {cta_url}"
+        )
+        return self.send_email(to_email, subject, html, text)
+
+    # ==================== MÉTODOS DE DISPARO EM LOTE / ASSÍNCRONO ====================
+
+    def _normalizar_texto(self, texto: Optional[str]) -> str:
+        import unicodedata
+        t = unicodedata.normalize("NFKD", (texto or "").strip().lower())
+        return "".join(c for c in t if not unicodedata.combining(c))
+
+    def notify_presenca_aberta(self, jogadores: Optional[list] = None, data_rodada: str = "Próxima Terça-Feira") -> None:
+        """Dispara e-mail de presença aberta em segundo plano para todos os jogadores válidos."""
+        def _run():
+            try:
+                from services.jogador_service import JogadorService
+                js = JogadorService()
+                lista_efetiva = jogadores or js.listar()
+                for j in lista_efetiva:
+                    email = getattr(j, "email", None) or (j.get("email") if isinstance(j, dict) else None)
+                    nome = getattr(j, "nome", None) or (j.get("nome") if isinstance(j, dict) else "Jogador")
+                    if email and "@" in str(email):
+                        try:
+                            self.send_presenca_aberta_email(to_email=str(email), nome=str(nome), data_rodada=data_rodada)
+                        except Exception as exc:
+                            logger.warning("Erro ao enviar email de presença para %s: %s", email, exc)
+            except Exception as e:
+                logger.error("Erro no worker notify_presenca_aberta: %s", e)
+
+        threading.Thread(target=_run, daemon=True).start()
+
+    def notify_votacao_aberta(self, participantes: list, partida_titulo: str = "Votação da Partida") -> None:
+        """Dispara e-mail de votação aberta APENAS para os participantes da partida."""
+        def _run():
+            try:
+                from services.jogador_service import JogadorService
+                js = JogadorService()
+                todos_jogadores = js.listar()
+                by_user_id = {str(j.owner_user_id): j for j in todos_jogadores if getattr(j, 'owner_user_id', None)}
+                by_nome = {self._normalizar_texto(j.nome): j for j in todos_jogadores if getattr(j, 'nome', None)}
+
+                for p in (participantes or []):
+                    email = getattr(p, "email", None) or (p.get("email") if isinstance(p, dict) else None)
+                    nome = getattr(p, "jogador_nome", None) or getattr(p, "nome", None) or (p.get("jogador_nome") or p.get("nome") if isinstance(p, dict) else "Jogador")
+                    user_id = getattr(p, "user_id", None) or (p.get("user_id") if isinstance(p, dict) else None)
+
+                    if not email:
+                        atleta = None
+                        if user_id and str(user_id) in by_user_id:
+                            atleta = by_user_id[str(user_id)]
+                        elif nome:
+                            chave = self._normalizar_texto(nome)
+                            if chave in by_nome:
+                                atleta = by_nome[chave]
+                        
+                        if atleta and getattr(atleta, "email", None):
+                            email = atleta.email
+
+                    if email and "@" in str(email):
+                        try:
+                            self.send_votacao_aberta_email(to_email=str(email), nome=str(nome), partida_titulo=partida_titulo)
+                        except Exception as exc:
+                            logger.warning("Erro ao enviar email de votação para %s: %s", email, exc)
+            except Exception as e:
+                logger.error("Erro no worker notify_votacao_aberta: %s", e)
+
+        threading.Thread(target=_run, daemon=True).start()
+
+    def notify_ranking_disponivel(self, jogadores: Optional[list] = None, partida_titulo: str = "Ranking Atualizado") -> None:
+        """Dispara e-mail de ranking disponível em segundo plano para todos os jogadores."""
+        def _run():
+            try:
+                from services.jogador_service import JogadorService
+                js = JogadorService()
+                lista_efetiva = jogadores or js.listar()
+                for j in lista_efetiva:
+                    email = getattr(j, "email", None) or (j.get("email") if isinstance(j, dict) else None)
+                    nome = getattr(j, "nome", None) or (j.get("nome") if isinstance(j, dict) else "Jogador")
+                    if email and "@" in str(email):
+                        try:
+                            self.send_ranking_disponivel_email(to_email=str(email), nome=str(nome), partida_titulo=partida_titulo)
+                        except Exception as exc:
+                            logger.warning("Erro ao enviar email de ranking para %s: %s", email, exc)
+            except Exception as e:
+                logger.error("Erro no worker notify_ranking_disponivel: %s", e)
+
+        threading.Thread(target=_run, daemon=True).start()
