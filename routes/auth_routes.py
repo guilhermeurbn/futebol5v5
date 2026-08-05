@@ -92,12 +92,21 @@ def _obter_notas_e_atributos_jogador(jogador, stats_jogador):
     from services.db import load_json_data
     
     # 1. Carrega notas das partidas do jogador a partir do histórico de votações
-    votacoes = load_json_data("votacoes_partidas", [])
+    votacoes_data = load_json_data("votacoes_partidas", [])
+    if isinstance(votacoes_data, dict):
+        votacoes = votacoes_data.get("partidas", [])
+    elif isinstance(votacoes_data, list):
+        votacoes = votacoes_data
+    else:
+        votacoes = []
+
     notas_por_partida = {}
     total_nota = 0.0
     qtd_votos = 0
     
     for partida in votacoes:
+        if not isinstance(partida, dict):
+            continue
         if partida.get("status") == "encerrada":
             ranking = partida.get("ranking") or {}
             ranking_jogadores = ranking.get("ranking_jogadores") or []
