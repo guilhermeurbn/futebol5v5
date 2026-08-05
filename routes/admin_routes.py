@@ -44,8 +44,12 @@ def _is_admin():
 def admin_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
-        if not session.get('user_id'):
+        user_id = session.get('user_id')
+        if not user_id:
             return redirect(url_for('auth.login_page'))
+        from routes.auth_routes import _usuario_sem_email
+        if _usuario_sem_email(user_id):
+            return redirect(url_for('auth.completar_email_page'))
         if not _is_admin():
             return redirect(url_for('jogador_crud.index'))
         return f(*args, **kwargs)

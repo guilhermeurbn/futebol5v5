@@ -537,10 +537,7 @@ class VotacaoService:
                     "notas_lista": [],
                 }
 
-        ranking_jogadores = sorted(jogadores.values(), key=lambda x: (x["pontos"], x["votos"]), reverse=True)
-        ranking_times = sorted(times.values(), key=lambda x: (x["nota_total"], x["votos"]), reverse=True)
-
-        for item in ranking_jogadores:
+        for item in jogadores.values():
             if item.get("soma_pesos") and item["soma_pesos"] > 0:
                 item["nota_media"] = round(item["nota_total"] / item["soma_pesos"], 2)
                 item["confiabilidade_media"] = round(item["soma_pesos"] / item["votos"], 4)
@@ -548,11 +545,22 @@ class VotacaoService:
                 item["nota_media"] = round(item["nota_total"] / item["votos"], 2) if item["votos"] else 0
                 item["confiabilidade_media"] = 1.0
 
-        for item in ranking_times:
+        for item in times.values():
             if item.get("soma_pesos") and item["soma_pesos"] > 0:
                 item["nota_media"] = round(item["nota_total"] / item["soma_pesos"], 2)
             else:
                 item["nota_media"] = round(item["nota_total"] / item["votos"], 2) if item["votos"] else 0
+
+        ranking_jogadores = sorted(
+            jogadores.values(),
+            key=lambda x: (x.get("nota_media", 0), x.get("pontos", 0), x.get("votos", 0)),
+            reverse=True
+        )
+        ranking_times = sorted(
+            times.values(),
+            key=lambda x: (x.get("nota_media", 0), x.get("nota_total", 0), x.get("votos", 0)),
+            reverse=True
+        )
 
         melhor_jogador = ranking_jogadores[0] if ranking_jogadores else None
         melhor_time = ranking_times[0] if ranking_times else None
@@ -617,6 +625,14 @@ class VotacaoService:
             votos = partida.get("votos", [])
             total_votos += len(votos)
 
+            # Ranking apurado da rodada
+            ranking_rodada = (partida.get("ranking") or {}).get("ranking_jogadores") or []
+            ranking_rodada_dict = {
+                item.get("jogador_nome"): item
+                for item in ranking_rodada
+                if item.get("jogador_nome")
+            }
+
             participantes = {
                 p.get("jogador_nome"): p
                 for p in partida.get("participantes", [])
@@ -634,6 +650,7 @@ class VotacaoService:
                 item = acumulado.setdefault(nome, {
                     "jogador_nome": nome,
                     "jogos": 0,
+                    "soma_medias_rodadas": 0.0,
                     "nota_total": 0.0,
                     "pontos": 0.0,
                     "avaliacoes": 0,
@@ -644,6 +661,13 @@ class VotacaoService:
                     "destaques": 0,
                 })
                 item["jogos"] += 1
+
+                # Soma a média obtida nesta rodada
+                rk_info = ranking_rodada_dict.get(nome)
+                if rk_info:
+                    nota_rodada = float(rk_info.get("nota_media", 0) or 0)
+                    item["soma_medias_rodadas"] += nota_rodada
+                    item["avaliacoes"] += 1
 
                 resultado_time = self._resultado_por_time(resultado, participante.get("time_numero")) if resultado else "empate"
                 detalhe = detalhes_resultado.get(nome, {})
@@ -659,25 +683,6 @@ class VotacaoService:
                 if melhor_jogador and melhor_jogador == nome:
                     item["destaques"] += 1
 
-            for voto in votos:
-                for voto_jogador in voto.get("votos", []):
-                    nome = voto_jogador.get("jogador_nome", "Jogador")
-                    nota = self._normalizar_nota(voto_jogador.get("nota", 0))
-                    item = acumulado.setdefault(nome, {
-                        "jogador_nome": nome,
-                        "jogos": 0,
-                        "nota_total": 0.0,
-                        "pontos": 0.0,
-                        "avaliacoes": 0,
-                        "gols": 0,
-                        "vitorias": 0,
-                        "derrotas": 0,
-                        "empates": 0,
-                        "destaques": 0,
-                    })
-                    item["avaliacoes"] += 1
-                    item["nota_total"] += nota
-
         if not (data_inicio and data_fim):
             for jogador in self.jogador_service.listar_para_dict():
                 nome = (jogador.get("nome") or "").strip()
@@ -686,6 +691,7 @@ class VotacaoService:
                 acumulado.setdefault(nome, {
                     "jogador_nome": nome,
                     "jogos": 0,
+                    "soma_medias_rodadas": 0.0,
                     "nota_total": 0.0,
                     "pontos": 0.0,
                     "avaliacoes": 0,
@@ -697,32 +703,20 @@ class VotacaoService:
                 })
 
         for item in acumulado.values():
-            avaliacoes = item.get("avaliacoes", 0)
             jogos = item.get("jogos", 0)
-            vitorias = item.get("vitorias", 0)
-            derrotas = item.get("derrotas", 0)
-            destaques = item.get("destaques", 0)
-            item["nota_media"] = round(item["nota_total"] / avaliacoes, 2) if avaliacoes else 0
-            saldo_resultado = vitorias - derrotas
-            item["saldo_resultado"] = saldo_resultado
-            nota_component = (item["nota_media"] / 10.0) * 50.0
-            jogos_component = (min(jogos, 20) / 20.0) * 15.0
-            saldo_component = 0.0
-            if jogos > 0:
-                saldo_clamped = max(-20, min(20, saldo_resultado))
-                saldo_component = ((saldo_clamped + 20) / 40.0) * 25.0
-            destaque_component = (min(destaques, 5) / 5.0) * 10.0
-
-            item["pontos"] = round(
-                min(100.0, max(0.0, nota_component + jogos_component + saldo_component + destaque_component)),
-                2,
-            )
+            avaliacoes = item.get("avaliacoes", 0)
+            soma_medias = item.get("soma_medias_rodadas", 0.0)
+            
+            # Pontos é a soma das médias dos rankings das rodadas
+            item["pontos"] = round(soma_medias, 2)
+            item["nota_total"] = round(soma_medias, 2)
+            item["nota_media"] = round(soma_medias / avaliacoes, 2) if avaliacoes else (round(soma_medias / jogos, 2) if jogos else 0.0)
 
         ranking = sorted(
             acumulado.values(),
             key=lambda x: (
-                -float(x.get("nota_media", 0) or 0),
                 -float(x.get("pontos", 0) or 0),
+                -float(x.get("nota_media", 0) or 0),
                 -int(x.get("jogos", 0) or 0),
                 -int(x.get("vitorias", 0) or 0),
                 -int(x.get("destaques", 0) or 0),

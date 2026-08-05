@@ -117,3 +117,55 @@ def test_email_service_send_temporary_password_email_layout(monkeypatch):
     assert 'NaTrave 5v5 &bull; Gestão Inteligente de Futebol' in html or 'NaTrave 5v5' in html
     assert 'alex@example.com' in html
 
+
+def test_completar_email_obrigatorio_flow():
+    from app import criar_app
+    app = criar_app()
+    app.config['TESTING'] = True
+    app.config['WTF_CSRF_ENABLED'] = False
+    client = app.test_client()
+
+    from services.auth_service import AuthService
+    auth_svc = AuthService()
+
+    import uuid
+    uname = f"sememailuser_{uuid.uuid4().hex[:6]}"
+
+    usuario = auth_svc.criar_usuario(
+        email="",
+        username=uname,
+        nome=f"Sem Email {uname}",
+        password="password123",
+        role="usuario"
+    )
+
+    dados = auth_svc._carregar()
+    for u in dados:
+        if u.get("id") == usuario["id"]:
+            u["email"] = ""
+    auth_svc._salvar(dados)
+
+    resp_login = client.post('/login', data={'username': uname, 'password': 'password123'}, follow_redirects=False)
+    assert resp_login.status_code == 302
+    assert '/completar-email' in resp_login.headers['Location']
+
+    with client.session_transaction() as sess:
+        sess['user_id'] = usuario['id']
+        sess['username'] = uname
+        sess['nome'] = 'Sem Email Teste'
+        sess['role'] = 'usuario'
+
+    resp_perfil = client.get('/perfil', follow_redirects=False)
+    assert resp_perfil.status_code == 302
+    assert '/completar-email' in resp_perfil.headers['Location']
+
+    resp_submit = client.post('/completar-email', data={'email': 'sememail.resolvido@exemplo.com'}, follow_redirects=True)
+    assert resp_submit.status_code == 200
+
+    u_atualizado = auth_svc.obter_por_id(usuario['id'])
+    assert u_atualizado['email'] == 'sememail.resolvido@exemplo.com'
+
+    # Cleanup
+    auth_svc.deletar_usuario(usuario['id'])
+
+

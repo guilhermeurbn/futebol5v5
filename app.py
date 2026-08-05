@@ -217,7 +217,7 @@ def criar_app(config_name: str = None) -> Flask:
             path.startswith('/favicon') or
             path.startswith('/robots') or
             path.startswith('/perfil_') or
-            path in ['/login', '/logout', '/cadastro', '/recuperar_senha', '/manifest.json']
+            path in ['/login', '/logout', '/cadastro', '/recuperar_senha', '/completar-email', '/manifest.json']
         ):
             return
 

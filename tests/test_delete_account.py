@@ -13,6 +13,7 @@ def _fake_user():
         'id': 'user-delete-test',
         'username': 'deleteme',
         'nome': 'Delete Me',
+        'email': 'deleteme@example.com',
         'role': 'usuario',
         'password_hash': 'scrypt:32768:8:1$dummy$dummyhash',
         'senha_temporaria_ativa': False,

@@ -47,10 +47,21 @@ def _is_juiz():
     return session.get('role') == 'juiz'
 
 
+def _usuario_sem_email(user_id):
+    if not user_id:
+        return False
+    u = auth_service.obter_por_id(user_id)
+    if not u:
+        return False
+    email = (u.get('email') or '').strip()
+    return not email or '@' not in email
+
+
 def login_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
-        if not session.get('user_id'):
+        user_id = session.get('user_id')
+        if not user_id:
             return redirect(url_for('auth.login_page'))
         if session.get('senha_temporaria_ativa') and request.endpoint not in {
             'auth.perfil_page',
@@ -58,6 +69,12 @@ def login_required(f):
             'auth.logout',
         }:
             return redirect(url_for('auth.perfil_page'))
+        if _usuario_sem_email(user_id) and request.endpoint not in {
+            'auth.completar_email_page',
+            'auth.completar_email_submit',
+            'auth.logout',
+        }:
+            return redirect(url_for('auth.completar_email_page'))
         return f(*args, **kwargs)
     return wrapper
 
@@ -226,6 +243,8 @@ def login_submit():
         session.modified = True
         if session['senha_temporaria_ativa']:
             return redirect(url_for('auth.perfil_page'))
+        if _usuario_sem_email(usuario['id']):
+            return redirect(url_for('auth.completar_email_page'))
         if session.get('role') == 'juiz':
             return redirect(url_for('juiz.jogar_page'))
         if session.get('role') in ['admin']:
@@ -235,6 +254,51 @@ def login_submit():
         return render_template('login.html', erro=str(e)), 400
     except Exception as e:
         return render_template('login.html', erro='Erro ao autenticar usuario'), 500
+
+
+@auth_bp.route('/completar-email', methods=['GET'])
+def completar_email_page():
+    """Página para preenchimento obrigatório de e-mail"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('auth.login_page'))
+    if not _usuario_sem_email(user_id):
+        if session.get('role') == 'juiz':
+            return redirect(url_for('juiz.jogar_page'))
+        if session.get('role') in ['admin']:
+            return redirect(url_for('jogador_crud.index'))
+        return redirect(url_for('auth.perfil_page'))
+    return render_template('completar_email.html')
+
+
+@auth_bp.route('/completar-email', methods=['POST'])
+def completar_email_submit():
+    """Handler para submissão do e-mail obrigatório"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('auth.login_page'))
+
+    email = request.form.get('email', '').strip().lower()
+    if not email or '@' not in email:
+        return render_template('completar_email.html', erro='Por favor, informe um e-mail válido com @.'), 400
+
+    try:
+        auth_service.atualizar_email(user_id=user_id, email=email)
+        flash('E-mail cadastrado com sucesso!', 'sucesso')
+        if session.get('role') == 'juiz':
+            return redirect(url_for('juiz.jogar_page'))
+        if session.get('role') in ['admin']:
+            return redirect(url_for('jogador_crud.index'))
+        return redirect(url_for('auth.perfil_page'))
+    except ValueError as exc:
+        msg = str(exc)
+        if msg == "Email ja existe":
+            msg = "Este e-mail já está cadastrado em outra conta. Informe outro e-mail."
+        return render_template('completar_email.html', erro=msg), 400
+    except Exception as exc:
+        logger.error(f"Erro ao salvar e-mail obrigatorio para usuario {user_id}: {exc}")
+        return render_template('completar_email.html', erro='Erro ao salvar e-mail. Tente novamente.'), 500
+
 
 
 @auth_bp.route('/cadastro', methods=['GET'])
