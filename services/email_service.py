@@ -454,6 +454,8 @@ class EmailService:
             f"Usuário registrado: {username}\n\n"
             f"Acesse agora: {clean_base}/login"
         )
+        # Dispara alerta de novo cadastro para natrave.suporte@gmail.com
+        self.notify_admin_novo_cadastro(nome=nome, username=username, email=to_email)
         return self.send_email(to_email, subject, html, text)
 
     def send_temporary_password_email(self, to_email: str, nome: str, username: str, senha_temporaria: str) -> EmailResult:
@@ -510,6 +512,7 @@ class EmailService:
             f"{senha_temporaria}\n\n"
             f"Acesse: {clean_base}/login"
         )
+        self.notify_admin_solicitacao_senha(nome=nome, username=username, email=to_email, tipo_acao="Senha Temporária Gerada")
         return self.send_email(to_email, subject, html, text)
 
     def send_password_reset_email(self, to_email: str, nome: str, reset_url: str) -> EmailResult:
@@ -563,6 +566,7 @@ class EmailService:
             f"Use este link para redefinir sua senha no NaTrave 5v5:\n{safe_reset_url}\n\n"
             "Se você não solicitou esta alteração, ignore este e-mail."
         )
+        self.notify_admin_solicitacao_senha(nome=nome, username="", email=to_email, tipo_acao="Link de Redefinição de Senha Solicitado")
         return self.send_email(to_email, subject, html, text)
 
     def send_reset_token_email(self, to_email: str, nome: str, token: str) -> EmailResult:
@@ -809,5 +813,108 @@ class EmailService:
                             logger.warning("Erro ao enviar email de ranking para %s: %s", email, exc)
             except Exception as e:
                 logger.error("Erro no worker notify_ranking_disponivel: %s", e)
+
+        threading.Thread(target=_run, daemon=True).start()
+
+    def notify_admin_novo_cadastro(self, nome: str, username: str, email: str) -> None:
+        """Envia e-mail de alerta para natrave.suporte@gmail.com quando uma conta é criada ou e-mail é cadastrado."""
+        def _run():
+            try:
+                from datetime import datetime
+                data_hora = datetime.now().strftime("%d/%m/%Y às %H:%M:%S")
+                subject = f"🔔 [NaTrave Suporte] Novo Cadastro / E-mail: @{username}"
+                
+                highlight_card_html = f"""
+                <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 24px;">
+                    <tr>
+                        <td style="background-color: #061c14 !important; border: 1px solid #22c55e !important; border-radius: 14px; padding: 20px 22px;">
+                            <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 800; color: #4ade80 !important; letter-spacing: 0.08em; text-transform: uppercase;">
+                                👤 Dados do Atleta
+                            </p>
+                            <p style="margin: 0 0 4px 0; font-size: 16px; color: #ffffff !important; font-weight: 700;">
+                                Nome: <strong style="color: #ffffff !important;">{nome}</strong>
+                            </p>
+                            <p style="margin: 0 0 4px 0; font-size: 15px; color: #a7f3d0 !important;">
+                                Usuário: <span style="font-family: monospace; color: #4ade80 !important;">@{username}</span>
+                            </p>
+                            <p style="margin: 0 0 4px 0; font-size: 15px; color: #a7f3d0 !important;">
+                                E-mail Cadastrado: <strong style="color: #ffffff !important;">{email}</strong>
+                            </p>
+                            <p style="margin: 8px 0 0 0; font-size: 12px; color: #71717a !important;">
+                                Registrado em: {data_hora}
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+                """
+
+                html = self._build_email_html(
+                    to_email="natrave.suporte@gmail.com",
+                    preheader=f"Novo cadastro realizado por {nome} (@{username})",
+                    badge_text="ALERTA DE SISTEMA • NOVO CADASTRO",
+                    title="Novo Atleta Cadastrado",
+                    subtitle=f"Um novo jogador acabou de registrar/atualizar seu e-mail na plataforma <strong style=\"color:#22c55e;\">NaTrave 5v5</strong>.",
+                    highlight_card_html=highlight_card_html,
+                    cta_text="Acessar Painel de Controle",
+                    cta_url=f"{self.get_clean_base_url()}/admin"
+                )
+
+                text = f"Novo cadastro no NaTrave 5v5:\nNome: {nome}\nUsuário: @{username}\nE-mail: {email}\nData: {data_hora}"
+                self.send_email("natrave.suporte@gmail.com", subject, html, text)
+            except Exception as exc:
+                logger.warning("Falha ao enviar e-mail de alerta de cadastro para suporte: %s", exc)
+
+        threading.Thread(target=_run, daemon=True).start()
+
+    def notify_admin_solicitacao_senha(self, nome: str, username: str, email: str, tipo_acao: str = "Solicitação de Senha") -> None:
+        """Envia e-mail de alerta para natrave.suporte@gmail.com sobre alteração/solicitação de senha de jogador."""
+        def _run():
+            try:
+                from datetime import datetime
+                data_hora = datetime.now().strftime("%d/%m/%Y às %H:%M:%S")
+                subject = f"🚨 [NaTrave Suporte] Alerta de Senha: @{username or email} ({tipo_acao})"
+                
+                highlight_card_html = f"""
+                <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 24px;">
+                    <tr>
+                        <td style="background-color: #241418 !important; border: 1px solid #f43f5e !important; border-radius: 14px; padding: 20px 22px;">
+                            <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 800; color: #fb7185 !important; letter-spacing: 0.08em; text-transform: uppercase;">
+                                🔑 Detalhes da Solicitação
+                            </p>
+                            <p style="margin: 0 0 4px 0; font-size: 16px; color: #ffffff !important; font-weight: 700;">
+                                Jogador: <strong style="color: #ffffff !important;">{nome}</strong>
+                            </p>
+                            <p style="margin: 0 0 4px 0; font-size: 15px; color: #fecdd3 !important;">
+                                Usuário: <span style="font-family: monospace; color: #fb7185 !important;">@{username or 'N/A'}</span>
+                            </p>
+                            <p style="margin: 0 0 4px 0; font-size: 15px; color: #fecdd3 !important;">
+                                E-mail: <strong style="color: #ffffff !important;">{email}</strong>
+                            </p>
+                            <p style="margin: 0 0 4px 0; font-size: 15px; color: #ffffff !important;">
+                                Ação Realizada: <strong style="color: #fb7185 !important;">{tipo_acao}</strong>
+                            </p>
+                            <p style="margin: 8px 0 0 0; font-size: 12px; color: #71717a !important;">
+                                Ocorrido em: {data_hora}
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+                """
+
+                html = self._build_email_html(
+                    to_email="natrave.suporte@gmail.com",
+                    preheader=f"Alerta de segurança: {tipo_acao} para @{username or email}",
+                    badge_text="ALERTA DE SEGURANÇA • SENHA",
+                    title="Solicitação/Troca de Senha",
+                    subtitle="Um jogador solicitou redefinição ou alterou a senha de acesso na plataforma.",
+                    highlight_card_html=highlight_card_html,
+                    cta_text="Acessar Painel Admin",
+                    cta_url=f"{self.get_clean_base_url()}/admin"
+                )
+
+                text = f"Alerta de Senha no NaTrave 5v5:\nJogador: {nome}\nUsuário: @{username}\nE-mail: {email}\nAção: {tipo_acao}\nData: {data_hora}"
+                self.send_email("natrave.suporte@gmail.com", subject, html, text)
+            except Exception as exc:
+                logger.warning("Falha ao enviar e-mail de alerta de senha para suporte: %s", exc)
 
         threading.Thread(target=_run, daemon=True).start()

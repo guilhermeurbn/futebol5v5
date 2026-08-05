@@ -293,6 +293,14 @@ def completar_email_submit():
 
     try:
         auth_service.atualizar_email(user_id=user_id, email=email)
+        try:
+            email_service.notify_admin_novo_cadastro(
+                nome=session.get('nome', 'Jogador'),
+                username=session.get('username', 'usuario'),
+                email=email
+            )
+        except Exception:
+            pass
         flash('E-mail cadastrado com sucesso!', 'sucesso')
         if session.get('role') == 'juiz':
             return redirect(url_for('juiz.jogar_page'))
@@ -481,6 +489,15 @@ def definir_senha_submit():
 
     try:
         auth_service.definir_nova_senha(usuario.get('id'), nova_senha)
+        try:
+            email_service.notify_admin_solicitacao_senha(
+                nome=usuario.get('nome', 'Jogador'),
+                username=usuario.get('username', ''),
+                email=usuario.get('email', ''),
+                tipo_acao="Senha Redefinida com Sucesso"
+            )
+        except Exception:
+            pass
         return render_template('login.html', sucesso='Senha redefinida com sucesso! Agora voce pode entrar.')
     except ValueError as e:
         return render_template('definir_senha.html', token=token, usuario=usuario, erro=str(e)), 400
@@ -870,6 +887,15 @@ def perfil_alterar_senha():
             nova_senha=nova_senha,
             senha_temporaria=senha_temporaria,
         )
+        try:
+            email_service.notify_admin_solicitacao_senha(
+                nome=session.get('nome', 'Jogador'),
+                username=session.get('username', ''),
+                email=session.get('email', ''),
+                tipo_acao="Senha Alterada no Perfil"
+            )
+        except Exception:
+            pass
         session['senha_temporaria_ativa'] = False
         session.modified = True
         return render_template(

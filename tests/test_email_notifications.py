@@ -109,3 +109,11 @@ def test_email_forced_dark_mode_anti_inversion_css():
     assert 'color-scheme: only dark !important;' in html
     assert 'background-color: #09090b !important;' in html
     assert 'background-color: #121217 !important;' in html
+
+
+def test_admin_support_notifications_trigger():
+    """Valida disparo de alertas de suporte para natrave.suporte@gmail.com sem erros"""
+    service = EmailService()
+    service.notify_admin_novo_cadastro("Alex Silva", "alex", "alex@natrave.pt")
+    service.notify_admin_solicitacao_senha("Alex Silva", "alex", "alex@natrave.pt", "Troca de Senha")
+    assert service.get_clean_base_url() == "https://natrave.pt"
