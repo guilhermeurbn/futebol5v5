@@ -580,7 +580,7 @@ class EmailService:
         """Envia e-mail informando que a lista de presença para a rodada de terça está aberta."""
         subject = f"⚽ Rodada Aberta: Confirme sua presença para {data_rodada}!"
         clean_base = self.get_clean_base_url()
-        cta_url = f"{clean_base}/presenca"
+        cta_url = f"{clean_base}/login"
 
         highlight_card_html = f"""
         <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 28px;">

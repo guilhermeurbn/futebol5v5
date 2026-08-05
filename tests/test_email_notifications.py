@@ -30,7 +30,7 @@ def test_send_presenca_aberta_email_html_and_no_localhost():
         title="Rodada Aberta: Próxima Terça-Feira",
         subtitle="Olá, Jogador!",
         cta_text="Confirmar Presença",
-        cta_url="http://localhost:5050/presenca"
+        cta_url="http://localhost:5050/login"
     )
 
     assert "NATRAVE" in html
@@ -38,7 +38,7 @@ def test_send_presenca_aberta_email_html_and_no_localhost():
     assert "Confirmar Presença" in html
     assert "localhost" not in html
     assert "127.0.0.1" not in html
-    assert "https://natrave.pt/presenca" in html
+    assert "https://natrave.pt/login" in html
 
 
 def test_send_votacao_aberta_email_html_and_no_localhost():
