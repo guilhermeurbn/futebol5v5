@@ -740,20 +740,45 @@ class EmailService:
         return "".join(c for c in t if not unicodedata.combining(c))
 
     def notify_presenca_aberta(self, jogadores: Optional[list] = None, data_rodada: str = "Próxima Terça-Feira") -> None:
-        """Dispara e-mail de presença aberta em segundo plano para todos os jogadores válidos."""
+        """Dispara e-mail de presença aberta em segundo plano para todos os perfis e usuários com e-mail cadastrado."""
         def _run():
             try:
                 from services.jogador_service import JogadorService
+                from services.auth_service import AuthService
                 js = JogadorService()
+                aus = AuthService()
+                
+                destinatarios = {}  # email.lower() -> nome
+
+                # 1. Carregar jogadores cadastrados
                 lista_efetiva = jogadores or js.listar()
                 for j in lista_efetiva:
                     email = getattr(j, "email", None) or (j.get("email") if isinstance(j, dict) else None)
                     nome = getattr(j, "nome", None) or (j.get("nome") if isinstance(j, dict) else "Jogador")
                     if email and "@" in str(email):
-                        try:
-                            self.send_presenca_aberta_email(to_email=str(email), nome=str(nome), data_rodada=data_rodada)
-                        except Exception as exc:
-                            logger.warning("Erro ao enviar email de presença para %s: %s", email, exc)
+                        e_clean = str(email).strip().lower()
+                        if e_clean not in destinatarios:
+                            destinatarios[e_clean] = str(nome)
+
+                # 2. Carregar todos os usuários do sistema de autenticação
+                try:
+                    todos_usuarios = aus.listar_usuarios()
+                    for u in todos_usuarios:
+                        email = u.get("email")
+                        nome = u.get("nome") or u.get("username") or "Jogador"
+                        if email and "@" in str(email):
+                            e_clean = str(email).strip().lower()
+                            if e_clean not in destinatarios:
+                                destinatarios[e_clean] = str(nome)
+                except Exception as _exc_u:
+                    logger.warning("Aviso ao carregar usuários de auth para presença: %s", _exc_u)
+
+                # 3. Disparar e-mails para todos os perfis encontrados
+                for e_mail, n_ome in destinatarios.items():
+                    try:
+                        self.send_presenca_aberta_email(to_email=e_mail, nome=n_ome, data_rodada=data_rodada)
+                    except Exception as exc:
+                        logger.warning("Erro ao enviar email de presença para %s: %s", e_mail, exc)
             except Exception as e:
                 logger.error("Erro no worker notify_presenca_aberta: %s", e)
 
