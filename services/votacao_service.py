@@ -212,13 +212,32 @@ class VotacaoService:
         self._encerrar_expiradas_em_dados(dados)
         return list(reversed(dados.get("partidas", [])))
 
+    def _enriquecer_participantes_fotos(self, partida: Optional[Dict]) -> Optional[Dict]:
+        if not partida or not partida.get("participantes"):
+            return partida
+        try:
+            from services.jogador_service import JogadorService
+            jogadores_map = {
+                (j.get("nome") or "").strip().lower(): j
+                for j in JogadorService().listar_para_dict()
+            }
+            for p in partida.get("participantes", []):
+                if not p.get("foto_url"):
+                    nome_key = (p.get("jogador_nome") or "").strip().lower()
+                    jog = jogadores_map.get(nome_key) or {}
+                    if jog.get("foto_url"):
+                        p["foto_url"] = jog.get("foto_url")
+        except Exception:
+            pass
+        return partida
+
     def obter_ativa(self) -> Optional[Dict]:
         dados = self._carregar()
         self._encerrar_expiradas_em_dados(dados)
         partidas = dados.get("partidas", [])
         for p in reversed(partidas):
             if p.get("status") == "aberta":
-                return p
+                return self._enriquecer_participantes_fotos(p)
         return None
 
     def obter_por_sorteio(self, sorteio_id: int) -> Optional[Dict]:
@@ -230,7 +249,7 @@ class VotacaoService:
         if not correspondentes:
             return None
         correspondentes.sort(key=lambda p: p.get("id", 0), reverse=True)
-        return correspondentes[0]
+        return self._enriquecer_participantes_fotos(correspondentes[0])
 
     def obter_ativa_para_usuario(self, user_id: str) -> Optional[Dict]:
         if not user_id:
@@ -240,7 +259,7 @@ class VotacaoService:
             return None
         for part in partida.get("participantes", []):
             if part.get("user_id") == user_id:
-                return partida
+                return self._enriquecer_participantes_fotos(partida)
         return None
 
     def obter_pendencia_usuario(self, user_id: str) -> Optional[Dict]:

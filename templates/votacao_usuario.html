@@ -186,6 +186,8 @@ const votacaoForm = document.querySelector('[data-votacao-form]');
 
 function atualizarProgressoGeral() {
     const notasInputs = Array.from(document.querySelectorAll('input[name="nota"]'));
+    const totalVotaveis = notasInputs.length;
+    const minReq = Math.min(5, totalVotaveis);
     const notasCount = notasInputs.filter(input => parseFloat(String(input.value || '0').replace(',', '.')) > 0).length;
     
     const contador = document.getElementById('notas-preenchidas');
@@ -193,7 +195,7 @@ function atualizarProgressoGeral() {
 
     const badgeProgresso = document.getElementById('notas-progresso-badge');
     if (badgeProgresso) {
-        if (notasCount >= 5) {
+        if (notasCount >= minReq && minReq > 0) {
             badgeProgresso.classList.add('is-complete');
         } else {
             badgeProgresso.classList.remove('is-complete');
@@ -203,13 +205,18 @@ function atualizarProgressoGeral() {
 
 votacaoForm?.addEventListener('submit', function (e) {
     const notasInputs = Array.from(document.querySelectorAll('input[name="nota"]'));
+    const totalVotaveis = notasInputs.length;
+    const minReq = Math.min(5, totalVotaveis);
     const notas = notasInputs.filter(input => parseFloat(String(input.value || '0').replace(',', '.')) > 0).length;
     const aviso = document.getElementById('aviso-obrigatorios');
     atualizarProgressoGeral();
 
-    if (notas < 5) {
+    if (notas < minReq) {
         e.preventDefault();
-        if (aviso) aviso.style.display = 'block';
+        if (aviso) {
+            aviso.textContent = `Você precisa dar nota para pelo menos ${minReq} jogador(es).`;
+            aviso.style.display = 'block';
+        }
         return;
     }
     if (aviso) aviso.style.display = 'none';

@@ -286,35 +286,54 @@ def votacao_salvar():
                 'nota': nota_valor
             }
 
-            if nota_valor > 0:
-                votos_nao_zero.append(item)
+        current_user_id = session.get('user_id')
+        partida = votacao_service.obter_ativa_para_usuario(current_user_id)
+        jogadores_votaveis = []
+        if partida:
+            participante_logado = next(
+                (p for p in partida.get('participantes', []) if p.get('user_id') == current_user_id),
+                None
+            )
+            meu_nome = (participante_logado.get('jogador_nome') if participante_logado else '').strip()
+            jogadores_votaveis = [
+                p for p in partida.get('participantes', [])
+                if p.get('user_id') != current_user_id and (p.get('jogador_nome') or '').strip() != meu_nome
+            ]
+        
+        min_esperado = min(5, len(jogadores_votaveis)) if jogadores_votaveis else 5
 
-        if len(votos_nao_zero) < 5:
-            raise ValueError('Voce precisa dar nota para pelo menos 5 jogadores')
+        if len(votos_nao_zero) < min_esperado:
+            raise ValueError(f'Você precisa dar nota para pelo menos {min_esperado} jogador(es)')
 
-        votos_obrigatorios = votos_nao_zero[:5]
-        votos_extras = votos_nao_zero[5:]
+        votos_obrigatorios = votos_nao_zero[:min_esperado]
+        votos_extras = votos_nao_zero[min_esperado:]
 
         votacao_service.salvar_voto(
             partida_id=partida_id,
-            user_id=session.get('user_id'),
+            user_id=current_user_id,
             votos_obrigatorios=votos_obrigatorios,
             votos_extras=votos_extras
         )
         return redirect(url_for('votacao.votacao_page'))
     except ValueError as e:
         try:
-            partida = votacao_service.obter_ativa_para_usuario(session.get('user_id'))
+            current_user_id = session.get('user_id')
+            partida = votacao_service.obter_ativa_para_usuario(current_user_id)
             participante = None
             voto = None
-            jogadores_votaveis = partida.get('participantes', []) if partida else []
+            jogadores_votaveis = []
             resultado_partida = partida.get('resultado_partida') if partida else None
             if partida:
                 participante = next(
-                    (p for p in partida.get('participantes', []) if p.get('user_id') == session.get('user_id')),
+                    (p for p in partida.get('participantes', []) if p.get('user_id') == current_user_id),
                     None
                 )
-                voto = votacao_service.obter_voto_usuario(partida.get('id'), session.get('user_id'))
+                meu_nome = (participante.get('jogador_nome') if participante else '').strip()
+                jogadores_votaveis = [
+                    p for p in partida.get('participantes', [])
+                    if p.get('user_id') != current_user_id and (p.get('jogador_nome') or '').strip() != meu_nome
+                ]
+                voto = votacao_service.obter_voto_usuario(partida.get('id'), current_user_id)
             return render_template(
                 'votacao_usuario.html',
                 partida=partida,
