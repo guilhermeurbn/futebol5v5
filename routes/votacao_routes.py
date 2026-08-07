@@ -510,7 +510,7 @@ def votacao_admin_criar():
             titulo=titulo,
             sorteio_id=sorteio.get('id'),
             resultado_partida=resultado_partida,
-            duracao_horas=12,
+            duracao_horas=20,
         )
         
         if _is_juiz():

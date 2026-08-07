@@ -275,7 +275,7 @@
                     <span class="judge-voting-step__number">2</span>
                     <div>
                         <h2>Votação dos jogadores</h2>
-                        <p>Encerra em 12 horas, quando todos votarem ou quando você encerrar.</p>
+                        <p>Encerra em 20 horas, quando todos votarem ou quando você encerrar.</p>
                     </div>
                     <span
                         class="judge-flow-status {% if ativa %}is-active{% elif rodada_encerrada %}is-complete{% elif resultado_concluido %}is-available{% else %}is-locked{% endif %}">
@@ -318,7 +318,7 @@
                     <input type="hidden" name="sorteio_id" value="{{ selected_sorteio_id }}">
                     <input type="hidden" name="titulo" value="Votação do sorteio #{{ selected_sorteio_id }}">
                     <button class="btn btn-primary" type="submit" {% if not pode_abrir_votacao %}disabled{% endif %}>
-                        Abrir votação por 12 horas
+                        Abrir votação por 20 horas
                     </button>
                 </form>
                 {% else %}

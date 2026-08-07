@@ -259,7 +259,7 @@ class VotacaoService:
         titulo: str = "",
         sorteio_id: Optional[int] = None,
         resultado_partida: Optional[Dict] = None,
-        duracao_horas: int = 12,
+        duracao_horas: int = 20,
     ) -> Dict:
         dados = self._carregar()
         self._encerrar_expiradas_em_dados(dados)
@@ -304,7 +304,7 @@ class VotacaoService:
             raise ValueError("Nenhum participante encontrado no sorteio")
 
         aberta_em = self._agora()
-        duracao_horas = max(1, int(duracao_horas or 12))
+        duracao_horas = max(1, int(duracao_horas or 20))
         fecha_em = aberta_em + timedelta(hours=duracao_horas)
 
         partida = {

@@ -123,10 +123,10 @@ def test_judge_voting_is_presented_as_two_sequential_steps():
     routes = (ROOT / 'routes' / 'votacao_routes.py').read_text(encoding='utf-8')
 
     assert 'Resultado dos times' in template
-    assert 'Abrir votação por 12 horas' in template
+    assert 'Abrir votação por 20 horas' in template
     assert 'Registre o resultado dos times para continuar' in template
     assert 'name="vitorias_{{ time.numero }}"' in template
-    assert 'duracao_horas=12' in routes
+    assert 'duracao_horas=20' in routes
 
 
 def test_judge_result_values_are_only_changed_with_stepper_buttons():
