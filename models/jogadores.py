@@ -25,6 +25,7 @@ class Jogador:
     # Histórico de evolução: lista de dicts com ts/nivel_anterior/nivel_novo/motivo
     historico_nivel: Optional[List[dict]] = None
     nivel_preciso: Optional[float] = None
+    foto_url: Optional[str] = None
 
     def __post_init__(self):
         """Validação e normalização pós-inicialização."""
@@ -69,7 +70,7 @@ class Jogador:
         """Cria jogador a partir de dicionário (tolerante a campos extras)."""
         campos_validos = {
             "nome", "nivel", "tipo", "posicao",
-            "presente", "id", "criado_em", "owner_user_id", "historico_nivel", "nivel_preciso",
+            "presente", "id", "criado_em", "owner_user_id", "historico_nivel", "nivel_preciso", "foto_url"
         }
         filtrado = {k: v for k, v in data.items() if k in campos_validos}
         return cls(**filtrado)

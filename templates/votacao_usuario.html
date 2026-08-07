@@ -138,10 +138,15 @@
                             {% for j in jogadores_votaveis %}
                             <div class="votacao-card" data-card-index="{{ loop.index0 }}">
                                 <div class="votacao-card__top">
-                                    <div>
-                                        <div class="votacao-card__name">{{ j.jogador_nome }}</div>
-                                        <div style="margin-top: 0.45rem;">
-                                            <span class="votacao-card-team-badge">Time {{ j.time_numero }}</span>
+                                    <div style="display: flex; align-items: center; gap: 0.65rem;">
+                                        {% if j.foto_url %}
+                                        <img src="{{ j.foto_url }}" alt="{{ j.jogador_nome }}" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1.5px solid rgba(34, 197, 94, 0.4); flex-shrink: 0;">
+                                        {% endif %}
+                                        <div>
+                                            <div class="votacao-card__name">{{ j.jogador_nome }}</div>
+                                            <div style="margin-top: 0.25rem;">
+                                                <span class="votacao-card-team-badge">Time {{ j.time_numero }}</span>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="votacao-card__score" data-score-for="{{ loop.index0 }}">0.0</div>

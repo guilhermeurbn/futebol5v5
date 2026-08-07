@@ -43,14 +43,39 @@ class JogadorService:
         """Carrega dados brutos do banco de dados ou arquivo local"""
         data = load_json_data(self.namespace, None)
         if data is not None:
-            return data if isinstance(data, list) else []
+            dados = data if isinstance(data, list) else []
+            return self._enriquecer_fotos(dados)
         
         # Fallback: carrega do arquivo local se banco falhar
         try:
             with open(self.arquivo, "r", encoding="utf-8") as f:
-                return json.load(f)
+                dados = json.load(f)
+                return self._enriquecer_fotos(dados)
         except (json.JSONDecodeError, FileNotFoundError):
             return []
+
+    def _enriquecer_fotos(self, dados: List[dict]) -> List[dict]:
+        """Garante que qualquer jogador vinculado a um usuário receba a foto do perfil se não tiver foto própria."""
+        if not dados:
+            return dados
+        try:
+            from services.auth_service import AuthService
+            usuarios = AuthService()._carregar()
+            user_by_id = {u.get("id"): u for u in usuarios if u.get("id")}
+            user_by_name = {u.get("nome", "").strip().lower(): u for u in usuarios if u.get("nome")}
+            user_by_username = {u.get("username", "").strip().lower(): u for u in usuarios if u.get("username")}
+
+            for item in dados:
+                foto = item.get("foto_url")
+                if not foto:
+                    owner_id = item.get("owner_user_id")
+                    nome_key = (item.get("nome") or "").strip().lower()
+                    u = user_by_id.get(owner_id) or user_by_name.get(nome_key) or user_by_username.get(nome_key)
+                    if u and u.get("foto_url"):
+                        item["foto_url"] = u.get("foto_url")
+        except Exception:
+            pass
+        return dados
     
     def _salvar(self, dados: List[dict]) -> None:
         """Salva dados no banco de dados (Postgres ou arquivo local)"""

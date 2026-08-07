@@ -329,7 +329,13 @@
                                 <div class="premium-player-card-inner">
                                     <div class="premium-player-card-header">
                                         <div class="premium-player-avatar-wrap">
+                                            {% if jogador.foto_url %}
+                                            <div class="premium-player-avatar-inner" style="padding: 0; overflow: hidden; border-radius: 50%;">
+                                                <img src="{{ jogador.foto_url }}" alt="{{ jogador.nome }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                            </div>
+                                            {% else %}
                                             <div class="premium-player-avatar-inner">{{ avatar_text|upper }}</div>
+                                            {% endif %}
                                         </div>
                                         <span class="premium-player-rating-badge">{{ '%.1f'|format(jogador.nivel|float) }}</span>
                                     </div>

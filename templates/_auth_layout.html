@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#7c3aed">
-    <meta name="description" content="{% block meta_description %}Acesse a plataforma NaTrave 5v5 para gerenciar suas partidas e sortear times equilibrados.{% endblock %}">
+    <meta name="description"
+        content="{% block meta_description %}Acesse a plataforma NaTrave 5v5 para gerenciar suas partidas e sortear times equilibrados.{% endblock %}">
 
     <link rel="canonical" href="{{ request.url | replace(request.host_url, 'https://natrave.pt/') }}">
 
@@ -22,20 +24,23 @@
     <meta name="twitter:description" content="{{ self.meta_description() }}">
     <meta name="twitter:image" content="https://natrave.pt/apple-touch-icon.png">
 
-    <link rel="icon" href="/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-    <link rel="manifest" href="/site.webmanifest">
+    <link rel="icon" href="/favicon.ico?v=20260807-02">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=20260807-02">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=20260807-02">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=20260807-02">
+    <link rel="manifest" href="/site.webmanifest?v=20260807-02">
 
     <title>NaTrave | {% block title %}Acesso{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='20260616-06') }}">
     <script src="{{ url_for('static', filename='local-datetime.js', v='20260616-06') }}" defer></script>
 </head>
+
 <body class="auth-page {% block body_class %}{% endblock %}">
     <header class="auth-global-header" role="banner" aria-label="NaTrave">
-        <a href="{{ url_for('auth.login_page') }}" aria-label="Ir para login" style="display:inline-block; line-height:0;">
-            <img src="{{ url_for('static', filename='logo-natrave-5v5.png', v='20260717-01') }}" alt="NaTrave 5v5" class="auth-global-header__logo" style="max-height: 48px; width: auto; object-fit: contain;">
+        <a href="{{ url_for('auth.login_page') }}" aria-label="Ir para login"
+            style="display:inline-block; line-height:0;">
+            <img src="{{ url_for('static', filename='logo-natrave-5v5.png', v='20260717-01') }}" alt="NaTrave 5v5"
+                class="auth-global-header__logo" style="max-height: 48px; width: auto; object-fit: contain;">
         </a>
     </header>
 
@@ -46,7 +51,8 @@
     <main class="auth-shell {% block auth_shell_class %}{% endblock %}">
         {% block auth_intro_wrapper %}{% endblock %}
 
-        <section class="auth-panel auth-panel--form {% block auth_form_panel_class %}{% endblock %}" id="loginFormPanel" aria-labelledby="{% block auth_heading_id %}authHeading{% endblock %}">
+        <section class="auth-panel auth-panel--form {% block auth_form_panel_class %}{% endblock %}" id="loginFormPanel"
+            aria-labelledby="{% block auth_heading_id %}authHeading{% endblock %}">
             {% block auth_messages %}{% endblock %}
             {% block auth_card_header %}{% endblock %}
             {% block auth_form %}{% endblock %}
@@ -55,7 +61,8 @@
     </main>
 
     <footer style="text-align: center; padding: 1rem 0 2rem 0; color: rgba(255,255,255,0.4); font-size: 0.78rem;">
-        <a href="{{ url_for('auth.privacidade_page') }}" style="color: rgba(255,255,255,0.5); text-decoration: underline;">Política de Privacidade</a>
+        <a href="{{ url_for('auth.privacidade_page') }}"
+            style="color: rgba(255,255,255,0.5); text-decoration: underline;">Política de Privacidade</a>
     </footer>
 
     {% block auth_scripts %}{% endblock %}
@@ -142,4 +149,5 @@
         })();
     </script>
 </body>
+
 </html>

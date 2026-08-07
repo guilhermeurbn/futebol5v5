@@ -29,13 +29,16 @@ juiz_partida_service = JuizPartidaService()
 # ============================================================
 
 def _usuario_logado():
+    user_id = session.get('user_id')
+    u = auth_service.obter_por_id(user_id) if user_id else {}
     return {
-        'id': session.get('user_id'),
+        'id': user_id,
         'username': session.get('username'),
         'nome': session.get('nome'),
         'role': session.get('role', 'usuario'),
         'senha_temporaria_ativa': bool(session.get('senha_temporaria_ativa')),
-        'autenticado': bool(session.get('user_id'))
+        'autenticado': bool(user_id),
+        'foto_url': (u.get('foto_url') if isinstance(u, dict) else None) or session.get('foto_url')
     }
 
 
@@ -635,12 +638,19 @@ def _obter_perfil_publico_dados(identifier):
     except Exception:
         jogador = None
 
-    # Se achou o jogador, tentar achar o usuario dono
-    if jogador and jogador.owner_user_id:
-        try:
-            owner_user = auth_service.obter_por_id(jogador.owner_user_id)
-        except Exception:
-            pass
+    # Se achou o jogador, tentar achar o usuario dono por id ou nome
+    if jogador and not owner_user:
+        u_id = getattr(jogador, 'user_id', None) or getattr(jogador, 'owner_user_id', None)
+        if u_id:
+            try:
+                owner_user = auth_service.obter_por_id(u_id)
+            except Exception:
+                pass
+        if not owner_user and jogador.nome:
+            try:
+                owner_user = auth_service.obter_por_nome(jogador.nome) or auth_service.obter_por_username(jogador.nome)
+            except Exception:
+                pass
 
     # 2. Tentar buscar usuario por username ou id
     if not owner_user:
@@ -663,8 +673,11 @@ def _obter_perfil_publico_dados(identifier):
                 j_nome_slug = j_nome.replace(" ", "_")
                 if j_nome == identifier_clean or j_nome_slug == identifier_clean:
                     jogador = j
-                    if j.owner_user_id and not owner_user:
-                        owner_user = auth_service.obter_por_id(j.owner_user_id)
+                    u_id = getattr(j, 'user_id', None) or getattr(j, 'owner_user_id', None)
+                    if u_id and not owner_user:
+                        owner_user = auth_service.obter_por_id(u_id)
+                    if not owner_user:
+                        owner_user = auth_service.obter_por_nome(j.nome) or auth_service.obter_por_username(j.nome)
                     break
         except Exception:
             pass
@@ -923,23 +936,38 @@ def perfil_alterar_senha():
 @auth_bp.route('/perfil/editar', methods=['POST'])
 @login_required
 def perfil_editar_dados():
-    """Edita e-mail, username ou nome do usuário logado"""
+    """Edita e-mail, username, nome ou foto do usuário logado"""
     user_id = session.get('user_id')
     email = request.form.get('email')
     username = request.form.get('username')
     nome = request.form.get('nome')
+    foto_file = request.files.get('foto')
 
     try:
+        url_foto = None
+        if foto_file and foto_file.filename:
+            from services.upload_service import UploadService
+            us = UploadService()
+            u_atual = auth_service.obter_por_id(user_id) or {}
+            url_foto = us.processar_foto_perfil(
+                file_storage=foto_file,
+                user_id=user_id,
+                foto_antiga_url=u_atual.get('foto_url')
+            )
+
         updated = auth_service.atualizar_perfil_usuario(
             user_id=user_id,
             email=email if email is not None and email.strip() else None,
             username=username if username is not None and username.strip() else None,
-            nome=nome if nome is not None and nome.strip() else None
+            nome=nome if nome is not None and nome.strip() else None,
+            foto_url=url_foto if url_foto else None
         )
         if updated.get('username'):
             session['username'] = updated.get('username')
         if updated.get('nome'):
             session['nome'] = updated.get('nome')
+        if updated.get('foto_url'):
+            session['foto_url'] = updated.get('foto_url')
         session.modified = True
 
         return render_template(
@@ -954,12 +982,42 @@ def perfil_editar_dados():
             erro_perfil=str(e)
         ), 400
     except Exception as e:
+        from services.upload_service import UploadError
+        if isinstance(e, UploadError):
+            return render_template(
+                'editar_perfil.html',
+                usuario=_usuario_logado(),
+                erro_perfil=str(e)
+            ), 400
         logger.error(f"Erro ao editar perfil: {str(e)}")
         return render_template(
             'editar_perfil.html',
             usuario=_usuario_logado(),
             erro_perfil='Erro ao atualizar perfil'
         ), 500
+
+
+@auth_bp.route('/perfil/foto/remover', methods=['POST'])
+@login_required
+def perfil_remover_foto():
+    """Remove a foto de perfil do usuário e restaura as iniciais."""
+    user_id = session.get('user_id')
+    from services.upload_service import UploadService
+    us = UploadService()
+    u_atual = auth_service.obter_por_id(user_id) or {}
+    foto_antiga = u_atual.get('foto_url')
+
+    if foto_antiga:
+        us.remover_foto(foto_antiga)
+        auth_service.atualizar_perfil_usuario(user_id=user_id, foto_url="")
+        session.pop('foto_url', None)
+        session.modified = True
+
+    return render_template(
+        'editar_perfil.html',
+        usuario=_usuario_logado(),
+        sucesso_perfil='Foto removida com sucesso! O perfil voltou a exibir as iniciais.'
+    )
 
 
 # ============================================================

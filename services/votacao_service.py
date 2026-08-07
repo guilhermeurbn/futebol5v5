@@ -734,6 +734,11 @@ class VotacaoService:
                     "destaques": 0,
                 })
 
+        jogadores_dict_map = {
+            (j.get("nome") or "").strip().lower(): j
+            for j in self.jogador_service.listar_para_dict()
+        }
+
         for item in acumulado.values():
             jogos = item.get("jogos", 0)
             avaliacoes = item.get("avaliacoes", 0)
@@ -743,6 +748,14 @@ class VotacaoService:
             item["pontos"] = round(soma_medias, 2)
             item["nota_total"] = round(soma_medias, 2)
             item["nota_media"] = round(soma_medias / avaliacoes, 2) if avaliacoes else (round(soma_medias / jogos, 2) if jogos else 0.0)
+
+            # Enriquecer foto_url e jogador_id se disponíveis
+            nome_key = str(item.get("jogador_nome", "")).strip().lower()
+            jog_obj = jogadores_dict_map.get(nome_key) or {}
+            if jog_obj.get("foto_url"):
+                item["foto_url"] = jog_obj.get("foto_url")
+            if jog_obj.get("id"):
+                item["jogador_id"] = jog_obj.get("id")
 
         ranking = sorted(
             acumulado.values(),

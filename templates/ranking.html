@@ -79,7 +79,7 @@
         </div>
 
         {% if ranking %}
-        <section class="section" style="padding: 0; display: grid; gap: 1rem;">
+        <section class="section" style="padding: 0; display: grid; gap: 0.75rem;">
             <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem;">
                 <article style="background: rgba(18, 18, 23, 0.9); border: 1px solid rgba(255,255,255,0.06); border-radius: 18px; padding: 1rem; display: grid; gap: 0.35rem;">
                     <div style="display: inline-flex; align-items: center; gap: 0.45rem; color: #cbd5e1; font-size: 0.76rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;">
@@ -107,20 +107,105 @@
                 </article>
             </div>
 
-            <div class="ranking-mobile-list" aria-label="Ranking completo em cards para mobile">
+            {% if ranking|length >= 1 %}
+            <!-- PÓDIO COMPACTO DO TOP 3 -->
+            <div class="podium-container">
+                <div class="podium-grid">
+                    {% set p1 = ranking[0] if ranking|length >= 1 else None %}
+                    {% set p2 = ranking[1] if ranking|length >= 2 else None %}
+                    {% set p3 = ranking[2] if ranking|length >= 3 else None %}
+
+                    {% if p1 %}
+                    <!-- 1º LUGAR (OURO) -->
+                    <a href="{{ url_for('auth.perfil_jogador_publico', jogador_id=p1.jogador_id or p1.jogador_nome) }}" class="podium-card podium-card--first" title="Ver perfil de {{ p1.jogador_nome }}">
+                        <div class="podium-left">
+                            <span class="podium-rank-badge">🥇</span>
+                            {% if p1.foto_url %}
+                            <img src="{{ p1.foto_url }}" alt="{{ p1.jogador_nome }}" class="podium-avatar podium-avatar--gold">
+                            {% else %}
+                            <div class="podium-avatar podium-avatar--gold podium-initials">{{ p1.jogador_nome[:2]|upper }}</div>
+                            {% endif %}
+                            <div>
+                                <h3 class="podium-name">{{ p1.jogador_nome | abreviar_nome }}</h3>
+                                <div class="podium-meta">{{ p1.jogos }} jogos • {{ p1.vitorias }} vitórias</div>
+                            </div>
+                        </div>
+                        <div class="podium-right">
+                            <span class="podium-pts podium-pts--gold">{{ p1.pontos }} pts</span>
+                            <span class="podium-grade">Média: {{ p1.nota_media }}</span>
+                        </div>
+                    </a>
+                    {% endif %}
+
+                    {% if p2 %}
+                    <!-- 2º LUGAR (PRATA) -->
+                    <a href="{{ url_for('auth.perfil_jogador_publico', jogador_id=p2.jogador_id or p2.jogador_nome) }}" class="podium-card podium-card--second" title="Ver perfil de {{ p2.jogador_nome }}">
+                        <div class="podium-left">
+                            <span class="podium-rank-badge">🥈</span>
+                            {% if p2.foto_url %}
+                            <img src="{{ p2.foto_url }}" alt="{{ p2.jogador_nome }}" class="podium-avatar podium-avatar--silver">
+                            {% else %}
+                            <div class="podium-avatar podium-avatar--silver podium-initials">{{ p2.jogador_nome[:2]|upper }}</div>
+                            {% endif %}
+                            <div>
+                                <h3 class="podium-name">{{ p2.jogador_nome | abreviar_nome }}</h3>
+                                <div class="podium-meta">{{ p2.jogos }} jogos • {{ p2.vitorias }} vitórias</div>
+                            </div>
+                        </div>
+                        <div class="podium-right">
+                            <span class="podium-pts podium-pts--silver">{{ p2.pontos }} pts</span>
+                            <span class="podium-grade">Média: {{ p2.nota_media }}</span>
+                        </div>
+                    </a>
+                    {% endif %}
+
+                    {% if p3 %}
+                    <!-- 3º LUGAR (BRONZE) -->
+                    <a href="{{ url_for('auth.perfil_jogador_publico', jogador_id=p3.jogador_id or p3.jogador_nome) }}" class="podium-card podium-card--third" title="Ver perfil de {{ p3.jogador_nome }}">
+                        <div class="podium-left">
+                            <span class="podium-rank-badge">🥉</span>
+                            {% if p3.foto_url %}
+                            <img src="{{ p3.foto_url }}" alt="{{ p3.jogador_nome }}" class="podium-avatar podium-avatar--bronze">
+                            {% else %}
+                            <div class="podium-avatar podium-avatar--bronze podium-initials">{{ p3.jogador_nome[:2]|upper }}</div>
+                            {% endif %}
+                            <div>
+                                <h3 class="podium-name">{{ p3.jogador_nome | abreviar_nome }}</h3>
+                                <div class="podium-meta">{{ p3.jogos }} jogos • {{ p3.vitorias }} vitórias</div>
+                            </div>
+                        </div>
+                        <div class="podium-right">
+                            <span class="podium-pts podium-pts--bronze">{{ p3.pontos }} pts</span>
+                            <span class="podium-grade">Média: {{ p3.nota_media }}</span>
+                        </div>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% set rest_ranking = ranking[3:] %}
+            {% if rest_ranking %}
+            <div class="ranking-mobile-list" aria-label="Demais posições em cards para mobile">
                 <div class="ranking-mobile-list__section">
-                    {% for item in ranking %}
-                    <article class="ranking-row-card" style="border-color: rgba(255,255,255,0.08);">
-                        <div class="ranking-row-card__rank ranking-other">{{ loop.index }}</div>
+                    {% for item in rest_ranking %}
+                    {% set pos = loop.index + 3 %}
+                    <a href="{{ url_for('auth.perfil_jogador_publico', jogador_id=item.jogador_id or item.jogador_nome) }}" class="ranking-row-card" style="text-decoration: none; border-color: rgba(255,255,255,0.08);">
+                        <div class="ranking-row-card__rank ranking-other">{{ pos }}</div>
                         <div class="ranking-row-card__content">
-                            <div class="ranking-row-card__name">{{ item.jogador_nome | abreviar_nome }}</div>
+                            <div class="ranking-row-card__name" style="display: flex; align-items: center; gap: 0.4rem;">
+                                {% if item.foto_url %}
+                                <img src="{{ item.foto_url }}" alt="{{ item.jogador_nome }}" style="width: 22px; height: 22px; border-radius: 50%; object-fit: cover;">
+                                {% endif %}
+                                <span>{{ item.jogador_nome | abreviar_nome }}</span>
+                            </div>
                             <div class="ranking-row-card__meta">{{ item.jogos }} jogos • {{ item.vitorias }} vitórias • {{ item.derrotas }} derrotas</div>
                         </div>
                         <div class="ranking-row-card__score" style="text-align: right;">
                             <strong style="color: #22c55e; font-size: 1.15rem; font-weight: 800;">{{ item.pontos }} pts</strong>
                             <span style="font-size: 0.78rem; color: #a78bfa;">Média: {{ item.nota_media }}</span>
                         </div>
-                    </article>
+                    </a>
                     {% endfor %}
                 </div>
             </div>
@@ -141,10 +226,20 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for item in ranking %}
+                        {% for item in rest_ranking %}
+                        {% set pos = loop.index + 3 %}
                         <tr>
-                            <td style="font-weight: 800; color: #cbd5e1;">{{ loop.index }}</td>
-                            <td style="font-weight: 700; color: #ffffff;">{{ item.jogador_nome | abreviar_nome }}</td>
+                            <td style="font-weight: 800; color: #cbd5e1;">{{ pos }}</td>
+                            <td style="font-weight: 700; color: #ffffff;">
+                                <a href="{{ url_for('auth.perfil_jogador_publico', jogador_id=item.jogador_id or item.jogador_nome) }}" style="display: inline-flex; align-items: center; gap: 0.6rem; color: #ffffff; text-decoration: none;">
+                                    {% if item.foto_url %}
+                                    <img src="{{ item.foto_url }}" alt="{{ item.jogador_nome }}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1px solid #22c55e;">
+                                    {% else %}
+                                    <div style="width: 28px; height: 28px; border-radius: 50%; background: #181823; color: #fff; font-size: 0.75rem; font-weight: 800; display: flex; align-items: center; justify-content: center; border: 1px solid #22c55e;">{{ item.jogador_nome[:2]|upper }}</div>
+                                    {% endif %}
+                                    <span>{{ item.jogador_nome | abreviar_nome }}</span>
+                                </a>
+                            </td>
                             <td class="text-center" style="font-weight: 800; color: #22c55e;">{{ item.pontos }} pts</td>
                             <td class="text-center" style="font-weight: 600; color: #a78bfa;">{{ item.nota_media }}</td>
                             <td class="text-center">{{ item.jogos }}</td>
@@ -157,6 +252,7 @@
                     </tbody>
                 </table>
             </div>
+            {% endif %}
         </section>
         {% else %}
         <div style="background: rgba(18, 18, 23, 0.95); border: 1px solid rgba(34, 197, 94, 0.22); border-radius: 20px; text-align: center; padding: 3rem 1.5rem; margin-top: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.45);">

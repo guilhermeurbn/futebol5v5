@@ -3815,9 +3815,7 @@ body.app-shell #app-content .footer {
   }
 
   .site-topbar {
-    display: block;
-    width: min(1120px, calc(100% - 2rem));
-    margin: 0.2rem auto 0;
+    display: none !important;
   }
 
   .site-topbar__nav {
@@ -18025,12 +18023,13 @@ body.is-referee-layout .judge-timer-reset:hover {
 
 .premium-profile-avatar-wrap {
   position: relative;
-  width: 84px;
-  height: 84px;
+  width: 93px;
+  height: 93px;
   border-radius: 50%;
-  padding: 3px;
-  background: linear-gradient(135deg, #a78bfa, #3b82f6, #10b981);
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  border: 1px solid rgba(255, 255, 255, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -20566,4 +20565,404 @@ html,
 
 .profile-guide-section__text li {
   margin-bottom: 0.35rem;
+}
+
+/* ============================================================
+   🖥️ NATRAVE 5V5 - REFORMULAÇÃO ULTIMATE UI/UX DESKTOP (>= 768px e >= 1024px)
+   Isolado 100% em Media Queries min-width para preservar o Mobile.
+   ============================================================ */
+
+@media (min-width: 768px) {
+  /* 1. CONTAINERS WIDESCREEN DESKTOP (APROVEITA A TELA TODA HASTA 1600PX) */
+  #app-content,
+  .site-main-content,
+  .app-shell-container,
+  .main-content,
+  .container,
+  .page-container-wide,
+  main.main,
+  .ranking-page__main,
+  .public-profile-dossier,
+  .votacao-admin-container {
+    width: 96% !important;
+    max-width: 1600px !important;
+    margin: 0 auto !important;
+    padding: 2rem 1rem 6.5rem 1rem !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 2. RODAPÉ PRINCIPAL NO DESKTOP IDÊNTICO AO DA VERSÃO MOBILE */
+  .site-footer,
+  .site-footer.judge-site-footer {
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    background: #0B0B0F !important;
+    border-top: 1px solid #2A2A34 !important;
+    border-top-left-radius: 30px !important;
+    border-top-right-radius: 30px !important;
+    box-shadow: 0 -14px 34px rgba(0, 0, 0, 0.42) !important;
+    padding: 0.6rem 2rem calc(0.62rem + env(safe-area-inset-bottom)) 2rem !important;
+    height: auto !important;
+    min-height: calc(var(--site-footer-height, 68px) + env(safe-area-inset-bottom)) !important;
+    z-index: 9999 !important;
+    display: block !important;
+    overflow: hidden !important;
+  }
+
+  .site-footer__nav {
+    width: 100% !important;
+    max-width: 1400px !important;
+    margin: 0 auto !important;
+    height: auto !important;
+    min-height: 48px !important;
+    display: grid !important;
+    grid-auto-flow: column !important;
+    grid-auto-columns: 1fr !important;
+    gap: 0.45rem !important;
+    align-items: stretch !important;
+    padding: 0.4rem !important;
+    border: 1px solid #2A2A34 !important;
+    border-radius: 22px !important;
+    background: #15151C !important;
+  }
+
+  .site-footer__link {
+    min-height: 100% !important;
+    display: grid !important;
+    align-content: center !important;
+    justify-items: center !important;
+    text-decoration: none !important;
+    color: #8E8E99 !important;
+    border-radius: 14px !important;
+    border: 1px solid transparent !important;
+    background: transparent !important;
+    transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease !important;
+    padding: 0.45rem 0.5rem !important;
+    margin-top: 0 !important;
+    opacity: 1 !important;
+  }
+
+  .site-footer__link:hover {
+    color: #FFFFFF !important;
+    background: #1D1B27 !important;
+    border-color: transparent !important;
+    transform: none !important;
+  }
+
+  .site-footer__link.is-active {
+    color: #FFFFFF !important;
+    background: #1D1B27 !important;
+    border-color: #2A2A34 !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03) !important;
+  }
+
+  .site-footer__link.is-active .site-footer__label,
+  .site-footer__link.is-active .site-footer__icon {
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+  }
+
+  .site-footer__icon {
+    width: 1.36rem !important;
+    height: 1.36rem !important;
+    stroke-width: 1.85 !important;
+    line-height: 1 !important;
+    display: block !important;
+  }
+
+  .site-footer__label {
+    font-size: 0.68rem !important;
+    font-weight: 700 !important;
+    margin-top: 0.22rem !important;
+    text-transform: capitalize !important;
+    letter-spacing: 0.02em !important;
+    display: block !important;
+    line-height: 1.1 !important;
+    text-align: center !important;
+  }
+
+  /* 3. HEADER E TOPBAR DESKTOP WIDESCREEN */
+  .brand-header--banner {
+    padding: 1.25rem 2.5rem !important;
+    background: rgba(18, 18, 23, 0.85) !important;
+    backdrop-filter: blur(12px) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  }
+
+  .brand-header__banner-center {
+    max-width: 1600px !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+  }
+
+  .site-topbar {
+    display: none !important;
+  }
+
+  /* 4. GRIDS WIDESCREEN DE PONTA A PONTA */
+  .player-dashboard-grid,
+  .index-container-desktop {
+    display: grid !important;
+    grid-template-columns: 360px 1fr !important;
+    gap: 2rem !important;
+    align-items: start !important;
+  }
+
+  .jogadores-grid,
+  .player-cards-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)) !important;
+    gap: 1.5rem !important;
+  }
+
+  .card-jogador,
+  .jogador-card {
+    background: #121217 !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 20px !important;
+    padding: 1.35rem !important;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+
+  .card-jogador:hover,
+  .jogador-card:hover {
+    transform: translateY(-4px) !important;
+    border-color: rgba(34, 197, 94, 0.4) !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.7), 0 0 24px rgba(34, 197, 94, 0.14) !important;
+  }
+
+  /* 5. RANKING WIDESCREEN DESKTOP */
+  .ranking-podium-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1.1fr 1fr !important;
+    gap: 1.75rem !important;
+    align-items: end !important;
+    margin-bottom: 3rem !important;
+  }
+
+  .ranking-table-card,
+  .ranking-desktop-table {
+    background: #121217 !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 24px !important;
+    padding: 2rem !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65) !important;
+  }
+
+  /* 6. HISTÓRICO DESKTOP */
+  .historico-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)) !important;
+    gap: 1.75rem !important;
+  }
+
+  /* 7. VOTAÇÃO DO USUÁRIO DESKTOP */
+  .votacao-usuario-wrapper {
+    width: 100% !important;
+    max-width: 1600px !important;
+    margin: 0 auto !important;
+  }
+
+  .votacao-cards-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)) !important;
+    gap: 1.75rem !important;
+  }
+
+  /* 8. JUIZ DESKTOP */
+  .juiz-criar-partida-container {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 2.25rem !important;
+    align-items: start !important;
+  }
+
+  /* 9. ADMIN DESKTOP & ACCORDIONS */
+  .votacao-admin-grid,
+  .judge-accordion-desktop-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1.75rem !important;
+    align-items: start !important;
+  }
+
+  .judge-result-team {
+    margin-bottom: 0 !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  /* SPLIT AUTH SCREEN DESKTOP */
+  .auth-shell {
+    display: grid !important;
+    grid-template-columns: 1fr 480px !important;
+    gap: 4rem !important;
+    align-items: center !important;
+    max-width: 1400px !important;
+    margin: 3.5rem auto !important;
+    padding: 0 2rem !important;
+  }
+
+  .auth-panel--form {
+    max-width: 480px !important;
+    width: 100% !important;
+    border-radius: 28px !important;
+    padding: 2.75rem 2.5rem !important;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8), 0 0 45px rgba(34, 197, 94, 0.1) !important;
+  }
+
+  .auth-preview-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 1.25rem !important;
+    margin-top: 2rem !important;
+  }
+}
+
+/* ============================================================
+   COMPACTO & ELEGANTE PÓDIO TOP 3
+   ============================================================ */
+.ranking-page .section::before,
+.ranking-page .section:hover::before,
+.ranking-page article::before,
+.ranking-page article:hover::before {
+  display: none !important;
+  content: none !important;
+  opacity: 0 !important;
+}
+
+.podium-container {
+  margin: 0.25rem 0 0.5rem 0;
+}
+
+.podium-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.65rem;
+}
+
+@media (min-width: 768px) {
+  .podium-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.85rem;
+  }
+}
+
+.podium-card {
+  position: relative;
+  background: rgba(18, 18, 23, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 0.75rem 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.podium-card:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.podium-card--first {
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.08) 0%, rgba(18, 18, 23, 0.96) 100%);
+}
+
+.podium-card--second {
+  border: 1px solid rgba(226, 232, 240, 0.28);
+  background: linear-gradient(135deg, rgba(226, 232, 240, 0.05) 0%, rgba(18, 18, 23, 0.96) 100%);
+}
+
+.podium-card--third {
+  border: 1px solid rgba(249, 115, 22, 0.28);
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.05) 0%, rgba(18, 18, 23, 0.96) 100%);
+}
+
+.podium-left {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.podium-rank-badge {
+  font-size: 1rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.podium-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.podium-avatar--gold {
+  border: 1.5px solid #fbbf24;
+}
+
+.podium-avatar--silver {
+  border: 1.5px solid #e2e8f0;
+}
+
+.podium-avatar--bronze {
+  border: 1.5px solid #f97316;
+}
+
+.podium-initials {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #181823;
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.podium-name {
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.92rem;
+  margin: 0;
+}
+
+.podium-meta {
+  font-size: 0.74rem;
+  color: #94a3b8;
+}
+
+.podium-right {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.podium-pts {
+  font-weight: 850;
+  font-size: 0.95rem;
+}
+
+.podium-pts--gold { color: #fbbf24; }
+.podium-pts--silver { color: #e2e8f0; }
+.podium-pts--bronze { color: #f97316; }
+
+.podium-grade {
+  font-size: 0.74rem;
+  color: #a78bfa;
 }

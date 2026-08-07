@@ -7,10 +7,8 @@
     style="background: #000000 !important;">
     <header class="header">
         <div class="header-content">
-            {% set perfil_user = target_user if target_user is defined and target_user else usuario %}
-            {% set is_self = is_self if is_self is defined else (usuario and perfil_user and (usuario.id if usuario.id
-            is defined else usuario.get('id')) == (perfil_user.id if perfil_user.id is defined else
-            perfil_user.get('id'))) %}
+            {% set is_self = is_self if (is_self is defined and is_self is not none) else (target_user is not defined or not target_user or (usuario and target_user and (usuario.id if usuario.id is defined else usuario.get('id')) == (target_user.id if target_user.id is defined else target_user.get('id')))) %}
+            {% set perfil_user = target_user if (target_user is defined and target_user) else (usuario if is_self else {}) %}
             {% set brand_title = 'Meu Perfil' if is_self else (jogador_proprio.nome if jogador_proprio else
             ((perfil_user.nome if perfil_user.nome is defined else perfil_user.get('nome')) or (perfil_user.username if
             perfil_user.username is defined else perfil_user.get('username')))) %}
@@ -86,8 +84,34 @@
                 </a>
             </div>
             {% endif %}
-            <div class="premium-profile-avatar-wrap">
+            <div class="premium-profile-avatar-wrap" style="position: relative;">
+                {% if is_self %}
+                <a href="{{ url_for('auth.editar_perfil_page') }}#cardItemFoto" title="Adicionar ou alterar foto de perfil" style="display: block; width: 100%; height: 100%; text-decoration: none; position: relative;">
+                    {% set eff_foto = (jogador.foto_url if (tem_jogador and jogador.foto_url) else (perfil_user.foto_url if (perfil_user and perfil_user.foto_url) else None)) %}
+                    {% if eff_foto %}
+                    <div class="premium-profile-avatar-inner" style="padding: 0; overflow: hidden; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: none;">
+                        <img src="{{ eff_foto }}" alt="Foto do perfil" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    {% else %}
+                    <div class="premium-profile-avatar-inner">{{ avatar_text|upper }}</div>
+                    {% endif %}
+                    <div style="position: absolute; bottom: 2px; right: 2px; width: 30px; height: 30px; border-radius: 50%; background: #18181b; color: #e4e4e7; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.6); border: 1px solid #27272a;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                            <circle cx="12" cy="13" r="4"/>
+                        </svg>
+                    </div>
+                </a>
+                {% else %}
+                {% set eff_foto = (jogador.foto_url if (tem_jogador and jogador.foto_url) else (target_user.foto_url if (target_user is defined and target_user and target_user.foto_url) else (target_user.get('foto_url') if (target_user is defined and target_user and target_user.get('foto_url') is defined) else None))) %}
+                {% if eff_foto %}
+                <div class="premium-profile-avatar-inner" style="padding: 0; overflow: hidden; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: none;">
+                    <img src="{{ eff_foto }}" alt="Foto do perfil" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                {% else %}
                 <div class="premium-profile-avatar-inner">{{ avatar_text|upper }}</div>
+                {% endif %}
+                {% endif %}
             </div>
             <div class="premium-profile-info">
                 <div class="premium-profile-name-row"
@@ -101,8 +125,7 @@
                         <span class="premium-profile-rating-badge">{{ '%.1f'|format(jogador.nivel|float) }}</span>
                         {% endif %}
                     </div>
-                    {% set p_uname = perfil_user.username if perfil_user.username is defined else
-                    perfil_user.get('username') %}
+                    {% set p_uname = (perfil_user.username if (perfil_user and perfil_user.username is defined) else (perfil_user.get('username') if (perfil_user and perfil_user.get is defined) else None)) if is_self else (target_user.username if (target_user and target_user.username is defined) else (target_user.get('username') if (target_user and target_user.get is defined) else None)) %}
                     {% if p_uname %}
                     <span class="premium-profile-username-tag"
                         style="font-size: 0.9rem; color: #a78bfa; font-weight: 500; font-family: monospace;">@{{ p_uname

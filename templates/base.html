@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#7c3aed">
-    <meta name="description" content="{% block meta_description %}NaTrave 5v5: A aplicação ideal para gerenciar partidas, sortear times equilibrados e acompanhar estatísticas de futebol. Organize seus jogos de forma profissional!{% endblock %}">
-    
+    <meta name="description"
+        content="{% block meta_description %}NaTrave 5v5: A aplicação ideal para gerenciar partidas, sortear times equilibrados e acompanhar estatísticas de futebol. Organize seus jogos de forma profissional!{% endblock %}">
+
     <link rel="canonical" href="{{ request.url | replace(request.host_url, 'https://natrave.pt/') }}">
 
     <!-- Open Graph / Facebook -->
@@ -50,11 +52,11 @@
     }
     </script>
 
-    <link rel="icon" href="/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-    <link rel="manifest" href="/site.webmanifest">
+    <link rel="icon" href="/favicon.ico?v=20260807-02">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=20260807-02">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=20260807-02">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=20260807-02">
+    <link rel="manifest" href="/site.webmanifest?v=20260807-02">
 
     <title>NaTrave | {% block title %}Organize seus jogos de forma equilibrada{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='20260616-06') }}">
@@ -65,7 +67,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 {% set show_site_footer = session.get('user_id') %}
-<body class="app-shell{% if show_site_footer %} has-site-footer{% endif %}{% if session.get('role') == 'juiz' %} is-referee-layout{% endif %} {% block body_class %}{% endblock %}" data-app-shell="{{ 1 if config.get('ENABLE_APP_SHELL') else 0 }}">
+
+<body
+    class="app-shell{% if show_site_footer %} has-site-footer{% endif %}{% if session.get('role') == 'juiz' %} is-referee-layout{% endif %} {% block body_class %}{% endblock %}"
+    data-app-shell="{{ 1 if config.get('ENABLE_APP_SHELL') else 0 }}">
     <script src="{{ url_for('static', filename='offline-judge.js') }}"></script>
     <script>
         // Inject CSRF token into all POST forms automatically (works with Flask-WTF CSRFProtect)
@@ -109,7 +114,7 @@
                 const serviceWorkerUrl = '/static/service-worker.js?v=20260616-06';
                 navigator.serviceWorker.register(serviceWorkerUrl, { updateViaCache: 'none' })
                     .then(registration => {
-                        registration.update().catch(() => {});
+                        registration.update().catch(() => { });
                         if (registration.waiting) {
                             registration.waiting.postMessage({ type: 'SKIP_WAITING' });
                         }
@@ -149,7 +154,8 @@
     {% if notificacoes_url %}
     <a href="{{ notificacoes_url }}" class="admin-notification-fab" aria-label="Abrir avisos do sistema">
         <span class="admin-notification-fab__icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                stroke-linejoin="round" focusable="false" aria-hidden="true">
                 <path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5" />
                 <path d="M9.8 20a2.4 2.4 0 0 0 4.4 0" />
             </svg>
@@ -158,9 +164,11 @@
     </a>
     {% endif %}
     {% if votacao_pendente and votacao_pendente_url %}
-    <aside class="player-vote-notification" role="status" aria-live="polite" data-vote-notification data-vote-notification-id="{{ votacao_pendente.id }}">
+    <aside class="player-vote-notification" role="status" aria-live="polite" data-vote-notification
+        data-vote-notification-id="{{ votacao_pendente.id }}">
         <span class="player-vote-notification__icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"
+                stroke-linejoin="round" focusable="false">
                 <path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5" />
                 <path d="M9.8 20a2.4 2.4 0 0 0 4.4 0" />
             </svg>
@@ -170,7 +178,8 @@
             <span>{{ votacao_pendente.titulo or 'Sua partida já pode ser avaliada' }}</span>
         </span>
         <a href="{{ votacao_pendente_url }}" class="player-vote-notification__action">Minha votação</a>
-        <button type="button" class="player-vote-notification__dismiss" data-vote-notification-dismiss aria-label="Fechar aviso de votação">×</button>
+        <button type="button" class="player-vote-notification__dismiss" data-vote-notification-dismiss
+            aria-label="Fechar aviso de votação">×</button>
     </aside>
     <script>
         (function () {
@@ -235,9 +244,12 @@
     {% endif %}
 
     {% if presenca_pendente and not votacao_pendente %}
-    <aside class="player-presence-toast" role="status" aria-live="polite" id="presenceToastNotification" style="border-color: rgba(34, 197, 94, 0.3); background: linear-gradient(135deg, rgba(34, 197, 94, 0.12), rgba(12, 10, 17, 0.96)), rgba(12, 10, 17, 0.98);">
-        <span class="player-presence-toast__icon" aria-hidden="true" style="color: #22c55e; display: flex; align-items: center; justify-content: center;">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <aside class="player-presence-toast" role="status" aria-live="polite" id="presenceToastNotification"
+        style="border-color: rgba(34, 197, 94, 0.3); background: linear-gradient(135deg, rgba(34, 197, 94, 0.12), rgba(12, 10, 17, 0.96)), rgba(12, 10, 17, 0.98);">
+        <span class="player-presence-toast__icon" aria-hidden="true"
+            style="color: #22c55e; display: flex; align-items: center; justify-content: center;">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#22c55e" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                 <line x1="16" y1="2" x2="16" y2="6"></line>
                 <line x1="8" y1="2" x2="8" y2="6"></line>
@@ -248,10 +260,16 @@
             <strong style="color: #ffffff; font-weight: 700; font-size: 0.85rem;">Lista de Presença Aberta</strong>
             <span style="font-size: 0.75rem; color: #94a3b8;">Confirme sua participação</span>
         </span>
-        <a href="{{ url_for('auth.perfil_page') }}?tab=partidas#tab-partidas" onclick="if (window.location.pathname.includes('/perfil')) { window.location.hash = '#tab-partidas'; }" class="player-presence-toast__action" style="background: #22c55e; color: #000000; font-weight: 800; padding: 0.35rem 0.75rem; border-radius: 8px; text-decoration: none; font-size: 0.8rem; white-space: nowrap; border: none;">
+        <a href="{{ url_for('auth.perfil_page') }}?tab=partidas#tab-partidas"
+            onclick="if (window.location.pathname.includes('/perfil')) { window.location.hash = '#tab-partidas'; }"
+            class="player-presence-toast__action"
+            style="background: #22c55e; color: #000000; font-weight: 800; padding: 0.35rem 0.75rem; border-radius: 8px; text-decoration: none; font-size: 0.8rem; white-space: nowrap; border: none;">
             Ver mais →
         </a>
-        <button type="button" class="player-presence-toast__dismiss" onclick="document.getElementById('presenceToastNotification').remove()" aria-label="Fechar aviso de presença" style="background: none; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer; padding: 0 0.2rem;">×</button>
+        <button type="button" class="player-presence-toast__dismiss"
+            onclick="document.getElementById('presenceToastNotification').remove()"
+            aria-label="Fechar aviso de presença"
+            style="background: none; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer; padding: 0 0.2rem;">×</button>
     </aside>
     {% endif %}
 
@@ -269,20 +287,27 @@
     {% set is_historico = current_path.startswith('/historico') %}
     {% set is_ranking = current_path.startswith('/ranking') %}
     {% set is_admin_page = current_path.startswith('/admin') %}
-    {% set vote_href = url_for('jogador.votacao_page') if session.get('role') == 'usuario' else url_for('votacao.votacao_admin_page') %}
+    {% set vote_href = url_for('jogador.votacao_page') if session.get('role') == 'usuario' else
+    url_for('votacao.votacao_admin_page') %}
     <footer class="site-footer{% if is_judge_role %} judge-site-footer{% endif %}" role="contentinfo">
         <nav class="site-footer__nav" aria-label="Navegação principal">
             {% if is_judge_role %}
-            <a href="{{ url_for('juiz.jogar_page') }}" class="site-footer__link{% if current_path.startswith('/jogar') and not current_path.startswith('/jogar/times') and not current_path.startswith('/jogar/compartilhar') and not current_path.startswith('/jogar/historico') and not current_path.startswith('/jogar/cronometro') %} is-active{% endif %}" aria-label="Criar" title="Criar">
-                <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <a href="{{ url_for('juiz.jogar_page') }}"
+                class="site-footer__link{% if current_path.startswith('/jogar') and not current_path.startswith('/jogar/times') and not current_path.startswith('/jogar/compartilhar') and not current_path.startswith('/jogar/historico') and not current_path.startswith('/jogar/cronometro') %} is-active{% endif %}"
+                aria-label="Criar" title="Criar">
+                <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
                     <path d="m14.5 4.5 5 5" />
                     <path d="M4 20l4.5-1 10-10a2.12 2.12 0 0 0-3-3l-10 10z" />
                 </svg>
                 <span class="site-footer__label">Criar</span>
             </a>
 
-            <a href="{{ url_for('juiz.juiz_times_page') }}" class="site-footer__link{% if current_path.startswith('/jogar/times') %} is-active{% endif %}" aria-label="Times" title="Times">
-                <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <a href="{{ url_for('juiz.juiz_times_page') }}"
+                class="site-footer__link{% if current_path.startswith('/jogar/times') %} is-active{% endif %}"
+                aria-label="Times" title="Times">
+                <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
                     <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
                     <circle cx="9" cy="7" r="4" />
                     <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
@@ -291,8 +316,11 @@
                 <span class="site-footer__label">Times</span>
             </a>
 
-            <a href="{{ url_for('votacao.votacao_admin_page') }}" class="site-footer__link{% if current_path.startswith('/admin/votacao') or current_path.startswith('/votacao') %} is-active{% endif %}" aria-label="Votações" title="Votações">
-                <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <a href="{{ url_for('votacao.votacao_admin_page') }}"
+                class="site-footer__link{% if current_path.startswith('/admin/votacao') or current_path.startswith('/votacao') %} is-active{% endif %}"
+                aria-label="Votações" title="Votações">
+                <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
                     <path d="M9 12 11 14 15 10" />
                     <path d="M5 3h14" />
                     <path d="M5 7h14" />
@@ -301,8 +329,11 @@
                 <span class="site-footer__label">Votações</span>
             </a>
 
-            <a href="{{ url_for('juiz.juiz_historico') }}" class="site-footer__link{% if current_path.startswith('/jogar/historico') %} is-active{% endif %}" aria-label="Histórico" title="Histórico">
-                <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <a href="{{ url_for('juiz.juiz_historico') }}"
+                class="site-footer__link{% if current_path.startswith('/jogar/historico') %} is-active{% endif %}"
+                aria-label="Histórico" title="Histórico">
+                <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
                     <path d="M3 3v5h5" />
                     <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8" />
                     <path d="M12 7v5l4 2" />
@@ -310,8 +341,11 @@
                 <span class="site-footer__label">Histórico</span>
             </a>
 
-            <a href="{{ url_for('juiz.juiz_cronometro') }}" class="site-footer__link{% if current_path.startswith('/jogar/cronometro') %} is-active{% endif %}" aria-label="Cronômetro" title="Cronômetro">
-                <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <a href="{{ url_for('juiz.juiz_cronometro') }}"
+                class="site-footer__link{% if current_path.startswith('/jogar/cronometro') %} is-active{% endif %}"
+                aria-label="Cronômetro" title="Cronômetro">
+                <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
                     <circle cx="12" cy="13" r="8" />
                     <path d="M12 9v4l2 2" />
                     <path d="M9 2h6" />
@@ -321,8 +355,11 @@
 
             <form method="post" action="{{ url_for('jogador.logout') }}" style="display: contents;">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="site-footer__link" aria-label="Sair" title="Sair" style="background: none; border: none; padding: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%;">
-                    <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <button type="submit" class="site-footer__link" aria-label="Sair" title="Sair"
+                    style="background: none; border: none; padding: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%;">
+                    <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+                        focusable="false">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                         <polyline points="16 17 21 12 16 7" />
                         <line x1="21" x2="9" y1="12" y2="12" />
@@ -331,139 +368,173 @@
                 </button>
             </form>
             {% else %}
-                {% if is_admin_role %}
-                <!-- 1. Jogadores -->
-                <a href="{{ url_for('jogador.index') }}" class="site-footer__link{% if is_jogadores %} is-active{% endif %}" aria-label="Jogadores" title="Jogadores"{% if is_jogadores %} aria-current="page"{% endif %}>
-                    <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                        <circle cx="9" cy="7" r="4" />
-                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                    </svg>
-                    <span class="site-footer__label">Jogadores</span>
-                </a>
+            {% if is_admin_role %}
+            <!-- 1. Jogadores -->
+            <a href="{{ url_for('jogador.index') }}" class="site-footer__link{% if is_jogadores %} is-active{% endif %}"
+                aria-label="Jogadores" title="Jogadores" {% if is_jogadores %} aria-current="page" {% endif %}>
+                <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+                <span class="site-footer__label">Jogadores</span>
+            </a>
 
-                <!-- 2. Histórico -->
-                <a href="{{ url_for('jogador.historico') }}" class="site-footer__link{% if is_historico %} is-active{% endif %}" aria-label="Histórico" title="Histórico"{% if is_historico %} aria-current="page"{% endif %}>
-                    <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                        <path d="M3 3v5h5" />
-                        <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8" />
-                        <path d="M12 7v5l4 2" />
-                    </svg>
-                    <span class="site-footer__label">Histórico</span>
-                </a>
+            <!-- 2. Histórico -->
+            <a href="{{ url_for('jogador.historico') }}"
+                class="site-footer__link{% if is_historico %} is-active{% endif %}" aria-label="Histórico"
+                title="Histórico" {% if is_historico %} aria-current="page" {% endif %}>
+                <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <path d="M3 3v5h5" />
+                    <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8" />
+                    <path d="M12 7v5l4 2" />
+                </svg>
+                <span class="site-footer__label">Histórico</span>
+            </a>
 
-                <!-- 3. Ranking -->
-                <a href="{{ url_for('jogador.pagina_ranking') }}" class="site-footer__link{% if is_ranking %} is-active{% endif %}" aria-label="Ranking" title="Ranking"{% if is_ranking %} aria-current="page"{% endif %}>
-                    <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                        <path d="M8 21h8" />
-                        <path d="M12 17v4" />
-                        <path d="M7 4h10v6a5 5 0 0 1-10 0V4Z" />
-                        <path d="M18 5h3v2a3 3 0 0 1-3 3" />
-                        <path d="M6 5H3v2a3 3 0 0 0 3 3" />
-                    </svg>
-                    <span class="site-footer__label">Ranking</span>
-                </a>
+            <!-- 3. Ranking -->
+            <a href="{{ url_for('jogador.pagina_ranking') }}"
+                class="site-footer__link{% if is_ranking %} is-active{% endif %}" aria-label="Ranking" title="Ranking"
+                {% if is_ranking %} aria-current="page" {% endif %}>
+                <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <path d="M8 21h8" />
+                    <path d="M12 17v4" />
+                    <path d="M7 4h10v6a5 5 0 0 1-10 0V4Z" />
+                    <path d="M18 5h3v2a3 3 0 0 1-3 3" />
+                    <path d="M6 5H3v2a3 3 0 0 0 3 3" />
+                </svg>
+                <span class="site-footer__label">Ranking</span>
+            </a>
 
-                <!-- 4. Meu Perfil -->
-                <a href="{{ url_for('auth.perfil_page') }}" class="site-footer__link{% if is_perfil %} is-active{% endif %}" aria-label="Meu perfil" title="Meu perfil"{% if is_perfil %} aria-current="page"{% endif %}>
-                    <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                        <circle cx="12" cy="8" r="4" />
-                        <path d="M6 21v-1a6 6 0 0 1 12 0v1" />
-                    </svg>
-                    <span class="site-footer__label">Perfil</span>
-                </a>
+            <!-- 4. Meu Perfil -->
+            <a href="{{ url_for('auth.perfil_page') }}" class="site-footer__link{% if is_perfil %} is-active{% endif %}"
+                aria-label="Meu perfil" title="Meu perfil" {% if is_perfil %} aria-current="page" {% endif %}>
+                <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <circle cx="12" cy="8" r="4" />
+                    <path d="M6 21v-1a6 6 0 0 1 12 0v1" />
+                </svg>
+                <span class="site-footer__label">Perfil</span>
+            </a>
 
-                <!-- 5. Ajustes -->
-                <a href="{{ url_for('admin.admin_page') }}" class="site-footer__link{% if is_admin_page %} is-active{% endif %}" aria-label="Ajustes" title="Ajustes"{% if is_admin_page %} aria-current="page"{% endif %}>
-                    <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                        <circle cx="12" cy="12" r="3"></circle>
-                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                    </svg>
-                    <span class="site-footer__label">Ajustes</span>
-                </a>
+            <!-- 5. Ajustes -->
+            <a href="{{ url_for('admin.admin_page') }}"
+                class="site-footer__link{% if is_admin_page %} is-active{% endif %}" aria-label="Ajustes"
+                title="Ajustes" {% if is_admin_page %} aria-current="page" {% endif %}>
+                <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z">
+                    </path>
+                </svg>
+                <span class="site-footer__label">Ajustes</span>
+            </a>
 
-                <form method="post" action="{{ url_for('jogador.logout') }}" style="display: contents;">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button type="submit" class="site-footer__link" aria-label="Sair" title="Sair" style="background: none; border: none; padding: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%;">
-                        <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                            <polyline points="16 17 21 12 16 7" />
-                            <line x1="21" x2="9" y1="12" y2="12" />
-                        </svg>
-                        <span class="site-footer__label" style="display: block; margin-top: 0.15rem;">Sair</span>
-                    </button>
-                </form>
-                {% else %}
-                <!-- 1. Perfil -->
-                <a href="{{ url_for('auth.perfil_page') }}" class="site-footer__link{% if is_perfil %} is-active{% endif %}" aria-label="Meu perfil" title="Meu perfil"{% if is_perfil %} aria-current="page"{% endif %}>
-                    <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                        <circle cx="12" cy="8" r="4" />
-                        <path d="M6 21v-1a6 6 0 0 1 12 0v1" />
+            <form method="post" action="{{ url_for('jogador.logout') }}" style="display: contents;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="site-footer__link" aria-label="Sair" title="Sair"
+                    style="background: none; border: none; padding: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%;">
+                    <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+                        focusable="false">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" x2="9" y1="12" y2="12" />
                     </svg>
-                    <span class="site-footer__label">Perfil</span>
-                </a>
+                    <span class="site-footer__label" style="display: block; margin-top: 0.15rem;">Sair</span>
+                </button>
+            </form>
+            {% else %}
+            <!-- 1. Perfil -->
+            <a href="{{ url_for('auth.perfil_page') }}" class="site-footer__link{% if is_perfil %} is-active{% endif %}"
+                aria-label="Meu perfil" title="Meu perfil" {% if is_perfil %} aria-current="page" {% endif %}>
+                <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <circle cx="12" cy="8" r="4" />
+                    <path d="M6 21v-1a6 6 0 0 1 12 0v1" />
+                </svg>
+                <span class="site-footer__label">Perfil</span>
+            </a>
 
-                <!-- 2. Jogadores -->
-                <a href="{{ url_for('jogador.index') }}" class="site-footer__link{% if is_jogadores %} is-active{% endif %}" aria-label="Jogadores" title="Jogadores"{% if is_jogadores %} aria-current="page"{% endif %}>
-                    <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                        <circle cx="9" cy="7" r="4" />
-                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            <!-- 2. Jogadores -->
+            <a href="{{ url_for('jogador.index') }}" class="site-footer__link{% if is_jogadores %} is-active{% endif %}"
+                aria-label="Jogadores" title="Jogadores" {% if is_jogadores %} aria-current="page" {% endif %}>
+                <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+                <span class="site-footer__label">Jogadores</span>
+            </a>
+
+            <!-- 3. Votação -->
+            <a href="{{ vote_href }}" class="site-footer__link{% if is_votacao %} is-active{% endif %}"
+                aria-label="Votação" title="Votação" {% if is_votacao %} aria-current="page" {% endif %}>
+                <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <path d="M9 12 11 14 15 10" />
+                    <path d="M5 3h14" />
+                    <path d="M5 7h14" />
+                    <path d="M7 21h10a2 2 0 0 0 2-2V9H5v10a2 2 0 0 0 2 2Z" />
+                </svg>
+                <span class="site-footer__label">Votação</span>
+            </a>
+
+            <!-- 4. Histórico -->
+            <a href="{{ url_for('jogador.historico') }}"
+                class="site-footer__link{% if is_historico %} is-active{% endif %}" aria-label="Histórico"
+                title="Histórico" {% if is_historico %} aria-current="page" {% endif %}>
+                <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <path d="M3 3v5h5" />
+                    <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8" />
+                    <path d="M12 7v5l4 2" />
+                </svg>
+                <span class="site-footer__label">Histórico</span>
+            </a>
+
+            <!-- 5. Ranking -->
+            <a href="{{ url_for('jogador.pagina_ranking') }}"
+                class="site-footer__link{% if is_ranking %} is-active{% endif %}" aria-label="Ranking" title="Ranking"
+                {% if is_ranking %} aria-current="page" {% endif %}>
+                <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <path d="M8 21h8" />
+                    <path d="M12 17v4" />
+                    <path d="M7 4h10v6a5 5 0 0 1-10 0V4Z" />
+                    <path d="M18 5h3v2a3 3 0 0 1-3 3" />
+                    <path d="M6 5H3v2a3 3 0 0 0 3 3" />
+                </svg>
+                <span class="site-footer__label">Ranking</span>
+            </a>
+
+            <!-- 6. Sair -->
+            <form method="post" action="{{ url_for('jogador.logout') }}" style="display: contents;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="site-footer__link" aria-label="Sair" title="Sair"
+                    style="background: none; border: none; padding: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%;">
+                    <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+                        focusable="false">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" x2="9" y1="12" y2="12" />
                     </svg>
-                    <span class="site-footer__label">Jogadores</span>
-                </a>
-
-                <!-- 3. Votação -->
-                <a href="{{ vote_href }}" class="site-footer__link{% if is_votacao %} is-active{% endif %}" aria-label="Votação" title="Votação"{% if is_votacao %} aria-current="page"{% endif %}>
-                    <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                        <path d="M9 12 11 14 15 10" />
-                        <path d="M5 3h14" />
-                        <path d="M5 7h14" />
-                        <path d="M7 21h10a2 2 0 0 0 2-2V9H5v10a2 2 0 0 0 2 2Z" />
-                    </svg>
-                    <span class="site-footer__label">Votação</span>
-                </a>
-
-                <!-- 4. Histórico -->
-                <a href="{{ url_for('jogador.historico') }}" class="site-footer__link{% if is_historico %} is-active{% endif %}" aria-label="Histórico" title="Histórico"{% if is_historico %} aria-current="page"{% endif %}>
-                    <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                        <path d="M3 3v5h5" />
-                        <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8" />
-                        <path d="M12 7v5l4 2" />
-                    </svg>
-                    <span class="site-footer__label">Histórico</span>
-                </a>
-
-                <!-- 5. Ranking -->
-                <a href="{{ url_for('jogador.pagina_ranking') }}" class="site-footer__link{% if is_ranking %} is-active{% endif %}" aria-label="Ranking" title="Ranking"{% if is_ranking %} aria-current="page"{% endif %}>
-                    <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                        <path d="M8 21h8" />
-                        <path d="M12 17v4" />
-                        <path d="M7 4h10v6a5 5 0 0 1-10 0V4Z" />
-                        <path d="M18 5h3v2a3 3 0 0 1-3 3" />
-                        <path d="M6 5H3v2a3 3 0 0 0 3 3" />
-                    </svg>
-                    <span class="site-footer__label">Ranking</span>
-                </a>
-
-                <!-- 6. Sair -->
-                <form method="post" action="{{ url_for('jogador.logout') }}" style="display: contents;">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button type="submit" class="site-footer__link" aria-label="Sair" title="Sair" style="background: none; border: none; padding: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%;">
-                        <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                            <polyline points="16 17 21 12 16 7" />
-                            <line x1="21" x2="9" y1="12" y2="12" />
-                        </svg>
-                        <span class="site-footer__label" style="display: block; margin-top: 0.15rem;">Sair</span>
-                    </button>
-                </form>
-                {% endif %}
+                    <span class="site-footer__label" style="display: block; margin-top: 0.15rem;">Sair</span>
+                </button>
+            </form>
+            {% endif %}
             {% endif %}
         </nav>
     </footer>
     {% endif %}
 </body>
+
 </html>

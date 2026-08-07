@@ -125,12 +125,17 @@
                             <!-- 5 Jogadores do Time -->
                             <div class="players-list">
                                 {% for jogador in time %}
-                                    <div class="player-item">
-                                        <span class="player-name">
-                                            {% if jogador.posicao == 'goleiro' %}🧤{% else %}⚽{% endif %}
-                                            {{ loop.index }}. {{ jogador.nome }}
-                                        </span>
-                                        <span class="player-level">Nível {{ jogador.nivel }}</span>
+                                    <div class="player-item" style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+                                        <div style="display: flex; align-items: center; gap: 0.55rem; min-width: 0;">
+                                            {% if jogador.foto_url %}
+                                            <img src="{{ jogador.foto_url }}" alt="{{ jogador.nome }}" style="width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255, 255, 255, 0.2); flex-shrink: 0;">
+                                            {% endif %}
+                                            <span class="player-name" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                                {% if jogador.posicao == 'goleiro' %}🧤{% else %}⚽{% endif %}
+                                                {{ loop.index }}. {{ jogador.nome }}
+                                            </span>
+                                        </div>
+                                        <span class="player-level" style="flex-shrink: 0;">Nível {{ jogador.nivel }}</span>
                                     </div>
                                 {% endfor %}
                             </div>

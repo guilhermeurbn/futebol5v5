@@ -416,7 +416,8 @@ class AuthService:
         user_id: str,
         email: Optional[str] = None,
         username: Optional[str] = None,
-        nome: Optional[str] = None
+        nome: Optional[str] = None,
+        foto_url: Optional[str] = None
     ) -> Dict:
         """
         Atualiza dados cadastrais (email, username, nome) do próprio usuário.
@@ -463,6 +464,18 @@ class AuthService:
                 linked_players = jog_svc.listar_por_usuario(user_id)
                 for p in linked_players:
                     jog_svc.atualizar(p.id, nome=nome_clean)
+            except Exception:
+                pass
+
+        if foto_url is not None:
+            alvo["foto_url"] = foto_url
+            # Sincronizar foto do atleta vinculado se existir
+            try:
+                from services.jogador_service import JogadorService
+                jog_svc = JogadorService()
+                linked_players = jog_svc.listar_por_usuario(user_id)
+                for p in linked_players:
+                    jog_svc.atualizar(p.id, foto_url=foto_url)
             except Exception:
                 pass
 
