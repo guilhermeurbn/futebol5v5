@@ -182,72 +182,32 @@
 </div>
 
 <script>
-const votacaoForm = document.querySelector('[data-votacao-form]');
+(function () {
+    function atualizarProgressoGeral() {
+        const notasInputs = Array.from(document.querySelectorAll('input[name="nota"]'));
+        const totalVotaveis = notasInputs.length;
+        const minReq = Math.min(5, totalVotaveis);
+        const notasCount = notasInputs.filter(input => parseFloat(String(input.value || '0').replace(',', '.')) > 0).length;
+        
+        const contador = document.getElementById('notas-preenchidas');
+        if (contador) contador.textContent = String(notasCount);
 
-function atualizarProgressoGeral() {
-    const notasInputs = Array.from(document.querySelectorAll('input[name="nota"]'));
-    const totalVotaveis = notasInputs.length;
-    const minReq = Math.min(5, totalVotaveis);
-    const notasCount = notasInputs.filter(input => parseFloat(String(input.value || '0').replace(',', '.')) > 0).length;
-    
-    const contador = document.getElementById('notas-preenchidas');
-    if (contador) contador.textContent = String(notasCount);
-
-    const badgeProgresso = document.getElementById('notas-progresso-badge');
-    if (badgeProgresso) {
-        if (notasCount >= minReq && minReq > 0) {
-            badgeProgresso.classList.add('is-complete');
-        } else {
-            badgeProgresso.classList.remove('is-complete');
-        }
-    }
-}
-
-votacaoForm?.addEventListener('submit', function (e) {
-    const notasInputs = Array.from(document.querySelectorAll('input[name="nota"]'));
-    const totalVotaveis = notasInputs.length;
-    const minReq = Math.min(5, totalVotaveis);
-    const notas = notasInputs.filter(input => parseFloat(String(input.value || '0').replace(',', '.')) > 0).length;
-    const aviso = document.getElementById('aviso-obrigatorios');
-    atualizarProgressoGeral();
-
-    if (notas < minReq) {
-        e.preventDefault();
-        if (aviso) {
-            aviso.textContent = `Você precisa dar nota para pelo menos ${minReq} jogador(es).`;
-            aviso.style.display = 'block';
-        }
-        return;
-    }
-    if (aviso) aviso.style.display = 'none';
-
-    if (window.NaTraveOffline && window.NaTraveOffline.isOffline()) {
-        e.preventDefault();
-        const form = e.currentTarget;
-        const payload = new URLSearchParams(new FormData(form)).toString();
-        window.NaTraveOffline.queueFormSubmission({
-            label: 'Voto da partida',
-            url: form.action,
-            method: 'POST',
-            headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
-            body: payload,
-            kind: 'votacao_usuario'
-        }).then(() => {
-            if (aviso) {
-                aviso.textContent = '📴 Voto salvo localmente. Ele será sincronizado quando a internet voltar.';
-                aviso.style.display = 'block';
-                aviso.className = 'alert alert-warning';
+        const badgeProgresso = document.getElementById('notas-progresso-badge');
+        if (badgeProgresso) {
+            if (notasCount >= minReq && minReq > 0) {
+                badgeProgresso.classList.add('is-complete');
+            } else {
+                badgeProgresso.classList.remove('is-complete');
             }
-        });
+        }
     }
-});
 
-function bindSliderEvents(input) {
-    const updateHandler = () => {
-        atualizarProgressoGeral();
-
-        const score = parseFloat(input.value || '0');
+    function atualizarEstadoSlider(input) {
+        if (!input || input.name !== 'nota') return;
+        const score = parseFloat(String(input.value || '0').replace(',', '.'));
         const index = input.dataset.scoreIndex;
+        if (index === undefined) return;
+
         const badge = document.querySelector(`[data-score-for="${index}"]`);
         const card = document.querySelector(`[data-card-index="${index}"]`);
 
@@ -267,30 +227,73 @@ function bindSliderEvents(input) {
                 card.classList.remove('is-active');
             }
         }
-    };
-
-    ['input', 'change', 'pointermove', 'touchmove', 'click'].forEach(evt => {
-        input.addEventListener(evt, updateHandler, { passive: true });
-    });
-}
-
-// Inicialização imediata de todos os sliders
-document.querySelectorAll('input[name="nota"]').forEach(input => {
-    bindSliderEvents(input);
-
-    const score = parseFloat(input.value || '0');
-    const index = input.dataset.scoreIndex;
-    const badge = document.querySelector(`[data-score-for="${index}"]`);
-    const card = document.querySelector(`[data-card-index="${index}"]`);
-
-    if (badge) {
-        badge.textContent = score.toFixed(1);
-        if (score > 0) badge.classList.add('is-active');
     }
-    if (card && score > 0) {
-        card.classList.add('is-active');
+
+    function initVotacaoUsuario() {
+        const inputs = document.querySelectorAll('input[name="nota"]');
+        inputs.forEach(input => {
+            atualizarEstadoSlider(input);
+        });
+        atualizarProgressoGeral();
     }
-});
-atualizarProgressoGeral();
+
+    if (!window._votacaoDelegationBound) {
+        window._votacaoDelegationBound = true;
+
+        ['input', 'change', 'pointermove', 'touchmove', 'click'].forEach(evt => {
+            document.addEventListener(evt, function (e) {
+                const input = e.target && e.target.closest ? e.target.closest('input[name="nota"]') : null;
+                if (input) {
+                    atualizarEstadoSlider(input);
+                    atualizarProgressoGeral();
+                }
+            }, { passive: true });
+        });
+
+        document.addEventListener('submit', function (e) {
+            const form = e.target.closest('[data-votacao-form]');
+            if (!form) return;
+
+            const notasInputs = Array.from(form.querySelectorAll('input[name="nota"]'));
+            const totalVotaveis = notasInputs.length;
+            const minReq = Math.min(5, totalVotaveis);
+            const notas = notasInputs.filter(input => parseFloat(String(input.value || '0').replace(',', '.')) > 0).length;
+            const aviso = document.getElementById('aviso-obrigatorios');
+            atualizarProgressoGeral();
+
+            if (notas < minReq) {
+                e.preventDefault();
+                if (aviso) {
+                    aviso.textContent = `Você precisa dar nota para pelo menos ${minReq} jogador(es).`;
+                    aviso.style.display = 'block';
+                }
+                return;
+            }
+            if (aviso) aviso.style.display = 'none';
+
+            if (window.NaTraveOffline && window.NaTraveOffline.isOffline()) {
+                e.preventDefault();
+                const payload = new URLSearchParams(new FormData(form)).toString();
+                window.NaTraveOffline.queueFormSubmission({
+                    label: 'Voto da partida',
+                    url: form.action,
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                    body: payload,
+                    kind: 'votacao_usuario'
+                }).then(() => {
+                    if (aviso) {
+                        aviso.textContent = '📴 Voto salvo localmente. Ele será sincronizado quando a internet voltar.';
+                        aviso.style.display = 'block';
+                        aviso.className = 'alert alert-warning';
+                    }
+                });
+            }
+        });
+    }
+
+    window.initVotacaoUsuario = initVotacaoUsuario;
+    initVotacaoUsuario();
+})();
 </script>
 {% endblock %}

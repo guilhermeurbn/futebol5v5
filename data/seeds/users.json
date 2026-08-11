@@ -3,7 +3,7 @@
     "id": "f58341a0-14ec-4076-9da5-931c866ebcac",
     "username": "admin",
     "nome": "Administrador",
-    "password_hash": "scrypt:32768:8:1$wFVkbCn0IfndKfw7$a4255035a67ddc8bb9b6b0be4312af23dd07b670896e1cf1d82cd2f14c8163d4fe420beb9ce70fbf92ef51a3803e0fd9098f227979b2acbfd98d2fb12615992d",
+    "password_hash": "scrypt:32768:8:1$bcvzkuey8NaSXa7P$3de1e84dfae112560c6cb5bf7613b590838b3c308e259412385a800d070df776df3ac09acee6ce57e43fe7f3c2b3e2b87a1fc850c629f408bf46eac045b7aa27",
     "role": "admin",
     "criado_em": "2026-04-23T22:47:25.614906",
     "ativo": true,

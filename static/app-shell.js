@@ -201,6 +201,10 @@
     hydratePlayersPage();
     hydrateJudgePage();
     hydrateAdminPage();
+
+    if (typeof window.initVotacaoUsuario === 'function') {
+      window.initVotacaoUsuario();
+    }
   }
 
   function formatRankingValue(value) {
@@ -777,8 +781,9 @@
     const token = ++navigationToken;
     const replace = Boolean(options && options.replace);
 
-    // Instant tab navigation from cache
-    const cachedItem = pageCache.get(targetUrl.href);
+    // Instant tab navigation from cache (skip for dynamic user voting route)
+    const isDynamicVotingRoute = targetUrl.pathname.startsWith('/votacao');
+    const cachedItem = !isDynamicVotingRoute ? pageCache.get(targetUrl.href) : null;
     if (cachedItem && cachedItem.html) {
       try {
         const nextDocument = new DOMParser().parseFromString(cachedItem.html, 'text/html');
@@ -860,7 +865,10 @@
     const urls = new Set();
 
     document.querySelectorAll('.site-footer__link[href], .judge-nav__tab[href]').forEach(link => {
-      urls.add(normalizeUrl(link.href).href);
+      const url = normalizeUrl(link.href);
+      if (!url.pathname.startsWith('/votacao')) {
+        urls.add(url.href);
+      }
     });
 
     const commonTargets = ['/', '/ranking', '/historico', '/perfil', '/admin', '/jogar'];

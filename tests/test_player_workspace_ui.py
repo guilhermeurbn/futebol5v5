@@ -191,4 +191,18 @@ def test_private_profile_lightbulb_guide_modal():
     assert ".profile-guide-trigger {" in stylesheet
 
 
+def test_votacao_usuario_script_iife_and_app_shell_hooks():
+    template = _read("templates/votacao_usuario.html")
+    app_shell = _read("static/app-shell.js")
+
+    assert "(function () {" in template
+    assert "window.initVotacaoUsuario = initVotacaoUsuario;" in template
+    assert "window._votacaoDelegationBound = true;" in template
+    assert "const input = e.target && e.target.closest ? e.target.closest('input[name=\"nota\"]') : null;" in template
+    assert "if (typeof window.initVotacaoUsuario === 'function') {" in app_shell
+    assert "window.initVotacaoUsuario();" in app_shell
+    assert "isDynamicVotingRoute = targetUrl.pathname.startsWith('/votacao');" in app_shell
+
+
+
 
