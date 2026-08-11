@@ -73,7 +73,7 @@
             </div>
             {% endif %}
 
-            <div class="judge-last-match-card__footer">
+            <div class="judge-last-match-card__footer" style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; justify-content: space-between;">
                 <div class="judge-last-match-card__meta">
                     {% if ultima_partida.encerrado_em %}
                     <span class="judge-last-match-card__date">
@@ -86,8 +86,14 @@
                     </span>
                     {% endif %}
                 </div>
-                <a href="{{ url_for('juiz.juiz_historico', sorteio_id=ultima_partida.sorteio_id) }}#sorteio-{{ ultima_partida.sorteio_id }}"
-                    class="judge-last-match-card__action">Ver no histórico →</a>
+                <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                    <a href="{{ url_for('votacao.votacao_admin_page', sorteio_id=ultima_partida.sorteio_id, editar_resultado=1) }}"
+                        class="btn" style="background: rgba(234, 179, 8, 0.18); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.4); font-weight: 800; border-radius: 10px; padding: 0.45rem 0.85rem; font-size: 0.82rem; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;">
+                        <span>✏️</span> Reabrir resultado
+                    </a>
+                    <a href="{{ url_for('juiz.juiz_historico', sorteio_id=ultima_partida.sorteio_id) }}#sorteio-{{ ultima_partida.sorteio_id }}"
+                        class="judge-last-match-card__action">Ver no histórico →</a>
+                </div>
             </div>
         </section>
         {% endif %}

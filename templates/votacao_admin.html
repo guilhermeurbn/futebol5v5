@@ -46,7 +46,7 @@
                     </span>
                 </div>
 
-                {% if current_user.role == 'juiz' and sorteio_contexto and not resultado_concluido and not
+                {% if current_user.role == 'juiz' and sorteio_contexto and (not resultado_concluido or modo_edicao_resultado) and not
                 rodada_selecionada %}
                 <form method="post" action="{{ url_for('votacao.votacao_resultado_juiz') }}" class="judge-result-form">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -258,13 +258,24 @@
                 {% elif not sorteio_contexto %}
                 <p class="judge-flow-empty">Crie uma partida para começar.</p>
                 {% else %}
-                <div class="judge-result-summary">
-                    {% for item in resultado_partida.times_desempenho %}
-                    <span>
-                        <strong>Time {{ item.time_numero }}</strong>
-                        {{ item.vitorias }}V · {{ item.empates }}E · {{ item.derrotas }}D · {{ item.gols }} gols
-                    </span>
-                    {% endfor %}
+                <div class="judge-result-summary" style="display: flex; flex-direction: column; gap: 0.85rem; width: 100%;">
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                        {% for item in resultado_partida.times_desempenho %}
+                        <span style="background: rgba(255,255,255,0.05); padding: 0.4rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem;">
+                            <strong style="color: #60a5fa;">Time {{ item.time_numero }}:</strong>
+                            {{ item.vitorias }}V · {{ item.empates }}E · {{ item.derrotas }}D · {{ item.gols }} gols
+                        </span>
+                        {% endfor %}
+                    </div>
+                    {% if current_user.role in ['admin', 'juiz'] and selected_sorteio_id %}
+                    <a href="{{ url_for('votacao.votacao_admin_page', sorteio_id=selected_sorteio_id, editar_resultado=1) }}" class="btn" style="align-self: flex-start; background: rgba(234, 179, 8, 0.18); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.4); font-weight: 800; border-radius: 12px; padding: 0.6rem 1.1rem; font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 0.45rem; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: all 0.2s ease;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                        <span>Editar / Reabrir resultado dos times</span>
+                    </a>
+                    {% endif %}
                 </div>
                 {% endif %}
             </article>

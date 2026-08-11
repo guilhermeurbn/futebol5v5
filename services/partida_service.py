@@ -84,18 +84,27 @@ class PartidaService:
         """
         partidas = self._carregar_raw()
         
-        ultimo_id = max((int(p.get("id", 0) or 0) for p in partidas), default=0)
-        partida = {
-            "id": ultimo_id + 1,
-            "sorteio_id": sorteio_id,
-            "data": datetime.now().isoformat(),
-            "time_vencedor": time_vencedor,
-            "gols_times": gols_times,
-            "notas": notas,
-            "times_desempenho": times_desempenho or []
-        }
-        
-        partidas.append(partida)
+        existente = next((p for p in partidas if int(p.get("sorteio_id", 0) or 0) == int(sorteio_id)), None)
+        if existente:
+            existente["time_vencedor"] = time_vencedor
+            existente["gols_times"] = gols_times
+            existente["notas"] = notas
+            existente["times_desempenho"] = times_desempenho or []
+            existente["atualizado_em"] = datetime.now().isoformat()
+            partida = existente
+        else:
+            ultimo_id = max((int(p.get("id", 0) or 0) for p in partidas), default=0)
+            partida = {
+                "id": ultimo_id + 1,
+                "sorteio_id": sorteio_id,
+                "data": datetime.now().isoformat(),
+                "time_vencedor": time_vencedor,
+                "gols_times": gols_times,
+                "notas": notas,
+                "times_desempenho": times_desempenho or []
+            }
+            partidas.append(partida)
+
         self._salvar(partidas)
         return partida
     

@@ -441,10 +441,20 @@ def votacao_resultado_juiz():
             times_desempenho=times_desempenho,
         )
         juiz_partida_service.marcar_resultado_registrado(sorteio_id, partida.get('id'))
+
+        partida_votacao = votacao_service.obter_por_sorteio(sorteio_id)
+        if partida_votacao:
+            partida_votacao['resultado_partida'] = partida
+            dados = votacao_service._carregar()
+            alvo = votacao_service._find_partida_em_dados(dados, partida_votacao['id'])
+            if alvo:
+                alvo['resultado_partida'] = partida
+                votacao_service._salvar(dados)
+
         return redirect(url_for(
             'votacao.votacao_admin_page',
             sorteio_id=sorteio_id,
-            sucesso='Resultado salvo. Agora você pode abrir a votação dos jogadores.',
+            sucesso='Resultado salvo com sucesso. Agora você pode abrir a votação dos jogadores.',
         ))
     except ValueError as e:
         contexto = _resolver_contexto_admin(sorteio_id_hint=sorteio_id)
@@ -472,15 +482,32 @@ def votacao_resultado_juiz():
 @votacao_bp.route('/admin/votacao', methods=['GET'])
 @admin_or_juiz_required
 def votacao_admin_page():
-    """Mantido por compatibilidade; redireciona para a central de rodada no admin."""
+    """Central de votação do admin/juiz com suporte a reabertura e edição de resultados."""
     sorteio_id = request.args.get('sorteio_id', type=int)
+    editar_resultado = request.args.get('editar_resultado', type=int) or request.args.get('reabrir_resultado', type=int)
     sucesso = request.args.get('sucesso', '').strip()
     erro = request.args.get('erro', '').strip()
+
+    if editar_resultado and sorteio_id and _is_juiz():
+        juiz_partida_service.reabrir_partida(sorteio_id)
+
     if _is_juiz():
         contexto = _resolver_contexto_admin(sorteio_id_hint=sorteio_id)
+        resultado_form_values = {}
+        res_partida = contexto.get('resultado_partida')
+        if res_partida and res_partida.get('times_desempenho'):
+            for td in res_partida['times_desempenho']:
+                num = td.get('time_numero')
+                resultado_form_values[f'vitorias_{num}'] = str(td.get('vitorias', 0))
+                resultado_form_values[f'empates_{num}'] = str(td.get('empates', 0))
+                resultado_form_values[f'derrotas_{num}'] = str(td.get('derrotas', 0))
+                resultado_form_values[f'gols_{num}'] = str(td.get('gols', 0))
+
         return render_template(
             'votacao_admin.html',
             **contexto,
+            modo_edicao_resultado=bool(editar_resultado),
+            resultado_form_values=resultado_form_values,
             sucesso=sucesso or None,
             erro=erro or None,
             usuario=_usuario_logado(),
