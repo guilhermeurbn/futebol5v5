@@ -1,18 +1,22 @@
 {
-  "appId": "com.natrave.app",
+  "appId": "pt.natrave.com",
   "appName": "NaTrave 5v5",
   "webDir": "static",
+  "appendUserAgent": "Capacitor NaTraveApp/1.0",
   "server": {
-    "url": "https://natrave.pt",
+    "url": "https://natrave.pt?mode=app",
     "cleartext": true,
     "androidScheme": "https",
     "iosScheme": "https",
     "allowNavigation": [
       "natrave.pt",
       "*.natrave.pt",
-      "*.railway.app",
-      "*.cloudflare.com"
+      "127.0.0.1",
+      "localhost"
     ]
+  },
+  "ios": {
+    "allowsLinkPreview": false
   },
   "plugins": {
     "StatusBar": {

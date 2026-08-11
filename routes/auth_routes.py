@@ -235,15 +235,21 @@ def login_submit():
     """Handler para submit de login"""
     username = request.form.get('username', '').strip()
     password = request.form.get('password', '')
-    remember_me = request.form.get('remember_me') in {'1', 'on', 'true', 'yes'}
+    is_app_mode = (
+        request.headers.get('X-Capacitor-Platform') or
+        'Capacitor' in request.headers.get('User-Agent', '') or
+        'NaTraveApp' in request.headers.get('User-Agent', '') or
+        request.args.get('mode') == 'app'
+    )
+    remember_me = (request.form.get('remember_me') in {'1', 'on', 'true', 'yes'}) or bool(is_app_mode)
     
     try:
         usuario = auth_service.autenticar(username, password)
         if not usuario:
             return render_template('login.html', erro='Usuario ou senha invalidos'), 401
 
-        session.permanent = remember_me
-        if remember_me:
+        session.permanent = True if (remember_me or is_app_mode) else False
+        if remember_me or is_app_mode:
             session['remember_me'] = True
         else:
             session.pop('remember_me', None)
@@ -266,6 +272,103 @@ def login_submit():
         return render_template('login.html', erro=str(e)), 400
     except Exception as e:
         return render_template('login.html', erro='Erro ao autenticar usuario'), 500
+
+
+@auth_bp.route('/social-login', methods=['POST'])
+def social_login():
+    """Handler para login/cadastro via Google e Apple"""
+    data = request.get_json(silent=True) or request.form
+    provider = data.get('provider', 'google')
+    email = data.get('email', '').strip().lower()
+    nome = data.get('nome', '').strip()
+    social_id = data.get('social_id', '').strip()
+
+    if not email or '@' not in email:
+        return jsonify({'success': False, 'error': 'E-mail inválido retornado pela conta social'}), 400
+
+    # 1. Tenta buscar usuário por email
+    usuario = auth_service.obter_por_email(email)
+    if usuario:
+        # Usuário existe! Efetua login imediatamente
+        session.permanent = True
+        session['remember_me'] = True
+        session['user_id'] = usuario['id']
+        session['username'] = usuario['username']
+        session['nome'] = usuario['nome']
+        session['role'] = usuario.get('role', 'usuario')
+        session.modified = True
+        return jsonify({
+            'success': True,
+            'status': 'logged_in',
+            'redirect_url': url_for('auth.perfil_page')
+        })
+
+    # 2. Usuário novo: solicita o nome de usuário (username)
+    return jsonify({
+        'success': True,
+        'status': 'need_username',
+        'email': email,
+        'nome': nome or email.split('@')[0],
+        'social_id': social_id,
+        'provider': provider
+    })
+
+
+@auth_bp.route('/social-complete-username', methods=['POST'])
+def social_complete_username():
+    """Handler para finalizar cadastro social com o username escolhido"""
+    data = request.get_json(silent=True) or request.form
+    email = data.get('email', '').strip().lower()
+    nome = data.get('nome', '').strip()
+    username = data.get('username', '').strip()
+
+    if not email or '@' not in email:
+        return jsonify({'success': False, 'error': 'E-mail inválido'}), 400
+    if not username or len(username) < 3:
+        return jsonify({'success': False, 'error': 'Nome de usuário deve ter ao menos 3 caracteres'}), 400
+    if not nome:
+        nome = username
+
+    try:
+        import uuid
+        random_pwd = str(uuid.uuid4())
+        usuario = auth_service.criar_usuario(
+            email=email,
+            username=username,
+            nome=nome,
+            password=random_pwd,
+            role='usuario'
+        )
+
+        try:
+            jogador_service.criar(
+                nome=nome,
+                nivel=5.5,
+                tipo='avulso',
+                posicao='linha',
+                owner_user_id=usuario.get('id')
+            )
+        except Exception as exc:
+            logger.warning(f"Erro ao criar perfil de jogador automático: {exc}")
+
+        session.permanent = True
+        session['remember_me'] = True
+        session['user_id'] = usuario['id']
+        session['username'] = usuario['username']
+        session['nome'] = usuario['nome']
+        session['role'] = usuario.get('role', 'usuario')
+        session.modified = True
+
+        return jsonify({
+            'success': True,
+            'status': 'logged_in',
+            'redirect_url': url_for('auth.perfil_page')
+        })
+    except ValueError as val_err:
+        return jsonify({'success': False, 'error': str(val_err)}), 400
+    except Exception as err:
+        logger.error(f"Erro ao concluir cadastro social: {err}")
+        return jsonify({'success': False, 'error': 'Erro ao criar conta social'}), 500
 
 
 @auth_bp.route('/completar-email', methods=['GET'])
