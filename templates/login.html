@@ -5,86 +5,527 @@
 {% block auth_heading_id %}loginHeading{% endblock %}
 
 {% block auth_intro_wrapper %}
-    <section class="auth-panel auth-panel--intro auth-panel--intro-hero" id="loginIntro">
-        {% include '_auth_intro.html' %}
-        <button class="auth-scroll-hint" id="loginScrollHint" type="button" aria-label="Ir para o formulário de login">
-            <span class="auth-scroll-hint__icon" aria-hidden="true">↓</span>
-        </button>
-    </section>
+<section class="auth-panel auth-panel--intro auth-panel--intro-hero" id="loginIntro">
+    {% include '_auth_intro.html' %}
+    <button class="auth-scroll-hint" id="loginScrollHint" type="button" aria-label="Ir para o formulário de login">
+        <span class="auth-scroll-hint__icon" aria-hidden="true">↓</span>
+    </button>
+</section>
+{% endblock %}
+
+{% block app_onboarding_overlay %}
+<!-- MODAL DE ONBOARDING - MODO APLICATIVO (TELA CHEIA REAL & PALETA VERDE/PRETA/BRANCA) -->
+<div id="app-onboarding-modal" class="app-onboarding-modal">
+    <!-- Fundo de Iluminação do Campo -->
+    <div class="onboarding-bg-glow onboarding-bg-glow--green"></div>
+    <div class="onboarding-bg-glow onboarding-bg-glow--pitch"></div>
+
+    <div class="onboarding-fullscreen-content">
+        <!-- Header Onboarding -->
+        <div class="onboarding-top-bar">
+            <img src="{{ url_for('static', filename='logo-natrave-transparent-v2.png') }}" alt="NaTrave 5v5"
+                class="onboarding-brand-logo">
+            <button type="button" id="onboarding-btn-skip" class="onboarding-skip-top-btn">Pular</button>
+        </div>
+
+        <!-- Corpo dos Slides (Centro) -->
+        <div class="onboarding-slides-container">
+            <!-- Slide 1: Modo Jogador -->
+            <div class="onboarding-card active" data-index="0">
+                <div class="onboarding-card-header">
+                    <div class="onboarding-mode-badge">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round"
+                            stroke-linejoin="round" class="onboarding-hero-lucide">
+                            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                        </svg>
+                    </div>
+                    <span class="onboarding-tag">MODO JOGADOR</span>
+                    <h2 class="onboarding-title">Seu Perfil & Estatísticas</h2>
+                </div>
+
+                <div class="onboarding-features-list">
+                    <div class="feature-mini-card">
+                        <div class="feature-mini-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polygon
+                                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                            </svg>
+                        </div>
+                        <div class="feature-mini-info">
+                            <h4 class="feature-mini-title">Overall & Atributos</h4>
+                            <p class="feature-mini-desc">Radar completo de ataque, defesa, técnica, físico e
+                                comprometimento.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-mini-card">
+                        <div class="feature-mini-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <circle cx="12" cy="12" r="6" />
+                                <circle cx="12" cy="12" r="2" />
+                            </svg>
+                        </div>
+                        <div class="feature-mini-info">
+                            <h4 class="feature-mini-title">Artilharia & Assistências</h4>
+                            <p class="feature-mini-desc">Controle individual de gols e passes decisivos a cada partida.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="feature-mini-card">
+                        <div class="feature-mini-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="8" r="6" />
+                                <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11" />
+                            </svg>
+                        </div>
+                        <div class="feature-mini-info">
+                            <h4 class="feature-mini-title">Nota Média por Jogo</h4>
+                            <p class="feature-mini-desc">Pontuação votada pelos outros atletas ao final de cada rodada.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 2: Modo Juiz -->
+            <div class="onboarding-card" data-index="1">
+                <div class="onboarding-card-header">
+                    <div class="onboarding-mode-badge">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round"
+                            stroke-linejoin="round" class="onboarding-hero-lucide">
+                            <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
+                            <path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
+                            <path d="M7 21h10" />
+                            <path d="M12 3v18" />
+                            <path d="M3 7h18" />
+                        </svg>
+                    </div>
+                    <span class="onboarding-tag">MODO JUIZ</span>
+                    <h2 class="onboarding-title">Placar Ao Vivo & Votação</h2>
+                </div>
+
+                <div class="onboarding-features-list">
+                    <div class="feature-mini-card">
+                        <div class="feature-mini-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="10" x2="14" y1="2" y2="2" />
+                                <line x1="12" x2="12" y1="14" y2="11" />
+                                <circle cx="12" cy="14" r="8" />
+                            </svg>
+                        </div>
+                        <div class="feature-mini-info">
+                            <h4 class="feature-mini-title">Cronômetro & Placar Real</h4>
+                            <p class="feature-mini-desc">Controle do tempo do jogo e gols marcados ao vivo na beira da
+                                quadra.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-mini-card">
+                        <div class="feature-mini-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M2 4l3 12h14l3-12-6 7-4-5-4 5-6-7z" />
+                                <path d="M12 17a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
+                            </svg>
+                        </div>
+                        <div class="feature-mini-info">
+                            <h4 class="feature-mini-title">Votação, Placar & Ranking</h4>
+                            <p class="feature-mini-desc">Votação do Craque/Bagre com atualização instantânea do ranking.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="feature-mini-card">
+                        <div class="feature-mini-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                            </svg>
+                        </div>
+                        <div class="feature-mini-info">
+                            <h4 class="feature-mini-title">Sorteio em 1 Clique</h4>
+                            <p class="feature-mini-desc">Gerador rápido de equipes equilibradas direto pelo celular do
+                                juiz.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 3: Modo Admin -->
+            <div class="onboarding-card" data-index="2">
+                <div class="onboarding-card-header">
+                    <div class="onboarding-mode-badge">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round"
+                            stroke-linejoin="round" class="onboarding-hero-lucide">
+                            <path
+                                d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
+                            <path d="m9 12 2 2 4-4" />
+                        </svg>
+                    </div>
+                    <span class="onboarding-tag">MODO ADMIN</span>
+                    <h2 class="onboarding-title">Gestão Completa do Clube</h2>
+                </div>
+
+                <div class="onboarding-features-list">
+                    <div class="feature-mini-card">
+                        <div class="feature-mini-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                                <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                            </svg>
+                        </div>
+                        <div class="feature-mini-info">
+                            <h4 class="feature-mini-title">Administração de Jogadores</h4>
+                            <p class="feature-mini-desc">Cadastro completo, nível de habilidade e posições de cada
+                                atleta.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-mini-card">
+                        <div class="feature-mini-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                <circle cx="8.5" cy="7" r="4" />
+                                <line x1="20" x2="20" y1="8" y2="14" />
+                                <line x1="17" x2="23" y1="11" y2="11" />
+                            </svg>
+                        </div>
+                        <div class="feature-mini-info">
+                            <h4 class="feature-mini-title">Adicionar & Editar Elenco</h4>
+                            <p class="feature-mini-desc">Incluir novos participantes, editar dados e gerenciar o grupo.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="feature-mini-card">
+                        <div class="feature-mini-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="4" x2="20" y1="21" y2="21" />
+                                <line x1="4" x2="20" y1="14" y2="14" />
+                                <line x1="4" x2="20" y1="7" y2="7" />
+                                <circle cx="8" cy="7" r="2" />
+                                <circle cx="16" cy="14" r="2" />
+                                <circle cx="12" cy="21" r="2" />
+                            </svg>
+                        </div>
+                        <div class="feature-mini-info">
+                            <h4 class="feature-mini-title">Gestão do Clube & Pelada</h4>
+                            <p class="feature-mini-desc">Controle total das partidas, histórico de jogos e estatísticas
+                                do grupo.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Onboarding (Controles Inferiores) -->
+        <div class="onboarding-bottom-bar">
+            <button type="button" id="onboarding-btn-prev" class="onboarding-prev-btn" style="display: none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" style="width: 16px; height: 16px;">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                <span>Voltar</span>
+            </button>
+
+            <div class="onboarding-dots">
+                <span class="onboarding-dot active"></span>
+                <span class="onboarding-dot"></span>
+                <span class="onboarding-dot"></span>
+            </div>
+
+            <button type="button" id="onboarding-btn-next" class="btn onboarding-main-btn">
+                <span>Avançar</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" style="width: 18px; height: 18px;">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block auth_card_header %}
-    <div class="auth-card-header">
-        <h2 id="loginHeading" class="auth-card-title auth-card-title--login">
-            <span class="auth-card-title__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                </svg>
-            </span>
-            <span>Login</span>
-        </h2>
-    </div>
-{% endblock %}
+<!-- CONTÊINER 3D FLIP DO CARD (LOGIN x CADASTRO) -->
+<div class="auth-card-flip-container" id="authCardFlip">
+    <div class="auth-card-flip-inner" id="authCardFlipInner">
 
-{% block auth_messages %}
-    {% if sucesso %}
-        <div class="auth-message auth-message--success" role="status" aria-live="polite">
-            <strong>✅</strong>
-            <span>{{ sucesso }}</span>
-        </div>
-    {% endif %}
-    {% if erro %}
-        <div class="auth-message auth-message--warning" role="alert" aria-live="assertive">
-            <strong>⚠️</strong>
-            <span>{{ erro }}</span>
-        </div>
-    {% endif %}
-{% endblock %}
+        <!-- FRENTE DO CARD: TELA DE LOGIN -->
+        <div class="auth-card-face auth-card-face--front">
+            <div id="app-login-container" class="app-login-container">
+                <div class="app-login-brand">
+                    <h2 class="app-login-title">Bem-vindo ao NaTrave</h2>
+                    <p class="app-login-subtitle">Entre na sua conta para acompanhar seus jogos</p>
+                </div>
+            </div>
 
-{% block auth_form %}
-    <form method="post" action="{{ url_for('jogador.login_submit') }}" class="auth-form">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <div class="form-group auth-field">
-            <label class="form-label" for="username">Usuário</label>
-            <div class="auth-input-wrap">
-                <span class="auth-input-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M20 21a8 8 0 0 0-16 0" />
-                        <circle cx="12" cy="8" r="4" />
+            <div class="auth-card-header">
+                <h2 id="loginHeading" class="auth-card-title auth-card-title--login">
+                    <span class="auth-card-title__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                            stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                    </span>
+                    <span>Login</span>
+                </h2>
+            </div>
+
+            {% if sucesso %}
+            <div class="auth-message auth-message--success" role="status" aria-live="polite">
+                <strong>✅</strong>
+                <span>{{ sucesso }}</span>
+            </div>
+            {% endif %}
+            {% if erro %}
+            <div class="auth-message auth-message--warning" role="alert" aria-live="assertive">
+                <strong>⚠️</strong>
+                <span>{{ erro }}</span>
+            </div>
+            {% endif %}
+
+            <form method="post" action="{{ url_for('jogador.login_submit') }}" class="auth-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="form-group auth-field">
+                    <label class="form-label" for="username">Usuário</label>
+                    <div class="auth-input-wrap">
+                        <span class="auth-input-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21a8 8 0 0 0-16 0" />
+                                <circle cx="12" cy="8" r="4" />
+                            </svg>
+                        </span>
+                        <input class="form-input auth-input" id="username" name="username" type="text"
+                            placeholder="Digite seu usuário" required autocomplete="username">
+                    </div>
+                </div>
+                <div class="form-group auth-field">
+                    <label class="form-label" for="password">Senha</label>
+                    <div class="auth-input-wrap">
+                        <span class="auth-input-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="4" y="10" width="16" height="10" rx="2" />
+                                <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                            </svg>
+                        </span>
+                        <input class="form-input auth-input" id="password" name="password" type="password"
+                            placeholder="Digite sua senha" required autocomplete="current-password">
+                    </div>
+                </div>
+
+                <div class="auth-utility-row">
+                    <label class="auth-remember">
+                        <input class="auth-remember__input" type="checkbox" name="remember_me" value="1">
+                        <span class="auth-remember__box" aria-hidden="true"></span>
+                        <span class="auth-remember__text">Lembrar de mim</span>
+                    </label>
+                    <a href="{{ url_for('auth.recuperar_senha_page') }}" class="auth-forgot-link">Esqueci minha
+                        senha</a>
+                </div>
+
+                <button class="btn btn-primary auth-submit" type="submit">Entrar</button>
+            </form>
+
+            <!-- Divisor Social -->
+            <div class="auth-social-divider">
+                <span>ou continue com</span>
+            </div>
+
+            <!-- Botões de Login Social (Apple & Google) -->
+            <div class="auth-social-buttons">
+                <button type="button" class="btn-social btn-social--apple js-social-login" data-provider="apple">
+                    <svg viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px;">
+                        <path
+                            d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.36c.66-.8 1.11-1.92.99-3.04-.96.04-2.13.64-2.81 1.44-.61.71-1.14 1.86-.99 2.97 1.07.08 2.15-.57 2.81-1.37z" />
                     </svg>
-                </span>
-                <input class="form-input auth-input" id="username" name="username" type="text" placeholder="Digite seu usuário" required autocomplete="username">
+                    <span>Apple</span>
+                </button>
+
+                <button type="button" class="btn-social btn-social--google js-social-login" data-provider="google">
+                    <svg viewBox="0 0 24 24" style="width: 18px; height: 18px;">
+                        <path fill="#4285F4"
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                        <path fill="#34A853"
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                        <path fill="#FBBC05"
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                        <path fill="#EA4335"
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                    </svg>
+                    <span>Google</span>
+                </button>
+            </div>
+
+            <div class="auth-card-footer">
+                <p class="auth-link-text">Não tem conta? <button type="button" id="btn-show-register"
+                        class="auth-flip-trigger">Criar cadastro</button></p>
             </div>
         </div>
-        <div class="form-group auth-field">
-            <label class="form-label" for="password">Senha</label>
-            <div class="auth-input-wrap">
-                <span class="auth-input-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="4" y="10" width="16" height="10" rx="2" />
-                        <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+
+        <!-- VERSO DO CARD: TELA DE CADASTRO -->
+        <div class="auth-card-face auth-card-face--back">
+            <div class="app-login-container" style="display: flex; margin-bottom: 0.75rem;">
+                <div class="app-login-brand">
+                    <h2 class="app-login-title">Criar sua Conta</h2>
+                    <p class="app-login-subtitle">Preencha seus dados para entrar no time</p>
+                </div>
+            </div>
+
+            <form method="post" action="{{ url_for('auth.cadastro_submit') }}" class="auth-form auth-form--compact">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="confirmar_password" id="reg_confirmar_password_hidden">
+
+                <div class="form-group auth-field auth-field--compact">
+                    <label class="form-label auth-label-app" for="reg_nome">Nome Completo</label>
+                    <div class="auth-input-wrap">
+                        <span class="auth-input-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path d="M20 21a8 8 0 0 0-16 0" />
+                                <circle cx="12" cy="8" r="4" />
+                            </svg>
+                        </span>
+                        <input class="form-input auth-input" id="reg_nome" name="nome" type="text"
+                            placeholder="Seu nome e sobrenome" required autocomplete="name">
+                    </div>
+                </div>
+
+                <div class="form-group auth-field auth-field--compact">
+                    <label class="form-label auth-label-app" for="reg_username">Usuário</label>
+                    <div class="auth-input-wrap">
+                        <span class="auth-input-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <circle cx="12" cy="12" r="4" />
+                                <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8" />
+                            </svg>
+                        </span>
+                        <input class="form-input auth-input" id="reg_username" name="username" type="text"
+                            placeholder="Escolha um nome de usuário" required autocomplete="username">
+                    </div>
+                </div>
+
+                <div class="form-group auth-field auth-field--compact">
+                    <label class="form-label auth-label-app" for="reg_email">E-mail</label>
+                    <div class="auth-input-wrap">
+                        <span class="auth-input-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                <polyline points="22,6 12,13 2,6" />
+                            </svg>
+                        </span>
+                        <input class="form-input auth-input" id="reg_email" name="email" type="email"
+                            placeholder="seuemail@exemplo.com" required autocomplete="email">
+                    </div>
+                </div>
+
+                <div class="form-group auth-field auth-field--compact">
+                    <label class="form-label auth-label-app" for="reg_password">Senha</label>
+                    <div class="auth-input-wrap">
+                        <span class="auth-input-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <rect x="4" y="10" width="16" height="10" rx="2" />
+                                <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                            </svg>
+                        </span>
+                        <input class="form-input auth-input" id="reg_password" name="password" type="password"
+                            placeholder="Digite sua senha" required autocomplete="new-password"
+                            oninput="document.getElementById('reg_confirmar_password_hidden').value = this.value">
+                    </div>
+                </div>
+
+                <button class="btn btn-primary auth-submit" type="submit">Cadastrar e Entrar</button>
+            </form>
+
+            <!-- Divisor Social -->
+            <div class="auth-social-divider">
+                <span>ou cadastre-se com</span>
+            </div>
+
+            <!-- Botões de Cadastro Social (Apple & Google) -->
+            <div class="auth-social-buttons">
+                <button type="button" class="btn-social btn-social--apple js-social-login" data-provider="apple">
+                    <svg viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px;">
+                        <path
+                            d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.36c.66-.8 1.11-1.92.99-3.04-.96.04-2.13.64-2.81 1.44-.61.71-1.14 1.86-.99 2.97 1.07.08 2.15-.57 2.81-1.37z" />
                     </svg>
-                </span>
-                <input class="form-input auth-input" id="password" name="password" type="password" placeholder="Digite sua senha" required autocomplete="current-password">
+                    <span>Apple</span>
+                </button>
+
+                <button type="button" class="btn-social btn-social--google js-social-login" data-provider="google">
+                    <svg viewBox="0 0 24 24" style="width: 18px; height: 18px;">
+                        <path fill="#4285F4"
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                        <path fill="#34A853"
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                        <path fill="#FBBC05"
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                        <path fill="#EA4335"
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                    </svg>
+                    <span>Google</span>
+                </button>
+            </div>
+
+            <div class="auth-card-footer">
+                <p class="auth-link-text">Já tem uma conta? <button type="button" id="btn-show-login"
+                        class="auth-flip-trigger">Fazer Login</button></p>
             </div>
         </div>
 
-        <div class="auth-utility-row">
-            <label class="auth-remember">
-                <input class="auth-remember__input" type="checkbox" name="remember_me" value="1">
-                <span class="auth-remember__box" aria-hidden="true"></span>
-                <span class="auth-remember__text">Lembrar de mim</span>
-            </label>
-            <a href="{{ url_for('auth.recuperar_senha_page') }}" class="auth-forgot-link">Esqueci minha senha</a>
+    </div>
+</div>
+
+<!-- MODAL DE DEFINIÇÃO DE USERNAME SOCIAL -->
+<div id="social-username-modal" class="social-modal-overlay" style="display: none;">
+    <div class="social-modal-card">
+        <div class="app-login-brand" style="margin-bottom: 1rem;">
+            <span class="social-modal-badge">⚽ QUASE PRONTO!</span>
+            <h3 class="app-login-title" style="font-size: 1.35rem; margin-top: 0.4rem;">Escolha seu Nome de Usuário</h3>
+            <p class="app-login-subtitle" id="social-modal-user-info">Seu nome foi importado. Escolha seu usuário único
+                no NaTrave:</p>
         </div>
 
-        <button class="btn btn-primary auth-submit" type="submit">Entrar</button>
-    </form>
+        <form id="social-username-form" class="auth-form">
+            <input type="hidden" id="social_email_hidden">
+            <input type="hidden" id="social_nome_hidden">
+
+            <div class="form-group auth-field auth-field--compact">
+                <label class="form-label auth-label-app" for="social_username_input">Usuário no NaTrave</label>
+                <div class="auth-input-wrap">
+                    <span class="auth-input-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
+                            <circle cx="12" cy="12" r="4" />
+                            <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8" />
+                        </svg>
+                    </span>
+                    <input class="form-input auth-input" id="social_username_input" type="text"
+                        placeholder="ex: guilherme5v5" required autocomplete="username">
+                </div>
+            </div>
+
+            <button class="btn btn-primary auth-submit" type="submit">Concluir Cadastro ➔</button>
+        </form>
+    </div>
+</div>
 {% endblock %}
 
-{% block auth_card_footer %}
-    <div class="auth-card-footer">
-        <p class="auth-link-text">Não tem conta? <a href="{{ url_for('jogador.cadastro_page') }}" class="text-accent-link">Criar cadastro</a></p>
-    </div>
-{% endblock %}
+{% block auth_messages %}{% endblock %}
+{% block auth_form %}{% endblock %}
+{% block auth_card_footer %}{% endblock %}

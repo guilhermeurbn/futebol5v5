@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#7c3aed">
     <meta name="description"
         content="{% block meta_description %}Acesse a plataforma NaTrave 5v5 para gerenciar suas partidas e sortear times equilibrados.{% endblock %}">
@@ -33,14 +34,17 @@
     <title>NaTrave | {% block title %}Acesso{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='20260616-06') }}">
     <script src="{{ url_for('static', filename='local-datetime.js', v='20260616-06') }}" defer></script>
+    <script src="{{ url_for('static', filename='app-onboarding.js', v='20260811-01') }}" defer></script>
 </head>
 
 <body class="auth-page {% block body_class %}{% endblock %}">
+    {% block app_onboarding_overlay %}{% endblock %}
+
     <header class="auth-global-header" role="banner" aria-label="NaTrave">
         <a href="{{ url_for('auth.login_page') }}" aria-label="Ir para login"
             style="display:inline-block; line-height:0;">
-            <img src="{{ url_for('static', filename='logo-natrave-5v5.png', v='20260717-01') }}" alt="NaTrave 5v5"
-                class="auth-global-header__logo" style="max-height: 48px; width: auto; object-fit: contain;">
+            <img src="{{ url_for('static', filename='logo-natrave-transparent-v2.png', v='20260811-02') }}"
+                alt="NaTrave 5v5" class="auth-global-header__logo">
         </a>
     </header>
 

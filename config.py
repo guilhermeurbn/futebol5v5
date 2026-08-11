@@ -14,11 +14,11 @@ class Config:
     DEBUG = False
     TESTING = False
     JSON_SORT_KEYS = False
-    PERMANENT_SESSION_LIFETIME = timedelta(hours=2)
+    PERMANENT_SESSION_LIFETIME = timedelta(days=90)
     ENABLE_APP_SHELL = _env_flag('ENABLE_APP_SHELL', '1')
     # Session / cookie security defaults (can be overridden per-environment)
     SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SAMESITE = 'Strict'
+    SESSION_COOKIE_SAMESITE = 'Lax'
     SESSION_COOKIE_SECURE = False
     PREFERRED_URL_SCHEME = 'https'
 

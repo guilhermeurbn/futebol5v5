@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>NaTrave 5v5</string>
+	<string>NaTrave 5v5</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -43,13 +43,16 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>NSCameraUsageDescription</key>
-	<string>O NaTrave solicita acesso à câmera para você tirar e atualizar sua foto de perfil.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>O NaTrave solicita acesso à sua galeria de fotos para você selecionar a foto do seu perfil.</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>O NaTrave precisa de permissão para salvar comprovantes e imagens de partidas no seu dispositivo.</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 </dict>
 </plist>

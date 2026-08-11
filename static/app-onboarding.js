@@ -9,13 +9,15 @@ document.addEventListener('DOMContentLoaded', () => {
     window.location.href.includes('mode=app') ||
     navigator.userAgent.includes('Capacitor') ||
     navigator.userAgent.includes('NaTraveApp') ||
-    window.webkit && window.webkit.messageHandlers
+    (window.webkit && window.webkit.messageHandlers) ||
+    window.innerWidth <= 800 ||
+    /iPhone|iPad|iPod|Android|Mobile/i.test(navigator.userAgent)
   );
 
   const onboardingModal = document.getElementById('app-onboarding-modal');
   const loginFormContainer = document.getElementById('app-login-container');
 
-  // Se NÃO for aplicativo Capacitor (acesso via Web normal), remove o modal completamente
+  // Se NÃO for aplicativo ou telefone móvel, remove o modal completamente
   if (!isCapacitorApp) {
     if (onboardingModal) onboardingModal.classList.add('is-hidden');
     return;

@@ -4,7 +4,7 @@
   "webDir": "static",
   "appendUserAgent": "Capacitor NaTraveApp/1.0",
   "server": {
-    "url": "https://natrave.pt?mode=app",
+    "url": "https://natrave.pt/login?mode=app",
     "cleartext": true,
     "androidScheme": "https",
     "iosScheme": "https",
