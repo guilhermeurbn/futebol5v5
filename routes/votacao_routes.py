@@ -218,23 +218,34 @@ def votacao_page():
         return _resposta_voto_somente_usuario()
 
     try:
-        partida = votacao_service.obter_ativa_para_usuario(session.get('user_id'))
+        current_user_id = session.get('user_id')
+        partida = votacao_service.obter_ativa_para_usuario(current_user_id)
+        if not partida:
+            partida = votacao_service.obter_ativa()
         if not partida:
             return render_template('votacao_usuario.html', partida=None, voto=None, participante=None, usuario=_usuario_logado())
 
+        current_uid_str = str(current_user_id).strip() if current_user_id is not None else ""
         participante = next(
-            (p for p in partida.get('participantes', []) if p.get('user_id') == session.get('user_id')),
+            (p for p in partida.get('participantes', []) if str(p.get('user_id')).strip() == current_uid_str),
             None
         )
-        voto = votacao_service.obter_voto_usuario(partida.get('id'), session.get('user_id'))
-        
-        current_user_id = session.get('user_id')
+        if not participante and _usuario_logado():
+            u_logado = _usuario_logado()
+            u_nome = (u_logado.get('nome') or '').strip().lower()
+            u_uname = (u_logado.get('username') or '').strip().lower()
+            participante = next(
+                (p for p in partida.get('participantes', []) if (p.get('jogador_nome') or '').strip().lower() in [u_nome, u_uname]),
+                None
+            )
+
+        voto = votacao_service.obter_voto_usuario(partida.get('id'), current_user_id)
         meu_nome = (participante.get('jogador_nome') if participante else '').strip()
 
         # Remove o próprio usuário/jogador das opções de voto (Anti-Self-Vote)
         jogadores_votaveis = [
             p for p in partida.get('participantes', [])
-            if p.get('user_id') != current_user_id and (p.get('jogador_nome') or '').strip() != meu_nome
+            if str(p.get('user_id')).strip() != current_uid_str and (p.get('jogador_nome') or '').strip() != meu_nome
         ]
         resultado_partida = partida.get('resultado_partida')
         

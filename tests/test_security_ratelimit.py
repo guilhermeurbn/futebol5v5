@@ -43,32 +43,32 @@ def client(app):
 
 
 class TestRateLimitingLogin:
-    """Test rate limiting on /login endpoint (max 10 per hour, 11th rejects)"""
+    """Test rate limiting on /login endpoint (max 50 per hour, 51st rejects)"""
     
-    def test_login_accepts_10_requests_per_hour(self, client, monkeypatch):
-        """Verify /login allows first 10 POST requests within an hour"""
-        for i in range(10):
+    def test_login_accepts_50_requests_per_hour(self, client, monkeypatch):
+        """Verify /login allows first 50 POST requests within an hour"""
+        for i in range(50):
             response = client.post('/login', data={
                 'username': f'user{i}',
                 'password': 'wrongpass'
             })
-            # Deve falhar autenticação, mas sem limitar antes da 11a
+            # Deve falhar autenticação, mas sem limitar antes da 51a
             assert response.status_code in [200, 401], \
                 f"Request {i+1} failed with {response.status_code}"
     
-    def test_login_rejects_11th_request_per_hour(self, client, monkeypatch):
-        """Verify /login rejects 11th POST request within an hour with 429"""
+    def test_login_rejects_51st_request_per_hour(self, client, monkeypatch):
+        """Verify /login rejects 51st POST request within an hour with 429"""
         responses = []
-        for i in range(11):
+        for i in range(51):
             response = client.post('/login', data={
                 'username': f'user{i}',
                 'password': 'wrongpass'
             })
             responses.append(response.status_code)
 
-        assert responses[10] == 429, \
-            f"11th request should be rate limited (429), got {responses[10]}"
-        for idx, code in enumerate(responses[:10]):
+        assert responses[50] == 429, \
+            f"51st request should be rate limited (429), got {responses[50]}"
+        for idx, code in enumerate(responses[:50]):
             assert code != 429, \
                 f"Request {idx+1} was rate limited but shouldn't be"
 
@@ -140,7 +140,7 @@ class TestRateLimitCounterReset:
         """Verify login rate limit counter resets after 3600 seconds (1 hour)"""
         app_source = Path(__file__).resolve().parent.parent / 'app.py'
         content = app_source.read_text(encoding='utf-8')
-        assert '"10/hour"' in content, "Rate limit window should be 3600 seconds (1 hour)"
+        assert '"50/hour"' in content, "Rate limit window should be 3600 seconds (1 hour)"
     
     def test_cadastro_counter_resets_after_hour(self, monkeypatch):
         """Verify signup rate limit counter resets after 3600 seconds"""

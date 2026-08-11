@@ -125,7 +125,7 @@ def criar_app(config_name: str = None) -> Flask:
             if session_obj.permanent:
                 from datetime import datetime as dt, timedelta as td, UTC
                 if session_obj.get('remember_me'):
-                    return dt.now(UTC) + td(days=30)
+                    return dt.now(UTC) + td(days=90)
                 return dt.now(UTC) + app_obj.permanent_session_lifetime
             return None
 
@@ -190,7 +190,7 @@ def criar_app(config_name: str = None) -> Flask:
     app.register_blueprint(auth_bp)
     
     # Apply rate limiting to auth endpoints (after blueprint registration)
-    app.view_functions['auth.login_submit'] = limiter.limit("10/hour")(app.view_functions['auth.login_submit'])
+    app.view_functions['auth.login_submit'] = limiter.limit("50/hour")(app.view_functions['auth.login_submit'])
     app.view_functions['auth.cadastro_submit'] = limiter.limit("3/hour")(app.view_functions['auth.cadastro_submit'])
     app.view_functions['auth.recuperar_senha_submit'] = limiter.limit("3/hour")(app.view_functions['auth.recuperar_senha_submit'])
     
@@ -510,4 +510,5 @@ if __name__ == '__main__':
         and os.getenv('ENABLE_FLASK_DEBUG', '').lower() in {'1', 'true', 'yes'}
     )
     app.run(debug=debug_enabled, host='0.0.0.0', port=port)
+    
     
