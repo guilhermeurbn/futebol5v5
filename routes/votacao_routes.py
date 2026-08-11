@@ -621,3 +621,37 @@ def votacao_admin_encerrar(partida_id):
             erro='Erro ao encerrar votação',
             usuario=_usuario_logado()
         ), 500
+
+
+@votacao_bp.route('/admin/votacao/<int:partida_id>/reabrir', methods=['POST'])
+@admin_or_juiz_required
+def votacao_admin_reabrir(partida_id):
+    """Reabre uma rodada encerrada para correções de resultado ou novos votos"""
+    try:
+        partida_reaberta = votacao_service.reabrir_rodada(partida_id, session.get('user_id', 'juiz'))
+        sorteio_id = partida_reaberta.get('sorteio_id')
+        if sorteio_id:
+            juiz_partida_service.reabrir_partida(sorteio_id)
+        
+        msg_sucesso = 'Rodada reaberta com sucesso! Agora você pode ajustar os resultados ou aguardar novos votos.'
+        if _is_juiz():
+            return redirect(url_for('votacao.votacao_admin_page', sorteio_id=sorteio_id, sucesso=msg_sucesso))
+
+        return redirect(url_for('admin.admin_page', partida_id=partida_id, sucesso=msg_sucesso))
+    except ValueError as e:
+        contexto = _resolver_contexto_admin()
+        return render_template(
+            'votacao_admin.html',
+            **contexto,
+            erro=str(e),
+            usuario=_usuario_logado()
+        ), 400
+    except Exception as e:
+        logger.error(f"Erro ao reabrir votação: {str(e)}")
+        contexto = _resolver_contexto_admin()
+        return render_template(
+            'votacao_admin.html',
+            **contexto,
+            erro='Erro ao reabrir votação',
+            usuario=_usuario_logado()
+        ), 500

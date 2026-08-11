@@ -525,8 +525,25 @@ class VotacaoService:
             EmailService().notify_ranking_disponivel(partida_titulo=alvo.get('titulo', 'Ranking Atualizado'))
         except Exception as _exc:
             import logging
-            logging.getLogger(__name__).warning("Falha ao disparar e-mail de ranking disponível: %s", _exc)
+        return alvo
 
+    def reabrir_rodada(self, partida_id: int, reaberto_por: str = "juiz") -> Dict:
+        dados = self._carregar()
+        alvo = self._find_partida_em_dados(dados, partida_id)
+
+        if not alvo:
+            raise ValueError("Partida não encontrada")
+
+        alvo["status"] = "aberta"
+        alvo.pop("encerrado_em", None)
+        alvo.pop("encerrado_por", None)
+        alvo.pop("encerramento_motivo", None)
+        alvo.pop("ranking", None)
+        alvo.pop("evolucao_nivel", None)
+        alvo["reaberto_em"] = self._agora().isoformat()
+        alvo["reaberto_por"] = reaberto_por
+
+        self._salvar(dados)
         return alvo
 
     def _apurar_ranking(self, partida: Dict) -> Dict:

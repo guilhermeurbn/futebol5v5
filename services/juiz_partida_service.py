@@ -135,6 +135,29 @@ class JuizPartidaService:
         self._salvar(dados)
         return dados
 
+    def reabrir_partida(self, sorteio_id: int) -> Dict:
+        dados = self._carregar()
+        partida = dados.get("partida_atual")
+        if not partida or int(partida.get("sorteio_id", 0) or 0) != int(sorteio_id):
+            ultima = dados.get("ultima_partida_encerrada") or {}
+            partida = {
+                "id": f"sorteio_{sorteio_id}",
+                "sorteio_id": int(sorteio_id),
+                "status": "votacao_aberta",
+                "resultado_registrado": True,
+                "votacao_partida_id": None,
+                "votacao_aberta": True
+            }
+        else:
+            partida["status"] = "votacao_aberta"
+            partida["votacao_aberta"] = True
+
+        dados["status"] = "votacao_aberta"
+        dados["partida_atual"] = partida
+        dados["ultima_partida_encerrada"] = None
+        self._salvar(dados)
+        return dados
+
     def limpar_ultima_partida_encerrada(self) -> Dict:
         dados = self._carregar()
         dados["ultima_partida_encerrada"] = None
