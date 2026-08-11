@@ -334,7 +334,7 @@
                     <input type="hidden" name="sorteio_id" value="{{ selected_sorteio_id }}">
                     <input type="hidden" name="titulo" value="Votação do sorteio #{{ selected_sorteio_id }}">
                     <button class="btn btn-primary" type="submit" {% if not pode_abrir_votacao %}disabled{% endif %}>
-                        Abrir votação por 20 horas
+                        {% if rodada_selecionada %}Reabrir votação por 20 horas{% else %}Abrir votação por 20 horas{% endif %}
                     </button>
                 </form>
                 {% else %}

@@ -169,7 +169,7 @@ def _resolver_contexto_admin(sorteio_id_hint=None):
     }
 
     resultado_partida = _obter_resultado_sorteio(selecionado) if selecionado else None
-    pode_abrir_votacao = bool(selecionado) and not rodada_selecionada and bool(resultado_partida)
+    pode_abrir_votacao = bool(selecionado) and bool(resultado_partida)
     fluxo_corresponde = bool(
         fluxo_partida
         and selecionado
@@ -519,18 +519,21 @@ def votacao_admin_criar():
             raise ValueError('Registre primeiro o resultado dos times')
 
         partida_existente = votacao_service.obter_por_sorteio(sorteio.get('id'))
-        if partida_existente and partida_existente.get('status') != 'aberta':
-            raise ValueError('Esta rodada já foi encerrada e não pode abrir votação novamente')
-
-        partida = votacao_service.criar_partida(
-            times_json=sorteio.get('times', []),
-            usuarios=usuarios,
-            criado_por=session.get('user_id'),
-            titulo=titulo,
-            sorteio_id=sorteio.get('id'),
-            resultado_partida=resultado_partida,
-            duracao_horas=20,
-        )
+        if partida_existente:
+            if partida_existente.get('status') != 'aberta':
+                partida = votacao_service.reabrir_rodada(partida_existente['id'], session.get('user_id', 'juiz'))
+            else:
+                partida = partida_existente
+        else:
+            partida = votacao_service.criar_partida(
+                times_json=sorteio.get('times', []),
+                usuarios=usuarios,
+                criado_por=session.get('user_id'),
+                titulo=titulo,
+                sorteio_id=sorteio.get('id'),
+                resultado_partida=resultado_partida,
+                duracao_horas=20,
+            )
         
         if _is_juiz():
             juiz_partida_service.marcar_votacao_aberta(sorteio.get('id'), partida.get('id'))
