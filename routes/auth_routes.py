@@ -279,9 +279,12 @@ def login_submit():
         return render_template('login.html', erro='Erro ao autenticar usuario'), 500
 
 
-@auth_bp.route('/social-login', methods=['POST'])
+@auth_bp.route('/social-login', methods=['GET', 'POST'])
 def social_login():
     """Handler para login/cadastro via Google e Apple"""
+    if request.method == 'GET':
+        return redirect(url_for('auth.login_page'))
+
     data = request.get_json(silent=True) or request.form
     provider = (data.get('provider') or 'google').strip().lower()
     email = data.get('email', '').strip().lower()

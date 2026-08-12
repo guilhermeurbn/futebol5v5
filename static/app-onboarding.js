@@ -383,118 +383,144 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Processa token retornado no fragmento da URL após OAuth do Google (ex: #access_token=...)
+  if (window.location.hash && window.location.hash.includes('access_token=')) {
+    try {
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get('access_token');
+      if (accessToken) {
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+        fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        }).then(r => r.json()).then(async userInfo => {
+          if (userInfo && userInfo.email) {
+            await submitSocialAuth('google', userInfo.email, userInfo.name || 'Atleta Google', userInfo.sub || `google_${Date.now()}`);
+          }
+        }).catch(err => console.error('Erro ao ler token OAuth da URL:', err));
+      }
+    } catch (hErr) {
+      console.warn('Erro ao processar hash OAuth:', hErr);
+    }
+  }
+
   socialBtns.forEach(btn => {
     btn.addEventListener('click', async (e) => {
       e.preventDefault();
       triggerHaptic();
       const provider = (btn.getAttribute('data-provider') || 'google').toLowerCase();
 
-      // 1. Tenta Sign-In nativo do iOS (Xcode / Capacitor App Sheet Oficial da Apple)
-      const applePlugin = (window.Capacitor && window.Capacitor.Plugins) ? 
-        (window.Capacitor.Plugins.SignInWithApple || window.Capacitor.Plugins.AppleSignIn) : null;
+      // 1. Fluxo de Autenticação com Apple ID
+      if (provider === 'apple') {
+        // 1a. Tenta Sign-In nativo do iOS (Xcode / Capacitor App Sheet Oficial da Apple)
+        const applePlugin = (window.Capacitor && window.Capacitor.Plugins) ? 
+          (window.Capacitor.Plugins.SignInWithApple || window.Capacitor.Plugins.AppleSignIn) : null;
 
-      if (provider === 'apple' && applePlugin) {
-        try {
-          const result = await applePlugin.authorize({
-            clientId: 'pt.natrave.app',
-            redirectURI: 'https://natrave.pt/social-login',
-            scopes: 'email name',
-            state: 'natrave_state',
-            nonce: 'natrave_nonce'
-          });
-          const res = (result && result.response) ? result.response : (result || {});
-          const social_id = res.user || `apple_${Date.now()}`;
-          const extractedEmail = res.email || parseJwtEmail(res.identityToken) || `apple_${social_id.substring(0, 10)}@apple.com`;
-          const nome = [res.givenName, res.familyName].filter(Boolean).join(' ') || 'Atleta Apple';
-          if (extractedEmail || social_id) {
-            await submitSocialAuth('apple', extractedEmail, nome, social_id);
-            return;
-          }
-        } catch (err) {
-          console.warn('Sign In with Apple nativo cancelado:', err);
-          return;
-        }
-      }
-
-      // 1b. Tenta Sign-In nativo do Google no iOS (Xcode / Capacitor GoogleAuth)
-      const googlePlugin = (window.Capacitor && window.Capacitor.Plugins) ? window.Capacitor.Plugins.GoogleAuth : null;
-      if (provider === 'google' && googlePlugin) {
-        try {
-          const clientId = window.GOOGLE_CLIENT_ID || '87998320853-mfkte5ili1uuvud8jdq6pvcp0kmknhrs.apps.googleusercontent.com';
-          if (typeof googlePlugin.initialize === 'function') {
-            await googlePlugin.initialize({
-              clientId: clientId,
-              scopes: ['profile', 'email'],
-              grantOfflineAccess: true
+        if (applePlugin) {
+          try {
+            const result = await applePlugin.authorize({
+              clientId: 'pt.natrave.app',
+              redirectURI: 'https://natrave.pt/social-login',
+              scopes: 'email name',
+              state: 'natrave_state',
+              nonce: 'natrave_nonce'
             });
+            const res = (result && result.response) ? result.response : (result || {});
+            const social_id = res.user || `apple_${Date.now()}`;
+            const extractedEmail = res.email || parseJwtEmail(res.identityToken) || `apple_${social_id.substring(0, 10)}@apple.com`;
+            const nome = [res.givenName, res.familyName].filter(Boolean).join(' ') || 'Atleta Apple';
+            if (extractedEmail || social_id) {
+              await submitSocialAuth('apple', extractedEmail, nome, social_id);
+              return;
+            }
+          } catch (err) {
+            console.warn('Sign In with Apple nativo cancelado ou falhou:', err);
           }
-          const result = await googlePlugin.signIn();
-          const email = result.email || '';
-          const nome = result.name || result.displayName || 'Atleta NaTrave';
-          const social_id = result.id || `google_${Date.now()}`;
-          if (email) {
-            await submitSocialAuth('google', email, nome, social_id);
-            return;
+        }
+
+        // 1b. Tenta SDK Web Oficial da Apple ID em navegadores (Safari/Chrome/Web)
+        if (window.AppleID && window.AppleID.auth) {
+          try {
+            window.AppleID.auth.init({
+              clientId: 'pt.natrave.app',
+              scope: 'name email',
+              redirectURI: window.location.origin + '/social-login',
+              state: 'natrave_state',
+              usePopup: true
+            });
+            const res = await window.AppleID.auth.signIn();
+            const userObj = res.user || {};
+            const extractedEmail = (res.authorization ? parseJwtEmail(res.authorization.id_token) : '') || (userObj.email || '');
+            const nome = userObj.name ? `${userObj.name.firstName || ''} ${userObj.name.lastName || ''}`.trim() : 'Atleta Apple';
+            if (extractedEmail) {
+              await submitSocialAuth('apple', extractedEmail, nome, `apple_${Date.now()}`);
+              return;
+            }
+          } catch (e) {
+            console.warn('AppleID Web SDK error:', e);
           }
-        } catch (err) {
-          console.warn('Google Sign-In nativo cancelado:', err);
         }
       }
 
-      // 2. Tenta SDK Web / GIS Oficial do Google
-      if (provider === 'google' && window.google && window.google.accounts && window.google.accounts.oauth2) {
-        try {
-          const clientId = window.GOOGLE_CLIENT_ID || '87998320853-mfkte5ili1uuvud8jdq6pvcp0kmknhrs.apps.googleusercontent.com';
-          const client = window.google.accounts.oauth2.initTokenClient({
-            client_id: clientId,
-            scope: 'email profile',
-            callback: async (tokenResponse) => {
-              if (tokenResponse && tokenResponse.access_token) {
-                try {
-                  const userInfo = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-                    headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
-                  }).then(r => r.json());
-                  if (userInfo && userInfo.email) {
-                    await submitSocialAuth('google', userInfo.email, userInfo.name || 'Atleta Google', userInfo.sub || `google_${Date.now()}`);
+      // 2. Fluxo de Autenticação com Google
+      if (provider === 'google') {
+        // 2a. Tenta Sign-In nativo do Google no iOS (Xcode / Capacitor GoogleAuth)
+        const googlePlugin = (window.Capacitor && window.Capacitor.Plugins) ? window.Capacitor.Plugins.GoogleAuth : null;
+        if (googlePlugin) {
+          try {
+            const clientId = window.GOOGLE_CLIENT_ID || '87998320853-mfkte5ili1uuvud8jdq6pvcp0kmknhrs.apps.googleusercontent.com';
+            if (typeof googlePlugin.initialize === 'function') {
+              await googlePlugin.initialize({
+                clientId: clientId,
+                scopes: ['profile', 'email'],
+                grantOfflineAccess: true
+              });
+            }
+            const result = await googlePlugin.signIn();
+            const email = result.email || '';
+            const nome = result.name || result.displayName || 'Atleta NaTrave';
+            const social_id = result.id || `google_${Date.now()}`;
+            if (email) {
+              await submitSocialAuth('google', email, nome, social_id);
+              return;
+            }
+          } catch (err) {
+            console.warn('Google Sign-In nativo cancelado ou falhou:', err);
+          }
+        }
+
+        // 2b. Tenta SDK Web / GIS Oficial do Google
+        const clientId = window.GOOGLE_CLIENT_ID || '87998320853-mfkte5ili1uuvud8jdq6pvcp0kmknhrs.apps.googleusercontent.com';
+        if (window.google && window.google.accounts && window.google.accounts.oauth2) {
+          try {
+            const client = window.google.accounts.oauth2.initTokenClient({
+              client_id: clientId,
+              scope: 'email profile',
+              callback: async (tokenResponse) => {
+                if (tokenResponse && tokenResponse.access_token) {
+                  try {
+                    const userInfo = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                      headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
+                    }).then(r => r.json());
+                    if (userInfo && userInfo.email) {
+                      await submitSocialAuth('google', userInfo.email, userInfo.name || 'Atleta Google', userInfo.sub || `google_${Date.now()}`);
+                    }
+                  } catch (userErr) {
+                    console.error('Erro ao buscar perfil do Google:', userErr);
                   }
-                } catch (userErr) {
-                  console.error('Erro ao buscar perfil do Google:', userErr);
                 }
               }
-            }
-          });
-          client.requestAccessToken();
-          return;
-        } catch (gErr) {
-          console.warn('Google GIS SDK erro:', gErr);
-        }
-      }
-
-      // 3. Tenta SDK Web Oficial da Apple
-      if (provider === 'apple' && window.AppleID && window.AppleID.auth) {
-        try {
-          const res = await window.AppleID.auth.signIn();
-          const userObj = res.user || {};
-          const email = res.authorization ? res.authorization.id_token : '';
-          const nome = userObj.name ? `${userObj.name.firstName} ${userObj.name.lastName}` : 'Atleta Apple';
-          if (email) {
-            await submitSocialAuth('apple', email, nome, `apple_${Date.now()}`);
+            });
+            client.requestAccessToken();
             return;
+          } catch (gErr) {
+            console.warn('Google GIS SDK erro:', gErr);
           }
-        } catch (e) {
-          console.warn('AppleID Web SDK error:', e);
         }
-      }
 
-      // 3. Em Web / Localhost sem SDK nativo inicializado, exibe Modal UI limpo (SEM prompt de navegador)
-      if (socialAuthInputModal) {
-        if (socialAuthProviderHidden) socialAuthProviderHidden.value = provider;
-        if (socialProviderBadge) socialProviderBadge.textContent = provider === 'apple' ? ' APPLE ID' : '🌐 GOOGLE ACCOUNT';
-        if (socialProviderTitle) socialProviderTitle.textContent = provider === 'apple' ? 'Autenticar com Apple ID' : 'Autenticar com Google';
-        if (socialProviderSubtitle) socialProviderSubtitle.textContent = `Informe seu e-mail do ${provider === 'apple' ? 'Apple ID' : 'Google'} para entrar:`;
-        if (socialAuthEmailInput) socialAuthEmailInput.value = '';
-        if (socialAuthNomeInput) socialAuthNomeInput.value = '';
-        socialAuthInputModal.style.display = 'flex';
+        // 2c. Fallback de Redirecionamento Oficial Web para o Google OAuth 2.0
+        const googleOAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(window.location.origin + '/login')}&response_type=token&scope=email%20profile`;
+        window.location.href = googleOAuthUrl;
+        return;
       }
     });
   });
