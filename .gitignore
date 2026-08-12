@@ -81,7 +81,9 @@ htmlcov/
 # Frontend
 node_modules/
 
-# Variáveis de ambiente
+# Variáveis de ambiente e credenciais secretas
 .env
 .env.local
 .secrets/
+client_secret*.json
+*.secret

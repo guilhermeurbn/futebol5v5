@@ -227,7 +227,12 @@ def login_page():
     
     sucesso = request.args.get('sucesso')
     erro = request.args.get('erro')
-    return render_template('login.html', sucesso=sucesso, erro=erro)
+    # Se a pessoa não está logada, vê a apresentação primeiro na tela de login
+    # Se houver aviso de erro ou sucesso (tentativa recente), foca direto no formulário
+    show_onboarding = not bool(erro or sucesso)
+    if request.args.get('onboarding') == '1' or request.args.get('show_onboarding') == '1':
+        show_onboarding = True
+    return render_template('login.html', sucesso=sucesso, erro=erro, show_onboarding=show_onboarding)
 
 
 @auth_bp.route('/login', methods=['POST'])
@@ -246,7 +251,7 @@ def login_submit():
     try:
         usuario = auth_service.autenticar(username, password)
         if not usuario:
-            return render_template('login.html', erro='Usuario ou senha invalidos'), 401
+            return render_template('login.html', erro='Usuario ou senha invalidos', show_onboarding=False), 401
 
         session.permanent = True if (remember_me or is_app_mode) else False
         if remember_me or is_app_mode:
@@ -278,7 +283,7 @@ def login_submit():
 def social_login():
     """Handler para login/cadastro via Google e Apple"""
     data = request.get_json(silent=True) or request.form
-    provider = data.get('provider', 'google')
+    provider = (data.get('provider') or 'google').strip().lower()
     email = data.get('email', '').strip().lower()
     nome = data.get('nome', '').strip()
     social_id = data.get('social_id', '').strip()
@@ -286,9 +291,31 @@ def social_login():
     if not email or '@' not in email:
         return jsonify({'success': False, 'error': 'E-mail inválido retornado pela conta social'}), 400
 
-    # 1. Tenta buscar usuário por email
-    usuario = auth_service.obter_por_email(email)
+    # 1. Tenta buscar usuário por social_id (apple_id / google_id) OU por email principal / social_email
+    usuarios = auth_service._carregar()
+    usuario = next(
+        (
+            u for u in usuarios
+            if (
+                (social_id and (u.get(f'{provider}_id') or '') == social_id) or
+                (email and (
+                    (u.get('email') or '').strip().lower() == email or
+                    (u.get('google_email') or '').strip().lower() == email or
+                    (u.get('apple_email') or '').strip().lower() == email or
+                    (u.get(f'{provider}_email') or '').strip().lower() == email
+                ))
+            )
+        ),
+        None
+    )
+
     if usuario:
+        # Vincula a conta social automaticamente se ainda não estiver vinculada
+        try:
+            auth_service.vincular_conta_social(user_id=usuario['id'], provider=provider, email=email, social_id=social_id)
+        except Exception:
+            pass
+
         # Usuário existe! Efetua login imediatamente
         session.permanent = True
         session['remember_me'] = True
@@ -314,13 +341,89 @@ def social_login():
     })
 
 
+@auth_bp.route('/checar-username', methods=['GET'])
+def checar_username():
+    """Verifica instantaneamente a disponibilidade de um nome de usuário (@username)"""
+    username = request.args.get('username', '').strip().lower()
+    if not username:
+        return jsonify({'available': False, 'message': 'Digite um nome de usuário'}), 400
+    if len(username) < 3:
+        return jsonify({'available': False, 'message': 'Mínimo de 3 caracteres'}), 400
+    if len(username) > 30:
+        return jsonify({'available': False, 'message': 'Máximo de 30 caracteres'}), 400
+    import re
+    if not re.match(r'^[a-zA-Z0-9_.]+$', username):
+        return jsonify({'available': False, 'message': 'Use apenas letras, números, _ ou .'}), 400
+
+    usuarios = auth_service._carregar()
+    existe = any((u.get('username') or '').strip().lower() == username for u in usuarios)
+    if existe:
+        return jsonify({'available': False, 'message': '✗ Este username já está em uso. Escolha outro.'})
+    return jsonify({'available': True, 'message': f'✓ @{username} está disponível!'})
+
+
+@auth_bp.route('/vincular-social', methods=['POST'])
+def vincular_social():
+    """Endpoint para vincular conta Google ou Apple ao perfil do usuário logado"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'success': False, 'error': 'Você precisa estar logado'}), 401
+    
+    data = request.get_json(silent=True) or request.form
+    provider = (data.get('provider') or 'google').strip().lower()
+    email = data.get('email', '').strip().lower()
+    social_id = data.get('social_id', '').strip()
+
+    if not email or '@' not in email:
+        return jsonify({'success': False, 'error': 'E-mail social inválido'}), 400
+
+    try:
+        usuario = auth_service.vincular_conta_social(user_id=user_id, provider=provider, email=email, social_id=social_id)
+        return jsonify({
+            'success': True,
+            'message': f'Conta {provider.title()} ({email}) vinculada com sucesso!',
+            'user': {
+                'google_email': usuario.get('google_email'),
+                'apple_email': usuario.get('apple_email')
+            }
+        })
+    except ValueError as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'error': 'Erro ao vincular conta social'}), 500
+
+
+@auth_bp.route('/desvincular-social', methods=['POST'])
+def desvincular_social():
+    """Endpoint para desvincular conta Google ou Apple do perfil do usuário logado"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'success': False, 'error': 'Você precisa estar logado'}), 401
+    
+    data = request.get_json(silent=True) or request.form
+    provider = (data.get('provider') or 'google').strip().lower()
+
+    try:
+        usuario = auth_service.desvincular_conta_social(user_id=user_id, provider=provider)
+        return jsonify({
+            'success': True,
+            'message': f'Conta {provider.title()} desvinculada com sucesso!'
+        })
+    except ValueError as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'error': 'Erro ao desvincular conta social'}), 500
+
+
 @auth_bp.route('/social-complete-username', methods=['POST'])
 def social_complete_username():
     """Handler para finalizar cadastro social com o username escolhido"""
     data = request.get_json(silent=True) or request.form
+    provider = (data.get('provider') or 'google').strip().lower()
     email = data.get('email', '').strip().lower()
     nome = data.get('nome', '').strip()
     username = data.get('username', '').strip()
+    social_id = data.get('social_id', '').strip()
 
     if not email or '@' not in email:
         return jsonify({'success': False, 'error': 'E-mail inválido'}), 400
@@ -339,6 +442,10 @@ def social_complete_username():
             password=random_pwd,
             role='usuario'
         )
+        try:
+            auth_service.vincular_conta_social(user_id=usuario['id'], provider=provider, email=email, social_id=social_id)
+        except Exception:
+            pass
 
         try:
             jogador_service.criar(

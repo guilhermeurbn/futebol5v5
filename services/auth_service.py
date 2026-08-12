@@ -539,7 +539,82 @@ class AuthService:
             linked_players = jogador_service.listar_por_usuario(user_id)
             for p in linked_players:
                 jogador_service.deletar(p.id)
-        except Exception as e:
+        except Exception:
             pass
             
         return True
+
+    def vincular_conta_social(self, user_id: str, provider: str, email: str, social_id: str = "") -> Dict:
+        """
+        Vincia uma conta social (google ou apple) ao perfil de um usuário existente.
+        """
+        provider = (provider or "google").strip().lower()
+        if provider not in ('google', 'apple'):
+            raise ValueError("Provedor inválido. Escolha 'google' ou 'apple'.")
+        email_clean = (email or "").strip().lower()
+        if not email_clean or "@" not in email_clean:
+            raise ValueError("E-mail social inválido.")
+
+        usuarios = self._carregar()
+        # Verificar se esse email social já está vinculado a OUTRO usuário
+        email_outro = next(
+            (
+                u for u in usuarios
+                if u.get("id") != user_id and (
+                    (u.get("email") or "").strip().lower() == email_clean or
+                    (u.get(f"{provider}_email") or "").strip().lower() == email_clean
+                )
+            ),
+            None
+        )
+        if email_outro:
+            raise ValueError(f"A conta {provider.title()} ({email_clean}) já está vinculada a outro usuário (@{email_outro.get('username')}).")
+
+        alvo = None
+        for u in usuarios:
+            if u.get("id") == user_id:
+                alvo = u
+                break
+
+        if not alvo:
+            raise ValueError("Usuário não encontrado.")
+
+        alvo[f"{provider}_email"] = email_clean
+        if social_id:
+            alvo[f"{provider}_id"] = social_id
+
+        social_accounts = alvo.get("social_accounts") or {}
+        social_accounts[provider] = {
+            "email": email_clean,
+            "social_id": social_id,
+            "vinculado_em": datetime.now().isoformat()
+        }
+        alvo["social_accounts"] = social_accounts
+
+        self._salvar(usuarios)
+        return alvo
+
+    def desvincular_conta_social(self, user_id: str, provider: str) -> Dict:
+        """
+        Desvincula uma conta social (google ou apple) do perfil do usuário.
+        """
+        provider = (provider or "google").strip().lower()
+        usuarios = self._carregar()
+        alvo = None
+        for u in usuarios:
+            if u.get("id") == user_id:
+                alvo = u
+                break
+
+        if not alvo:
+            raise ValueError("Usuário não encontrado.")
+
+        alvo.pop(f"{provider}_email", None)
+        alvo.pop(f"{provider}_id", None)
+        social_accounts = alvo.get("social_accounts") or {}
+        social_accounts.pop(provider, None)
+        alvo["social_accounts"] = social_accounts
+
+        self._salvar(usuarios)
+        return alvo
+

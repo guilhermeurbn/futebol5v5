@@ -60,6 +60,7 @@
 
     <title>NaTrave | {% block title %}Organize seus jogos de forma equilibrada{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='20260616-06') }}">
+    <script src="capacitor.js"></script>
     <script src="{{ url_for('static', filename='local-datetime.js', v='20260616-06') }}" defer></script>
     {% if config.get('ENABLE_APP_SHELL') %}
     <script src="{{ url_for('static', filename='app-shell.js', v='20260717-01') }}" defer></script>

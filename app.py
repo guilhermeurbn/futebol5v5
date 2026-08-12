@@ -189,6 +189,14 @@ def criar_app(config_name: str = None) -> Flask:
     # Registrar blueprints
     app.register_blueprint(auth_bp)
     
+    # Exempt social authentication endpoints from CSRF token validation (required for native iOS/Android Capacitor apps)
+    if 'auth.social_login' in app.view_functions:
+        csrf.exempt(app.view_functions['auth.social_login'])
+    if 'auth.social_complete_username' in app.view_functions:
+        csrf.exempt(app.view_functions['auth.social_complete_username'])
+    if 'auth.vincular_social' in app.view_functions:
+        csrf.exempt(app.view_functions['auth.vincular_social'])
+    
     # Apply rate limiting to auth endpoints (after blueprint registration)
     app.view_functions['auth.login_submit'] = limiter.limit("50/hour")(app.view_functions['auth.login_submit'])
     app.view_functions['auth.cadastro_submit'] = limiter.limit("3/hour")(app.view_functions['auth.cadastro_submit'])

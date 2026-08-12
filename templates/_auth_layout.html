@@ -6,6 +6,7 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#7c3aed">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description"
         content="{% block meta_description %}Acesse a plataforma NaTrave 5v5 para gerenciar suas partidas e sortear times equilibrados.{% endblock %}">
 
@@ -33,11 +34,15 @@
 
     <title>NaTrave | {% block title %}Acesso{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='20260616-06') }}">
+    <script>window.GOOGLE_CLIENT_ID = "{{ config.get('GOOGLE_CLIENT_ID', '') }}";</script>
+    <script src="capacitor.js"></script>
+    <script src="https://appleid.cdn-apple.com/appleauth/static/js/api/v1/appleid.auth.js" defer></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="{{ url_for('static', filename='local-datetime.js', v='20260616-06') }}" defer></script>
     <script src="{{ url_for('static', filename='app-onboarding.js', v='20260811-01') }}" defer></script>
 </head>
 
-<body class="auth-page {% block body_class %}{% endblock %}">
+<body class="auth-page is-capacitor-app {% block body_class %}{% endblock %}">
     {% block app_onboarding_overlay %}{% endblock %}
 
     <header class="auth-global-header" role="banner" aria-label="NaTrave">

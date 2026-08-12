@@ -49,3 +49,17 @@ def test_mobile_login_intro_centers_brand_and_uses_vertical_cards():
     assert 'grid-template-columns: 1fr;' in stylesheet
     assert '.auth-page--login .auth-preview-card {' in stylesheet
     assert 'min-height: 92px;' in stylesheet
+
+
+def test_login_assumes_single_app_position_and_onboarding_persistence():
+    layout = (ROOT / 'templates' / '_auth_layout.html').read_text(encoding='utf-8')
+    app_onboarding = (ROOT / 'static' / 'app-onboarding.js').read_text(encoding='utf-8')
+    auth_routes = (ROOT / 'routes' / 'auth_routes.py').read_text(encoding='utf-8')
+
+    assert '<body class="auth-page is-capacitor-app' in layout
+    assert "document.body.classList.add('is-capacitor-app');" in app_onboarding
+    assert "const onboardingKey = 'natrave_app_onboarding_completed_v1';" in app_onboarding
+    assert "show_onboarding = not bool(erro or sucesso)" in auth_routes
+    assert "dots.forEach((dot, index) => {" in app_onboarding
+    assert "slidesContainer.addEventListener('touchstart'" in app_onboarding
+

@@ -2,52 +2,52 @@
   "evaluators": {
     "u1": {
       "reliability": 0.9032,
-      "total_votos": 374
+      "total_votos": 424
     },
     "u2": {
       "reliability": 0.9032,
-      "total_votos": 374
+      "total_votos": 424
     },
     "u3_hater": {
       "reliability": 0.5753,
-      "total_votos": 374
+      "total_votos": 424
     }
   },
   "relationships": {
     "u1:Alex": {
-      "match_count": 187,
-      "cumulative_offset": 654.5
+      "match_count": 212,
+      "cumulative_offset": 742.0
     },
     "u2:Alex": {
-      "match_count": 187,
-      "cumulative_offset": 654.5
+      "match_count": 212,
+      "cumulative_offset": 742.0
     },
     "u3_hater:Alex": {
-      "match_count": 187,
-      "cumulative_offset": -1309.0
+      "match_count": 212,
+      "cumulative_offset": -1484.0
     },
     "u1:Bruno": {
-      "match_count": 187,
+      "match_count": 212,
       "cumulative_offset": 0.0
     },
     "u2:Bruno": {
-      "match_count": 187,
+      "match_count": 212,
       "cumulative_offset": 0.0
     },
     "u3_hater:Bruno": {
-      "match_count": 187,
+      "match_count": 212,
       "cumulative_offset": 0.0
     }
   },
   "target_baselines": {
     "Alex": {
-      "sum_scores": 3179.0,
-      "count": 561,
+      "sum_scores": 3604.0,
+      "count": 636,
       "historical_avg": 5.67
     },
     "Bruno": {
-      "sum_scores": 3927.0,
-      "count": 561,
+      "sum_scores": 4452.0,
+      "count": 636,
       "historical_avg": 7.0
     }
   }

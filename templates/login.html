@@ -15,7 +15,7 @@
 
 {% block app_onboarding_overlay %}
 <!-- MODAL DE ONBOARDING - MODO APLICATIVO (TELA CHEIA REAL & PALETA VERDE/PRETA/BRANCA) -->
-<div id="app-onboarding-modal" class="app-onboarding-modal">
+<div id="app-onboarding-modal" class="app-onboarding-modal{% if not show_onboarding %} is-hidden{% endif %}" style="{% if not show_onboarding %}display: none !important;{% else %}display: block;{% endif %}">
     <!-- Fundo de Iluminação do Campo -->
     <div class="onboarding-bg-glow onboarding-bg-glow--green"></div>
     <div class="onboarding-bg-glow onboarding-bg-glow--pitch"></div>
@@ -242,9 +242,9 @@
             </button>
 
             <div class="onboarding-dots">
-                <span class="onboarding-dot active"></span>
-                <span class="onboarding-dot"></span>
-                <span class="onboarding-dot"></span>
+                <span class="onboarding-dot active" data-index="0"></span>
+                <span class="onboarding-dot" data-index="1"></span>
+                <span class="onboarding-dot" data-index="2"></span>
             </div>
 
             <button type="button" id="onboarding-btn-next" class="btn onboarding-main-btn">
@@ -256,6 +256,89 @@
                 </svg>
             </button>
         </div>
+    </div>
+</div>
+
+<!-- MODAL DE DEFINIÇÃO DE USERNAME SOCIAL -->
+<div id="social-username-modal" class="social-modal-overlay" style="display: none;">
+    <div class="social-modal-card">
+        <div class="app-login-brand" style="margin-bottom: 1.2rem;">
+            <span class="social-modal-badge">⚽ QUASE PRONTO!</span>
+            <h3 class="app-login-title" style="font-size: 1.4rem; font-weight: 800; color: #ffffff; margin-top: 0.5rem; margin-bottom: 0.4rem;">Escolha seu Nome de Usuário</h3>
+            <p class="app-login-subtitle" id="social-modal-user-info" style="font-size: 0.88rem; color: #94a3b8; line-height: 1.4; margin: 0 auto; max-width: 310px;">
+                Seu nome foi importado. Escolha seu usuário único no NaTrave:
+            </p>
+        </div>
+
+        <form id="social-username-form" class="auth-form" style="margin-top: 1rem;">
+            <input type="hidden" id="social_email_hidden">
+            <input type="hidden" id="social_nome_hidden">
+
+            <div class="form-group auth-field auth-field--compact">
+                <label class="form-label" for="social_username_input" style="color: #94a3b8 !important; font-size: 0.8rem !important; font-weight: 600 !important; margin-bottom: 0.4rem !important; display: block; text-align: left;">
+                    Escolha seu Username no NaTrave
+                </label>
+                <div class="auth-input-wrap">
+                    <span class="auth-input-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" width="20" height="20">
+                            <circle cx="12" cy="12" r="4" />
+                            <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8" />
+                        </svg>
+                    </span>
+                    <input class="form-input auth-input" id="social_username_input" type="text"
+                        placeholder="ex: guilherme5v5" required autocomplete="username" style="background: rgba(15, 23, 42, 0.8) !important; border: 1.5px solid rgba(16, 185, 129, 0.3) !important; color: #ffffff !important; font-size: 1rem !important; font-weight: 600 !important; border-radius: 14px !important; padding-left: 2.8rem !important;">
+                </div>
+                <div id="social_username_status" style="font-size: 0.85rem; margin-top: 0.5rem; font-weight: 600; min-height: 1.4rem; text-align: center; transition: all 0.2s;"></div>
+            </div>
+
+            <button class="btn btn-primary auth-submit" id="social_username_btn" type="submit" disabled style="opacity: 0.5; width: 100%; padding: 0.85rem; border-radius: 16px; font-weight: 700; font-size: 1rem; margin-top: 0.6rem; transition: all 0.2s;">Concluir Cadastro ➔</button>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL DE ENTRADA SOCIAL WEB/LOCALHOST (SEM PROMPTS DO NAVEGADOR) -->
+<div id="social-auth-input-modal" class="social-modal-overlay" style="display: none;">
+    <div class="social-modal-card">
+        <div class="app-login-brand" style="margin-bottom: 1.2rem;">
+            <span class="social-modal-badge" id="social-provider-badge">🔑 LOGIN SOCIAL</span>
+            <h3 class="app-login-title" id="social-provider-title" style="font-size: 1.35rem; margin-top: 0.4rem;">Autenticação Social</h3>
+            <p class="app-login-subtitle" id="social-provider-subtitle">Conecte sua conta para entrar no NaTrave</p>
+        </div>
+
+        <form id="social-auth-direct-form" class="auth-form">
+            <input type="hidden" id="social_auth_provider">
+            
+            <div class="form-group auth-field auth-field--compact">
+                <label class="form-label" for="social_auth_email_input" style="color: #94a3b8 !important; font-size: 0.8rem !important; font-weight: 600 !important; margin-bottom: 0.4rem !important; display: block; text-align: left;">E-mail da Conta Social</label>
+                <div class="auth-input-wrap">
+                    <span class="auth-input-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
+                            <rect x="3" y="5" width="18" height="14" rx="2" />
+                            <path d="m4 7 8 6 8-6" />
+                        </svg>
+                    </span>
+                    <input class="form-input auth-input" id="social_auth_email_input" type="email" placeholder="seu-email@exemplo.com" required autocomplete="email">
+                </div>
+            </div>
+
+            <div class="form-group auth-field auth-field--compact">
+                <label class="form-label" for="social_auth_nome_input" style="color: #94a3b8 !important; font-size: 0.8rem !important; font-weight: 600 !important; margin-bottom: 0.4rem !important; display: block; text-align: left;">Nome Completo</label>
+                <div class="auth-input-wrap">
+                    <span class="auth-input-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
+                            <path d="M20 21a8 8 0 0 0-16 0" />
+                            <circle cx="12" cy="8" r="4" />
+                        </svg>
+                    </span>
+                    <input class="form-input auth-input" id="social_auth_nome_input" type="text" placeholder="Seu Nome e Sobrenome" autocomplete="name">
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 0.75rem; margin-top: 1.2rem;">
+                <button type="button" id="social-auth-cancel-btn" class="btn" style="flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; font-weight: 700; border-radius: 14px;">Cancelar</button>
+                <button type="submit" class="btn btn-primary auth-submit" style="flex: 1.5; margin-top: 0; border-radius: 14px;">Continuar ➔</button>
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}
@@ -377,6 +460,9 @@
             <div class="auth-card-footer">
                 <p class="auth-link-text">Não tem conta? <button type="button" id="btn-show-register"
                         class="auth-flip-trigger">Criar cadastro</button></p>
+                <div style="margin-top: 0.65rem; text-align: center;">
+                    <button type="button" class="auth-onboarding-reopen-btn js-open-onboarding" style="background: none; border: none; color: #10b981; font-size: 0.78rem; font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; opacity: 0.85; transition: opacity 0.2s;">✨ Ver como funciona o app</button>
+                </div>
             </div>
         </div>
 
@@ -482,46 +568,8 @@
                     <span>Google</span>
                 </button>
             </div>
-
-            <div class="auth-card-footer">
-                <p class="auth-link-text">Já tem uma conta? <button type="button" id="btn-show-login"
-                        class="auth-flip-trigger">Fazer Login</button></p>
-            </div>
         </div>
 
-    </div>
-</div>
-
-<!-- MODAL DE DEFINIÇÃO DE USERNAME SOCIAL -->
-<div id="social-username-modal" class="social-modal-overlay" style="display: none;">
-    <div class="social-modal-card">
-        <div class="app-login-brand" style="margin-bottom: 1rem;">
-            <span class="social-modal-badge">⚽ QUASE PRONTO!</span>
-            <h3 class="app-login-title" style="font-size: 1.35rem; margin-top: 0.4rem;">Escolha seu Nome de Usuário</h3>
-            <p class="app-login-subtitle" id="social-modal-user-info">Seu nome foi importado. Escolha seu usuário único
-                no NaTrave:</p>
-        </div>
-
-        <form id="social-username-form" class="auth-form">
-            <input type="hidden" id="social_email_hidden">
-            <input type="hidden" id="social_nome_hidden">
-
-            <div class="form-group auth-field auth-field--compact">
-                <label class="form-label auth-label-app" for="social_username_input">Usuário no NaTrave</label>
-                <div class="auth-input-wrap">
-                    <span class="auth-input-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
-                            <circle cx="12" cy="12" r="4" />
-                            <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8" />
-                        </svg>
-                    </span>
-                    <input class="form-input auth-input" id="social_username_input" type="text"
-                        placeholder="ex: guilherme5v5" required autocomplete="username">
-                </div>
-            </div>
-
-            <button class="btn btn-primary auth-submit" type="submit">Concluir Cadastro ➔</button>
-        </form>
     </div>
 </div>
 {% endblock %}

@@ -4,7 +4,7 @@
   "webDir": "static",
   "appendUserAgent": "Capacitor NaTraveApp/1.0",
   "server": {
-    "url": "https://natrave.pt/login?mode=app",
+    "url": "http://127.0.0.1:5051/login?mode=app",
     "cleartext": true,
     "androidScheme": "https",
     "iosScheme": "https",
@@ -19,6 +19,11 @@
     "allowsLinkPreview": false
   },
   "plugins": {
+    "GoogleAuth": {
+      "scopes": ["profile", "email"],
+      "serverClientId": "87998320853-mfkte5ili1uuvud8jdq6pvcp0kmknhrs.apps.googleusercontent.com",
+      "forceCodeForRefreshToken": true
+    },
     "StatusBar": {
       "style": "DARK",
       "backgroundColor": "#121217",
