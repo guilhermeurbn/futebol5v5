@@ -390,10 +390,6 @@ def votacao_resultado_juiz():
         sorteio = contexto.get('sorteio_contexto')
         if not sorteio:
             raise ValueError('Crie uma partida antes de registrar o resultado')
-        if contexto.get('rodada_selecionada'):
-            raise ValueError('A votação desta partida já foi aberta')
-        if contexto.get('resultado_partida'):
-            raise ValueError('O resultado desta partida já foi registrado')
 
         estado = juiz_partida_service.obter_estado()
         partida_atual = estado.get('partida_atual') or {}
@@ -424,16 +420,20 @@ def votacao_resultado_juiz():
 
         total_vitorias = sum(item['vitorias'] for item in times_desempenho)
         total_empates = sum(item['empates'] for item in times_desempenho)
-        total_jogos = total_vitorias + total_empates + sum(
-            item['derrotas'] for item in times_desempenho
-        )
-        if total_jogos == 0:
-            raise ValueError('Registre ao menos um jogo antes de continuar')
-        # if total_vitorias != sum(item['derrotas'] for item in times_desempenho):
-        #     raise ValueError('O total de vitórias deve ser igual ao total de derrotas')
-        empates_por_time = [item['empates'] for item in times_desempenho]
-        if total_empates % 2 != 0 or max(empates_por_time, default=0) > total_empates / 2:
-            raise ValueError('Cada empate deve aparecer para os dois times')
+        total_derrotas = sum(item['derrotas'] for item in times_desempenho)
+        total_jogos = total_vitorias + total_empates + total_derrotas
+
+        # Se V/E/D não foram fornecidos manualmente, infere a partir dos gols para 2 times
+        if total_jogos == 0 and len(times_desempenho) == 2:
+            t1, t2 = times_desempenho[0], times_desempenho[1]
+            if t1['gols'] > t2['gols']:
+                t1['vitorias'], t1['derrotas'] = 1, 0
+                t2['vitorias'], t2['derrotas'] = 0, 1
+            elif t2['gols'] > t1['gols']:
+                t2['vitorias'], t2['derrotas'] = 1, 0
+                t1['vitorias'], t1['derrotas'] = 0, 1
+            else:
+                t1['empates'], t2['empates'] = 1, 1
 
         gols_times = [item['gols'] for item in times_desempenho]
         maiores_vitorias = max(item['vitorias'] for item in times_desempenho)
@@ -517,7 +517,7 @@ def votacao_admin_page():
         return render_template(
             'votacao_admin.html',
             **contexto,
-            modo_edicao_resultado=bool(editar_resultado),
+            modo_edicao_resultado=False,
             resultado_form_values=resultado_form_values,
             sucesso=sucesso or None,
             erro=erro or None,
