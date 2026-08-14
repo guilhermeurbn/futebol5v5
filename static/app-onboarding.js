@@ -126,9 +126,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const isLast = index === cards.length - 1;
       const btnSpan = btnNext.querySelector('span');
       if (btnSpan) {
-        btnSpan.textContent = isLast ? 'Começar 🚀' : 'Avançar';
+        btnSpan.textContent = isLast ? 'Começar' : 'Avançar';
       } else {
-        btnNext.textContent = isLast ? 'Começar 🚀' : 'Avançar';
+        btnNext.textContent = isLast ? 'Começar' : 'Avançar';
       }
     }
   }
