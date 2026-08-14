@@ -90,8 +90,9 @@
                     {% set eff_foto = (jogador.foto_url if (tem_jogador and jogador.foto_url) else (perfil_user.foto_url if (perfil_user and perfil_user.foto_url) else None)) %}
                     {% if eff_foto %}
                     <div class="premium-profile-avatar-inner" style="padding: 0; overflow: hidden; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: none;">
-                        <img src="{{ eff_foto }}" alt="Foto do perfil" style="width: 100%; height: 100%; object-fit: cover;">
+                        <img src="{{ eff_foto }}" alt="Foto do perfil" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
                     </div>
+                    <div class="premium-profile-avatar-inner" style="display: none;">{{ avatar_text|upper }}</div>
                     {% else %}
                     <div class="premium-profile-avatar-inner">{{ avatar_text|upper }}</div>
                     {% endif %}
@@ -106,8 +107,9 @@
                 {% set eff_foto = (jogador.foto_url if (tem_jogador and jogador.foto_url) else (target_user.foto_url if (target_user is defined and target_user and target_user.foto_url) else (target_user.get('foto_url') if (target_user is defined and target_user and target_user.get('foto_url') is defined) else None))) %}
                 {% if eff_foto %}
                 <div class="premium-profile-avatar-inner" style="padding: 0; overflow: hidden; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: none;">
-                    <img src="{{ eff_foto }}" alt="Foto do perfil" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="{{ eff_foto }}" alt="Foto do perfil" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
                 </div>
+                <div class="premium-profile-avatar-inner" style="display: none;">{{ avatar_text|upper }}</div>
                 {% else %}
                 <div class="premium-profile-avatar-inner">{{ avatar_text|upper }}</div>
                 {% endif %}
