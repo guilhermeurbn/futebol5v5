@@ -177,7 +177,56 @@
 <script>
     const QUANTIDADES_VALIDAS = [10, 15, 20];
     const INSCRITOS_IDS = {{ confirmados_ids|default([])|tojson }};
+    const IS_POST_INIT = {% if request.method == 'POST' %}true{% else %}false{% endif %};
+    const DRAFT_KEY = 'natrave_juiz_selection_draft_v1';
     let quantidadeSelecionada = null;
+
+    function salvarRascunhoLocal() {
+        if (!quantidadeSelecionada) return;
+        const checkedBoxes = document.querySelectorAll('.jogador-checkbox:checked');
+        const ids = Array.from(checkedBoxes).map(cb => cb.getAttribute('data-id'));
+        const draft = {
+            quantidade: quantidadeSelecionada,
+            ids: ids,
+            updated_at: Date.now()
+        };
+        try {
+            localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+            if (window.NaTraveOffline && typeof window.NaTraveOffline.salvarSelecaoOffline === 'function') {
+                window.NaTraveOffline.salvarSelecaoOffline(draft);
+            }
+        } catch (e) {
+            console.warn('Erro ao salvar rascunho local:', e);
+        }
+    }
+
+    function carregarRascunhoLocal() {
+        if (IS_POST_INIT) {
+            limparRascunhoLocal();
+            return null;
+        }
+        try {
+            const raw = localStorage.getItem(DRAFT_KEY);
+            if (!raw) return null;
+            const draft = JSON.parse(raw);
+            if (draft && draft.updated_at && (Date.now() - draft.updated_at > 12 * 3600 * 1000)) {
+                limparRascunhoLocal();
+                return null;
+            }
+            return draft;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function limparRascunhoLocal() {
+        try {
+            localStorage.removeItem(DRAFT_KEY);
+            if (window.NaTraveOffline && typeof window.NaTraveOffline.limparSelecaoOffline === 'function') {
+                window.NaTraveOffline.limparSelecaoOffline();
+            }
+        } catch (e) {}
+    }
 
     function usarJogadoresInscritos() {
         if (!INSCRITOS_IDS || INSCRITOS_IDS.length === 0) {
@@ -222,7 +271,7 @@
         }
     }
 
-    function atualizarContador() {
+    function atualizarContador(bypassSave = false) {
         document.querySelectorAll('.jogador-checkbox').forEach(cb => {
             const card = cb.closest('.judge-player-option');
             if (card) {
@@ -271,9 +320,13 @@
             btnSortearTexto.textContent = 'Sortear';
             btnSortear.setAttribute('aria-label', 'Sortear times');
         }
+
+        if (!bypassSave) {
+            salvarRascunhoLocal();
+        }
     }
 
-    function selecionarQuantidade(quantidade) {
+    function selecionarQuantidade(quantidade, bypassSave = false) {
         quantidadeSelecionada = Math.floor(quantidade);
 
         document.querySelectorAll('.qty-btn').forEach(btn => {
@@ -294,13 +347,14 @@
             acoesSorteio.style.display = 'flex';
         }
 
-        atualizarContador();
+        atualizarContador(bypassSave);
     }
 
     function limparSelecao() {
         document.querySelectorAll('.jogador-checkbox').forEach(cb => cb.checked = false);
         document.getElementById('mensagemErro').style.display = 'none';
-        atualizarContador();
+        limparRascunhoLocal();
+        atualizarContador(true);
     }
 
     function confirmarSelecao() {
@@ -316,6 +370,7 @@
             return;
         }
 
+        limparRascunhoLocal();
         msgErro.style.display = 'none';
         const btnSortear = document.getElementById('btnSortear');
         const btnSortearTexto = document.getElementById('btnSortearTexto');
@@ -353,12 +408,35 @@
             });
     }
 
-    // Inicializa se já houver marcações salvas
-    const marcadosIniciais = document.querySelectorAll('.jogador-checkbox:checked').length;
-    if (QUANTIDADES_VALIDAS.includes(marcadosIniciais)) {
-        selecionarQuantidade(marcadosIniciais);
-    } else {
-        atualizarContador();
-    }
+    // Event listeners para salvar rascunho a cada seleção de jogador
+    document.querySelectorAll('.jogador-checkbox').forEach(cb => {
+        cb.addEventListener('change', () => {
+            atualizarContador();
+        });
+    });
+
+    // Inicialização: Restaura o rascunho salvo se houver (ex: após deploy ou recarregamento de página)
+    (function inicializarSelecaoJuiz() {
+        const draftSalvo = carregarRascunhoLocal();
+        if (draftSalvo && QUANTIDADES_VALIDAS.includes(Number(draftSalvo.quantidade))) {
+            selecionarQuantidade(Number(draftSalvo.quantidade), true);
+            if (Array.isArray(draftSalvo.ids) && draftSalvo.ids.length > 0) {
+                document.querySelectorAll('.jogador-checkbox').forEach(cb => {
+                    const idStr = String(cb.getAttribute('data-id'));
+                    if (draftSalvo.ids.includes(idStr)) {
+                        cb.checked = true;
+                    }
+                });
+            }
+            atualizarContador(true);
+        } else {
+            const marcadosIniciais = document.querySelectorAll('.jogador-checkbox:checked').length;
+            if (QUANTIDADES_VALIDAS.includes(marcadosIniciais)) {
+                selecionarQuantidade(marcadosIniciais, true);
+            } else {
+                atualizarContador(true);
+            }
+        }
+    })();
 </script>
 {% endblock %}

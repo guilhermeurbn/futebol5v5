@@ -304,6 +304,8 @@ def jogar_page():
     """Hub principal do fluxo do juiz"""
     try:
         estado_fluxo = _sincronizar_fluxo_juiz()
+        if estado_fluxo and estado_fluxo.get('status') == 'selecionando':
+            return redirect(url_for('juiz.juiz_criar_partida'))
         destino_aberto = _destino_partida_oficial_aberta(estado_fluxo)
         if destino_aberto:
             return redirect(destino_aberto)
