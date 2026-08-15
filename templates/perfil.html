@@ -118,13 +118,46 @@
             <div class="premium-profile-info">
                 <div class="premium-profile-name-row"
                     style="display: flex; flex-direction: column; align-items: flex-start; gap: 0.25rem;">
+                    {% set v_rodada = variacao_rodada if (variacao_rodada is defined and variacao_rodada) else None %}
+                    {% if not v_rodada and tem_jogador and jogador %}
+                        {% set hist = (jogador.historico_nivel if jogador.historico_nivel is defined else (jogador.get('historico_nivel') if jogador.get is defined else None)) or [] %}
+                        {% if hist|length > 0 %}
+                            {% set ult = hist[-1] %}
+                            {% set ant = (ult.nivel_anterior|float) if ult.nivel_anterior is defined else (ult.get('nivel_anterior')|float if ult.get is defined else 0.0) %}
+                            {% set nov = (ult.nivel_novo|float) if ult.nivel_novo is defined else (ult.get('nivel_novo')|float if ult.get is defined else 0.0) %}
+                            {% set diff = (nov - ant)|round(2) %}
+                            {% if diff > 0 %}
+                                {% set v_rodada = {'variacao': diff, 'direcao': 'subiu', 'texto': '+' ~ ('%.2f'|format(diff)).rstrip('0').rstrip('.')} %}
+                            {% elif diff < 0 %}
+                                {% set v_rodada = {'variacao': diff, 'direcao': 'desceu', 'texto': ('%.2f'|format(diff)).rstrip('0').rstrip('.')} %}
+                            {% endif %}
+                        {% endif %}
+                    {% endif %}
+
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                         <h1 class="premium-profile-name">{% if tem_jogador %}{{ jogador.nome }}{% else %}{{
                             (perfil_user.nome if perfil_user.nome is defined else perfil_user.get('nome')) or
                             (perfil_user.username if perfil_user.username is defined else perfil_user.get('username'))
                             }}{% endif %}</h1>
                         {% if tem_jogador %}
-                        <span class="premium-profile-rating-badge">{{ '%.1f'|format(jogador.nivel|float) }}</span>
+                        <div style="display: inline-flex; align-items: center; gap: 0.4rem;">
+                            <span class="premium-profile-rating-badge">{{ '%.1f'|format(jogador.nivel|float) }}</span>
+                            {% if v_rodada and v_rodada.direcao in ['subiu', 'desceu'] %}
+                            <span class="rating-delta-badge rating-delta-{{ v_rodada.direcao }}" 
+                                  title="Variação na última rodada: {{ v_rodada.texto }}">
+                                {% if v_rodada.direcao == 'subiu' %}
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="18 15 12 9 6 15"></polyline>
+                                </svg>
+                                {% elif v_rodada.direcao == 'desceu' %}
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                                {% endif %}
+                                <span>{{ v_rodada.texto }}</span>
+                            </span>
+                            {% endif %}
+                        </div>
                         {% endif %}
                     </div>
                     {% set p_uname = (perfil_user.username if (perfil_user and perfil_user.username is defined) else (perfil_user.get('username') if (perfil_user and perfil_user.get is defined) else None)) if is_self else (target_user.username if (target_user and target_user.username is defined) else (target_user.get('username') if (target_user and target_user.get is defined) else None)) %}
@@ -400,7 +433,7 @@
                         <span class="premium-profile-stat-label">Gols marcados</span>
                     </div>
                     <div class="premium-profile-stat-card">
-                        <strong class="premium-profile-stat-val">{{ '%.2f'|format(stats.get('nota_media', 0)|float) }}</strong>
+                        <strong class="premium-profile-stat-val">{{ '%.2f'|format((stats.get('nota_media') or stats.get('nota_media_geral') or (jogador.nivel if tem_jogador and jogador else 7.0))|float) }}</strong>
                         <span class="premium-profile-stat-label">Nota Média</span>
                     </div>
                 </div>

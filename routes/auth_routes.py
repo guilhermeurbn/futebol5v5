@@ -106,23 +106,45 @@ def _obter_notas_e_atributos_jogador(jogador, stats_jogador):
     notas_por_partida = {}
     total_nota = 0.0
     qtd_votos = 0
+    nome_norm = (jogador.nome or "").strip().lower()
     
     for partida in votacoes:
         if not isinstance(partida, dict):
             continue
-        if partida.get("status") == "encerrada":
+        if partida.get("status") in ["encerrada", "finalizada"]:
             ranking = partida.get("ranking") or {}
             ranking_jogadores = ranking.get("ranking_jogadores") or []
             for r in ranking_jogadores:
-                if r.get("jogador_nome") == jogador.nome:
-                    nota_media = r.get("nota_media", 0)
+                r_nome = (r.get("jogador_nome") or "").strip().lower()
+                if r_nome == nome_norm:
+                    nota_media = float(r.get("nota_media", 0) or 0)
                     partida_id = partida.get("id")
                     notas_por_partida[partida_id] = nota_media
-                    total_nota += nota_media
-                    qtd_votos += 1
+                    if nota_media > 0:
+                        total_nota += nota_media
+                        qtd_votos += 1
                     break
                     
-    nota_geral = round(total_nota / qtd_votos, 2) if qtd_votos else 7.0
+    if qtd_votos > 0:
+        nota_geral = round(total_nota / qtd_votos, 2)
+    else:
+        try:
+            from services.votacao_service import VotacaoService
+            vs = VotacaoService()
+            ranking_geral = vs.obter_ranking_geral()
+            nota_geral = 0.0
+            for r in ranking_geral:
+                if (r.get("jogador_nome") or "").strip().lower() == nome_norm:
+                    nm = float(r.get("nota_media", 0) or 0)
+                    if nm > 0:
+                        nota_geral = round(nm, 2)
+                        break
+            if nota_geral <= 0:
+                nota_geral = round(float(getattr(jogador, 'nivel', 7.0) or 7.0), 2)
+        except Exception:
+            nota_geral = round(float(getattr(jogador, 'nivel', 7.0) or 7.0), 2)
+
+    stats_jogador["nota_media"] = nota_geral
     stats_jogador["nota_media_geral"] = f"{nota_geral:.2f}"
     
     # Injeta a nota individual e placar real em cada partida no histórico
@@ -732,6 +754,40 @@ def logout():
 # PERFIL E SENHA
 # ============================================================
 
+def _obter_variacao_rodada(jogador) -> dict:
+    """Calcula a variação do nível do jogador na última rodada com base no histórico."""
+    if not jogador:
+        return {'variacao': 0.0, 'direcao': 'neutro', 'texto': ''}
+        
+    hist = getattr(jogador, 'historico_nivel', None) or []
+    if not isinstance(hist, list) and isinstance(jogador, dict):
+        hist = jogador.get('historico_nivel', []) or []
+        
+    if hist:
+        ultimo = hist[-1]
+        ant = float(ultimo.get('nivel_anterior', 0) or 0)
+        nov = float(ultimo.get('nivel_novo', 0) or 0)
+        
+        if nov == 0:
+            nov = float(getattr(jogador, 'nivel', 0) or (jogador.get('nivel', 0) if isinstance(jogador, dict) else 0))
+            
+        diff = round(nov - ant, 2)
+        if diff > 0:
+            formatted_diff = f"+{diff:.2f}".rstrip('0').rstrip('.')
+            if formatted_diff == "+0":
+                formatted_diff = "+0.0"
+            return {'variacao': diff, 'direcao': 'subiu', 'texto': formatted_diff}
+        elif diff < 0:
+            formatted_diff = f"{diff:.2f}".rstrip('0').rstrip('.')
+            if formatted_diff == "-0":
+                formatted_diff = "-0.0"
+            return {'variacao': diff, 'direcao': 'desceu', 'texto': formatted_diff}
+        else:
+            return {'variacao': 0.0, 'direcao': 'neutro', 'texto': '0.0'}
+
+    return {'variacao': 0.0, 'direcao': 'sem_historico', 'texto': ''}
+
+
 @auth_bp.route('/perfil', methods=['GET'])
 @login_required
 def perfil_page():
@@ -815,6 +871,8 @@ def perfil_page():
     if aba_ativa not in ['mensagem', 'estatisticas', 'partidas', 'duelo', 'mais']:
         aba_ativa = 'partidas' if jogador_proprio else 'mensagem'
 
+    variacao_rodada = _obter_variacao_rodada(jogador_proprio)
+
     return render_template(
         'perfil.html',
         usuario=_usuario_logado(),
@@ -829,6 +887,7 @@ def perfil_page():
         mensagens_nao_lidas=mensagens_nao_lidas,
         mensagens_lidas=mensagens_lidas,
         tem_mensagens_nao_lidas=tem_mensagens_nao_lidas,
+        variacao_rodada=variacao_rodada,
         is_self=True
     )
 
@@ -968,6 +1027,8 @@ def perfil_jogador_publico(jogador_id):
         except Exception:
             pass
 
+        variacao_rodada = _obter_variacao_rodada(jogador)
+
         return render_template(
             'perfil.html',
             jogador_proprio=jogador,
@@ -982,7 +1043,8 @@ def perfil_jogador_publico(jogador_id):
             mensagens_diretas=mensagens_nao_lidas,
             mensagens_nao_lidas=mensagens_nao_lidas,
             mensagens_lidas=mensagens_lidas,
-            tem_mensagens_nao_lidas=tem_mensagens_nao_lidas
+            tem_mensagens_nao_lidas=tem_mensagens_nao_lidas,
+            variacao_rodada=variacao_rodada
         )
     except Exception as e:
         import logging
