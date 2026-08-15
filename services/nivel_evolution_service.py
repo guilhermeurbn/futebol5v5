@@ -4,7 +4,7 @@ Serviço de Evolução de Nível (Rating) do NaTrave
 Aplica evolução inteligente do nível/rating dos jogadores com base nas votações de cada partida.
 
 As 6 Regras de Evolução:
-─────────────────────────
+-------------------------
 1. Mínimo de votos: Apenas atualiza se o jogador recebeu votos de pelo menos 40% dos participantes.
    Tabela: 10 jogadores -> min 4 votos; 15 -> min 6; 20 -> min 8.
    Caso contrário, mantém-se inalterado.
@@ -14,11 +14,13 @@ As 6 Regras de Evolução:
    - |Diferenca| < 0.20 -> variação = 0
    - 0.20 <= |Diferenca| < 0.80 -> variação = +0.1 ou -0.1
    - |Diferenca| >= 0.80 -> variação = +0.2 ou -0.2
-5. Desaceleração de experientes (alteração máxima permitida por faixa):
-   - 1.0 até 3.0: max 0.05
-   - 3.1 até 7.0: max 0.10
-   - 7.1 até 9.0: max 0.05
-   - 9.1 até 10.0: max 0.02
+5. Desaceleração por faixa de nível (alteração máxima permitida):
+   - 1.0 até 3.0: max 0.15
+   - 3.1 até 5.0: max 0.10
+   - 5.1 até 6.0: max 0.05
+   - 6.1 até 7.5: max 0.02
+   - 7.5 até 8.5: max 0.03
+   - 8.5 até 10.0: max 0.02
 6. Arredondamento e limites: Nível final arredondado para múltiplos de 0.1 e limitado entre 1.0 e 10.0.
    Utiliza nivel_preciso para acumular pequenas variações e evitar perda de evolução em faixas muito estreitas.
 """
@@ -29,7 +31,7 @@ from typing import Dict, List, Optional, Tuple
 logger = logging.getLogger(__name__)
 
 
-# ────────────────────── lógica pura ──────────────────────────────
+# ---------------------- lógica pura ------------------------------
 
 def calcular_novo_nivel(
     nivel_atual: float,
@@ -72,14 +74,18 @@ def calcular_novo_nivel(
     else:
         alteracao_tentativa = 0.2 if diferenca > 0 else -0.2
         
-    # Regra 5: Jogadores experientes mudam mais lentamente (alteração máxima permitida)
+    # Regra 5: Jogadores experientes mudam mais lentamente (alteração máxima permitida por faixa de nível)
     # Usamos o nivel_atual (que é o rating preciso antes desta partida) para decidir a faixa
     if nivel_atual <= 3.0:
-        limite_alteracao = 0.05
-    elif nivel_atual <= 7.0:
+        limite_alteracao = 0.15
+    elif nivel_atual <= 5.0:
         limite_alteracao = 0.10
-    elif nivel_atual <= 9.0:
+    elif nivel_atual <= 6.0:
         limite_alteracao = 0.05
+    elif nivel_atual <= 7.5:
+        limite_alteracao = 0.02
+    elif nivel_atual <= 8.5:
+        limite_alteracao = 0.03
     else:
         limite_alteracao = 0.02
         
@@ -107,7 +113,7 @@ def calcular_novo_nivel(
     return novo_nivel_preciso, tendencia
 
 
-# ────────────────────── aplicação integrada ──────────────────────
+# ---------------------- aplicação integrada ----------------------
 
 def aplicar_evolucao_pos_votacao(
     ranking_jogadores: List[Dict],
