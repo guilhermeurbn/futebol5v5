@@ -43,42 +43,41 @@ def client(app):
 
 
 class TestRateLimitingLogin:
-    """Test rate limiting on /login endpoint (max 50 per hour, 51st rejects)"""
+    """Test rate limiting on /login endpoint (max 30 per hour, 31st rejects)"""
     
-    def test_login_accepts_50_requests_per_hour(self, client, monkeypatch):
-        """Verify /login allows first 50 POST requests within an hour"""
-        for i in range(50):
+    def test_login_accepts_30_requests_per_hour(self, client, monkeypatch):
+        """Verify /login allows first 30 POST requests within an hour"""
+        for i in range(30):
             response = client.post('/login', data={
                 'username': f'user{i}',
                 'password': 'wrongpass'
             })
-            # Deve falhar autenticação, mas sem limitar antes da 51a
             assert response.status_code in [200, 401], \
                 f"Request {i+1} failed with {response.status_code}"
     
-    def test_login_rejects_51st_request_per_hour(self, client, monkeypatch):
-        """Verify /login rejects 51st POST request within an hour with 429"""
+    def test_login_rejects_31st_request_per_hour(self, client, monkeypatch):
+        """Verify /login rejects 31st POST request within an hour with 429"""
         responses = []
-        for i in range(51):
+        for i in range(31):
             response = client.post('/login', data={
                 'username': f'user{i}',
                 'password': 'wrongpass'
             })
             responses.append(response.status_code)
 
-        assert responses[50] == 429, \
-            f"51st request should be rate limited (429), got {responses[50]}"
-        for idx, code in enumerate(responses[:50]):
+        assert responses[30] == 429, \
+            f"31st request should be rate limited (429), got {responses[30]}"
+        for idx, code in enumerate(responses[:30]):
             assert code != 429, \
                 f"Request {idx+1} was rate limited but shouldn't be"
 
 
 class TestRateLimitingCadastro:
-    """Test rate limiting on /cadastro endpoint (max 3 per hour, 4th rejects)"""
+    """Test rate limiting on /cadastro endpoint (max 30 per hour, 31st rejects)"""
     
-    def test_cadastro_accepts_3_requests_per_hour(self, client, monkeypatch):
-        """Verify /cadastro allows first 3 POST requests within an hour"""
-        for i in range(3):
+    def test_cadastro_accepts_30_requests_per_hour(self, client, monkeypatch):
+        """Verify /cadastro allows first 30 POST requests within an hour"""
+        for i in range(30):
             response = client.post('/cadastro', data={
                 'nome': f'User {i}',
                 'email': f'user{i}_{time()}@example.com',
@@ -90,10 +89,10 @@ class TestRateLimitingCadastro:
             assert response.status_code != 429, \
                 f"Request {i+1} was rate limited but shouldn't be"
     
-    def test_cadastro_rejects_4th_request_per_hour(self, client, monkeypatch):
-        """Verify /cadastro rejects 4th POST request within an hour with 429"""
+    def test_cadastro_rejects_31st_request_per_hour(self, client, monkeypatch):
+        """Verify /cadastro rejects 31st POST request within an hour with 429"""
         responses = []
-        for i in range(4):
+        for i in range(31):
             response = client.post('/cadastro', data={
                 'nome': f'User {i}',
                 'email': f'user{i}_{time()}@example.com',
@@ -104,49 +103,49 @@ class TestRateLimitingCadastro:
             })
             responses.append(response.status_code)
 
-        assert responses[3] == 429, \
-            f"4th request should be rate limited (429), got {responses[3]}"
+        assert responses[30] == 429, \
+            f"31st request should be rate limited (429), got {responses[30]}"
 
 
 class TestRateLimitingPasswordReset:
-    """Test rate limiting on /recuperar-senha (max 3 per hour, 4th rejects)"""
+    """Test rate limiting on /recuperar-senha (max 30 per hour, 31st rejects)"""
     
-    def test_password_reset_accepts_3_requests_per_hour(self, client, monkeypatch):
-        """Verify /recuperar-senha allows first 3 POST requests within an hour"""
-        for i in range(3):
+    def test_password_reset_accepts_30_requests_per_hour(self, client, monkeypatch):
+        """Verify /recuperar-senha allows first 30 POST requests within an hour"""
+        for i in range(30):
             response = client.post('/recuperar-senha', data={
                 'email': f'user{i}@example.com'
             })
             assert response.status_code != 429, \
                 f"Request {i+1} was rate limited but shouldn't be"
     
-    def test_password_reset_rejects_4th_request_per_hour(self, client, monkeypatch):
-        """Verify /recuperar-senha rejects 4th POST request within an hour with 429"""
+    def test_password_reset_rejects_31st_request_per_hour(self, client, monkeypatch):
+        """Verify /recuperar-senha rejects 31st POST request within an hour with 429"""
         responses = []
-        for i in range(4):
+        for i in range(31):
             response = client.post('/recuperar-senha', data={
                 'email': f'user{i}@example.com'
             })
             responses.append(response.status_code)
 
-        assert responses[3] == 429, \
-            f"4th request should be rate limited (429), got {responses[3]}"
+        assert responses[30] == 429, \
+            f"31st request should be rate limited (429), got {responses[30]}"
 
 
 class TestRateLimitCounterReset:
     """Test that rate limit counters reset after time window expires"""
     
     def test_login_counter_resets_after_hour(self, monkeypatch):
-        """Verify login rate limit counter resets after 3600 seconds (1 hour)"""
+        """Verify login rate limit counter is set to 30 per hour"""
         app_source = Path(__file__).resolve().parent.parent / 'app.py'
         content = app_source.read_text(encoding='utf-8')
-        assert '"50/hour"' in content, "Rate limit window should be 3600 seconds (1 hour)"
+        assert '"30/hour"' in content, "Rate limit window should be 30 per hour"
     
     def test_cadastro_counter_resets_after_hour(self, monkeypatch):
-        """Verify signup rate limit counter resets after 3600 seconds"""
+        """Verify signup rate limit counter is set to 30 per hour"""
         app_source = Path(__file__).resolve().parent.parent / 'app.py'
         content = app_source.read_text(encoding='utf-8')
-        assert '"3/hour"' in content, "Rate limit window should be 3600 seconds (1 hour)"
+        assert '"30/hour"' in content, "Rate limit window should be 30 per hour"
 
 
 if __name__ == '__main__':

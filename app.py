@@ -198,9 +198,15 @@ def criar_app(config_name: str = None) -> Flask:
         csrf.exempt(app.view_functions['auth.vincular_social'])
     
     # Apply rate limiting to auth endpoints (after blueprint registration)
-    app.view_functions['auth.login_submit'] = limiter.limit("50/hour")(app.view_functions['auth.login_submit'])
-    app.view_functions['auth.cadastro_submit'] = limiter.limit("3/hour")(app.view_functions['auth.cadastro_submit'])
-    app.view_functions['auth.recuperar_senha_submit'] = limiter.limit("3/hour")(app.view_functions['auth.recuperar_senha_submit'])
+    app.view_functions['auth.login_submit'] = limiter.limit("30/hour")(app.view_functions['auth.login_submit'])
+    app.view_functions['auth.cadastro_submit'] = limiter.limit("30/hour")(app.view_functions['auth.cadastro_submit'])
+    app.view_functions['auth.recuperar_senha_submit'] = limiter.limit("30/hour")(app.view_functions['auth.recuperar_senha_submit'])
+    if 'auth.checar_username' in app.view_functions:
+        app.view_functions['auth.checar_username'] = limiter.limit("30/minute")(app.view_functions['auth.checar_username'])
+    if 'auth.checar_email' in app.view_functions:
+        app.view_functions['auth.checar_email'] = limiter.limit("30/minute")(app.view_functions['auth.checar_email'])
+    if 'auth.sugerir_username' in app.view_functions:
+        app.view_functions['auth.sugerir_username'] = limiter.limit("30/minute")(app.view_functions['auth.sugerir_username'])
     
     app.register_blueprint(jogador_bp)
     app.register_blueprint(partida_bp)

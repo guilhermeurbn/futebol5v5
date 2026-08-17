@@ -387,6 +387,65 @@ def checar_username():
     return jsonify({'available': True, 'message': f'✓ @{username} está disponível!'})
 
 
+@auth_bp.route('/checar-email', methods=['GET'])
+def checar_email():
+    """Verifica instantaneamente a disponibilidade e validade de um e-mail no cadastro"""
+    email = request.args.get('email', '').strip().lower()
+    if not email:
+        return jsonify({'available': False, 'message': 'Digite um e-mail'}), 400
+    if '@' not in email or '.' not in email.split('@')[-1]:
+        return jsonify({'available': False, 'message': 'E-mail em formato inválido'}), 400
+    
+    usuarios = auth_service._carregar()
+    existe = any((u.get('email') or '').strip().lower() == email for u in usuarios)
+    if existe:
+        return jsonify({'available': False, 'message': '✗ Este e-mail já está cadastrado em outra conta.'})
+    return jsonify({'available': True, 'message': '✓ E-mail disponível!'})
+
+
+@auth_bp.route('/sugerir-username', methods=['GET'])
+def sugerir_username():
+    """Gera uma sugestão limpa e disponível de username a partir do nome do usuário"""
+    nome = request.args.get('nome', '').strip()
+    if not nome:
+        return jsonify({'suggestion': '', 'available': False, 'message': 'Nome não informado'}), 400
+
+    import unicodedata
+    import re
+
+    # Normalizar removendo acentos e caracteres especiais
+    nome_nfkd = unicodedata.normalize('NFKD', nome)
+    slug = "".join([c for c in nome_nfkd if not unicodedata.combining(c)])
+    slug = slug.lower().strip()
+    partes = [re.sub(r'[^a-z0-9]', '', p) for p in slug.split() if p]
+
+    if not partes:
+        base_user = "jogador"
+    elif len(partes) == 1:
+        base_user = partes[0]
+    else:
+        base_user = f"{partes[0]}_{partes[-1]}"
+
+    if len(base_user) < 3:
+        base_user = f"{base_user}_fc"
+
+    usuarios = auth_service._carregar()
+    existing_usernames = {(u.get('username') or '').strip().lower() for u in usuarios if u.get('username')}
+
+    candidate = base_user
+    counter = 1
+    while candidate in existing_usernames and counter < 100:
+        candidate = f"{base_user}{counter}"
+        counter += 1
+
+    available = candidate not in existing_usernames
+    return jsonify({
+        'suggestion': candidate,
+        'available': available,
+        'message': f"✓ Sugestão livre: @{candidate}" if available else "✗ Username em uso"
+    })
+
+
 @auth_bp.route('/vincular-social', methods=['POST'])
 def vincular_social():
     """Endpoint para vincular conta Google ou Apple ao perfil do usuário logado"""
@@ -573,24 +632,35 @@ def cadastro_page():
 @auth_bp.route('/cadastro', methods=['POST'])
 def cadastro_submit():
     """Handler para submit de cadastro"""
-    nome = request.form.get('nome', '').strip()
-    email = request.form.get('email', '').strip().lower()
-    username = request.form.get('username', '').strip()
-    senha = request.form.get('password', '')
-    confirmar = request.form.get('confirmar_password', '')
-    nivel = request.form.get('nivel', '5.5')
-    tipo = request.form.get('tipo', 'avulso')
-    posicao = request.form.get('posicao', 'linha')
+    is_json = request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.headers.get('Accept') == 'application/json'
+    data = request.get_json(silent=True) if request.is_json else request.form
+
+    nome = (data.get('nome') or '').strip()
+    email = (data.get('email') or '').strip().lower()
+    username = (data.get('username') or '').strip()
+    senha = data.get('password') or ''
+    confirmar = data.get('confirmar_password') or senha
+    nivel = data.get('nivel', '5.5')
+    tipo = data.get('tipo', 'avulso')
+    posicao = data.get('posicao', 'linha')
 
     if not email or '@' not in email:
+        if is_json:
+            return jsonify({'success': False, 'error': 'Informe um e-mail válido'}), 400
         return render_template('cadastro.html', erro='Informe um email valido'), 400
     if senha != confirmar:
+        if is_json:
+            return jsonify({'success': False, 'error': 'A confirmação de senha não confere'}), 400
         return render_template('cadastro.html', erro='A confirmacao de senha nao confere'), 400
 
     if not nome or len(nome) < 2:
+        if is_json:
+            return jsonify({'success': False, 'error': 'Nome deve ter ao menos 2 caracteres'}), 400
         return render_template('cadastro.html', erro='Nome deve ter ao menos 2 caracteres'), 400
     nome_partes = [p for p in nome.split() if p]
     if len(nome_partes) < 2:
+        if is_json:
+            return jsonify({'success': False, 'error': 'Por favor, digite seu nome e sobrenome.'}), 400
         return render_template('cadastro.html', erro='Por favor, digite seu nome e sobrenome.'), 400
 
     try:
@@ -644,6 +714,22 @@ def cadastro_submit():
             tipo='cadastro'
         )
 
+        if is_json or request.args.get('auto_login') == '1':
+            session.permanent = True
+            session['remember_me'] = True
+            session['user_id'] = usuario['id']
+            session['username'] = usuario['username']
+            session['nome'] = usuario['nome']
+            session['role'] = usuario.get('role', 'usuario')
+            session.modified = True
+
+            return jsonify({
+                'success': True,
+                'status': 'logged_in',
+                'message': 'Cadastro realizado com sucesso!',
+                'redirect_url': url_for('auth.perfil_page')
+            })
+
         return render_template(
             'login.html',
             sucesso='Cadastro realizado com sucesso! Entre com seu usuario e senha.'
@@ -654,8 +740,12 @@ def cadastro_submit():
             msg = "Este nome de usuário já está em uso. Por favor, escolha outro."
         elif msg == "Email ja existe":
             msg = "Este e-mail já está em uso. Por favor, escolha outro."
+        if is_json:
+            return jsonify({'success': False, 'error': msg}), 400
         return render_template('cadastro.html', erro=msg), 400
     except Exception as e:
+        if is_json:
+            return jsonify({'success': False, 'error': 'Erro ao criar conta'}), 500
         return render_template('cadastro.html', erro='Erro ao criar usuario'), 500
 
 

@@ -303,6 +303,382 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   }
+
+  // ============================================================
+  // CONTROLLER DO WIZARD DE CADASTRO (1 A 5 PERGUNTA POR VEZ)
+  // ============================================================
+  const regForm = document.getElementById('reg-wizard-form');
+  const regCounter = document.getElementById('reg-wizard-counter');
+  const regProgressFill = document.getElementById('reg-wizard-progress');
+  const regErrorBox = document.getElementById('reg-wizard-error');
+  const regErrorMsg = document.getElementById('reg-wizard-error-msg');
+  const regBtnPrev = document.getElementById('reg-btn-prev');
+  const regBtnNext = document.getElementById('reg-btn-next');
+  const regBtnFinish = document.getElementById('reg-btn-finish');
+
+  const regNomeInput = document.getElementById('reg_nome');
+  const regEmailInput = document.getElementById('reg_email');
+  const regPasswordInput = document.getElementById('reg_password');
+  const regUsernameInput = document.getElementById('reg_username');
+  const regConfirmHidden = document.getElementById('reg_confirmar_password_hidden');
+
+  const regNomeStatus = document.getElementById('reg-nome-status');
+  const regEmailStatus = document.getElementById('reg-email-status');
+  const regPwdStatus = document.getElementById('reg-pwd-status');
+  const regUserStatus = document.getElementById('reg-user-status');
+  const regStep5Status = document.getElementById('reg-step5-status');
+
+  const regSummaryName = document.getElementById('reg-summary-name-val');
+  const regSummaryUser = document.getElementById('reg-summary-user-val');
+
+  let currentRegStep = 1;
+  let emailValidAndAvailable = false;
+  let usernameValidAndAvailable = false;
+  let emailDebounceTimer = null;
+  let usernameDebounceTimer = null;
+
+  function showError(msg, step) {
+    const activeStep = step || currentRegStep;
+    let targetStatus = null;
+    let targetInput = null;
+
+    if (activeStep === 1) {
+      targetStatus = regNomeStatus;
+      targetInput = regNomeInput;
+    } else if (activeStep === 2) {
+      targetStatus = regEmailStatus;
+      targetInput = regEmailInput;
+    } else if (activeStep === 3) {
+      targetStatus = regPwdStatus;
+      targetInput = regPasswordInput;
+    } else if (activeStep === 4) {
+      targetStatus = regUserStatus;
+      targetInput = regUsernameInput;
+    } else if (activeStep === 5) {
+      targetStatus = regStep5Status;
+    }
+
+    if (targetStatus) {
+      targetStatus.textContent = `⚠ ${msg}`;
+      targetStatus.className = 'reg-live-status reg-live-status--err';
+      targetStatus.style.display = 'block';
+    }
+    if (targetInput) {
+      targetInput.classList.add('is-invalid');
+      targetInput.focus();
+    }
+  }
+
+  function clearError() {
+    [regNomeStatus, regEmailStatus, regPwdStatus, regUserStatus, regStep5Status].forEach(st => {
+      if (st && st.classList.contains('reg-live-status--err')) {
+        st.style.display = 'none';
+        st.textContent = '';
+      }
+    });
+    [regNomeInput, regEmailInput, regPasswordInput, regUsernameInput].forEach(inp => {
+      if (inp) inp.classList.remove('is-invalid');
+    });
+  }
+
+  function goToRegStep(step) {
+    clearError();
+    currentRegStep = Math.max(1, Math.min(5, step));
+
+    document.querySelectorAll('.js-reg-step').forEach(pane => {
+      const paneStep = parseInt(pane.getAttribute('data-step'), 10);
+      if (paneStep === currentRegStep) {
+        pane.style.display = 'block';
+        pane.classList.add('active');
+      } else {
+        pane.style.display = 'none';
+        pane.classList.remove('active');
+      }
+    });
+
+    if (regCounter) regCounter.innerHTML = `<strong style="color: #5bf500;">${currentRegStep}</strong> de 5`;
+    if (regProgressFill) regProgressFill.style.width = `${currentRegStep * 20}%`;
+
+    if (regBtnPrev) {
+      regBtnPrev.style.visibility = currentRegStep > 1 ? 'visible' : 'hidden';
+    }
+
+    if (regBtnNext) {
+      regBtnNext.style.display = 'flex';
+      if (currentRegStep === 5) {
+        if (regSummaryName && regNomeInput) regSummaryName.textContent = regNomeInput.value.trim();
+        if (regSummaryUser && regUsernameInput) regSummaryUser.textContent = `@${regUsernameInput.value.trim()}`;
+      }
+    }
+  }
+
+  // Validação ao vivo do Nome (Passo 1)
+  if (regNomeInput) {
+    regNomeInput.addEventListener('input', () => {
+      regNomeInput.classList.remove('is-invalid');
+      if (regNomeStatus && regNomeStatus.classList.contains('reg-live-status--err')) {
+        regNomeStatus.style.display = 'none';
+        regNomeStatus.textContent = '';
+      }
+    });
+  }
+
+  // Validação ao vivo do E-mail (Passo 2)
+  if (regEmailInput) {
+    regEmailInput.addEventListener('input', () => {
+      regEmailInput.classList.remove('is-invalid');
+      const email = regEmailInput.value.trim();
+      emailValidAndAvailable = false;
+      if (emailDebounceTimer) clearTimeout(emailDebounceTimer);
+
+      if (!email || !email.includes('@') || !email.split('@')[1]?.includes('.')) {
+        if (regEmailStatus) {
+          regEmailStatus.textContent = email.length > 0 ? '⚠ Digite um e-mail em formato válido' : '';
+          regEmailStatus.className = 'reg-live-status reg-live-status--err';
+          regEmailStatus.style.display = email.length > 0 ? 'block' : 'none';
+        }
+        return;
+      }
+
+      if (regEmailStatus) {
+        regEmailStatus.textContent = 'Verificando e-mail...';
+        regEmailStatus.className = 'reg-live-status reg-live-status--loading';
+        regEmailStatus.style.display = 'block';
+      }
+
+      emailDebounceTimer = setTimeout(async () => {
+        try {
+          const res = await fetch(`/checar-email?email=${encodeURIComponent(email)}`);
+          const data = await res.json();
+          emailValidAndAvailable = Boolean(data.available);
+          if (regEmailStatus) {
+            regEmailStatus.textContent = data.message || '';
+            regEmailStatus.className = data.available ? 'reg-live-status reg-live-status--ok' : 'reg-live-status reg-live-status--err';
+          }
+        } catch (err) {
+          console.warn('Erro ao checar e-mail:', err);
+        }
+      }, 250);
+    });
+  }
+
+  // Validação ao vivo da Senha (Passo 3)
+  if (regPasswordInput) {
+    regPasswordInput.addEventListener('input', () => {
+      const pwd = regPasswordInput.value;
+      if (regConfirmHidden) regConfirmHidden.value = pwd;
+
+      if (!pwd || pwd.length < 6) {
+        if (regPwdStatus) {
+          regPwdStatus.textContent = pwd.length > 0 ? `⚠ Faltam ${6 - pwd.length} caracteres (mínimo 6)` : '';
+          regPwdStatus.className = 'reg-live-status reg-live-status--err';
+          regPwdStatus.style.display = pwd.length > 0 ? 'block' : 'none';
+        }
+      } else {
+        if (regPwdStatus) {
+          regPwdStatus.textContent = '✓ Senha válida!';
+          regPwdStatus.className = 'reg-live-status reg-live-status--ok';
+          regPwdStatus.style.display = 'block';
+        }
+      }
+    });
+  }
+
+  // Validação ao vivo do Username (Passo 4)
+  if (regUsernameInput) {
+    regUsernameInput.addEventListener('input', () => {
+      const username = regUsernameInput.value.trim();
+      usernameValidAndAvailable = false;
+      if (usernameDebounceTimer) clearTimeout(usernameDebounceTimer);
+
+      if (!username || username.length < 3) {
+        if (regUserStatus) {
+          regUserStatus.textContent = username.length > 0 ? '⚠ Mínimo de 3 caracteres' : '';
+          regUserStatus.className = 'reg-live-status reg-live-status--err';
+          regUserStatus.style.display = username.length > 0 ? 'block' : 'none';
+        }
+        return;
+      }
+
+      if (regUserStatus) {
+        regUserStatus.textContent = 'Verificando @username...';
+        regUserStatus.className = 'reg-live-status reg-live-status--loading';
+        regUserStatus.style.display = 'block';
+      }
+
+      usernameDebounceTimer = setTimeout(async () => {
+        try {
+          const res = await fetch(`/checar-username?username=${encodeURIComponent(username)}`);
+          const data = await res.json();
+          usernameValidAndAvailable = Boolean(data.available);
+          if (regUserStatus) {
+            regUserStatus.textContent = data.message || '';
+            regUserStatus.className = data.available ? 'reg-live-status reg-live-status--ok' : 'reg-live-status reg-live-status--err';
+          }
+        } catch (err) {
+          console.warn('Erro ao checar username:', err);
+        }
+      }, 250);
+    });
+  }
+
+  // Avanço entre os Passos do Wizard
+  if (regBtnNext) {
+    regBtnNext.addEventListener('click', async (e) => {
+      e.preventDefault();
+      triggerHaptic();
+
+      // Validação do Passo 1: Nome Completo (Nome + Sobrenome)
+      if (currentRegStep === 1) {
+        const nome = regNomeInput ? regNomeInput.value.trim() : '';
+        const partes = nome.split(/\s+/).filter(Boolean);
+        if (!nome || partes.length < 2) {
+          showError('Por favor, digite seu nome e sobrenome.');
+          return;
+        }
+
+        // Sugerir Username para o Passo 4 caso ainda não tenha sido preenchido
+        try {
+          const sugRes = await fetch(`/sugerir-username?nome=${encodeURIComponent(nome)}`);
+          const sugData = await sugRes.json();
+          if (sugData.suggestion && regUsernameInput && !regUsernameInput.value) {
+            regUsernameInput.value = sugData.suggestion;
+            usernameValidAndAvailable = Boolean(sugData.available);
+            if (regUserStatus) {
+              regUserStatus.textContent = sugData.message || '';
+              regUserStatus.className = sugData.available ? 'reg-live-status reg-live-status--ok' : 'reg-live-status reg-live-status--err';
+              regUserStatus.style.display = 'block';
+            }
+          }
+        } catch (sugErr) {
+          console.warn('Erro ao obter sugestão de username:', sugErr);
+        }
+
+        goToRegStep(2);
+        return;
+      }
+
+      // Validação do Passo 2: E-mail
+      if (currentRegStep === 2) {
+        const email = regEmailInput ? regEmailInput.value.trim() : '';
+        if (!email || !email.includes('@')) {
+          showError('Por favor, informe um e-mail válido.');
+          return;
+        }
+        if (!emailValidAndAvailable) {
+          showError('Por favor, informe um e-mail válido e que não esteja cadastrado.');
+          return;
+        }
+        goToRegStep(3);
+        return;
+      }
+
+      // Validação do Passo 3: Senha
+      if (currentRegStep === 3) {
+        const pwd = regPasswordInput ? regPasswordInput.value : '';
+        if (!pwd || pwd.length < 6) {
+          showError('A senha deve ter pelo menos 6 caracteres.');
+          return;
+        }
+        goToRegStep(4);
+        return;
+      }
+
+      // Validação do Passo 4: Username
+      if (currentRegStep === 4) {
+        const username = regUsernameInput ? regUsernameInput.value.trim() : '';
+        if (!username || username.length < 3) {
+          showError('Escolha um nome de usuário com pelo menos 3 caracteres.');
+          return;
+        }
+        if (!usernameValidAndAvailable) {
+          showError('Este nome de usuário já está em uso ou é inválido. Escolha outro.');
+          return;
+        }
+        goToRegStep(5);
+        return;
+      }
+
+      // Passo 5: Submeter Formulário
+      if (currentRegStep === 5) {
+        if (regForm) regForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+        return;
+      }
+    });
+  }
+
+  if (regBtnPrev) {
+    regBtnPrev.addEventListener('click', (e) => {
+      e.preventDefault();
+      triggerHaptic();
+      goToRegStep(currentRegStep - 1);
+    });
+  }
+
+  // Submissão Final do Wizard (Passo 5)
+  if (regForm) {
+    regForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      triggerHaptic();
+
+      if (regBtnNext) {
+        regBtnNext.disabled = true;
+        regBtnNext.innerHTML = '<span>Criando conta...</span>';
+      }
+
+      const nome = regNomeInput ? regNomeInput.value.trim() : '';
+      const email = regEmailInput ? regEmailInput.value.trim() : '';
+      const password = regPasswordInput ? regPasswordInput.value : '';
+      const username = regUsernameInput ? regUsernameInput.value.trim() : '';
+      const posicaoSelect = document.getElementById('reg_posicao');
+      const posicao = posicaoSelect ? posicaoSelect.value : 'linha';
+
+      try {
+        const resp = await fetch(regForm.action, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': getCsrfToken()
+          },
+          body: JSON.stringify({
+            nome,
+            email,
+            password,
+            confirmar_password: password,
+            username,
+            posicao,
+            nivel: 5.5,
+            tipo: 'avulso'
+          })
+        });
+
+        const data = await resp.json();
+        if (data.success && data.redirect_url) {
+          window.location.href = data.redirect_url;
+        } else {
+          showError(data.error || 'Erro ao realizar cadastro. Tente novamente.');
+          if (regBtnNext) {
+            regBtnNext.disabled = false;
+            regBtnNext.innerHTML = '<span>Continuar</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px; margin-left: 6px;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
+          }
+        }
+      } catch (err) {
+        showError('Erro de conexão ao enviar cadastro.');
+        if (regBtnNext) {
+          regBtnNext.disabled = false;
+          regBtnNext.innerHTML = '<span>Continuar</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px; margin-left: 6px;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
+        }
+      }
+    });
+  }
+
+  // Resetar Wizard ao virar para o cadastro
+  if (btnShowRegister) {
+    btnShowRegister.addEventListener('click', () => {
+      goToRegStep(1);
+    });
+  }
   const socialBtns = document.querySelectorAll('.js-social-login');
   const socialModal = document.getElementById('social-username-modal');
   const socialUsernameForm = document.getElementById('social-username-form');
