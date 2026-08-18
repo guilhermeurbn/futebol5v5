@@ -247,6 +247,24 @@ def votacao_page():
             p for p in partida.get('participantes', [])
             if str(p.get('user_id')).strip() != current_uid_str and (p.get('jogador_nome') or '').strip() != meu_nome
         ]
+        
+        # Ordenar jogadores votáveis colocando o time campeão (com mais gols) primeiro
+        resultado_resumido = partida.get('resultado_resumido') or []
+        winning_team = None
+        if resultado_resumido and isinstance(resultado_resumido, list) and len(resultado_resumido) >= 2:
+            try:
+                sorted_teams = sorted(resultado_resumido, key=lambda t: int((t or {}).get('gols', 0) or 0), reverse=True)
+                if int((sorted_teams[0] or {}).get('gols', 0) or 0) > int((sorted_teams[1] or {}).get('gols', 0) or 0):
+                    winning_team = (sorted_teams[0] or {}).get('time_numero')
+            except Exception:
+                pass
+
+        if winning_team is not None:
+            jogadores_votaveis = sorted(
+                jogadores_votaveis,
+                key=lambda p: (0 if p.get('time_numero') == winning_team else 1, int(p.get('time_numero', 0) or 0), (p.get('jogador_nome') or '').lower())
+            )
+
         resultado_partida = partida.get('resultado_partida')
         
         return render_template(

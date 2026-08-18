@@ -1,8 +1,490 @@
 {% extends 'base.html' %}
 
-{% block title %}Votacao da Partida{% endblock %}
+{% block title %}Votação da Partida - NaTrave{% endblock %}
 
 {% block content %}
+<style>
+/* ============================================================
+   VOTAÇÃO DA PARTIDA - HIGH END DESIGN SYSTEM
+   ============================================================ */
+
+.voting-workspace-panel {
+    max-width: 760px;
+    margin: 0.5rem auto 3rem auto;
+    padding: 0 0.5rem;
+}
+
+/* 1. Hero Scoreboard Card (Sem radial glow verde no topo) */
+.vote-hero-card {
+    background: linear-gradient(145deg, rgba(20, 20, 30, 0.95), rgba(10, 10, 16, 0.98));
+    border: 1px solid rgba(91, 245, 0, 0.22);
+    border-radius: 24px;
+    padding: 1.4rem 1.25rem;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 1.25rem;
+}
+
+.vote-hero-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.vote-hero-tag {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #5bf500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.vote-hero-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    background: rgba(91, 245, 0, 0.12);
+    border: 1px solid rgba(91, 245, 0, 0.3);
+    color: #5bf500;
+    font-weight: 800;
+    font-size: 0.78rem;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    box-shadow: 0 0 12px rgba(91, 245, 0, 0.2);
+}
+
+.vote-hero-status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #5bf500;
+    box-shadow: 0 0 8px #5bf500;
+    animation: pulseDot 2s infinite;
+}
+
+@keyframes pulseDot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.vote-hero-title {
+    font-size: 1.35rem;
+    font-weight: 900;
+    color: #ffffff;
+    margin: 0.15rem 0 0.85rem 0;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+}
+
+/* Scoreboard Placar da Partida (Time 1 e Time 2 na mesma altura, resultado abaixo) */
+.vote-scoreboard {
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 0.85rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+}
+
+.vote-scoreboard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.vote-team-title {
+    font-size: 0.82rem;
+    font-weight: 850;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #94a3b8;
+}
+
+.vote-vs-tag {
+    font-size: 0.72rem;
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.3);
+    letter-spacing: 0.1em;
+}
+
+.vote-scoreboard-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.85rem;
+}
+
+.vote-team-score {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: #ffffff;
+    background: rgba(91, 245, 0, 0.12);
+    border: 1px solid rgba(91, 245, 0, 0.3);
+    padding: 0.25rem 1.1rem;
+    border-radius: 12px;
+    min-width: 52px;
+    text-align: center;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+.vote-score-divider {
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.vote-hero-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.vote-chip {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    color: #e2e8f0;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.32rem 0.75rem;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.vote-chip--highlight {
+    background: rgba(91, 245, 0, 0.12);
+    border-color: rgba(91, 245, 0, 0.3);
+    color: #5bf500;
+}
+
+/* 2. Progress & Instruction Header */
+.vote-progress-card {
+    background: rgba(18, 18, 26, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 1.15rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    backdrop-filter: blur(14px);
+    margin-bottom: 1.25rem;
+}
+
+.vote-progress-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.65rem;
+}
+
+.vote-progress-title {
+    font-size: 1.15rem;
+    font-weight: 850;
+    color: #ffffff;
+    margin: 0;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.vote-progress-subtitle {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin: 0.2rem 0 0 0;
+    font-weight: 500;
+}
+
+.vote-progress-badge {
+    background: rgba(91, 245, 0, 0.12);
+    border: 1px solid rgba(91, 245, 0, 0.3);
+    color: #5bf500;
+    font-weight: 850;
+    font-size: 0.92rem;
+    padding: 0.35rem 0.85rem;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: all 0.3s ease;
+}
+
+.vote-progress-badge.is-complete {
+    background: #5bf500;
+    color: #000000;
+    border-color: #5bf500;
+    box-shadow: 0 0 16px rgba(91, 245, 0, 0.4);
+}
+
+/* Track Bar */
+.vote-track-container {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 0.75rem;
+}
+
+.vote-track-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #5bf500, #4ade80);
+    border-radius: 999px;
+    transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 0 10px rgba(91, 245, 0, 0.5);
+}
+
+/* 3. Player Cards Design */
+.votacao-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.votacao-card {
+    background: rgba(18, 18, 26, 0.85) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 20px !important;
+    padding: 1.15rem 1.25rem !important;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.votacao-card.is-active {
+    border-color: rgba(91, 245, 0, 0.45) !important;
+    background: rgba(24, 26, 36, 0.95) !important;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5), 0 0 20px rgba(91, 245, 0, 0.08) !important;
+}
+
+.votacao-card__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.85rem;
+}
+
+.vote-card-player-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.vote-player-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(91, 245, 0, 0.4);
+    background: rgba(255, 255, 255, 0.05);
+    flex-shrink: 0;
+}
+
+/* Fundo preto com texto branco na inicial do jogador */
+.vote-player-avatar-fallback {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #000000 !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.18) !important;
+    color: #ffffff !important;
+    font-weight: 900;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+.votacao-card__name {
+    font-size: 1.05rem;
+    font-weight: 850;
+    color: #ffffff;
+    line-height: 1.2;
+}
+
+.votacao-card-team-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.18rem 0.55rem;
+    font-size: 0.72rem;
+    font-weight: 800;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #94a3b8;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    margin-top: 0.25rem;
+    transition: all 0.2s ease;
+}
+
+.votacao-card.is-active .votacao-card-team-badge {
+    background: rgba(91, 245, 0, 0.12);
+    color: #5bf500;
+    border-color: rgba(91, 245, 0, 0.25);
+}
+
+/* Score Display Badge (Apenas número, sem palavra, tamanho certinho) */
+.vote-score-badge {
+    min-width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #94a3b8;
+    font-size: 0.95rem;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.55rem;
+    transition: all 0.2s ease;
+}
+
+.votacao-card.is-active .vote-score-badge {
+    background: rgba(91, 245, 0, 0.15);
+    border-color: rgba(91, 245, 0, 0.35);
+    color: #5bf500;
+    box-shadow: 0 0 14px rgba(91, 245, 0, 0.2);
+}
+
+/* Custom Slider Styling */
+.votacao-slider-wrap {
+    margin-top: 0.75rem;
+}
+
+.votacao-slider {
+    width: 100%;
+    height: 38px;
+    accent-color: #5bf500;
+    cursor: pointer;
+    background: transparent;
+    -webkit-appearance: none;
+}
+
+.votacao-slider::-webkit-slider-runnable-track {
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    transition: background 0.2s ease;
+}
+
+.votacao-slider::-webkit-slider-thumb {
+    width: 26px;
+    height: 26px;
+    margin-top: -9px;
+    border: 2.5px solid #000000;
+    border-radius: 50%;
+    background: #5bf500;
+    box-shadow: 0 4px 14px rgba(91, 245, 0, 0.4);
+    -webkit-appearance: none;
+    transition: transform 0.12s ease, background 0.2s ease;
+}
+
+.votacao-slider:active::-webkit-slider-thumb {
+    transform: scale(1.22);
+    box-shadow: 0 0 20px #5bf500;
+}
+
+/* Quick Tap Pills (Sem emojis) */
+.vote-quick-pills {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.35rem;
+    margin-top: 0.65rem;
+    padding-top: 0.55rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.vote-quick-btn {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    color: #94a3b8;
+    font-size: 0.76rem;
+    font-weight: 800;
+    padding: 0.35rem 0;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.vote-quick-btn:hover, .vote-quick-btn:active {
+    background: rgba(91, 245, 0, 0.12);
+    border-color: rgba(91, 245, 0, 0.3);
+    color: #5bf500;
+}
+
+.vote-quick-btn.active {
+    background: #5bf500 !important;
+    border-color: #5bf500 !important;
+    color: #000000 !important;
+    box-shadow: 0 2px 10px rgba(91, 245, 0, 0.3);
+}
+
+/* 4. Action & Submit Bar */
+.vote-action-footer {
+    position: sticky;
+    bottom: 1rem;
+    z-index: 100;
+    margin-top: 1.5rem;
+    padding: 0.75rem 1rem;
+    background: rgba(14, 14, 20, 0.92);
+    border: 1px solid rgba(91, 245, 0, 0.3);
+    border-radius: 20px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), 0 0 24px rgba(91, 245, 0, 0.15);
+    backdrop-filter: blur(16px);
+}
+
+.vote-submit-btn {
+    width: 100%;
+    height: 52px;
+    border-radius: 14px !important;
+    font-size: 1.02rem !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.01em;
+    background: #5bf500 !important;
+    color: #000000 !important;
+    border: none !important;
+    box-shadow: 0 6px 20px rgba(91, 245, 0, 0.35) !important;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.vote-submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(91, 245, 0, 0.5) !important;
+}
+
+.vote-submit-btn:disabled {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #64748b !important;
+    box-shadow: none !important;
+    cursor: not-allowed;
+    transform: none !important;
+}
+</style>
+
 <div class="container page-container-wide player-workspace-page" style="background: #000000 !important;">
     <header class="header">
         <div class="header-content">
@@ -14,14 +496,17 @@
 
     <main class="main">
         {% if erro %}
-            <div class="alert alert-warning"><strong>⚠️</strong> {{ erro }}</div>
+            <div class="alert alert-warning" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; border-radius: 14px; display: flex; align-items: center; gap: 0.5rem;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span>{{ erro }}</span>
+            </div>
         {% endif %}
 
         {% if not partida %}
             <div style="max-width: 720px; margin: 2rem auto 4rem auto; padding: 0 1rem;">
-                <div style="background: rgba(18, 18, 23, 0.96); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 24px; padding: 2.8rem 2rem; text-align: center; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.1rem;">
+                <div style="background: rgba(18, 18, 23, 0.96); border: 1px solid rgba(91, 245, 0, 0.3); border-radius: 24px; padding: 2.8rem 2rem; text-align: center; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.1rem;">
                     
-                    <div style="width: 68px; height: 68px; border-radius: 20px; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); color: #22c55e; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 24px rgba(34, 197, 94, 0.18);">
+                    <div style="width: 68px; height: 68px; border-radius: 20px; background: rgba(91, 245, 0, 0.1); border: 1px solid rgba(91, 245, 0, 0.3); color: #5bf500; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 24px rgba(91, 245, 0, 0.18);">
                         <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="2" y="4" width="20" height="16" rx="2"/>
                             <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
@@ -35,7 +520,7 @@
                         </p>
                     </div>
 
-                    <div style="display: inline-flex; align-items: center; gap: 0.55rem; padding: 0.55rem 1.2rem; background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.22); border-radius: 999px; color: #bbf7d0; font-size: 0.83rem; font-weight: 700; margin-top: 0.4rem;">
+                    <div style="display: inline-flex; align-items: center; gap: 0.55rem; padding: 0.55rem 1.2rem; background: rgba(91, 245, 0, 0.08); border: 1px solid rgba(91, 245, 0, 0.22); border-radius: 999px; color: #5bf500; font-size: 0.83rem; font-weight: 700; margin-top: 0.4rem;">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10"/>
                             <polyline points="12 6 12 12 16 14"/>
@@ -45,120 +530,275 @@
                 </div>
             </div>
         {% elif voto %}
-            <section class="section">
-                <div class="surface-panel surface-panel--accent">
-                    <div class="section-label">Voto registrado</div>
-                    <h2 class="section-title" style="margin-top: 0;">Você já votou nesta partida</h2>
-                    <p class="text-secondary">Seu voto foi salvo com sucesso!</p>
-                    <div class="summary-grid" style="margin-top: var(--spacing-lg);">
-                        <div class="summary-card summary-card--primary">
-                            <div class="summary-card__label">Jogadores avaliados</div>
-                            <div class="summary-card__value">{{ voto.votos|length }}</div>
+            <section class="section voting-workspace-panel">
+                
+                <!-- 1. Hero Confirmation Card -->
+                <div class="vote-hero-card">
+                    <div class="vote-hero-top">
+                        <div class="vote-hero-tag">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            VOTO CONFIRMADO
                         </div>
-                        <div class="summary-card summary-card--secondary">
-                            <div class="summary-card__label">Última atualização</div>
-                            <div class="summary-card__value--large">OK</div>
-                            <div class="summary-card__subtext">{{ voto.atualizado_em|dt_pt_hm }}</div>
+                        <span class="vote-hero-status" style="background: rgba(91, 245, 0, 0.15); border-color: rgba(91, 245, 0, 0.35);">
+                            <span class="vote-hero-status-dot"></span>
+                            Computado
+                        </span>
+                    </div>
+
+                    <h2 class="vote-hero-title">Sua Avaliação da Rodada</h2>
+                    <p style="color: #94a3b8; font-size: 0.9rem; margin-top: -0.4rem; margin-bottom: 1.1rem; line-height: 1.5;">
+                        Sua avaliação foi salva e computada no ranking oficial da temporada dos jogadores!
+                    </p>
+
+                    <!-- Placar da Partida -->
+                    {% if partida and partida.resultado_resumido %}
+                    <div class="vote-scoreboard">
+                        {% set t1 = partida.resultado_resumido[0] if partida.resultado_resumido|length > 0 else {'gols': 0, 'time_numero': 1} %}
+                        {% set t2 = partida.resultado_resumido[1] if partida.resultado_resumido|length > 1 else {'gols': 0, 'time_numero': 2} %}
+                        
+                        <div class="vote-scoreboard-header">
+                            <span class="vote-team-title">Time {{ t1.time_numero }}</span>
+                            <span class="vote-vs-tag">VS</span>
+                            <span class="vote-team-title">Time {{ t2.time_numero }}</span>
+                        </div>
+
+                        <div class="vote-scoreboard-body">
+                            <span class="vote-team-score">{{ t1.gols }}</span>
+                            <span class="vote-score-divider">-</span>
+                            <span class="vote-team-score">{{ t2.gols }}</span>
                         </div>
                     </div>
-                    {% if auth_user.role in ['admin'] %}
-                    <a href="{{ url_for('jogador.historico') }}" class="btn btn-primary">Ver histórico</a>
+                    {% endif %}
+
+                    <!-- Meta Badges -->
+                    <div class="vote-hero-chips">
+                        <span class="vote-chip">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                            </svg>
+                            {{ participante.jogador_nome if participante else (usuario.nome or usuario.username) }}
+                        </span>
+                        {% if participante and participante.time_numero %}
+                        <span class="vote-chip vote-chip--highlight">
+                            Time {{ participante.time_numero }}
+                        </span>
+                        {% endif %}
+                        <span class="vote-chip">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            {{ voto.atualizado_em|dt_pt_hm }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- 2. Metrics Summary Grid -->
+                {% set total_notas = namespace(soma=0, max_nota=0, max_jogador='') %}
+                {% for item in voto.votos %}
+                    {% set n = item.nota|float %}
+                    {% set total_notas.soma = total_notas.soma + n %}
+                    {% if n > total_notas.max_nota %}
+                        {% set total_notas.max_nota = n %}
+                        {% set total_notas.max_jogador = item.jogador_nome %}
+                    {% endif %}
+                {% endfor %}
+                {% set media_dada = (total_notas.soma / (voto.votos|length))|round(1) if voto.votos|length > 0 else 0 %}
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem; margin-bottom: 1.25rem;">
+                    <div style="background: rgba(18, 18, 26, 0.9); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; padding: 1rem; text-align: center;">
+                        <div style="font-size: 0.72rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem;">Avaliados</div>
+                        <div style="font-size: 1.6rem; font-weight: 900; color: #ffffff;">{{ voto.votos|length }}</div>
+                    </div>
+
+                    <div style="background: rgba(18, 18, 26, 0.9); border: 1px solid rgba(91, 245, 0, 0.25); border-radius: 18px; padding: 1rem; text-align: center;">
+                        <div style="font-size: 0.72rem; font-weight: 800; color: #5bf500; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem;">Média Dada</div>
+                        <div style="font-size: 1.6rem; font-weight: 900; color: #5bf500;">{{ media_dada }}</div>
+                    </div>
+
+                    <div style="background: rgba(18, 18, 26, 0.9); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; padding: 1rem; text-align: center;">
+                        <div style="font-size: 0.72rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem;">Maior Nota</div>
+                        <div style="font-size: 1.6rem; font-weight: 900; color: #f59e0b;">{{ total_notas.max_nota }}</div>
+                    </div>
+
+                    <div style="background: rgba(18, 18, 26, 0.9); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; padding: 1rem; text-align: center;">
+                        <div style="font-size: 0.72rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem;">Status</div>
+                        <div style="font-size: 1.1rem; font-weight: 900; color: #4ade80; margin-top: 0.3rem;">Computado</div>
+                    </div>
+                </div>
+
+                <!-- 3. Given Ratings Breakdown List -->
+                <div style="background: rgba(18, 18, 26, 0.9); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 20px; padding: 1.25rem; margin-bottom: 1.5rem;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid rgba(255, 255, 255, 0.06);">
+                        <h3 style="font-size: 1.1rem; font-weight: 850; color: #ffffff; margin: 0; display: flex; align-items: center; gap: 0.45rem;">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5bf500" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                            Sua Ficha de Avaliações
+                        </h3>
+                        <span style="font-size: 0.78rem; font-weight: 700; color: #94a3b8;">{{ voto.votos|length }} jogadores</span>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 0.65rem;">
+                        {% for item in voto.votos %}
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0.9rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 14px;">
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <div class="vote-player-avatar-fallback" style="width: 38px; height: 38px; font-size: 0.95rem;">
+                                    {{ item.jogador_nome[:1]|upper }}
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.95rem; font-weight: 850; color: #ffffff; line-height: 1.2;">{{ item.jogador_nome }}</div>
+                                    {% if item.time_numero %}
+                                    <span class="votacao-card-team-badge" style="font-size: 0.68rem; padding: 0.12rem 0.45rem; margin-top: 0.15rem;">Time {{ item.time_numero }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <div class="vote-score-badge" style="background: rgba(91, 245, 0, 0.12); border-color: rgba(91, 245, 0, 0.3); color: #5bf500; font-size: 0.92rem; min-width: 38px; height: 38px;">
+                                    {{ item.nota }}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- 4. Navigation Action Buttons -->
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <a href="{{ url_for('jogador_crud.index') }}" class="btn btn-primary" style="width: 100%; height: 50px; border-radius: 14px; background: #5bf500 !important; color: #000000 !important; font-weight: 900; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; text-decoration: none; border: none;">
+                        <span>Ir para Página Inicial</span>
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </a>
+                    {% if auth_user and auth_user.role in ['admin'] %}
+                    <a href="{{ url_for('jogador.historico') }}" class="btn" style="width: 100%; height: 46px; border-radius: 14px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); color: #ffffff; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; text-decoration: none;">
+                        <span>Ver Histórico de Partidas</span>
+                    </a>
                     {% endif %}
                 </div>
+
             </section>
         {% else %}
-            <section class="section voting-workspace-panel" style="margin-top: 1rem;">
+            <section class="section voting-workspace-panel">
                 
-                <!-- Hero Header Card da Votação -->
-                <div class="vote-mobile-hero" style="background: linear-gradient(145deg, rgba(24, 24, 36, 0.95), rgba(14, 14, 22, 0.98)); border: 1px solid rgba(34, 197, 94, 0.25); border-radius: 20px; padding: 1.25rem; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); backdrop-filter: blur(16px); position: relative; overflow: hidden; margin-bottom: 1.25rem;">
-                    
-                    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.85rem;">
-                        <div>
-                            <div style="font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #4ade80; display: inline-flex; align-items: center; gap: 0.35rem;">
-                                <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 13px; height: 13px; color: #4ade80;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                                Rodada
-                            </div>
-                            <h2 style="font-size: 1.3rem; font-weight: 900; color: #ffffff; margin-top: 0.2rem; margin-bottom: 0; line-height: 1.25; letter-spacing: -0.01em;">{{ partida.titulo }}</h2>
+                <!-- 1. Hero Card da Rodada (vote-mobile-hero mantido para compatibilidade) -->
+                <div class="vote-hero-card vote-mobile-hero">
+                    <div class="vote-hero-top">
+                        <div class="vote-hero-tag">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                            RODADA DE JOGO
                         </div>
-                        <span style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(34, 197, 94, 0.12); border: 1px solid rgba(34, 197, 94, 0.3); color: #4ade80; font-weight: 800; font-size: 0.78rem; padding: 0.35rem 0.8rem; border-radius: 20px; flex-shrink: 0;">
-                            <span style="width: 7px; height: 7px; border-radius: 50%; background: #4ade80;"></span>
+                        <span class="vote-hero-status">
+                            <span class="vote-hero-status-dot"></span>
                             Aberta
                         </span>
                     </div>
 
-                    <!-- Meta Badges -->
-                    <div class="vote-mobile-chips" style="display: flex; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 0.85rem;">
-                        <span style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #f8fafc; font-size: 0.78rem; font-weight: 700; padding: 0.3rem 0.7rem; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.35rem;">
-                            <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 12px; height: 12px; color: #a78bfa;"><path d="M19 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                            {{ participante.jogador_nome }}
-                        </span>
-                        <span style="background: rgba(34, 197, 94, 0.12); border: 1px solid rgba(34, 197, 94, 0.3); color: #4ade80; font-size: 0.78rem; font-weight: 800; padding: 0.3rem 0.7rem; border-radius: 10px;">
-                            Time {{ participante.time_numero }}
-                        </span>
-                        <span style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); color: #94a3b8; font-size: 0.78rem; font-weight: 600; padding: 0.3rem 0.7rem; border-radius: 10px;">
-                            🕒 {{ partida.aberta_em|dt_pt_hm if partida.aberta_em else 'Agora' }}
-                        </span>
-                    </div>
+                    <h2 class="vote-hero-title">{{ partida.titulo }}</h2>
 
-                    <!-- Resumo dos Gols da Partida -->
-                    {% if resultado_partida %}
-                    <div style="background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 0.65rem 0.85rem; display: flex; align-items: center; justify-content: space-around; gap: 0.5rem; margin-top: 0.5rem;">
-                        {% for time in partida.resultado_resumido %}
-                        <div style="display: flex; align-items: center; gap: 0.4rem;">
-                            <span style="font-size: 0.78rem; font-weight: 700; color: #94a3b8;">Time {{ time.time_numero }}:</span>
-                            <span style="font-size: 0.88rem; font-weight: 900; color: #ffffff; background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.3); padding: 0.15rem 0.55rem; border-radius: 8px;">{{ time.gols }} gol{{ '' if time.gols == 1 else 's' }}</span>
+                    <!-- Placar de Gols da Partida (Time 1 e Time 2 alinhados na mesma altura, placar abaixo) -->
+                    {% if partida.resultado_resumido %}
+                    <div class="vote-scoreboard">
+                        {% set t1 = partida.resultado_resumido[0] if partida.resultado_resumido|length > 0 else {'gols': 0, 'time_numero': 1} %}
+                        {% set t2 = partida.resultado_resumido[1] if partida.resultado_resumido|length > 1 else {'gols': 0, 'time_numero': 2} %}
+                        
+                        <div class="vote-scoreboard-header">
+                            <span class="vote-team-title">Time {{ t1.time_numero }}</span>
+                            <span class="vote-vs-tag">VS</span>
+                            <span class="vote-team-title">Time {{ t2.time_numero }}</span>
                         </div>
-                        {% endfor %}
+
+                        <div class="vote-scoreboard-body">
+                            <span class="vote-team-score">{{ t1.gols }}</span>
+                            <span class="vote-score-divider">-</span>
+                            <span class="vote-team-score">{{ t2.gols }}</span>
+                        </div>
                     </div>
                     {% endif %}
+
+                    <!-- Meta Badges (vote-mobile-chips mantido) -->
+                    <div class="vote-hero-chips vote-mobile-chips">
+                        <span class="vote-chip">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                            </svg>
+                            {{ participante.jogador_nome }}
+                        </span>
+                        <span class="vote-chip vote-chip--highlight">
+                            Time {{ participante.time_numero }}
+                        </span>
+                        <span class="vote-chip">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            {{ partida.aberta_em|dt_pt_hm if partida.aberta_em else 'Agora' }}
+                        </span>
+                    </div>
                 </div>
 
-                <div class="vote-mobile-form-section" style="border: none !important; background: transparent !important; box-shadow: none !important; padding: 0 !important; margin-top: 1rem;">
+                <div class="vote-mobile-form-section" style="border: none !important; background: transparent !important; box-shadow: none !important; padding: 0 !important;">
                     <form method="post" action="{{ url_for('jogador.votacao_salvar') }}" class="votacao-form-container" id="votacaoForm" data-votacao-form>
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="partida_id" value="{{ partida.id }}">
 
-                        <!-- Card de Instrução e Progresso das Notas -->
-                        <div class="votacao-intro" style="background: rgba(22, 22, 30, 0.85); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 1.1rem; box-shadow: 0 4px 20px rgba(0,0,0,0.25); backdrop-filter: blur(12px); margin-bottom: 1.25rem;">
-                            <div class="votacao-intro__header" style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;">
+                        <!-- 2. Card de Instrução & Barra de Progresso -->
+                        <div class="vote-progress-card">
+                            <div class="vote-progress-header">
                                 <div>
-                                    <div style="font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #a78bfa; display: flex; align-items: center; gap: 0.3rem;">
-                                        <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 12px; height: 12px; color: #a78bfa;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                                        Avaliação
-                                    </div>
-                                    <h3 class="votacao-intro__title" style="font-size: 1.15rem; font-weight: 800; color: #ffffff; margin-top: 0.2rem; margin-bottom: 0;">Avalie 5+ jogadores</h3>
+                                    <h3 class="vote-progress-title">
+                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#5bf500" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                        Avalie 5+ jogadores
+                                    </h3>
+                                    <p class="vote-progress-subtitle">Deslize o controle ou toque nas notas rápidas</p>
                                 </div>
-                                <div class="votacao-progress">
-                                    <span class="votacao-progress__badge" id="notas-progresso-badge" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(16, 185, 129, 0.1)); border: 1px solid rgba(34, 197, 94, 0.35); color: #4ade80; font-weight: 800; font-size: 0.95rem; padding: 0.35rem 0.85rem; border-radius: 12px; display: inline-flex; align-items: center; gap: 0.2rem;"><span id="notas-preenchidas">0</span>/5</span>
-                                </div>
+                                <span class="vote-progress-badge" id="notas-progresso-badge">
+                                    <span id="notas-preenchidas">0</span>/5
+                                </span>
+                            </div>
+                            
+                            <!-- Track Fill Bar -->
+                            <div class="vote-track-container">
+                                <div id="vote-progress-bar" class="vote-track-fill"></div>
                             </div>
                         </div>
 
+                        <!-- 3. Lista de Cards dos Jogadores (Time campeão ordenado primeiro via backend) -->
                         <div class="votacao-list">
                             {% for j in jogadores_votaveis %}
                             <div class="votacao-card" data-card-index="{{ loop.index0 }}">
                                 <div class="votacao-card__top">
-                                    <div style="display: flex; align-items: center; gap: 0.65rem;">
+                                    <div class="vote-card-player-info">
                                         {% if j.foto_url %}
-                                        <img src="{{ j.foto_url }}" alt="{{ j.jogador_nome }}" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1.5px solid rgba(34, 197, 94, 0.4); flex-shrink: 0;" onerror="this.style.display='none';">
+                                        <img src="{{ j.foto_url }}" alt="{{ j.jogador_nome }}" class="vote-player-avatar" onerror="this.style.display='none';">
+                                        {% else %}
+                                        <div class="vote-player-avatar-fallback">
+                                            {{ j.jogador_nome[:1]|upper }}
+                                        </div>
                                         {% endif %}
                                         <div>
                                             <div class="votacao-card__name">{{ j.jogador_nome }}</div>
-                                            <div style="margin-top: 0.25rem;">
-                                                <span class="votacao-card-team-badge">Time {{ j.time_numero }}</span>
-                                            </div>
+                                            <span class="votacao-card-team-badge">Time {{ j.time_numero }}</span>
                                         </div>
                                     </div>
-                                    <div class="votacao-card__score" data-score-for="{{ loop.index0 }}">0.0</div>
+
+                                    <!-- Score Display Badge (Apenas o número, sem palavras, tamanho perfeito) -->
+                                    <div class="votacao-card__score" data-score-for="{{ loop.index0 }}">
+                                        <div class="vote-score-badge">
+                                            <span class="vote-score-val" data-score-val="{{ loop.index0 }}">0.0</span>
+                                        </div>
+                                    </div>
                                 </div>
 
+                                <!-- Slider Input -->
                                 <div class="votacao-slider-wrap" style="touch-action: manipulation; -webkit-tap-highlight-color: transparent;">
                                     <input class="votacao-slider" type="range" min="0" max="10" step="0.5" value="0" name="nota" data-score-index="{{ loop.index0 }}" style="touch-action: manipulation; cursor: pointer; -webkit-tap-highlight-color: transparent;">
-                                    <div class="votacao-slider-labels">
-                                        <span>0</span>
-                                        <span>5</span>
-                                        <span>10</span>
-                                    </div>
+                                </div>
+
+                                <!-- Quick Rate Touch Pills (Sem emojis) -->
+                                <div class="vote-quick-pills">
+                                    <div class="vote-quick-btn" data-target-idx="{{ loop.index0 }}" data-val="5">5.0</div>
+                                    <div class="vote-quick-btn" data-target-idx="{{ loop.index0 }}" data-val="6">6.0</div>
+                                    <div class="vote-quick-btn" data-target-idx="{{ loop.index0 }}" data-val="7">7.0</div>
+                                    <div class="vote-quick-btn" data-target-idx="{{ loop.index0 }}" data-val="8">8.0</div>
+                                    <div class="vote-quick-btn" data-target-idx="{{ loop.index0 }}" data-val="9">9.0</div>
+                                    <div class="vote-quick-btn" data-target-idx="{{ loop.index0 }}" data-val="10">10.0</div>
                                 </div>
 
                                 <input type="hidden" name="jogador_nome" value="{{ j.jogador_nome }}">
@@ -167,12 +807,24 @@
                             {% endfor %}
                         </div>
 
-                        <div id="aviso-obrigatorios" class="alert alert-warning" style="display:none; margin-top: 1rem;">
-                            Você precisa dar nota para pelo menos 5 jogadores.
+                        <!-- Banner Alerta se tentar enviar sem o mínimo (Lucide icon) -->
+                        <div id="aviso-obrigatorios" class="alert alert-warning" style="display:none; margin-top: 1.25rem; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; border-radius: 14px;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                <span>Você precisa dar nota para pelo menos 5 jogadores.</span>
+                            </div>
                         </div>
 
-                        <div class="vote-mobile-submit">
-                            <button class="btn btn-primary" type="submit">Salvar</button>
+                        <!-- 4. Floating Action Submit Bar -->
+                        <div class="vote-action-footer">
+                            <button class="btn btn-primary vote-submit-btn" type="submit" id="btn-salvar-votos" disabled>
+                                <span id="btn-salvar-texto">Avalie mais 5 jogadores</span>
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    <polyline points="12 5 19 12 12 19"></polyline>
+                                </svg>
+                                <span style="display:none;">>Salvar</button></span>
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -192,12 +844,34 @@
         const contador = document.getElementById('notas-preenchidas');
         if (contador) contador.textContent = String(notasCount);
 
+        const fillBar = document.getElementById('vote-progress-bar');
+        if (fillBar) {
+            const pct = Math.min(100, Math.round((notasCount / minReq) * 100));
+            fillBar.style.width = pct + '%';
+        }
+
         const badgeProgresso = document.getElementById('notas-progresso-badge');
         if (badgeProgresso) {
             if (notasCount >= minReq && minReq > 0) {
                 badgeProgresso.classList.add('is-complete');
+                badgeProgresso.innerHTML = `✓ ${notasCount}/${minReq}`;
             } else {
                 badgeProgresso.classList.remove('is-complete');
+                badgeProgresso.innerHTML = `<span id="notas-preenchidas">${notasCount}</span>/${minReq}`;
+            }
+        }
+
+        // Atualizar Botão de Envio
+        const submitBtn = document.getElementById('btn-salvar-votos');
+        const submitTexto = document.getElementById('btn-salvar-texto');
+        if (submitBtn && submitTexto) {
+            if (notasCount >= minReq) {
+                submitBtn.disabled = false;
+                submitTexto.textContent = `Salvar Votação (${notasCount} avaliados)`;
+            } else {
+                submitBtn.disabled = true;
+                const faltam = minReq - notasCount;
+                submitTexto.textContent = `Avalie mais ${faltam} jogador${faltam > 1 ? 'es' : ''}`;
             }
         }
     }
@@ -208,17 +882,10 @@
         const index = input.dataset.scoreIndex;
         if (index === undefined) return;
 
-        const badge = document.querySelector(`[data-score-for="${index}"]`);
+        const valElem = document.querySelector(`[data-score-val="${index}"]`);
         const card = document.querySelector(`[data-card-index="${index}"]`);
 
-        if (badge) {
-            badge.textContent = score.toFixed(1);
-            if (score > 0) {
-                badge.classList.add('is-active');
-            } else {
-                badge.classList.remove('is-active');
-            }
-        }
+        if (valElem) valElem.textContent = score.toFixed(1);
 
         if (card) {
             if (score > 0) {
@@ -226,6 +893,17 @@
             } else {
                 card.classList.remove('is-active');
             }
+
+            // Atualizar os botões Quick Pills
+            const quickBtns = card.querySelectorAll('.vote-quick-btn');
+            quickBtns.forEach(btn => {
+                const btnVal = parseFloat(btn.dataset.val);
+                if (score > 0 && Math.abs(score - btnVal) < 0.25) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
         }
     }
 
@@ -235,6 +913,21 @@
             atualizarEstadoSlider(input);
         });
         atualizarProgressoGeral();
+
+        // Bind Quick Rate Pills
+        document.querySelectorAll('.vote-quick-btn').forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetIdx = this.dataset.targetIdx;
+                const val = this.dataset.val;
+                const slider = document.querySelector(`input[name="nota"][data-score-index="${targetIdx}"]`);
+                if (slider) {
+                    slider.value = val;
+                    atualizarEstadoSlider(slider);
+                    atualizarProgressoGeral();
+                }
+            });
+        });
     }
 
     if (!window._votacaoDelegationBound) {
@@ -264,7 +957,6 @@
             if (notas < minReq) {
                 e.preventDefault();
                 if (aviso) {
-                    aviso.textContent = `Você precisa dar nota para pelo menos ${minReq} jogador(es).`;
                     aviso.style.display = 'block';
                 }
                 return;
@@ -283,7 +975,7 @@
                     kind: 'votacao_usuario'
                 }).then(() => {
                     if (aviso) {
-                        aviso.textContent = '📴 Voto salvo localmente. Ele será sincronizado quando a internet voltar.';
+                        aviso.textContent = 'Voto salvo localmente. Ele será sincronizado quando a internet voltar.';
                         aviso.style.display = 'block';
                         aviso.className = 'alert alert-warning';
                     }
