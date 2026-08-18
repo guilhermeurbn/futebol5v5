@@ -994,44 +994,35 @@
         }
     }
 
+    function desbloquearAvaliacaoJogadores() {
+        const container = document.getElementById('step-avaliacao-container');
+        if (!container) return;
+        if (container.style.display === 'none' || !container.classList.contains('is-unlocked')) {
+            container.style.display = 'block';
+            requestAnimationFrame(() => {
+                container.style.opacity = '1';
+                container.classList.add('is-unlocked');
+                container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        }
+    }
+    window.desbloquearAvaliacaoJogadores = desbloquearAvaliacaoJogadores;
+
     function initVotacaoUsuario() {
         const inputs = document.querySelectorAll('input[name="nota"]');
         inputs.forEach(input => {
             atualizarEstadoSlider(input);
         });
         atualizarProgressoGeral();
+    }
 
-        // Bind Quick Rate Pills (Notas)
-        document.querySelectorAll('.vote-quick-btn').forEach(btn => {
-            btn.addEventListener('click', function (e) {
-                e.preventDefault();
-                const targetIdx = this.dataset.targetIdx;
-                const val = this.dataset.val;
-                const slider = document.querySelector(`input[name="nota"][data-score-index="${targetIdx}"]`);
-                if (slider) {
-                    slider.value = val;
-                    atualizarEstadoSlider(slider);
-                    atualizarProgressoGeral();
-                }
-            });
-        });
+    if (!window._votacaoDelegationBound) {
+        window._votacaoDelegationBound = true;
 
-        function desbloquearAvaliacaoJogadores() {
-            const container = document.getElementById('step-avaliacao-container');
-            if (!container) return;
-            if (container.style.display === 'none' || !container.classList.contains('is-unlocked')) {
-                container.style.display = 'block';
-                requestAnimationFrame(() => {
-                    container.style.opacity = '1';
-                    container.classList.add('is-unlocked');
-                    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                });
-            }
-        }
-
-        // Bind Goal Selection Pills (0 a 6+ gols)
-        document.querySelectorAll('.goal-pill-btn').forEach(btn => {
-            btn.addEventListener('click', function (e) {
+        document.addEventListener('click', function (e) {
+            // 1. Goal Pill Buttons
+            const goalBtn = e.target && e.target.closest ? e.target.closest('.goal-pill-btn') : null;
+            if (goalBtn) {
                 e.preventDefault();
                 document.querySelectorAll('.goal-pill-btn').forEach(b => {
                     b.classList.remove('active');
@@ -1039,32 +1030,44 @@
                     b.style.borderColor = 'rgba(255, 255, 255, 0.07)';
                     b.style.color = '#94a3b8';
                 });
-                this.classList.add('active');
-                this.style.background = '#5bf500';
-                this.style.borderColor = '#5bf500';
-                this.style.color = '#000000';
+                goalBtn.classList.add('active');
+                goalBtn.style.background = '#5bf500';
+                goalBtn.style.borderColor = '#5bf500';
+                goalBtn.style.color = '#000000';
 
-                const val = parseInt(this.dataset.goalVal || '0', 10);
+                const val = parseInt(goalBtn.dataset.goalVal || '0', 10);
                 const input = document.getElementById('gols_marcados_input');
                 const badge = document.getElementById('selected-goals-val');
                 if (input) input.value = val;
                 if (badge) badge.textContent = val;
-            });
-        });
+                return;
+            }
 
-        const btnConfirmar = document.getElementById('btn-confirmar-gols');
-        if (btnConfirmar) {
-            btnConfirmar.addEventListener('click', function (e) {
+            // 2. Confirm Goals Button
+            const confirmBtn = e.target && e.target.closest ? e.target.closest('#btn-confirmar-gols') : null;
+            if (confirmBtn) {
                 e.preventDefault();
                 desbloquearAvaliacaoJogadores();
-            });
-        }
-    }
+                return;
+            }
 
-    if (!window._votacaoDelegationBound) {
-        window._votacaoDelegationBound = true;
+            // 3. Quick Rate Pills (Notas)
+            const quickBtn = e.target && e.target.closest ? e.target.closest('.vote-quick-btn') : null;
+            if (quickBtn) {
+                e.preventDefault();
+                const targetIdx = quickBtn.dataset.targetIdx;
+                const val = quickBtn.dataset.val;
+                const slider = document.querySelector(`input[name="nota"][data-score-index="${targetIdx}"]`);
+                if (slider) {
+                    slider.value = val;
+                    atualizarEstadoSlider(slider);
+                    atualizarProgressoGeral();
+                }
+                return;
+            }
+        });
 
-        ['input', 'change', 'pointermove', 'touchmove', 'click'].forEach(evt => {
+        ['input', 'change', 'pointermove', 'touchmove'].forEach(evt => {
             document.addEventListener(evt, function (e) {
                 const input = e.target && e.target.closest ? e.target.closest('input[name="nota"]') : null;
                 if (input) {
@@ -1116,7 +1119,11 @@
     }
 
     window.initVotacaoUsuario = initVotacaoUsuario;
-    initVotacaoUsuario();
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initVotacaoUsuario);
+    } else {
+        initVotacaoUsuario();
+    }
 })();
 </script>
 {% endblock %}
