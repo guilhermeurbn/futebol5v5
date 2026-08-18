@@ -618,7 +618,8 @@
                         </span>
                         {% endif %}
                         <span class="vote-chip" style="background: rgba(91, 245, 0, 0.12); color: #5bf500; border-color: rgba(91, 245, 0, 0.3);">
-                            ⚽ {{ voto.get('gols_marcados', 0) }} {{ 'Gol' if voto.get('gols_marcados', 0) == 1 else 'Gols' }}
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/><path d="m12 12 4-4"/><path d="M12 12v6"/><path d="m12 12-4-4"/></svg>
+                            {{ voto.get('gols_marcados', 0) }} {{ 'Gol' if voto.get('gols_marcados', 0) == 1 else 'Gols' }}
                         </span>
                         <span class="vote-chip">
                             <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -794,32 +795,31 @@
                             </div>
                         </div>
 
-                        <!-- 2.5 Card de Seleção de Gols Marcados pelo Jogador -->
-                        <div class="vote-goals-card" style="background: rgba(18, 18, 26, 0.95); border: 1px solid rgba(91, 245, 0, 0.28); border-radius: 20px; padding: 1.15rem 1.25rem; margin-bottom: 1.25rem; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);">
-                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.85rem;">
-                                <div style="display: flex; align-items: center; gap: 0.65rem;">
-                                    <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(91, 245, 0, 0.12); border: 1px solid rgba(91, 245, 0, 0.3); color: #5bf500; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; box-shadow: 0 0 16px rgba(91, 245, 0, 0.18);">
-                                        ⚽
-                                    </div>
-                                    <div>
-                                        <h3 style="font-size: 1.02rem; font-weight: 850; color: #ffffff; margin: 0; letter-spacing: -0.01em;">Quantos gols você fez nesta partida?</h3>
-                                        <p style="font-size: 0.76rem; color: #94a3b8; margin: 0.15rem 0 0 0;">Selecione a sua contagem de gols marcados na rodada</p>
-                                    </div>
+                        <!-- 2.5 Card Minimalista de Gols do Jogador -->
+                        <div class="vote-goals-card" style="background: rgba(18, 18, 26, 0.85); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 0.85rem 1rem; margin-bottom: 1rem;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.65rem;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#5bf500" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <path d="M12 2a10 10 0 0 1 10 10"/>
+                                        <path d="m12 12 4-4"/>
+                                        <path d="M12 12v6"/>
+                                        <path d="m12 12-4-4"/>
+                                    </svg>
+                                    <span style="font-size: 0.88rem; font-weight: 850; color: #ffffff; letter-spacing: -0.01em;">Gols que você fez</span>
                                 </div>
-                                <div class="vote-goals-badge" style="background: rgba(91, 245, 0, 0.15); border: 1px solid rgba(91, 245, 0, 0.35); color: #5bf500; font-size: 1.05rem; font-weight: 900; padding: 0.3rem 0.85rem; border-radius: 12px; display: flex; align-items: center; gap: 0.35rem; box-shadow: 0 0 14px rgba(91, 245, 0, 0.15); flex-shrink: 0;">
-                                    <span>⚽</span>
-                                    <span id="selected-goals-val">0</span>
-                                </div>
+                                <span style="font-size: 0.78rem; font-weight: 800; color: #5bf500; background: rgba(91, 245, 0, 0.12); border: 1px solid rgba(91, 245, 0, 0.25); padding: 0.15rem 0.6rem; border-radius: 8px;">
+                                    <span id="selected-goals-val">0</span> gols
+                                </span>
                             </div>
 
                             <input type="hidden" name="gols_marcados" id="gols_marcados_input" value="0">
 
-                            <!-- Grid de botões 0 a 20 gols -->
-                            <div class="goals-pill-grid" style="display: flex; flex-wrap: wrap; gap: 0.45rem; max-height: 140px; overflow-y: auto; padding: 0.25rem 0.25rem 0.4rem 0.25rem; scrollbar-width: thin; scrollbar-color: rgba(91, 245, 0, 0.4) transparent;">
-                                {% for g in range(0, 21) %}
-                                <button type="button" class="goal-pill-btn {% if g == 0 %}active{% endif %}" data-goal-val="{{ g }}" style="flex: 0 0 auto; min-width: 44px; height: 38px; border-radius: 10px; background: {% if g == 0 %}#5bf500{% else %}rgba(255, 255, 255, 0.05){% endif %}; border: 1px solid {% if g == 0 %}#5bf500{% else %}rgba(255, 255, 255, 0.08){% endif %}; color: {% if g == 0 %}#000000{% else %}#ffffff{% endif %}; font-weight: 850; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 0.25rem; cursor: pointer; transition: all 0.15s ease; -webkit-tap-highlight-color: transparent;">
-                                    {% if g > 0 %}<span style="font-size: 0.78rem;">⚽</span>{% endif %}
-                                    <span>{{ g }}</span>
+                            <!-- Seletor minimalista de pills (0 a 6+ gols) -->
+                            <div class="goals-pill-grid" style="display: flex; align-items: center; justify-content: space-between; gap: 0.35rem;">
+                                {% for g in [0, 1, 2, 3, 4, 5, 6] %}
+                                <button type="button" class="goal-pill-btn {% if g == 0 %}active{% endif %}" data-goal-val="{{ g }}" style="flex: 1; height: 34px; border-radius: 8px; background: {% if g == 0 %}#5bf500{% else %}rgba(255, 255, 255, 0.04){% endif %}; border: 1px solid {% if g == 0 %}#5bf500{% else %}rgba(255, 255, 255, 0.07){% endif %}; color: {% if g == 0 %}#000000{% else %}#94a3b8{% endif %}; font-weight: 850; font-size: 0.82rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s ease; -webkit-tap-highlight-color: transparent;">
+                                    {{ g }}
                                 </button>
                                 {% endfor %}
                             </div>
