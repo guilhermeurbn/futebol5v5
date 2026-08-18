@@ -758,3 +758,31 @@ def test_anti_self_vote_validation(tmp_path):
         service.salvar_voto(partida['id'], 'u1', votos_com_si_mesmo)
 
 
+def test_non_participant_cannot_vote(tmp_path):
+    import pytest
+    service = VotacaoService(str(tmp_path / 'votacoes.json'))
+    partida = service.criar_partida(
+        _times(),
+        _usuarios(),
+        'juiz',
+        sorteio_id=1,
+        duracao_horas=12,
+    )
+
+    # Usuario 'u999' nao esteve no sorteio
+    assert not service.eh_participante(partida, 'u999')
+    assert service.obter_ativa_para_usuario('u999') is None
+
+    votos_validos = [
+        {'jogador_nome': 'Jogador 1', 'time_numero': 1, 'nota': 8},
+        {'jogador_nome': 'Jogador 2', 'time_numero': 1, 'nota': 8},
+        {'jogador_nome': 'Jogador 3', 'time_numero': 1, 'nota': 8},
+        {'jogador_nome': 'Jogador 4', 'time_numero': 1, 'nota': 8},
+        {'jogador_nome': 'Jogador 5', 'time_numero': 1, 'nota': 8},
+    ]
+
+    with pytest.raises(ValueError, match="Apenas os jogadores participantes desta rodada podem votar"):
+        service.salvar_voto(partida['id'], 'u999', votos_validos)
+
+
+

@@ -219,11 +219,19 @@ def votacao_page():
 
     try:
         current_user_id = session.get('user_id')
-        partida = votacao_service.obter_ativa_para_usuario(current_user_id)
-        if not partida:
-            partida = votacao_service.obter_ativa()
+        partida = votacao_service.obter_ativa()
         if not partida:
             return render_template('votacao_usuario.html', partida=None, voto=None, participante=None, usuario=_usuario_logado())
+
+        if not votacao_service.eh_participante(partida, current_user_id):
+            return render_template(
+                'votacao_usuario.html',
+                partida=partida,
+                participante=None,
+                nao_participante=True,
+                voto=None,
+                usuario=_usuario_logado()
+            )
 
         current_uid_str = str(current_user_id).strip() if current_user_id is not None else ""
         participante = next(
@@ -319,9 +327,16 @@ def votacao_salvar():
 
         current_user_id = session.get('user_id')
         current_uid_str = str(current_user_id).strip() if current_user_id is not None else ""
-        partida = votacao_service.obter_ativa_para_usuario(current_user_id)
-        if not partida:
-            partida = votacao_service.obter_ativa()
+        partida = votacao_service.obter_ativa()
+
+        if not partida or not votacao_service.eh_participante(partida, current_user_id):
+            return render_template(
+                'votacao_usuario.html',
+                partida=partida,
+                participante=None,
+                nao_participante=True,
+                erro='Apenas os jogadores que participaram desta partida podem votar.'
+            ), 403
 
         jogadores_votaveis = []
         if partida:

@@ -55,14 +55,55 @@ class JogadorStatsService:
         return f"{self.__class__.__name__}:{id(self)}:{chave_nome}"
     
     def _carregar_partidas(self) -> List[dict]:
-        """Carrega dados de partidas"""
+        """Carrega dados de partidas combinando partidas e votacoes_partidas"""
         if os.getenv("DATABASE_URL"):
-            return load_json_data("partidas", [])
-        try:
-            with open(self.partidas_arquivo, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except (json.JSONDecodeError, FileNotFoundError):
-            return []
+            partidas = load_json_data("partidas", [])
+            votacoes = load_json_data("votacoes_partidas", {})
+        else:
+            try:
+                with open(self.partidas_arquivo, "r", encoding="utf-8") as f:
+                    partidas = json.load(f)
+            except (json.JSONDecodeError, FileNotFoundError):
+                partidas = []
+            try:
+                with open("data/votacoes.json", "r", encoding="utf-8") as f:
+                    votacoes = json.load(f)
+            except (json.JSONDecodeError, FileNotFoundError):
+                votacoes = {}
+
+        votacoes_list = (
+            votacoes.get("partidas", [])
+            if isinstance(votacoes, dict)
+            else (votacoes if isinstance(votacoes, list) else [])
+        )
+
+        partidas_dict = {}
+        for p in partidas:
+            if isinstance(p, dict):
+                pid = p.get("id") or p.get("sorteio_id")
+                if pid is not None:
+                    partidas_dict[str(pid)] = dict(p)
+
+        for vp in votacoes_list:
+            if isinstance(vp, dict):
+                pid = str(vp.get("id") or vp.get("sorteio_id") or "")
+                if not pid:
+                    continue
+                data_val = vp.get("data") or vp.get("encerrado_em") or vp.get("aberta_em") or ""
+                vp_copy = dict(vp)
+                vp_copy["data"] = data_val
+                if pid in partidas_dict:
+                    existing = partidas_dict[pid]
+                    if not existing.get("data"):
+                        existing["data"] = data_val
+                    if not existing.get("jogadores_detalhes") and vp.get("participantes"):
+                        existing["participantes"] = vp.get("participantes")
+                    if not existing.get("resultado_resumido") and vp.get("resultado_resumido"):
+                        existing["resultado_resumido"] = vp.get("resultado_resumido")
+                else:
+                    partidas_dict[pid] = vp_copy
+
+        return list(partidas_dict.values())
     
     def _carregar_historico(self) -> List[dict]:
         """Carrega dados do histórico de sorteios"""
@@ -241,16 +282,33 @@ class JogadorStatsService:
         if not time_numero:
             return "empate"
 
+        # 1. Checar resultado_resumido (formato da VotacaoService)
+        resumo = partida.get("resultado_resumido") or []
+        if resumo and isinstance(resumo, list) and len(resumo) >= 2:
+            meu_gols = None
+            outro_gols = None
+            for item in resumo:
+                if isinstance(item, dict):
+                    if item.get("time_numero") == int(time_numero):
+                        meu_gols = int(item.get("gols", 0) or 0)
+                    else:
+                        outro_gols = int(item.get("gols", 0) or 0)
+            if meu_gols is not None and outro_gols is not None:
+                if meu_gols > outro_gols:
+                    return "vitória"
+                elif meu_gols < outro_gols:
+                    return "derrota"
+                else:
+                    return "empate"
+
+        # 2. Checar times_desempenho
         for item in partida.get("times_desempenho", []) or []:
             if int(item.get("time_numero", 0) or 0) != int(time_numero):
                 continue
-            # Só considerar times_desempenho quando houver informação útil
             v = int(item.get("vitorias", 0) or 0)
             d = int(item.get("derrotas", 0) or 0)
             e = int(item.get("empates", 0) or 0)
             if v == 0 and d == 0 and e == 0:
-                # sem informação explícita neste registro; ignore e caia
-                # para a lógica fallback que usa `time_vencedor` / gols
                 continue
             if v > 0:
                 return "vitória"
@@ -259,11 +317,13 @@ class JogadorStatsService:
             if e > 0:
                 return "empate"
 
+        # 3. Checar time_vencedor
         time_vencedor = partida.get("time_vencedor")
-        if not time_vencedor:
-            return "empate"
-        if int(time_numero) == int(time_vencedor):
-            return "vitória"
+        if time_vencedor is not None:
+            if int(time_numero) == int(time_vencedor):
+                return "vitória"
+            else:
+                return "derrota"
 
         gols_times = partida.get("gols_times", []) or []
         indice = int(time_numero) - 1
@@ -274,34 +334,11 @@ class JogadorStatsService:
             if any(g == meu_placar for idx, g in enumerate(gols_times) if idx != indice):
                 return "empate"
 
-        return "derrota"
+        return "empate"
     
     def obter_stats_jogador(self, nome_jogador: str) -> Dict:
         """
         Obtém estatísticas completas de um jogador
-        
-        Args:
-            nome_jogador: Nome do jogador
-            
-        Returns:
-            {
-                "nome": str,
-                "total_partidas": int,
-                "gols": int,
-                "assistencias": int,
-                "cartoes_amarelos": int,
-                "cartoes_vermelhos": int,
-                "vitórias": int,
-                "derrotas": int,
-                "empates": int,
-                "win_rate": float,
-                "gols_por_partida": float,
-                "assistencias_por_partida": float,
-                "maior_artilheiro": bool,
-                "melhor_artilheiro_partida": int,
-                "partidas_sem_gols": int,
-                "historico_partidas": List[Dict]
-            }
         """
         try:
             chave_cache = self._chave_cache_stats(nome_jogador)
@@ -361,7 +398,7 @@ class JogadorStatsService:
                     stats["historico_partidas"].append({
                         "partida_id": partida.get('id'),
                         "sorteio_id": sorteio_id,
-                        "data": partida.get('data'),
+                        "data": partida.get('data') or partida.get('encerrado_em') or partida.get('aberta_em') or '',
                         "gols": detalhes.get("gols", 0),
                         "assistencias": detalhes.get("assistencias", 0),
                         "cartoes_amarelos": detalhes.get("cartoes_amarelos", 0),
@@ -382,8 +419,8 @@ class JogadorStatsService:
             if gols_todos and max(gols_todos.values(), default=0) == stats["gols"] and stats["gols"] > 0:
                 stats["maior_artilheiro"] = True
             
-            # Ordenar histórico por data (mais recente primeiro)
-            stats["historico_partidas"].sort(key=lambda x: x.get('data', ''), reverse=True)
+            # Ordenar histórico por data (mais recente primeiro, com tratamento seguro para None)
+            stats["historico_partidas"].sort(key=lambda x: str(x.get('data') or ''), reverse=True)
 
             # Dashboard e dados para planilha/exportação
             stats["ultimos_resultados"] = self._build_recent_form(stats["historico_partidas"], limite=5)
@@ -396,7 +433,6 @@ class JogadorStatsService:
 
             return stats
         except Exception as e:
-            # Se houver erro, retornar stats vazio em vez de quebrar a aplicação
             import sys
             print(f"Erro ao calcular stats para {nome_jogador}: {str(e)}", file=sys.stderr)
             return self._stats_vazio(nome_jogador)
@@ -404,30 +440,47 @@ class JogadorStatsService:
     def _extrair_detalhes_jogador(self, partida: dict, nome_jogador: str, sorteio: dict) -> Optional[dict]:
         """
         Extrai detalhes de um jogador específico em uma partida
-        
-        Returns:
-            Dict com gols, assistências, cartões e resultado, ou None se não encontrado
         """
-        # Procurar detalhes do jogador nos dados de jogadores da partida
         jogadores_detalhes = partida.get("jogadores_detalhes", [])
         nome_normalizado = self._normalizar_nome(nome_jogador)
         
+        # 1. Procurar em jogadores_detalhes
         for detalhe in jogadores_detalhes:
-            if self._normalizar_nome(detalhe.get("nome", "")) == nome_normalizado:
+            d_nome = self._normalizar_nome(detalhe.get("nome", ""))
+            if d_nome and (d_nome == nome_normalizado or nome_normalizado in d_nome or d_nome in nome_normalizado):
                 time_numero = detalhe.get("time_numero")
                 resultado = self._resultado_por_time(partida, time_numero)
                 dados = dict(detalhe)
                 dados["resultado"] = resultado
                 return dados
+
+        # 2. Procurar em participantes (partidas de votação)
+        participantes = partida.get("participantes", [])
+        for part in participantes:
+            p_nome = self._normalizar_nome(
+                part.get("jogador_nome") or part.get("nome_usuario") or part.get("username") or ""
+            )
+            if p_nome and (p_nome == nome_normalizado or nome_normalizado in p_nome or p_nome in nome_normalizado):
+                time_numero = part.get("time_numero")
+                resultado = self._resultado_por_time(partida, time_numero)
+                return {
+                    "gols": 0,
+                    "assistencias": 0,
+                    "cartoes_amarelos": 0,
+                    "cartoes_vermelhos": 0,
+                    "resultado": resultado,
+                    "time_numero": time_numero,
+                    "posicao": part.get("posicao", "linha")
+                }
         
-        # Se não houver detalhes específicos, tentar encontrar o jogador no sorteio
+        # 3. Procurar no sorteio (historico)
         if sorteio:
             times = sorteio.get('times', [])
             for time_idx, time_data in enumerate(times):
                 jogadores = time_data.get('jogadores', [])
                 for jogador in jogadores:
-                    if self._normalizar_nome(jogador.get('nome', '')) == nome_normalizado:
-                        # Encontrou o jogador neste time
+                    j_nome = self._normalizar_nome(jogador.get('nome', ''))
+                    if j_nome and (j_nome == nome_normalizado or nome_normalizado in j_nome or j_nome in nome_normalizado):
                         time_numero = time_idx + 1
                         resultado = self._resultado_por_time(partida, time_numero)
                         

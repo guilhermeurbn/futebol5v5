@@ -251,6 +251,33 @@ class VotacaoService:
         correspondentes.sort(key=lambda p: p.get("id", 0), reverse=True)
         return self._enriquecer_participantes_fotos(correspondentes[0])
 
+    def eh_participante(self, partida: Dict, user_id: Any) -> bool:
+        if not partida or not user_id:
+            return False
+        target_uid_str = str(user_id).strip()
+
+        for part in partida.get("participantes", []):
+            p_uid = str(part.get("user_id")).strip() if part.get("user_id") is not None else ""
+            if p_uid and p_uid == target_uid_str:
+                return True
+
+        # Tentar vincular por nome caso o participante não tivesse user_id gravado
+        try:
+            from services.auth_service import AuthService
+            usuario = AuthService().obter_por_id(user_id)
+            if usuario:
+                u_nome = self._chave_identidade(usuario.get("nome"))
+                u_username = self._chave_identidade(usuario.get("username"))
+                for part in partida.get("participantes", []):
+                    p_nome = self._chave_identidade(part.get("jogador_nome") or part.get("nome_usuario"))
+                    if (u_nome and p_nome and u_nome == p_nome) or (u_username and p_nome and u_username == p_nome):
+                        part["user_id"] = user_id
+                        return True
+        except Exception:
+            pass
+
+        return False
+
     def obter_ativa_para_usuario(self, user_id: Any) -> Optional[Dict]:
         if not user_id:
             return None
@@ -258,14 +285,10 @@ class VotacaoService:
         if not partida:
             return None
 
-        target_uid_str = str(user_id).strip()
-        for part in partida.get("participantes", []):
-            p_uid = str(part.get("user_id")).strip() if part.get("user_id") is not None else ""
-            if p_uid and p_uid == target_uid_str:
-                return self._enriquecer_participantes_fotos(partida)
+        if self.eh_participante(partida, user_id):
+            return self._enriquecer_participantes_fotos(partida)
 
-        # Fallback: Se a partida está com status 'aberta', enriquecer e permitir votação
-        return self._enriquecer_participantes_fotos(partida)
+        return None
 
     def obter_pendencia_usuario(self, user_id: str) -> Optional[Dict]:
         partida = self.obter_ativa_para_usuario(user_id)
@@ -415,6 +438,9 @@ class VotacaoService:
             raise ValueError("Partida ja encerrada")
         if not user_id:
             raise ValueError("Usuario invalido para votar")
+
+        if not self.eh_participante(alvo, user_id):
+            raise ValueError("Apenas os jogadores participantes desta rodada podem votar")
 
         target_uid_str = str(user_id).strip()
         participante_user_ids = {

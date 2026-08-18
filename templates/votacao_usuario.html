@@ -529,6 +529,38 @@
                     </div>
                 </div>
             </div>
+        {% elif nao_participante %}
+            <div style="max-width: 720px; margin: 2rem auto 4rem auto; padding: 0 1rem;">
+                <div style="background: rgba(18, 18, 23, 0.96); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 24px; padding: 2.8rem 2rem; text-align: center; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.1rem;">
+                    
+                    <div style="width: 68px; height: 68px; border-radius: 20px; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); color: #f59e0b; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 24px rgba(245, 158, 11, 0.18);">
+                        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                    </div>
+
+                    <div style="display: grid; gap: 0.45rem; max-width: 480px;">
+                        <h2 style="font-size: 1.5rem; font-weight: 850; color: #ffffff; margin: 0; letter-spacing: -0.025em;">Votação Exclusiva para Jogadores da Rodada</h2>
+                        <p style="font-size: 0.92rem; color: #94a3b8; margin: 0; line-height: 1.6;">
+                            Esta votação é restrita aos jogadores que foram escalados nesta partida. O seu usuário não constava na escalação oficial desta rodada.
+                        </p>
+                    </div>
+
+                    <div style="display: inline-flex; align-items: center; gap: 0.55rem; padding: 0.55rem 1.2rem; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.22); border-radius: 999px; color: #f59e0b; font-size: 0.83rem; font-weight: 700; margin-top: 0.4rem;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                        <span>Apenas jogadores escalados no sorteio podem votar</span>
+                    </div>
+
+                    <a href="{{ url_for('jogador_crud.index') }}" class="btn btn-primary" style="margin-top: 0.8rem; background: #5bf500 !important; color: #000000 !important; font-weight: 850; padding: 0.75rem 1.8rem; border-radius: 12px; text-decoration: none;">
+                        Voltar para a Página Inicial
+                    </a>
+                </div>
+            </div>
         {% elif voto %}
             <section class="section voting-workspace-panel">
                 
