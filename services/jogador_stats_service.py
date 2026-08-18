@@ -77,31 +77,45 @@ class JogadorStatsService:
             else (votacoes if isinstance(votacoes, list) else [])
         )
 
+        v_by_id = {}
+        v_by_sorteio = {}
+        for vp in votacoes_list:
+            if isinstance(vp, dict):
+                if vp.get("id"):
+                    v_by_id[str(vp["id"])] = vp
+                if vp.get("sorteio_id"):
+                    v_by_sorteio[str(vp["sorteio_id"])] = vp
+
         partidas_dict = {}
         for p in partidas:
             if isinstance(p, dict):
-                pid = p.get("id") or p.get("sorteio_id")
-                if pid is not None:
-                    partidas_dict[str(pid)] = dict(p)
+                pid = str(p.get("id") or p.get("sorteio_id") or "")
+                sid = str(p.get("sorteio_id") or "")
+                if pid:
+                    p_copy = dict(p)
+                    vp = v_by_sorteio.get(sid) or v_by_id.get(pid) or v_by_sorteio.get(pid)
+                    if vp:
+                        data_val = p_copy.get("data") or vp.get("data") or vp.get("encerrado_em") or vp.get("aberta_em") or ""
+                        p_copy["data"] = data_val
+                        if not p_copy.get("jogadores_detalhes") and vp.get("participantes"):
+                            p_copy["participantes"] = vp.get("participantes")
+                        if not p_copy.get("resultado_resumido") and vp.get("resultado_resumido"):
+                            p_copy["resultado_resumido"] = vp.get("resultado_resumido")
+                        if vp.get("ranking"):
+                            p_copy["ranking"] = vp.get("ranking")
+                    partidas_dict[pid] = p_copy
 
         for vp in votacoes_list:
             if isinstance(vp, dict):
                 pid = str(vp.get("id") or vp.get("sorteio_id") or "")
-                if not pid:
+                sid = str(vp.get("sorteio_id") or "")
+                if not pid and not sid:
                     continue
-                data_val = vp.get("data") or vp.get("encerrado_em") or vp.get("aberta_em") or ""
-                vp_copy = dict(vp)
-                vp_copy["data"] = data_val
-                if pid in partidas_dict:
-                    existing = partidas_dict[pid]
-                    if not existing.get("data"):
-                        existing["data"] = data_val
-                    if not existing.get("jogadores_detalhes") and vp.get("participantes"):
-                        existing["participantes"] = vp.get("participantes")
-                    if not existing.get("resultado_resumido") and vp.get("resultado_resumido"):
-                        existing["resultado_resumido"] = vp.get("resultado_resumido")
-                else:
-                    partidas_dict[pid] = vp_copy
+                if pid not in partidas_dict and (not sid or sid not in partidas_dict):
+                    data_val = vp.get("data") or vp.get("encerrado_em") or vp.get("aberta_em") or ""
+                    vp_copy = dict(vp)
+                    vp_copy["data"] = data_val
+                    partidas_dict[pid or sid] = vp_copy
 
         return list(partidas_dict.values())
     
@@ -160,7 +174,6 @@ class JogadorStatsService:
                     "win_rate": 0.0,
                     "participacoes_por_partida": 0.0,
                     "indice_disciplina": 100.0,
-                    "pontos_ultimos_5": 0,
                 },
                 "series_ultimos_5": [],
             },
@@ -405,7 +418,9 @@ class JogadorStatsService:
                         "cartoes_vermelhos": detalhes.get("cartoes_vermelhos", 0),
                         "resultado": resultado,
                         "time_numero": detalhes.get("time_numero"),
-                        "posicao": detalhes.get("posicao")
+                        "posicao": detalhes.get("posicao"),
+                        "nota_media": detalhes.get("nota_media", 0.0),
+                        "nota_partida": detalhes.get("nota_partida", 0.0)
                     })
             
             # Calcular taxas
@@ -441,8 +456,18 @@ class JogadorStatsService:
         """
         Extrai detalhes de um jogador específico em uma partida
         """
-        jogadores_detalhes = partida.get("jogadores_detalhes", [])
         nome_normalizado = self._normalizar_nome(nome_jogador)
+        nota_media_ranking = 0.0
+
+        ranking = partida.get("ranking") or {}
+        if isinstance(ranking, dict):
+            for rj in ranking.get("ranking_jogadores", []) or []:
+                rj_nome = self._normalizar_nome(rj.get("jogador_nome", ""))
+                if rj_nome and (rj_nome == nome_normalizado or nome_normalizado in rj_nome or rj_nome in nome_normalizado):
+                    nota_media_ranking = float(rj.get("nota_media", 0) or 0)
+                    break
+
+        jogadores_detalhes = partida.get("jogadores_detalhes", [])
         
         # 1. Procurar em jogadores_detalhes
         for detalhe in jogadores_detalhes:
@@ -452,6 +477,9 @@ class JogadorStatsService:
                 resultado = self._resultado_por_time(partida, time_numero)
                 dados = dict(detalhe)
                 dados["resultado"] = resultado
+                nota_val = float(dados.get("nota_media") or dados.get("nota_partida") or dados.get("nota") or nota_media_ranking or 0.0)
+                dados["nota_media"] = nota_val
+                dados["nota_partida"] = nota_val
                 return dados
 
         # 2. Procurar em participantes (partidas de votação)
@@ -463,6 +491,7 @@ class JogadorStatsService:
             if p_nome and (p_nome == nome_normalizado or nome_normalizado in p_nome or p_nome in nome_normalizado):
                 time_numero = part.get("time_numero")
                 resultado = self._resultado_por_time(partida, time_numero)
+                nota_val = float(part.get("nota_media") or part.get("nota_partida") or part.get("nota") or nota_media_ranking or 0.0)
                 return {
                     "gols": 0,
                     "assistencias": 0,
@@ -470,7 +499,9 @@ class JogadorStatsService:
                     "cartoes_vermelhos": 0,
                     "resultado": resultado,
                     "time_numero": time_numero,
-                    "posicao": part.get("posicao", "linha")
+                    "posicao": part.get("posicao", "linha"),
+                    "nota_media": nota_val,
+                    "nota_partida": nota_val
                 }
         
         # 3. Procurar no sorteio (historico)
@@ -483,7 +514,7 @@ class JogadorStatsService:
                     if j_nome and (j_nome == nome_normalizado or nome_normalizado in j_nome or j_nome in nome_normalizado):
                         time_numero = time_idx + 1
                         resultado = self._resultado_por_time(partida, time_numero)
-                        
+                        nota_val = float(jogador.get("nota") or nota_media_ranking or 0.0)
                         return {
                             "gols": 0,
                             "assistencias": 0,
@@ -491,7 +522,9 @@ class JogadorStatsService:
                             "cartoes_vermelhos": 0,
                             "resultado": resultado,
                             "time_numero": time_numero,
-                            "posicao": jogador.get("posicao")
+                            "posicao": jogador.get("posicao"),
+                            "nota_media": nota_val,
+                            "nota_partida": nota_val
                         }
         
         return None

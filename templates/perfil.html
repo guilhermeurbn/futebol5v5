@@ -687,11 +687,17 @@
                         </div>
 
                         <div style="display: flex; align-items: center;">
-                            {% set n_val = jogo.get('nota_partida', '7.0')|float %}
+                            {% set n_val = (jogo.get('nota_media') or jogo.get('nota_partida') or jogo.get('nota') or 0.0)|float %}
+                            {% if n_val > 0 %}
                             <span
                                 class="premium-profile-match-rating-badge {% if n_val >= 7.5 %}premium-profile-match-rating-badge--high{% elif n_val >= 6.0 %}premium-profile-match-rating-badge--mid{% endif %}">
-                                {{ jogo.get('nota_partida', '7.0') }}
+                                {{ "%.1f"|format(n_val) }}
                             </span>
+                            {% else %}
+                            <span class="premium-profile-match-rating-badge" style="background: rgba(255,255,255,0.06); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1);">
+                                N/A
+                            </span>
+                            {% endif %}
                             <svg class="premium-profile-match-chevron" viewBox="0 0 24 24" fill="none"
                                 stroke="currentColor" stroke-width="2.5">
                                 <polyline points="9 18 15 12 9 6" />
