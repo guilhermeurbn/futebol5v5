@@ -785,4 +785,29 @@ def test_non_participant_cannot_vote(tmp_path):
         service.salvar_voto(partida['id'], 'u999', votos_validos)
 
 
+def test_salvar_voto_com_gols_marcados(tmp_path):
+    service = VotacaoService(str(tmp_path / 'votacoes.json'))
+    partida = service.criar_partida(
+        _times(),
+        _usuarios(),
+        'juiz',
+        sorteio_id=10,
+        duracao_horas=12,
+    )
+
+    votos = [
+        {'jogador_nome': 'Jogador 2', 'time_numero': 1, 'nota': 8},
+        {'jogador_nome': 'Jogador 3', 'time_numero': 1, 'nota': 8},
+        {'jogador_nome': 'Jogador 4', 'time_numero': 1, 'nota': 8},
+        {'jogador_nome': 'Jogador 5', 'time_numero': 1, 'nota': 8},
+    ]
+
+    voto = service.salvar_voto(partida['id'], 'u1', votos, gols_marcados=3)
+    assert voto['gols_marcados'] == 3
+
+    alvo = service.obter_partida(partida['id'])
+    p1 = next(p for p in alvo['participantes'] if str(p.get('user_id')) == 'u1')
+    assert p1['gols'] == 3
+
+
 

@@ -427,6 +427,7 @@ class VotacaoService:
         user_id: str,
         votos_obrigatorios: List[Dict],
         votos_extras: Optional[List[Dict]] = None,
+        gols_marcados: int = 0,
     ) -> Dict:
         dados = self._carregar()
         self._encerrar_expiradas_em_dados(dados)
@@ -527,9 +528,18 @@ class VotacaoService:
         if voto_existente:
             raise ValueError("Voce ja votou nesta partida")
 
+        gols_val = max(0, min(20, int(gols_marcados or 0)))
+
+        # Atualizar gols do participante na rodada
+        for part in alvo.get("participantes", []):
+            if str(part.get("user_id")).strip() == target_uid_str or (meu_jogador_nome and (part.get("jogador_nome") or "").strip() == meu_jogador_nome):
+                part["gols"] = gols_val
+                break
+
         voto = {
             "user_id": user_id,
             "votos": todos,
+            "gols_marcados": gols_val,
             "atualizado_em": self._agora().isoformat(),
         }
 
@@ -652,7 +662,16 @@ class VotacaoService:
                     "notas_lista": [],
                 }
 
+        # Mapear gols dos participantes
+        gols_map = {}
+        for participante in partida.get("participantes", []):
+            p_nome = participante.get("nome") or participante.get("jogador_nome")
+            if p_nome:
+                gols_map[p_nome] = int(participante.get("gols", 0) or 0)
+
         for item in jogadores.values():
+            j_nome = item.get("jogador_nome")
+            item["gols"] = gols_map.get(j_nome, 0)
             if item.get("soma_pesos") and item["soma_pesos"] > 0:
                 item["nota_media"] = round(item["nota_total"] / item["soma_pesos"], 2)
                 item["confiabilidade_media"] = round(item["soma_pesos"] / item["votos"], 4)

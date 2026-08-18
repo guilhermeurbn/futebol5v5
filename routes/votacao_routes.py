@@ -359,12 +359,14 @@ def votacao_salvar():
         votos_extras = votos_nao_zero[min_esperado:]
 
         target_partida_id = partida_id or (partida.get('id') if partida else None)
+        gols_marcados = request.form.get('gols_marcados', 0, type=int)
 
         votacao_service.salvar_voto(
             partida_id=target_partida_id,
             user_id=current_user_id,
             votos_obrigatorios=votos_obrigatorios,
-            votos_extras=votos_extras
+            votos_extras=votos_extras,
+            gols_marcados=gols_marcados
         )
         return redirect(url_for('votacao.votacao_page'))
     except ValueError as e:
