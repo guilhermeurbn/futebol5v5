@@ -572,6 +572,8 @@ def social_complete_username():
     email = data.get('email', '').strip().lower()
     nome = data.get('nome', '').strip()
     username = data.get('username', '').strip()
+    posicao = (data.get('posicao') or 'linha').strip().lower()
+    posicao = 'goleiro' if posicao == 'goleiro' else 'linha'
     social_id = data.get('social_id', '').strip()
 
     if not email or '@' not in email:
@@ -601,7 +603,7 @@ def social_complete_username():
                 nome=nome,
                 nivel=5.5,
                 tipo='avulso',
-                posicao='linha',
+                posicao=posicao,
                 owner_user_id=usuario.get('id')
             )
         except Exception as exc:

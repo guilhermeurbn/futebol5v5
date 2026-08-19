@@ -805,14 +805,39 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (data.status === 'need_username') {
           if (socialEmailHidden) socialEmailHidden.value = data.email;
           if (socialNomeHidden) socialNomeHidden.value = data.nome;
+
+          const autofillNome = document.getElementById('social-autofill-nome');
+          if (autofillNome) autofillNome.textContent = data.nome || 'Atleta NaTrave';
+
+          const autofillEmail = document.getElementById('social-autofill-email');
+          if (autofillEmail) autofillEmail.textContent = data.email || '';
+
+          const providerTag = document.getElementById('social-provider-imported-tag');
+          if (providerTag) {
+            providerTag.textContent = `✓ Autenticado via ${provider === 'apple' ? 'Apple ID' : 'Google'}`;
+          }
+
           if (socialModalUserInfo) {
-            socialModalUserInfo.textContent = `Olá, ${data.nome}! O seu e-mail foi autenticado via ${provider === 'apple' ? 'Apple ID' : 'Google'}. Escolha o seu @username no NaTrave:`;
+            socialModalUserInfo.textContent = `Olá, ${data.nome}! Seus dados foram autenticados via ${provider === 'apple' ? 'Apple ID' : 'Google'}. Confirme sua posição e escolha seu username no NaTrave:`;
           }
           const usernameInput = document.getElementById('social_username_input');
           if (usernameInput) {
-            const sugestao = (data.nome || (data.email ? data.email.split('@')[0] : '')).toLowerCase().replace(/[^a-z0-9_]/g, '');
-            usernameInput.value = sugestao;
-            usernameInput.dispatchEvent(new Event('input'));
+            try {
+              const sugRes = await fetch(`/sugerir-username?nome=${encodeURIComponent(data.nome || data.email)}`);
+              const sugData = await sugRes.json();
+              if (sugData && sugData.suggestion) {
+                usernameInput.value = sugData.suggestion;
+                usernameInput.dispatchEvent(new Event('input'));
+              } else {
+                const sugestao = (data.nome || (data.email ? data.email.split('@')[0] : '')).toLowerCase().replace(/[^a-z0-9_]/g, '');
+                usernameInput.value = sugestao;
+                usernameInput.dispatchEvent(new Event('input'));
+              }
+            } catch (sugErr) {
+              const sugestao = (data.nome || (data.email ? data.email.split('@')[0] : '')).toLowerCase().replace(/[^a-z0-9_]/g, '');
+              usernameInput.value = sugestao;
+              usernameInput.dispatchEvent(new Event('input'));
+            }
           }
           if (socialModal) socialModal.style.display = 'flex';
         }
@@ -1078,6 +1103,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const email = socialEmailHidden ? socialEmailHidden.value : '';
       const nome = socialNomeHidden ? socialNomeHidden.value : '';
       const val = socialUsernameInput ? socialUsernameInput.value.trim() : '';
+      const posicaoSelect = document.getElementById('social_posicao_select');
+      const posicao = posicaoSelect ? posicaoSelect.value : 'linha';
 
       if (!val) return;
 
@@ -1088,7 +1115,7 @@ document.addEventListener('DOMContentLoaded', () => {
             'Content-Type': 'application/json',
             'X-CSRFToken': getCsrfToken()
           },
-          body: JSON.stringify({ email, nome, username: val })
+          body: JSON.stringify({ email, nome, username: val, posicao: posicao })
         });
         const data = await resp.json();
         if (data.success && data.redirect_url) {
