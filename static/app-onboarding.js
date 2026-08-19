@@ -964,7 +964,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // 1c. Fallback de Redirecionamento Oficial Web para o Apple ID OAuth 2.0 (na página oficial da Apple)
-        const appleOAuthUrl = `https://appleid.apple.com/auth/authorize?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code%20id_token&scope=name%20email&response_mode=form_post`;
+        const appleOAuthUrl = `https://appleid.apple.com/auth/authorize?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code%20id_token&scope=name%20email&response_mode=query`;
         window.location.href = appleOAuthUrl;
         return;
       }
@@ -1127,6 +1127,15 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('Erro de conexão ao concluir cadastro');
       }
     });
+  }
+
+  const initEmail = socialEmailHidden ? socialEmailHidden.value.trim() : '';
+  const initNome = socialNomeHidden ? socialNomeHidden.value.trim() : '';
+  const initProvider = (document.getElementById('social_provider_hidden')?.value || 'apple').trim();
+  const initSocialId = (document.getElementById('social_id_hidden')?.value || '').trim();
+
+  if (initEmail) {
+    submitSocialAuth(initProvider, initEmail, initNome, initSocialId);
   }
 
   updateCard(0);

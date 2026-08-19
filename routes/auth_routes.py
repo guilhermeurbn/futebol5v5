@@ -302,16 +302,17 @@ def login_submit():
 
 
 def _extrair_dados_apple_post():
-    """Extrai email, nome e social_id do payload form_post da Apple ID"""
+    """Extrai email, nome e social_id do payload da Apple ID (POST form, JSON ou GET query args)"""
     import base64
     import json
 
-    id_token = request.form.get('id_token', '')
-    user_json_str = request.form.get('user', '')
+    data = request.get_json(silent=True) or request.form
+    id_token = data.get('id_token') or request.args.get('id_token') or ''
+    user_json_str = data.get('user') or request.args.get('user') or ''
     
-    email = ''
-    social_id = ''
-    nome = 'Atleta Apple'
+    email = (data.get('email') or request.args.get('email') or '').strip().lower()
+    social_id = (data.get('social_id') or request.args.get('social_id') or '').strip()
+    nome = (data.get('nome') or request.args.get('nome') or '').strip() or 'Atleta Apple'
 
     if id_token and '.' in id_token:
         try:
@@ -321,24 +322,26 @@ def _extrair_dados_apple_post():
                 payload_b64 += '=' * (-len(payload_b64) % 4)
                 decoded = base64.urlsafe_b64decode(payload_b64)
                 claims = json.loads(decoded)
-                email = (claims.get('email') or '').strip().lower()
-                social_id = claims.get('sub', '')
+                if not email:
+                    email = (claims.get('email') or '').strip().lower()
+                if not social_id:
+                    social_id = claims.get('sub', '')
         except Exception as e:
             logger.warning(f"Erro ao decodificar id_token JWT da Apple: {e}")
 
-    if user_json_str:
+    if user_json_str and isinstance(user_json_str, str):
         try:
             user_data = json.loads(user_json_str)
             if isinstance(user_data, dict):
                 user_email = (user_data.get('email') or '').strip().lower()
-                if user_email:
+                if user_email and not email:
                     email = user_email
                 name_obj = user_data.get('name') or {}
                 if isinstance(name_obj, dict):
                     first = name_obj.get('firstName') or ''
                     last = name_obj.get('lastName') or ''
                     full_name = f"{first} {last}".strip()
-                    if full_name:
+                    if full_name and nome == 'Atleta Apple':
                         nome = full_name
         except Exception:
             pass
@@ -349,53 +352,68 @@ def _extrair_dados_apple_post():
 @auth_bp.route('/social-login', methods=['GET', 'POST'])
 def social_login():
     """Handler para login/cadastro via Google e Apple"""
-    if request.method == 'GET':
+    has_apple_params = (
+        'id_token' in request.form or 
+        'id_token' in request.args or 
+        'code' in request.args or
+        (request.is_json and 'id_token' in (request.get_json(silent=True) or {}))
+    )
+
+    if request.method == 'GET' and not has_apple_params:
         return redirect(url_for('auth.login_page'))
 
     data = request.get_json(silent=True) or request.form
-    provider = (data.get('provider') or ('apple' if 'id_token' in request.form else 'google')).strip().lower()
-    email = data.get('email', '').strip().lower()
-    nome = data.get('nome', '').strip()
-    social_id = data.get('social_id', '').strip()
+    provider = (data.get('provider') or request.args.get('provider') or ('apple' if has_apple_params else 'google')).strip().lower()
 
-    # Se a requisição veio via Apple form_post redirect (id_token na request.form):
-    if not email and 'id_token' in request.form:
+    email = (data.get('email') or request.args.get('email') or '').strip().lower()
+    nome = (data.get('nome') or request.args.get('nome') or '').strip()
+    social_id = (data.get('social_id') or request.args.get('social_id') or '').strip()
+
+    # Se parâmetros id_token da Apple estiverem presentes:
+    if has_apple_params:
         apple_email, apple_nome, apple_id = _extrair_dados_apple_post()
         if apple_email:
             email = apple_email
-        if apple_nome:
+        if apple_nome and apple_nome != 'Atleta Apple':
             nome = apple_nome
         if apple_id:
             social_id = apple_id
 
-    if not email or '@' not in email:
-        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json
-        if is_ajax:
-            return jsonify({'success': False, 'error': 'E-mail inválido retornado pela conta social'}), 400
-        return render_template('login.html', erro='E-mail inválido retornado pela conta social'), 400
-
-    # 1. Tenta buscar usuário por social_id (apple_id / google_id) OU por email principal / social_email
+    # 1. Tenta buscar usuário por social_id (apple_id / google_id) OU por e-mail
     usuarios = auth_service._carregar()
-    usuario = next(
-        (
-            u for u in usuarios
-            if (
-                (social_id and (u.get(f'{provider}_id') or '') == social_id) or
-                (email and (
-                    (u.get('email') or '').strip().lower() == email or
-                    (u.get('google_email') or '').strip().lower() == email or
-                    (u.get('apple_email') or '').strip().lower() == email or
-                    (u.get(f'{provider}_email') or '').strip().lower() == email
-                ))
-            )
-        ),
-        None
-    )
+    usuario = None
+
+    if social_id:
+        usuario = next(
+            (
+                u for u in usuarios
+                if (
+                    (u.get('apple_id') or '') == social_id or
+                    (u.get('google_id') or '') == social_id or
+                    (u.get(f'{provider}_id') or '') == social_id
+                )
+            ),
+            None
+        )
+
+    if not usuario and email:
+        email_clean = email.strip().lower()
+        usuario = next(
+            (
+                u for u in usuarios
+                if (
+                    (u.get('email') or '').strip().lower() == email_clean or
+                    (u.get('google_email') or '').strip().lower() == email_clean or
+                    (u.get('apple_email') or '').strip().lower() == email_clean
+                )
+            ),
+            None
+        )
 
     if usuario:
-        # Vincula a conta social automaticamente se ainda não estiver vinculada
+        # Vincula a conta social se ainda não estiver vinculada
         try:
-            auth_service.vincular_conta_social(user_id=usuario['id'], provider=provider, email=email, social_id=social_id)
+            auth_service.vincular_conta_social(user_id=usuario['id'], provider=provider, email=email or usuario.get('email', ''), social_id=social_id)
         except Exception:
             pass
 
@@ -417,7 +435,14 @@ def social_login():
             })
         return redirect(url_for('auth.perfil_page'))
 
-    # 2. Usuário novo: solicita o nome de usuário (username)
+    # Se o usuário NÃO existe e o e-mail não veio (ex: conta não registrada e sem e-mail)
+    if not email or '@' not in email:
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json
+        if is_ajax:
+            return jsonify({'success': False, 'error': 'E-mail não fornecido pela conta Apple. Tente entrar novamente.'}), 400
+        return render_template('login.html', erro='E-mail não fornecido pela conta Apple. Tente entrar novamente.'), 400
+
+    # 2. Usuário novo: solicita a escolha do nome de usuário (username)
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json
     if is_ajax:
         return jsonify({

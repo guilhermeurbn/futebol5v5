@@ -270,9 +270,10 @@
             </p>
         </div>
 
-        <form id="social-username-form" class="auth-form" style="margin-top: 0.8rem;">
-            <input type="hidden" id="social_email_hidden">
-            <input type="hidden" id="social_nome_hidden">
+            <input type="hidden" id="social_email_hidden" value="{{ social_email or '' }}">
+            <input type="hidden" id="social_nome_hidden" value="{{ social_nome or '' }}">
+            <input type="hidden" id="social_provider_hidden" value="{{ social_provider or '' }}">
+            <input type="hidden" id="social_id_hidden" value="{{ social_id or '' }}">
 
             <!-- DADOS AUTO-COMPLETADOS DA APPLE/GOOGLE -->
             <div class="social-autofill-preview" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; padding: 0.75rem 1rem; margin-bottom: 0.85rem; text-align: left;">
