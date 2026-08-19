@@ -535,3 +535,171 @@ class JogadorService:
             "target_jogador_id": target_id
         }
 
+
+def sincronizar_dados_e_partidas() -> dict:
+    """
+    Sincroniza todos os nomes de jogadores e usuários alterados em todas as tabelas
+    e históricos de partidas (partidas, votacoes_partidas, historico).
+    Garante que partidas antigas registradas sob um nome anterior ou primeiro nome
+    sejam vinculadas e atualizadas para o nome atual do perfil.
+    """
+    from services.auth_service import AuthService
+    from services.jogador_service import JogadorService
+    from services.votacao_service import VotacaoService
+    from services.jogador_stats_service import JogadorStatsService
+    from services.db import load_json_data, save_json_data
+    import unicodedata
+
+    def norm(txt: str) -> str:
+        if not txt:
+            return ""
+        s = unicodedata.normalize("NFKD", str(txt).strip().casefold())
+        return "".join(c for c in s if not unicodedata.combining(c))
+
+    auth_svc = AuthService()
+    usuarios = auth_svc._carregar()
+    jog_svc = JogadorService()
+    jogadores_raw = jog_svc._carregar_raw()
+
+    user_aliases_map = {}
+    user_canonical_name = {}
+
+    for u in usuarios:
+        uid = u.get("id")
+        nome = (u.get("nome") or "").strip()
+        username = (u.get("username") or "").strip()
+        if not uid or not nome:
+            continue
+        
+        user_canonical_name[uid] = nome
+        aliases = {norm(nome), norm(username)}
+        
+        partes = nome.split()
+        if partes and len(norm(partes[0])) >= 3:
+            aliases.add(norm(partes[0]))
+        
+        user_aliases_map[uid] = aliases
+
+    for j in jogadores_raw:
+        owner_id = j.get("owner_user_id")
+        j_nome = (j.get("nome") or "").strip()
+        if owner_id and owner_id in user_canonical_name:
+            canonical = user_canonical_name[owner_id]
+            if j_nome != canonical:
+                j["nome"] = canonical
+            if owner_id in user_aliases_map and j_nome:
+                user_aliases_map[owner_id].add(norm(j_nome))
+
+    jog_svc._salvar(jogadores_raw)
+
+    def resolver_user_id(p_nome: str, p_user_id: Optional[str]) -> Tuple[Optional[str], Optional[str]]:
+        if p_user_id and p_user_id in user_canonical_name:
+            return p_user_id, user_canonical_name[p_user_id]
+        
+        norm_p = norm(p_nome)
+        if not norm_p:
+            return None, None
+        
+        for uid, aliases in user_aliases_map.items():
+            if norm_p in aliases or any(a == norm_p for a in aliases):
+                return uid, user_canonical_name[uid]
+        return None, None
+
+    alterou_partidas = False
+    alterou_votacoes = False
+    alterou_historico = False
+
+    # 1. Atualizar partidas.json
+    partidas = load_json_data("partidas", []) or []
+    for p in partidas:
+        if not isinstance(p, dict):
+            continue
+        for det in p.get("jogadores_detalhes", []) or []:
+            if isinstance(det, dict):
+                p_nome = det.get("nome", "")
+                p_uid = det.get("user_id") or det.get("owner_user_id")
+                found_uid, canonical = resolver_user_id(p_nome, p_uid)
+                if found_uid and canonical:
+                    if det.get("nome") != canonical:
+                        det["nome"] = canonical
+                        alterou_partidas = True
+                    if not det.get("user_id"):
+                        det["user_id"] = found_uid
+                        alterou_partidas = True
+                    if not det.get("owner_user_id"):
+                        det["owner_user_id"] = found_uid
+                        alterou_partidas = True
+
+    if alterou_partidas:
+        save_json_data("partidas", partidas)
+
+    # 2. Atualizar votacoes.json / votacoes_partidas
+    vot_svc = VotacaoService()
+    vot_dados = vot_svc._carregar_raw()
+    vot_partidas = vot_dados.get("partidas", []) if isinstance(vot_dados, dict) else []
+
+    for vp in vot_partidas:
+        if not isinstance(vp, dict):
+            continue
+        for part in vp.get("participantes", []) or []:
+            if isinstance(part, dict):
+                p_nome = part.get("jogador_nome") or part.get("nome_usuario") or part.get("nome", "")
+                p_uid = part.get("user_id") or part.get("owner_user_id")
+                found_uid, canonical = resolver_user_id(p_nome, p_uid)
+                if found_uid and canonical:
+                    if part.get("jogador_nome") != canonical:
+                        part["jogador_nome"] = canonical
+                        alterou_votacoes = True
+                    if part.get("nome_usuario") != canonical:
+                        part["nome_usuario"] = canonical
+                        alterou_votacoes = True
+                    if not part.get("user_id"):
+                        part["user_id"] = found_uid
+                        alterou_votacoes = True
+        
+        ranking_info = vp.get("ranking")
+        if ranking_info and isinstance(ranking_info, dict):
+            for rj in ranking_info.get("ranking_jogadores", []) or []:
+                if isinstance(rj, dict):
+                    p_nome = rj.get("jogador_nome") or rj.get("nome", "")
+                    p_uid = rj.get("user_id") or rj.get("owner_user_id")
+                    found_uid, canonical = resolver_user_id(p_nome, p_uid)
+                    if found_uid and canonical and rj.get("jogador_nome") != canonical:
+                        rj["jogador_nome"] = canonical
+                        alterou_votacoes = True
+
+    if alterou_votacoes:
+        vot_svc._salvar(vot_dados)
+
+    # 3. Atualizar historico.json
+    historico = load_json_data("historico", []) or []
+    for h in historico:
+        if not isinstance(h, dict):
+            continue
+        for t in h.get("times", []) or []:
+            if isinstance(t, dict):
+                for jog in t.get("jogadores", []) or []:
+                    if isinstance(jog, dict):
+                        p_nome = jog.get("nome", "")
+                        p_uid = jog.get("owner_user_id") or jog.get("user_id")
+                        found_uid, canonical = resolver_user_id(p_nome, p_uid)
+                        if found_uid and canonical:
+                            if jog.get("nome") != canonical:
+                                jog["nome"] = canonical
+                                alterou_historico = True
+                            if not jog.get("owner_user_id"):
+                                jog["owner_user_id"] = found_uid
+                                alterou_historico = True
+
+    if alterou_historico:
+        save_json_data("historico", historico)
+
+    JogadorStatsService.invalidar_cache_stats()
+
+    return {
+        "sucesso": True,
+        "alterou_partidas": alterou_partidas,
+        "alterou_votacoes": alterou_votacoes,
+        "alterou_historico": alterou_historico
+    }
+

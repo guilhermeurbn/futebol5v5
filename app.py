@@ -217,6 +217,12 @@ def criar_app(config_name: str = None) -> Flask:
     _registrar_aliases_jogador(app)
     _registrar_role_url_prefixes(app)
 
+    try:
+        from services.jogador_service import sincronizar_dados_e_partidas
+        sincronizar_dados_e_partidas()
+    except Exception as _sync_err:
+        app.logger.warning("Falha ao sincronizar histórico de jogadores no startup: %s", _sync_err)
+
     @app.before_request
     def auto_prefix_role_urls():
         # Em testes automatizados, desativado para garantir 100% de compatibilidade

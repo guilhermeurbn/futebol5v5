@@ -457,13 +457,14 @@ class AuthService:
                 raise ValueError("Por favor, insira o nome e sobrenome.")
             alvo["nome"] = nome_clean
             
-            # Sincronizar nome do atleta vinculado se existir
+            # Sincronizar nome do atleta vinculado e dados de partidas se existir
             try:
-                from services.jogador_service import JogadorService
+                from services.jogador_service import JogadorService, sincronizar_dados_e_partidas
                 jog_svc = JogadorService()
                 linked_players = jog_svc.listar_por_usuario(user_id)
                 for p in linked_players:
                     jog_svc.atualizar(p.id, nome=nome_clean)
+                sincronizar_dados_e_partidas()
             except Exception:
                 pass
 
