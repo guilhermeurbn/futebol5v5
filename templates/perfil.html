@@ -726,6 +726,8 @@
                         </div>
 
                         {% if usuario and usuario.get('role') == 'admin' %}
+                        {% set target_nome = (jogador.nome if (tem_jogador and jogador and jogador.nome) else (perfil_user.nome if (perfil_user is defined and perfil_user and perfil_user.nome) else '')) %}
+                        {% set target_id = (jogador.id if (tem_jogador and jogador and jogador.id) else (target_user_id if (target_user_id is defined and target_user_id) else '')) %}
                         <!-- CARD INLINE DE EDIÇÃO DE NOTA DO ADMIN -->
                         <div id="adminInlineCard-{{ loop.index }}" class="admin-inline-card" style="display: none; background: rgba(18, 18, 23, 0.98); border: 1.5px solid rgba(234, 179, 8, 0.4); border-top: none; border-radius: 0 0 14px 14px; padding: 1rem 1.25rem; margin-top: -2px; box-shadow: 0 12px 24px -4px rgba(0,0,0,0.6); z-index: 5; position: relative;">
                             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
@@ -738,17 +740,21 @@
                                         Card de Edição de Nota (Admin)
                                     </div>
                                     <div style="font-size: 0.75rem; color: #94a3b8;">
-                                        Digite a nova nota manual para {{ jogador.nome }} nesta partida (0 a 10):
+                                        Digite a nova nota manual para {{ target_nome or 'o jogador' }} nesta partida (0 a 10):
                                     </div>
                                 </div>
 
                                 <div style="display: flex; align-items: center; gap: 8px;">
-                                    <input type="number" id="inputInlineNota-{{ loop.index }}" step="0.1" min="0" max="10" 
+                                    <input type="text" id="inputInlineNota-{{ loop.index }}" inputmode="decimal"
                                            value="{{ '%.1f'|format(n_val) if n_val > 0 else '7.0' }}"
                                            style="width: 85px; background: #09090b; border: 1.5px solid rgba(234, 179, 8, 0.4); border-radius: 8px; padding: 6px 10px; color: #facc15; font-size: 1.1rem; font-weight: 800; text-align: center;" placeholder="Nota">
                                     
                                     <button type="button" id="btnSalvarInline-{{ loop.index }}"
-                                            onclick="salvarNotaInline('{{ loop.index }}', '{{ jogo.get('partida_id') or '' }}', '{{ jogo.get('sorteio_id') or '' }}', '{{ jogador.nome }}');"
+                                            data-partida-id="{{ jogo.get('partida_id') or '' }}"
+                                            data-sorteio-id="{{ jogo.get('sorteio_id') or '' }}"
+                                            data-jogador-nome="{{ target_nome }}"
+                                            data-jogador-id="{{ target_id }}"
+                                            onclick="salvarNotaInline('{{ loop.index }}', this);"
                                             style="background: #eab308; border: none; color: #000; padding: 7px 14px; border-radius: 8px; font-weight: 800; font-size: 0.8rem; cursor: pointer; box-shadow: 0 2px 8px rgba(234, 179, 8, 0.3); transition: all 0.2s;">
                                         Salvar Nota
                                     </button>
@@ -1481,46 +1487,57 @@ function toggleAdminInlineCard(index) {
     }
 }
 
-async function salvarNotaInline(index, partidaId, sorteioId, jogadorNome) {
+async function salvarNotaInline(index, btnElement) {
     const input = document.getElementById(`inputInlineNota-${index}`);
-    const btn = document.getElementById(`btnSalvarInline-${index}`);
-    if (!input || !btn) return;
+    if (!input || !btnElement) return;
 
-    const novaNota = parseFloat(input.value);
+    const partidaId = btnElement.getAttribute('data-partida-id') || '';
+    const sorteioId = btnElement.getAttribute('data-sorteio-id') || '';
+    const jogadorNome = btnElement.getAttribute('data-jogador-nome') || '';
+    const jogadorId = btnElement.getAttribute('data-jogador-id') || '';
+
+    let rawVal = String(input.value || '').replace(',', '.').trim();
+    let novaNota = parseFloat(rawVal);
     if (isNaN(novaNota) || novaNota < 0 || novaNota > 10) {
         alert('Por favor, informe uma nota válida entre 0.0 e 10.0');
         return;
     }
 
-    btn.disabled = true;
-    btn.textContent = 'Salvando...';
+    btnElement.disabled = true;
+    btnElement.textContent = 'Salvando...';
 
     try {
-        const resp = await fetch('/admin/partida/editar-nota-jogador', {
+        const endpoint = window.location.protocol + '//' + window.location.host + '/admin/partida/editar-nota-jogador';
+        const resp = await fetch(endpoint, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
             body: JSON.stringify({
                 partida_id: partidaId,
                 sorteio_id: sorteioId,
                 jogador_nome: jogadorNome,
+                jogador_id: jogadorId,
                 nova_nota: novaNota
             })
         });
 
         const data = await resp.json();
-        if (data.sucesso) {
+        if (data && data.sucesso) {
             toggleAdminInlineCard(index);
             alert(data.mensagem || 'Nota alterada com sucesso!');
             window.location.reload();
         } else {
-            alert('Erro: ' + (data.erro || 'Não foi possível alterar a nota.'));
-            btn.disabled = false;
-            btn.textContent = 'Salvar Nota';
+            alert('Erro: ' + ((data && data.erro) ? data.erro : 'Não foi possível alterar a nota.'));
+            btnElement.disabled = false;
+            btnElement.textContent = 'Salvar Nota';
         }
     } catch (err) {
-        alert('Erro ao conectar ao servidor: ' + err.message);
-        btn.disabled = false;
-        btn.textContent = 'Salvar Nota';
+        console.error("Erro ao salvar nota:", err);
+        alert('Erro ao conectar ao servidor: ' + (err.message || err));
+        btnElement.disabled = false;
+        btnElement.textContent = 'Salvar Nota';
     }
 }
 
