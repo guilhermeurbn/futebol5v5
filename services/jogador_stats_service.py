@@ -56,20 +56,8 @@ class JogadorStatsService:
     
     def _carregar_partidas(self) -> List[dict]:
         """Carrega dados de partidas combinando partidas e votacoes_partidas"""
-        if os.getenv("DATABASE_URL"):
-            partidas = load_json_data("partidas", [])
-            votacoes = load_json_data("votacoes_partidas", {})
-        else:
-            try:
-                with open(self.partidas_arquivo, "r", encoding="utf-8") as f:
-                    partidas = json.load(f)
-            except (json.JSONDecodeError, FileNotFoundError):
-                partidas = []
-            try:
-                with open("data/votacoes.json", "r", encoding="utf-8") as f:
-                    votacoes = json.load(f)
-            except (json.JSONDecodeError, FileNotFoundError):
-                votacoes = {}
+        partidas = load_json_data("partidas", [])
+        votacoes = load_json_data("votacoes_partidas", {})
 
         votacoes_list = (
             votacoes.get("partidas", [])
@@ -93,7 +81,7 @@ class JogadorStatsService:
                 sid = str(p.get("sorteio_id") or "")
                 if pid:
                     p_copy = dict(p)
-                    vp = v_by_sorteio.get(sid) or v_by_id.get(pid) or v_by_sorteio.get(pid)
+                    vp = v_by_sorteio.get(sid) or v_by_id.get(pid) or v_by_sorteio.get(pid) or v_by_id.get(sid)
                     if vp:
                         data_val = p_copy.get("data") or vp.get("data") or vp.get("encerrado_em") or vp.get("aberta_em") or ""
                         p_copy["data"] = data_val
@@ -121,13 +109,7 @@ class JogadorStatsService:
     
     def _carregar_historico(self) -> List[dict]:
         """Carrega dados do histórico de sorteios"""
-        if os.getenv("DATABASE_URL"):
-            return load_json_data("historico", [])
-        try:
-            with open(self.historico_arquivo, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except (json.JSONDecodeError, FileNotFoundError):
-            return []
+        return load_json_data("historico", [])
 
     def _stats_vazio(self, nome_jogador: str) -> Dict:
         """Retorna estrutura base de estatísticas com compatibilidade retroativa."""
@@ -494,8 +476,38 @@ class JogadorStatsService:
                 rj_nome = rj.get("jogador_nome", "")
                 rj_uid = rj.get("user_id") or rj.get("owner_user_id")
                 if _is_match(rj_nome, rj_uid):
-                    nota_media_ranking = float(rj.get("nota_media", 0) or 0)
-                    break
+                    n_val = float(rj.get("nota_media", 0) or 0)
+                    if n_val > 0:
+                        nota_media_ranking = n_val
+                        break
+
+        # Fallback: se nota_media_ranking não foi encontrada na partida, buscar em votacoes_partidas
+        if nota_media_ranking == 0.0:
+            try:
+                vot_dados = load_json_data("votacoes_partidas", {})
+                vot_list = vot_dados.get("partidas", []) if isinstance(vot_dados, dict) else []
+                pid = str(partida.get("id") or "")
+                sid = str(partida.get("sorteio_id") or "")
+                for vp in vot_list:
+                    if not isinstance(vp, dict):
+                        continue
+                    v_pid = str(vp.get("id") or "")
+                    v_sid = str(vp.get("sorteio_id") or "")
+                    if (pid and (v_pid == pid or v_sid == pid)) or (sid and (v_sid == sid or v_pid == sid)):
+                        v_rk = vp.get("ranking") or {}
+                        if isinstance(v_rk, dict):
+                            for rj in v_rk.get("ranking_jogadores", []) or []:
+                                rj_nome = rj.get("jogador_nome", "")
+                                rj_uid = rj.get("user_id") or rj.get("owner_user_id")
+                                if _is_match(rj_nome, rj_uid):
+                                    n_val = float(rj.get("nota_media", 0) or 0)
+                                    if n_val > 0:
+                                        nota_media_ranking = n_val
+                                        break
+                    if nota_media_ranking > 0:
+                        break
+            except Exception:
+                pass
 
         jogadores_detalhes = partida.get("jogadores_detalhes", [])
         
@@ -508,7 +520,7 @@ class JogadorStatsService:
                 resultado = self._resultado_por_time(partida, time_numero)
                 dados = dict(detalhe)
                 dados["resultado"] = resultado
-                nota_val = float(dados.get("nota_media") or dados.get("nota_partida") or dados.get("nota") or nota_media_ranking or 0.0)
+                nota_val = nota_media_ranking if nota_media_ranking > 0 else float(dados.get("nota_media") or dados.get("nota_partida") or dados.get("nota") or 0.0)
                 dados["nota_media"] = nota_val
                 dados["nota_partida"] = nota_val
                 return dados
@@ -521,7 +533,7 @@ class JogadorStatsService:
             if _is_match(p_nome, p_uid):
                 time_numero = part.get("time_numero")
                 resultado = self._resultado_por_time(partida, time_numero)
-                nota_val = float(part.get("nota_media") or part.get("nota_partida") or part.get("nota") or nota_media_ranking or 0.0)
+                nota_val = nota_media_ranking if nota_media_ranking > 0 else float(part.get("nota_media") or part.get("nota_partida") or part.get("nota") or 0.0)
                 return {
                     "gols": 0,
                     "assistencias": 0,
@@ -545,7 +557,7 @@ class JogadorStatsService:
                     if _is_match(j_nome, j_uid):
                         time_numero = time_idx + 1
                         resultado = self._resultado_por_time(partida, time_numero)
-                        nota_val = float(jogador.get("nota") or nota_media_ranking or 0.0)
+                        nota_val = nota_media_ranking if nota_media_ranking > 0 else float(jogador.get("nota") or 0.0)
                         return {
                             "gols": 0,
                             "assistencias": 0,
