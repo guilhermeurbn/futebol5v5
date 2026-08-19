@@ -714,6 +714,8 @@ def sincronizar_dados_e_partidas() -> dict:
     if alterou_historico:
         save_json_data("historico", historico)
 
+    from services.db import clear_db_cache
+    clear_db_cache()
     JogadorStatsService.invalidar_cache_stats()
 
     return {

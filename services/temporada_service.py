@@ -20,16 +20,7 @@ class TemporadaService:
         self.dados = self._carregar_dados()
 
     def _carregar_dados(self) -> Dict[str, Any]:
-        if os.path.exists(self.data_file):
-            try:
-                with open(self.data_file, 'r', encoding='utf-8') as f:
-                    content = f.read().strip()
-                    if content:
-                        return json.loads(content)
-            except Exception as e:
-                logger.error(f"Erro ao carregar temporadas.json: {str(e)}")
-        
-        # Configuração padrão da Temporada #1 (Julho a Outubro)
+        from services.db import load_json_data, save_json_data
         padrao = {
             "temporada_ativa": {
                 "id": 1,
@@ -41,18 +32,25 @@ class TemporadaService:
             },
             "historico_temporadas": []
         }
-        self._salvar_dados(padrao)
-        return padrao
+        dados = load_json_data("temporadas", padrao)
+        if not dados or not isinstance(dados, dict) or "temporada_ativa" not in dados:
+            save_json_data("temporadas", padrao)
+            return padrao
+
+        # Garantir que a primeira temporada ativa em produção inclua todas as partidas desde Julho
+        temp_ativa = dados.get("temporada_ativa", {})
+        historico_temp = dados.get("historico_temporadas", [])
+        if not historico_temp and temp_ativa.get("data_inicio", "") > "2026-07-01T00:00:00":
+            temp_ativa["data_inicio"] = "2026-07-01T00:00:00"
+            save_json_data("temporadas", dados)
+
+        return dados
 
     def _salvar_dados(self, dados: Optional[Dict[str, Any]] = None):
+        from services.db import save_json_data
         if dados is None:
             dados = self.dados
-        os.makedirs(os.path.dirname(self.data_file), exist_ok=True)
-        try:
-            with open(self.data_file, 'w', encoding='utf-8') as f:
-                json.dump(dados, f, ensure_ascii=False, indent=2)
-        except Exception as e:
-            logger.error(f"Erro ao salvar temporadas.json: {str(e)}")
+        save_json_data("temporadas", dados)
 
     def obter_temporada_ativa(self, total_partidas_periodo: int = 0) -> Dict[str, Any]:
         from services.time_utils import obter_agora_local
