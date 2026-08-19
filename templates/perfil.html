@@ -669,8 +669,7 @@
                     {% set n_val = (jogo.get('nota_media') or jogo.get('nota_partida') or jogo.get('nota') or 0.0)|float %}
                     
                     <div class="admin-match-card-wrapper" style="margin-bottom: 0.75rem; position: relative;">
-                        <a href="{% if auth_user and auth_user.role == 'juiz' %}{{ url_for('juiz.juiz_historico') }}{% else %}{{ url_for('partida.historico') }}{% endif %}#sorteio-{{ jogo.sorteio_id }}"
-                            class="premium-profile-match-card" style="margin-bottom: 0;">
+                        <div class="premium-profile-match-card" style="margin-bottom: 0;">
                             {% if jogo.get('resultado', 'empate') == 'vitória' %}
                             <div class="premium-profile-match-result-badge premium-profile-match-result-badge--win">V</div>
                             {% elif jogo.get('resultado', 'empate') == 'derrota' %}
@@ -705,22 +704,26 @@
                                 <button type="button" 
                                         class="admin-edit-rating-btn" 
                                         title="Editar Nota da Partida (Admin)"
-                                        onclick="event.preventDefault(); event.stopPropagation(); toggleAdminInlineCard('{{ loop.index }}');"
-                                        style="background: rgba(234, 179, 8, 0.15); border: 1px solid rgba(234, 179, 8, 0.4); color: #facc15; padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s;">
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                        onclick="toggleAdminInlineCard('{{ loop.index }}');"
+                                        style="background: rgba(234, 179, 8, 0.2); border: 1px solid rgba(234, 179, 8, 0.6); color: #facc15; padding: 5px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s;">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                                         <path d="M12 20h9"></path>
                                         <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
                                     </svg>
-                                    <span>Editar</span>
+                                    <span>Editar Nota</span>
                                 </button>
                                 {% endif %}
 
-                                <svg class="premium-profile-match-chevron" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="2.5">
-                                    <polyline points="9 18 15 12 9 6" />
-                                </svg>
+                                <a href="{% if auth_user and auth_user.role == 'juiz' %}{{ url_for('juiz.juiz_historico') }}{% else %}{{ url_for('partida.historico') }}{% endif %}#sorteio-{{ jogo.sorteio_id }}"
+                                   title="Ver detalhes no histórico"
+                                   style="color: #94a3b8; display: inline-flex; align-items: center; padding: 4px; text-decoration: none;">
+                                    <svg class="premium-profile-match-chevron" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2.5">
+                                        <polyline points="9 18 15 12 9 6" />
+                                    </svg>
+                                </a>
                             </div>
-                        </a>
+                        </div>
 
                         {% if usuario and usuario.get('role') == 'admin' %}
                         <!-- CARD INLINE DE EDIÇÃO DE NOTA DO ADMIN -->
