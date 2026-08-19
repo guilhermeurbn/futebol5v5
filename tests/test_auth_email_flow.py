@@ -151,6 +151,7 @@ def test_completar_email_obrigatorio_flow():
 
     with client.session_transaction() as sess:
         sess['user_id'] = usuario['id']
+        sess['pending_email_user_id'] = usuario['id']
         sess['username'] = uname
         sess['nome'] = 'Sem Email Teste'
         sess['role'] = 'usuario'
@@ -159,11 +160,12 @@ def test_completar_email_obrigatorio_flow():
     assert resp_perfil.status_code == 302
     assert '/completar-email' in resp_perfil.headers['Location']
 
-    resp_submit = client.post('/completar-email', data={'email': 'sememail.resolvido@exemplo.com'}, follow_redirects=True)
+    res_email = f"sememail.resolvido.{uuid.uuid4().hex[:6]}@exemplo.com"
+    resp_submit = client.post('/completar-email', data={'email': res_email}, follow_redirects=True)
     assert resp_submit.status_code == 200
 
     u_atualizado = auth_svc.obter_por_id(usuario['id'])
-    assert u_atualizado['email'] == 'sememail.resolvido@exemplo.com'
+    assert u_atualizado['email'] == res_email
 
     # Cleanup
     auth_svc.deletar_usuario(usuario['id'])

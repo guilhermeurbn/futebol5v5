@@ -666,108 +666,46 @@
                     {% set gols = jogo.get('gols_times') or [0, 0] %}
                     {% set gols1 = gols[0]|default(0)|int %}
                     {% set gols2 = gols[1]|default(0)|int %}
-                    {% set n_val = (jogo.get('nota_media') or jogo.get('nota_partida') or jogo.get('nota') or 0.0)|float %}
-                    
-                    <div class="admin-match-card-wrapper" style="margin-bottom: 0.75rem; position: relative;">
-                        <div class="premium-profile-match-card" style="margin-bottom: 0;">
-                            {% if jogo.get('resultado', 'empate') == 'vitória' %}
-                            <div class="premium-profile-match-result-badge premium-profile-match-result-badge--win">V</div>
-                            {% elif jogo.get('resultado', 'empate') == 'derrota' %}
-                            <div class="premium-profile-match-result-badge premium-profile-match-result-badge--loss">D</div>
-                            {% else %}
-                            <div class="premium-profile-match-result-badge premium-profile-match-result-badge--draw">E</div>
-                            {% endif %}
-
-                            <div class="premium-profile-match-details">
-                                <div class="premium-profile-match-teams">
-                                    Time A {{ gols1 }} <span>x</span> {{ gols2 }} Time B
-                                </div>
-                                <div class="premium-profile-match-date">
-                                    {{ jogo.get('data')|dt_pt if jogo.get('data') else 'N/A' }} · Gols: {{ jogo.get('gols',
-                                    0) }} · Assist: {{ jogo.get('assistencias', 0) }}
-                                </div>
-                            </div>
-
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                {% if n_val > 0 %}
-                                <span
-                                    class="premium-profile-match-rating-badge {% if n_val >= 7.5 %}premium-profile-match-rating-badge--high{% elif n_val >= 6.0 %}premium-profile-match-rating-badge--mid{% endif %}">
-                                    {{ "%.1f"|format(n_val) }}
-                                </span>
-                                {% else %}
-                                <span class="premium-profile-match-rating-badge" style="background: rgba(255,255,255,0.06); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1);">
-                                    N/A
-                                </span>
-                                {% endif %}
-
-                                {% if usuario and usuario.get('role') == 'admin' %}
-                                <button type="button" 
-                                        class="admin-edit-rating-btn" 
-                                        title="Editar Nota da Partida (Admin)"
-                                        onclick="toggleAdminInlineCard('{{ loop.index }}');"
-                                        style="background: rgba(234, 179, 8, 0.2); border: 1px solid rgba(234, 179, 8, 0.6); color: #facc15; padding: 5px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s;">
-                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                        <path d="M12 20h9"></path>
-                                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                                    </svg>
-                                    <span>Editar Nota</span>
-                                </button>
-                                {% endif %}
-
-                                <a href="{% if auth_user and auth_user.role == 'juiz' %}{{ url_for('juiz.juiz_historico') }}{% else %}{{ url_for('partida.historico') }}{% endif %}#sorteio-{{ jogo.sorteio_id }}"
-                                   title="Ver detalhes no histórico"
-                                   style="color: #94a3b8; display: inline-flex; align-items: center; padding: 4px; text-decoration: none;">
-                                    <svg class="premium-profile-match-chevron" viewBox="0 0 24 24" fill="none"
-                                        stroke="currentColor" stroke-width="2.5">
-                                        <polyline points="9 18 15 12 9 6" />
-                                    </svg>
-                                </a>
-                            </div>
-                        </div>
-
-                        {% if usuario and usuario.get('role') == 'admin' %}
-                        {% set target_nome = (jogador.nome if (tem_jogador and jogador and jogador.nome) else (perfil_user.nome if (perfil_user is defined and perfil_user and perfil_user.nome) else '')) %}
-                        {% set target_id = (jogador.id if (tem_jogador and jogador and jogador.id) else (target_user_id if (target_user_id is defined and target_user_id) else '')) %}
-                        <!-- CARD INLINE DE EDIÇÃO DE NOTA DO ADMIN -->
-                        <div id="adminInlineCard-{{ loop.index }}" class="admin-inline-card" style="display: none; background: rgba(18, 18, 23, 0.98); border: 1.5px solid rgba(234, 179, 8, 0.4); border-top: none; border-radius: 0 0 14px 14px; padding: 1rem 1.25rem; margin-top: -2px; box-shadow: 0 12px 24px -4px rgba(0,0,0,0.6); z-index: 5; position: relative;">
-                            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
-                                <div>
-                                    <div style="font-size: 0.85rem; font-weight: 800; color: #facc15; display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                            <path d="M12 20h9"></path>
-                                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                                        </svg>
-                                        Card de Edição de Nota (Admin)
-                                    </div>
-                                    <div style="font-size: 0.75rem; color: #94a3b8;">
-                                        Digite a nova nota manual para {{ target_nome or 'o jogador' }} nesta partida (0 a 10):
-                                    </div>
-                                </div>
-
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <input type="text" id="inputInlineNota-{{ loop.index }}" inputmode="decimal"
-                                           value="{{ '%.1f'|format(n_val) if n_val > 0 else '7.0' }}"
-                                           style="width: 85px; background: #09090b; border: 1.5px solid rgba(234, 179, 8, 0.4); border-radius: 8px; padding: 6px 10px; color: #facc15; font-size: 1.1rem; font-weight: 800; text-align: center;" placeholder="Nota">
-                                    
-                                    <button type="button" id="btnSalvarInline-{{ loop.index }}"
-                                            data-partida-id="{{ jogo.get('partida_id') or '' }}"
-                                            data-sorteio-id="{{ jogo.get('sorteio_id') or '' }}"
-                                            data-jogador-nome="{{ target_nome }}"
-                                            data-jogador-id="{{ target_id }}"
-                                            onclick="salvarNotaInline('{{ loop.index }}', this);"
-                                            style="background: #eab308; border: none; color: #000; padding: 7px 14px; border-radius: 8px; font-weight: 800; font-size: 0.8rem; cursor: pointer; box-shadow: 0 2px 8px rgba(234, 179, 8, 0.3); transition: all 0.2s;">
-                                        Salvar Nota
-                                    </button>
-                                    <button type="button" onclick="toggleAdminInlineCard('{{ loop.index }}');"
-                                            style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #ccc; padding: 7px 12px; border-radius: 8px; font-weight: 600; font-size: 0.8rem; cursor: pointer;">
-                                        Cancelar
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                    <a href="{% if auth_user and auth_user.role == 'juiz' %}{{ url_for('juiz.juiz_historico') }}{% else %}{{ url_for('partida.historico') }}{% endif %}#sorteio-{{ jogo.sorteio_id }}"
+                        class="premium-profile-match-card">
+                        {% if jogo.get('resultado', 'empate') == 'vitória' %}
+                        <div class="premium-profile-match-result-badge premium-profile-match-result-badge--win">V</div>
+                        {% elif jogo.get('resultado', 'empate') == 'derrota' %}
+                        <div class="premium-profile-match-result-badge premium-profile-match-result-badge--loss">D</div>
+                        {% else %}
+                        <div class="premium-profile-match-result-badge premium-profile-match-result-badge--draw">E</div>
                         {% endif %}
-                    </div>
+
+                        <div class="premium-profile-match-details">
+                            <div class="premium-profile-match-teams">
+                                Time A {{ gols1 }} <span>x</span> {{ gols2 }} Time B
+                            </div>
+                            <div class="premium-profile-match-date">
+                                {{ jogo.get('data')|dt_pt if jogo.get('data') else 'N/A' }} · Gols: {{ jogo.get('gols',
+                                0) }} · Assist: {{ jogo.get('assistencias', 0) }}
+                            </div>
+                        </div>
+
+                        <div style="display: flex; align-items: center;">
+                            {% set n_val = (jogo.get('nota_media') or jogo.get('nota_partida') or jogo.get('nota') or 0.0)|float %}
+                            {% if n_val > 0 %}
+                            <span
+                                class="premium-profile-match-rating-badge {% if n_val >= 7.5 %}premium-profile-match-rating-badge--high{% elif n_val >= 6.0 %}premium-profile-match-rating-badge--mid{% endif %}">
+                                {{ "%.1f"|format(n_val) }}
+                            </span>
+                            {% else %}
+                            <span class="premium-profile-match-rating-badge" style="background: rgba(255,255,255,0.06); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1);">
+                                N/A
+                            </span>
+                            {% endif %}
+                            <svg class="premium-profile-match-chevron" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2.5">
+                                <polyline points="9 18 15 12 9 6" />
+                            </svg>
+                        </div>
+                    </a>
                     {% endfor %}
+                </div>
                 </div>
                 {% else %}
                 <div class="premium-profile-empty">
@@ -1438,164 +1376,4 @@
     }
 </script>
 
-{% if usuario and usuario.get('role') == 'admin' %}
-<!-- MODAL DE EDIÇÃO DE NOTA PARA ADMIN -->
-<div id="modalEditarNotaAdmin" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 99999; align-items: center; justify-content: center; padding: 1rem;">
-    <div style="background: #18181b; border: 1px solid rgba(234, 179, 8, 0.4); border-radius: 20px; max-width: 420px; width: 100%; padding: 1.75rem; color: #fff; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7); animation: modalFadeIn 0.2s ease-out;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-            <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #facc15; display: flex; align-items: center; gap: 8px;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <path d="M12 20h9"></path>
-                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                </svg>
-                Editar Nota (Admin)
-            </h3>
-            <button onclick="fecharModalEditarNotaAdmin()" style="background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; padding: 0; line-height: 1;">&times;</button>
-        </div>
-        <p style="font-size: 0.9rem; color: #a1a1aa; margin-bottom: 1.25rem; line-height: 1.5;">
-            Alterar nota da partida para <strong id="adminModalJogadorNome" style="color: #fff;"></strong>. O ranking geral da competição será atualizado instantaneamente.
-        </p>
-
-        <form id="formEditarNotaAdmin" onsubmit="salvarNotaAdmin(event)">
-            <input type="hidden" id="adminModalPartidaId" name="partida_id">
-            <input type="hidden" id="adminModalSorteioId" name="sorteio_id">
-            <input type="hidden" id="adminModalJogadorNomeInput" name="jogador_nome">
-
-            <div style="margin-bottom: 1.5rem;">
-                <label style="display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #a1a1aa; margin-bottom: 0.5rem;">Nova Nota do Jogador (0.0 a 10.0)</label>
-                <input type="number" id="adminModalNovaNota" step="0.1" min="0" max="10" required
-                       style="width: 100%; background: #09090b; border: 1.5px solid rgba(234, 179, 8, 0.4); border-radius: 12px; padding: 0.85rem; color: #facc15; font-size: 1.5rem; font-weight: 800; text-align: center; box-sizing: border-box;" placeholder="Ex: 8.5">
-            </div>
-
-            <div style="display: flex; gap: 0.75rem;">
-                <button type="button" onclick="fecharModalEditarNotaAdmin()" style="flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #e4e4e7; padding: 0.85rem; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 0.9rem;">
-                    Cancelar
-                </button>
-                <button type="submit" id="adminBtnSalvarNota" style="flex: 1; background: #eab308; border: none; color: #000; padding: 0.85rem; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(234, 179, 8, 0.3);">
-                    Salvar Nota
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<script>
-function toggleAdminInlineCard(index) {
-    const card = document.getElementById(`adminInlineCard-${index}`);
-    if (card) {
-        card.style.display = (card.style.display === 'none' || !card.style.display) ? 'block' : 'none';
-    }
-}
-
-async function salvarNotaInline(index, btnElement) {
-    const input = document.getElementById(`inputInlineNota-${index}`);
-    if (!input || !btnElement) return;
-
-    const partidaId = btnElement.getAttribute('data-partida-id') || '';
-    const sorteioId = btnElement.getAttribute('data-sorteio-id') || '';
-    const jogadorNome = btnElement.getAttribute('data-jogador-nome') || '';
-    const jogadorId = btnElement.getAttribute('data-jogador-id') || '';
-
-    let rawVal = String(input.value || '').replace(',', '.').trim();
-    let novaNota = parseFloat(rawVal);
-    if (isNaN(novaNota) || novaNota < 0 || novaNota > 10) {
-        alert('Por favor, informe uma nota válida entre 0.0 e 10.0');
-        return;
-    }
-
-    btnElement.disabled = true;
-    btnElement.textContent = 'Salvando...';
-
-    try {
-        const endpoint = window.location.protocol + '//' + window.location.host + '/admin/partida/editar-nota-jogador';
-        const resp = await fetch(endpoint, {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                partida_id: partidaId,
-                sorteio_id: sorteioId,
-                jogador_nome: jogadorNome,
-                jogador_id: jogadorId,
-                nova_nota: novaNota
-            })
-        });
-
-        const data = await resp.json();
-        if (data && data.sucesso) {
-            toggleAdminInlineCard(index);
-            alert(data.mensagem || 'Nota alterada com sucesso!');
-            window.location.reload();
-        } else {
-            alert('Erro: ' + ((data && data.erro) ? data.erro : 'Não foi possível alterar a nota.'));
-            btnElement.disabled = false;
-            btnElement.textContent = 'Salvar Nota';
-        }
-    } catch (err) {
-        console.error("Erro ao salvar nota:", err);
-        alert('Erro ao conectar ao servidor: ' + (err.message || err));
-        btnElement.disabled = false;
-        btnElement.textContent = 'Salvar Nota';
-    }
-}
-
-function abrirModalEditarNotaAdmin(partidaId, sorteioId, jogadorNome, notaAtual) {
-    document.getElementById('adminModalPartidaId').value = partidaId || '';
-    document.getElementById('adminModalSorteioId').value = sorteioId || '';
-    document.getElementById('adminModalJogadorNomeInput').value = jogadorNome || '';
-    document.getElementById('adminModalJogadorNome').textContent = jogadorNome || '';
-    document.getElementById('adminModalNovaNota').value = (parseFloat(notaAtual) > 0 ? parseFloat(notaAtual) : 7.0).toFixed(1);
-    
-    const modal = document.getElementById('modalEditarNotaAdmin');
-    modal.style.display = 'flex';
-}
-
-function fecharModalEditarNotaAdmin() {
-    const modal = document.getElementById('modalEditarNotaAdmin');
-    modal.style.display = 'none';
-}
-
-async function salvarNotaAdmin(e) {
-    e.preventDefault();
-    const btn = document.getElementById('adminBtnSalvarNota');
-    btn.disabled = true;
-    btn.textContent = 'Salvando...';
-
-    const partidaId = document.getElementById('adminModalPartidaId').value;
-    const sorteioId = document.getElementById('adminModalSorteioId').value;
-    const jogadorNome = document.getElementById('adminModalJogadorNomeInput').value;
-    const novaNota = parseFloat(document.getElementById('adminModalNovaNota').value);
-
-    try {
-        const resp = await fetch('/admin/partida/editar-nota-jogador', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                partida_id: partidaId,
-                sorteio_id: sorteioId,
-                jogador_nome: jogadorNome,
-                nova_nota: novaNota
-            })
-        });
-
-        const data = await resp.json();
-        if (data.sucesso) {
-            fecharModalEditarNotaAdmin();
-            alert(data.mensagem || 'Nota alterada com sucesso!');
-            window.location.reload();
-        } else {
-            alert('Erro: ' + (data.erro || 'Não foi possível alterar a nota.'));
-            btn.disabled = false;
-            btn.textContent = 'Salvar Nota';
-        }
-    } catch (err) {
-        alert('Erro ao conectar ao servidor: ' + err.message);
-        btn.disabled = false;
-        btn.textContent = 'Salvar Nota';
-    }
-}
-</script>
-{% endif %}
 {% endblock %}
