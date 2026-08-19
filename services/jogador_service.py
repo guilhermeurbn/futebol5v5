@@ -657,6 +657,18 @@ def sincronizar_dados_e_partidas() -> dict:
                         part["user_id"] = found_uid
                         alterou_votacoes = True
         
+        # Atualizar votos individuais
+        for voto in (vp.get("votos", []) or []):
+            if isinstance(voto, dict):
+                for voto_j in (voto.get("votos", []) or []):
+                    if isinstance(voto_j, dict):
+                        p_nome = voto_j.get("jogador_nome", "")
+                        p_uid = voto_j.get("user_id") or voto_j.get("owner_user_id")
+                        found_uid, canonical = resolver_user_id(p_nome, p_uid)
+                        if found_uid and canonical and voto_j.get("jogador_nome") != canonical:
+                            voto_j["jogador_nome"] = canonical
+                            alterou_votacoes = True
+
         ranking_info = vp.get("ranking")
         if ranking_info and isinstance(ranking_info, dict):
             for rj in ranking_info.get("ranking_jogadores", []) or []:
@@ -667,6 +679,14 @@ def sincronizar_dados_e_partidas() -> dict:
                     if found_uid and canonical and rj.get("jogador_nome") != canonical:
                         rj["jogador_nome"] = canonical
                         alterou_votacoes = True
+
+        # Se a partida estiver encerrada, re-apurar ranking para recalcular notas limpas
+        if vp.get("status") == "encerrada":
+            try:
+                vp["ranking"] = vot_svc._apurar_ranking(vp)
+                alterou_votacoes = True
+            except Exception:
+                pass
 
     if alterou_votacoes:
         vot_svc._salvar(vot_dados)

@@ -755,34 +755,81 @@ class VotacaoService:
         acumulado: Dict[str, Dict] = {}
         total_votos = 0
 
+        # Mapeamento de canonização de nomes para unificar usuários que mudaram de nome
+        from services.auth_service import AuthService
+        import unicodedata
+
+        def _norm(txt: str) -> str:
+            if not txt:
+                return ""
+            s = unicodedata.normalize("NFKD", str(txt).strip().casefold())
+            return "".join(c for c in s if not unicodedata.combining(c))
+
+        usuarios = AuthService()._carregar()
+        user_canonical = {}
+        alias_to_canonical = {}
+
+        for u in usuarios:
+            uid = u.get("id")
+            c_nome = (u.get("nome") or "").strip()
+            username = (u.get("username") or "").strip()
+            if uid and c_nome:
+                user_canonical[uid] = c_nome
+                alias_to_canonical[_norm(c_nome)] = c_nome
+                if username:
+                    alias_to_canonical[_norm(username)] = c_nome
+                partes = c_nome.split()
+                if partes and len(_norm(partes[0])) >= 3:
+                    alias_to_canonical[_norm(partes[0])] = c_nome
+
+        def resolver_canonical(p_nome: str, p_uid: Optional[str] = None) -> str:
+            if p_uid and p_uid in user_canonical:
+                return user_canonical[p_uid]
+            n = _norm(p_nome)
+            if n in alias_to_canonical:
+                return alias_to_canonical[n]
+            for alias, c_nome in alias_to_canonical.items():
+                if alias == n or alias in n or n in alias:
+                    return c_nome
+            return p_nome.strip() if p_nome else "Jogador"
+
         for partida in encerradas:
             votos = partida.get("votos", [])
             total_votos += len(votos)
 
             # Ranking apurado da rodada
             ranking_rodada = (partida.get("ranking") or {}).get("ranking_jogadores") or []
-            ranking_rodada_dict = {
-                item.get("jogador_nome"): item
-                for item in ranking_rodada
-                if item.get("jogador_nome")
-            }
+            ranking_rodada_dict = {}
+            for ritem in ranking_rodada:
+                r_nome = ritem.get("jogador_nome")
+                r_uid = ritem.get("user_id") or ritem.get("owner_user_id")
+                if r_nome or r_uid:
+                    c_name = resolver_canonical(r_nome, r_uid)
+                    ranking_rodada_dict[c_name] = ritem
 
-            participantes = {
-                p.get("jogador_nome"): p
-                for p in partida.get("participantes", [])
-                if p.get("jogador_nome")
-            }
+            participantes_canonical = {}
+            for p in (partida.get("participantes", []) or []):
+                p_nome = p.get("jogador_nome") or p.get("nome_usuario") or p.get("nome", "")
+                p_uid = p.get("user_id") or p.get("owner_user_id")
+                if p_nome or p_uid:
+                    c_name = resolver_canonical(p_nome, p_uid)
+                    participantes_canonical[c_name] = p
+
             resultado = partida.get("resultado_partida") or {}
-            detalhes_resultado = {
-                item.get("nome"): item
-                for item in resultado.get("jogadores_detalhes", []) or []
-                if item.get("nome")
-            }
-            melhor_jogador = ((partida.get("ranking") or {}).get("melhor_jogador") or {}).get("jogador_nome")
+            detalhes_resultado = {}
+            for ditem in (resultado.get("jogadores_detalhes", []) or []):
+                d_nome = ditem.get("nome", "")
+                d_uid = ditem.get("user_id") or ditem.get("owner_user_id")
+                if d_nome or d_uid:
+                    c_name = resolver_canonical(d_nome, d_uid)
+                    detalhes_resultado[c_name] = ditem
 
-            for nome, participante in participantes.items():
-                item = acumulado.setdefault(nome, {
-                    "jogador_nome": nome,
+            melhor_jogador_raw = ((partida.get("ranking") or {}).get("melhor_jogador") or {}).get("jogador_nome")
+            melhor_jogador_c = resolver_canonical(melhor_jogador_raw) if melhor_jogador_raw else None
+
+            for c_nome, participante in participantes_canonical.items():
+                item = acumulado.setdefault(c_nome, {
+                    "jogador_nome": c_nome,
                     "jogos": 0,
                     "soma_medias_rodadas": 0.0,
                     "nota_total": 0.0,
@@ -797,14 +844,14 @@ class VotacaoService:
                 item["jogos"] += 1
 
                 # Soma a média obtida nesta rodada
-                rk_info = ranking_rodada_dict.get(nome)
+                rk_info = ranking_rodada_dict.get(c_nome)
                 if rk_info:
                     nota_rodada = float(rk_info.get("nota_media", 0) or 0)
                     item["soma_medias_rodadas"] += nota_rodada
                     item["avaliacoes"] += 1
 
                 resultado_time = self._resultado_por_time(resultado, participante.get("time_numero")) if resultado else "empate"
-                detalhe = detalhes_resultado.get(nome, {})
+                detalhe = detalhes_resultado.get(c_nome, {})
                 item["gols"] += int(detalhe.get("gols", 0) or 0)
 
                 if resultado_time == "vitoria":
@@ -814,7 +861,7 @@ class VotacaoService:
                 else:
                     item["empates"] += 1
 
-                if melhor_jogador and melhor_jogador == nome:
+                if melhor_jogador_c and melhor_jogador_c == c_nome:
                     item["destaques"] += 1
 
         if not (data_inicio and data_fim):
