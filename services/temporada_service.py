@@ -55,13 +55,14 @@ class TemporadaService:
             logger.error(f"Erro ao salvar temporadas.json: {str(e)}")
 
     def obter_temporada_ativa(self, total_partidas_periodo: int = 0) -> Dict[str, Any]:
+        from services.time_utils import obter_agora_local
         temp = self.dados.get("temporada_ativa", {})
         if not temp:
             return {}
 
         dt_inicio = datetime.fromisoformat(temp["data_inicio"])
         dt_fim = datetime.fromisoformat(temp["data_fim"])
-        agora = datetime.now()
+        agora = obter_agora_local()
         tipo_duracao = temp.get("tipo_duracao", "meses")
         limite_partidas = temp.get("limite_partidas")
 
@@ -114,9 +115,11 @@ class TemporadaService:
         descricao_premio: Optional[str] = None
     ) -> Dict[str, Any]:
         """
-        Arquiva a competição atual e abre uma nova competição zerada a partir de agora.
+        Arquiva a competição atual e abre uma nova competição zerada no fuso horário local da Europa (Europe/Lisbon).
+        Partidas de competições anteriores ficam no histórico arquivado.
         """
-        agora = datetime.now()
+        from services.time_utils import obter_agora_local
+        agora = obter_agora_local()
 
         # Arquivar a temporada ativa anterior se existir
         temp_atual = self.dados.get("temporada_ativa")
@@ -125,15 +128,15 @@ class TemporadaService:
             temp_atual["encerrada_em"] = agora.isoformat()
             self.dados.setdefault("historico_temporadas", []).append(temp_atual)
 
-        # Incluir todas as partidas anteriores registradas no perfil para a competição
-        dt_inicio = "2020-01-01T00:00:00"
+        # Início da nova competição no começo do dia atual no fuso horário da Europa
+        dt_inicio = agora.replace(hour=0, minute=0, second=0, microsecond=0).isoformat()
 
         if tipo_duracao == "meses":
             dias = max(1, valor_duracao * 30)
-            dt_fim = (agora + timedelta(days=dias)).isoformat()
+            dt_fim = (agora + timedelta(days=dias)).replace(hour=23, minute=59, second=59, microsecond=0).isoformat()
             limite_partidas = None
         else:  # "partidas"
-            dt_fim = (agora + timedelta(days=365)).isoformat()
+            dt_fim = (agora + timedelta(days=365)).replace(hour=23, minute=59, second=59, microsecond=0).isoformat()
             limite_partidas = max(1, valor_duracao)
 
         novo_id = len(self.dados.get("historico_temporadas", [])) + 1

@@ -54,7 +54,8 @@ class VotacaoService:
             json.dump(dados, f, indent=2, ensure_ascii=False)
 
     def _agora(self) -> datetime:
-        return datetime.now()
+        from services.time_utils import obter_agora_local
+        return obter_agora_local()
 
     def _parse_iso(self, valor: Optional[str]) -> Optional[datetime]:
         if not valor:
