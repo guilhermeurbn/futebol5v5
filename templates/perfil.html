@@ -686,7 +686,7 @@
                             </div>
                         </div>
 
-                        <div style="display: flex; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
                             {% set n_val = (jogo.get('nota_media') or jogo.get('nota_partida') or jogo.get('nota') or 0.0)|float %}
                             {% if n_val > 0 %}
                             <span
@@ -698,6 +698,21 @@
                                 N/A
                             </span>
                             {% endif %}
+
+                            {% if usuario and usuario.get('role') == 'admin' %}
+                            <button type="button" 
+                                    class="admin-edit-rating-btn" 
+                                    title="Editar Nota da Partida (Admin)"
+                                    onclick="event.preventDefault(); event.stopPropagation(); abrirModalEditarNotaAdmin('{{ jogo.get('partida_id') or '' }}', '{{ jogo.get('sorteio_id') or '' }}', '{{ jogador.nome }}', '{{ n_val }}');"
+                                    style="background: rgba(234, 179, 8, 0.15); border: 1px solid rgba(234, 179, 8, 0.4); color: #facc15; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <path d="M12 20h9"></path>
+                                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                                </svg>
+                                <span>Editar</span>
+                            </button>
+                            {% endif %}
+
                             <svg class="premium-profile-match-chevron" viewBox="0 0 24 24" fill="none"
                                 stroke="currentColor" stroke-width="2.5">
                                 <polyline points="9 18 15 12 9 6" />
@@ -1374,4 +1389,104 @@
         }
     }
 </script>
+
+{% if usuario and usuario.get('role') == 'admin' %}
+<!-- MODAL DE EDIÇÃO DE NOTA PARA ADMIN -->
+<div id="modalEditarNotaAdmin" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 99999; align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: #18181b; border: 1px solid rgba(234, 179, 8, 0.4); border-radius: 20px; max-width: 420px; width: 100%; padding: 1.75rem; color: #fff; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7); animation: modalFadeIn 0.2s ease-out;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #facc15; display: flex; align-items: center; gap: 8px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M12 20h9"></path>
+                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                </svg>
+                Editar Nota (Admin)
+            </h3>
+            <button onclick="fecharModalEditarNotaAdmin()" style="background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; padding: 0; line-height: 1;">&times;</button>
+        </div>
+        <p style="font-size: 0.9rem; color: #a1a1aa; margin-bottom: 1.25rem; line-height: 1.5;">
+            Alterar nota da partida para <strong id="adminModalJogadorNome" style="color: #fff;"></strong>. O ranking geral da competição será atualizado instantaneamente.
+        </p>
+
+        <form id="formEditarNotaAdmin" onsubmit="salvarNotaAdmin(event)">
+            <input type="hidden" id="adminModalPartidaId" name="partida_id">
+            <input type="hidden" id="adminModalSorteioId" name="sorteio_id">
+            <input type="hidden" id="adminModalJogadorNomeInput" name="jogador_nome">
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #a1a1aa; margin-bottom: 0.5rem;">Nova Nota do Jogador (0.0 a 10.0)</label>
+                <input type="number" id="adminModalNovaNota" step="0.1" min="0" max="10" required
+                       style="width: 100%; background: #09090b; border: 1.5px solid rgba(234, 179, 8, 0.4); border-radius: 12px; padding: 0.85rem; color: #facc15; font-size: 1.5rem; font-weight: 800; text-align: center; box-sizing: border-box;" placeholder="Ex: 8.5">
+            </div>
+
+            <div style="display: flex; gap: 0.75rem;">
+                <button type="button" onclick="fecharModalEditarNotaAdmin()" style="flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #e4e4e7; padding: 0.85rem; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 0.9rem;">
+                    Cancelar
+                </button>
+                <button type="submit" id="adminBtnSalvarNota" style="flex: 1; background: #eab308; border: none; color: #000; padding: 0.85rem; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(234, 179, 8, 0.3);">
+                    Salvar Nota
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function abrirModalEditarNotaAdmin(partidaId, sorteioId, jogadorNome, notaAtual) {
+    document.getElementById('adminModalPartidaId').value = partidaId || '';
+    document.getElementById('adminModalSorteioId').value = sorteioId || '';
+    document.getElementById('adminModalJogadorNomeInput').value = jogadorNome || '';
+    document.getElementById('adminModalJogadorNome').textContent = jogadorNome || '';
+    document.getElementById('adminModalNovaNota').value = (parseFloat(notaAtual) > 0 ? parseFloat(notaAtual) : 7.0).toFixed(1);
+    
+    const modal = document.getElementById('modalEditarNotaAdmin');
+    modal.style.display = 'flex';
+}
+
+function fecharModalEditarNotaAdmin() {
+    const modal = document.getElementById('modalEditarNotaAdmin');
+    modal.style.display = 'none';
+}
+
+async function salvarNotaAdmin(e) {
+    e.preventDefault();
+    const btn = document.getElementById('adminBtnSalvarNota');
+    btn.disabled = true;
+    btn.textContent = 'Salvando...';
+
+    const partidaId = document.getElementById('adminModalPartidaId').value;
+    const sorteioId = document.getElementById('adminModalSorteioId').value;
+    const jogadorNome = document.getElementById('adminModalJogadorNomeInput').value;
+    const novaNota = parseFloat(document.getElementById('adminModalNovaNota').value);
+
+    try {
+        const resp = await fetch('/admin/partida/editar-nota-jogador', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                partida_id: partidaId,
+                sorteio_id: sorteioId,
+                jogador_nome: jogadorNome,
+                nova_nota: novaNota
+            })
+        });
+
+        const data = await resp.json();
+        if (data.sucesso) {
+            fecharModalEditarNotaAdmin();
+            alert(data.mensagem || 'Nota alterada com sucesso!');
+            window.location.reload();
+        } else {
+            alert('Erro: ' + (data.erro || 'Não foi possível alterar a nota.'));
+            btn.disabled = false;
+            btn.textContent = 'Salvar Nota';
+        }
+    } catch (err) {
+        alert('Erro ao conectar ao servidor: ' + err.message);
+        btn.disabled = false;
+        btn.textContent = 'Salvar Nota';
+    }
+}
+</script>
+{% endif %}
 {% endblock %}

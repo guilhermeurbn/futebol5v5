@@ -368,4 +368,120 @@ def admin_sincronizar_jogador():
         return redirect(url_for('admin.admin_page'))
 
 
+@admin_bp.route('/admin/partida/editar-nota-jogador', methods=['POST'])
+@admin_required
+def admin_editar_nota_jogador():
+    """Permite ao administrador alterar manualmente a nota de um jogador em uma partida especifica."""
+    try:
+        dados = request.get_json(silent=True) or request.form.to_dict()
+        partida_id = str(dados.get('partida_id', '')).strip()
+        sorteio_id = str(dados.get('sorteio_id', '')).strip()
+        jogador_nome = str(dados.get('jogador_nome', '')).strip()
+        jogador_id = str(dados.get('jogador_id', '')).strip()
+        
+        try:
+            nova_nota = float(dados.get('nova_nota'))
+        except (TypeError, ValueError):
+            return jsonify({'sucesso': False, 'erro': 'Nota inválida'}), 400
+
+        if not (0.0 <= nova_nota <= 10.0):
+            return jsonify({'sucesso': False, 'erro': 'A nota deve estar entre 0.0 e 10.0'}), 400
+
+        if not partida_id and not sorteio_id:
+            return jsonify({'sucesso': False, 'erro': 'Identificador de partida ausente'}), 400
+
+        from services.db import load_json_data, save_json_data, clear_db_cache
+        from services.jogador_stats_service import JogadorStatsService
+        from services.jogador_service import sincronizar_dados_e_partidas
+
+        stats_svc = JogadorStatsService()
+        nome_norm = stats_svc._normalizar_nome(jogador_nome)
+
+        # 1. Atualizar em votacoes_partidas
+        vot_dados = load_json_data("votacoes_partidas", {})
+        vot_list = vot_dados.get("partidas", []) if isinstance(vot_dados, dict) else []
+        alterado_vot = False
+
+        for vp in vot_list:
+            if not isinstance(vp, dict):
+                continue
+            v_pid = str(vp.get("id") or "")
+            v_sid = str(vp.get("sorteio_id") or "")
+            if (partida_id and (v_pid == partida_id or v_sid == partida_id)) or (sorteio_id and (v_sid == sorteio_id or v_pid == sorteio_id)):
+                ranking = vp.get("ranking")
+                if not isinstance(ranking, dict):
+                    ranking = {"ranking_jogadores": [], "ranking_times": []}
+                    vp["ranking"] = ranking
+                
+                ranking_jogadores = ranking.get("ranking_jogadores", [])
+                encontrado = False
+                for rj in ranking_jogadores:
+                    rj_nome = stats_svc._normalizar_nome(rj.get("jogador_nome", ""))
+                    rj_uid = str(rj.get("user_id") or "")
+                    if (jogador_id and rj_uid == jogador_id) or (nome_norm and rj_nome == nome_norm):
+                        rj["nota_media"] = round(nova_nota, 2)
+                        votos_cnt = int(rj.get("votos", 1) or 1)
+                        rj["nota_total"] = round(nova_nota * votos_cnt, 2)
+                        rj["pontos"] = round(nova_nota * votos_cnt, 2)
+                        encontrado = True
+                        alterado_vot = True
+                        break
+                
+                if not encontrado and (jogador_nome or nome_norm):
+                    ranking_jogadores.append({
+                        "jogador_nome": jogador_nome,
+                        "user_id": jogador_id or None,
+                        "nota_media": round(nova_nota, 2),
+                        "nota_total": round(nova_nota, 2),
+                        "soma_pesos": 1.0,
+                        "votos": 1,
+                        "pontos": round(nova_nota, 2),
+                        "gols": 0,
+                        "confiabilidade_media": 1.0
+                    })
+                    ranking["ranking_jogadores"] = ranking_jogadores
+                    alterado_vot = True
+
+        if alterado_vot:
+            save_json_data("votacoes_partidas", vot_dados)
+
+        # 2. Atualizar em partidas
+        partidas_list = load_json_data("partidas", [])
+        alterado_partidas = False
+        for p in partidas_list:
+            if not isinstance(p, dict):
+                continue
+            p_pid = str(p.get("id") or "")
+            p_sid = str(p.get("sorteio_id") or "")
+            if (partida_id and (p_pid == partida_id or p_sid == partida_id)) or (sorteio_id and (p_sid == sorteio_id or p_pid == sorteio_id)):
+                jogadores_detalhes = p.get("jogadores_detalhes", [])
+                for det in jogadores_detalhes:
+                    d_nome = stats_svc._normalizar_nome(det.get("nome", ""))
+                    d_uid = str(det.get("user_id") or det.get("owner_user_id") or "")
+                    if (jogador_id and d_uid == jogador_id) or (nome_norm and d_nome == nome_norm):
+                        det["nota_media"] = round(nova_nota, 2)
+                        det["nota_partida"] = round(nova_nota, 2)
+                        det["nota"] = round(nova_nota, 2)
+                        alterado_partidas = True
+
+        if alterado_partidas:
+            save_json_data("partidas", partidas_list)
+
+        # 3. Limpar caches e ressincronizar estatísticas
+        stats_svc.invalidar_cache_stats()
+        clear_db_cache()
+        sincronizar_dados_e_partidas()
+
+        return jsonify({
+            'sucesso': True,
+            'mensagem': f'Nota alterada com sucesso para {nova_nota:.2f}!',
+            'nova_nota': round(nova_nota, 2)
+        })
+
+    except Exception as e:
+        logger.error(f"Erro ao editar nota de jogador: {str(e)}")
+        return jsonify({'sucesso': False, 'erro': str(e)}), 500
+
+
+
 
