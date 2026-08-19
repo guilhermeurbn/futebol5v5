@@ -635,7 +635,7 @@ def sincronizar_dados_e_partidas() -> dict:
 
     # 2. Atualizar votacoes.json / votacoes_partidas
     vot_svc = VotacaoService()
-    vot_dados = vot_svc._carregar_raw()
+    vot_dados = vot_svc._carregar()
     vot_partidas = vot_dados.get("partidas", []) if isinstance(vot_dados, dict) else []
 
     for vp in vot_partidas:

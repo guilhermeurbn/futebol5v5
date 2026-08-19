@@ -604,10 +604,55 @@ class VotacaoService:
         self._salvar(dados)
         return alvo
 
+    def _obter_mapeamento_canonico(self):
+        from services.auth_service import AuthService
+        import unicodedata
+
+        def _norm(txt: str) -> str:
+            if not txt:
+                return ""
+            s = unicodedata.normalize("NFKD", str(txt).strip().casefold())
+            return "".join(c for c in s if not unicodedata.combining(c))
+
+        user_canonical = {}
+        alias_to_canonical = {}
+        try:
+            usuarios = AuthService()._carregar()
+            for u in usuarios:
+                uid = u.get("id")
+                c_nome = (u.get("nome") or "").strip()
+                username = (u.get("username") or "").strip()
+                if uid and c_nome:
+                    user_canonical[uid] = c_nome
+                    alias_to_canonical[_norm(c_nome)] = c_nome
+                    if username:
+                        alias_to_canonical[_norm(username)] = c_nome
+                    partes = c_nome.split()
+                    if partes and len(_norm(partes[0])) >= 3:
+                        alias_to_canonical[_norm(partes[0])] = c_nome
+        except Exception:
+            pass
+
+        def resolver_canonical(p_nome: str, p_uid: Optional[str] = None) -> str:
+            if p_uid and str(p_uid) in user_canonical:
+                return user_canonical[str(p_uid)]
+            n = _norm(p_nome)
+            if not n:
+                return p_nome.strip() if p_nome else "Jogador"
+            if n in alias_to_canonical:
+                return alias_to_canonical[n]
+            for alias, c_nome in alias_to_canonical.items():
+                if alias == n or alias in n or n in alias:
+                    return c_nome
+            return p_nome.strip() if p_nome else "Jogador"
+
+        return resolver_canonical
+
     def _apurar_ranking(self, partida: Dict) -> Dict:
         votos = partida.get("votos", [])
         jogadores = {}
         times = {}
+        resolver_canonical = self._obter_mapeamento_canonico()
 
         # Avaliar confiabilidade dos votos
         avaliacao_confiabilidade = self.confiabilidade_service.avaliar_pesos_partida(votos, partida.get("participantes"))
@@ -616,11 +661,13 @@ class VotacaoService:
         for voto in votos:
             eval_id = str(voto.get("user_id") or voto.get("username") or "anonimo")
             for voto_jogador in voto.get("votos", []):
-                nome = voto_jogador.get("jogador_nome", "Jogador")
+                nome_raw = voto_jogador.get("jogador_nome", "Jogador")
+                uid_raw = voto_jogador.get("user_id") or voto_jogador.get("owner_user_id")
+                nome = resolver_canonical(nome_raw, uid_raw)
                 time = voto_jogador.get("time_numero")
                 nota = self._normalizar_nota(voto_jogador.get("nota", 0))
 
-                peso = float(mapa_pesos.get(eval_id, {}).get(nome, 1.0))
+                peso = float(mapa_pesos.get(eval_id, {}).get(nome_raw, 1.0))
                 nota_ponderada = nota * peso
 
                 stats = jogadores.setdefault(nome, {
@@ -650,18 +697,21 @@ class VotacaoService:
                 t["votos"] += 1
 
         for participante in partida.get("participantes", []):
-            nome = participante.get("nome") or participante.get("jogador_nome")
-            time = participante.get("time_numero")
-            if nome and nome not in jogadores:
-                jogadores[nome] = {
-                    "jogador_nome": nome,
-                    "time_numero": time,
-                    "nota_total": 0.0,
-                    "soma_pesos": 0.0,
-                    "votos": 0,
-                    "pontos": 0.0,
-                    "notas_lista": [],
-                }
+            p_nome_raw = participante.get("nome") or participante.get("jogador_nome")
+            p_uid_raw = participante.get("user_id") or participante.get("owner_user_id")
+            if p_nome_raw or p_uid_raw:
+                nome = resolver_canonical(p_nome_raw, p_uid_raw)
+                time = participante.get("time_numero")
+                if nome not in jogadores:
+                    jogadores[nome] = {
+                        "jogador_nome": nome,
+                        "time_numero": time,
+                        "nota_total": 0.0,
+                        "soma_pesos": 0.0,
+                        "votos": 0,
+                        "pontos": 0.0,
+                        "notas_lista": [],
+                    }
 
         # Mapear gols dos participantes
         gols_map = {}
@@ -756,43 +806,7 @@ class VotacaoService:
         acumulado: Dict[str, Dict] = {}
         total_votos = 0
 
-        # Mapeamento de canonização de nomes para unificar usuários que mudaram de nome
-        from services.auth_service import AuthService
-        import unicodedata
-
-        def _norm(txt: str) -> str:
-            if not txt:
-                return ""
-            s = unicodedata.normalize("NFKD", str(txt).strip().casefold())
-            return "".join(c for c in s if not unicodedata.combining(c))
-
-        usuarios = AuthService()._carregar()
-        user_canonical = {}
-        alias_to_canonical = {}
-
-        for u in usuarios:
-            uid = u.get("id")
-            c_nome = (u.get("nome") or "").strip()
-            username = (u.get("username") or "").strip()
-            if uid and c_nome:
-                user_canonical[uid] = c_nome
-                alias_to_canonical[_norm(c_nome)] = c_nome
-                if username:
-                    alias_to_canonical[_norm(username)] = c_nome
-                partes = c_nome.split()
-                if partes and len(_norm(partes[0])) >= 3:
-                    alias_to_canonical[_norm(partes[0])] = c_nome
-
-        def resolver_canonical(p_nome: str, p_uid: Optional[str] = None) -> str:
-            if p_uid and p_uid in user_canonical:
-                return user_canonical[p_uid]
-            n = _norm(p_nome)
-            if n in alias_to_canonical:
-                return alias_to_canonical[n]
-            for alias, c_nome in alias_to_canonical.items():
-                if alias == n or alias in n or n in alias:
-                    return c_nome
-            return p_nome.strip() if p_nome else "Jogador"
+        resolver_canonical = self._obter_mapeamento_canonico()
 
         for partida in encerradas:
             votos = partida.get("votos", [])
