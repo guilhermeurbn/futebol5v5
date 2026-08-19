@@ -29,12 +29,12 @@ class TemporadaService:
             except Exception as e:
                 logger.error(f"Erro ao carregar temporadas.json: {str(e)}")
         
-        # Configuração padrão da Temporada #1 (Terça 04/08/2026 até 04/10/2026)
+        # Configuração padrão da Temporada #1 (Julho a Outubro)
         padrao = {
             "temporada_ativa": {
                 "id": 1,
                 "nome": "Temporada #1 - Edição de Prêmios 🏆",
-                "data_inicio": "2026-08-04T00:00:00",
+                "data_inicio": "2026-07-01T00:00:00",
                 "data_fim": "2026-10-04T23:59:59",
                 "descricao_premio": "🏆 1º Lugar: Prêmio Especial da Temporada NaTrave!",
                 "ativa": True

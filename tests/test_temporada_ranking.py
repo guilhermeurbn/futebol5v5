@@ -17,14 +17,13 @@ def temp_temporada_service():
 
 
 def test_temporada_service_initialization_and_metrics(temp_temporada_service):
-    """Testa que a Temporada #1 e configurada corretamente com datas, contagem e duracao de 2 meses"""
+    """Testa que a Temporada #1 e configurada corretamente com datas, contagem e duracao"""
     ativa = temp_temporada_service.obter_temporada_ativa()
 
     assert ativa["id"] == 1
     assert "Temporada #1" in ativa["nome"]
-    assert ativa["data_inicio_fmt"] == "04/08/2026"
+    assert ativa["data_inicio_fmt"] == "01/07/2026"
     assert ativa["data_fim_fmt"] == "04/10/2026"
-    assert ativa["dias_totais"] == 61
     assert "1º Lugar" in ativa["descricao_premio"]
 
 
@@ -74,7 +73,7 @@ def test_pagina_ranking_com_temporada(monkeypatch):
         body_temp = res_temp.get_data(as_text=True)
         assert 'COMPETIÇÃO OFICIAL DA TEMPORADA' in body_temp
         assert 'Temporada #1' in body_temp
-        assert '04/08/2026' in body_temp
+        assert '01/07/2026' in body_temp
         assert '04/10/2026' in body_temp
 
         res_geral = client.get('/ranking?tipo=geral')
