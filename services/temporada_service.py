@@ -125,7 +125,8 @@ class TemporadaService:
             temp_atual["encerrada_em"] = agora.isoformat()
             self.dados.setdefault("historico_temporadas", []).append(temp_atual)
 
-        dt_inicio = agora.isoformat()
+        # Incluir todas as partidas anteriores registradas no perfil para a competição
+        dt_inicio = "2020-01-01T00:00:00"
 
         if tipo_duracao == "meses":
             dias = max(1, valor_duracao * 30)
