@@ -75,14 +75,27 @@ class JogadorStatsService:
                     v_by_sorteio[str(vp["sorteio_id"])] = vp
 
         partidas_dict = {}
+        used_votacao_ids = set()
+
         for p in partidas:
             if isinstance(p, dict):
-                pid = str(p.get("id") or p.get("sorteio_id") or "")
+                pid = str(p.get("id") or "")
                 sid = str(p.get("sorteio_id") or "")
-                if pid:
+                if pid or sid:
                     p_copy = dict(p)
-                    vp = v_by_sorteio.get(sid) or v_by_id.get(pid) or v_by_sorteio.get(pid) or v_by_id.get(sid)
+                    # Priorizar id exato, depois sorteio_id
+                    vp = None
+                    if pid and pid in v_by_id:
+                        vp = v_by_id[pid]
+                    elif sid and sid in v_by_sorteio:
+                        vp = v_by_sorteio[sid]
+                    elif pid and pid in v_by_sorteio:
+                        vp = v_by_sorteio[pid]
+                    elif sid and sid in v_by_id:
+                        vp = v_by_id[sid]
+
                     if vp:
+                        used_votacao_ids.add(str(vp.get("id")))
                         data_val = p_copy.get("data") or vp.get("data") or vp.get("encerrado_em") or vp.get("aberta_em") or ""
                         p_copy["data"] = data_val
                         if not p_copy.get("jogadores_detalhes") and vp.get("participantes"):
@@ -91,19 +104,21 @@ class JogadorStatsService:
                             p_copy["resultado_resumido"] = vp.get("resultado_resumido")
                         if vp.get("ranking"):
                             p_copy["ranking"] = vp.get("ranking")
-                    partidas_dict[pid] = p_copy
+                    partidas_dict[pid or sid] = p_copy
 
         for vp in votacoes_list:
             if isinstance(vp, dict):
-                pid = str(vp.get("id") or vp.get("sorteio_id") or "")
-                sid = str(vp.get("sorteio_id") or "")
-                if not pid and not sid:
+                vpid = str(vp.get("id") or "")
+                vsid = str(vp.get("sorteio_id") or "")
+                if not vpid and not vsid:
                     continue
-                if pid not in partidas_dict and (not sid or sid not in partidas_dict):
+                if vpid not in used_votacao_ids:
                     data_val = vp.get("data") or vp.get("encerrado_em") or vp.get("aberta_em") or ""
                     vp_copy = dict(vp)
                     vp_copy["data"] = data_val
-                    partidas_dict[pid or sid] = vp_copy
+                    key = vpid or vsid
+                    if key not in partidas_dict:
+                        partidas_dict[key] = vp_copy
 
         return list(partidas_dict.values())
     
