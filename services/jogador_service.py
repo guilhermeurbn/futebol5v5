@@ -567,6 +567,7 @@ def sincronizar_dados_e_partidas() -> dict:
 
     user_aliases_map = {}
     user_canonical_name = {}
+    user_jogador_id_map = {}
 
     for u in usuarios:
         uid = str(u.get("id") or "")
@@ -590,13 +591,20 @@ def sincronizar_dados_e_partidas() -> dict:
             user_aliases_map[gui_main_id].update({norm("guilherme"), norm("guilherme urbano"), norm("guilherme_urbano")})
             user_aliases_map[gui_old_id] = user_aliases_map[gui_main_id]
 
-    # Coletar aliases de jogadores.json
+    # Coletar aliases de jogadores.json e mapear jogador_id
     for j in jogadores_raw:
         if isinstance(j, dict):
+            jid = str(j.get("id") or "")
             owner_id = str(j.get("owner_user_id") or j.get("user_id") or "")
             j_nome = (j.get("nome") or "").strip()
-            if owner_id and owner_id in user_canonical_name and j_nome:
-                user_aliases_map[owner_id].add(norm(j_nome))
+            if owner_id and owner_id in user_canonical_name:
+                if jid:
+                    user_jogador_id_map[owner_id] = jid
+                if j_nome:
+                    user_aliases_map[owner_id].add(norm(j_nome))
+
+    if gui_main_id in user_jogador_id_map:
+        user_jogador_id_map[gui_old_id] = user_jogador_id_map[gui_main_id]
 
     # Coletar aliases de partidas.json
     for p in partidas:
@@ -624,18 +632,19 @@ def sincronizar_dados_e_partidas() -> dict:
                     if uid and uid in user_aliases_map and rname:
                         user_aliases_map[uid].add(norm(rname))
 
-    def resolver_user_id(p_nome: str, p_user_id: Optional[str]) -> Tuple[Optional[str], Optional[str]]:
+    def resolver_user_id(p_nome: str, p_user_id: Optional[str]) -> Tuple[Optional[str], Optional[str], Optional[str]]:
         if p_user_id and str(p_user_id) in user_canonical_name:
-            return str(p_user_id), user_canonical_name[str(p_user_id)]
+            uid_str = str(p_user_id)
+            return uid_str, user_canonical_name[uid_str], user_jogador_id_map.get(uid_str)
         
         norm_p = norm(p_nome)
         if not norm_p:
-            return None, None
+            return None, None, None
         
         for uid, aliases in user_aliases_map.items():
             if norm_p in aliases or any(a == norm_p for a in aliases):
-                return uid, user_canonical_name[uid]
-        return None, None
+                return uid, user_canonical_name[uid], user_jogador_id_map.get(uid)
+        return None, None, None
 
     alterou_partidas = False
     alterou_votacoes = False
@@ -650,7 +659,7 @@ def sincronizar_dados_e_partidas() -> dict:
             if isinstance(det, dict):
                 p_nome = det.get("nome", "")
                 p_uid = det.get("user_id") or det.get("owner_user_id")
-                found_uid, canonical = resolver_user_id(p_nome, p_uid)
+                found_uid, canonical, found_jid = resolver_user_id(p_nome, p_uid)
                 if found_uid and canonical:
                     if det.get("nome") != canonical:
                         det["nome"] = canonical
@@ -660,6 +669,9 @@ def sincronizar_dados_e_partidas() -> dict:
                         alterou_partidas = True
                     if not det.get("owner_user_id"):
                         det["owner_user_id"] = found_uid
+                        alterou_partidas = True
+                    if found_jid and not det.get("jogador_id"):
+                        det["jogador_id"] = found_jid
                         alterou_partidas = True
 
     if alterou_partidas:
@@ -677,7 +689,7 @@ def sincronizar_dados_e_partidas() -> dict:
             if isinstance(part, dict):
                 p_nome = part.get("jogador_nome") or part.get("nome_usuario") or part.get("nome", "")
                 p_uid = part.get("user_id") or part.get("owner_user_id")
-                found_uid, canonical = resolver_user_id(p_nome, p_uid)
+                found_uid, canonical, found_jid = resolver_user_id(p_nome, p_uid)
                 if found_uid and canonical:
                     if part.get("jogador_nome") != canonical:
                         part["jogador_nome"] = canonical
@@ -688,6 +700,9 @@ def sincronizar_dados_e_partidas() -> dict:
                     if not part.get("user_id"):
                         part["user_id"] = found_uid
                         alterou_votacoes = True
+                    if found_jid and not part.get("jogador_id"):
+                        part["jogador_id"] = found_jid
+                        alterou_votacoes = True
         
         # Atualizar votos individuais
         for voto in (vp.get("votos", []) or []):
@@ -696,10 +711,14 @@ def sincronizar_dados_e_partidas() -> dict:
                     if isinstance(voto_j, dict):
                         p_nome = voto_j.get("jogador_nome", "")
                         p_uid = voto_j.get("user_id") or voto_j.get("owner_user_id")
-                        found_uid, canonical = resolver_user_id(p_nome, p_uid)
-                        if found_uid and canonical and voto_j.get("jogador_nome") != canonical:
-                            voto_j["jogador_nome"] = canonical
-                            alterou_votacoes = True
+                        found_uid, canonical, found_jid = resolver_user_id(p_nome, p_uid)
+                        if found_uid and canonical:
+                            if voto_j.get("jogador_nome") != canonical:
+                                voto_j["jogador_nome"] = canonical
+                                alterou_votacoes = True
+                            if found_jid and not voto_j.get("jogador_id"):
+                                voto_j["jogador_id"] = found_jid
+                                alterou_votacoes = True
 
         ranking_info = vp.get("ranking")
         if ranking_info and isinstance(ranking_info, dict):
@@ -707,10 +726,17 @@ def sincronizar_dados_e_partidas() -> dict:
                 if isinstance(rj, dict):
                     p_nome = rj.get("jogador_nome") or rj.get("nome", "")
                     p_uid = rj.get("user_id") or rj.get("owner_user_id")
-                    found_uid, canonical = resolver_user_id(p_nome, p_uid)
-                    if found_uid and canonical and rj.get("jogador_nome") != canonical:
-                        rj["jogador_nome"] = canonical
-                        alterou_votacoes = True
+                    found_uid, canonical, found_jid = resolver_user_id(p_nome, p_uid)
+                    if found_uid and canonical:
+                        if rj.get("jogador_nome") != canonical:
+                            rj["jogador_nome"] = canonical
+                            alterou_votacoes = True
+                        if not rj.get("user_id"):
+                            rj["user_id"] = found_uid
+                            alterou_votacoes = True
+                        if found_jid and not rj.get("jogador_id"):
+                            rj["jogador_id"] = found_jid
+                            alterou_votacoes = True
 
         # Se a partida estiver encerrada, re-apurar ranking para recalcular notas limpas
         if vp.get("status") == "encerrada":
@@ -734,13 +760,16 @@ def sincronizar_dados_e_partidas() -> dict:
                     if isinstance(jog, dict):
                         p_nome = jog.get("nome", "")
                         p_uid = jog.get("owner_user_id") or jog.get("user_id")
-                        found_uid, canonical = resolver_user_id(p_nome, p_uid)
+                        found_uid, canonical, found_jid = resolver_user_id(p_nome, p_uid)
                         if found_uid and canonical:
                             if jog.get("nome") != canonical:
                                 jog["nome"] = canonical
                                 alterou_historico = True
                             if not jog.get("owner_user_id"):
                                 jog["owner_user_id"] = found_uid
+                                alterou_historico = True
+                            if found_jid and not jog.get("jogador_id"):
+                                jog["jogador_id"] = found_jid
                                 alterou_historico = True
 
     if alterou_historico:
