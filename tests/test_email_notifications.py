@@ -117,3 +117,38 @@ def test_admin_support_notifications_trigger():
     service.notify_admin_novo_cadastro("Alex Silva", "alex", "alex@natrave.pt")
     service.notify_admin_solicitacao_senha("Alex Silva", "alex", "alex@natrave.pt", "Troca de Senha")
     assert service.get_clean_base_url() == "https://natrave.pt"
+
+
+def test_email_suppression_in_test_and_local_modes(monkeypatch):
+    """Garante que em ambiente de testes ou local (localhost), e-mails não-permitidos nunca atingem a API real do Resend."""
+    service = EmailService(api_key="re_fake_key", from_email="NaTrave <no-reply@natrave.pt>")
+    
+    # 1. No ambiente de testes (pytest) sem mock de requests.post, envio real e suprimido
+    res = service.send_email("qualquer_usuario@gmail.com", "Teste", "<p>Olá</p>")
+    assert res.ok is True
+    assert res.message_id == "mock_test_suppressed"
+
+    # 2. Em ambiente local (fora de pytest), emails para usuarios comuns sao suprimidos
+    monkeypatch.setattr(service, "_is_testing_env", lambda: False)
+    monkeypatch.setattr(service, "_is_local_dev", lambda: True)
+
+    res_random = service.send_email("joao@gmail.com", "Teste", "<p>Olá</p>")
+    assert res_random.ok is True
+    assert res_random.message_id == "mock_local_suppressed"
+
+    class FakeResp:
+        def raise_for_status(self):
+            pass
+        @property
+        def text(self):
+            return '{"id": "sent_123"}'
+        def json(self):
+            return {"id": "sent_123"}
+
+    fake_func = lambda *args, **kwargs: FakeResp()
+    fake_func.__module__ = "requests.api"
+    monkeypatch.setattr("requests.post", fake_func)
+    
+    res_gui = service.send_email("guilherme@natrave.pt", "Teste", "<p>Olá</p>")
+    assert res_gui.ok is True
+    assert res_gui.message_id == "sent_123"

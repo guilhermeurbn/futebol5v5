@@ -434,7 +434,7 @@
                         <span class="auth-remember__box" aria-hidden="true"></span>
                         <span class="auth-remember__text">Lembrar de mim</span>
                     </label>
-                    <a href="{{ url_for('auth.recuperar_senha_page') }}" class="auth-forgot-link">Esqueci minha
+                    <a href="{{ url_for('auth.recuperar_senha_page') }}" class="auth-forgot-link" id="btn-show-forgot">Esqueci minha
                         senha</a>
                 </div>
 
@@ -480,8 +480,60 @@
             </div>
         </div>
 
-        <!-- VERSO DO CARD: TELA DE CADASTRO (WIZARD 1 A 5) -->
-        <div class="auth-card-face auth-card-face--back">
+        <!-- VERSO 1 DO CARD: RECUPERAR SENHA -->
+        <div class="auth-card-face auth-card-face--back auth-card-face--forgot" id="authFaceForgot">
+            <div style="padding-bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 1.25rem;">
+                <button type="button" class="auth-back-btn" id="btn-forgot-back" aria-label="Voltar para login" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12); color: #cbd5e1; padding: 0.4rem 0.75rem; border-radius: 10px; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.2s ease;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    <span>Voltar ao login</span>
+                </button>
+            </div>
+
+            <div class="reg-wizard-header" style="padding-bottom: 0.5rem;">
+                <div class="reg-wizard-title-wrap">
+                    <div class="reg-wizard-header-left">
+                        <span class="reg-wizard-avatar-icon" aria-hidden="true" style="background: rgba(91, 245, 0, 0.12); border-color: rgba(91, 245, 0, 0.25);">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#5bf500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
+                                <rect x="4" y="10" width="16" height="10" rx="2" />
+                                <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                            </svg>
+                        </span>
+                        <h2 class="reg-wizard-title">Recuperar Senha</h2>
+                    </div>
+                </div>
+                <p class="reg-field-hint" style="margin-top: 0.5rem; color: #94a3b8; font-size: 0.84rem; line-height: 1.4;">
+                    Informe seu e-mail cadastrado. Enviaremos um link seguro para você redefinir sua senha.
+                </p>
+            </div>
+
+            <div id="forgot-status-msg" class="auth-message" style="display: none; margin-top: 0.75rem;"></div>
+
+            <form id="forgot-password-form" method="post" action="{{ url_for('auth.recuperar_senha_submit') }}" class="auth-form" style="margin-top: 1rem;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="form-group auth-field">
+                    <label class="form-label" for="forgot_email">Seu E-mail</label>
+                    <div class="auth-input-wrap">
+                        <span class="auth-input-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                <polyline points="22,6 12,13 2,6" />
+                            </svg>
+                        </span>
+                        <input class="form-input auth-input" id="forgot_email" name="email" type="email" placeholder="seuemail@exemplo.com" required autocomplete="email">
+                    </div>
+                </div>
+
+                <button class="btn btn-primary auth-submit" type="submit" id="btn-forgot-submit" style="margin-top: 1.25rem;">
+                    <span>Enviar Link de Recuperação</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- VERSO 2 DO CARD: TELA DE CADASTRO (WIZARD 1 A 5) -->
+        <div class="auth-card-face auth-card-face--back auth-card-face--register" id="authFaceRegister">
             <!-- Header com Ícone, Título e Badge 1 de 5 -->
             <div class="reg-wizard-header">
                 <div class="reg-wizard-title-wrap">

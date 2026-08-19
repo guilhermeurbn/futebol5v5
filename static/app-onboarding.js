@@ -281,17 +281,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Animação 3D Flip do Card (Login x Cadastro)
+  // Animação 3D Flip do Card (Login x Cadastro x Recuperar Senha)
   const cardFlipInner = document.getElementById('authCardFlipInner');
   const btnShowRegister = document.getElementById('btn-show-register');
   const btnShowLogin = document.getElementById('btn-show-login');
+  const btnShowForgot = document.getElementById('btn-show-forgot') || document.querySelector('.auth-forgot-link');
+  const btnForgotBack = document.getElementById('btn-forgot-back');
 
   if (cardFlipInner) {
     if (btnShowRegister) {
       btnShowRegister.addEventListener('click', (e) => {
         e.preventDefault();
         triggerHaptic();
-        cardFlipInner.classList.add('is-flipped');
+        cardFlipInner.classList.remove('is-flipped-forgot');
+        cardFlipInner.classList.add('is-flipped', 'is-flipped-register');
       });
     }
 
@@ -299,9 +302,84 @@ document.addEventListener('DOMContentLoaded', () => {
       btnShowLogin.addEventListener('click', (e) => {
         e.preventDefault();
         triggerHaptic();
-        cardFlipInner.classList.remove('is-flipped');
+        cardFlipInner.classList.remove('is-flipped', 'is-flipped-register', 'is-flipped-forgot');
       });
     }
+
+    if (btnShowForgot) {
+      btnShowForgot.addEventListener('click', (e) => {
+        e.preventDefault();
+        triggerHaptic();
+        cardFlipInner.classList.remove('is-flipped', 'is-flipped-register');
+        cardFlipInner.classList.add('is-flipped-forgot');
+        const emailInput = document.getElementById('forgot_email');
+        if (emailInput) setTimeout(() => emailInput.focus(), 350);
+      });
+    }
+
+    if (btnForgotBack) {
+      btnForgotBack.addEventListener('click', (e) => {
+        e.preventDefault();
+        triggerHaptic();
+        cardFlipInner.classList.remove('is-flipped-forgot', 'is-flipped-register', 'is-flipped');
+      });
+    }
+  }
+
+  // Handler AJAX para formulário de Recuperar Senha
+  const forgotForm = document.getElementById('forgot-password-form');
+  const forgotStatus = document.getElementById('forgot-status-msg');
+  const btnForgotSubmit = document.getElementById('btn-forgot-submit');
+
+  if (forgotForm) {
+    forgotForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const emailInput = document.getElementById('forgot_email');
+      const emailVal = emailInput ? emailInput.value.trim() : '';
+
+      if (!emailVal) return;
+
+      if (btnForgotSubmit) {
+        btnForgotSubmit.disabled = true;
+        btnForgotSubmit.innerHTML = '<span>Enviando...</span>';
+      }
+
+      try {
+        const formData = new FormData(forgotForm);
+        const response = await fetch(forgotForm.action, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
+
+        const data = await response.json();
+
+        if (forgotStatus) {
+          forgotStatus.style.display = 'flex';
+          if (data.ok) {
+            forgotStatus.className = 'auth-message auth-message--success';
+            forgotStatus.innerHTML = `<strong>✅</strong><span>${data.sucesso || 'Link de recuperação enviado com sucesso! Verifique seu e-mail.'}</span>`;
+            if (emailInput) emailInput.value = '';
+          } else {
+            forgotStatus.className = 'auth-message auth-message--warning';
+            forgotStatus.innerHTML = `<strong>⚠️</strong><span>${data.erro || 'Erro ao enviar e-mail. Tente novamente.'}</span>`;
+          }
+        }
+      } catch (err) {
+        if (forgotStatus) {
+          forgotStatus.style.display = 'flex';
+          forgotStatus.className = 'auth-message auth-message--warning';
+          forgotStatus.innerHTML = '<strong>⚠️</strong><span>Erro ao conectar com o servidor. Tente novamente.</span>';
+        }
+      } finally {
+        if (btnForgotSubmit) {
+          btnForgotSubmit.disabled = false;
+          btnForgotSubmit.innerHTML = '<span>Enviar Link de Recuperação</span>';
+        }
+      }
+    });
   }
 
   // ============================================================
@@ -779,13 +857,34 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function openSocialInputModal(provider) {
+    if (!socialAuthInputModal) return;
+    if (socialAuthProviderHidden) socialAuthProviderHidden.value = provider;
+
+    if (provider === 'apple') {
+      if (socialProviderBadge) socialProviderBadge.textContent = ' APPLE ID';
+      if (socialProviderTitle) socialProviderTitle.textContent = 'Entrar com Apple';
+      if (socialProviderSubtitle) socialProviderSubtitle.textContent = 'Conecte sua conta do Apple ID para entrar no NaTrave:';
+    } else {
+      if (socialProviderBadge) socialProviderBadge.textContent = '🌐 GOOGLE ACCOUNT';
+      if (socialProviderTitle) socialProviderTitle.textContent = 'Entrar com Google';
+      if (socialProviderSubtitle) socialProviderSubtitle.textContent = 'Conecte sua conta do Google para entrar no NaTrave:';
+    }
+
+    if (socialAuthEmailInput) socialAuthEmailInput.value = '';
+    if (socialAuthNomeInput) socialAuthNomeInput.value = '';
+
+    socialAuthInputModal.style.display = 'flex';
+    if (socialAuthEmailInput) setTimeout(() => socialAuthEmailInput.focus(), 300);
+  }
+
   socialBtns.forEach(btn => {
     btn.addEventListener('click', async (e) => {
       e.preventDefault();
       triggerHaptic();
       const provider = (btn.getAttribute('data-provider') || 'google').toLowerCase();
 
-      // 1. Fluxo de Autenticação com Apple ID
+      // 1. Fluxo de Autenticação Oficial com Apple ID
       if (provider === 'apple') {
         // 1a. Tenta Sign-In nativo do iOS (Xcode / Capacitor App Sheet Oficial da Apple)
         const applePlugin = (window.Capacitor && window.Capacitor.Plugins) ? 
@@ -794,7 +893,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (applePlugin) {
           try {
             const result = await applePlugin.authorize({
-              clientId: 'pt.natrave.app',
+              clientId: window.APPLE_CLIENT_ID || 'pt.natrave.app',
               redirectURI: 'https://natrave.pt/social-login',
               scopes: 'email name',
               state: 'natrave_state',
@@ -813,14 +912,17 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
 
-        // 1b. Tenta SDK Web Oficial da Apple ID em navegadores (Safari/Chrome/Web)
+        // 1b. Tenta SDK Web Oficial da Apple ID em navegadores (Safari/Chrome/Web Popup)
+        const clientId = window.APPLE_CLIENT_ID || 'pt.natrave.web';
+        const redirectUri = window.location.origin + '/social-login';
+
         if (window.AppleID && window.AppleID.auth) {
           try {
             window.AppleID.auth.init({
-              clientId: 'pt.natrave.app',
+              clientId: clientId,
               scope: 'name email',
-              redirectURI: window.location.origin + '/social-login',
-              state: 'natrave_state',
+              redirectURI: redirectUri,
+              state: 'natrave_apple_state',
               usePopup: true
             });
             const res = await window.AppleID.auth.signIn();
@@ -832,9 +934,14 @@ document.addEventListener('DOMContentLoaded', () => {
               return;
             }
           } catch (e) {
-            console.warn('AppleID Web SDK error:', e);
+            console.warn('AppleID Web SDK popup error, tentando redirecionamento:', e);
           }
         }
+
+        // 1c. Fallback de Redirecionamento Oficial Web para o Apple ID OAuth 2.0 (na página oficial da Apple)
+        const appleOAuthUrl = `https://appleid.apple.com/auth/authorize?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code%20id_token&scope=name%20email&response_mode=form_post`;
+        window.location.href = appleOAuthUrl;
+        return;
       }
 
       // 2. Fluxo de Autenticação com Google

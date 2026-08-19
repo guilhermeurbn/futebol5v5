@@ -21736,8 +21736,13 @@ body.is-capacitor-app .auth-input {
   transform-style: preserve-3d;
 }
 
-.auth-card-flip-inner.is-flipped {
+.auth-card-flip-inner.is-flipped,
+.auth-card-flip-inner.is-flipped-register {
   transform: rotateY(180deg);
+}
+
+.auth-card-flip-inner.is-flipped-forgot {
+  transform: rotateY(-180deg);
 }
 
 .auth-card-face {
@@ -21754,14 +21759,16 @@ body.is-capacitor-app .auth-input {
   transform: rotateY(180deg);
 }
 
-.auth-card-flip-inner:not(.is-flipped) .auth-card-face--back {
+.auth-card-flip-inner:not(.is-flipped):not(.is-flipped-register):not(.is-flipped-forgot) .auth-card-face--back {
   opacity: 0 !important;
   pointer-events: none !important;
   visibility: hidden !important;
   position: absolute !important;
 }
 
-.auth-card-flip-inner.is-flipped .auth-card-face--front {
+.auth-card-flip-inner.is-flipped:not(.is-flipped-forgot) .auth-card-face--front,
+.auth-card-flip-inner.is-flipped-register .auth-card-face--front,
+.auth-card-flip-inner.is-flipped-forgot .auth-card-face--front {
   opacity: 0 !important;
   pointer-events: none !important;
   visibility: hidden !important;
@@ -21770,13 +21777,34 @@ body.is-capacitor-app .auth-input {
   left: 0 !important;
 }
 
-.auth-card-flip-inner.is-flipped .auth-card-face--back {
+/* Exibir o card de Cadastro */
+.auth-card-flip-inner.is-flipped:not(.is-flipped-forgot) #authFaceRegister,
+.auth-card-flip-inner.is-flipped-register #authFaceRegister {
   opacity: 1 !important;
   pointer-events: auto !important;
   visibility: visible !important;
   position: relative !important;
   top: auto !important;
   left: auto !important;
+}
+
+/* Exibir o card de Recuperar Senha */
+.auth-card-flip-inner.is-flipped-forgot #authFaceForgot {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  visibility: visible !important;
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+}
+
+/* Ocultar card inativo quando o outro está ativo */
+.auth-card-flip-inner.is-flipped-forgot #authFaceRegister,
+.auth-card-flip-inner.is-flipped-register #authFaceForgot {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  position: absolute !important;
 }
 
 body.is-capacitor-app .form-label,

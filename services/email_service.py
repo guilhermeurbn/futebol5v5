@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import re
+import sys
 import threading
 from pathlib import Path
 from dataclasses import dataclass
@@ -140,11 +141,51 @@ class EmailService:
         resolved_api_key, resolved_from_email = self._resolve_credentials(api_key=api_key, from_email=from_email)
         return bool(resolved_api_key and resolved_from_email)
 
+    def _is_testing_env(self) -> bool:
+        """Retorna True se o codigo estiver rodando em ambiente de testes (pytest)."""
+        return bool(
+            os.getenv("PYTEST_CURRENT_TEST")
+            or os.getenv("FLASK_ENV") == "testing"
+            or os.getenv("TESTING") in ("1", "true", "True")
+            or "pytest" in sys.modules
+        )
+
+    def _is_local_dev(self) -> bool:
+        """Retorna True se estiver rodando em localhost / desenvolvimento (fora do Railway/Producao)."""
+        if os.getenv("RAILWAY_ENVIRONMENT") or os.getenv("FLASK_ENV") == "production":
+            return False
+        return True
+
+    def _is_allowed_local_recipient(self, to_email: str) -> bool:
+        """Retorna True se o destinatario for do juiz, guilherme ou admin em ambiente local."""
+        if os.getenv("ALLOW_ALL_EMAILS_LOCAL") in ("1", "true", "True"):
+            return True
+        email_lower = (to_email or "").strip().lower()
+        allowed_keywords = ["juiz", "guilherme", "admin", "urbano"]
+        return any(kw in email_lower for kw in allowed_keywords)
+
     def _post(self, payload: dict, api_key: Optional[str] = None, from_email: Optional[str] = None) -> EmailResult:
         resolved_api_key, resolved_from_email = self._resolve_credentials(api_key=api_key, from_email=from_email)
         if not resolved_api_key or not resolved_from_email:
             logger.warning("Resend desativado: configure RESEND_API_KEY e RESEND_FROM_EMAIL")
             return EmailResult(ok=False, error="Resend nao configurado")
+
+        to_emails = payload.get("to", [])
+        primary_to = to_emails[0] if to_emails else ""
+
+        # Verificar se requests.post e a funcao real da biblioteca requests
+        is_real_requests = getattr(requests.post, "__module__", "") in ("requests", "requests.api")
+
+        if is_real_requests:
+            # 1. Em ambiente de testes (pytest), se requests.post nao foi mockado por um teste, suprimir envio real
+            if self._is_testing_env():
+                logger.info("[MODO TESTE] Envio de email real suprimido para: %s", primary_to)
+                return EmailResult(ok=True, message_id="mock_test_suppressed")
+
+            # 2. Em ambiente local (localhost / dev), desativar envio real para destinatarios comuns
+            if self._is_local_dev() and not self._is_allowed_local_recipient(primary_to):
+                logger.info("[LOCALHOST] Envio de email real desativado para: %s (Permitido apenas juiz, guilherme, admin)", primary_to)
+                return EmailResult(ok=True, message_id="mock_local_suppressed")
 
         url = "https://api.resend.com/emails"
         headers = {

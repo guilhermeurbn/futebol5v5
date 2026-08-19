@@ -301,6 +301,51 @@ def login_submit():
         return render_template('login.html', erro='Erro ao autenticar usuario'), 500
 
 
+def _extrair_dados_apple_post():
+    """Extrai email, nome e social_id do payload form_post da Apple ID"""
+    import base64
+    import json
+
+    id_token = request.form.get('id_token', '')
+    user_json_str = request.form.get('user', '')
+    
+    email = ''
+    social_id = ''
+    nome = 'Atleta Apple'
+
+    if id_token and '.' in id_token:
+        try:
+            parts = id_token.split('.')
+            if len(parts) >= 2:
+                payload_b64 = parts[1]
+                payload_b64 += '=' * (-len(payload_b64) % 4)
+                decoded = base64.urlsafe_b64decode(payload_b64)
+                claims = json.loads(decoded)
+                email = (claims.get('email') or '').strip().lower()
+                social_id = claims.get('sub', '')
+        except Exception as e:
+            logger.warning(f"Erro ao decodificar id_token JWT da Apple: {e}")
+
+    if user_json_str:
+        try:
+            user_data = json.loads(user_json_str)
+            if isinstance(user_data, dict):
+                user_email = (user_data.get('email') or '').strip().lower()
+                if user_email:
+                    email = user_email
+                name_obj = user_data.get('name') or {}
+                if isinstance(name_obj, dict):
+                    first = name_obj.get('firstName') or ''
+                    last = name_obj.get('lastName') or ''
+                    full_name = f"{first} {last}".strip()
+                    if full_name:
+                        nome = full_name
+        except Exception:
+            pass
+
+    return email, nome, social_id
+
+
 @auth_bp.route('/social-login', methods=['GET', 'POST'])
 def social_login():
     """Handler para login/cadastro via Google e Apple"""
@@ -308,13 +353,26 @@ def social_login():
         return redirect(url_for('auth.login_page'))
 
     data = request.get_json(silent=True) or request.form
-    provider = (data.get('provider') or 'google').strip().lower()
+    provider = (data.get('provider') or ('apple' if 'id_token' in request.form else 'google')).strip().lower()
     email = data.get('email', '').strip().lower()
     nome = data.get('nome', '').strip()
     social_id = data.get('social_id', '').strip()
 
+    # Se a requisição veio via Apple form_post redirect (id_token na request.form):
+    if not email and 'id_token' in request.form:
+        apple_email, apple_nome, apple_id = _extrair_dados_apple_post()
+        if apple_email:
+            email = apple_email
+        if apple_nome:
+            nome = apple_nome
+        if apple_id:
+            social_id = apple_id
+
     if not email or '@' not in email:
-        return jsonify({'success': False, 'error': 'E-mail inválido retornado pela conta social'}), 400
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json
+        if is_ajax:
+            return jsonify({'success': False, 'error': 'E-mail inválido retornado pela conta social'}), 400
+        return render_template('login.html', erro='E-mail inválido retornado pela conta social'), 400
 
     # 1. Tenta buscar usuário por social_id (apple_id / google_id) OU por email principal / social_email
     usuarios = auth_service._carregar()
@@ -349,21 +407,28 @@ def social_login():
         session['nome'] = usuario['nome']
         session['role'] = usuario.get('role', 'usuario')
         session.modified = True
-        return jsonify({
-            'success': True,
-            'status': 'logged_in',
-            'redirect_url': url_for('auth.perfil_page')
-        })
+
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json
+        if is_ajax:
+            return jsonify({
+                'success': True,
+                'status': 'logged_in',
+                'redirect_url': url_for('auth.perfil_page')
+            })
+        return redirect(url_for('auth.perfil_page'))
 
     # 2. Usuário novo: solicita o nome de usuário (username)
-    return jsonify({
-        'success': True,
-        'status': 'need_username',
-        'email': email,
-        'nome': nome or email.split('@')[0],
-        'social_id': social_id,
-        'provider': provider
-    })
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json
+    if is_ajax:
+        return jsonify({
+            'success': True,
+            'status': 'need_username',
+            'email': email,
+            'nome': nome or email.split('@')[0],
+            'social_id': social_id,
+            'provider': provider
+        })
+    return render_template('login.html', social_email=email, social_nome=nome or email.split('@')[0], social_provider=provider, social_id=social_id)
 
 
 @auth_bp.route('/checar-username', methods=['GET'])
@@ -761,13 +826,18 @@ def recuperar_senha_page():
 @auth_bp.route('/recuperar-senha', methods=['POST'])
 def recuperar_senha_submit():
     email = request.form.get('email', '').strip().lower()
-    mensagem = 'Se o email existir na base, enviamos um link de redefinicao de senha.'
+    mensagem = 'Se o email existir na base, enviamos um link de redefinição de senha.'
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json
 
     if not email or '@' not in email:
+        if is_ajax:
+            return jsonify({'ok': False, 'erro': 'Informe um e-mail válido'}), 400
         return render_template('recuperar_senha.html', erro='Informe um email valido'), 400
 
     usuario = auth_service.obter_por_email(email)
     if not usuario:
+        if is_ajax:
+            return jsonify({'ok': True, 'sucesso': mensagem})
         return render_template('recuperar_senha.html', sucesso=mensagem)
 
     try:
@@ -784,6 +854,8 @@ def recuperar_senha_submit():
     except Exception as exc:
         logger.warning('Erro ao processar recuperacao de senha para %s: %s', email, exc)
 
+    if is_ajax:
+        return jsonify({'ok': True, 'sucesso': mensagem})
     return render_template('recuperar_senha.html', sucesso=mensagem)
 
 
