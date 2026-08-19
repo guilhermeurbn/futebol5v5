@@ -472,9 +472,6 @@ class JogadorStatsService:
                     player_aliases.add(self._normalizar_nome(u_target["nome"]))
                 if u_target.get("username"):
                     player_aliases.add(self._normalizar_nome(u_target["username"]))
-                p_primeiro = u_target.get("nome", "").split()[0] if u_target.get("nome") else ""
-                if p_primeiro and len(self._normalizar_nome(p_primeiro)) >= 3:
-                    player_aliases.add(self._normalizar_nome(p_primeiro))
         except Exception:
             pass
 
@@ -484,7 +481,7 @@ class JogadorStatsService:
             n = self._normalizar_nome(item_nome)
             if not n:
                 return False
-            return any(alias == n or alias in n or n in alias for alias in player_aliases)
+            return any(alias == n for alias in player_aliases)
 
         ranking = partida.get("ranking") or {}
         if isinstance(ranking, dict):

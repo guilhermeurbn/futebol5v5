@@ -573,11 +573,6 @@ def sincronizar_dados_e_partidas() -> dict:
         
         user_canonical_name[uid] = nome
         aliases = {norm(nome), norm(username)}
-        
-        partes = nome.split()
-        if partes and len(norm(partes[0])) >= 3:
-            aliases.add(norm(partes[0]))
-        
         user_aliases_map[uid] = aliases
 
     for j in jogadores_raw:

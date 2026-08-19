@@ -627,9 +627,6 @@ class VotacaoService:
                     alias_to_canonical[_norm(c_nome)] = c_nome
                     if username:
                         alias_to_canonical[_norm(username)] = c_nome
-                    partes = c_nome.split()
-                    if partes and len(_norm(partes[0])) >= 3:
-                        alias_to_canonical[_norm(partes[0])] = c_nome
         except Exception:
             pass
 
@@ -641,9 +638,6 @@ class VotacaoService:
                 return p_nome.strip() if p_nome else "Jogador"
             if n in alias_to_canonical:
                 return alias_to_canonical[n]
-            for alias, c_nome in alias_to_canonical.items():
-                if alias == n or alias in n or n in alias:
-                    return c_nome
             return p_nome.strip() if p_nome else "Jogador"
 
         return resolver_canonical
