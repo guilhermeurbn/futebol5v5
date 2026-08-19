@@ -470,13 +470,18 @@ class JogadorStatsService:
                 target_user_id = u_target.get("id")
                 if u_target.get("nome"):
                     player_aliases.add(self._normalizar_nome(u_target["nome"]))
-                if u_target.get("username"):
-                    player_aliases.add(self._normalizar_nome(u_target["username"]))
+            target_user_ids = {str(target_user_id)} if target_user_id else set()
+            gui_main_id = "18c652b0-330e-4e0d-9c5d-eb9a27b889a2"
+            gui_old_id = "09142ace-266e-4d33-96db-8b92ed6144c8"
+            if gui_main_id in target_user_ids:
+                target_user_ids.add(gui_old_id)
+                player_aliases.add(self._normalizar_nome("guilherme"))
+
         except Exception:
             pass
 
         def _is_match(item_nome: str, item_user_id: Optional[str]) -> bool:
-            if target_user_id and item_user_id and str(item_user_id) == str(target_user_id):
+            if target_user_ids and item_user_id and str(item_user_id) in target_user_ids:
                 return True
             n = self._normalizar_nome(item_nome)
             if not n:

@@ -575,6 +575,16 @@ def sincronizar_dados_e_partidas() -> dict:
         aliases = {norm(nome), norm(username)}
         user_aliases_map[uid] = aliases
 
+    # Vincular conta prévia do usuário principal (@guilherme -> Guilherme urbano)
+    gui_main_id = "18c652b0-330e-4e0d-9c5d-eb9a27b889a2"
+    gui_old_id = "09142ace-266e-4d33-96db-8b92ed6144c8"
+    if gui_main_id in user_canonical_name:
+        user_canonical_name[gui_old_id] = user_canonical_name[gui_main_id]
+        if gui_main_id in user_aliases_map:
+            user_aliases_map[gui_main_id].add(norm("guilherme"))
+            user_aliases_map[gui_main_id].add(norm("guilherme_urbano"))
+            user_aliases_map[gui_main_id].add(gui_old_id)
+
     for j in jogadores_raw:
         owner_id = j.get("owner_user_id")
         j_nome = (j.get("nome") or "").strip()

@@ -627,6 +627,14 @@ class VotacaoService:
                     alias_to_canonical[_norm(c_nome)] = c_nome
                     if username:
                         alias_to_canonical[_norm(username)] = c_nome
+
+            # Vincular contas prévias do usuário principal (@guilherme -> Guilherme urbano)
+            gui_main_id = "18c652b0-330e-4e0d-9c5d-eb9a27b889a2"
+            gui_old_id = "09142ace-266e-4d33-96db-8b92ed6144c8"
+            if gui_main_id in user_canonical:
+                canonical_gui = user_canonical[gui_main_id]
+                user_canonical[gui_old_id] = canonical_gui
+                alias_to_canonical[_norm("guilherme")] = canonical_gui
         except Exception:
             pass
 
