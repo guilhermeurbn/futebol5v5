@@ -606,6 +606,7 @@ class VotacaoService:
 
     def _obter_mapeamento_canonico(self):
         from services.auth_service import AuthService
+        from services.db import load_json_data
         import unicodedata
 
         def _norm(txt: str) -> str:
@@ -618,15 +619,36 @@ class VotacaoService:
         alias_to_canonical = {}
         try:
             usuarios = AuthService()._carregar()
+            jogadores = load_json_data("jogadores", [])
+            partidas = load_json_data("partidas", [])
+
             for u in usuarios:
-                uid = u.get("id")
+                uid = str(u.get("id") or "")
                 c_nome = (u.get("nome") or "").strip()
                 username = (u.get("username") or "").strip()
-                if uid and c_nome:
-                    user_canonical[uid] = c_nome
-                    alias_to_canonical[_norm(c_nome)] = c_nome
+                if uid and (c_nome or username):
+                    c_val = c_nome or username
+                    user_canonical[uid] = c_val
+                    if c_nome:
+                        alias_to_canonical[_norm(c_nome)] = c_val
                     if username:
-                        alias_to_canonical[_norm(username)] = c_nome
+                        alias_to_canonical[_norm(username)] = c_val
+
+            for j in jogadores:
+                if isinstance(j, dict):
+                    j_uid = str(j.get("owner_user_id") or j.get("user_id") or "")
+                    j_nome = (j.get("nome") or "").strip()
+                    if j_uid and j_uid in user_canonical and j_nome:
+                        alias_to_canonical[_norm(j_nome)] = user_canonical[j_uid]
+
+            for p in partidas:
+                if isinstance(p, dict):
+                    for det in p.get("jogadores_detalhes", []) or []:
+                        if isinstance(det, dict):
+                            d_uid = str(det.get("user_id") or det.get("owner_user_id") or "")
+                            d_nome = (det.get("nome") or "").strip()
+                            if d_uid and d_uid in user_canonical and d_nome:
+                                alias_to_canonical[_norm(d_nome)] = user_canonical[d_uid]
 
             # Vincular contas prévias do usuário principal (@guilherme -> Guilherme urbano)
             gui_main_id = "18c652b0-330e-4e0d-9c5d-eb9a27b889a2"
@@ -635,6 +657,8 @@ class VotacaoService:
                 canonical_gui = user_canonical[gui_main_id]
                 user_canonical[gui_old_id] = canonical_gui
                 alias_to_canonical[_norm("guilherme")] = canonical_gui
+                alias_to_canonical[_norm("guilherme urbano")] = canonical_gui
+                alias_to_canonical[_norm("guilherme_urbano")] = canonical_gui
         except Exception:
             pass
 

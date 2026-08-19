@@ -441,23 +441,54 @@ class JogadorStatsService:
         nome_normalizado = self._normalizar_nome(nome_jogador)
         nota_media_ranking = 0.0
 
-        # Obter aliases e user_id do jogador
-        target_user_id = None
+        target_user_ids = set()
         player_aliases = {nome_normalizado}
         try:
             from services.auth_service import AuthService
             usuarios = AuthService()._carregar()
+            jogadores = load_json_data("jogadores", [])
+            partidas = load_json_data("partidas", [])
+
             u_target = next((u for u in usuarios if self._normalizar_nome(u.get("nome", "")) == nome_normalizado or self._normalizar_nome(u.get("username", "")) == nome_normalizado), None)
+            
+            if not u_target:
+                j_target = next((j for j in jogadores if isinstance(j, dict) and self._normalizar_nome(j.get("nome", "")) == nome_normalizado), None)
+                if j_target:
+                    j_uid = str(j_target.get("owner_user_id") or j_target.get("user_id") or "")
+                    if j_uid:
+                        u_target = next((u for u in usuarios if str(u.get("id")) == j_uid), None)
+
             if u_target:
-                target_user_id = u_target.get("id")
+                uid_str = str(u_target.get("id"))
+                target_user_ids.add(uid_str)
                 if u_target.get("nome"):
                     player_aliases.add(self._normalizar_nome(u_target["nome"]))
-            target_user_ids = {str(target_user_id)} if target_user_id else set()
+                if u_target.get("username"):
+                    player_aliases.add(self._normalizar_nome(u_target["username"]))
+
+                for j in jogadores:
+                    if isinstance(j, dict):
+                        j_uid = str(j.get("owner_user_id") or j.get("user_id") or "")
+                        if j_uid and j_uid == uid_str and j.get("nome"):
+                            player_aliases.add(self._normalizar_nome(j["nome"]))
+
+                for p in partidas:
+                    if isinstance(p, dict):
+                        for det in p.get("jogadores_detalhes", []) or []:
+                            if isinstance(det, dict):
+                                d_uid = str(det.get("user_id") or det.get("owner_user_id") or "")
+                                if d_uid and d_uid == uid_str and det.get("nome"):
+                                    player_aliases.add(self._normalizar_nome(det["nome"]))
+
             gui_main_id = "18c652b0-330e-4e0d-9c5d-eb9a27b889a2"
             gui_old_id = "09142ace-266e-4d33-96db-8b92ed6144c8"
-            if gui_main_id in target_user_ids:
-                target_user_ids.add(gui_old_id)
-                player_aliases.add(self._normalizar_nome("guilherme"))
+            if gui_main_id in target_user_ids or gui_old_id in target_user_ids:
+                target_user_ids.update({gui_main_id, gui_old_id})
+                player_aliases.update({
+                    self._normalizar_nome("guilherme"),
+                    self._normalizar_nome("guilherme urbano"),
+                    self._normalizar_nome("guilherme_urbano")
+                })
 
         except Exception:
             pass

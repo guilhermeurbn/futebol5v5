@@ -560,19 +560,25 @@ def sincronizar_dados_e_partidas() -> dict:
     usuarios = auth_svc._carregar()
     jog_svc = JogadorService()
     jogadores_raw = jog_svc._carregar_raw()
+    partidas = load_json_data("partidas", []) or []
+    vot_svc = VotacaoService()
+    vot_dados = vot_svc._carregar()
+    vot_partidas = vot_dados.get("partidas", []) if isinstance(vot_dados, dict) else []
 
     user_aliases_map = {}
     user_canonical_name = {}
 
     for u in usuarios:
-        uid = u.get("id")
+        uid = str(u.get("id") or "")
         nome = (u.get("nome") or "").strip()
         username = (u.get("username") or "").strip()
-        if not uid or not nome:
+        if not uid or not (nome or username):
             continue
         
-        user_canonical_name[uid] = nome
+        c_name = nome or username
+        user_canonical_name[uid] = c_name
         aliases = {norm(nome), norm(username)}
+        aliases.discard("")
         user_aliases_map[uid] = aliases
 
     # Vincular conta prévia do usuário principal (@guilherme -> Guilherme urbano)
@@ -581,25 +587,46 @@ def sincronizar_dados_e_partidas() -> dict:
     if gui_main_id in user_canonical_name:
         user_canonical_name[gui_old_id] = user_canonical_name[gui_main_id]
         if gui_main_id in user_aliases_map:
-            user_aliases_map[gui_main_id].add(norm("guilherme"))
-            user_aliases_map[gui_main_id].add(norm("guilherme_urbano"))
-            user_aliases_map[gui_main_id].add(gui_old_id)
+            user_aliases_map[gui_main_id].update({norm("guilherme"), norm("guilherme urbano"), norm("guilherme_urbano")})
+            user_aliases_map[gui_old_id] = user_aliases_map[gui_main_id]
 
+    # Coletar aliases de jogadores.json
     for j in jogadores_raw:
-        owner_id = j.get("owner_user_id")
-        j_nome = (j.get("nome") or "").strip()
-        if owner_id and owner_id in user_canonical_name:
-            canonical = user_canonical_name[owner_id]
-            if j_nome != canonical:
-                j["nome"] = canonical
-            if owner_id in user_aliases_map and j_nome:
+        if isinstance(j, dict):
+            owner_id = str(j.get("owner_user_id") or j.get("user_id") or "")
+            j_nome = (j.get("nome") or "").strip()
+            if owner_id and owner_id in user_canonical_name and j_nome:
                 user_aliases_map[owner_id].add(norm(j_nome))
 
-    jog_svc._salvar(jogadores_raw)
+    # Coletar aliases de partidas.json
+    for p in partidas:
+        if isinstance(p, dict):
+            for det in p.get("jogadores_detalhes", []) or []:
+                if isinstance(det, dict):
+                    uid = str(det.get("user_id") or det.get("owner_user_id") or "")
+                    dname = (det.get("nome") or "").strip()
+                    if uid and uid in user_aliases_map and dname:
+                        user_aliases_map[uid].add(norm(dname))
+
+    # Coletar aliases de votacoes_partidas.json
+    for vp in vot_partidas:
+        if isinstance(vp, dict):
+            for part in vp.get("participantes", []) or []:
+                if isinstance(part, dict):
+                    uid = str(part.get("user_id") or part.get("owner_user_id") or "")
+                    pname = (part.get("jogador_nome") or part.get("nome_usuario") or part.get("nome") or "").strip()
+                    if uid and uid in user_aliases_map and pname:
+                        user_aliases_map[uid].add(norm(pname))
+            for rj in ((vp.get("ranking") or {}).get("ranking_jogadores") or []):
+                if isinstance(rj, dict):
+                    uid = str(rj.get("user_id") or rj.get("owner_user_id") or "")
+                    rname = (rj.get("jogador_nome") or rj.get("nome") or "").strip()
+                    if uid and uid in user_aliases_map and rname:
+                        user_aliases_map[uid].add(norm(rname))
 
     def resolver_user_id(p_nome: str, p_user_id: Optional[str]) -> Tuple[Optional[str], Optional[str]]:
-        if p_user_id and p_user_id in user_canonical_name:
-            return p_user_id, user_canonical_name[p_user_id]
+        if p_user_id and str(p_user_id) in user_canonical_name:
+            return str(p_user_id), user_canonical_name[str(p_user_id)]
         
         norm_p = norm(p_nome)
         if not norm_p:
