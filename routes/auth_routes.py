@@ -1003,7 +1003,11 @@ def perfil_page():
         
         # Obter estatísticas do jogador
         if jogador_proprio:
-            stats_jogador = jogador_stats_service.obter_stats_jogador(jogador_proprio.nome)
+            stats_jogador = jogador_stats_service.obter_stats_jogador(
+                jogador_proprio.nome,
+                jogador_id=jogador_proprio.id,
+                user_id=jogador_proprio.owner_user_id or current_uid
+            )
             stats_jogador.setdefault('efficiency', {})
             stats_jogador.setdefault('discipline', {})
             stats_jogador.setdefault('ultimos_resultados', {'forma': [], 'pontos': 0, 'partidas': []})
@@ -1166,7 +1170,11 @@ def perfil_jogador_publico(jogador_id):
         stats_jogador = None
         if jogador:
             try:
-                stats_jogador = jogador_stats_service.obter_stats_jogador(jogador.nome)
+                stats_jogador = jogador_stats_service.obter_stats_jogador(
+                    jogador.nome,
+                    jogador_id=jogador.id,
+                    user_id=target_user_id or jogador.owner_user_id
+                )
                 stats_jogador.setdefault('efficiency', {})
                 stats_jogador.setdefault('discipline', {})
                 stats_jogador.setdefault('ultimos_resultados', {'forma': [], 'pontos': 0, 'partidas': []})

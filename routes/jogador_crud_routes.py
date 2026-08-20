@@ -140,7 +140,11 @@ def index():
         jogadores_premium = []
 
         for jogador in jogadores:
-            stats = jogador_stats_service.obter_stats_jogador(jogador.get('nome', ''))
+            stats = jogador_stats_service.obter_stats_jogador(
+                jogador.get('nome', ''),
+                jogador_id=jogador.get('id'),
+                user_id=jogador.get('owner_user_id') or jogador.get('user_id')
+            )
             jogadores_premium.append({
                 **jogador,
                 'stats_card': {

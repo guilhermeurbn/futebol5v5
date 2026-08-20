@@ -340,6 +340,7 @@ class VotacaoService:
                     )
                     user_id = usuario.get("id") if usuario else None
                 participantes.append({
+                    "jogador_id": j.get("id") or j.get("jogador_id"),
                     "user_id": user_id if usuario else None,
                     "username": (usuario or {}).get("username", ""),
                     "nome_usuario": (usuario or {}).get("nome", ""),
@@ -725,12 +726,15 @@ class VotacaoService:
         for participante in partida.get("participantes", []):
             p_nome_raw = participante.get("nome") or participante.get("jogador_nome")
             p_uid_raw = participante.get("user_id") or participante.get("owner_user_id")
-            if p_nome_raw or p_uid_raw:
+            p_jid_raw = participante.get("jogador_id") or participante.get("id")
+            if p_nome_raw or p_uid_raw or p_jid_raw:
                 nome = resolver_canonical(p_nome_raw, p_uid_raw)
                 time = participante.get("time_numero")
                 if nome not in jogadores:
                     jogadores[nome] = {
                         "jogador_nome": nome,
+                        "user_id": p_uid_raw,
+                        "jogador_id": p_jid_raw,
                         "time_numero": time,
                         "nota_total": 0.0,
                         "soma_pesos": 0.0,

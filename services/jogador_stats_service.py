@@ -49,10 +49,10 @@ class JogadorStatsService:
             "data": data,
         }
 
-    def _chave_cache_stats(self, nome_jogador: str) -> str:
+    def _chave_cache_stats(self, nome_jogador: str, jogador_id: Optional[str] = None, user_id: Optional[str] = None) -> str:
         """Monta uma chave que evita reaproveitar stats entre fontes diferentes."""
-        chave_nome = self._normalizar_nome(nome_jogador)
-        return f"{self.__class__.__name__}:{id(self)}:{chave_nome}"
+        chave_id = user_id or jogador_id or self._normalizar_nome(nome_jogador)
+        return f"{self.__class__.__name__}:{id(self)}:{chave_id}"
     
     def _carregar_partidas(self) -> List[dict]:
         """Carrega dados de partidas combinando partidas e votacoes_partidas"""
@@ -346,12 +346,12 @@ class JogadorStatsService:
 
         return "empate"
     
-    def obter_stats_jogador(self, nome_jogador: str) -> Dict:
+    def obter_stats_jogador(self, nome_jogador: str, jogador_id: Optional[str] = None, user_id: Optional[str] = None) -> Dict:
         """
-        Obtém estatísticas completas de um jogador
+        Obtém estatísticas completas de um jogador por nome, jogador_id ou user_id
         """
         try:
-            chave_cache = self._chave_cache_stats(nome_jogador)
+            chave_cache = self._chave_cache_stats(nome_jogador, jogador_id=jogador_id, user_id=user_id)
             cache_hit = self._obter_stats_em_cache(chave_cache)
             if cache_hit is not None:
                 return cache_hit
@@ -377,7 +377,7 @@ class JogadorStatsService:
                 sorteio = historico_dict.get(sorteio_id, {})
                 
                 # Obter detalhes do jogador na partida
-                detalhes = self._extrair_detalhes_jogador(partida, nome_jogador, sorteio)
+                detalhes = self._extrair_detalhes_jogador(partida, nome_jogador, sorteio, jogador_id=jogador_id, user_id=user_id)
                 
                 if detalhes:
                     stats["total_partidas"] += 1
@@ -449,29 +449,48 @@ class JogadorStatsService:
             print(f"Erro ao calcular stats para {nome_jogador}: {str(e)}", file=sys.stderr)
             return self._stats_vazio(nome_jogador)
     
-    def _extrair_detalhes_jogador(self, partida: dict, nome_jogador: str, sorteio: dict) -> Optional[dict]:
+    def _extrair_detalhes_jogador(self, partida: dict, nome_jogador: str, sorteio: dict, jogador_id: Optional[str] = None, user_id: Optional[str] = None) -> Optional[dict]:
         """
-        Extrai detalhes de um jogador específico em uma partida
+        Extrai detalhes de um jogador específico em uma partida usando ID único (jogador_id / user_id)
+        com fallback para nome.
         """
         nome_normalizado = self._normalizar_nome(nome_jogador)
         nota_media_ranking = 0.0
 
         target_user_ids = set()
-        player_aliases = {nome_normalizado}
+        target_jogador_ids = set()
+        player_aliases = set()
+        if nome_normalizado:
+            player_aliases.add(nome_normalizado)
+        if user_id:
+            target_user_ids.add(str(user_id))
+        if jogador_id:
+            target_jogador_ids.add(str(jogador_id))
+
         try:
             from services.auth_service import AuthService
             usuarios = AuthService()._carregar()
             jogadores = load_json_data("jogadores", [])
             partidas = load_json_data("partidas", [])
 
-            u_target = next((u for u in usuarios if self._normalizar_nome(u.get("nome", "")) == nome_normalizado or self._normalizar_nome(u.get("username", "")) == nome_normalizado), None)
-            
-            if not u_target:
-                j_target = next((j for j in jogadores if isinstance(j, dict) and self._normalizar_nome(j.get("nome", "")) == nome_normalizado), None)
-                if j_target:
-                    j_uid = str(j_target.get("owner_user_id") or j_target.get("user_id") or "")
+            u_target = None
+            if user_id:
+                u_target = next((u for u in usuarios if str(u.get("id")) == str(user_id)), None)
+            if not u_target and jogador_id:
+                j = next((j for j in jogadores if isinstance(j, dict) and str(j.get("id")) == str(jogador_id)), None)
+                if j:
+                    j_uid = str(j.get("owner_user_id") or j.get("user_id") or "")
                     if j_uid:
                         u_target = next((u for u in usuarios if str(u.get("id")) == j_uid), None)
+
+            if not u_target and nome_normalizado:
+                u_target = next((u for u in usuarios if self._normalizar_nome(u.get("nome", "")) == nome_normalizado or self._normalizar_nome(u.get("username", "")) == nome_normalizado), None)
+                if not u_target:
+                    j_target = next((j for j in jogadores if isinstance(j, dict) and self._normalizar_nome(j.get("nome", "")) == nome_normalizado), None)
+                    if j_target:
+                        j_uid = str(j_target.get("owner_user_id") or j_target.get("user_id") or "")
+                        if j_uid:
+                            u_target = next((u for u in usuarios if str(u.get("id")) == j_uid), None)
 
             if u_target:
                 uid_str = str(u_target.get("id"))
@@ -484,16 +503,18 @@ class JogadorStatsService:
                 for j in jogadores:
                     if isinstance(j, dict):
                         j_uid = str(j.get("owner_user_id") or j.get("user_id") or "")
-                        if j_uid and j_uid == uid_str and j.get("nome"):
+                        j_id = str(j.get("id") or "")
+                        if (j_uid and j_uid == uid_str) or (jogador_id and j_id == str(jogador_id)):
+                            if j_id:
+                                target_jogador_ids.add(j_id)
+                            if j.get("nome"):
+                                player_aliases.add(self._normalizar_nome(j["nome"]))
+            elif jogador_id:
+                target_jogador_ids.add(str(jogador_id))
+                for j in jogadores:
+                    if isinstance(j, dict) and str(j.get("id")) == str(jogador_id):
+                        if j.get("nome"):
                             player_aliases.add(self._normalizar_nome(j["nome"]))
-
-                for p in partidas:
-                    if isinstance(p, dict):
-                        for det in p.get("jogadores_detalhes", []) or []:
-                            if isinstance(det, dict):
-                                d_uid = str(det.get("user_id") or det.get("owner_user_id") or "")
-                                if d_uid and d_uid == uid_str and det.get("nome"):
-                                    player_aliases.add(self._normalizar_nome(det["nome"]))
 
             gui_main_id = "18c652b0-330e-4e0d-9c5d-eb9a27b889a2"
             gui_old_id = "09142ace-266e-4d33-96db-8b92ed6144c8"
@@ -508,8 +529,10 @@ class JogadorStatsService:
         except Exception:
             pass
 
-        def _is_match(item_nome: str, item_user_id: Optional[str]) -> bool:
+        def _is_match(item_nome: str, item_user_id: Optional[str], item_jogador_id: Optional[str] = None) -> bool:
             if target_user_ids and item_user_id and str(item_user_id) in target_user_ids:
+                return True
+            if target_jogador_ids and item_jogador_id and str(item_jogador_id) in target_jogador_ids:
                 return True
             n = self._normalizar_nome(item_nome)
             if not n:
@@ -521,7 +544,8 @@ class JogadorStatsService:
             for rj in ranking.get("ranking_jogadores", []) or []:
                 rj_nome = rj.get("jogador_nome", "")
                 rj_uid = rj.get("user_id") or rj.get("owner_user_id")
-                if _is_match(rj_nome, rj_uid):
+                rj_jid = rj.get("jogador_id") or rj.get("id")
+                if _is_match(rj_nome, rj_uid, rj_jid):
                     n_val = float(rj.get("nota_media", 0) or 0)
                     if n_val > 0:
                         nota_media_ranking = n_val
@@ -545,7 +569,8 @@ class JogadorStatsService:
                             for rj in v_rk.get("ranking_jogadores", []) or []:
                                 rj_nome = rj.get("jogador_nome", "")
                                 rj_uid = rj.get("user_id") or rj.get("owner_user_id")
-                                if _is_match(rj_nome, rj_uid):
+                                rj_jid = rj.get("jogador_id") or rj.get("id")
+                                if _is_match(rj_nome, rj_uid, rj_jid):
                                     n_val = float(rj.get("nota_media", 0) or 0)
                                     if n_val > 0:
                                         nota_media_ranking = n_val
@@ -561,7 +586,8 @@ class JogadorStatsService:
         for detalhe in jogadores_detalhes:
             d_nome = detalhe.get("nome", "")
             d_uid = detalhe.get("user_id") or detalhe.get("owner_user_id")
-            if _is_match(d_nome, d_uid):
+            d_jid = detalhe.get("jogador_id") or detalhe.get("id")
+            if _is_match(d_nome, d_uid, d_jid):
                 time_numero = detalhe.get("time_numero")
                 resultado = self._resultado_por_time(partida, time_numero)
                 dados = dict(detalhe)
@@ -576,7 +602,8 @@ class JogadorStatsService:
         for part in participantes:
             p_nome = part.get("jogador_nome") or part.get("nome_usuario") or part.get("username") or ""
             p_uid = part.get("user_id") or part.get("owner_user_id")
-            if _is_match(p_nome, p_uid):
+            p_jid = part.get("jogador_id") or part.get("id")
+            if _is_match(p_nome, p_uid, p_jid):
                 time_numero = part.get("time_numero")
                 resultado = self._resultado_por_time(partida, time_numero)
                 nota_val = nota_media_ranking if nota_media_ranking > 0 else float(part.get("nota_media") or part.get("nota_partida") or part.get("nota") or 0.0)
@@ -600,7 +627,8 @@ class JogadorStatsService:
                 for jogador in jogadores:
                     j_nome = jogador.get('nome', '')
                     j_uid = jogador.get('owner_user_id') or jogador.get('user_id')
-                    if _is_match(j_nome, j_uid):
+                    j_jid = jogador.get('jogador_id') or jogador.get('id')
+                    if _is_match(j_nome, j_uid, j_jid):
                         time_numero = time_idx + 1
                         resultado = self._resultado_por_time(partida, time_numero)
                         nota_val = nota_media_ranking if nota_media_ranking > 0 else float(jogador.get("nota") or 0.0)

@@ -481,7 +481,17 @@ class AuthService:
                 pass
 
         self._salvar(usuarios)
+
+        try:
+            from services.jogador_service import sincronizar_dados_e_partidas
+            from services.jogador_stats_service import JogadorStatsService
+            sincronizar_dados_e_partidas()
+            JogadorStatsService.invalidar_cache_stats()
+        except Exception:
+            pass
+
         return alvo
+
     
     def deletar_usuario(self, user_id: str, executor_id: Optional[str] = None) -> bool:
         """
