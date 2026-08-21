@@ -84,18 +84,48 @@ def estatisticas():
 def api_stats_players():
     """API: Estatísticas detalhadas por jogador"""
     try:
-        stats = stats_service.calcular_stats_jogadores()
+        from services.jogador_stats_service import JogadorStatsService
+        from services.jogador_service import JogadorService
         
-        # Ordenar por win_rate (decrescente)
-        stats_ordenadas = dict(
-            sorted(
-                stats.items(),
-                key=lambda x: x[1].get('win_rate', 0),
-                reverse=True
-            )
-        )
+        jss = JogadorStatsService()
+        js = JogadorService()
         
-        return jsonify(stats_ordenadas)
+        jogadores = js.listar_para_dict()
+        resultado = {}
+        
+        for j in jogadores:
+            nome = j.get('nome', '')
+            j_id = j.get('id', '')
+            u_id = j.get('owner_user_id') or j.get('user_id')
+            stats = jss.obter_stats_jogador(nome, jogador_id=j_id, user_id=u_id)
+            
+            wins = stats.get('vitórias', stats.get('vitorias', 0))
+            matches = stats.get('total_partidas', 0)
+            win_rate = stats.get('win_rate', 0.0)
+            
+            player_stats = {
+                'wins': wins,
+                'vitórias': wins,
+                'vitorias': wins,
+                'times_vencedores': wins,
+                'matches': matches,
+                'total_partidas': matches,
+                'partidas': matches,
+                'vezes_sorteado': matches,
+                'approval': win_rate,
+                'win_rate': win_rate,
+                'aproveitamento': win_rate,
+                'gols': stats.get('gols', 0),
+                'assistencias': stats.get('assistencias', 0),
+            }
+            
+            if nome:
+                resultado[nome] = player_stats
+                resultado[nome.strip().lower()] = player_stats
+            if j_id:
+                resultado[j_id] = player_stats
+
+        return jsonify(resultado)
     except Exception as e:
         logger.error(f"Erro ao calcular stats de jogadores: {str(e)}")
         return jsonify({'sucesso': False, 'erro': 'Erro ao calcular estatísticas'}), 500

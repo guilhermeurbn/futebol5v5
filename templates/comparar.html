@@ -56,95 +56,176 @@
         {% set p2 = comparacao.j2 %}
         {% set conf = comparacao.confronto_direto %}
 
-        <!-- Cards do Duelo -->
-        <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; align-items: center; margin-bottom: 2rem;">
-            <!-- Player 1 -->
-            <div style="background: #121217; border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 16px; padding: 1.25rem; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.4);">
-                <div style="width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, #8b5cf6, #3b82f6); color: #fff; font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem auto;">
+        <!-- Cards do Duelo Simétricos 100% Iguais (Grid minmax 50/50 + Stretch) -->
+        <div style="display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 0.75rem; align-items: stretch; margin-bottom: 1.25rem; width: 100%;">
+            <!-- Player 1 (Verde Suave) -->
+            <div style="background: #14141b; border: 1px solid rgba(34, 197, 94, 0.35); border-radius: 14px; padding: 1rem 0.6rem; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; box-sizing: border-box;">
+                {% if p1.foto_url or p1.foto %}
+                <img src="{{ p1.foto_url or p1.foto }}" alt="{{ p1.jogador_nome }}" style="width: 48px; height: 48px; flex: 0 0 48px; border-radius: 50%; object-fit: cover; border: 2px solid #22c55e; margin: 0 auto 0.45rem auto;" />
+                {% else %}
+                <div style="width: 48px; height: 48px; flex: 0 0 48px; border-radius: 50%; background: rgba(34, 197, 94, 0.1); border: 2px solid #22c55e; color: #fff; font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.45rem auto;">
                     {{ p1.jogador_nome[:2]|upper }}
                 </div>
-                <h2 style="font-size: 1.2rem; font-weight: 800; color: #ffffff; margin: 0 0 0.2rem 0;">{{ p1.jogador_nome }}</h2>
-                <div style="display: inline-block; padding: 0.2rem 0.6rem; background: rgba(139, 92, 246, 0.2); border-radius: 12px; color: #a78bfa; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.5rem;">
-                    Nível {{ '%.1f'|format(p1.nivel|float) }} ★
+                {% endif %}
+                <h2 style="font-size: 0.95rem; font-weight: 800; color: #ffffff; margin: 0 0 0.35rem 0; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center;" title="{{ p1.jogador_nome }}">{{ p1.jogador_nome }}</h2>
+                <div style="display: inline-flex; align-items: center; justify-content: center; gap: 0.25rem; padding: 0.2rem 0.5rem; background: rgba(34, 197, 94, 0.1); border-radius: 8px; color: #22c55e; font-size: 0.75rem; font-weight: 700; border: 1px solid rgba(34, 197, 94, 0.25); white-space: nowrap; max-width: 100%;">
+                    ⭐ Nível {{ '%.1f'|format(p1.nivel|float) }}
                 </div>
-                <div style="font-size: 0.75rem; color: #9ca3af;">{{ 'Goleiro' if p1.posicao == 'goleiro' else 'Linha' }} • {{ p1.tipo|capitalize }}</div>
             </div>
 
-            <!-- VS Badge -->
-            <div style="font-size: 1.5rem; font-weight: 900; color: #f59e0b; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                VS
+            <!-- VS Badge Minimalista Alinhado ao Centro -->
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <span style="background: #1e1e28; color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.1); font-weight: 900; font-size: 0.75rem; padding: 0.35rem 0.65rem; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block;">VS</span>
             </div>
 
-            <!-- Player 2 -->
-            <div style="background: #121217; border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 16px; padding: 1.25rem; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.4);">
-                <div style="width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #10b981); color: #fff; font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem auto;">
+            <!-- Player 2 (Azul Suave) -->
+            <div style="background: #14141b; border: 1px solid rgba(59, 130, 246, 0.35); border-radius: 14px; padding: 1rem 0.6rem; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; box-sizing: border-box;">
+                {% if p2.foto_url or p2.foto %}
+                <img src="{{ p2.foto_url or p2.foto }}" alt="{{ p2.jogador_nome }}" style="width: 48px; height: 48px; flex: 0 0 48px; border-radius: 50%; object-fit: cover; border: 2px solid #3b82f6; margin: 0 auto 0.45rem auto;" />
+                {% else %}
+                <div style="width: 48px; height: 48px; flex: 0 0 48px; border-radius: 50%; background: rgba(59, 130, 246, 0.1); border: 2px solid #3b82f6; color: #fff; font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.45rem auto;">
                     {{ p2.jogador_nome[:2]|upper }}
                 </div>
-                <h2 style="font-size: 1.2rem; font-weight: 800; color: #ffffff; margin: 0 0 0.2rem 0;">{{ p2.jogador_nome }}</h2>
-                <div style="display: inline-block; padding: 0.2rem 0.6rem; background: rgba(59, 130, 246, 0.2); border-radius: 12px; color: #60a5fa; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.5rem;">
-                    Nível {{ '%.1f'|format(p2.nivel|float) }} ★
+                {% endif %}
+                <h2 style="font-size: 0.95rem; font-weight: 800; color: #ffffff; margin: 0 0 0.35rem 0; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center;" title="{{ p2.jogador_nome }}">{{ p2.jogador_nome }}</h2>
+                <div style="display: inline-flex; align-items: center; justify-content: center; gap: 0.25rem; padding: 0.2rem 0.5rem; background: rgba(59, 130, 246, 0.1); border-radius: 8px; color: #60a5fa; font-size: 0.75rem; font-weight: 700; border: 1px solid rgba(59, 130, 246, 0.25); white-space: nowrap; max-width: 100%;">
+                    ⭐ Nível {{ '%.1f'|format(p2.nivel|float) }}
                 </div>
-                <div style="font-size: 0.75rem; color: #9ca3af;">{{ 'Goleiro' if p2.posicao == 'goleiro' else 'Linha' }} • {{ p2.tipo|capitalize }}</div>
             </div>
         </div>
 
-        <!-- Banner de Retrospecto Direto -->
-        <section style="background: rgba(24, 24, 32, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 1.25rem; margin-bottom: 2rem;">
-            <h3 style="font-size: 1.05rem; font-weight: 700; color: #f59e0b; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.4rem;">
+        <!-- Banner de Retrospecto Direto Minimalista -->
+        <section style="background: #14141b; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 1.1rem; margin-bottom: 1.25rem;">
+            <h3 style="font-size: 0.9rem; font-weight: 700; color: #22c55e; margin-bottom: 0.85rem; display: flex; align-items: center; gap: 0.4rem;">
                 <span>🤝</span> Retrospecto Direto em Campo
             </h3>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                <div style="background: rgba(255, 255, 255, 0.03); border-radius: 12px; padding: 1rem; border-left: 3px solid #10b981;">
-                    <div style="font-size: 0.8rem; color: #9ca3af; font-weight: 600;">JOGANDO JUNTOS (MESMO TIME)</div>
-                    <div style="font-size: 1.4rem; font-weight: 800; color: #10b981; margin: 0.3rem 0;">{{ conf.jogos_juntos }} jogos</div>
-                    <div style="font-size: 0.85rem; color: #d1d5db;">
-                        {{ conf.vitorias_juntos }} vitórias ({{ conf.pct_vitorias_juntos }}%) • {{ conf.gols_juntos }} gols marcados juntos
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem;">
+                <div style="background: rgba(255, 255, 255, 0.02); border-radius: 10px; padding: 0.85rem; border-left: 3px solid #22c55e;">
+                    <div style="font-size: 0.75rem; color: #9ca3af; font-weight: 600;">JOGANDO JUNTOS (MESMO TIME)</div>
+                    <div style="font-size: 1.25rem; font-weight: 800; color: #22c55e; margin: 0.2rem 0;">{{ conf.jogos_juntos }} jogos</div>
+                    <div style="font-size: 0.8rem; color: #d1d5db;">
+                        {{ conf.vitorias_juntos }} vitórias ({{ conf.pct_vitorias_juntos }}%) • {{ conf.gols_juntos }} gols marcados
                     </div>
                 </div>
 
-                <div style="background: rgba(255, 255, 255, 0.03); border-radius: 12px; padding: 1rem; border-left: 3px solid #f59e0b;">
-                    <div style="font-size: 0.8rem; color: #9ca3af; font-weight: 600;">CONFRONTOS ADVERSÁRIOS (TIMES OPOSTOS)</div>
-                    <div style="font-size: 1.4rem; font-weight: 800; color: #f59e0b; margin: 0.3rem 0;">{{ conf.jogos_contra }} confrontos</div>
-                    <div style="font-size: 0.85rem; color: #d1d5db;">
-                        {{ p1.jogador_nome }}: <strong>{{ conf.vitorias_j1 }} vitórias</strong> | {{ p2.jogador_nome }}: <strong>{{ conf.vitorias_j2 }} vitórias</strong>
+                <div style="background: rgba(255, 255, 255, 0.02); border-radius: 10px; padding: 0.85rem; border-left: 3px solid #3b82f6;">
+                    <div style="font-size: 0.75rem; color: #9ca3af; font-weight: 600;">CONFRONTOS ADVERSÁRIOS (TIMES OPOSTOS)</div>
+                    <div style="font-size: 1.25rem; font-weight: 800; color: #60a5fa; margin: 0.2rem 0;">{{ conf.jogos_contra }} confrontos</div>
+                    <div style="font-size: 0.8rem; color: #d1d5db;">
+                        <span style="color: #22c55e;">{{ p1.jogador_nome }}: <strong>{{ conf.vitorias_j1 }} vitórias</strong></span> | <span style="color: #60a5fa;">{{ p2.jogador_nome }}: <strong>{{ conf.vitorias_j2 }} vitórias</strong></span>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Tabela Comparativa de Estatísticas -->
-        <section style="background: #121217; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 1.25rem;">
-            <h3 style="font-size: 1.05rem; font-weight: 700; color: #ffffff; margin-bottom: 1.25rem;">📊 Comparativo de Atributos</h3>
+        <!-- Comparativo de Desempenho (Com 1 Única Linha e Ícones SVG Vector) -->
+        <section style="background: #14141b; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 1.1rem;">
+            {% set j1_gols = p1.gols|int %}
+            {% set j2_gols = p2.gols|int %}
+            {% set max_gols = [j1_gols, j2_gols, 1]|max %}
+            {% set gols_pct = (((j1_gols if j1_gols > j2_gols else j2_gols) / max_gols) * 100)|round|int if (j1_gols > 0 or j2_gols > 0) else 0 %}
+            {% set gols_color = '#22c55e' if j1_gols > j2_gols else ('#3b82f6' if j2_gols > j1_gols else ('rgba(255,255,255,0.2)' if j1_gols > 0 else 'transparent')) %}
 
-            {% macro stat_row(label, val1, val2, unit="") %}
-            <div style="margin-bottom: 1.1rem;">
-                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #d1d5db; margin-bottom: 0.35rem; font-weight: 600;">
-                    <span style="color: #a78bfa;">{{ val1 }}{{ unit }}</span>
-                    <span style="color: #9ca3af; font-weight: 700;">{{ label }}</span>
-                    <span style="color: #60a5fa;">{{ val2 }}{{ unit }}</span>
+            {% set j1_nota = p1.nota_media|float %}
+            {% set j2_nota = p2.nota_media|float %}
+            {% set nota_pct = (((j1_nota if j1_nota > j2_nota else j2_nota) / 10.0) * 100)|round|int if (j1_nota > 0 or j2_nota > 0) else 0 %}
+            {% set nota_color = '#22c55e' if j1_nota > j2_nota else ('#3b82f6' if j2_nota > j1_nota else ('rgba(255,255,255,0.2)' if j1_nota > 0 else 'transparent')) %}
+
+            {% set j1_wins = p1.vitorias|int %}
+            {% set j2_wins = p2.vitorias|int %}
+            {% set max_wins = [j1_wins, j2_wins, 1]|max %}
+            {% set wins_pct = (((j1_wins if j1_wins > j2_wins else j2_wins) / max_wins) * 100)|round|int if (j1_wins > 0 or j2_wins > 0) else 0 %}
+            {% set wins_color = '#22c55e' if j1_wins > j2_wins else ('#3b82f6' if j2_wins > j1_wins else ('rgba(255,255,255,0.2)' if j1_wins > 0 else 'transparent')) %}
+
+            {% set j1_app = p1.pct_vitorias|float|round|int %}
+            {% set j2_app = p2.pct_vitorias|float|round|int %}
+            {% set app_pct = (j1_app if j1_app > j2_app else j2_app) if (j1_app > 0 or j2_app > 0) else 0 %}
+            {% set app_color = '#22c55e' if j1_app > j2_app else ('#3b82f6' if j2_app > j1_app else ('rgba(255,255,255,0.2)' if j1_app > 0 else 'transparent')) %}
+
+            <!-- 1. GOLS -->
+            <div style="margin-bottom: 0.85rem; background: rgba(255,255,255,0.02); padding: 0.6rem 0.8rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.04);">
+                <div style="display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; margin-bottom: 0.35rem; font-size: 0.8rem; font-weight: 700; width: 100%;">
+                    <div style="display: flex; align-items: center; justify-content: flex-start; gap: 0.3rem; color: #22c55e;">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5 14.5 9.5 13.5 12.5h-3L9.5 9.5z"/></svg>
+                        <span>{{ j1_gols }}</span>
+                    </div>
+                    <div style="text-align: center; color: #94a3b8; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; padding: 0 0.3rem;">
+                        GOLS
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.3rem; color: #60a5fa;">
+                        <span>{{ j2_gols }}</span>
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5 14.5 9.5 13.5 12.5h-3L9.5 9.5z"/></svg>
+                    </div>
                 </div>
-                <div style="display: flex; gap: 4px; height: 8px; background: rgba(255, 255, 255, 0.05); border-radius: 4px; overflow: hidden;">
-                    {% set max_val = [val1|float, val2|float, 1.0]|max %}
-                    {% set pct1 = (val1|float / max_val * 100) if max_val > 0 else 0 %}
-                    {% set pct2 = (val2|float / max_val * 100) if max_val > 0 else 0 %}
-                    <div style="width: 50%; display: flex; justify-content: flex-end;">
-                        <div style="width: {{ pct1 }}%; background: #8b5cf6; height: 100%; border-radius: 4px 0 0 4px;"></div>
-                    </div>
-                    <div style="width: 50%; display: flex; justify-content: flex-start;">
-                        <div style="width: {{ pct2 }}%; background: #3b82f6; height: 100%; border-radius: 0 4px 4px 0;"></div>
-                    </div>
+                <!-- 1 Única Linha de Progresso -->
+                <div style="height: 6px; background: rgba(255, 255, 255, 0.06); border-radius: 4px; overflow: hidden; width: 100%;">
+                    <div style="width: {{ gols_pct }}%; background: {{ gols_color }}; height: 100%; border-radius: 4px; transition: width 0.3s ease;"></div>
                 </div>
             </div>
-            {% endmacro %}
 
-            {{ stat_row("Nível Técnico ★", p1.nivel, p2.nivel) }}
-            {{ stat_row("% de Vitórias", p1.pct_vitorias, p2.pct_vitorias, "%") }}
-            {{ stat_row("Partidas Jogadas", p1.jogos, p2.jogos) }}
-            {{ stat_row("Gols Marcados", p1.gols, p2.gols) }}
-            {{ stat_row("Destaques da Rodada", p1.destaques, p2.destaques) }}
-            {{ stat_row("Nota Média Geral", p1.nota_media, p2.nota_media) }}
-            {{ stat_row("Pontuação no Ranking", p1.pontos, p2.pontos, " pts") }}
+            <!-- 2. NOTA MÉDIA -->
+            <div style="margin-bottom: 0.85rem; background: rgba(255,255,255,0.02); padding: 0.6rem 0.8rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.04);">
+                <div style="display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; margin-bottom: 0.35rem; font-size: 0.78rem; font-weight: 700; width: 100%;">
+                    <div style="display: flex; align-items: center; justify-content: flex-start; gap: 0.3rem; color: #22c55e;">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="#22c55e"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <span>{{ '%.2f'|format(j1_nota) }}</span>
+                    </div>
+                    <div style="text-align: center; color: #94a3b8; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; padding: 0 0.3rem;">
+                        NOTA MÉDIA
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.3rem; color: #60a5fa;">
+                        <span>{{ '%.2f'|format(j2_nota) }}</span>
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="#3b82f6"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    </div>
+                </div>
+                <!-- 1 Única Linha de Progresso -->
+                <div style="height: 6px; background: rgba(255, 255, 255, 0.06); border-radius: 4px; overflow: hidden; width: 100%;">
+                    <div style="width: {{ nota_pct }}%; background: {{ nota_color }}; height: 100%; border-radius: 4px; transition: width 0.3s ease;"></div>
+                </div>
+            </div>
+
+            <!-- 3. VITÓRIAS -->
+            <div style="margin-bottom: 0.85rem; background: rgba(255,255,255,0.02); padding: 0.6rem 0.8rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.04);">
+                <div style="display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; margin-bottom: 0.35rem; font-size: 0.8rem; font-weight: 700; width: 100%;">
+                    <div style="display: flex; align-items: center; justify-content: flex-start; gap: 0.3rem; color: #22c55e;">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2"/><path d="M18 9h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H7v4h10v-4h-2c-.55 0-1-.45-1-1v-2.34"/><path d="M18 3H6v7a6 6 0 0 0 12 0V3z"/></svg>
+                        <span>{{ j1_wins }}</span>
+                    </div>
+                    <div style="text-align: center; color: #94a3b8; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; padding: 0 0.3rem;">
+                        VITÓRIAS
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.3rem; color: #60a5fa;">
+                        <span>{{ j2_wins }}</span>
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2"/><path d="M18 9h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H7v4h10v-4h-2c-.55 0-1-.45-1-1v-2.34"/><path d="M18 3H6v7a6 6 0 0 0 12 0V3z"/></svg>
+                    </div>
+                </div>
+                <!-- 1 Única Linha de Progresso -->
+                <div style="height: 6px; background: rgba(255, 255, 255, 0.06); border-radius: 4px; overflow: hidden; width: 100%;">
+                    <div style="width: {{ wins_pct }}%; background: {{ wins_color }}; height: 100%; border-radius: 4px; transition: width 0.3s ease;"></div>
+                </div>
+            </div>
+
+            <!-- 4. NÍVEL DE APROVEITAMENTO -->
+            <div style="background: rgba(255,255,255,0.02); padding: 0.6rem 0.8rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.04);">
+                <div style="display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; margin-bottom: 0.35rem; font-size: 0.8rem; font-weight: 700; width: 100%;">
+                    <div style="display: flex; align-items: center; justify-content: flex-start; gap: 0.3rem; color: #22c55e;">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                        <span>{{ j1_app }}%</span>
+                    </div>
+                    <div style="text-align: center; color: #94a3b8; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; padding: 0 0.3rem;">
+                        APROVEITAMENTO
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.3rem; color: #60a5fa;">
+                        <span>{{ j2_app }}%</span>
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                    </div>
+                </div>
+                <!-- 1 Única Linha de Progresso -->
+                <div style="height: 6px; background: rgba(255, 255, 255, 0.06); border-radius: 4px; overflow: hidden; width: 100%;">
+                    <div style="width: {{ app_pct }}%; background: {{ app_color }}; height: 100%; border-radius: 4px; transition: width 0.3s ease;"></div>
+                </div>
+            </div>
         </section>
         {% endif %}
     </main>

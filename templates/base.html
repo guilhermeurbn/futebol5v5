@@ -359,20 +359,7 @@
                 <span class="site-footer__label">Cronômetro</span>
             </a>
 
-            <form method="post" action="{{ url_for('jogador.logout') }}" style="display: contents;">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="site-footer__link" aria-label="Sair" title="Sair"
-                    style="background: none; border: none; padding: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%;">
-                    <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
-                        focusable="false">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                        <polyline points="16 17 21 12 16 7" />
-                        <line x1="21" x2="9" y1="12" y2="12" />
-                    </svg>
-                    <span class="site-footer__label" style="display: block; margin-top: 0.15rem;">Sair</span>
-                </button>
-            </form>
+
             {% else %}
             {% if is_admin_role %}
             <!-- 1. Jogadores -->
@@ -441,20 +428,7 @@
                 <span class="site-footer__label">Ajustes</span>
             </a>
 
-            <form method="post" action="{{ url_for('jogador.logout') }}" style="display: contents;">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="site-footer__link" aria-label="Sair" title="Sair"
-                    style="background: none; border: none; padding: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%;">
-                    <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
-                        focusable="false">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                        <polyline points="16 17 21 12 16 7" />
-                        <line x1="21" x2="9" y1="12" y2="12" />
-                    </svg>
-                    <span class="site-footer__label" style="display: block; margin-top: 0.15rem;">Sair</span>
-                </button>
-            </form>
+
             {% else %}
             <!-- 1. Perfil -->
             <a href="{{ url_for('auth.perfil_page') }}" class="site-footer__link{% if is_perfil %} is-active{% endif %}"
@@ -521,24 +495,13 @@
                 <span class="site-footer__label">Ranking</span>
             </a>
 
-            <!-- 6. Sair -->
-            <form method="post" action="{{ url_for('jogador.logout') }}" style="display: contents;">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="site-footer__link" aria-label="Sair" title="Sair"
-                    style="background: none; border: none; padding: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%;">
-                    <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
-                        focusable="false">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                        <polyline points="16 17 21 12 16 7" />
-                        <line x1="21" x2="9" y1="12" y2="12" />
-                    </svg>
-                    <span class="site-footer__label" style="display: block; margin-top: 0.15rem;">Sair</span>
-                </button>
-            </form>
+
             {% endif %}
             {% endif %}
         </nav>
+        <form method="post" action="{{ url_for('jogador.logout') }}" style="display: none;" id="globalLogoutForm">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        </form>
     </footer>
     {% endif %}
 </body>

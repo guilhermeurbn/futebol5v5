@@ -157,8 +157,8 @@ select,
   --z-modal: 1000;
   --z-dropdown: 100;
   --z-sticky: 50;
-  --site-footer-height: 92px;
-  --site-footer-height-mobile: 92px;
+  --site-footer-height: 97px;
+  --site-footer-height-mobile: 97px;
   --mobile-auth-header-height: 74px;
 }
 
@@ -16294,20 +16294,26 @@ body.modal-open {
 }
 
 .profile-security-dialog {
-  width: min(92vw, 540px);
-  max-width: 540px;
-  max-height: min(760px, 90dvh);
-  margin: auto;
-  padding: 0;
-  overflow: hidden;
-  border: 1px solid rgba(167, 139, 250, 0.24);
-  border-radius: 22px;
-  color: #f4f1f8;
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: min(90vw, 420px) !important;
+  max-width: 420px !important;
+  height: fit-content !important;
+  max-height: 85vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(167, 139, 250, 0.3) !important;
+  border-radius: 20px !important;
+  color: #f4f1f8 !important;
   background:
     radial-gradient(circle at top right, rgba(139, 92, 246, 0.14), transparent 36%),
     linear-gradient(155deg, rgba(255, 255, 255, 0.03), transparent 46%),
-    rgba(18, 15, 25, 0.98);
-  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.72);
+    rgba(18, 15, 25, 0.98) !important;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.85) !important;
+  z-index: 99999 !important;
 }
 
 .profile-security-dialog:not([open]) {
@@ -16549,11 +16555,15 @@ body.modal-open {
   }
 
   .profile-security-dialog {
-    width: calc(100% - 1rem);
-    max-width: none;
-    max-height: calc(100dvh - 0.5rem);
-    margin: auto auto 0.25rem;
-    border-radius: 20px 20px 16px 16px;
+    width: min(92vw, 420px) !important;
+    max-width: 420px !important;
+    max-height: 85vh !important;
+    margin: 0 !important;
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    border-radius: 20px !important;
   }
 
   .profile-security-dialog__shell {
@@ -18160,16 +18170,47 @@ body.is-referee-layout .judge-timer-reset:hover {
   stroke: #8b5cf6;
 }
 
+/* ----------------------------------------------------
+   NATRAVE 5V5 - PUBLIC PROFILE DOSSIER & DUELO MOBILE FLOW
+   ---------------------------------------------------- */
+.profile-page .main,
+.player-workspace-page .main {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  align-items: stretch !important;
+}
+
+.public-profile-dossier,
+.profile-page--public .public-profile-dossier,
+.player-workspace-page .public-profile-dossier {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  align-content: flex-start !important;
+  align-items: stretch !important;
+  gap: 1rem !important;
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+.public-profile-dossier > .premium-profile-tabs,
+.public-profile-dossier > .premium-profile-header,
+.public-profile-dossier > .premium-profile-tab-content {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
 /* Horizontal navigation tabs */
 .premium-profile-tabs {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.5rem;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.35rem;
   background: rgba(12, 10, 17, 0.8);
   border: 1px solid rgba(167, 139, 250, 0.15);
   border-radius: 16px;
   padding: 0.35rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0 !important;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
 }
 
@@ -18178,7 +18219,7 @@ body.is-referee-layout .judge-timer-reset:hover {
 }
 
 .premium-profile-tabs--public-admin {
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
 }
 
 .premium-profile-tab {
@@ -18226,12 +18267,58 @@ body.is-referee-layout .judge-timer-reset:hover {
 
 /* Tabs content wrapper */
 .premium-profile-tab-content {
-  display: none;
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  overflow: hidden !important;
+}
+
+.premium-profile-tab-content.is-active:not([hidden]) {
+  display: block !important;
+  height: auto !important;
+  overflow: visible !important;
   animation: fadeInProfile 0.3s ease both;
 }
 
-.premium-profile-tab-content.is-active {
-  display: block;
+.premium-profile-tab-content[hidden] {
+  display: none !important;
+  height: 0 !important;
+}
+
+@media (max-width: 600px) {
+  .premium-profile-tabs {
+    display: grid !important;
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 0.25rem !important;
+    padding: 0.4rem 0.5rem !important;
+    border-radius: 16px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .premium-profile-tab {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.2rem !important;
+    padding: 0.55rem 0.15rem !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
+  }
+
+  .premium-profile-tab span {
+    font-size: clamp(0.64rem, 2.2vw, 0.74rem) !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100% !important;
+  }
 }
 
 @keyframes fadeInProfile {
@@ -19543,14 +19630,12 @@ html,
 }
 
 .site-footer__icon {
-  width: 1.36rem !important;
-  /* Aumentar levemente o tamanho do ícone */
-  height: 1.36rem !important;
+  width: 1.50rem !important;
+  height: 1.50rem !important;
 }
 
 .site-footer__label {
-  font-size: 0.66rem !important;
-  /* Aumentar levemente o tamanho da legenda */
+  font-size: 0.73rem !important;
   margin-top: 0.22rem !important;
 }
 

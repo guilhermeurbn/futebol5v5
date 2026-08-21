@@ -202,8 +202,14 @@
     hydrateJudgePage();
     hydrateAdminPage();
 
+    if (typeof window.initPerfilPage === 'function') {
+      window.initPerfilPage();
+    }
     if (typeof window.initVotacaoUsuario === 'function') {
       window.initVotacaoUsuario();
+    }
+    if (window.NaTraveLocalDateTime && typeof window.NaTraveLocalDateTime.apply === 'function') {
+      window.NaTraveLocalDateTime.apply(document);
     }
   }
 
@@ -290,8 +296,11 @@
       return map;
     }
 
-    Object.entries(statsPayload).forEach(([name, stats]) => {
-      map.set(normalizePlayerName(name), stats || {});
+    Object.entries(statsPayload).forEach(([key, stats]) => {
+      if (key) {
+        map.set(normalizePlayerName(key), stats || {});
+        map.set(String(key), stats || {});
+      }
     });
 
     return map;
@@ -306,17 +315,20 @@
 
     const cards = Array.from(document.querySelectorAll('.player-card[data-player-id]'));
     cards.forEach(card => {
-      const nameEl = card.querySelector('.player-card__name, .player-list-row__name');
+      const playerId = card.dataset.playerId;
+      const nameEl = card.querySelector('.premium-player-name, .player-card__name, .player-list-row__name');
       const name = normalizePlayerName(nameEl ? nameEl.textContent : card.dataset.name);
-      const stats = statsMap.get(name);
+      const stats = (playerId && statsMap.get(playerId)) || statsMap.get(name);
       if (!stats) return;
 
-      const wins = playerStatsValue(stats, ['vitórias', 'vitorias', 'wins'], 0);
-      const matches = playerStatsValue(stats, ['total_partidas', 'matches', 'partidas'], 0);
+      const wins = playerStatsValue(stats, ['vitórias', 'vitorias', 'wins', 'times_vencedores'], 0);
+      const matches = playerStatsValue(stats, ['total_partidas', 'matches', 'partidas', 'vezes_sorteado'], 0);
+      const winRate = playerStatsValue(stats, ['win_rate', 'approval', 'aproveitamento'], 0);
 
       const statValues = card.querySelectorAll('.premium-player-stat-val, .player-card__stat-value');
-      if (statValues[0]) statValues[0].textContent = String(wins);
-      if (statValues[1]) statValues[1].textContent = String(matches);
+      if (statValues[0]) statValues[0].textContent = String(matches);
+      if (statValues[1]) statValues[1].textContent = String(wins);
+      if (statValues[2]) statValues[2].textContent = `${Math.round(Number(winRate) || 0)}%`;
 
       const mobileMeta = card.querySelector('.player-list-row__meta-item:last-child');
       if (mobileMeta) {
@@ -986,6 +998,120 @@
         card.style.setProperty('display', 'none', 'important');
       }
     });
+  });
+
+  // Delegação global de clique para abas de perfil (.premium-profile-tab) e modals de segurança
+  document.addEventListener('click', event => {
+    const profileTab = event.target.closest('.premium-profile-tab');
+    if (profileTab) {
+      const target = profileTab.dataset.tabTarget;
+      if (!target) return;
+      const targetId = `tab-${target}`;
+
+      const tabs = document.querySelectorAll('.premium-profile-tab');
+      const contents = document.querySelectorAll('.premium-profile-tab-content');
+
+      tabs.forEach(t => {
+        const active = t === profileTab;
+        t.classList.toggle('is-active', active);
+        t.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+
+      contents.forEach(c => {
+        const id = c.getAttribute('id');
+        const active = id === targetId;
+        c.classList.toggle('is-active', active);
+        c.hidden = !active;
+      });
+
+      try {
+        history.replaceState(null, null, `#${targetId}`);
+      } catch (e) {}
+
+      if (target === 'duelo') {
+        const select = document.getElementById('dueloOponenteSelect');
+        if (select && typeof window.carregarDueloPerfil === 'function') {
+          let opId = select.value;
+          if (!opId && select.options.length > 1) {
+            for (let i = 0; i < select.options.length; i++) {
+              if (select.options[i].value) {
+                select.selectedIndex = i;
+                opId = select.options[i].value;
+                break;
+              }
+            }
+          }
+          if (opId) {
+            window.carregarDueloPerfil(opId, select.dataset.jogadorId || select.getAttribute('data-jogador-id'));
+          }
+        }
+      }
+      return;
+    }
+
+    const openPassBtn = event.target.closest('[data-open-password-dialog]');
+    if (openPassBtn) {
+      const dialog = document.getElementById('passwordDialog');
+      if (dialog) {
+        if (dialog.hasAttribute('open')) dialog.removeAttribute('open');
+        if (!dialog.open) dialog.showModal();
+        document.body.classList.add('modal-open');
+      }
+      return;
+    }
+
+    const closePassBtn = event.target.closest('[data-close-password-dialog]');
+    if (closePassBtn) {
+      const dialog = document.getElementById('passwordDialog');
+      if (dialog && dialog.dataset.required !== 'true') {
+        dialog.close();
+        document.body.classList.remove('modal-open');
+      }
+      return;
+    }
+
+    const openDeleteBtn = event.target.closest('[data-open-delete-dialog]');
+    if (openDeleteBtn) {
+      const dialog = document.getElementById('deleteAccountDialog');
+      if (dialog) {
+        if (dialog.hasAttribute('open')) dialog.removeAttribute('open');
+        if (!dialog.open) dialog.showModal();
+        document.body.classList.add('modal-open');
+      }
+      return;
+    }
+
+    const closeDeleteBtn = event.target.closest('[data-close-delete-dialog]');
+    if (closeDeleteBtn) {
+      const dialog = document.getElementById('deleteAccountDialog');
+      if (dialog) {
+        dialog.close();
+        document.body.classList.remove('modal-open');
+      }
+      return;
+    }
+
+    const toggleBtn = event.target.closest('[data-password-toggle]');
+    if (toggleBtn) {
+      const inputId = toggleBtn.dataset.passwordToggle;
+      const input = document.getElementById(inputId);
+      if (input) {
+        const showing = input.type === 'text';
+        input.type = showing ? 'password' : 'text';
+        toggleBtn.setAttribute('aria-pressed', String(!showing));
+      }
+    }
+  });
+
+  document.addEventListener('change', event => {
+    const select = event.target.closest('#dueloOponenteSelect');
+    if (select) {
+      const oponenteId = select.value;
+      const jogadorId = select.dataset.jogadorId || select.getAttribute('data-jogador-id');
+      if (typeof window.carregarDueloPerfil === 'function') {
+        window.carregarDueloPerfil(oponenteId, jogadorId);
+      }
+    }
   });
 
   window.addEventListener('popstate', () => {

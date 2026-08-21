@@ -53,8 +53,15 @@ class ComparadorService:
         return None
 
     def comparar(self, id1: str, id2: str) -> Dict[str, Any]:
+        jogadores = self.jogador_service.listar_para_dict() or []
+
         j1 = self._obter_jogador(id1)
         j2 = self._obter_jogador(id2)
+
+        if not j1 and jogadores:
+            j1 = jogadores[0]
+        if not j2 and jogadores:
+            j2 = jogadores[1] if (len(jogadores) > 1 and j1 and str(jogadores[0].get('id')) == str(j1.get('id'))) else jogadores[0]
 
         if not j1 or not j2:
             return {
@@ -79,11 +86,15 @@ class ComparadorService:
         })
 
         # Adicionar dados de perfil
+        stats1["foto_url"] = j1.get("foto_url") or stats1.get("foto_url") or j1.get("foto") or stats1.get("foto") or ""
+        stats1["foto"] = stats1["foto_url"]
         stats1["nivel"] = j1.get("nivel", 5.5)
         stats1["posicao"] = j1.get("posicao", "linha")
         stats1["tipo"] = j1.get("tipo", "avulso")
         stats1["pct_vitorias"] = round((stats1["vitorias"] / stats1["jogos"] * 100), 1) if stats1.get("jogos") else 0.0
 
+        stats2["foto_url"] = j2.get("foto_url") or stats2.get("foto_url") or j2.get("foto") or stats2.get("foto") or ""
+        stats2["foto"] = stats2["foto_url"]
         stats2["nivel"] = j2.get("nivel", 5.5)
         stats2["posicao"] = j2.get("posicao", "linha")
         stats2["tipo"] = j2.get("tipo", "avulso")

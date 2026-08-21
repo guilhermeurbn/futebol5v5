@@ -249,11 +249,11 @@
             {% if is_self or (auth_user and auth_user.role in ['admin']) %}
             <button class="premium-profile-tab {% if aba_ativa == 'mais' %}is-active{% endif %}" data-tab-target="mais"
                 aria-selected="{% if aba_ativa == 'mais' %}true{% else %}false{% endif %}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
                     stroke-linejoin="round" style="width: 20px; height: 20px;">
-                    <circle cx="12" cy="12" r="1" />
-                    <circle cx="19" cy="12" r="1" />
-                    <circle cx="5" cy="12" r="1" />
+                    <circle cx="5" cy="12" r="1.5" fill="currentColor" />
+                    <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+                    <circle cx="19" cy="12" r="1.5" fill="currentColor" />
                 </svg>
                 <span>{% if is_self %}Mais{% else %}Gerenciar{% endif %}</span>
             </button>
@@ -423,10 +423,15 @@
                     Resumo do Jogador
                 </h2>
 
-                <div class="premium-profile-stats-grid public-profile-kpi-strip">
+                {% set total_vitorias = stats.get('vitorias') if stats.get('vitorias') is defined else (stats.get('vitórias') if stats.get('vitórias') is defined else (jogador.vitorias if (tem_jogador and jogador and jogador.vitorias is defined) else 0)) %}
+                <div class="premium-profile-stats-grid public-profile-kpi-strip" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem;">
                     <div class="premium-profile-stat-card">
                         <strong class="premium-profile-stat-val">{{ total_partidas }}</strong>
                         <span class="premium-profile-stat-label">Partidas disputadas</span>
+                    </div>
+                    <div class="premium-profile-stat-card">
+                        <strong class="premium-profile-stat-val" style="color: #22c55e;">{{ total_vitorias }}</strong>
+                        <span class="premium-profile-stat-label">Partidas ganhas</span>
                     </div>
                     <div class="premium-profile-stat-card">
                         <strong class="premium-profile-stat-val">{{ total_gols }}</strong>
@@ -445,38 +450,75 @@
                 <h2 class="premium-profile-panel-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
                         stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10" />
-                        <polyline points="12 6 12 12 16 14" />
+                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                        <polyline points="17 6 23 6 23 12" />
                     </svg>
-                    Desempenho
+                    Desempenho Real em Campo
                 </h2>
 
+                {% set win_rate_val = (stats.get('win_rate') or stats.get('pct_vitorias') or ((total_vitorias / total_partidas * 100) if total_partidas > 0 else 0.0))|float %}
+                {% set gols_por_jogo = (stats.get('gols_por_partida') or ((total_gols / total_partidas) if total_partidas > 0 else 0.0))|float %}
+                {% set total_destaques = stats.get('destaques') or (jogador.destaques if (tem_jogador and jogador and jogador.destaques is defined) else 0) %}
+
                 <div class="premium-profile-attributes-list">
-                    {% set attrs = stats.get('atributos') or {'comprometimento': 7.0} %}
-                    {% set val_comp = attrs.get('comprometimento', 7.0) %}
-
-                    <!-- 1. Comprometimento -->
+                    <!-- 1. Taxa de Vitória (%) -->
                     <div class="premium-profile-attr-item">
                         <div class="premium-profile-attr-labels">
-                            <span class="premium-profile-attr-name">Comprometimento</span>
-                            <span class="premium-profile-attr-val">{{ '%.1f'|format(val_comp|float) }} / 10.0</span>
+                            <span class="premium-profile-attr-name" style="display: flex; align-items: center; gap: 0.35rem;">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#22c55e" stroke-width="2"><path d="M6 9H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2"/><path d="M18 9h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H7v4h10v-4h-2c-.55 0-1-.45-1-1v-2.34"/><path d="M18 3H6v7a6 6 0 0 0 12 0V3z"/></svg>
+                                Taxa de Vitória / Aproveitamento
+                            </span>
+                            <span class="premium-profile-attr-val" style="color: #22c55e; font-weight: 800;">{{ '%.1f'|format(win_rate_val) }}%</span>
                         </div>
                         <div class="premium-profile-attr-track">
-                            <div class="premium-profile-attr-fill" style="width: {{ (val_comp|float * 10)|int }}%;">
-                            </div>
+                            <div class="premium-profile-attr-fill" style="width: {{ [100, [0, win_rate_val|int]|max]|min }}%; background: linear-gradient(90deg, #16a34a, #22c55e);"></div>
                         </div>
                     </div>
 
-                    <!-- 2. Progresso -->
+                    <!-- 2. Média de Gols por Partida -->
                     <div class="premium-profile-attr-item">
                         <div class="premium-profile-attr-labels">
-                            <span class="premium-profile-attr-name">Progresso</span>
-                            <span class="premium-profile-attr-val">{{ '%.1f'|format(nivel_val) }} / 10.0</span>
+                            <span class="premium-profile-attr-name" style="display: flex; align-items: center; gap: 0.35rem;">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#60a5fa" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7.5 14.5 9.5 13.5 12.5h-3L9.5 9.5z"/></svg>
+                                Média de Gols / Partida
+                            </span>
+                            <span class="premium-profile-attr-val" style="color: #60a5fa; font-weight: 800;">{{ '%.2f'|format(gols_por_jogo) }} gols/jogo</span>
                         </div>
                         <div class="premium-profile-attr-track">
-                            <div class="premium-profile-attr-fill" style="width: {{ (nivel_val * 10)|int }}%;"></div>
+                            {% set gols_pct_bar = [100, [(gols_por_jogo * 33.3)|int, 0]|max]|min %}
+                            <div class="premium-profile-attr-fill" style="width: {{ gols_pct_bar }}%; background: linear-gradient(90deg, #2563eb, #60a5fa);"></div>
                         </div>
                     </div>
+
+                    <!-- 3. Nível Técnico Geral -->
+                    <div class="premium-profile-attr-item">
+                        <div class="premium-profile-attr-labels">
+                            <span class="premium-profile-attr-name" style="display: flex; align-items: center; gap: 0.35rem;">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="#eab308"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                Nível Técnico Geral
+                            </span>
+                            <span class="premium-profile-attr-val" style="color: #eab308; font-weight: 800;">⭐ {{ '%.1f'|format(nivel_val) }} / 10.0</span>
+                        </div>
+                        <div class="premium-profile-attr-track">
+                            <div class="premium-profile-attr-fill" style="width: {{ (nivel_val * 10)|int }}%; background: linear-gradient(90deg, #ca8a04, #eab308);"></div>
+                        </div>
+                    </div>
+
+                    {% if total_destaques|int > 0 %}
+                    <!-- 4. Destaques da Rodada (MVP) -->
+                    <div class="premium-profile-attr-item">
+                        <div class="premium-profile-attr-labels">
+                            <span class="premium-profile-attr-name" style="display: flex; align-items: center; gap: 0.35rem;">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="#a78bfa"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                Prêmios de Destaque da Rodada
+                            </span>
+                            <span class="premium-profile-attr-val" style="color: #a78bfa; font-weight: 800;">🏆 {{ total_destaques }}x MVP</span>
+                        </div>
+                        <div class="premium-profile-attr-track">
+                            <div class="premium-profile-attr-fill" style="width: {{ [100, (total_destaques|int * 20)]|min }}%; background: linear-gradient(90deg, #7c3aed, #a78bfa);"></div>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
 
@@ -722,17 +764,12 @@
         </div>
 
         {# DUELO TAB #}
-        <div class="premium-profile-tab-content {% if aba_ativa == 'duelo' %}is-active{% endif %}" id="tab-duelo" {% if
-            aba_ativa !='duelo' %}hidden{% endif %}>
-            <div class="premium-profile-panel"
-                style="border: 1px solid rgba(34, 197, 94, 0.25); background: rgba(18, 18, 23, 0.95); border-radius: 20px; padding: 1.5rem;">
-                <div
-                    style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 1rem;">
+        <div class="premium-profile-tab-content {% if aba_ativa == 'duelo' %}is-active{% endif %}" id="tab-duelo" {% if aba_ativa !='duelo' %}hidden{% endif %}>
+            <div class="premium-profile-panel" style="border: 1px solid rgba(255, 255, 255, 0.08); background: #121217; margin-top: 0;">
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.85rem;">
                     <div>
-                        <div
-                            style="font-size: 0.75rem; font-weight: 700; color: #22c55e; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.2rem; display: flex; align-items: center; gap: 0.4rem;">
-                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#22c55e"
-                                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <div style="font-size: 0.75rem; font-weight: 700; color: #22c55e; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.2rem; display: flex; align-items: center; gap: 0.4rem;">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#22c55e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M14.5 17.5L3 6V3h3l11.5 11.5" />
                                 <path d="M13 19l6-6" />
                                 <path d="M16 16l4 4" />
@@ -740,19 +777,33 @@
                             </svg>
                             <span>CONFRONTO DIRETO X1</span>
                         </div>
-                        <h2 style="font-size: 1.3rem; font-weight: 800; color: #ffffff; margin: 0;">Duelo de Desempenho
+                        <h2 class="premium-profile-panel-title" style="margin: 0;">
+                            Duelo de Desempenho
                         </h2>
                     </div>
 
+                    {% set current_jog_identifier = (
+                        jogador.id if (jogador is defined and jogador and jogador.id is defined and jogador.id)
+                        else (jogador.get('id') if (jogador is defined and jogador and jogador.get is defined and jogador.get('id'))
+                        else (jogador_proprio.id if (jogador_proprio is defined and jogador_proprio and jogador_proprio.id is defined and jogador_proprio.id)
+                        else (jogador_proprio.get('id') if (jogador_proprio is defined and jogador_proprio and jogador_proprio.get is defined and jogador_proprio.get('id'))
+                        else (stats_jogador.jogador_id if (stats_jogador is defined and stats_jogador and stats_jogador.jogador_id is defined and stats_jogador.jogador_id)
+                        else (stats_jogador.jogador_nome if (stats_jogador is defined and stats_jogador and stats_jogador.jogador_nome is defined and stats_jogador.jogador_nome)
+                        else (jogador.nome if (jogador is defined and jogador and jogador.nome is defined and jogador.nome)
+                        else (jogador_proprio.nome if (jogador_proprio is defined and jogador_proprio and jogador_proprio.nome is defined and jogador_proprio.nome)
+                        else (usuario.nome if (usuario is defined and usuario and usuario.nome is defined and usuario.nome)
+                        else (usuario.username if (usuario is defined and usuario and usuario.username is defined and usuario.username)
+                        else (usuario.id if (usuario is defined and usuario and usuario.id is defined and usuario.id)
+                        else session.get('user_id', '')))))))))))
+                    ) %}
+
                     <!-- Seletor Fluido de Oponente -->
-                    {% set current_jog_identifier = (jogador.id if (jogador and jogador.id is defined) else (jogador.get('id') if (jogador and jogador.get is defined) else (jogador.nome if (jogador and jogador.nome is defined) else (usuario.nome if (usuario and usuario.nome is defined) else session.get('user_id', ''))))) %}
                     <div style="min-width: 240px; flex: 1; max-width: 340px;">
-                        <label
-                            style="display: block; font-size: 0.78rem; font-weight: 700; color: #94a3b8; margin-bottom: 0.35rem; text-transform: uppercase;">Escolha
-                            o Adversário:</label>
-                        <select id="dueloOponenteSelect" data-jogador-id="{{ current_jog_identifier }}" onchange="carregarDueloPerfil(this.value, this.getAttribute('data-jogador-id') || '{{ current_jog_identifier }}')"
-                            style="background: #121217; color: #ffffff; border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 12px; padding: 0.65rem 1rem; width: 100%; font-size: 0.9rem; font-weight: 700; cursor: pointer; outline: none; box-shadow: 0 4px 14px rgba(0,0,0,0.3);">
-                            <option value="" disabled selected>Selecione um oponente...</option>
+                        <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #94a3b8; margin-bottom: 0.35rem; text-transform: uppercase;">
+                            Escolha o Adversário:
+                        </label>
+                        <select id="dueloOponenteSelect" data-jogador-id="{{ current_jog_identifier }}" onchange="if (window.carregarDueloPerfil) window.carregarDueloPerfil(this.value, this.getAttribute('data-jogador-id'))"
+                            style="background: #121217; color: #ffffff; border: 1px solid rgba(34, 197, 94, 0.4); border-radius: 12px; padding: 0.65rem 1rem; width: 100%; font-size: 0.9rem; font-weight: 700; cursor: pointer; outline: none; box-shadow: 0 4px 14px rgba(0,0,0,0.3);">
                             {% for j in todos_jogadores_duelo|default([]) %}
                             {% set j_id = j.id if j.id is defined else (j.get('id') if j.get is defined else '') %}
                             {% set j_nome = j.nome if j.nome is defined else (j.get('nome') if j.get is defined else '') %}
@@ -767,81 +818,86 @@
 
                 <!-- Container do Duelo Renderizado Dinamicamente -->
                 <div id="dueloArenaContainer">
-                    <div style="text-align: center; padding: 2.5rem 1rem; color: #94a3b8;">
-                        <svg viewBox="0 0 24 24" width="42" height="42" fill="none" stroke="#22c55e" stroke-width="1.8"
-                            stroke-linecap="round" stroke-linejoin="round"
-                            style="margin: 0 auto 0.75rem auto; opacity: 0.8;">
-                            <path d="M14.5 17.5L3 6V3h3l11.5 11.5" />
-                            <path d="M13 19l6-6" />
-                            <path d="M16 16l4 4" />
-                            <path d="M19 21l2-2" />
-                        </svg>
-                        <h3 style="color: #ffffff; font-weight: 700; font-size: 1.1rem; margin-bottom: 0.3rem;">
-                            Selecione um jogador acima</h3>
-                        <p style="font-size: 0.85rem; margin: 0; color: #94a3b8;">Compare estatísticas, nível técnico,
-                            taxa de vitória e o histórico de confrontos diretos.</p>
+                    <div style="text-align: center; padding: 2rem 1rem; color: #22c55e;">
+                        <div style="font-size: 1rem; font-weight: 700;">Carregando arena de duelo...</div>
                     </div>
                 </div>
             </div>
         </div>
 
         {# MAIS TAB #}
-        <div class="premium-profile-tab-content {% if aba_ativa == 'mais' %}is-active{% endif %} premium-profile-panel profile-account-access"
-            id="tab-mais" {% if aba_ativa !='mais' %}hidden{% endif %}>
-            <div>
-                <h2 class="premium-profile-panel-title">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                    </svg>
-                    Acesso e Segurança
-                </h2>
-
-                <div class="premium-profile-cred-row">
-                    <span class="premium-profile-cred-label">Usuário</span>
-                    <span class="premium-profile-cred-value">@{{ usuario.username }}</span>
-                </div>
-                <div class="premium-profile-cred-row">
-                    <span class="premium-profile-cred-label">Nível de Acesso</span>
-                    <span class="premium-profile-cred-value">
-                        {% if usuario.role == 'admin' %}Admin
-                        {% elif usuario.role == 'admin' %}Admin
-                        {% elif usuario.role == 'juiz' %}Juiz
-                        {% else %}Jogador{% endif %}
-                    </span>
+        <div class="premium-profile-tab-content {% if aba_ativa == 'mais' %}is-active{% endif %}" id="tab-mais" {% if aba_ativa !='mais' %}hidden{% endif %}>
+            <div class="premium-profile-panel profile-account-access" style="border: 1px solid rgba(167, 139, 250, 0.25); background: rgba(18, 18, 23, 0.95); margin-top: 0;">
+                <!-- Header da Seção Mais -->
+                <div style="border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 1rem; margin-bottom: 1.25rem;">
+                    <div style="font-size: 0.75rem; font-weight: 700; color: #a78bfa; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.2rem; display: flex; align-items: center; gap: 0.4rem;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#a78bfa" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="3" />
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                        </svg>
+                        <span>CONFIGURAÇÕES DA CONTA</span>
+                    </div>
+                    <h2 class="premium-profile-panel-title" style="margin: 0; font-size: 1.3rem;">
+                        Opções & Segurança
+                    </h2>
                 </div>
 
-                <div class="premium-profile-btn-wrap">
+                <!-- Credenciais da Conta -->
+                <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 14px; padding: 0.85rem 1.15rem; margin-bottom: 1.25rem;">
+                    <div class="premium-profile-cred-row" style="padding: 0.5rem 0;">
+                        <span class="premium-profile-cred-label">Nome de Usuário</span>
+                        <span class="premium-profile-cred-value">@{{ usuario.username }}</span>
+                    </div>
+                    <div class="premium-profile-cred-row" style="padding: 0.5rem 0;">
+                        <span class="premium-profile-cred-label">Nível de Acesso</span>
+                        <span class="premium-profile-cred-value" style="color: #a78bfa;">
+                            {% if usuario.role == 'admin' %}Administrador
+                            {% elif usuario.role == 'juiz' %}Juiz de Quadra
+                            {% else %}Atleta Jogador{% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Bloco de Ações (Resetar Senha, Apagar Conta, Logout) -->
+                <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+                    <!-- Botão Resetar / Alterar Senha -->
                     <button type="button" class="btn btn-secondary" data-open-password-dialog aria-haspopup="dialog"
-                        style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);">Alterar
-                        senha</button>
-                </div>
-            </div>
+                        style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: rgba(167, 139, 250, 0.12); border: 1px solid rgba(167, 139, 250, 0.3); color: #ffffff; padding: 0.85rem 1.25rem; border-radius: 12px; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: all 0.2s ease;">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#a78bfa" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                        </svg>
+                        <span>Resetar / Alterar Senha</span>
+                    </button>
 
-            <div style="margin-top: 1.5rem;">
-                <h2 class="premium-profile-panel-title">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
-                        <path d="M12 8v4" />
-                        <path d="M12 16h.01" />
-                    </svg>
-                    Ações de Conta
-                </h2>
-                <p style="color: #aaa3b5; font-size: 0.85rem; margin-top: 0; margin-bottom: 1.25rem;">Desconecte-se de
-                    sua sessão ou apague sua conta permanentemente.</p>
-
-                <div class="premium-profile-btn-wrap"
-                    style="display: flex; gap: 1rem; width: 100%; justify-content: center; flex-wrap: wrap;">
-                    <form method="post" action="{{ url_for('auth.logout') }}"
-                        style="display: flex; justify-content: center; width: 100%; max-width: 220px;">
+                    <!-- Botão Sair do Aplicativo -->
+                    <form method="post" action="{{ url_for('auth.logout') }}" style="width: 100%; margin: 0;">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <button class="btn btn-secondary" type="submit" style="width: 100%;">Sair do aplicativo</button>
+                        <button class="btn btn-secondary" type="submit"
+                            style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15); color: #94a3b8; padding: 0.85rem 1.25rem; border-radius: 12px; font-weight: 700; font-size: 0.95rem; cursor: pointer;">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                                <polyline points="16 17 21 12 16 7" />
+                                <line x1="21" y1="12" x2="9" y2="12" />
+                            </svg>
+                            <span>Sair do Aplicativo</span>
+                        </button>
                     </form>
+
+                    <!-- Botão Apagar Conta (se não for admin) -->
                     {% if usuario.role not in ['admin'] %}
-                    <button class="btn btn-primary" type="button" data-open-delete-dialog
-                        style="background: linear-gradient(135deg, #ef4444, #b91c1c) !important; border-color: rgba(239, 68, 68, 0.3) !important; color: white !important; width: 100%; max-width: 220px;">Apagar
-                        conta</button>
+                    <div style="margin-top: 0.5rem; border-top: 1px solid rgba(239, 68, 68, 0.15); padding-top: 0.85rem;">
+                        <button class="btn btn-primary" type="button" data-open-delete-dialog
+                            style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: linear-gradient(135deg, #ef4444, #b91c1c) !important; border: 1px solid rgba(239, 68, 68, 0.4) !important; color: #ffffff !important; padding: 0.85rem 1.25rem; border-radius: 12px; font-weight: 800; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 16px rgba(239, 68, 68, 0.25);">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6" />
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                <line x1="10" y1="11" x2="10" y2="17" />
+                                <line x1="14" y1="11" x2="14" y2="17" />
+                            </svg>
+                            <span>Apagar Conta Permanetemente</span>
+                        </button>
+                    </div>
                     {% endif %}
                 </div>
             </div>
@@ -1055,60 +1111,93 @@
 {% endif %}
 
 <script>
-    (() => {
+    window.initPerfilPage = function() {
         // --- GERENCIADOR DE ABAS ---
         const tabs = document.querySelectorAll('.premium-profile-tab');
         const contents = document.querySelectorAll('.premium-profile-tab-content');
 
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                const target = tab.dataset.tabTarget;
-                const targetId = `tab-${target}`;
+        const switchTab = (tab) => {
+            if (!tab) return;
+            const target = tab.dataset.tabTarget;
+            const targetId = `tab-${target}`;
 
-                tabs.forEach(t => {
-                    t.classList.toggle('is-active', t === tab);
-                    t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
-                });
+            tabs.forEach(t => {
+                const active = t === tab;
+                t.classList.toggle('is-active', active);
+                t.setAttribute('aria-selected', active ? 'true' : 'false');
+            });
 
-                contents.forEach(c => {
-                    const id = c.getAttribute('id');
-                    const active = id === targetId;
-                    c.classList.toggle('is-active', active);
-                    c.hidden = !active;
-                });
+            contents.forEach(c => {
+                const id = c.getAttribute('id');
+                const active = id === targetId;
+                c.classList.toggle('is-active', active);
+                c.hidden = !active;
+            });
 
-                // Salva a aba ativa na URL hash sem pular/rolar a página
+            try {
                 history.replaceState(null, null, `#${targetId}`);
+            } catch (e) {}
 
-                if (target === 'duelo') {
-                    const select = document.getElementById('dueloOponenteSelect');
-                    if (select && select.options.length > 1 && (select.selectedIndex <= 0 || !document.getElementById('dueloArenaContainer')?.querySelector('.premium-profile-panel'))) {
+            if (target === 'duelo') {
+                const select = document.getElementById('dueloOponenteSelect');
+                if (select && typeof window.carregarDueloPerfil === 'function') {
+                    let opId = select.value;
+                    if (!opId && select.options.length > 1) {
                         for (let i = 0; i < select.options.length; i++) {
                             if (select.options[i].value) {
                                 select.selectedIndex = i;
-                                select.dispatchEvent(new Event('change'));
+                                opId = select.options[i].value;
                                 break;
                             }
                         }
                     }
+                    if (opId) {
+                        window.carregarDueloPerfil(opId, select.dataset.jogadorId || select.getAttribute('data-jogador-id'));
+                    }
                 }
-            });
+            }
+        };
+
+        tabs.forEach(tab => {
+            tab.onclick = () => switchTab(tab);
         });
 
-        // Restaurar aba ativa a partir do hash na URL (e escutar mudanças de hash na mesma página)
+        // Restaurar aba ativa a partir do hash na URL
         const ativarAbaPorHash = () => {
             const hash = window.location.hash;
             if (hash && hash.startsWith('#tab-')) {
                 const activeTabTarget = hash.replace('#tab-', '');
                 const matchingTab = Array.from(tabs).find(t => t.dataset.tabTarget === activeTabTarget);
                 if (matchingTab) {
-                    matchingTab.click();
+                    switchTab(matchingTab);
                 }
             }
         };
 
         ativarAbaPorHash();
-        window.addEventListener('hashchange', ativarAbaPorHash);
+
+        const dueloSelect = document.getElementById('dueloOponenteSelect');
+        if (dueloSelect && typeof window.carregarDueloPerfil === 'function') {
+            let opId = dueloSelect.value;
+            if (!opId && dueloSelect.options.length > 1) {
+                for (let i = 0; i < dueloSelect.options.length; i++) {
+                    if (dueloSelect.options[i].value) {
+                        dueloSelect.selectedIndex = i;
+                        opId = dueloSelect.options[i].value;
+                        break;
+                    }
+                }
+            }
+            if (opId) {
+                window.carregarDueloPerfil(opId, dueloSelect.dataset.jogadorId || dueloSelect.getAttribute('data-jogador-id'));
+            }
+        }
+
+        if (window._perfilHashHandler) {
+            window.removeEventListener('hashchange', window._perfilHashHandler);
+        }
+        window._perfilHashHandler = ativarAbaPorHash;
+        window.addEventListener('hashchange', window._perfilHashHandler);
 
         // --- DIALOG ALTERAR SENHA ---
         const dialog = document.getElementById('passwordDialog');
@@ -1120,42 +1209,63 @@
         const match = document.querySelector('[data-password-match]');
         const required = dialog?.dataset.required === 'true';
 
-        if (!dialog || !opener || !form) return;
+        if (dialog && form) {
+            const openDialog = () => {
+                if (dialog.hasAttribute('open')) dialog.removeAttribute('open');
+                if (!dialog.open) dialog.showModal();
+                document.body.classList.add('modal-open');
+                const error = dialog.querySelector('[role="alert"]');
+                (error || dialog.querySelector('input:not([type="hidden"])'))?.focus();
+            };
 
-        const openDialog = () => {
-            if (dialog.hasAttribute('open')) dialog.removeAttribute('open');
-            if (!dialog.open) dialog.showModal();
-            document.body.classList.add('modal-open');
-            const error = dialog.querySelector('[role="alert"]');
-            (error || dialog.querySelector('input:not([type="hidden"])'))?.focus();
-        };
+            const closeDialog = () => {
+                if (required) return;
+                dialog.close();
+            };
 
-        const closeDialog = () => {
-            if (required) return;
-            dialog.close();
-        };
+            if (opener) opener.onclick = openDialog;
+            dialog.querySelectorAll('[data-close-password-dialog]').forEach((button) => {
+                button.onclick = closeDialog;
+            });
+            dialog.oncancel = (event) => {
+                if (required) event.preventDefault();
+            };
+            dialog.onclick = (event) => {
+                if (!required && event.target === dialog) closeDialog();
+            };
+            dialog.onclose = () => {
+                document.body.classList.remove('modal-open');
+                form.reset();
+                if (confirmPassword) confirmPassword.setCustomValidity('');
+                requirement?.classList.remove('is-valid');
+                match?.classList.remove('is-valid', 'is-invalid');
+                if (opener) opener.focus();
+            };
 
-        opener.addEventListener('click', openDialog);
-        dialog.querySelectorAll('[data-close-password-dialog]').forEach((button) => {
-            button.addEventListener('click', closeDialog);
-        });
-        dialog.addEventListener('cancel', (event) => {
-            if (required) event.preventDefault();
-        });
-        dialog.addEventListener('click', (event) => {
-            if (!required && event.target === dialog) closeDialog();
-        });
-        dialog.addEventListener('close', () => {
-            document.body.classList.remove('modal-open');
-            form.reset();
-            confirmPassword.setCustomValidity('');
-            requirement?.classList.remove('is-valid');
-            match?.classList.remove('is-valid', 'is-invalid');
-            opener.focus();
-        });
+            if (newPassword && confirmPassword) {
+                const validatePasswords = () => {
+                    const longEnough = newPassword.value.length >= 6;
+                    const hasConfirmation = confirmPassword.value.length > 0;
+                    const matches = hasConfirmation && newPassword.value === confirmPassword.value;
 
+                    requirement?.classList.toggle('is-valid', longEnough);
+                    match?.classList.toggle('is-valid', matches);
+                    match?.classList.toggle('is-invalid', hasConfirmation && !matches);
+                    confirmPassword.setCustomValidity(hasConfirmation && !matches ? 'As novas senhas não coincidem.' : '');
+                };
+
+                newPassword.oninput = validatePasswords;
+                confirmPassword.oninput = validatePasswords;
+            }
+
+            if (dialog.dataset.autoOpen === 'true') {
+                openDialog();
+            }
+        }
+
+        // --- TOGGLES DE VISIBILIDADE DE SENHA ---
         document.querySelectorAll('[data-password-toggle]').forEach((button) => {
-            button.addEventListener('click', () => {
+            button.onclick = () => {
                 const input = document.getElementById(button.dataset.passwordToggle);
                 if (!input) return;
 
@@ -1164,26 +1274,8 @@
                 const labelText = input.labels && input.labels[0] ? input.labels[0].textContent.toLowerCase() : 'senha';
                 button.setAttribute('aria-label', `${showing ? 'Mostrar' : 'Ocultar'} ${labelText}`);
                 button.setAttribute('aria-pressed', String(!showing));
-            });
+            };
         });
-
-        const validatePasswords = () => {
-            const longEnough = newPassword.value.length >= 6;
-            const hasConfirmation = confirmPassword.value.length > 0;
-            const matches = hasConfirmation && newPassword.value === confirmPassword.value;
-
-            requirement?.classList.toggle('is-valid', longEnough);
-            match?.classList.toggle('is-valid', matches);
-            match?.classList.toggle('is-invalid', hasConfirmation && !matches);
-            confirmPassword.setCustomValidity(hasConfirmation && !matches ? 'As novas senhas não coincidem.' : '');
-        };
-
-        newPassword.addEventListener('input', validatePasswords);
-        confirmPassword.addEventListener('input', validatePasswords);
-
-        if (dialog.dataset.autoOpen === 'true') {
-            openDialog();
-        }
 
         // --- DIALOG DELETAR CONTA ---
         const deleteDialog = document.getElementById('deleteAccountDialog');
@@ -1192,42 +1284,47 @@
         const confirmWordInput = document.getElementById('confirmar_exclusao_palavra');
         const confirmBtn = document.getElementById('btnConfirmarExclusao');
 
-        if (deleteDialog && deleteOpener && deleteForm) {
+        if (deleteDialog && deleteForm) {
             const openDeleteDialog = () => {
                 if (deleteDialog.hasAttribute('open')) deleteDialog.removeAttribute('open');
                 if (!deleteDialog.open) deleteDialog.showModal();
                 document.body.classList.add('modal-open');
-                confirmWordInput.focus();
+                if (confirmWordInput) confirmWordInput.focus();
             };
 
             const closeDeleteDialog = () => {
                 deleteDialog.close();
             };
 
-            deleteOpener.addEventListener('click', openDeleteDialog);
+            if (deleteOpener) deleteOpener.onclick = openDeleteDialog;
             deleteDialog.querySelectorAll('[data-close-delete-dialog]').forEach((button) => {
-                button.addEventListener('click', closeDeleteDialog);
+                button.onclick = closeDeleteDialog;
             });
-            deleteDialog.addEventListener('click', (event) => {
+            deleteDialog.onclick = (event) => {
                 if (event.target === deleteDialog) closeDeleteDialog();
-            });
-            deleteDialog.addEventListener('close', () => {
+            };
+            deleteDialog.onclose = () => {
                 document.body.classList.remove('modal-open');
                 deleteForm.reset();
-                confirmBtn.disabled = true;
-                deleteOpener.focus();
-            });
+                if (confirmBtn) confirmBtn.disabled = true;
+                if (deleteOpener) deleteOpener.focus();
+            };
 
-            // Dupla validação: habilitar botão se digitou "APAGAR"
-            confirmWordInput.addEventListener('input', () => {
-                confirmBtn.disabled = confirmWordInput.value.trim().toUpperCase() !== 'APAGAR';
-            });
+            if (confirmWordInput && confirmBtn) {
+                confirmWordInput.oninput = () => {
+                    confirmBtn.disabled = confirmWordInput.value.trim().toUpperCase() !== 'APAGAR';
+                };
+            }
 
             if (deleteDialog.dataset.autoOpen === 'true') {
                 openDeleteDialog();
             }
         }
-    })();
+    };
+
+    if (typeof window.initPerfilPage === 'function') {
+        window.initPerfilPage();
+    }
 
     async function responderPresencaPerfil(status) {
         try {
@@ -1255,13 +1352,22 @@
 
     async function carregarDueloPerfil(oponenteId, jogadorId) {
         const select = document.getElementById('dueloOponenteSelect');
-        if ((!jogadorId || jogadorId === 'None' || jogadorId === 'undefined' || jogadorId === '') && select) {
-            jogadorId = select.dataset.jogadorId;
+        if (!oponenteId && select && select.value) {
+            oponenteId = select.value;
         }
+        if (!jogadorId || jogadorId === 'None' || jogadorId === 'undefined' || jogadorId === '') {
+            if (select) {
+                jogadorId = select.dataset.jogadorId || select.getAttribute('data-jogador-id');
+            }
+        }
+        if (!jogadorId || jogadorId === 'None' || jogadorId === 'undefined' || jogadorId === '') {
+            jogadorId = '{{ current_jog_identifier }}';
+        }
+
         const container = document.getElementById('dueloArenaContainer');
         if (!container) return;
 
-        if (!oponenteId || !jogadorId || oponenteId === 'None' || jogadorId === 'None') {
+        if (!oponenteId || oponenteId === 'None' || oponenteId === 'undefined' || oponenteId === '') {
             container.innerHTML = `
                 <div style="text-align: center; padding: 2.5rem 1rem; color: #94a3b8;">
                     <svg viewBox="0 0 24 24" width="42" height="42" fill="none" stroke="#22c55e" stroke-width="1.8"
@@ -1300,79 +1406,232 @@
             const j2 = data.j2;
             const conf = data.confronto_direto;
 
-            container.innerHTML = `
-            <!-- Placa do Duelo -->
-            <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; align-items: center; margin-bottom: 1.5rem;">
-                <!-- Player 1 -->
-                <div style="background: #121217; border: 1px solid rgba(34, 197, 94, 0.35); border-radius: 16px; padding: 1.25rem; text-align: center; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
-                    <div style="width: 56px; height: 56px; border-radius: 50%; background: #181823; border: 2px solid #22c55e; color: #ffffff; font-size: 1.3rem; font-weight: 800; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem auto;">
-                        ${(j1.jogador_nome || '').substring(0, 2).toUpperCase()}
-                    </div>
-                    <h3 style="font-size: 1.1rem; font-weight: 800; color: #ffffff; margin: 0 0 0.2rem 0;">${j1.jogador_nome}</h3>
-                    <div style="font-size: 0.82rem; color: #22c55e; font-weight: 700;">⭐ Nível ${parseFloat(j1.nivel).toFixed(1)}</div>
-                </div>
+            const j1Gols = parseInt(j1.gols || 0);
+            const j2Gols = parseInt(j2.gols || 0);
+            const j1Nota = parseFloat(j1.nota_media || 0);
+            const j2Nota = parseFloat(j2.nota_media || 0);
+            const j1Wins = parseInt(j1.vitorias || 0);
+            const j2Wins = parseInt(j2.vitorias || 0);
+            const j1Pct = parseFloat(j1.pct_vitorias || 0);
+            const j2Pct = parseFloat(j2.pct_vitorias || 0);
 
-                <!-- VS Badge -->
-                <div style="text-align: center;">
-                    <span style="background: #22c55e; color: #000000; font-weight: 900; font-size: 0.9rem; padding: 0.45rem 0.85rem; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 0 14px rgba(34, 197, 94, 0.4);">VS</span>
-                </div>
-
-                <!-- Player 2 -->
-                <div style="background: #121217; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 1.25rem; text-align: center; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
-                    <div style="width: 56px; height: 56px; border-radius: 50%; background: #181823; border: 2px solid rgba(255, 255, 255, 0.3); color: #ffffff; font-size: 1.3rem; font-weight: 800; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem auto;">
-                        ${(j2.jogador_nome || '').substring(0, 2).toUpperCase()}
-                    </div>
-                    <h3 style="font-size: 1.1rem; font-weight: 800; color: #ffffff; margin: 0 0 0.2rem 0;">${j2.jogador_nome}</h3>
-                    <div style="font-size: 0.82rem; color: #94a3b8; font-weight: 700;">⭐ Nível ${parseFloat(j2.nivel).toFixed(1)}</div>
-                </div>
-            </div>
-
-            <!-- Métricas Comparativas -->
-            <div style="background: #121217; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 1.25rem; margin-bottom: 1.5rem;">
-                <h4 style="font-size: 0.82rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 1rem; text-align: center; letter-spacing: 0.05em;">Comparativo de Atributos</h4>
+            // Cálculo de 1 Única Linha de Comparação por Métrica
+            function calcSingleLine(v1, v2, scaleMax = null) {
+                const num1 = parseFloat(v1 || 0);
+                const num2 = parseFloat(v2 || 0);
+                const maxVal = scaleMax || Math.max(num1, num2, 1);
                 
-                <!-- Win Rate Bar -->
-                <div style="margin-bottom: 1rem;">
-                    <div style="display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; color: #ffffff; margin-bottom: 0.35rem;">
-                        <span style="color: #22c55e;">${j1.pct_vitorias}% Vitórias</span>
-                        <span style="color: #94a3b8;">Aproveitamento</span>
-                        <span style="color: #cbd5e1;">${j2.pct_vitorias}% Vitórias</span>
-                    </div>
-                    <div style="height: 8px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; display: flex;">
-                        <div style="width: ${j1.pct_vitorias}%; background: #22c55e; height: 100%;"></div>
-                        <div style="width: ${100 - j1.pct_vitorias}%; background: rgba(255,255,255,0.12); height: 100%;"></div>
+                let pct = 0;
+                let color = 'transparent';
+                let leader = 0; // 1 = p1, 2 = p2, 0 = tie
+                
+                if (num1 > num2) {
+                    leader = 1;
+                    pct = Math.min(100, Math.round((num1 / maxVal) * 100));
+                    color = '#22c55e'; // Verde
+                } else if (num2 > num1) {
+                    leader = 2;
+                    pct = Math.min(100, Math.round((num2 / maxVal) * 100));
+                    color = '#3b82f6'; // Azul
+                } else {
+                    leader = 0;
+                    if (num1 > 0) {
+                        pct = Math.min(100, Math.round((num1 / maxVal) * 100));
+                        color = 'rgba(255, 255, 255, 0.2)';
+                    } else {
+                        pct = 0;
+                        color = 'transparent';
+                    }
+                }
+                return { pct, color, leader };
+            }
+
+            const maxGols = Math.max(1, j1Gols, j2Gols);
+            const lineGols = calcSingleLine(j1Gols, j2Gols, maxGols);
+            const lineNota = calcSingleLine(j1Nota, j2Nota, 10.0);
+            const maxWins = Math.max(1, j1Wins, j2Wins);
+            const lineWins = calcSingleLine(j1Wins, j2Wins, maxWins);
+            const lineApp = calcSingleLine(j1Pct, j2Pct, 100);
+
+            function escapeHtml(str) {
+                if (!str) return '';
+                return String(str)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
+            }
+
+            const j1Nome = escapeHtml(j1.jogador_nome || '');
+            const j2Nome = escapeHtml(j2.jogador_nome || '');
+
+            const j1Foto = j1.foto_url || j1.foto || '';
+            const j2Foto = j2.foto_url || j2.foto || '';
+
+            const j1AvatarHtml = j1Foto
+                ? `<img src="${encodeURI(j1Foto)}" alt="${j1Nome}" style="width: 48px; height: 48px; flex: 0 0 48px; border-radius: 50%; object-fit: cover; border: 2px solid #22c55e; margin: 0 auto 0.45rem auto;" />`
+                : `<div style="width: 48px; height: 48px; flex: 0 0 48px; border-radius: 50%; background: rgba(34, 197, 94, 0.1); border: 2px solid #22c55e; color: #ffffff; font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.45rem auto;">${(j1Nome || '').substring(0, 2).toUpperCase()}</div>`;
+
+            const j2AvatarHtml = j2Foto
+                ? `<img src="${encodeURI(j2Foto)}" alt="${j2Nome}" style="width: 48px; height: 48px; flex: 0 0 48px; border-radius: 50%; object-fit: cover; border: 2px solid #3b82f6; margin: 0 auto 0.45rem auto;" />`
+                : `<div style="width: 48px; height: 48px; flex: 0 0 48px; border-radius: 50%; background: rgba(59, 130, 246, 0.1); border: 2px solid #3b82f6; color: #ffffff; font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.45rem auto;">${(j2Nome || '').substring(0, 2).toUpperCase()}</div>`;
+
+            container.innerHTML = `
+            <!-- Placa do Duelo Simétrica 100% Igual (Grid minmax 50/50 + Stretch) -->
+            <div style="display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 0.75rem; align-items: stretch; margin-bottom: 1.25rem; width: 100%;">
+                <!-- Player 1 (Verde Suave) -->
+                <div style="background: #14141b; border: 1px solid rgba(34, 197, 94, 0.35); border-radius: 14px; padding: 1rem 0.6rem; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; box-sizing: border-box;">
+                    ${j1AvatarHtml}
+                    <h3 style="font-size: 0.95rem; font-weight: 800; color: #ffffff; margin: 0 0 0.35rem 0; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center;" title="${j1Nome}">${j1Nome}</h3>
+                    <div style="display: inline-flex; align-items: center; justify-content: center; gap: 0.25rem; padding: 0.2rem 0.5rem; background: rgba(34, 197, 94, 0.1); border-radius: 8px; color: #22c55e; font-size: 0.75rem; font-weight: 700; border: 1px solid rgba(34, 197, 94, 0.25); white-space: nowrap; max-width: 100%;">
+                        ⭐ Nível ${parseFloat(j1.nivel).toFixed(1)}
                     </div>
                 </div>
 
-                <!-- Goals Comparison -->
-                <div style="display: flex; justify-content: space-between; padding: 0.65rem 0; border-top: 1px solid rgba(255,255,255,0.05); font-size: 0.88rem;">
-                    <span style="font-weight: 800; color: #22c55e;">${j1.gols} Gols</span>
-                    <span style="color: #94a3b8; font-weight: 600;">Total de Gols</span>
-                    <span style="font-weight: 800; color: #ffffff;">${j2.gols} Gols</span>
+                <!-- VS Badge Minimalista Alinhado ao Centro -->
+                <div style="display: flex; align-items: center; justify-content: center;">
+                    <span style="background: #1e1e28; color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.1); font-weight: 900; font-size: 0.75rem; padding: 0.35rem 0.65rem; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block;">VS</span>
                 </div>
 
-                <!-- Rating Avg Comparison -->
-                <div style="display: flex; justify-content: space-between; padding: 0.65rem 0; border-top: 1px solid rgba(255,255,255,0.05); font-size: 0.88rem;">
-                    <span style="font-weight: 800; color: #22c55e;">${parseFloat(j1.nota_media || 0).toFixed(2)}</span>
-                    <span style="color: #94a3b8; font-weight: 600;">Nota Média</span>
-                    <span style="font-weight: 800; color: #ffffff;">${parseFloat(j2.nota_media || 0).toFixed(2)}</span>
+                <!-- Player 2 (Azul Suave) -->
+                <div style="background: #14141b; border: 1px solid rgba(59, 130, 246, 0.35); border-radius: 14px; padding: 1rem 0.6rem; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; box-sizing: border-box;">
+                    ${j2AvatarHtml}
+                    <h3 style="font-size: 0.95rem; font-weight: 800; color: #ffffff; margin: 0 0 0.35rem 0; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center;" title="${j2Nome}">${j2Nome}</h3>
+                    <div style="display: inline-flex; align-items: center; justify-content: center; gap: 0.25rem; padding: 0.2rem 0.5rem; background: rgba(59, 130, 246, 0.1); border-radius: 8px; color: #60a5fa; font-size: 0.75rem; font-weight: 700; border: 1px solid rgba(59, 130, 246, 0.25); white-space: nowrap; max-width: 100%;">
+                        ⭐ Nível ${parseFloat(j2.nivel).toFixed(1)}
+                    </div>
                 </div>
             </div>
 
-            <!-- Retrospecto de Confrontos Diretos -->
-            <div style="background: rgba(34, 197, 94, 0.06); border: 1px solid rgba(34, 197, 94, 0.22); border-radius: 16px; padding: 1.25rem; text-align: center;">
-                <h4 style="font-size: 0.82rem; font-weight: 700; color: #22c55e; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.05em;">Retrospecto em Campo</h4>
-                <div style="font-size: 1.1rem; font-weight: 800; color: #ffffff; margin-bottom: 0.4rem;">
-                    ${conf.vitorias_j1} Vitórias de ${j1.jogador_nome} • ${conf.empates_confronto} Empates • ${conf.vitorias_j2} Vitórias de ${j2.jogador_nome}
+            <!-- Painel Minimalista de Comparação de Desempenho -->
+            <div style="background: #14141b; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 1.1rem; margin-bottom: 1.25rem;">
+                <!-- 1. GOLS -->
+                <div style="margin-bottom: 0.85rem; background: rgba(255,255,255,0.02); padding: 0.6rem 0.8rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.04);">
+                    <div style="display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; margin-bottom: 0.35rem; font-size: 0.8rem; font-weight: 700; width: 100%;">
+                        <div style="display: flex; align-items: center; justify-content: flex-start; gap: 0.3rem; color: #22c55e;">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5 14.5 9.5 13.5 12.5h-3L9.5 9.5z"/></svg>
+                            <span>${j1Gols}</span>
+                        </div>
+                        <div style="text-align: center; color: #94a3b8; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; padding: 0 0.3rem;">
+                            GOLS
+                        </div>
+                        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.3rem; color: #60a5fa;">
+                            <span>${j2Gols}</span>
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5 14.5 9.5 13.5 12.5h-3L9.5 9.5z"/></svg>
+                        </div>
+                    </div>
+                    <!-- 1 Única Linha de Progresso -->
+                    <div style="height: 6px; background: rgba(255, 255, 255, 0.06); border-radius: 4px; overflow: hidden; width: 100%;">
+                        <div style="width: ${lineGols.pct}%; background: ${lineGols.color}; height: 100%; border-radius: 4px; transition: width 0.3s ease;"></div>
+                    </div>
                 </div>
-                <div style="font-size: 0.82rem; color: #94a3b8;">
+
+                <!-- 2. NOTA MÉDIA -->
+                <div style="margin-bottom: 0.85rem; background: rgba(255,255,255,0.02); padding: 0.6rem 0.8rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.04);">
+                    <div style="display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; margin-bottom: 0.35rem; font-size: 0.78rem; font-weight: 700; width: 100%;">
+                        <div style="display: flex; align-items: center; justify-content: flex-start; gap: 0.3rem; color: #22c55e;">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="#22c55e"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            <span>${j1Nota.toFixed(2)}</span>
+                        </div>
+                        <div style="text-align: center; color: #94a3b8; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; padding: 0 0.3rem;">
+                            NOTA MÉDIA
+                        </div>
+                        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.3rem; color: #60a5fa;">
+                            <span>${j2Nota.toFixed(2)}</span>
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="#3b82f6"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        </div>
+                    </div>
+                    <!-- 1 Única Linha de Progresso -->
+                    <div style="height: 6px; background: rgba(255, 255, 255, 0.06); border-radius: 4px; overflow: hidden; width: 100%;">
+                        <div style="width: ${lineNota.pct}%; background: ${lineNota.color}; height: 100%; border-radius: 4px; transition: width 0.3s ease;"></div>
+                    </div>
+                </div>
+
+                <!-- 3. VITÓRIAS -->
+                <div style="margin-bottom: 0.85rem; background: rgba(255,255,255,0.02); padding: 0.6rem 0.8rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.04);">
+                    <div style="display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; margin-bottom: 0.35rem; font-size: 0.8rem; font-weight: 700; width: 100%;">
+                        <div style="display: flex; align-items: center; justify-content: flex-start; gap: 0.3rem; color: #22c55e;">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2"/><path d="M18 9h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H7v4h10v-4h-2c-.55 0-1-.45-1-1v-2.34"/><path d="M18 3H6v7a6 6 0 0 0 12 0V3z"/></svg>
+                            <span>${j1Wins}</span>
+                        </div>
+                        <div style="text-align: center; color: #94a3b8; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; padding: 0 0.3rem;">
+                            VITÓRIAS
+                        </div>
+                        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.3rem; color: #60a5fa;">
+                            <span>${j2Wins}</span>
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2"/><path d="M18 9h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H7v4h10v-4h-2c-.55 0-1-.45-1-1v-2.34"/><path d="M18 3H6v7a6 6 0 0 0 12 0V3z"/></svg>
+                        </div>
+                    </div>
+                    <!-- 1 Única Linha de Progresso -->
+                    <div style="height: 6px; background: rgba(255, 255, 255, 0.06); border-radius: 4px; overflow: hidden; width: 100%;">
+                        <div style="width: ${lineWins.pct}%; background: ${lineWins.color}; height: 100%; border-radius: 4px; transition: width 0.3s ease;"></div>
+                    </div>
+                </div>
+
+                <!-- 4. NÍVEL DE APROVEITAMENTO -->
+                <div style="background: rgba(255,255,255,0.02); padding: 0.6rem 0.8rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.04);">
+                    <div style="display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; margin-bottom: 0.35rem; font-size: 0.8rem; font-weight: 700; width: 100%;">
+                        <div style="display: flex; align-items: center; justify-content: flex-start; gap: 0.3rem; color: #22c55e;">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                            <span>${j1Pct}%</span>
+                        </div>
+                        <div style="text-align: center; color: #94a3b8; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; padding: 0 0.3rem;">
+                            APROVEITAMENTO
+                        </div>
+                        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.3rem; color: #60a5fa;">
+                            <span>${j2Pct}%</span>
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                        </div>
+                    </div>
+                    <!-- 1 Única Linha de Progresso -->
+                    <div style="height: 6px; background: rgba(255, 255, 255, 0.06); border-radius: 4px; overflow: hidden; width: 100%;">
+                        <div style="width: ${lineApp.pct}%; background: ${lineApp.color}; height: 100%; border-radius: 4px; transition: width 0.3s ease;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Retrospecto de Confrontos Diretos Minimalista -->
+            <div style="background: #14141b; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 1.1rem; text-align: center;">
+                <h4 style="font-size: 0.78rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 0.4rem; letter-spacing: 0.05em;">Retrospecto em Campo</h4>
+                <div style="font-size: 0.95rem; font-weight: 800; color: #ffffff; margin-bottom: 0.35rem;">
+                    <span style="color: #22c55e;">${conf.vitorias_j1} Vitórias de ${j1.jogador_nome}</span> • ${conf.empates_confronto} Empates • <span style="color: #60a5fa;">${conf.vitorias_j2} Vitórias de ${j2.jogador_nome}</span>
+                </div>
+                <div style="font-size: 0.8rem; color: #94a3b8;">
                     Jogaram juntos no mesmo time em <strong>${conf.jogos_juntos}</strong> partidas (${conf.vitorias_juntos} vitórias da equipe).
                 </div>
             </div>
-        `;
+            `;
         } catch (e) {
-            container.innerHTML = `<div style="color:#ef4444; padding:1.5rem; text-align:center; font-weight:700;">Erro ao conectar ao servidor.</div>`;
+            console.error("Erro ao carregar duelo:", e);
+            container.innerHTML = `<div style="color:#ef4444; padding:1.5rem; text-align:center; font-weight:700;">Erro ao carregar os dados do duelo.</div>`;
         }
+    }
+    window.carregarDueloPerfil = carregarDueloPerfil;
+
+    // Trigger inicial automático ao carregar a página
+    const initDueloOnLoad = () => {
+        const dueloSelect = document.getElementById('dueloOponenteSelect');
+        if (dueloSelect && typeof window.carregarDueloPerfil === 'function') {
+            let opId = dueloSelect.value;
+            if (!opId && dueloSelect.options.length > 1) {
+                for (let i = 0; i < dueloSelect.options.length; i++) {
+                    if (dueloSelect.options[i].value) {
+                        dueloSelect.selectedIndex = i;
+                        opId = dueloSelect.options[i].value;
+                        break;
+                    }
+                }
+            }
+            if (opId) {
+                window.carregarDueloPerfil(opId, dueloSelect.dataset.jogadorId || dueloSelect.getAttribute('data-jogador-id'));
+            }
+        }
+    };
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initDueloOnLoad);
+    } else {
+        initDueloOnLoad();
     }
 </script>
 
