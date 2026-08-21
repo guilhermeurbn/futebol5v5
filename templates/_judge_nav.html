@@ -1,6 +1,6 @@
 {% set nav_sorteio_id = judge_nav_sorteio_id | default(none) %}
 
-<div class="judge-nav-shell">
+<div class="judge-nav-shell" style="padding: 0.28rem;">
   <nav class="judge-nav" aria-label="Navegação do Painel do Juiz">
     <a href="{{ url_for('juiz.jogar_page') }}"
       class="judge-nav__tab {% if current_section in ['home', 'criar'] %}judge-nav__tab--active{% endif %}" {% if
@@ -24,8 +24,6 @@
     </span>
     {% endif %}
 
-
-
     {% if nav_sorteio_id %}
     <a href="{{ url_for('votacao.votacao_admin_page', sorteio_id=nav_sorteio_id) }}"
       class="judge-nav__tab {% if current_section == 'votacao' %}judge-nav__tab--active{% endif %}" {% if
@@ -48,9 +46,9 @@
       <span class="judge-nav__label">Histórico</span>
     </a>
 
-    <form method="post" action="{{ url_for('auth.logout') }}" style="display: inline-flex; margin: 0; padding: 0; flex: 1;">
+    <form method="post" action="{{ url_for('auth.logout') }}" style="display: contents;">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <button type="submit" class="judge-nav__tab" style="background: none; border: none; font: inherit; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; color: inherit; padding: 0; margin: 0; width: 100%; border-radius: 0;">
+      <button type="submit" class="judge-nav__tab" title="Sair da conta" aria-label="Sair">
         <span class="judge-nav__icon" aria-hidden="true">🚪</span>
         <span class="judge-nav__label">Sair</span>
       </button>
