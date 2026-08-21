@@ -18,15 +18,15 @@ def test_cloudinary_url_parsing():
     file_storage = FileStorage(stream=img_byte_arr, filename="avatar_test.png", content_type="image/png")
 
     env = {
-        "CLOUDINARY_URL": "cloudinary://834268265253525:GaVdaTINIw0dXb7FIkRkZ0Bfgm4@nt547vdb"
+        "CLOUDINARY_URL": "cloudinary://123456789012345:dummy_api_secret_key@dummy_cloud_name"
     }
 
     with patch.dict(os.environ, env, clear=True):
         with patch("cloudinary.uploader.upload") as mock_upload:
-            mock_upload.return_value = {"secure_url": "https://res.cloudinary.com/nt547vdb/image/upload/v123/avatar.webp"}
+            mock_upload.return_value = {"secure_url": "https://res.cloudinary.com/dummy_cloud_name/image/upload/v123/avatar.webp"}
             
             us = UploadService()
             url_resultado = us.processar_foto_perfil(file_storage, user_id="user_test_123")
 
-            assert url_resultado == "https://res.cloudinary.com/nt547vdb/image/upload/v123/avatar.webp"
+            assert url_resultado == "https://res.cloudinary.com/dummy_cloud_name/image/upload/v123/avatar.webp"
             assert mock_upload.called
