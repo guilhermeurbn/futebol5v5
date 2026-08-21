@@ -48,5 +48,12 @@
       <span class="judge-nav__label">Histórico</span>
     </a>
 
+    <form method="post" action="{{ url_for('auth.logout') }}" style="display: inline-flex; margin: 0; padding: 0; flex: 1;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="judge-nav__tab" style="background: none; border: none; font: inherit; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; color: inherit; padding: 0; margin: 0; width: 100%; border-radius: 0;">
+        <span class="judge-nav__icon" aria-hidden="true">🚪</span>
+        <span class="judge-nav__label">Sair</span>
+      </button>
+    </form>
   </nav>
 </div>

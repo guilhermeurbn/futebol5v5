@@ -95,6 +95,16 @@
                         <path d="M9 2h6" />
                     </svg>
                 </a>
+                <form method="post" action="{{ url_for('auth.logout') }}" style="display: inline-block; margin: 0;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="site-topbar__link" type="submit" aria-label="Sair da conta" title="Sair da conta" style="background: none; border: none; cursor: pointer; color: #ef4444;">
+                        <svg class="site-topbar__icon" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                            <polyline points="16 17 21 12 16 7" />
+                            <line x1="21" y1="12" x2="9" y2="12" />
+                        </svg>
+                    </button>
+                </form>
                 {% endif %}
                 {% if auth_user and auth_user.autenticado and auth_user.role != 'juiz' %}
                 <span class="brand-profile-shortcut" hidden aria-hidden="true"></span>
@@ -107,6 +117,12 @@
             <div class="auth-links">
                 {% if auth_user.role == 'juiz' %}
                 <a class="btn btn-secondary judge-timer-shortcut" href="{{ url_for('juiz.juiz_cronometro') }}" aria-label="Abrir cronômetro" title="Cronômetro">⏱</a>
+                <form method="post" action="{{ url_for('auth.logout') }}" style="display: inline-block; margin: 0;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-secondary" type="submit" title="Sair da conta" aria-label="Sair da conta" style="padding: 0.4rem 0.65rem; font-size: 0.82rem; font-weight: 700; color: #ef4444; border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.1);">
+                        🚪 Sair
+                    </button>
+                </form>
                 {% endif %}
             </div>
         </div>
