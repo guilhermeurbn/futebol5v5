@@ -83,10 +83,14 @@ class UploadService:
         )
 
         # 5. Se o Cloudinary estiver configurado nas variáveis de ambiente, enviar para a nuvem
-        cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME")
-        api_key = os.getenv("CLOUDINARY_API_KEY")
-        api_secret = os.getenv("CLOUDINARY_API_SECRET")
-        cloudinary_url = os.getenv("CLOUDINARY_URL")
+        cloud_name = (os.getenv("CLOUDINARY_CLOUD_NAME") or "").strip("\"' ")
+        api_key = (os.getenv("CLOUDINARY_API_KEY") or "").strip("\"' ")
+        api_secret = (os.getenv("CLOUDINARY_API_SECRET") or "").strip("\"' ")
+        cloudinary_url = (os.getenv("CLOUDINARY_URL") or "").strip()
+
+        if "=" in cloudinary_url and "cloudinary://" in cloudinary_url:
+            cloudinary_url = cloudinary_url.split("=", 1)[-1]
+        cloudinary_url = cloudinary_url.strip("\"' ")
 
         if cloudinary_url or (cloud_name and api_key and api_secret):
             try:
