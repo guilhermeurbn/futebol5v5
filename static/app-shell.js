@@ -1004,47 +1004,8 @@
   document.addEventListener('click', event => {
     const profileTab = event.target.closest('.premium-profile-tab');
     if (profileTab) {
-      const target = profileTab.dataset.tabTarget;
-      if (!target) return;
-      const targetId = `tab-${target}`;
-
-      const tabs = document.querySelectorAll('.premium-profile-tab');
-      const contents = document.querySelectorAll('.premium-profile-tab-content');
-
-      tabs.forEach(t => {
-        const active = t === profileTab;
-        t.classList.toggle('is-active', active);
-        t.setAttribute('aria-selected', active ? 'true' : 'false');
-      });
-
-      contents.forEach(c => {
-        const id = c.getAttribute('id');
-        const active = id === targetId;
-        c.classList.toggle('is-active', active);
-        c.hidden = !active;
-      });
-
-      try {
-        history.replaceState(null, null, `#${targetId}`);
-      } catch (e) {}
-
-      if (target === 'duelo') {
-        const select = document.getElementById('dueloOponenteSelect');
-        if (select && typeof window.carregarDueloPerfil === 'function') {
-          let opId = select.value;
-          if (!opId && select.options.length > 1) {
-            for (let i = 0; i < select.options.length; i++) {
-              if (select.options[i].value) {
-                select.selectedIndex = i;
-                opId = select.options[i].value;
-                break;
-              }
-            }
-          }
-          if (opId) {
-            window.carregarDueloPerfil(opId, select.dataset.jogadorId || select.getAttribute('data-jogador-id'));
-          }
-        }
+      if (typeof window.switchPerfilTab === 'function') {
+        window.switchPerfilTab(profileTab);
       }
       return;
     }

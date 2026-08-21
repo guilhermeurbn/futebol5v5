@@ -18214,12 +18214,10 @@ body.is-referee-layout .judge-timer-reset:hover {
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
 }
 
-.premium-profile-tabs--public {
-  grid-template-columns: repeat(3, 1fr);
-}
-
+.premium-profile-tabs,
+.premium-profile-tabs--public,
 .premium-profile-tabs--public-admin {
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(5, 1fr) !important;
 }
 
 .premium-profile-tab {

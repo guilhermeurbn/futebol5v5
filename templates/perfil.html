@@ -246,7 +246,6 @@
                 </svg>
                 <span>Duelo X1</span>
             </button>
-            {% if is_self or (auth_user and auth_user.role in ['admin']) %}
             <button class="premium-profile-tab {% if aba_ativa == 'mais' %}is-active{% endif %}" data-tab-target="mais"
                 aria-selected="{% if aba_ativa == 'mais' %}true{% else %}false{% endif %}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
@@ -255,9 +254,8 @@
                     <circle cx="12" cy="12" r="1.5" fill="currentColor" />
                     <circle cx="19" cy="12" r="1.5" fill="currentColor" />
                 </svg>
-                <span>{% if is_self %}Mais{% else %}Gerenciar{% endif %}</span>
+                <span>{% if is_self %}Mais{% else %}Opções{% endif %}</span>
             </button>
-            {% endif %}
         </nav>
 
         {# MENSAGENS TAB #}
@@ -1111,93 +1109,77 @@
 {% endif %}
 
 <script>
-    window.initPerfilPage = function() {
-        // --- GERENCIADOR DE ABAS ---
+    window.switchPerfilTab = function(targetOrElement) {
+        let target = '';
+        if (typeof targetOrElement === 'string') {
+            target = targetOrElement.replace('#', '').replace('tab-', '');
+        } else if (targetOrElement && targetOrElement.dataset) {
+            target = targetOrElement.dataset.tabTarget;
+        }
+
+        if (!target) return;
+        const targetId = `tab-${target}`;
+
         const tabs = document.querySelectorAll('.premium-profile-tab');
         const contents = document.querySelectorAll('.premium-profile-tab-content');
 
-        const switchTab = (tab) => {
-            if (!tab) return;
-            const target = tab.dataset.tabTarget;
-            const targetId = `tab-${target}`;
-
-            tabs.forEach(t => {
-                const active = t === tab;
-                t.classList.toggle('is-active', active);
-                t.setAttribute('aria-selected', active ? 'true' : 'false');
-            });
-
-            contents.forEach(c => {
-                const id = c.getAttribute('id');
-                const active = id === targetId;
-                c.classList.toggle('is-active', active);
-                c.hidden = !active;
-            });
-
-            try {
-                history.replaceState(null, null, `#${targetId}`);
-            } catch (e) {}
-
-            if (target === 'duelo') {
-                const select = document.getElementById('dueloOponenteSelect');
-                if (select && typeof window.carregarDueloPerfil === 'function') {
-                    let opId = select.value;
-                    if (!opId && select.options.length > 1) {
-                        for (let i = 0; i < select.options.length; i++) {
-                            if (select.options[i].value) {
-                                select.selectedIndex = i;
-                                opId = select.options[i].value;
-                                break;
-                            }
-                        }
-                    }
-                    if (opId) {
-                        window.carregarDueloPerfil(opId, select.dataset.jogadorId || select.getAttribute('data-jogador-id'));
-                    }
-                }
-            }
-        };
-
-        tabs.forEach(tab => {
-            tab.onclick = () => switchTab(tab);
+        tabs.forEach(t => {
+            const active = (t.dataset.tabTarget === target);
+            t.classList.toggle('is-active', active);
+            t.setAttribute('aria-selected', active ? 'true' : 'false');
         });
 
-        // Restaurar aba ativa a partir do hash na URL
-        const ativarAbaPorHash = () => {
-            const hash = window.location.hash;
-            if (hash && hash.startsWith('#tab-')) {
-                const activeTabTarget = hash.replace('#tab-', '');
-                const matchingTab = Array.from(tabs).find(t => t.dataset.tabTarget === activeTabTarget);
-                if (matchingTab) {
-                    switchTab(matchingTab);
-                }
-            }
-        };
+        contents.forEach(c => {
+            const id = c.getAttribute('id');
+            const active = (id === targetId);
+            c.classList.toggle('is-active', active);
+            c.hidden = !active;
+        });
 
-        ativarAbaPorHash();
+        try {
+            history.replaceState(null, null, `#${targetId}`);
+        } catch (e) {}
 
-        const dueloSelect = document.getElementById('dueloOponenteSelect');
-        if (dueloSelect && typeof window.carregarDueloPerfil === 'function') {
-            let opId = dueloSelect.value;
-            if (!opId && dueloSelect.options.length > 1) {
-                for (let i = 0; i < dueloSelect.options.length; i++) {
-                    if (dueloSelect.options[i].value) {
-                        dueloSelect.selectedIndex = i;
-                        opId = dueloSelect.options[i].value;
-                        break;
+        if (target === 'duelo') {
+            const select = document.getElementById('dueloOponenteSelect');
+            if (select) {
+                let opId = select.value;
+                if (!opId && select.options && select.options.length > 1) {
+                    for (let i = 0; i < select.options.length; i++) {
+                        if (select.options[i].value) {
+                            select.selectedIndex = i;
+                            opId = select.options[i].value;
+                            break;
+                        }
                     }
                 }
-            }
-            if (opId) {
-                window.carregarDueloPerfil(opId, dueloSelect.dataset.jogadorId || dueloSelect.getAttribute('data-jogador-id'));
+                const jogId = select.dataset.jogadorId || select.getAttribute('data-jogador-id') || '{{ current_jog_identifier }}';
+                if (opId && typeof window.carregarDueloPerfil === 'function') {
+                    window.carregarDueloPerfil(opId, jogId);
+                }
             }
         }
+    };
 
-        if (window._perfilHashHandler) {
-            window.removeEventListener('hashchange', window._perfilHashHandler);
+    window.initPerfilPage = function() {
+        const tabs = document.querySelectorAll('.premium-profile-tab');
+        tabs.forEach(tab => {
+            tab.onclick = (e) => {
+                if (e) e.preventDefault();
+                window.switchPerfilTab(tab);
+            };
+        });
+
+        // Restaurar aba ativa por hash na URL ou manter a aba ativa inicial
+        const hash = window.location.hash;
+        if (hash && hash.startsWith('#tab-')) {
+            window.switchPerfilTab(hash);
+        } else {
+            const activeTab = document.querySelector('.premium-profile-tab.is-active');
+            if (activeTab) {
+                window.switchPerfilTab(activeTab);
+            }
         }
-        window._perfilHashHandler = ativarAbaPorHash;
-        window.addEventListener('hashchange', window._perfilHashHandler);
 
         // --- DIALOG ALTERAR SENHA ---
         const dialog = document.getElementById('passwordDialog');
