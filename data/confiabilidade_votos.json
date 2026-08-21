@@ -2,975 +2,975 @@
   "evaluators": {
     "u1": {
       "reliability": 0.9032,
-      "total_votos": 594
+      "total_votos": 596
     },
     "u2": {
       "reliability": 0.9032,
-      "total_votos": 594
+      "total_votos": 596
     },
     "u3_hater": {
       "reliability": 0.5753,
-      "total_votos": 594
+      "total_votos": 596
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033": {
       "reliability": 1.0,
-      "total_votos": 1820
+      "total_votos": 3600
     },
     "0d2e29f6-ddc4-4328-a971-d49157356f8f": {
       "reliability": 0.9595,
-      "total_votos": 1729
+      "total_votos": 3420
     },
     "93377df9-a1dd-429a-a48f-e6bafb2e8254": {
       "reliability": 0.8839,
-      "total_votos": 2275
+      "total_votos": 4500
     },
     "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6": {
       "reliability": 0.9931,
-      "total_votos": 910
+      "total_votos": 1800
     },
     "19e6a32e-2a20-49a2-81e0-da12aa681505": {
       "reliability": 0.7731,
-      "total_votos": 2275
+      "total_votos": 4500
     },
     "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7": {
       "reliability": 0.9919,
-      "total_votos": 910
+      "total_votos": 1800
     },
     "09142ace-266e-4d33-96db-8b92ed6144c8": {
       "reliability": 1.0,
-      "total_votos": 455
+      "total_votos": 900
     },
     "ecd248ae-e0af-417d-af7a-04927833df6f": {
       "reliability": 1.0,
-      "total_votos": 455
+      "total_votos": 900
     },
     "usr_1": {
       "reliability": 1.0,
-      "total_votos": 455
+      "total_votos": 900
     },
     "usr_2": {
       "reliability": 1.0,
-      "total_votos": 455
+      "total_votos": 900
     },
     "usr_3": {
       "reliability": 1.0,
-      "total_votos": 455
+      "total_votos": 900
     },
     "usr_4": {
       "reliability": 1.0,
-      "total_votos": 455
+      "total_votos": 900
     },
     "usr_5": {
       "reliability": 1.0,
-      "total_votos": 455
+      "total_votos": 900
     },
     "usr_6": {
       "reliability": 1.0,
-      "total_votos": 455
+      "total_votos": 900
     },
     "usr_7": {
       "reliability": 1.0,
-      "total_votos": 455
+      "total_votos": 900
     },
     "usr_8": {
       "reliability": 1.0,
-      "total_votos": 455
+      "total_votos": 900
     },
     "usr_9": {
       "reliability": 1.0,
-      "total_votos": 455
+      "total_votos": 900
     },
     "usr_10": {
       "reliability": 1.0,
-      "total_votos": 455
+      "total_votos": 900
     },
     "e5369426-8836-4e76-9e3c-5445829b249e": {
       "reliability": 0.5941,
-      "total_votos": 455
+      "total_votos": 900
     },
     "a7866b07-ddc2-4902-92e4-3d3b607c87ec": {
       "reliability": 0.5941,
-      "total_votos": 455
+      "total_votos": 900
     }
   },
   "relationships": {
     "u1:Alex": {
-      "match_count": 297,
-      "cumulative_offset": 1039.5
+      "match_count": 298,
+      "cumulative_offset": 1043.0
     },
     "u2:Alex": {
-      "match_count": 297,
-      "cumulative_offset": 1039.5
+      "match_count": 298,
+      "cumulative_offset": 1043.0
     },
     "u3_hater:Alex": {
-      "match_count": 297,
-      "cumulative_offset": -2079.0
+      "match_count": 298,
+      "cumulative_offset": -2086.0
     },
     "u1:Bruno": {
-      "match_count": 297,
+      "match_count": 298,
       "cumulative_offset": 0.0
     },
     "u2:Bruno": {
-      "match_count": 297,
+      "match_count": 298,
       "cumulative_offset": 0.0
     },
     "u3_hater:Bruno": {
-      "match_count": 297,
+      "match_count": 298,
       "cumulative_offset": 0.0
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Guilherme urbano": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Renan": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Lucas Teixeira": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Rafael": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Jhon": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Carlos": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Bacatela": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Alex": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Markinhos": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Sombra": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Ramon": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Drey": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Edmo": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:João Pinto": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:André Balada": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Luan": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Netao": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Samuel": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Flavio": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "0d2e29f6-ddc4-4328-a971-d49157356f8f:Gabriel goleiro": {
-      "match_count": 91,
-      "cumulative_offset": -159.25
+      "match_count": 180,
+      "cumulative_offset": -315.0
     },
     "93377df9-a1dd-429a-a48f-e6bafb2e8254:Gabriel goleiro": {
-      "match_count": 182,
-      "cumulative_offset": -216.57999999999973
+      "match_count": 360,
+      "cumulative_offset": -428.39999999999935
     },
     "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6:Gabriel goleiro": {
-      "match_count": 91,
-      "cumulative_offset": 68.25
+      "match_count": 180,
+      "cumulative_offset": 135.0
     },
     "19e6a32e-2a20-49a2-81e0-da12aa681505:Gabriel goleiro": {
-      "match_count": 182,
-      "cumulative_offset": 295.75
+      "match_count": 360,
+      "cumulative_offset": 585.0
     },
     "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7:Gabriel goleiro": {
-      "match_count": 91,
-      "cumulative_offset": 10.92000000000003
+      "match_count": 180,
+      "cumulative_offset": 21.60000000000012
     },
     "0d2e29f6-ddc4-4328-a971-d49157356f8f:Bacatela": {
-      "match_count": 91,
-      "cumulative_offset": -192.92000000000024
+      "match_count": 180,
+      "cumulative_offset": -381.60000000000065
     },
     "93377df9-a1dd-429a-a48f-e6bafb2e8254:Bacatela": {
-      "match_count": 91,
-      "cumulative_offset": -80.07999999999998
+      "match_count": 180,
+      "cumulative_offset": -158.39999999999958
     },
     "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6:Bacatela": {
-      "match_count": 91,
-      "cumulative_offset": -80.07999999999998
+      "match_count": 180,
+      "cumulative_offset": -158.39999999999958
     },
     "19e6a32e-2a20-49a2-81e0-da12aa681505:Bacatela": {
-      "match_count": 91,
-      "cumulative_offset": 318.5
+      "match_count": 180,
+      "cumulative_offset": 630.0
     },
     "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7:Bacatela": {
-      "match_count": 91,
-      "cumulative_offset": 34.579999999999956
+      "match_count": 180,
+      "cumulative_offset": 68.4000000000001
     },
     "0d2e29f6-ddc4-4328-a971-d49157356f8f:Drey": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "93377df9-a1dd-429a-a48f-e6bafb2e8254:Drey": {
-      "match_count": 182,
+      "match_count": 360,
       "cumulative_offset": 0.0
     },
     "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6:Drey": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "19e6a32e-2a20-49a2-81e0-da12aa681505:Drey": {
-      "match_count": 182,
+      "match_count": 360,
       "cumulative_offset": 0.0
     },
     "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7:Drey": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "0d2e29f6-ddc4-4328-a971-d49157356f8f:Jhon": {
-      "match_count": 91,
-      "cumulative_offset": 45.5
+      "match_count": 180,
+      "cumulative_offset": 90.0
     },
     "93377df9-a1dd-429a-a48f-e6bafb2e8254:Jhon": {
-      "match_count": 91,
-      "cumulative_offset": -10.92000000000003
+      "match_count": 180,
+      "cumulative_offset": -21.60000000000012
     },
     "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6:Jhon": {
-      "match_count": 91,
-      "cumulative_offset": 45.5
+      "match_count": 180,
+      "cumulative_offset": 90.0
     },
     "19e6a32e-2a20-49a2-81e0-da12aa681505:Jhon": {
-      "match_count": 91,
-      "cumulative_offset": -68.25
+      "match_count": 180,
+      "cumulative_offset": -135.0
     },
     "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7:Jhon": {
-      "match_count": 91,
-      "cumulative_offset": -10.92000000000003
+      "match_count": 180,
+      "cumulative_offset": -21.60000000000012
     },
     "0d2e29f6-ddc4-4328-a971-d49157356f8f:Guilherme urbano": {
-      "match_count": 182,
-      "cumulative_offset": -307.5799999999997
+      "match_count": 360,
+      "cumulative_offset": -608.3999999999993
     },
     "93377df9-a1dd-429a-a48f-e6bafb2e8254:Guilherme urbano": {
-      "match_count": 91,
-      "cumulative_offset": -22.75
+      "match_count": 180,
+      "cumulative_offset": -45.0
     },
     "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6:Guilherme urbano": {
-      "match_count": 91,
-      "cumulative_offset": 91.0
+      "match_count": 180,
+      "cumulative_offset": 180.0
     },
     "19e6a32e-2a20-49a2-81e0-da12aa681505:Guilherme urbano": {
-      "match_count": 91,
-      "cumulative_offset": 204.75
+      "match_count": 180,
+      "cumulative_offset": 405.0
     },
     "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7:Guilherme urbano": {
-      "match_count": 91,
-      "cumulative_offset": 34.579999999999956
+      "match_count": 180,
+      "cumulative_offset": 68.4000000000001
     },
     "0d2e29f6-ddc4-4328-a971-d49157356f8f:Carlos": {
-      "match_count": 91,
-      "cumulative_offset": 45.5
+      "match_count": 180,
+      "cumulative_offset": 90.0
     },
     "93377df9-a1dd-429a-a48f-e6bafb2e8254:Carlos": {
-      "match_count": 182,
-      "cumulative_offset": -283.9200000000003
+      "match_count": 360,
+      "cumulative_offset": -561.6000000000007
     },
     "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6:Carlos": {
-      "match_count": 91,
-      "cumulative_offset": 159.25
+      "match_count": 180,
+      "cumulative_offset": 315.0
     },
     "19e6a32e-2a20-49a2-81e0-da12aa681505:Carlos": {
-      "match_count": 182,
-      "cumulative_offset": 147.42000000000021
+      "match_count": 360,
+      "cumulative_offset": 291.6000000000006
     },
     "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7:Carlos": {
-      "match_count": 91,
-      "cumulative_offset": -68.25
+      "match_count": 180,
+      "cumulative_offset": -135.0
     },
     "0d2e29f6-ddc4-4328-a971-d49157356f8f:André Balada": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "93377df9-a1dd-429a-a48f-e6bafb2e8254:André Balada": {
-      "match_count": 91,
-      "cumulative_offset": -56.41999999999994
+      "match_count": 180,
+      "cumulative_offset": -111.60000000000025
     },
     "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6:André Balada": {
-      "match_count": 91,
-      "cumulative_offset": -113.75
+      "match_count": 180,
+      "cumulative_offset": -225.0
     },
     "19e6a32e-2a20-49a2-81e0-da12aa681505:André Balada": {
-      "match_count": 91,
-      "cumulative_offset": 227.5
+      "match_count": 180,
+      "cumulative_offset": 450.0
     },
     "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7:André Balada": {
-      "match_count": 91,
-      "cumulative_offset": -56.41999999999994
+      "match_count": 180,
+      "cumulative_offset": -111.60000000000025
     },
     "0d2e29f6-ddc4-4328-a971-d49157356f8f:Alex": {
-      "match_count": 182,
-      "cumulative_offset": 91.0
+      "match_count": 360,
+      "cumulative_offset": 180.0
     },
     "93377df9-a1dd-429a-a48f-e6bafb2e8254:Alex": {
-      "match_count": 182,
-      "cumulative_offset": 500.5
+      "match_count": 360,
+      "cumulative_offset": 990.0
     },
     "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6:Alex": {
-      "match_count": 91,
-      "cumulative_offset": -22.75
+      "match_count": 180,
+      "cumulative_offset": -45.0
     },
     "19e6a32e-2a20-49a2-81e0-da12aa681505:Alex": {
-      "match_count": 182,
-      "cumulative_offset": -432.25
+      "match_count": 360,
+      "cumulative_offset": -855.0
     },
     "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7:Alex": {
-      "match_count": 91,
-      "cumulative_offset": -136.5
+      "match_count": 180,
+      "cumulative_offset": -270.0
     },
     "0d2e29f6-ddc4-4328-a971-d49157356f8f:Edmo": {
-      "match_count": 91,
-      "cumulative_offset": -22.75
+      "match_count": 180,
+      "cumulative_offset": -45.0
     },
     "93377df9-a1dd-429a-a48f-e6bafb2e8254:Edmo": {
-      "match_count": 182,
-      "cumulative_offset": -262.0799999999997
+      "match_count": 360,
+      "cumulative_offset": -518.3999999999993
     },
     "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6:Edmo": {
-      "match_count": 91,
-      "cumulative_offset": -22.75
+      "match_count": 180,
+      "cumulative_offset": -45.0
     },
     "19e6a32e-2a20-49a2-81e0-da12aa681505:Edmo": {
-      "match_count": 182,
-      "cumulative_offset": 216.57999999999973
+      "match_count": 360,
+      "cumulative_offset": 428.3999999999993
     },
     "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7:Edmo": {
-      "match_count": 91,
-      "cumulative_offset": 91.0
+      "match_count": 180,
+      "cumulative_offset": 180.0
     },
     "0d2e29f6-ddc4-4328-a971-d49157356f8f:João Pinto": {
-      "match_count": 91,
-      "cumulative_offset": -80.07999999999998
+      "match_count": 180,
+      "cumulative_offset": -158.39999999999958
     },
     "93377df9-a1dd-429a-a48f-e6bafb2e8254:João Pinto": {
-      "match_count": 182,
-      "cumulative_offset": -546.0
+      "match_count": 360,
+      "cumulative_offset": -1080.0
     },
     "d50f384a-7ec7-47d0-bfb4-3b07b9a45bd6:João Pinto": {
-      "match_count": 91,
-      "cumulative_offset": -136.5
+      "match_count": 180,
+      "cumulative_offset": -270.0
     },
     "19e6a32e-2a20-49a2-81e0-da12aa681505:João Pinto": {
-      "match_count": 182,
-      "cumulative_offset": 955.5
+      "match_count": 360,
+      "cumulative_offset": 1890.0
     },
     "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7:João Pinto": {
-      "match_count": 91,
-      "cumulative_offset": -192.92000000000024
+      "match_count": 180,
+      "cumulative_offset": -381.60000000000065
     },
     "19e6a32e-2a20-49a2-81e0-da12aa681505:Lucas Teixeira": {
-      "match_count": 91,
-      "cumulative_offset": 45.5
+      "match_count": 180,
+      "cumulative_offset": 90.0
     },
     "93377df9-a1dd-429a-a48f-e6bafb2e8254:Lucas Teixeira": {
-      "match_count": 91,
-      "cumulative_offset": -45.5
+      "match_count": 180,
+      "cumulative_offset": -90.0
     },
     "19e6a32e-2a20-49a2-81e0-da12aa681505:Luan": {
-      "match_count": 91,
-      "cumulative_offset": -45.5
+      "match_count": 180,
+      "cumulative_offset": -90.0
     },
     "93377df9-a1dd-429a-a48f-e6bafb2e8254:Luan": {
-      "match_count": 91,
-      "cumulative_offset": 45.5
+      "match_count": 180,
+      "cumulative_offset": 90.0
     },
     "19e6a32e-2a20-49a2-81e0-da12aa681505:Alfa 4d9030": {
-      "match_count": 91,
-      "cumulative_offset": -91.0
+      "match_count": 180,
+      "cumulative_offset": -180.0
     },
     "93377df9-a1dd-429a-a48f-e6bafb2e8254:Alfa 4d9030": {
-      "match_count": 91,
-      "cumulative_offset": 91.0
+      "match_count": 180,
+      "cumulative_offset": 180.0
     },
     "19e6a32e-2a20-49a2-81e0-da12aa681505:Markinhos G": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "93377df9-a1dd-429a-a48f-e6bafb2e8254:Markinhos G": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "19e6a32e-2a20-49a2-81e0-da12aa681505:Netao": {
-      "match_count": 91,
-      "cumulative_offset": 136.5
+      "match_count": 180,
+      "cumulative_offset": 270.0
     },
     "93377df9-a1dd-429a-a48f-e6bafb2e8254:Netao": {
-      "match_count": 91,
-      "cumulative_offset": -136.5
+      "match_count": 180,
+      "cumulative_offset": -270.0
     },
     "19e6a32e-2a20-49a2-81e0-da12aa681505:Alfa 371bb0": {
-      "match_count": 91,
-      "cumulative_offset": 273.0
+      "match_count": 180,
+      "cumulative_offset": 540.0
     },
     "93377df9-a1dd-429a-a48f-e6bafb2e8254:Alfa 371bb0": {
-      "match_count": 91,
-      "cumulative_offset": -273.0
+      "match_count": 180,
+      "cumulative_offset": -540.0
     },
     "19e6a32e-2a20-49a2-81e0-da12aa681505:Guilherme Goleiro": {
-      "match_count": 91,
-      "cumulative_offset": 45.5
+      "match_count": 180,
+      "cumulative_offset": 90.0
     },
     "93377df9-a1dd-429a-a48f-e6bafb2e8254:Guilherme Goleiro": {
-      "match_count": 91,
-      "cumulative_offset": -45.5
+      "match_count": 180,
+      "cumulative_offset": -90.0
     },
     "19e6a32e-2a20-49a2-81e0-da12aa681505:Renan": {
-      "match_count": 91,
-      "cumulative_offset": -45.5
+      "match_count": 180,
+      "cumulative_offset": -90.0
     },
     "93377df9-a1dd-429a-a48f-e6bafb2e8254:Renan": {
-      "match_count": 91,
-      "cumulative_offset": 45.5
+      "match_count": 180,
+      "cumulative_offset": 90.0
     },
     "0d2e29f6-ddc4-4328-a971-d49157356f8f:Markinhos G": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "0d2e29f6-ddc4-4328-a971-d49157356f8f:Renan": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "0d2e29f6-ddc4-4328-a971-d49157356f8f:Netao": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "0d2e29f6-ddc4-4328-a971-d49157356f8f:Samuel": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "0d2e29f6-ddc4-4328-a971-d49157356f8f:Ramon": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "0d2e29f6-ddc4-4328-a971-d49157356f8f:Rafael": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "0d2e29f6-ddc4-4328-a971-d49157356f8f:Sombra": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "09142ace-266e-4d33-96db-8b92ed6144c8:gabriel goleiro": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "09142ace-266e-4d33-96db-8b92ed6144c8:Drey": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "09142ace-266e-4d33-96db-8b92ed6144c8:Jhon": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "09142ace-266e-4d33-96db-8b92ed6144c8:Abner": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "09142ace-266e-4d33-96db-8b92ed6144c8:carlao linha": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "ecd248ae-e0af-417d-af7a-04927833df6f:Ramon": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "ecd248ae-e0af-417d-af7a-04927833df6f:Samuel": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "ecd248ae-e0af-417d-af7a-04927833df6f:victor": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "ecd248ae-e0af-417d-af7a-04927833df6f:Vidal": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "ecd248ae-e0af-417d-af7a-04927833df6f:ricardo avulso": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_1:Alfa 5": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_2:Alfa 5": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_3:Alfa 5": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_4:Alfa 5": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_5:Alfa 5": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_1:Alfa 6": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_2:Alfa 6": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_3:Alfa 6": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_4:Alfa 6": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_5:Alfa 6": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_1:Alfa 7": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_2:Alfa 7": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_3:Alfa 7": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_4:Alfa 7": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_5:Alfa 7": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_1:Alfa 8": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_2:Alfa 8": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_3:Alfa 8": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_4:Alfa 8": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_5:Alfa 8": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_1:Alfa 9": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_2:Alfa 9": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_3:Alfa 9": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_4:Alfa 9": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_5:Alfa 9": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_6:Guilherme urbano": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_7:Guilherme urbano": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_8:Guilherme urbano": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_9:Guilherme urbano": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_10:Guilherme urbano": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_6:Alfa 1": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_7:Alfa 1": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_8:Alfa 1": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_9:Alfa 1": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_10:Alfa 1": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_6:Alfa 2": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_7:Alfa 2": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_8:Alfa 2": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_9:Alfa 2": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_10:Alfa 2": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_6:Alfa 3": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_7:Alfa 3": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_8:Alfa 3": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_9:Alfa 3": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_10:Alfa 3": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_6:Alfa 4": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_7:Alfa 4": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_8:Alfa 4": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_9:Alfa 4": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "usr_10:Alfa 4": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "e5369426-8836-4e76-9e3c-5445829b249e:Lucas Teixeira": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     },
     "e5369426-8836-4e76-9e3c-5445829b249e:Markinhos": {
-      "match_count": 91,
-      "cumulative_offset": 273.0
+      "match_count": 180,
+      "cumulative_offset": 540.0
     },
     "a7866b07-ddc2-4902-92e4-3d3b607c87ec:Markinhos": {
-      "match_count": 91,
-      "cumulative_offset": -273.0
+      "match_count": 180,
+      "cumulative_offset": -540.0
     },
     "e5369426-8836-4e76-9e3c-5445829b249e:Netao": {
-      "match_count": 91,
-      "cumulative_offset": 318.5
+      "match_count": 180,
+      "cumulative_offset": 630.0
     },
     "a7866b07-ddc2-4902-92e4-3d3b607c87ec:Netao": {
-      "match_count": 91,
-      "cumulative_offset": -318.5
+      "match_count": 180,
+      "cumulative_offset": -630.0
     },
     "e5369426-8836-4e76-9e3c-5445829b249e:Ramon": {
-      "match_count": 91,
-      "cumulative_offset": -227.5
+      "match_count": 180,
+      "cumulative_offset": -450.0
     },
     "a7866b07-ddc2-4902-92e4-3d3b607c87ec:Ramon": {
-      "match_count": 91,
-      "cumulative_offset": 227.5
+      "match_count": 180,
+      "cumulative_offset": 450.0
     },
     "e5369426-8836-4e76-9e3c-5445829b249e:Sombra": {
-      "match_count": 91,
-      "cumulative_offset": 273.0
+      "match_count": 180,
+      "cumulative_offset": 540.0
     },
     "a7866b07-ddc2-4902-92e4-3d3b607c87ec:Sombra": {
-      "match_count": 91,
-      "cumulative_offset": -273.0
+      "match_count": 180,
+      "cumulative_offset": -540.0
     },
     "a7866b07-ddc2-4902-92e4-3d3b607c87ec:lucas ramos": {
-      "match_count": 91,
+      "match_count": 180,
       "cumulative_offset": 0.0
     }
   },
   "target_baselines": {
     "Alex": {
-      "sum_scores": 9007.5,
-      "count": 1710,
-      "historical_avg": 5.27
+      "sum_scores": 12896.0,
+      "count": 2514,
+      "historical_avg": 5.13
     },
     "Bruno": {
-      "sum_scores": 6237.0,
-      "count": 891,
+      "sum_scores": 6258.0,
+      "count": 894,
       "historical_avg": 7.0
     },
     "Guilherme urbano": {
-      "sum_scores": 5505.5,
-      "count": 1092,
+      "sum_scores": 10890.0,
+      "count": 2160,
       "historical_avg": 5.04
     },
     "Renan": {
-      "sum_scores": 2047.5,
-      "count": 364,
+      "sum_scores": 4050.0,
+      "count": 720,
       "historical_avg": 5.62
     },
     "Lucas Teixeira": {
-      "sum_scores": 4186.0,
-      "count": 637,
+      "sum_scores": 8280.0,
+      "count": 1260,
       "historical_avg": 6.57
     },
     "Rafael": {
-      "sum_scores": 455.0,
-      "count": 182,
+      "sum_scores": 900.0,
+      "count": 360,
       "historical_avg": 2.5
     },
     "Jhon": {
-      "sum_scores": 2593.5,
-      "count": 637,
+      "sum_scores": 5130.0,
+      "count": 1260,
       "historical_avg": 4.07
     },
     "Carlos": {
-      "sum_scores": 3549.0,
-      "count": 728,
+      "sum_scores": 7020.0,
+      "count": 1440,
       "historical_avg": 4.88
     },
     "Bacatela": {
-      "sum_scores": 2684.5,
-      "count": 546,
+      "sum_scores": 5310.0,
+      "count": 1080,
       "historical_avg": 4.92
     },
     "Markinhos": {
-      "sum_scores": 1956.5,
-      "count": 273,
+      "sum_scores": 3870.0,
+      "count": 540,
       "historical_avg": 7.17
     },
     "Sombra": {
-      "sum_scores": 2821.0,
-      "count": 364,
+      "sum_scores": 5580.0,
+      "count": 720,
       "historical_avg": 7.75
     },
     "Ramon": {
-      "sum_scores": 2821.0,
-      "count": 455,
+      "sum_scores": 5580.0,
+      "count": 900,
       "historical_avg": 6.2
     },
     "Drey": {
-      "sum_scores": 6870.5,
-      "count": 819,
+      "sum_scores": 13590.0,
+      "count": 1620,
       "historical_avg": 8.39
     },
     "Edmo": {
-      "sum_scores": 4186.0,
-      "count": 728,
+      "sum_scores": 8280.0,
+      "count": 1440,
       "historical_avg": 5.75
     },
     "João Pinto": {
-      "sum_scores": 4186.0,
-      "count": 728,
+      "sum_scores": 8280.0,
+      "count": 1440,
       "historical_avg": 5.75
     },
     "André Balada": {
-      "sum_scores": 3185.0,
-      "count": 546,
+      "sum_scores": 6300.0,
+      "count": 1080,
       "historical_avg": 5.83
     },
     "Luan": {
-      "sum_scores": 2138.5,
-      "count": 273,
+      "sum_scores": 4230.0,
+      "count": 540,
       "historical_avg": 7.83
     },
     "Netao": {
-      "sum_scores": 2684.5,
-      "count": 546,
+      "sum_scores": 5310.0,
+      "count": 1080,
       "historical_avg": 4.92
     },
     "Samuel": {
-      "sum_scores": 1501.5,
-      "count": 273,
+      "sum_scores": 2970.0,
+      "count": 540,
       "historical_avg": 5.5
     },
     "Flavio": {
-      "sum_scores": 591.5,
-      "count": 91,
+      "sum_scores": 1170.0,
+      "count": 180,
       "historical_avg": 6.5
     },
     "Gabriel goleiro": {
-      "sum_scores": 4277.0,
-      "count": 637,
+      "sum_scores": 8460.0,
+      "count": 1260,
       "historical_avg": 6.71
     },
     "Alfa 4d9030": {
-      "sum_scores": 1365.0,
-      "count": 182,
+      "sum_scores": 2700.0,
+      "count": 360,
       "historical_avg": 7.5
     },
     "Markinhos G": {
-      "sum_scores": 1638.0,
-      "count": 273,
+      "sum_scores": 3240.0,
+      "count": 540,
       "historical_avg": 6.0
     },
     "Alfa 371bb0": {
-      "sum_scores": 1183.0,
-      "count": 182,
+      "sum_scores": 2340.0,
+      "count": 360,
       "historical_avg": 6.5
     },
     "Guilherme Goleiro": {
-      "sum_scores": 1501.5,
-      "count": 182,
+      "sum_scores": 2970.0,
+      "count": 360,
       "historical_avg": 8.25
     },
     "gabriel goleiro": {
-      "sum_scores": 500.5,
-      "count": 91,
+      "sum_scores": 990.0,
+      "count": 180,
       "historical_avg": 5.5
     },
     "Abner": {
-      "sum_scores": 637.0,
-      "count": 91,
+      "sum_scores": 1260.0,
+      "count": 180,
       "historical_avg": 7.0
     },
     "carlao linha": {
-      "sum_scores": 637.0,
-      "count": 91,
+      "sum_scores": 1260.0,
+      "count": 180,
       "historical_avg": 7.0
     },
     "victor": {
-      "sum_scores": 455.0,
-      "count": 91,
+      "sum_scores": 900.0,
+      "count": 180,
       "historical_avg": 5.0
     },
     "Vidal": {
-      "sum_scores": 318.5,
-      "count": 91,
+      "sum_scores": 630.0,
+      "count": 180,
       "historical_avg": 3.5
     },
     "ricardo avulso": {
-      "sum_scores": 182.0,
-      "count": 91,
+      "sum_scores": 360.0,
+      "count": 180,
       "historical_avg": 2.0
     },
     "Alfa 5": {
-      "sum_scores": 1592.5,
-      "count": 455,
+      "sum_scores": 3150.0,
+      "count": 900,
       "historical_avg": 3.5
     },
     "Alfa 6": {
-      "sum_scores": 1592.5,
-      "count": 455,
+      "sum_scores": 3150.0,
+      "count": 900,
       "historical_avg": 3.5
     },
     "Alfa 7": {
-      "sum_scores": 1592.5,
-      "count": 455,
+      "sum_scores": 3150.0,
+      "count": 900,
       "historical_avg": 3.5
     },
     "Alfa 8": {
-      "sum_scores": 1592.5,
-      "count": 455,
+      "sum_scores": 3150.0,
+      "count": 900,
       "historical_avg": 3.5
     },
     "Alfa 9": {
-      "sum_scores": 1592.5,
-      "count": 455,
+      "sum_scores": 3150.0,
+      "count": 900,
       "historical_avg": 3.5
     },
     "Alfa 1": {
-      "sum_scores": 1592.5,
-      "count": 455,
+      "sum_scores": 3150.0,
+      "count": 900,
       "historical_avg": 3.5
     },
     "Alfa 2": {
-      "sum_scores": 1592.5,
-      "count": 455,
+      "sum_scores": 3150.0,
+      "count": 900,
       "historical_avg": 3.5
     },
     "Alfa 3": {
-      "sum_scores": 1592.5,
-      "count": 455,
+      "sum_scores": 3150.0,
+      "count": 900,
       "historical_avg": 3.5
     },
     "Alfa 4": {
-      "sum_scores": 1592.5,
-      "count": 455,
+      "sum_scores": 3150.0,
+      "count": 900,
       "historical_avg": 3.5
     },
     "lucas ramos": {
-      "sum_scores": 728.0,
-      "count": 91,
+      "sum_scores": 1440.0,
+      "count": 180,
       "historical_avg": 8.0
     }
   }

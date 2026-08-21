@@ -630,7 +630,7 @@ def votacao_admin_criar():
             email_svc.notify_votacao_aberta(participantes, partida_titulo=titulo)
         except Exception as exc:
             logger.warning(f"Erro ao disparar e-mails de votação aberta: {exc}")
-        
+
         if _is_juiz():
             return redirect(url_for('votacao.votacao_admin_page', sorteio_id=sorteio.get('id'), sucesso='Votacao aberta com sucesso.'))
 
@@ -685,11 +685,11 @@ def votacao_admin_encerrar(partida_id):
         if _is_juiz():
             from services.jogador_service import JogadorService
             jogador_service = JogadorService()
-            
+
             juiz_partida_service.finalizar_partida(_resumo_encerramento(partida_encerrada))
             jogador_service.limpar_presenca()
             return redirect(url_for('juiz.jogar_page'))
-        
+
         return redirect(url_for('admin.admin_page', partida_id=partida_id, sucesso='Rodada encerrada e ranking apurado.'))
     except ValueError as e:
         contexto = _resolver_contexto_admin()

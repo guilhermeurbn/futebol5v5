@@ -232,7 +232,6 @@ def sortear():
         )
         _salvar_ultimo_sorteio_sessao(sorteio_data)
         undoredo_service.adicionar_sorteio(sorteio_data)
-        
         return redirect(url_for('juiz.juiz_times_page', sorteio_id=sorteio_id))
     except ValueError as e:
         logger.error(f"Erro ao sortear: {str(e)}")

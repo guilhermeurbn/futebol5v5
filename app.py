@@ -185,7 +185,7 @@ def criar_app(config_name: str = None) -> Flask:
     except Exception as e:
         logger.error(f"Falha ao iniciar CSRFProtect: {e}")
         raise
-    
+
     # Registrar blueprints
     app.register_blueprint(auth_bp)
     
