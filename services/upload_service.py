@@ -82,18 +82,61 @@ class UploadService:
             centering=(0.5, 0.5)
         )
 
-        # 5. Gerar nome de arquivo seguro e único
+        # 5. Se o Cloudinary estiver configurado nas variáveis de ambiente, enviar para a nuvem
+        cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME")
+        api_key = os.getenv("CLOUDINARY_API_KEY")
+        api_secret = os.getenv("CLOUDINARY_API_SECRET")
+        cloudinary_url = os.getenv("CLOUDINARY_URL")
+
+        if cloudinary_url or (cloud_name and api_key and api_secret):
+            try:
+                import io
+                import cloudinary
+                import cloudinary.uploader
+
+                if cloudinary_url:
+                    cloudinary.config(cloudinary_url=cloudinary_url, secure=True)
+                else:
+                    cloudinary.config(
+                        cloud_name=cloud_name,
+                        api_key=api_key,
+                        api_secret=api_secret,
+                        secure=True
+                    )
+
+                if img_quadrada.mode != "RGB":
+                    img_quadrada = img_quadrada.convert("RGB")
+
+                buffer = io.BytesIO()
+                img_quadrada.save(buffer, format="WEBP", quality=85, optimize=True)
+                buffer.seek(0)
+
+                nome_publico = f"avatar_{user_id}_{uuid.uuid4().hex[:8]}"
+                res = cloudinary.uploader.upload(
+                    buffer,
+                    folder="futebol5v5/avatars",
+                    public_id=nome_publico,
+                    overwrite=True,
+                    resource_type="image"
+                )
+                url_nuvem = res.get("secure_url") or res.get("url")
+                if url_nuvem:
+                    logger.info("Foto enviada com sucesso ao Cloudinary para user %s: %s", user_id, url_nuvem)
+                    return url_nuvem
+            except Exception as exc:
+                logger.error("Erro ao enviar imagem ao Cloudinary para user %s: %s. Usando fallback local.", user_id, exc)
+
+        # 6. Fallback Local: Gerar nome de arquivo seguro e salvar no disco local
         nome_unico = f"avatar_{user_id}_{uuid.uuid4().hex[:8]}.webp"
         caminho_final = os.path.join(self.pasta_destino, nome_unico)
 
-        # 6. Converter para RGB e salvar em WebP comprimido (85% qualidade)
         try:
             if img_quadrada.mode != "RGB":
                 img_quadrada = img_quadrada.convert("RGB")
             
             img_quadrada.save(caminho_final, format="WEBP", quality=85, optimize=True)
         except Exception as exc:
-            logger.error("Erro ao converter/salvar imagem para user %s: %s", user_id, exc)
+            logger.error("Erro ao converter/salvar imagem localmente para user %s: %s", user_id, exc)
             raise UploadError("Erro ao processar imagem no servidor")
 
         # 7. Apagar a foto antiga do disco se existir
