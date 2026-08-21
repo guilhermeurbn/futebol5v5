@@ -93,36 +93,46 @@ class UploadService:
                 import io
                 import cloudinary
                 import cloudinary.uploader
+                from urllib.parse import urlparse
+
+                c_cloud = cloud_name
+                c_key = api_key
+                c_secret = api_secret
 
                 if cloudinary_url:
-                    cloudinary.config(cloudinary_url=cloudinary_url, secure=True)
-                else:
+                    parsed = urlparse(cloudinary_url)
+                    if parsed.hostname and parsed.username and parsed.password:
+                        c_cloud = parsed.hostname
+                        c_key = parsed.username
+                        c_secret = parsed.password
+
+                if c_cloud and c_key and c_secret:
                     cloudinary.config(
-                        cloud_name=cloud_name,
-                        api_key=api_key,
-                        api_secret=api_secret,
+                        cloud_name=c_cloud,
+                        api_key=c_key,
+                        api_secret=c_secret,
                         secure=True
                     )
 
-                if img_quadrada.mode != "RGB":
-                    img_quadrada = img_quadrada.convert("RGB")
+                    if img_quadrada.mode != "RGB":
+                        img_quadrada = img_quadrada.convert("RGB")
 
-                buffer = io.BytesIO()
-                img_quadrada.save(buffer, format="WEBP", quality=85, optimize=True)
-                buffer.seek(0)
+                    buffer = io.BytesIO()
+                    img_quadrada.save(buffer, format="WEBP", quality=85, optimize=True)
+                    buffer.seek(0)
 
-                nome_publico = f"avatar_{user_id}_{uuid.uuid4().hex[:8]}"
-                res = cloudinary.uploader.upload(
-                    buffer,
-                    folder="futebol5v5/avatars",
-                    public_id=nome_publico,
-                    overwrite=True,
-                    resource_type="image"
-                )
-                url_nuvem = res.get("secure_url") or res.get("url")
-                if url_nuvem:
-                    logger.info("Foto enviada com sucesso ao Cloudinary para user %s: %s", user_id, url_nuvem)
-                    return url_nuvem
+                    nome_publico = f"avatar_{user_id}_{uuid.uuid4().hex[:8]}"
+                    res = cloudinary.uploader.upload(
+                        buffer,
+                        folder="futebol5v5/avatars",
+                        public_id=nome_publico,
+                        overwrite=True,
+                        resource_type="image"
+                    )
+                    url_nuvem = res.get("secure_url") or res.get("url")
+                    if url_nuvem:
+                        logger.info("Foto enviada com sucesso ao Cloudinary para user %s: %s", user_id, url_nuvem)
+                        return url_nuvem
             except Exception as exc:
                 logger.error("Erro ao enviar imagem ao Cloudinary para user %s: %s. Usando fallback local.", user_id, exc)
 
