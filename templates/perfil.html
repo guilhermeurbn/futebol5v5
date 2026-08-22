@@ -62,20 +62,18 @@
 
         <div class="premium-profile-header public-profile-hero" style="position: relative;">
             {% if is_self %}
-            <div style="position: absolute; top: 1rem; right: 1rem; display: flex; align-items: center; gap: 0.5rem; z-index: 10;">
-                <a href="{{ url_for('auth.editar_perfil_page') }}" class="profile-guide-trigger" id="openEditProfileBtn"
-                    title="Editar Perfil (Nome, E-mail, Senha)" aria-label="Editar Perfil"
-                    style="position: relative; top: 0; right: 0; background: rgba(34, 197, 94, 0.14); border: 1px solid rgba(34, 197, 94, 0.4); color: #22c55e;">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"
+            <div class="profile-header-actions">
+                <a href="{{ url_for('auth.editar_perfil_page') }}" class="profile-guide-trigger profile-header-action-btn" id="openEditProfileBtn"
+                    title="Editar Perfil (Nome, E-mail, Senha)" aria-label="Editar Perfil">
+                    <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#22c55e" stroke-width="2.2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 20h9" />
                         <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
                     </svg>
                 </a>
-                <a href="{{ url_for('auth.configuracoes_page') }}" class="profile-guide-trigger" id="openProfileGuideBtn"
-                    title="Configurações & Preferências" aria-label="Configurações & Preferências"
-                    style="position: relative; top: 0; right: 0;">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"
+                <a href="{{ url_for('auth.configuracoes_page') }}" class="profile-guide-trigger profile-header-action-btn" id="openProfileGuideBtn"
+                    title="Configurações & Preferências" aria-label="Configurações & Preferências">
+                    <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#a78bfa" stroke-width="2.2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path
                             d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
@@ -268,7 +266,7 @@
         else None) or (t_user.get('username') if t_user and t_user.get is defined else None) or 'Atleta') %}
 
         <div class="premium-profile-tab-content {% if aba_ativa == 'mensagem' %}is-active{% endif %}" id="tab-mensagem"
-            {% if aba_ativa !='mensagem' %}hidden{% endif %}>
+            {% if aba_ativa !='mensagem' %}hidden style="display: none !important;"{% endif %}>
             <div class="premium-profile-panel">
                 <h2 class="premium-profile-panel-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
@@ -410,7 +408,7 @@
 
         {# ESTATISTICAS TAB #}
         <div class="premium-profile-tab-content {% if aba_ativa == 'estatisticas' %}is-active{% endif %}"
-            id="tab-estatisticas" {% if aba_ativa !='estatisticas' %}hidden{% endif %}>
+            id="tab-estatisticas" {% if aba_ativa !='estatisticas' %}hidden style="display: none !important;"{% endif %}>
             <div class="premium-profile-panel">
                 <h2 class="premium-profile-panel-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
@@ -594,7 +592,7 @@
 
         {# PARTIDAS TAB #}
         <div class="premium-profile-tab-content {% if aba_ativa == 'partidas' %}is-active{% endif %}" id="tab-partidas"
-            {% if aba_ativa !='partidas' %}hidden{% endif %}>
+            {% if aba_ativa !='partidas' %}hidden style="display: none !important;"{% endif %}>
             <!-- Card: Próxima Partida & Presença -->
             {% set lista_aberta = (presenca_resumo and presenca_resumo.get('status_lista') == 'aberta') %}
             {% if lista_aberta %}
@@ -762,7 +760,7 @@
         </div>
 
         {# DUELO TAB #}
-        <div class="premium-profile-tab-content {% if aba_ativa == 'duelo' %}is-active{% endif %}" id="tab-duelo" {% if aba_ativa !='duelo' %}hidden{% endif %}>
+        <div class="premium-profile-tab-content {% if aba_ativa == 'duelo' %}is-active{% endif %}" id="tab-duelo" {% if aba_ativa !='duelo' %}hidden style="display: none !important;"{% endif %}>
             <div class="premium-profile-panel" style="border: 1px solid rgba(255, 255, 255, 0.08); background: #121217; margin-top: 0;">
                 <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.85rem;">
                     <div>
@@ -824,7 +822,8 @@
         </div>
 
         {# MAIS TAB #}
-        <div class="premium-profile-tab-content {% if aba_ativa == 'mais' %}is-active{% endif %}" id="tab-mais" {% if aba_ativa !='mais' %}hidden{% endif %}>
+        <div class="premium-profile-tab-content {% if aba_ativa == 'mais' %}is-active{% endif %}" id="tab-mais"
+            {% if aba_ativa !='mais' %}hidden style="display: none !important;"{% endif %}>
             <div class="premium-profile-panel profile-account-access" style="border: 1px solid rgba(167, 139, 250, 0.25); background: rgba(18, 18, 23, 0.95); margin-top: 0;">
                 <!-- Header da Seção Mais -->
                 <div style="border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 1rem; margin-bottom: 1.25rem;">
@@ -1134,6 +1133,13 @@
             const active = (id === targetId);
             c.classList.toggle('is-active', active);
             c.hidden = !active;
+            if (active) {
+                c.removeAttribute('hidden');
+                c.style.setProperty('display', 'block', 'important');
+            } else {
+                c.setAttribute('hidden', '');
+                c.style.setProperty('display', 'none', 'important');
+            }
         });
 
         try {

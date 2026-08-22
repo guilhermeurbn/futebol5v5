@@ -18280,9 +18280,14 @@ body.is-referee-layout .judge-timer-reset:hover {
   animation: fadeInProfile 0.3s ease both;
 }
 
-.premium-profile-tab-content[hidden] {
+.premium-profile-tab-content[hidden],
+.premium-profile-tab-content:not(.is-active) {
   display: none !important;
   height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  overflow: hidden !important;
 }
 
 @media (max-width: 600px) {
@@ -20565,22 +20570,79 @@ html,
 /* ============================================================
    GUIA DO SISTEMA DO PERFIL (BOTÃO LÂMPADA & MODAL EXCLUSIVO)
    ============================================================ */
-.profile-guide-trigger {
+.profile-header-actions {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #d1d5db;
+  top: 1.15rem;
+  right: 1.15rem;
   display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  z-index: 20;
+}
+
+.profile-header-action-btn,
+.profile-guide-trigger {
+  position: relative;
+  top: 0;
+  right: 0;
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  min-height: 42px;
+  border-radius: 12px;
+  background: rgba(18, 18, 26, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #d1d5db;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  touch-action: manipulation;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
   z-index: 10;
+}
+
+.profile-header-action-btn:hover,
+.profile-guide-trigger:hover {
+  background: rgba(30, 28, 42, 0.9);
+  border-color: rgba(167, 139, 250, 0.4);
+  transform: translateY(-1px);
+}
+
+.profile-header-action-btn:active,
+.profile-guide-trigger:active {
+  transform: scale(0.93);
+}
+
+@media (max-width: 640px) {
+  .public-profile-hero,
+  .premium-profile-header {
+    padding-top: 2.75rem !important;
+  }
+
+  .profile-header-actions {
+    top: 0.75rem !important;
+    right: 0.75rem !important;
+    gap: 0.45rem !important;
+  }
+
+  .profile-header-action-btn,
+  .profile-guide-trigger {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+    border-radius: 10px !important;
+  }
+
+  .profile-header-action-btn svg,
+  .profile-guide-trigger svg {
+    width: 17px !important;
+    height: 17px !important;
+  }
 }
 
 .profile-guide-trigger:hover {
