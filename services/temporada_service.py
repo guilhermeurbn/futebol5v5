@@ -24,7 +24,7 @@ class TemporadaService:
         padrao = {
             "temporada_ativa": {
                 "id": 1,
-                "nome": "Temporada #1 - Edição de Prêmios 🏆",
+                "nome": "Temporada #1 - Edição de Prêmios",
                 "data_inicio": "2026-07-01T00:00:00",
                 "data_fim": "2026-10-04T23:59:59",
                 "descricao_premio": "🏆 1º Lugar: Prêmio Especial da Temporada NaTrave!",

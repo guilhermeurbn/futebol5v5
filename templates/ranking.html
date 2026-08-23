@@ -18,44 +18,33 @@
         {% set competencia_titulo = temporada.nome if temporada else 'Competição ativa' %}
         {% set competencia_subtitulo = 'A pontuação acumula a média das notas ao longo de 2 meses.' %}
 
-        <section class="section ranking-hero" style="background: rgba(18, 18, 23, 0.96); border: 1px solid rgba(34, 197, 94, 0.22); border-radius: 22px; padding: 1.25rem 1.4rem; margin-bottom: 1rem; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);">
-            <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-start; justify-content: space-between;">
-                <div style="display: grid; gap: 0.55rem; max-width: 44rem;">
-                    <div style="display: inline-flex; align-items: center; gap: 0.45rem; width: fit-content; padding: 0.3rem 0.7rem; border-radius: 999px; border: 1px solid rgba(34, 197, 94, 0.24); background: rgba(34, 197, 94, 0.08); color: #bbf7d0; font-size: 0.74rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;">
-                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6"/><path d="M5 6h14"/><path d="M7 6v14h10V6"/><path d="M10 12h4"/></svg>
-                        COMPETIÇÃO OFICIAL DA TEMPORADA
-                    </div>
-                    <div>
-                        <h2 style="margin: 0; color: #ffffff; font-size: clamp(1.4rem, 2.8vw, 2rem); font-weight: 850; letter-spacing: -0.03em;">{% if tipo_ranking == 'geral' %}Ranking Histórico Geral{% else %}{{ competencia_titulo }}{% endif %}</h2>
-                        <p style="margin: 0.35rem 0 0; color: #94a3b8; font-size: 0.92rem; line-height: 1.5;">{% if tipo_ranking == 'geral' %}Classificação acumulada com todos os jogos e votos de todas as temporadas.{% else %}{{ competencia_subtitulo }}{% endif %}</p>
-                    </div>
-                    {% if temporada %}
-                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; color: #cbd5e1; font-size: 0.82rem;">
-                        <span style="padding: 0.3rem 0.6rem; border-radius: 999px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.06); display: inline-flex; gap: 0.4rem; align-items: center;">
-                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-                            {{ temporada.data_inicio_fmt }} → {{ temporada.data_fim_fmt }}
-                        </span>
-                        <span style="padding: 0.3rem 0.6rem; border-radius: 999px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.06); display: inline-flex; gap: 0.4rem; align-items: center;">
-                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-3 4 4 5-7"/></svg>
-                            {{ temporada.progresso_pct }}% concluído
-                        </span>
-                        {% if temporada.tipo_duracao == 'partidas' %}
-                        <span style="padding: 0.3rem 0.6rem; border-radius: 999px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.06); display: inline-flex; gap: 0.4rem; align-items: center;">
-                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6v6l4 2"/><circle cx="12" cy="12" r="9"/></svg>
-                            {{ temporada.partidas_jogadas }} de {{ temporada.limite_partidas }} partidas
-                        </span>
-                        {% endif %}
-                    </div>
-                    {% endif %}
-                </div>
+        <section class="ranking-hero-minimal" style="background: rgba(18, 20, 26, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 0.7rem 1rem; margin-bottom: 1rem; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                <h2 style="margin: 0; color: #ffffff; font-size: 1.05rem; font-weight: 850; letter-spacing: -0.02em; display: inline-flex; align-items: center; gap: 0.5rem; line-height: 1;" aria-label="COMPETIÇÃO OFICIAL DA TEMPORADA">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: #22c55e; flex-shrink: 0; display: inline-block; vertical-align: middle;" aria-hidden="true">
+                        <path d="M8 21H16M12 17V21M17 4V9C17 11.7614 14.7614 14 12 14C9.23858 14 7 11.7614 7 9V4H17ZM17 4H20C20.5523 4 21 4.44772 21 5V7C21 8.10457 20.1046 9 19 9H17M7 4H4C3.44772 4 3 4.44772 3 5V7C3 8.10457 3.89543 9 5 9H7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span style="display: inline-block; vertical-align: middle; line-height: 1.2;">{% if tipo_ranking == 'geral' %}Ranking Histórico Geral{% else %}{{ competencia_titulo | replace('🏆', '') | trim }}{% endif %}</span>
+                </h2>
 
-                {% if eh_admin %}
-                <button type="button" onclick="document.getElementById('modalAbrirCompeticao').showModal()" style="background: #22c55e; color: #000000; font-weight: 850; border-radius: 14px; padding: 0.72rem 1.05rem; border: none; cursor: pointer; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 0 16px rgba(34, 197, 94, 0.28);">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 8v8"/><path d="M14 12H6"/><circle cx="12" cy="12" r="10"/></svg>
-                    Abrir nova competição
-                </button>
+                {% if temporada and tipo_ranking != 'geral' %}
+                <div style="display: flex; align-items: center; gap: 0.45rem; color: #94a3b8; font-size: 0.8rem; flex-wrap: wrap;">
+                    <span style="background: rgba(255, 255, 255, 0.05); padding: 0.2rem 0.55rem; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.06); font-weight: 600;">
+                        {{ temporada.data_inicio_fmt }} → {{ temporada.data_fim_fmt }}
+                    </span>
+                    <span style="background: rgba(34, 197, 94, 0.12); color: #4ade80; padding: 0.2rem 0.55rem; border-radius: 999px; border: 1px solid rgba(34, 197, 94, 0.25); font-weight: 700;">
+                        {{ temporada.progresso_pct }}% concluído
+                    </span>
+                </div>
                 {% endif %}
             </div>
+
+            {% if eh_admin %}
+            <button type="button" onclick="document.getElementById('modalAbrirCompeticao').showModal()" style="background: rgba(34, 197, 94, 0.16); color: #4ade80; font-weight: 800; border-radius: 10px; padding: 0.45rem 0.85rem; border: 1px solid rgba(34, 197, 94, 0.35); cursor: pointer; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.2s ease;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                Nova competição
+            </button>
+            {% endif %}
         </section>
 
         <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem; margin-bottom: 1rem;">
@@ -80,31 +69,28 @@
 
         {% if ranking %}
         <section class="section" style="padding: 0; display: grid; gap: 0.75rem;">
-            <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem;">
-                <article style="background: rgba(18, 18, 23, 0.9); border: 1px solid rgba(255,255,255,0.06); border-radius: 18px; padding: 1rem; display: grid; gap: 0.35rem;">
-                    <div style="display: inline-flex; align-items: center; gap: 0.45rem; color: #cbd5e1; font-size: 0.76rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;">
-                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M5 8h14"/><path d="M8 8v10"/><path d="M16 8v10"/></svg>
+            <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.55rem; margin-bottom: 0.75rem;">
+                <div style="background: rgba(18, 20, 26, 0.75); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 0.7rem 0.4rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.35rem; text-align: center;">
+                    <div style="color: #94a3b8; font-size: 0.75rem; font-weight: 800; display: inline-flex; align-items: center; gap: 0.35rem; text-transform: uppercase; letter-spacing: 0.04em;">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#22c55e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
                         Partidas
                     </div>
-                    <strong style="font-size: 1.6rem; color: #ffffff; line-height: 1;">{{ dados.total_partidas }}</strong>
-                    <span style="color: #94a3b8; font-size: 0.8rem;">encerradas nesta competição</span>
-                </article>
-                <article style="background: rgba(18, 18, 23, 0.9); border: 1px solid rgba(255,255,255,0.06); border-radius: 18px; padding: 1rem; display: grid; gap: 0.35rem;">
-                    <div style="display: inline-flex; align-items: center; gap: 0.45rem; color: #cbd5e1; font-size: 0.76rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;">
-                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg>
+                    <strong style="font-size: 1.35rem; color: #ffffff; font-weight: 850; line-height: 1;">{{ dados.total_partidas }}</strong>
+                </div>
+                <div style="background: rgba(18, 20, 26, 0.75); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 0.7rem 0.4rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.35rem; text-align: center;">
+                    <div style="color: #94a3b8; font-size: 0.75rem; font-weight: 800; display: inline-flex; align-items: center; gap: 0.35rem; text-transform: uppercase; letter-spacing: 0.04em;">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#22c55e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;" aria-hidden="true"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg>
                         Votos
                     </div>
-                    <strong style="font-size: 1.6rem; color: #ffffff; line-height: 1;">{{ dados.total_votos }}</strong>
-                    <span style="color: #94a3b8; font-size: 0.8rem;">considerados no ciclo atual</span>
-                </article>
-                <article style="background: rgba(18, 18, 23, 0.9); border: 1px solid rgba(255,255,255,0.06); border-radius: 18px; padding: 1rem; display: grid; gap: 0.35rem;">
-                    <div style="display: inline-flex; align-items: center; gap: 0.45rem; color: #cbd5e1; font-size: 0.76rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;">
-                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19h16"/><path d="M7 16V8"/><path d="M12 16V4"/><path d="M17 16v-6"/></svg>
+                    <strong style="font-size: 1.35rem; color: #ffffff; font-weight: 850; line-height: 1;">{{ dados.total_votos }}</strong>
+                </div>
+                <div style="background: rgba(18, 20, 26, 0.75); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 0.7rem 0.4rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.35rem; text-align: center;">
+                    <div style="color: #94a3b8; font-size: 0.75rem; font-weight: 800; display: inline-flex; align-items: center; gap: 0.35rem; text-transform: uppercase; letter-spacing: 0.04em;">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#22c55e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
                         Jogadores
                     </div>
-                    <strong style="font-size: 1.6rem; color: #ffffff; line-height: 1;">{{ dados.total_jogadores }}</strong>
-                    <span style="color: #94a3b8; font-size: 0.8rem;">todos zerados no início do ciclo</span>
-                </article>
+                    <strong style="font-size: 1.35rem; color: #ffffff; font-weight: 850; line-height: 1;">{{ dados.total_jogadores }}</strong>
+                </div>
             </div>
 
             {% if ranking|length >= 1 %}

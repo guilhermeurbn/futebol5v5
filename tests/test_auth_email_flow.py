@@ -125,8 +125,7 @@ def test_completar_email_obrigatorio_flow():
     app.config['WTF_CSRF_ENABLED'] = False
     client = app.test_client()
 
-    from services.auth_service import AuthService
-    auth_svc = AuthService()
+    from routes.auth_routes import auth_service as auth_svc
 
     import uuid
     uname = f"sememailuser_{uuid.uuid4().hex[:6]}"
