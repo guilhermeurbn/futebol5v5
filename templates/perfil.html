@@ -1502,44 +1502,6 @@
             const j1Pct = parseFloat(j1.pct_vitorias || 0);
             const j2Pct = parseFloat(j2.pct_vitorias || 0);
 
-            // Cálculo de 1 Única Linha de Comparação por Métrica
-            function calcSingleLine(v1, v2, scaleMax = null) {
-                const num1 = parseFloat(v1 || 0);
-                const num2 = parseFloat(v2 || 0);
-                const maxVal = scaleMax || Math.max(num1, num2, 1);
-                
-                let pct = 0;
-                let color = 'transparent';
-                let leader = 0; // 1 = p1, 2 = p2, 0 = tie
-                
-                if (num1 > num2) {
-                    leader = 1;
-                    pct = Math.min(100, Math.round((num1 / maxVal) * 100));
-                    color = '#22c55e'; // Verde
-                } else if (num2 > num1) {
-                    leader = 2;
-                    pct = Math.min(100, Math.round((num2 / maxVal) * 100));
-                    color = '#3b82f6'; // Azul
-                } else {
-                    leader = 0;
-                    if (num1 > 0) {
-                        pct = Math.min(100, Math.round((num1 / maxVal) * 100));
-                        color = 'rgba(255, 255, 255, 0.2)';
-                    } else {
-                        pct = 0;
-                        color = 'transparent';
-                    }
-                }
-                return { pct, color, leader };
-            }
-
-            const maxGols = Math.max(1, j1Gols, j2Gols);
-            const lineGols = calcSingleLine(j1Gols, j2Gols, maxGols);
-            const lineNota = calcSingleLine(j1Nota, j2Nota, 10.0);
-            const maxWins = Math.max(1, j1Wins, j2Wins);
-            const lineWins = calcSingleLine(j1Wins, j2Wins, maxWins);
-            const lineApp = calcSingleLine(j1Pct, j2Pct, 100);
-
             function escapeHtml(str) {
                 if (!str) return '';
                 return String(str)
@@ -1552,7 +1514,6 @@
 
             const j1Nome = escapeHtml(j1.jogador_nome || '');
             const j2Nome = escapeHtml(j2.jogador_nome || '');
-
             const j1Foto = j1.foto_url || j1.foto || '';
             const j2Foto = j2.foto_url || j2.foto || '';
 
@@ -1564,122 +1525,154 @@
                 ? `<img src="${encodeURI(j2Foto)}" alt="${j2Nome}" style="width: 48px; height: 48px; flex: 0 0 48px; border-radius: 50%; object-fit: cover; border: 2px solid #3b82f6; margin: 0 auto 0.45rem auto;" />`
                 : `<div style="width: 48px; height: 48px; flex: 0 0 48px; border-radius: 50%; background: rgba(59, 130, 246, 0.1); border: 2px solid #3b82f6; color: #ffffff; font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.45rem auto;">${(j2Nome || '').substring(0, 2).toUpperCase()}</div>`;
 
+            // Função para gerar o card de cada métrica no estilo Split Dual-Bar + Badge
+            function buildMetricCard(title, val1Display, val2Display, num1, num2, iconGreenHtml, iconBlueHtml) {
+                const v1 = parseFloat(num1 || 0);
+                const v2 = parseFloat(num2 || 0);
+
+                let pct1 = 50;
+                let pct2 = 50;
+                let isTie = false;
+                let winner = 0; // 1 = J1, 2 = J2, 0 = Empate
+
+                if (v1 > v2) {
+                    winner = 1;
+                    if (v1 + v2 > 0) {
+                        pct1 = Math.max(15, Math.min(85, Math.round((v1 / (v1 + v2)) * 100)));
+                        pct2 = 100 - pct1;
+                    } else {
+                        pct1 = 70; pct2 = 30;
+                    }
+                } else if (v2 > v1) {
+                    winner = 2;
+                    if (v1 + v2 > 0) {
+                        pct2 = Math.max(15, Math.min(85, Math.round((v2 / (v1 + v2)) * 100)));
+                        pct1 = 100 - pct2;
+                    } else {
+                        pct1 = 30; pct2 = 70;
+                    }
+                } else {
+                    isTie = true;
+                    pct1 = 50;
+                    pct2 = 50;
+                }
+
+                let winnerBadgeHtml = '';
+                if (winner === 1) {
+                    winnerBadgeHtml = `
+                        <div style="display: flex; justify-content: center; margin-top: 0.65rem;">
+                            <span style="display: inline-flex; align-items: center; gap: 0.35rem; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.35); color: #22c55e; border-radius: 999px; padding: 0.3rem 0.85rem; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em;">
+                                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2"/><path d="M18 9h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H7v4h10v-4h-2c-.55 0-1-.45-1-1v-2.34"/><path d="M18 3H6v7a6 6 0 0 0 12 0V3z"/></svg>
+                                <span>${j1Nome.toUpperCase()} VENCE</span>
+                            </span>
+                        </div>
+                    `;
+                } else if (winner === 2) {
+                    winnerBadgeHtml = `
+                        <div style="display: flex; justify-content: center; margin-top: 0.65rem;">
+                            <span style="display: inline-flex; align-items: center; gap: 0.35rem; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.35); color: #60a5fa; border-radius: 999px; padding: 0.3rem 0.85rem; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em;">
+                                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2"/><path d="M18 9h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H7v4h10v-4h-2c-.55 0-1-.45-1-1v-2.34"/><path d="M18 3H6v7a6 6 0 0 0 12 0V3z"/></svg>
+                                <span>${j2Nome.toUpperCase()} VENCE</span>
+                            </span>
+                        </div>
+                    `;
+                }
+
+                return {
+                    winner,
+                    html: `
+                    <div style="background: #111118; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 0.95rem 1.1rem; margin-bottom: 0.85rem; box-shadow: 0 4px 18px rgba(0,0,0,0.25);">
+                        <!-- Linha Superior: Valores + Título -->
+                        <div style="display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; margin-bottom: 0.6rem; width: 100%;">
+                            <!-- Esquerda (Verde) -->
+                            <div style="display: flex; align-items: center; justify-content: flex-start; gap: 0.45rem; color: #22c55e; font-size: 1.05rem; font-weight: 900;">
+                                ${iconGreenHtml}
+                                <span>${val1Display}</span>
+                            </div>
+
+                            <!-- Centro (Título) -->
+                            <div style="text-align: center; padding: 0 0.4rem;">
+                                <div style="color: #cbd5e1; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap;">
+                                    ${title}
+                                </div>
+                                ${isTie ? `<div style="font-size: 0.7rem; color: #64748b; font-weight: 600; margin-top: 0.1rem;">Empate</div>` : ''}
+                            </div>
+
+                            <!-- Direita (Azul) -->
+                            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.45rem; color: #60a5fa; font-size: 1.05rem; font-weight: 900;">
+                                <span>${val2Display}</span>
+                                ${iconBlueHtml}
+                            </div>
+                        </div>
+
+                        <!-- Cano Transparente 100% com Preenchimento Relativo (Verde Esquerda | Azul Direita) -->
+                        <div style="width: 100%; height: 9px; background: rgba(255, 255, 255, 0.08); border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.07); display: flex; align-items: center; gap: 3px; padding: 1px; box-sizing: border-box; overflow: hidden; box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.5);">
+                            <div style="width: ${pct1}%; height: 100%; background: linear-gradient(90deg, #16a34a, #22c55e); border-radius: 999px; transition: width 0.4s ease; box-shadow: 0 0 10px rgba(34, 197, 94, 0.35);"></div>
+                            <div style="width: ${pct2}%; height: 100%; background: linear-gradient(90deg, #3b82f6, #2563eb); border-radius: 999px; transition: width 0.4s ease; box-shadow: 0 0 10px rgba(59, 130, 246, 0.35);"></div>
+                        </div>
+
+                        <!-- Badge de Vitória da Métrica -->
+                        ${winnerBadgeHtml}
+                    </div>
+                    `
+                };
+            }
+
+            // Ícones de cada métrica
+            const iconGolsG = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#22c55e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="0.5" fill="#22c55e"/></svg>`;
+            const iconGolsB = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#3b82f6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="0.5" fill="#3b82f6"/></svg>`;
+
+            const iconNotaG = `<svg viewBox="0 0 24 24" width="16" height="16" fill="#22c55e"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
+            const iconNotaB = `<svg viewBox="0 0 24 24" width="16" height="16" fill="#3b82f6"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
+
+            const iconWinsG = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2"/><path d="M18 9h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H7v4h10v-4h-2c-.55 0-1-.45-1-1v-2.34"/><path d="M18 3H6v7a6 6 0 0 0 12 0V3z"/></svg>`;
+            const iconWinsB = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2"/><path d="M18 9h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H7v4h10v-4h-2c-.55 0-1-.45-1-1v-2.34"/><path d="M18 3H6v7a6 6 0 0 0 12 0V3z"/></svg>`;
+
+            const iconAppG = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#22c55e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>`;
+            const iconAppB = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#3b82f6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>`;
+
+            const m1 = buildMetricCard("GOLS", j1Gols, j2Gols, j1Gols, j2Gols, iconGolsG, iconGolsB);
+            const m2 = buildMetricCard("NOTA MÉDIA", j1Nota.toFixed(2), j2Nota.toFixed(2), j1Nota, j2Nota, iconNotaG, iconNotaB);
+            const m3 = buildMetricCard("VITÓRIAS", j1Wins, j2Wins, j1Wins, j2Wins, iconWinsG, iconWinsB);
+            const m4 = buildMetricCard("APROVEITAMENTO", j1Pct + '%', j2Pct + '%', j1Pct, j2Pct, iconAppG, iconAppB);
+
             container.innerHTML = `
-            <!-- Placa do Duelo Simétrica 100% Igual (Grid minmax 50/50 + Stretch) -->
+            <!-- Placa do Duelo Simétrica -->
             <div style="display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 0.75rem; align-items: stretch; margin-bottom: 1.25rem; width: 100%;">
-                <!-- Player 1 (Verde Suave) -->
-                <div style="background: #14141b; border: 1px solid rgba(34, 197, 94, 0.35); border-radius: 14px; padding: 1rem 0.6rem; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; box-sizing: border-box;">
+                <!-- Player 1 (Verde) -->
+                <div style="background: #14141b; border: 1px solid rgba(34, 197, 94, 0.35); border-radius: 16px; padding: 1rem 0.6rem; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; box-sizing: border-box;">
                     ${j1AvatarHtml}
                     <h3 style="font-size: 0.95rem; font-weight: 800; color: #ffffff; margin: 0 0 0.35rem 0; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center;" title="${j1Nome}">${j1Nome}</h3>
-                    <div style="display: inline-flex; align-items: center; justify-content: center; gap: 0.25rem; padding: 0.2rem 0.5rem; background: rgba(34, 197, 94, 0.1); border-radius: 8px; color: #22c55e; font-size: 0.75rem; font-weight: 700; border: 1px solid rgba(34, 197, 94, 0.25); white-space: nowrap; max-width: 100%;">
+                    <div style="display: inline-flex; align-items: center; justify-content: center; gap: 0.25rem; padding: 0.2rem 0.55rem; background: rgba(34, 197, 94, 0.1); border-radius: 8px; color: #22c55e; font-size: 0.75rem; font-weight: 700; border: 1px solid rgba(34, 197, 94, 0.25); white-space: nowrap; max-width: 100%;">
                         ⭐ Nível ${parseFloat(j1.nivel).toFixed(1)}
                     </div>
                 </div>
 
-                <!-- VS Badge Minimalista Alinhado ao Centro -->
+                <!-- VS Badge -->
                 <div style="display: flex; align-items: center; justify-content: center;">
                     <span style="background: #1e1e28; color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.1); font-weight: 900; font-size: 0.75rem; padding: 0.35rem 0.65rem; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block;">VS</span>
                 </div>
 
-                <!-- Player 2 (Azul Suave) -->
-                <div style="background: #14141b; border: 1px solid rgba(59, 130, 246, 0.35); border-radius: 14px; padding: 1rem 0.6rem; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; box-sizing: border-box;">
+                <!-- Player 2 (Azul) -->
+                <div style="background: #14141b; border: 1px solid rgba(59, 130, 246, 0.35); border-radius: 16px; padding: 1rem 0.6rem; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; box-sizing: border-box;">
                     ${j2AvatarHtml}
                     <h3 style="font-size: 0.95rem; font-weight: 800; color: #ffffff; margin: 0 0 0.35rem 0; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center;" title="${j2Nome}">${j2Nome}</h3>
-                    <div style="display: inline-flex; align-items: center; justify-content: center; gap: 0.25rem; padding: 0.2rem 0.5rem; background: rgba(59, 130, 246, 0.1); border-radius: 8px; color: #60a5fa; font-size: 0.75rem; font-weight: 700; border: 1px solid rgba(59, 130, 246, 0.25); white-space: nowrap; max-width: 100%;">
+                    <div style="display: inline-flex; align-items: center; justify-content: center; gap: 0.25rem; padding: 0.2rem 0.55rem; background: rgba(59, 130, 246, 0.1); border-radius: 8px; color: #60a5fa; font-size: 0.75rem; font-weight: 700; border: 1px solid rgba(59, 130, 246, 0.25); white-space: nowrap; max-width: 100%;">
                         ⭐ Nível ${parseFloat(j2.nivel).toFixed(1)}
                     </div>
                 </div>
             </div>
 
-            <!-- Painel Minimalista de Comparação de Desempenho -->
-            <div style="background: #14141b; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 1.1rem; margin-bottom: 1.25rem;">
-                <!-- 1. GOLS -->
-                <div style="margin-bottom: 0.85rem; background: rgba(255,255,255,0.02); padding: 0.6rem 0.8rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.04);">
-                    <div style="display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; margin-bottom: 0.35rem; font-size: 0.8rem; font-weight: 700; width: 100%;">
-                        <div style="display: flex; align-items: center; justify-content: flex-start; gap: 0.3rem; color: #22c55e;">
-                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5 14.5 9.5 13.5 12.5h-3L9.5 9.5z"/></svg>
-                            <span>${j1Gols}</span>
-                        </div>
-                        <div style="text-align: center; color: #94a3b8; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; padding: 0 0.3rem;">
-                            GOLS
-                        </div>
-                        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.3rem; color: #60a5fa;">
-                            <span>${j2Gols}</span>
-                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5 14.5 9.5 13.5 12.5h-3L9.5 9.5z"/></svg>
-                        </div>
-                    </div>
-                    <!-- 1 Única Linha de Progresso -->
-                    <div style="height: 6px; background: rgba(255, 255, 255, 0.06); border-radius: 4px; overflow: hidden; width: 100%;">
-                        <div style="width: ${lineGols.pct}%; background: ${lineGols.color}; height: 100%; border-radius: 4px; transition: width 0.3s ease;"></div>
-                    </div>
-                </div>
-
-                <!-- 2. NOTA MÉDIA -->
-                <div style="margin-bottom: 0.85rem; background: rgba(255,255,255,0.02); padding: 0.6rem 0.8rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.04);">
-                    <div style="display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; margin-bottom: 0.35rem; font-size: 0.78rem; font-weight: 700; width: 100%;">
-                        <div style="display: flex; align-items: center; justify-content: flex-start; gap: 0.3rem; color: #22c55e;">
-                            <svg viewBox="0 0 24 24" width="13" height="13" fill="#22c55e"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                            <span>${j1Nota.toFixed(2)}</span>
-                        </div>
-                        <div style="text-align: center; color: #94a3b8; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; padding: 0 0.3rem;">
-                            NOTA MÉDIA
-                        </div>
-                        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.3rem; color: #60a5fa;">
-                            <span>${j2Nota.toFixed(2)}</span>
-                            <svg viewBox="0 0 24 24" width="13" height="13" fill="#3b82f6"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        </div>
-                    </div>
-                    <!-- 1 Única Linha de Progresso -->
-                    <div style="height: 6px; background: rgba(255, 255, 255, 0.06); border-radius: 4px; overflow: hidden; width: 100%;">
-                        <div style="width: ${lineNota.pct}%; background: ${lineNota.color}; height: 100%; border-radius: 4px; transition: width 0.3s ease;"></div>
-                    </div>
-                </div>
-
-                <!-- 3. VITÓRIAS -->
-                <div style="margin-bottom: 0.85rem; background: rgba(255,255,255,0.02); padding: 0.6rem 0.8rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.04);">
-                    <div style="display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; margin-bottom: 0.35rem; font-size: 0.8rem; font-weight: 700; width: 100%;">
-                        <div style="display: flex; align-items: center; justify-content: flex-start; gap: 0.3rem; color: #22c55e;">
-                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2"/><path d="M18 9h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H7v4h10v-4h-2c-.55 0-1-.45-1-1v-2.34"/><path d="M18 3H6v7a6 6 0 0 0 12 0V3z"/></svg>
-                            <span>${j1Wins}</span>
-                        </div>
-                        <div style="text-align: center; color: #94a3b8; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; padding: 0 0.3rem;">
-                            VITÓRIAS
-                        </div>
-                        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.3rem; color: #60a5fa;">
-                            <span>${j2Wins}</span>
-                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2"/><path d="M18 9h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H7v4h10v-4h-2c-.55 0-1-.45-1-1v-2.34"/><path d="M18 3H6v7a6 6 0 0 0 12 0V3z"/></svg>
-                        </div>
-                    </div>
-                    <!-- 1 Única Linha de Progresso -->
-                    <div style="height: 6px; background: rgba(255, 255, 255, 0.06); border-radius: 4px; overflow: hidden; width: 100%;">
-                        <div style="width: ${lineWins.pct}%; background: ${lineWins.color}; height: 100%; border-radius: 4px; transition: width 0.3s ease;"></div>
-                    </div>
-                </div>
-
-                <!-- 4. NÍVEL DE APROVEITAMENTO -->
-                <div style="background: rgba(255,255,255,0.02); padding: 0.6rem 0.8rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.04);">
-                    <div style="display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; margin-bottom: 0.35rem; font-size: 0.8rem; font-weight: 700; width: 100%;">
-                        <div style="display: flex; align-items: center; justify-content: flex-start; gap: 0.3rem; color: #22c55e;">
-                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-                            <span>${j1Pct}%</span>
-                        </div>
-                        <div style="text-align: center; color: #94a3b8; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; padding: 0 0.3rem;">
-                            APROVEITAMENTO
-                        </div>
-                        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.3rem; color: #60a5fa;">
-                            <span>${j2Pct}%</span>
-                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-                        </div>
-                    </div>
-                    <!-- 1 Única Linha de Progresso -->
-                    <div style="height: 6px; background: rgba(255, 255, 255, 0.06); border-radius: 4px; overflow: hidden; width: 100%;">
-                        <div style="width: ${lineApp.pct}%; background: ${lineApp.color}; height: 100%; border-radius: 4px; transition: width 0.3s ease;"></div>
-                    </div>
-                </div>
+            <!-- Cards Individuais de Comparação de Desempenho -->
+            <div style="margin-bottom: 1.25rem;">
+                ${m1.html}
+                ${m2.html}
+                ${m3.html}
+                ${m4.html}
             </div>
 
             <!-- Retrospecto de Confrontos Diretos Minimalista -->
-            <div style="background: #14141b; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 1.1rem; text-align: center;">
+            <div style="background: #14141b; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 1.1rem; text-align: center;">
                 <h4 style="font-size: 0.78rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 0.4rem; letter-spacing: 0.05em;">Retrospecto em Campo</h4>
                 <div style="font-size: 0.95rem; font-weight: 800; color: #ffffff; margin-bottom: 0.35rem;">
                     <span style="color: #22c55e;">${conf.vitorias_j1} Vitórias de ${j1.jogador_nome}</span> • ${conf.empates_confronto} Empates • <span style="color: #60a5fa;">${conf.vitorias_j2} Vitórias de ${j2.jogador_nome}</span>
