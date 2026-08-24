@@ -19,38 +19,54 @@ def abreviar_nome(nome: str) -> str:
     return f"{first_name} {last_name_initial}."
 
 
-def formatar_nome_perfil(nome: str) -> str:
+def formatar_nome_perfil(nome: str, max_len: int = 10) -> str:
     """
     Formata o nome para exibição no card de perfil.
-    Regra: Mantém o primeiro nome e reduz o sobrenome principal para 3 letras com ponto.
+    Regra: Abrevia o sobrenome e garante limite estrito de no máximo max_len (10) caracteres.
     Exemplo:
-      'Guilherme Urbano' -> 'Guilherme Urb.'
-      'guilherme urbano' -> 'guilherme urb.'
+      'Gui Urbano' -> 'Gui Urb.'
+      'Guilherme Urbano' -> 'Guilherme.'
       'João Pedro Santos' -> 'João Ped.'
-      'Carlos da Silva' -> 'Carlos da Sil.'
     """
     if not nome:
         return ""
     partes = [p for p in nome.strip().split() if p]
-    if len(partes) <= 1:
-        return nome
+    if not partes:
+        return ""
 
     primeiro_nome = partes[0]
-    preposicoes = {"de", "da", "do", "das", "dos", "e"}
     
-    sobrenome_idx = 1
-    pref = ""
-    if partes[1].lower() in preposicoes and len(partes) > 2:
-        pref = partes[1] + " "
-        sobrenome_idx = 2
-        
-    sobrenome = partes[sobrenome_idx]
-    if len(sobrenome) > 3:
-        sobrenome_abrev = sobrenome[:3] + "."
+    if len(partes) == 1:
+        res = primeiro_nome
     else:
-        sobrenome_abrev = sobrenome
+        preposicoes = {"de", "da", "do", "das", "dos", "e"}
+        sobrenome_idx = 1
+        pref = ""
+        if partes[1].lower() in preposicoes and len(partes) > 2:
+            pref = partes[1] + " "
+            sobrenome_idx = 2
+            
+        sobrenome = partes[sobrenome_idx]
+        if len(sobrenome) > 3:
+            sobrenome_abrev = sobrenome[:3] + "."
+        else:
+            sobrenome_abrev = sobrenome
 
-    return f"{primeiro_nome} {pref}{sobrenome_abrev}".strip()
+        res = f"{primeiro_nome} {pref}{sobrenome_abrev}".strip()
+
+    if len(res) > max_len:
+        if len(partes) > 1:
+            res_curto = f"{primeiro_nome} {partes[1][0].upper()}."
+            if len(res_curto) <= max_len:
+                return res_curto
+        
+        res_trunc = res[:max_len].rstrip()
+        if not res_trunc.endswith('.'):
+            res_trunc = res[:max_len - 1].rstrip() + "."
+        return res_trunc
+
+    return res
+
 
 
 

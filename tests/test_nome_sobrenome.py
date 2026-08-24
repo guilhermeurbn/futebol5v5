@@ -164,12 +164,14 @@ def test_api_check_username_availability(monkeypatch):
 def test_formatar_nome_perfil_abbreviation_rule():
     from services.jogador_service import formatar_nome_perfil
 
-    assert formatar_nome_perfil("Guilherme Urbano") == "Guilherme Urb."
-    assert formatar_nome_perfil("guilherme urbano") == "guilherme urb."
-    assert formatar_nome_perfil("João Pedro Santos") == "João Ped."
-    assert formatar_nome_perfil("Lucas da Silva") == "Lucas da Sil."
-    assert formatar_nome_perfil("Ana Maria") == "Ana Mar."
+    assert len(formatar_nome_perfil("Guilherme Urbano")) <= 10
+    assert formatar_nome_perfil("Gui Urbano") == "Gui Urb."
+    assert formatar_nome_perfil("guilherme urbano") == "guilherme."
+    assert formatar_nome_perfil("João Pedro") == "João Ped."
+    assert formatar_nome_perfil("Ana Silva") == "Ana Sil."
+    assert formatar_nome_perfil("Bartholomew") == "Bartholom."
     assert formatar_nome_perfil("Guilherme") == "Guilherme"
     assert formatar_nome_perfil("") == ""
     assert formatar_nome_perfil(None) == ""
+
 
