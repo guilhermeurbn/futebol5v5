@@ -81,16 +81,16 @@
       "total_votos": 5
     },
     "u1": {
-      "reliability": 0.973,
-      "total_votos": 4
+      "reliability": 0.9625,
+      "total_votos": 6
     },
     "u2": {
-      "reliability": 0.973,
-      "total_votos": 4
+      "reliability": 0.9625,
+      "total_votos": 6
     },
     "u3_hater": {
-      "reliability": 0.8821,
-      "total_votos": 4
+      "reliability": 0.836,
+      "total_votos": 6
     }
   },
   "relationships": {
@@ -743,27 +743,27 @@
       "cumulative_offset": 0.0
     },
     "u1:Alex": {
-      "match_count": 2,
-      "cumulative_offset": 7.0
+      "match_count": 3,
+      "cumulative_offset": 10.5
     },
     "u2:Alex": {
-      "match_count": 2,
-      "cumulative_offset": 7.0
+      "match_count": 3,
+      "cumulative_offset": 10.5
     },
     "u3_hater:Alex": {
-      "match_count": 2,
-      "cumulative_offset": -14.0
+      "match_count": 3,
+      "cumulative_offset": -21.0
     },
     "u1:Bruno": {
-      "match_count": 2,
+      "match_count": 3,
       "cumulative_offset": 0.0
     },
     "u2:Bruno": {
-      "match_count": 2,
+      "match_count": 3,
       "cumulative_offset": 0.0
     },
     "u3_hater:Bruno": {
-      "match_count": 2,
+      "match_count": 3,
       "cumulative_offset": 0.0
     }
   },
@@ -804,9 +804,9 @@
       "historical_avg": 4.92
     },
     "Alex": {
-      "sum_scores": 77.5,
-      "count": 15,
-      "historical_avg": 5.17
+      "sum_scores": 94.5,
+      "count": 18,
+      "historical_avg": 5.25
     },
     "Markinhos": {
       "sum_scores": 21.5,
@@ -969,8 +969,8 @@
       "historical_avg": 8.0
     },
     "Bruno": {
-      "sum_scores": 42.0,
-      "count": 6,
+      "sum_scores": 63.0,
+      "count": 9,
       "historical_avg": 7.0
     }
   }

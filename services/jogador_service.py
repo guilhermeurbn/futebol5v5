@@ -19,14 +19,20 @@ def abreviar_nome(nome: str) -> str:
     return f"{first_name} {last_name_initial}."
 
 
-def formatar_nome_perfil(nome: str, max_len: int = 10) -> str:
+def formatar_nome_perfil(nome: str) -> str:
     """
-    Formata o nome para exibição no card de perfil.
-    Regra: Abrevia o sobrenome e garante limite estrito de no máximo max_len (10) caracteres.
-    Exemplo:
-      'Gui Urbano' -> 'Gui Urb.'
-      'Guilherme Urbano' -> 'Guilherme.'
-      'João Pedro Santos' -> 'João Ped.'
+    Formata o nome para exibição no card de perfil segundo as seguintes regras:
+    1. Se o primeiro nome tiver mais de 10 letras, fica reduzido às 10 primeiras letras.
+    2. Se não houver sobrenome, retorna o primeiro nome (limitado a 10 letras).
+    3. Se houver sobrenome:
+       - Soma-se a quantidade de caracteres do primeiro nome + espaço + sobrenome.
+       - Se o total for maior que 12 caracteres, o sobrenome é reduzido para as 2 primeiras letras + ponto (ex: 'Ur.').
+       - Se o total for até 12 caracteres, o sobrenome é mantido completo.
+    Exemplos:
+      'Guilherme Urbano' -> 'Guilherme Ur.' (9 + 1 + 6 = 16 > 12 -> 'Ur.')
+      'guilherme urbano' -> 'guilherme ur.'
+      'João Pedro' -> 'João Pedro' (4 + 1 + 5 = 10 <= 12)
+      'Gui Urbano' -> 'Gui Urbano' (3 + 1 + 6 = 10 <= 12)
     """
     if not nome:
         return ""
@@ -34,38 +40,37 @@ def formatar_nome_perfil(nome: str, max_len: int = 10) -> str:
     if not partes:
         return ""
 
+    # 1. Primeiro nome (máximo 10 letras)
     primeiro_nome = partes[0]
-    
+    if len(primeiro_nome) > 10:
+        primeiro_nome = primeiro_nome[:10]
+
+    # Se só tem 1 palavra
     if len(partes) == 1:
-        res = primeiro_nome
-    else:
-        preposicoes = {"de", "da", "do", "das", "dos", "e"}
-        sobrenome_idx = 1
-        pref = ""
-        if partes[1].lower() in preposicoes and len(partes) > 2:
-            pref = partes[1] + " "
-            sobrenome_idx = 2
-            
-        sobrenome = partes[sobrenome_idx]
-        if len(sobrenome) > 3:
-            sobrenome_abrev = sobrenome[:3] + "."
+        return primeiro_nome
+
+    # 2. Processar sobrenome e preposição (se houver)
+    preposicoes = {"de", "da", "do", "das", "dos", "e"}
+    sobrenome_idx = 1
+    pref = ""
+    if partes[1].lower() in preposicoes and len(partes) > 2:
+        pref = partes[1] + " "
+        sobrenome_idx = 2
+
+    sobrenome = partes[sobrenome_idx]
+    
+    # Nome completo montado sem abreviar o sobrenome
+    nome_completo_tentativo = f"{primeiro_nome} {pref}{sobrenome}"
+
+    # Se a soma total (nome + sobrenome) passar de 12 letras, reduz sobrenome para 2 letras + '.'
+    if len(nome_completo_tentativo) > 12:
+        if len(sobrenome) > 2:
+            sobrenome_abrev = sobrenome[:2] + "."
         else:
             sobrenome_abrev = sobrenome
+        return f"{primeiro_nome} {pref}{sobrenome_abrev}".strip()
 
-        res = f"{primeiro_nome} {pref}{sobrenome_abrev}".strip()
-
-    if len(res) > max_len:
-        if len(partes) > 1:
-            res_curto = f"{primeiro_nome} {partes[1][0].upper()}."
-            if len(res_curto) <= max_len:
-                return res_curto
-        
-        res_trunc = res[:max_len].rstrip()
-        if not res_trunc.endswith('.'):
-            res_trunc = res[:max_len - 1].rstrip() + "."
-        return res_trunc
-
-    return res
+    return nome_completo_tentativo
 
 
 
