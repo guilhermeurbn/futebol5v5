@@ -159,3 +159,17 @@ def test_api_check_username_availability(monkeypatch):
         res2 = client.get('/api/auth/check-username?username=free')
         assert res2.status_code == 200
         assert res2.get_json()['exists'] is False
+
+
+def test_formatar_nome_perfil_abbreviation_rule():
+    from services.jogador_service import formatar_nome_perfil
+
+    assert formatar_nome_perfil("Guilherme Urbano") == "Guilherme Urb."
+    assert formatar_nome_perfil("guilherme urbano") == "guilherme urb."
+    assert formatar_nome_perfil("João Pedro Santos") == "João Ped."
+    assert formatar_nome_perfil("Lucas da Silva") == "Lucas da Sil."
+    assert formatar_nome_perfil("Ana Maria") == "Ana Mar."
+    assert formatar_nome_perfil("Guilherme") == "Guilherme"
+    assert formatar_nome_perfil("") == ""
+    assert formatar_nome_perfil(None) == ""
+

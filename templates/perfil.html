@@ -132,11 +132,9 @@
                         {% endif %}
                     {% endif %}
 
+                    {% set nome_completo_exibicao = (jogador.nome if tem_jogador else ((perfil_user.nome if perfil_user.nome is defined else perfil_user.get('nome')) or (perfil_user.username if perfil_user.username is defined else perfil_user.get('username')))) %}
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
-                        <h1 class="premium-profile-name">{% if tem_jogador %}{{ jogador.nome }}{% else %}{{
-                            (perfil_user.nome if perfil_user.nome is defined else perfil_user.get('nome')) or
-                            (perfil_user.username if perfil_user.username is defined else perfil_user.get('username'))
-                            }}{% endif %}</h1>
+                        <h1 class="premium-profile-name" title="{{ nome_completo_exibicao }}">{{ nome_completo_exibicao | formatar_nome_perfil }}</h1>
                         {% if tem_jogador %}
                         <div style="display: inline-flex; align-items: center; gap: 0.4rem;">
                             <span class="premium-profile-rating-badge">{{ '%.1f'|format(jogador.nivel|float) }}</span>

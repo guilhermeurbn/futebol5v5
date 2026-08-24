@@ -19,6 +19,41 @@ def abreviar_nome(nome: str) -> str:
     return f"{first_name} {last_name_initial}."
 
 
+def formatar_nome_perfil(nome: str) -> str:
+    """
+    Formata o nome para exibição no card de perfil.
+    Regra: Mantém o primeiro nome e reduz o sobrenome principal para 3 letras com ponto.
+    Exemplo:
+      'Guilherme Urbano' -> 'Guilherme Urb.'
+      'guilherme urbano' -> 'guilherme urb.'
+      'João Pedro Santos' -> 'João Ped.'
+      'Carlos da Silva' -> 'Carlos da Sil.'
+    """
+    if not nome:
+        return ""
+    partes = [p for p in nome.strip().split() if p]
+    if len(partes) <= 1:
+        return nome
+
+    primeiro_nome = partes[0]
+    preposicoes = {"de", "da", "do", "das", "dos", "e"}
+    
+    sobrenome_idx = 1
+    pref = ""
+    if partes[1].lower() in preposicoes and len(partes) > 2:
+        pref = partes[1] + " "
+        sobrenome_idx = 2
+        
+    sobrenome = partes[sobrenome_idx]
+    if len(sobrenome) > 3:
+        sobrenome_abrev = sobrenome[:3] + "."
+    else:
+        sobrenome_abrev = sobrenome
+
+    return f"{primeiro_nome} {pref}{sobrenome_abrev}".strip()
+
+
+
 class JogadorService:
     """Serviço para gerenciar jogadores - com suporte a Postgres via db.py"""
     

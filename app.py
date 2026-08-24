@@ -418,7 +418,7 @@ def criar_app(config_name: str = None) -> Flask:
     app.jinja_env.filters['parse_iso_date'] = _parse_iso_date
     app.jinja_env.filters['_parse_iso_date'] = _parse_iso_date
 
-    from services.jogador_service import abreviar_nome
+    from services.jogador_service import abreviar_nome, formatar_nome_perfil
 
     def abreviar_nomes_lista(jogadores: list) -> str:
         nomes_abrev = []
@@ -434,6 +434,7 @@ def criar_app(config_name: str = None) -> Flask:
         return ", ".join(nomes_abrev)
 
     app.jinja_env.filters['abreviar_nome'] = abreviar_nome
+    app.jinja_env.filters['formatar_nome_perfil'] = formatar_nome_perfil
     app.jinja_env.filters['abreviar_nomes_lista'] = abreviar_nomes_lista
 
     @app.context_processor
