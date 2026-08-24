@@ -326,7 +326,7 @@ def executar_migracao_link_usuarios_jogadores() -> None:
     for u in usuarios:
         if not isinstance(u, dict):
             continue
-        if u.get("id") in matched_user_ids or u.get("role") in ["admin", "admin", "juiz"]:
+        if u.get("id") in matched_user_ids or u.get("role") in ["admin", "juiz"]:
             novos_usuarios.append(u)
 
     novos_jogadores = []

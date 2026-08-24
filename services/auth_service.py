@@ -78,20 +78,10 @@ class AuthService:
                 pass
 
     def _carregar(self) -> List[Dict]:
-        if os.getenv("DATABASE_URL"):
-            return load_json_data("users", [])
-        try:
-            with open(self.arquivo, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
-            return []
+        return load_json_data("users", [])
 
     def _salvar(self, dados: List[Dict]) -> None:
-        if os.getenv("DATABASE_URL"):
-            save_json_data("users", dados)
-            return
-        with open(self.arquivo, "w", encoding="utf-8") as f:
-            json.dump(dados, f, indent=2, ensure_ascii=False)
+        save_json_data("users", dados)
 
     def listar_usuarios(self) -> List[Dict]:
         usuarios = self._carregar()
