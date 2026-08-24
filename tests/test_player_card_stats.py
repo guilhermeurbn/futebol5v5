@@ -30,3 +30,30 @@ def test_app_shell_has_correct_stat_element_indices():
     assert "statValues[0].textContent = String(matches);" in app_shell_content
     assert "statValues[1].textContent = String(wins);" in app_shell_content
     assert "statValues[2].textContent = `${Math.round(Number(winRate) || 0)}%`;" in app_shell_content
+
+
+def test_gols_informados_na_votacao_soma_nos_stats(monkeypatch):
+    """Testa se gols informados durante votação são contabilizados nos stats do jogador."""
+    from services.jogador_stats_service import JogadorStatsService
+    svc = JogadorStatsService()
+    svc.invalidar_cache_stats()
+
+    partidas_mock = [{
+        "id": 9991,
+        "sorteio_id": 9991,
+        "data": "2026-08-24T12:00:00",
+        "participantes": [
+            {"user_id": "u-test-gols-1", "jogador_nome": "Jogador Gols Teste", "time_numero": 1, "gols": 3}
+        ],
+        "votos": [
+            {"user_id": "u-test-gols-1", "gols_marcados": 3, "votos": []}
+        ]
+    }]
+
+    monkeypatch.setattr(svc, '_carregar_partidas', lambda: partidas_mock)
+    monkeypatch.setattr(svc, '_carregar_historico', lambda: [])
+
+    stats = svc.obter_stats_jogador("Jogador Gols Teste", user_id="u-test-gols-1")
+    assert stats["gols"] == 3
+    assert stats["total_partidas"] == 1
+

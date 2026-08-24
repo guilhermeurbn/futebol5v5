@@ -582,6 +582,25 @@ class JogadorStatsService:
 
         jogadores_detalhes = partida.get("jogadores_detalhes", [])
         
+        # Helper para resolver gols em participantes / votos
+        def _extrair_gols_votacao(p_uid: Optional[str], p_jid: Optional[str], p_nome: str) -> int:
+            for part in partida.get("participantes", []):
+                part_nome = part.get("jogador_nome") or part.get("nome_usuario") or part.get("username") or ""
+                part_uid = part.get("user_id") or part.get("owner_user_id")
+                part_jid = part.get("jogador_id") or part.get("id")
+                if _is_match(part_nome, part_uid, part_jid):
+                    g_val = int(part.get("gols", 0) or 0)
+                    if g_val > 0:
+                        return g_val
+            uids = target_user_ids or ({str(p_uid)} if p_uid else set())
+            for v in partida.get("votos", []):
+                v_uid = str(v.get("user_id") or "").strip()
+                if v_uid and (v_uid in uids or (p_uid and v_uid == str(p_uid).strip())):
+                    g_val = int(v.get("gols_marcados", 0) or 0)
+                    if g_val > 0:
+                        return g_val
+            return 0
+
         # 1. Procurar em jogadores_detalhes
         for detalhe in jogadores_detalhes:
             d_nome = detalhe.get("nome", "")
@@ -595,6 +614,10 @@ class JogadorStatsService:
                 nota_val = nota_media_ranking if nota_media_ranking > 0 else float(dados.get("nota_media") or dados.get("nota_partida") or dados.get("nota") or 0.0)
                 dados["nota_media"] = nota_val
                 dados["nota_partida"] = nota_val
+                if int(dados.get("gols", 0) or 0) == 0:
+                    gols_v = _extrair_gols_votacao(d_uid, d_jid, d_nome)
+                    if gols_v > 0:
+                        dados["gols"] = gols_v
                 return dados
 
         # 2. Procurar em participantes (partidas de votação)
@@ -607,11 +630,12 @@ class JogadorStatsService:
                 time_numero = part.get("time_numero")
                 resultado = self._resultado_por_time(partida, time_numero)
                 nota_val = nota_media_ranking if nota_media_ranking > 0 else float(part.get("nota_media") or part.get("nota_partida") or part.get("nota") or 0.0)
+                gols_v = _extrair_gols_votacao(p_uid, p_jid, p_nome)
                 return {
-                    "gols": 0,
-                    "assistencias": 0,
-                    "cartoes_amarelos": 0,
-                    "cartoes_vermelhos": 0,
+                    "gols": gols_v,
+                    "assistencias": int(part.get("assistencias", 0) or 0),
+                    "cartoes_amarelos": int(part.get("cartoes_amarelos", 0) or 0),
+                    "cartoes_vermelhos": int(part.get("cartoes_vermelhos", 0) or 0),
                     "resultado": resultado,
                     "time_numero": time_numero,
                     "posicao": part.get("posicao", "linha"),
@@ -632,8 +656,9 @@ class JogadorStatsService:
                         time_numero = time_idx + 1
                         resultado = self._resultado_por_time(partida, time_numero)
                         nota_val = nota_media_ranking if nota_media_ranking > 0 else float(jogador.get("nota") or 0.0)
+                        gols_v = _extrair_gols_votacao(j_uid, j_jid, j_nome)
                         return {
-                            "gols": 0,
+                            "gols": gols_v,
                             "assistencias": 0,
                             "cartoes_amarelos": 0,
                             "cartoes_vermelhos": 0,

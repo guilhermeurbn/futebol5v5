@@ -551,6 +551,11 @@ class VotacaoService:
         if self._todos_participantes_votaram(alvo):
             self._encerrar_partida_obj(alvo, "sistema", motivo="todos_votaram")
         self._salvar(dados)
+        try:
+            from services.jogador_stats_service import jogador_stats_service
+            jogador_stats_service.invalidar_cache_stats()
+        except Exception:
+            pass
         return voto
 
     def obter_voto_usuario(self, partida_id: int, user_id: Any) -> Optional[Dict]:
