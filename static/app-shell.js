@@ -760,7 +760,18 @@
 
     refreshFooterState(nextUrl);
     runPageHooks();
-    window.scrollTo(0, 0);
+
+    // Preservar e restaurar a posição do scroll ao voltar para a lista de jogadores
+    const isTargetingJogadores = nextUrl.pathname === '/' || nextUrl.pathname.includes('/jogadores');
+    const savedY = sessionStorage.getItem('jogadores_scroll_y');
+
+    if (isTargetingJogadores && savedY !== null) {
+      const scrollPos = parseInt(savedY, 10);
+      window.scrollTo({ top: isNaN(scrollPos) ? 0 : scrollPos, behavior: 'instant' });
+      sessionStorage.removeItem('jogadores_scroll_y');
+    } else {
+      window.scrollTo(0, 0);
+    }
 
     return true;
   }
@@ -955,6 +966,10 @@
       return;
     }
 
+    if (window.location.pathname === '/' || window.location.pathname.includes('/jogadores')) {
+      sessionStorage.setItem('jogadores_scroll_y', String(window.scrollY));
+    }
+
     event.preventDefault();
     loadPage(link.href, { replace: false });
   }, true);
@@ -1000,12 +1015,33 @@
     });
   });
 
-  // Delegação global de clique para abas de perfil (.premium-profile-tab) e modals de segurança
   document.addEventListener('click', event => {
     const profileTab = event.target.closest('.premium-profile-tab');
     if (profileTab) {
+      event.preventDefault();
       if (typeof window.switchPerfilTab === 'function') {
         window.switchPerfilTab(profileTab);
+      } else {
+        const target = profileTab.getAttribute('data-tab-target');
+        if (target) {
+          const targetId = `tab-${target}`;
+          document.querySelectorAll('.premium-profile-tab').forEach(t => {
+            const active = (t.getAttribute('data-tab-target') === target);
+            t.classList.toggle('is-active', active);
+            t.setAttribute('aria-selected', active ? 'true' : 'false');
+          });
+          document.querySelectorAll('.premium-profile-tab-content').forEach(c => {
+            const active = (c.id === targetId);
+            c.classList.toggle('is-active', active);
+            if (active) {
+              c.removeAttribute('hidden');
+              c.style.setProperty('display', 'block', 'important');
+            } else {
+              c.setAttribute('hidden', '');
+              c.style.setProperty('display', 'none', 'important');
+            }
+          });
+        }
       }
       return;
     }

@@ -4,14 +4,48 @@
 
 {% block content %}
 <div class="container profile-page profile-page--public page-container-wide player-workspace-page"
-    style="background: #000000 !important;">
+    style="background: #000000 !important; padding-top: 0 !important;">
+    
+    {% set is_self = is_self if (is_self is defined and is_self is not none) else (target_user is not defined or not target_user or (usuario and target_user and (usuario.id if usuario.id is defined else usuario.get('id')) == (target_user.id if target_user.id is defined else target_user.get('id')))) %}
+    {% set perfil_user = target_user if (target_user is defined and target_user) else (usuario if is_self else {}) %}
+    {% set brand_title = 'Meu Perfil' if is_self else (jogador_proprio.nome if (jogador_proprio and jogador_proprio.nome) else ((perfil_user.nome if perfil_user.nome is defined else perfil_user.get('nome')) or (perfil_user.username if perfil_user.username is defined else perfil_user.get('username')) or 'Perfil do Jogador')) %}
+
+    {% if not is_self %}
+    <!-- Header Fixo de Navegação com Botão Voltar (Apenas ao visualizar perfil de outro jogador) -->
+    <header class="profile-topbar-sticky" style="position: sticky; top: 0; z-index: 100; background: rgba(0, 0, 0, 0.92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid rgba(34, 197, 94, 0.18); padding: calc(0.55rem + max(10px, env(safe-area-inset-top, 0px))) 0.85rem 0.55rem 0.85rem; margin-left: -1rem; margin-right: -1rem; margin-bottom: 1rem;">
+        <div style="max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+            
+            <!-- Botão Voltar Inteligente -->
+            <a href="javascript:void(0)" onclick="voltarParaJogadoresLista()" class="btn-back-link" title="Voltar para os Jogadores" aria-label="Voltar para os Jogadores" style="display: inline-flex; align-items: center; gap: 0.4rem; color: #22c55e; font-weight: 800; font-size: 0.8rem; text-decoration: none; background: rgba(34, 197, 94, 0.12); padding: 0.38rem 0.75rem; border-radius: 999px; border: 1px solid rgba(34, 197, 94, 0.3); box-shadow: 0 0 16px rgba(34, 197, 94, 0.15); transition: all 0.22s ease; cursor: pointer; flex-shrink: 0;">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                <span>Voltar</span>
+            </a>
+
+            <!-- Badge do Perfil Ativo -->
+            <div style="display: inline-flex; align-items: center; gap: 0.4rem; color: #94a3b8; font-size: 0.78rem; font-weight: 700; background: rgba(255,255,255,0.04); padding: 0.35rem 0.75rem; border-radius: 999px; border: 1px solid rgba(255,255,255,0.08); white-space: nowrap; flex-shrink: 0; max-width: 60%; overflow: hidden; text-overflow: ellipsis;">
+                <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #22c55e; flex-shrink: 0;"></span>
+                <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ brand_title }}</span>
+            </div>
+
+        </div>
+    </header>
+    {% endif %}
+
+    <script>
+    function voltarParaJogadoresLista() {
+        if (window.history.length > 1 && document.referrer && (document.referrer.includes(window.location.host) || document.referrer.includes('/jogadores') || document.referrer.endsWith('/'))) {
+            window.history.back();
+        } else {
+            window.location.href = "{{ url_for('jogador.index') }}";
+        }
+    }
+    </script>
+
     <header class="header">
         <div class="header-content">
-            {% set is_self = is_self if (is_self is defined and is_self is not none) else (target_user is not defined or not target_user or (usuario and target_user and (usuario.id if usuario.id is defined else usuario.get('id')) == (target_user.id if target_user.id is defined else target_user.get('id')))) %}
-            {% set perfil_user = target_user if (target_user is defined and target_user) else (usuario if is_self else {}) %}
-            {% set brand_title = 'Meu Perfil' if is_self else (jogador_proprio.nome if jogador_proprio else
-            ((perfil_user.nome if perfil_user.nome is defined else perfil_user.get('nome')) or (perfil_user.username if
-            perfil_user.username is defined else perfil_user.get('username')))) %}
             {% set brand_subtitle = 'Seus dados e estatísticas' if is_self else 'Perfil público do jogador' %}
             {% include '_brand_header.html' %}
         </div>
@@ -196,7 +230,7 @@
 
         <nav class="premium-profile-tabs" aria-label="Navegação do perfil">
             <button class="premium-profile-tab {% if aba_ativa == 'mensagem' %}is-active{% endif %}"
-                data-tab-target="mensagem"
+                data-tab-target="mensagem" onclick="window.switchPerfilTab(this)"
                 aria-selected="{% if aba_ativa == 'mensagem' %}true{% else %}false{% endif %}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                     stroke-linejoin="round" style="width: 20px; height: 20px;">
@@ -209,7 +243,7 @@
                 {% endif %}
             </button>
             <button class="premium-profile-tab {% if aba_ativa == 'estatisticas' %}is-active{% endif %}"
-                data-tab-target="estatisticas"
+                data-tab-target="estatisticas" onclick="window.switchPerfilTab(this)"
                 aria-selected="{% if aba_ativa == 'estatisticas' %}true{% else %}false{% endif %}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                     stroke-linejoin="round" style="width: 20px; height: 20px;">
@@ -220,7 +254,7 @@
                 <span>Estatísticas</span>
             </button>
             <button class="premium-profile-tab {% if aba_ativa == 'partidas' %}is-active{% endif %}"
-                data-tab-target="partidas"
+                data-tab-target="partidas" onclick="window.switchPerfilTab(this)"
                 aria-selected="{% if aba_ativa == 'partidas' %}true{% else %}false{% endif %}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                     stroke-linejoin="round" style="width: 20px; height: 20px;">
@@ -232,7 +266,8 @@
                 <span>Partidas</span>
             </button>
             <button class="premium-profile-tab {% if aba_ativa == 'duelo' %}is-active{% endif %}"
-                data-tab-target="duelo" aria-selected="{% if aba_ativa == 'duelo' %}true{% else %}false{% endif %}">
+                data-tab-target="duelo" onclick="window.switchPerfilTab(this)"
+                aria-selected="{% if aba_ativa == 'duelo' %}true{% else %}false{% endif %}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                     stroke-linejoin="round" style="width: 20px; height: 20px;">
                     <path d="M14.5 17.5L3 6V3h3l11.5 11.5" />
@@ -243,6 +278,7 @@
                 <span>Duelo X1</span>
             </button>
             <button class="premium-profile-tab {% if aba_ativa == 'mais' %}is-active{% endif %}" data-tab-target="mais"
+                onclick="window.switchPerfilTab(this)"
                 aria-selected="{% if aba_ativa == 'mais' %}true{% else %}false{% endif %}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
                     stroke-linejoin="round" style="width: 20px; height: 20px;">
@@ -742,7 +778,6 @@
                     </a>
                     {% endfor %}
                 </div>
-                </div>
                 {% else %}
                 <div class="premium-profile-empty">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -778,17 +813,15 @@
 
                     {% set current_jog_identifier = (
                         jogador.id if (jogador is defined and jogador and jogador.id is defined and jogador.id)
-                        else (jogador.get('id') if (jogador is defined and jogador and jogador.get is defined and jogador.get('id'))
                         else (jogador_proprio.id if (jogador_proprio is defined and jogador_proprio and jogador_proprio.id is defined and jogador_proprio.id)
-                        else (jogador_proprio.get('id') if (jogador_proprio is defined and jogador_proprio and jogador_proprio.get is defined and jogador_proprio.get('id'))
-                        else (stats_jogador.jogador_id if (stats_jogador is defined and stats_jogador and stats_jogador.jogador_id is defined and stats_jogador.jogador_id)
-                        else (stats_jogador.jogador_nome if (stats_jogador is defined and stats_jogador and stats_jogador.jogador_nome is defined and stats_jogador.jogador_nome)
                         else (jogador.nome if (jogador is defined and jogador and jogador.nome is defined and jogador.nome)
                         else (jogador_proprio.nome if (jogador_proprio is defined and jogador_proprio and jogador_proprio.nome is defined and jogador_proprio.nome)
+                        else (stats_jogador.jogador_id if (stats_jogador is defined and stats_jogador and stats_jogador.jogador_id is defined and stats_jogador.jogador_id)
+                        else (stats_jogador.jogador_nome if (stats_jogador is defined and stats_jogador and stats_jogador.jogador_nome is defined and stats_jogador.jogador_nome)
                         else (usuario.nome if (usuario is defined and usuario and usuario.nome is defined and usuario.nome)
                         else (usuario.username if (usuario is defined and usuario and usuario.username is defined and usuario.username)
                         else (usuario.id if (usuario is defined and usuario and usuario.id is defined and usuario.id)
-                        else session.get('user_id', '')))))))))))
+                        else session.get('user_id', '')))))))))
                     ) %}
 
                     <!-- Seletor Fluido de Oponente -->
@@ -799,11 +832,12 @@
                         <select id="dueloOponenteSelect" data-jogador-id="{{ current_jog_identifier }}" onchange="if (window.carregarDueloPerfil) window.carregarDueloPerfil(this.value, this.getAttribute('data-jogador-id'))"
                             style="background: #121217; color: #ffffff; border: 1px solid rgba(34, 197, 94, 0.4); border-radius: 12px; padding: 0.65rem 1rem; width: 100%; font-size: 0.9rem; font-weight: 700; cursor: pointer; outline: none; box-shadow: 0 4px 14px rgba(0,0,0,0.3);">
                             {% for j in todos_jogadores_duelo|default([]) %}
-                            {% set j_id = j.id if j.id is defined else (j.get('id') if j.get is defined else '') %}
-                            {% set j_nome = j.nome if j.nome is defined else (j.get('nome') if j.get is defined else '') %}
-                            {% set j_nivel = j.nivel if j.nivel is defined else (j.get('nivel') if j.get is defined else 5.5) %}
+                            {% set j_id = j.id if (j.id is defined and j.id) else (j.get('id') if (j.get is defined and j.get('id')) else '') %}
+                            {% set j_nome = j.nome if (j.nome is defined and j.nome) else (j.get('nome') if (j.get is defined and j.get('nome')) else '') %}
+                            {% set j_nivel_raw = j.nivel if (j.nivel is defined and j.nivel is not none) else (j.get('nivel') if (j.get is defined and j.get('nivel') is not none) else 5.5) %}
+                            {% set j_nivel_val = (j_nivel_raw|default(5.5)|float) %}
                             {% if j_id|string != current_jog_identifier|string and j_nome|string|lower != current_jog_identifier|string|lower %}
-                            <option value="{{ j_id if j_id else j_nome }}">{{ j_nome }} (⭐ {{ '%.1f'|format(j_nivel|float) }})</option>
+                            <option value="{{ j_id if j_id else j_nome }}">{{ j_nome }} (⭐ {{ '%.1f'|format(j_nivel_val) }})</option>
                             {% endif %}
                             {% endfor %}
                         </select>
@@ -822,6 +856,8 @@
         {# MAIS TAB #}
         <div class="premium-profile-tab-content {% if aba_ativa == 'mais' %}is-active{% endif %}" id="tab-mais"
             {% if aba_ativa !='mais' %}hidden style="display: none !important;"{% endif %}>
+            
+            {% if is_self %}
             <div class="premium-profile-panel profile-account-access" style="border: 1px solid rgba(167, 139, 250, 0.25); background: rgba(18, 18, 23, 0.95); margin-top: 0;">
                 <!-- Header da Seção Mais -->
                 <div style="border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 1rem; margin-bottom: 1.25rem;">
@@ -855,7 +891,6 @@
 
                 <!-- Bloco de Ações (Resetar Senha, Apagar Conta, Logout) -->
                 <div style="display: flex; flex-direction: column; gap: 0.85rem;">
-                    <!-- Botão Resetar / Alterar Senha -->
                     <button type="button" class="btn btn-secondary" data-open-password-dialog aria-haspopup="dialog"
                         style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: rgba(167, 139, 250, 0.12); border: 1px solid rgba(167, 139, 250, 0.3); color: #ffffff; padding: 0.85rem 1.25rem; border-radius: 12px; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: all 0.2s ease;">
                         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#a78bfa" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -865,7 +900,6 @@
                         <span>Resetar / Alterar Senha</span>
                     </button>
 
-                    <!-- Botão Sair do Aplicativo -->
                     <form method="post" action="{{ url_for('auth.logout') }}" style="width: 100%; margin: 0;">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button class="btn btn-secondary" type="submit"
@@ -879,7 +913,6 @@
                         </button>
                     </form>
 
-                    <!-- Botão Apagar Conta (se não for admin) -->
                     {% if usuario.role not in ['admin'] %}
                     <div style="margin-top: 0.5rem; border-top: 1px solid rgba(239, 68, 68, 0.15); padding-top: 0.85rem;">
                         <button class="btn btn-primary" type="button" data-open-delete-dialog
@@ -896,6 +929,64 @@
                     {% endif %}
                 </div>
             </div>
+            {% else %}
+            <!-- Painel de Opções Públicas do Atleta (Ao visualizar outro jogador) -->
+            <div class="premium-profile-panel" style="border: 1px solid rgba(167, 139, 250, 0.25); background: rgba(18, 18, 23, 0.95); margin-top: 0;">
+                <div style="border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 1rem; margin-bottom: 1.25rem;">
+                    <div style="font-size: 0.75rem; font-weight: 700; color: #a78bfa; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.2rem; display: flex; align-items: center; gap: 0.4rem;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#a78bfa" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="12" y1="16" x2="12" y2="12" />
+                            <line x1="12" y1="8" x2="12.01" y2="8" />
+                        </svg>
+                        <span>INFORMAÇÕES DO ATLETA</span>
+                    </div>
+                    <h2 class="premium-profile-panel-title" style="margin: 0; font-size: 1.3rem;">
+                        Opções & Interação
+                    </h2>
+                </div>
+
+                <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 14px; padding: 0.85rem 1.15rem; margin-bottom: 1.25rem;">
+                    <div class="premium-profile-cred-row" style="padding: 0.5rem 0;">
+                        <span class="premium-profile-cred-label">Nome do Atleta</span>
+                        <span class="premium-profile-cred-value">{{ jogador.nome if (tem_jogador and jogador) else brand_title }}</span>
+                    </div>
+                    <div class="premium-profile-cred-row" style="padding: 0.5rem 0;">
+                        <span class="premium-profile-cred-label">Posição Principal</span>
+                        <span class="premium-profile-cred-value" style="color: #22c55e;">
+                            {{ 'Goleiro' if (tem_jogador and jogador and jogador.posicao == 'goleiro') else 'Linha' }}
+                        </span>
+                    </div>
+                    <div class="premium-profile-cred-row" style="padding: 0.5rem 0;">
+                        <span class="premium-profile-cred-label">Categoria de Atleta</span>
+                        <span class="premium-profile-cred-value" style="color: #a78bfa;">
+                            {{ 'Mensalista Fixo' if (tem_jogador and jogador and jogador.tipo == 'fixo') else 'Avulso' }}
+                        </span>
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+                    <button type="button" class="btn btn-primary" onclick="window.switchPerfilTab('mensagem')"
+                        style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: rgba(34, 197, 94, 0.15) !important; border: 1px solid rgba(34, 197, 94, 0.4) !important; color: #22c55e !important; padding: 0.85rem 1.25rem; border-radius: 12px; font-weight: 700; font-size: 0.95rem; cursor: pointer;">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                        </svg>
+                        <span>Enviar Mensagem Direta</span>
+                    </button>
+
+                    <button type="button" class="btn btn-secondary" onclick="window.switchPerfilTab('duelo')"
+                        style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 0.85rem 1.25rem; border-radius: 12px; font-weight: 700; font-size: 0.95rem; cursor: pointer;">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14.5 17.5L3 6V3h3l11.5 11.5" />
+                            <path d="M13 19l6-6" />
+                            <path d="M16 16l4 4" />
+                            <path d="M19 21l2-2" />
+                        </svg>
+                        <span>Simular Duelo X1</span>
+                    </button>
+                </div>
+            </div>
+            {% endif %}
         </div>
 
     </main>
@@ -1110,8 +1201,16 @@
         let target = '';
         if (typeof targetOrElement === 'string') {
             target = targetOrElement.replace('#', '').replace('tab-', '');
-        } else if (targetOrElement && targetOrElement.dataset) {
-            target = targetOrElement.dataset.tabTarget;
+        } else if (targetOrElement) {
+            if (targetOrElement.getAttribute) {
+                target = targetOrElement.getAttribute('data-tab-target') || (targetOrElement.dataset ? targetOrElement.dataset.tabTarget : '');
+            }
+            if (!target && targetOrElement.closest) {
+                const btn = targetOrElement.closest('.premium-profile-tab');
+                if (btn) {
+                    target = btn.getAttribute('data-tab-target') || (btn.dataset ? btn.dataset.tabTarget : '');
+                }
+            }
         }
 
         if (!target) return;
@@ -1121,7 +1220,8 @@
         const contents = document.querySelectorAll('.premium-profile-tab-content');
 
         tabs.forEach(t => {
-            const active = (t.dataset.tabTarget === target);
+            const tTarget = t.getAttribute('data-tab-target') || (t.dataset ? t.dataset.tabTarget : '');
+            const active = (tTarget === target);
             t.classList.toggle('is-active', active);
             t.setAttribute('aria-selected', active ? 'true' : 'false');
         });
@@ -1130,7 +1230,6 @@
             const id = c.getAttribute('id');
             const active = (id === targetId);
             c.classList.toggle('is-active', active);
-            c.hidden = !active;
             if (active) {
                 c.removeAttribute('hidden');
                 c.style.setProperty('display', 'block', 'important');
@@ -1157,9 +1256,9 @@
                         }
                     }
                 }
-                const jogId = select.dataset.jogadorId || select.getAttribute('data-jogador-id') || '{{ current_jog_identifier }}';
+                const jogId = select.dataset ? (select.dataset.jogadorId || select.getAttribute('data-jogador-id')) : select.getAttribute('data-jogador-id');
                 if (opId && typeof window.carregarDueloPerfil === 'function') {
-                    window.carregarDueloPerfil(opId, jogId);
+                    window.carregarDueloPerfil(opId, jogId || '{{ current_jog_identifier }}');
                 }
             }
         }
@@ -1182,6 +1281,8 @@
             const activeTab = document.querySelector('.premium-profile-tab.is-active');
             if (activeTab) {
                 window.switchPerfilTab(activeTab);
+            } else if (tabs.length > 0) {
+                window.switchPerfilTab(tabs[0]);
             }
         }
 

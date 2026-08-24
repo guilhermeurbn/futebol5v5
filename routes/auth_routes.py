@@ -1132,7 +1132,19 @@ def _obter_perfil_publico_dados(identifier):
     # 3. Tentar por nome de jogador
     if not jogador:
         try:
-            todos = jogador_service.listar_todos()
+            jogador = jogador_service.obter_por_nome(identifier_str) or jogador_service.obter_por_nome(identifier_clean)
+            if jogador and not owner_user:
+                u_id = getattr(jogador, 'user_id', None) or getattr(jogador, 'owner_user_id', None)
+                if u_id:
+                    owner_user = auth_service.obter_por_id(u_id)
+                if not owner_user and jogador.nome:
+                    owner_user = auth_service.obter_por_nome(jogador.nome) or auth_service.obter_por_username(jogador.nome)
+        except Exception:
+            jogador = None
+
+    if not jogador:
+        try:
+            todos = jogador_service.listar()
             for j in todos:
                 j_nome = (j.nome or "").strip().lower()
                 j_nome_slug = j_nome.replace(" ", "_")

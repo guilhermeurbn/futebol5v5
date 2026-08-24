@@ -568,6 +568,15 @@
 
         // ===== ROLAGEM E REALCE APÓS EDIÇÃO =====
         window.addEventListener('DOMContentLoaded', () => {
+            const savedY = sessionStorage.getItem('jogadores_scroll_y');
+            if (savedY !== null) {
+                const yPos = parseInt(savedY, 10);
+                if (!isNaN(yPos) && yPos > 0) {
+                    window.scrollTo({ top: yPos, behavior: 'instant' });
+                }
+                setTimeout(() => sessionStorage.removeItem('jogadores_scroll_y'), 500);
+            }
+
             const hash = window.location.hash;
             if (hash && hash.startsWith('#player-')) {
                 const card = document.querySelector(hash);
