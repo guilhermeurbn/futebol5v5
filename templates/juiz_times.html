@@ -97,15 +97,30 @@
                     <span><strong>Exportar PDF</strong><small>Visualizar/Imprimir</small></span>
                 </a>
 
+                {% if not resultado_partida %}
+                <a class="judge-action-btn judge-action-btn--swap"
+                    href="{{ url_for('juiz.juiz_trocar_jogadores', sorteio_id=sorteio.id) }}"
+                    aria-label="Trocar Jogadores" title="Trocar Jogadores">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="m16 3 4 4-4 4" />
+                        <path d="M20 7H4" />
+                        <path d="m8 21-4-4 4 4" />
+                        <path d="M4 17h16" />
+                    </svg>
+                    <span><strong>Trocar Jogadores</strong><small>Alterar Seleção</small></span>
+                </a>
+                {% endif %}
+
                 <a class="judge-action-btn judge-action-btn--vote"
                     href="{{ url_for('votacao.votacao_admin_page', sorteio_id=sorteio.id) }}"
-                    aria-label="Ir para votações" title="Ir para votações">
+                    aria-label="Iniciar Rodada" title="Iniciar Rodada">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
                         stroke-linejoin="round">
                         <path d="m9 11 3 3L22 4" />
                         <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
                     </svg>
-                    <span><strong>Iniciar Votação</strong><small>Melhor do Jogo</small></span>
+                    <span><strong>Iniciar Rodada</strong><small>Painel da Rodada</small></span>
                 </a>
             </div>
             <p class="judge-copy-feedback" id="copiarSorteioStatus" role="status" aria-live="polite"

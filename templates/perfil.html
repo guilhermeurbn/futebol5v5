@@ -1634,7 +1634,6 @@
             const m1 = buildMetricCard("GOLS", j1Gols, j2Gols, j1Gols, j2Gols, iconGolsG, iconGolsB);
             const m2 = buildMetricCard("NOTA MÉDIA", j1Nota.toFixed(2), j2Nota.toFixed(2), j1Nota, j2Nota, iconNotaG, iconNotaB);
             const m3 = buildMetricCard("VITÓRIAS", j1Wins, j2Wins, j1Wins, j2Wins, iconWinsG, iconWinsB);
-            const m4 = buildMetricCard("APROVEITAMENTO", j1Pct + '%', j2Pct + '%', j1Pct, j2Pct, iconAppG, iconAppB);
 
             container.innerHTML = `
             <!-- Placa do Duelo Simétrica -->
@@ -1668,7 +1667,6 @@
                 ${m1.html}
                 ${m2.html}
                 ${m3.html}
-                ${m4.html}
             </div>
 
             <!-- Retrospecto de Confrontos Diretos Minimalista -->

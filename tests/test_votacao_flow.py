@@ -277,7 +277,7 @@ def test_judge_draw_page_uses_dedicated_times_workspace(monkeypatch):
     assert response.status_code == 200
     assert 'judge-teams-page' in body
     assert 'Times' in body
-    assert 'Ir para votações' in body
+    assert 'Iniciar Rodada' in body
     assert 'Histórico de sorteios' not in body
 
 

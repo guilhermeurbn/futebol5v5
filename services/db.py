@@ -78,6 +78,9 @@ def _candidate_paths(relative_path: str):
 
 
 def _get_cached(namespace: str):
+    if namespace == "users":
+        return None  # Nunca servir credenciais obsoletas de usuários do cache em memória
+
     if namespace not in _cache:
         return None
 

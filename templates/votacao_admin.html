@@ -22,7 +22,7 @@
                 {% set brand_subtitle = 'Conduza a avaliação da partida em duas etapas' %}
                 {% include '_brand_header.html' %}
             </div>
-            <span class="judge-sorteio-badge-sutil">Sorteio #{{ selected_sorteio_id or '-' }}</span>
+            <span class="judge-sorteio-badge-sutil">Sorteio #{{ proximo_sorteio_num if proximo_sorteio_num is defined and proximo_sorteio_num else (selected_sorteio_id or 1) }}</span>
         </div>
     </header>
 

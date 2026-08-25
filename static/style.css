@@ -12717,18 +12717,35 @@ tbody td code {
 
 .judge-voting-step {
   position: relative;
+  background:
+    radial-gradient(circle at top left, rgba(34, 197, 94, 0.09), transparent 40%),
+    radial-gradient(circle at top right, rgba(168, 85, 247, 0.07), transparent 35%),
+    linear-gradient(155deg, rgba(255, 255, 255, 0.03), transparent 45%),
+    #14141b !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4) !important;
 }
 
 .judge-voting-step.is-complete {
-  border-color: rgba(16, 185, 129, 0.35);
+  border-color: rgba(34, 197, 94, 0.4) !important;
+  background:
+    radial-gradient(circle at top left, rgba(34, 197, 94, 0.12), transparent 40%),
+    linear-gradient(155deg, rgba(255, 255, 255, 0.03), transparent 45%),
+    #14141b !important;
 }
 
 .judge-voting-step.is-active {
-  border-color: rgba(34, 197, 94, 0.42);
+  border-color: rgba(168, 85, 247, 0.45) !important;
+  background:
+    radial-gradient(circle at top left, rgba(168, 85, 247, 0.12), transparent 40%),
+    linear-gradient(155deg, rgba(255, 255, 255, 0.03), transparent 45%),
+    #14141b !important;
 }
 
 .judge-voting-step.is-locked {
-  opacity: 0.62;
+  opacity: 0.72 !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
 }
 
 .judge-voting-step__header {
@@ -12737,15 +12754,22 @@ tbody td code {
 }
 
 .judge-voting-step__number {
-  display: grid;
-  place-items: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 12px;
-  background: #2c3e50;
-  /* solid professional color */
-  color: #fff;
-  font-weight: 900;
+  display: grid !important;
+  place-items: center !important;
+  width: 2.6rem !important;
+  height: 2.6rem !important;
+  border-radius: 12px !important;
+  background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+  color: #000000 !important;
+  font-weight: 900 !important;
+  font-size: 1.1rem !important;
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35) !important;
+}
+
+.judge-voting-step:nth-child(2) .judge-voting-step__number {
+  background: linear-gradient(135deg, #a855f7, #7c3aed) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(168, 85, 247, 0.35) !important;
 }
 
 .judge-voting-step__header p {
@@ -17032,29 +17056,63 @@ body.is-referee-layout .brand-logo-image {
   width: auto !important;
 }
 
-/* Adjust footer links for 7 icons layout to prevent overflow on mobile */
+/* Adjust footer links for Juiz layout to ensure active state perfectly wraps icon + label */
 body.is-referee-layout .site-footer__link {
-  width: 3rem !important;
-  height: 3rem !important;
-  border-radius: 12px !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 48px !important;
+  padding: 0.35rem 0.2rem !important;
+  border-radius: 14px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
 }
 
 body.is-referee-layout .site-footer__icon {
-  width: 1.2rem !important;
-  height: 1.2rem !important;
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+  flex-shrink: 0 !important;
+}
+
+body.is-referee-layout .site-footer__label {
+  font-size: 0.65rem !important;
+  font-weight: 700 !important;
+  line-height: 1.1 !important;
+  margin-top: 0.2rem !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 100% !important;
+  text-align: center !important;
 }
 
 @media (max-width: 640px) {
   body.is-referee-layout .site-footer__link {
-    width: 2.65rem !important;
-    height: 2.65rem !important;
-    border-radius: 10px !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 46px !important;
+    padding: 0.3rem 0.15rem !important;
+    border-radius: 12px !important;
   }
 
   body.is-referee-layout .site-footer__icon {
-    width: 1.1rem !important;
-    height: 1.1rem !important;
+    width: 1.15rem !important;
+    height: 1.15rem !important;
   }
+
+  body.is-referee-layout .site-footer__label {
+    font-size: 0.58rem !important;
+    letter-spacing: -0.01em !important;
+  }
+}
+
+body.is-referee-layout .site-footer__link.is-active {
+  background: rgba(34, 197, 94, 0.14) !important;
+  border: 1px solid rgba(34, 197, 94, 0.4) !important;
+  border-radius: 14px !important;
+  transform: scale(0.96) !important;
 }
 
 /* Card de Criar Partida Interativo & Premium */
@@ -17527,7 +17585,7 @@ body.judge-times-edit-mode .judge-share-vote-card {
 
 .judge-share-vote-actions {
   display: grid !important;
-  grid-template-columns: repeat(3, 1fr) !important;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)) !important;
   gap: 0.85rem !important;
 }
 
@@ -17599,6 +17657,18 @@ body.judge-times-edit-mode .judge-share-vote-card {
   background: rgba(56, 189, 248, 0.16) !important;
   border-color: rgba(56, 189, 248, 0.45) !important;
   box-shadow: 0 10px 25px rgba(56, 189, 248, 0.25) !important;
+}
+
+.judge-action-btn--swap {
+  color: #f59e0b !important;
+  background: rgba(245, 158, 11, 0.08) !important;
+  border: 1px solid rgba(245, 158, 11, 0.22) !important;
+}
+
+.judge-action-btn--swap:hover {
+  background: rgba(245, 158, 11, 0.16) !important;
+  border-color: rgba(245, 158, 11, 0.45) !important;
+  box-shadow: 0 10px 25px rgba(245, 158, 11, 0.25) !important;
 }
 
 .judge-action-btn--vote {
@@ -20195,18 +20265,18 @@ html,
 
 /* Subtle Sorteio Badge tag */
 .judge-sorteio-badge-sutil {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: var(--judge-muted);
-  border-radius: 8px;
-  padding: 0.25rem 0.55rem;
-  font-size: 0.74rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+  background: rgba(34, 197, 94, 0.12) !important;
+  border: 1px solid rgba(34, 197, 94, 0.35) !important;
+  color: #4ade80 !important;
+  border-radius: 12px !important;
+  padding: 0.35rem 0.8rem !important;
+  font-size: 0.82rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.03em !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.15) !important;
 }
 
 /* ============================================================

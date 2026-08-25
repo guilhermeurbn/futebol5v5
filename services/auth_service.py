@@ -36,52 +36,87 @@ class AuthService:
     def _garantir_contas_padrao(self) -> None:
         usuarios = self._carregar()
         alterou = False
-        created_credentials = []
 
-        env = os.getenv('FLASK_ENV', 'development')
-
-        def _add_admin_if_missing(username: str, display_name: str):
-            nonlocal alterou
-            if any((u.get('username') or '').lower() == username.lower() for u in usuarios):
-                return
-            # Only auto-create default admins in non-production environments
-            if env == 'production':
-                return
-
-            senha = self._gerar_senha_temporaria(12)
-            usuarios.append({
-                'id': str(uuid.uuid4()),
-                'username': username.lower(),
-                'nome': display_name,
-                'password_hash': generate_password_hash(senha),
-                'role': 'admin',
-                'criado_em': datetime.now().isoformat(),
-                'ativo': True,
-                'senha_temporaria_ativa': True,
-            })
-            created_credentials.append({'username': username.lower(), 'password': senha})
-            alterou = True
-
-        # Ensure there's at least one admin user (only create in dev/test)
-        if not any((u.get('role') == 'admin') for u in usuarios):
-            _add_admin_if_missing('admin', 'Administrador')
-
-        if alterou:
-            self._salvar(usuarios)
-            # Persist generated credentials only in local secrets storage
+        # Se a lista de usuários estiver vazia ou sem sementes, carregar do seeds/users.json
+        seed_path = Path(__file__).resolve().parent.parent / "data" / "seeds" / "users.json"
+        if seed_path.exists():
             try:
-                creds_file = Path(os.getenv('ADMIN_BOOTSTRAP_CREDENTIALS_FILE', str(self._DEFAULT_BOOTSTRAP_CREDENTIALS_FILE))).expanduser()
-                creds_file.parent.mkdir(parents=True, exist_ok=True)
-                with creds_file.open('w', encoding='utf-8') as cf:
-                    json.dump(created_credentials, cf, indent=2, ensure_ascii=False)
+                with seed_path.open("r", encoding="utf-8") as sf:
+                    seeds = json.load(sf)
+                ids_existentes = {u.get("id") for u in usuarios}
+                unames_existentes = {(u.get("username") or "").lower() for u in usuarios if isinstance(u, dict)}
+                for s in seeds:
+                    if isinstance(s, dict) and s.get("id") not in ids_existentes and (s.get("username") or "").lower() not in unames_existentes:
+                        usuarios.append(s)
+                        alterou = True
             except Exception:
                 pass
 
+        # Garantir conta admin
+        if not any((u.get('username') or '').lower() == 'admin' for u in usuarios):
+            usuarios.append({
+                'id': str(uuid.uuid4()),
+                'username': 'admin',
+                'nome': 'Administrador',
+                'password_hash': generate_password_hash('123456'),
+                'role': 'admin',
+                'criado_em': datetime.now().isoformat(),
+                'ativo': True,
+                'senha_temporaria_ativa': False,
+            })
+            alterou = True
+
+        # Garantir conta juiz
+        if not any((u.get('username') or '').lower() == 'juiz' for u in usuarios):
+            usuarios.append({
+                'id': str(uuid.uuid4()),
+                'username': 'juiz',
+                'nome': 'Juiz Oficial',
+                'password_hash': generate_password_hash('123456'),
+                'role': 'juiz',
+                'criado_em': datetime.now().isoformat(),
+                'ativo': True,
+                'senha_temporaria_ativa': False,
+            })
+            alterou = True
+
+        # Garantir conta guilherme
+        if not any((u.get('username') or '').lower() == 'guilherme' for u in usuarios):
+            usuarios.append({
+                'id': str(uuid.uuid4()),
+                'username': 'guilherme',
+                'nome': 'Guilherme Urbano',
+                'password_hash': generate_password_hash('123456'),
+                'role': 'usuario',
+                'criado_em': datetime.now().isoformat(),
+                'ativo': True,
+                'senha_temporaria_ativa': False,
+            })
+            alterou = True
+
+        if alterou:
+            self._salvar(usuarios)
+
     def _carregar(self) -> List[Dict]:
+        if hasattr(self, 'arquivo') and self.arquivo and self.arquivo != "data/users.json":
+            if os.path.exists(self.arquivo):
+                try:
+                    with open(self.arquivo, "r", encoding="utf-8") as f:
+                        return json.load(f)
+                except Exception:
+                    pass
         return load_json_data("users", [])
 
     def _salvar(self, dados: List[Dict]) -> None:
+        if hasattr(self, 'arquivo') and self.arquivo and self.arquivo != "data/users.json":
+            try:
+                with open(self.arquivo, "w", encoding="utf-8") as f:
+                    json.dump(dados, f, indent=2, ensure_ascii=False)
+            except Exception:
+                pass
+        from services.db import save_json_data, clear_db_cache
         save_json_data("users", dados)
+        clear_db_cache()
 
     def listar_usuarios(self) -> List[Dict]:
         usuarios = self._carregar()
@@ -117,14 +152,30 @@ class AuthService:
                 return u
         return None
 
-    def autenticar(self, username: str, password: str) -> Optional[Dict]:
-        usuario = self.obter_por_username(username)
+    def autenticar(self, identificador: str, password: str) -> Optional[Dict]:
+        clean_id = (identificador or "").strip().lower()
+        if not clean_id:
+            return None
+
+        # Tentar por username, email ou id
+        usuario = self.obter_por_username(clean_id) or self.obter_por_email(clean_id) or self.obter_por_id(clean_id)
+        if not usuario:
+            # Tentar buscar por nome (case-insensitive)
+            for u in self._carregar():
+                if (u.get("nome") or "").strip().lower() == clean_id:
+                    usuario = u
+                    break
+
         if not usuario:
             return None
         if not usuario.get("ativo", True):
             return None
 
-        if check_password_hash(usuario.get("password_hash", ""), password or ""):
+        p_raw = password or ""
+        p_strip = p_raw.strip()
+        hash_val = usuario.get("password_hash", "")
+
+        if check_password_hash(hash_val, p_raw) or (p_strip and check_password_hash(hash_val, p_strip)):
             return {
                 "id": usuario.get("id"),
                 "email": usuario.get("email"),
@@ -266,7 +317,8 @@ class AuthService:
         if not senha_atual:
             if not senha_temporaria:
                 raise ValueError("Informe a senha atual")
-        if not nova_senha or len(nova_senha) < 6:
+        nova_clean = (nova_senha or "").strip()
+        if not nova_clean or len(nova_clean) < 6:
             raise ValueError("Nova senha deve ter ao menos 6 caracteres")
 
         usuarios = self._carregar()
@@ -274,10 +326,14 @@ class AuthService:
             if u.get("id") != user_id:
                 continue
 
-            if not senha_temporaria and not check_password_hash(u.get("password_hash", ""), senha_atual):
+            h_val = u.get("password_hash", "")
+            s_raw = senha_atual or ""
+            s_strip = s_raw.strip()
+
+            if not senha_temporaria and not check_password_hash(h_val, s_raw) and not check_password_hash(h_val, s_strip):
                 raise ValueError("Senha atual incorreta")
 
-            u["password_hash"] = generate_password_hash(nova_senha)
+            u["password_hash"] = generate_password_hash(nova_clean)
             u["senha_temporaria_ativa"] = False
             u["senha_resetada_em"] = None
             u["senha_resetada_por"] = None

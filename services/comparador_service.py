@@ -74,31 +74,102 @@ class ComparadorService:
         nome1 = j1.get("nome")
         nome2 = j2.get("nome")
 
-        # Obter ranking geral para extrair estatísticas consolidadas de cada um
+        # Usar JogadorStatsService para garantir que todas as estatísticas (gols, vitórias, nota_média) venham de forma robusta e precisa
+        stats1_raw = {}
+        stats2_raw = {}
+        try:
+            from services.jogador_stats_service import JogadorStatsService
+            jss = JogadorStatsService()
+            if j1:
+                stats1_raw = jss.obter_stats_jogador(
+                    nome1,
+                    jogador_id=j1.get("id"),
+                    user_id=j1.get("owner_user_id") or j1.get("id")
+                ) or {}
+            if j2:
+                stats2_raw = jss.obter_stats_jogador(
+                    nome2,
+                    jogador_id=j2.get("id"),
+                    user_id=j2.get("owner_user_id") or j2.get("id")
+                ) or {}
+        except Exception as e:
+            logger.warning(f"Erro ao obter estatísticas via JogadorStatsService no Duelo: {e}")
+
+        # Obter ranking geral para fallback de extração
         dados_geral = self.votacao_service.ranking_jogadores_geral(limite=500)
         ranking_list = dados_geral.get("ranking", [])
 
-        stats1 = next((item for item in ranking_list if item.get("jogador_nome") == nome1), {
-            "jogador_nome": nome1, "jogos": 0, "vitorias": 0, "gols": 0, "destaques": 0, "nota_media": 0.0, "pontos": 0.0
-        })
-        stats2 = next((item for item in ranking_list if item.get("jogador_nome") == nome2), {
-            "jogador_nome": nome2, "jogos": 0, "vitorias": 0, "gols": 0, "destaques": 0, "nota_media": 0.0, "pontos": 0.0
-        })
+        def _encontrar_no_ranking(j_dict, nome):
+            if not j_dict and not nome:
+                return {}
+            j_id = str(j_dict.get("id") or "").strip().lower()
+            j_owner = str(j_dict.get("owner_user_id") or "").strip().lower()
+            n_lower = str(nome or "").strip().lower()
 
-        # Adicionar dados de perfil
-        stats1["foto_url"] = j1.get("foto_url") or stats1.get("foto_url") or j1.get("foto") or stats1.get("foto") or ""
-        stats1["foto"] = stats1["foto_url"]
-        stats1["nivel"] = j1.get("nivel", 5.5)
-        stats1["posicao"] = j1.get("posicao", "linha")
-        stats1["tipo"] = j1.get("tipo", "avulso")
-        stats1["pct_vitorias"] = round((stats1["vitorias"] / stats1["jogos"] * 100), 1) if stats1.get("jogos") else 0.0
+            for item in ranking_list:
+                item_jid = str(item.get("jogador_id") or item.get("id") or "").strip().lower()
+                item_uid = str(item.get("user_id") or item.get("owner_user_id") or "").strip().lower()
+                if (j_id and (j_id == item_jid or j_id == item_uid)) or (j_owner and (j_owner == item_jid or j_owner == item_uid)):
+                    return item
 
-        stats2["foto_url"] = j2.get("foto_url") or stats2.get("foto_url") or j2.get("foto") or stats2.get("foto") or ""
-        stats2["foto"] = stats2["foto_url"]
-        stats2["nivel"] = j2.get("nivel", 5.5)
-        stats2["posicao"] = j2.get("posicao", "linha")
-        stats2["tipo"] = j2.get("tipo", "avulso")
-        stats2["pct_vitorias"] = round((stats2["vitorias"] / stats2["jogos"] * 100), 1) if stats2.get("jogos") else 0.0
+            for item in ranking_list:
+                item_nome = str(item.get("jogador_nome") or item.get("nome") or "").strip().lower()
+                if n_lower and item_nome == n_lower:
+                    return item
+
+            for item in ranking_list:
+                item_nome = str(item.get("jogador_nome") or item.get("nome") or "").strip().lower()
+                if n_lower and (n_lower in item_nome or item_nome in n_lower):
+                    return item
+
+            return {}
+
+        rk1 = _encontrar_no_ranking(j1, nome1)
+        rk2 = _encontrar_no_ranking(j2, nome2)
+
+        gols1 = stats1_raw.get("gols") if (stats1_raw.get("gols") is not None and stats1_raw.get("gols") > 0) else rk1.get("gols", 0)
+        gols2 = stats2_raw.get("gols") if (stats2_raw.get("gols") is not None and stats2_raw.get("gols") > 0) else rk2.get("gols", 0)
+
+        vitorias1 = stats1_raw.get("vitorias") if stats1_raw.get("vitorias") is not None else rk1.get("vitorias", 0)
+        vitorias2 = stats2_raw.get("vitorias") if stats2_raw.get("vitorias") is not None else rk2.get("vitorias", 0)
+
+        jogos1 = stats1_raw.get("jogos") if stats1_raw.get("jogos") is not None else rk1.get("jogos", 0)
+        jogos2 = stats2_raw.get("jogos") if stats2_raw.get("jogos") is not None else rk2.get("jogos", 0)
+
+        nota1 = stats1_raw.get("nota_media") if stats1_raw.get("nota_media") is not None else rk1.get("nota_media", 0.0)
+        nota2 = stats2_raw.get("nota_media") if stats2_raw.get("nota_media") is not None else rk2.get("nota_media", 0.0)
+
+        stats1 = {
+            "jogador_nome": nome1,
+            "jogos": jogos1,
+            "vitorias": vitorias1,
+            "gols": gols1,
+            "destaques": stats1_raw.get("destaques") or rk1.get("destaques", 0),
+            "nota_media": float(nota1 or 0.0),
+            "pontos": float(stats1_raw.get("pontos") or rk1.get("pontos", 0.0) or 0.0),
+            "foto_url": j1.get("foto_url") or j1.get("foto") or stats1_raw.get("foto_url") or rk1.get("foto_url") or "",
+            "foto": j1.get("foto_url") or j1.get("foto") or stats1_raw.get("foto_url") or rk1.get("foto_url") or "",
+            "nivel": j1.get("nivel", 5.5),
+            "posicao": j1.get("posicao", "linha"),
+            "tipo": j1.get("tipo", "avulso"),
+            "pct_vitorias": round((vitorias1 / jogos1 * 100), 1) if jogos1 else 0.0
+        }
+
+        stats2 = {
+            "jogador_nome": nome2,
+            "jogos": jogos2,
+            "vitorias": vitorias2,
+            "gols": gols2,
+            "destaques": stats2_raw.get("destaques") or rk2.get("destaques", 0),
+            "nota_media": float(nota2 or 0.0),
+            "pontos": float(stats2_raw.get("pontos") or rk2.get("pontos", 0.0) or 0.0),
+            "foto_url": j2.get("foto_url") or j2.get("foto") or stats2_raw.get("foto_url") or rk2.get("foto_url") or "",
+            "foto": j2.get("foto_url") or j2.get("foto") or stats2_raw.get("foto_url") or rk2.get("foto_url") or "",
+            "nivel": j2.get("nivel", 5.5),
+            "posicao": j2.get("posicao", "linha"),
+            "tipo": j2.get("tipo", "avulso"),
+            "pct_vitorias": round((vitorias2 / jogos2 * 100), 1) if jogos2 else 0.0
+        }
 
         # Análise de Retrospecto Direto (Partidas Encerradas)
         partidas = [p for p in self.votacao_service.listar() if p.get("status") == "encerrada"]

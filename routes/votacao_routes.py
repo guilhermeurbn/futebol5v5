@@ -186,11 +186,15 @@ def _resolver_contexto_admin(sorteio_id_hint=None):
         'total_jogadores': 0,
     }
 
+    maior_id = max((int(s.get('id', 0) or 0) for s in sorteios if isinstance(s, dict)), default=0)
+    proximo_sorteio_num = int(selecionado) if selecionado else (maior_id + 1)
+
     return {
         'ativa': ativa,
         'sorteios_disponiveis': sorteios_ordenados,
         'sorteio_contexto': sorteio_contexto,
         'selected_sorteio_id': selecionado,
+        'proximo_sorteio_num': proximo_sorteio_num,
         'fluxo_partida': fluxo_partida,
         'voted_user_ids': voted_user_ids,
         'pode_abrir_votacao': pode_abrir_votacao,

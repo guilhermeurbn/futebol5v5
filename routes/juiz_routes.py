@@ -276,6 +276,45 @@ def juiz_compartilhar_page():
     return redirect(url_for('juiz.juiz_times_page', _anchor='acoes-sorteio'))
 
 
+@juiz_bp.route('/jogar/trocar-jogadores/<int:sorteio_id>', methods=['GET', 'POST'])
+@juiz_required
+def juiz_trocar_jogadores(sorteio_id):
+    """Permite ao juiz trocar/substituir jogadores de um sorteio ativo antes do resultado ser registrado."""
+    try:
+        resultado_partida = _obter_resultado_sorteio(sorteio_id)
+        if resultado_partida:
+            return redirect(url_for('juiz.juiz_times_page', sorteio_id=sorteio_id))
+
+        sorteio = historico_service.obter_sorteio(sorteio_id)
+        if not sorteio:
+            return redirect(url_for('juiz.jogar_page'))
+
+        todos_jogadores = jogador_service.listar()
+        jogador_ids = []
+        for t in sorteio.get('times', []):
+            for j in t.get('jogadores', []):
+                j_id = j.get('id')
+                if j_id and any(p.id == j_id for p in todos_jogadores):
+                    if j_id not in jogador_ids:
+                        jogador_ids.append(j_id)
+                elif j.get('nome'):
+                    nome_norm = (j.get('nome') or '').strip().lower()
+                    match = next((p for p in todos_jogadores if (p.nome or '').strip().lower() == nome_norm), None)
+                    if match and match.id not in jogador_ids:
+                        jogador_ids.append(match.id)
+
+        if jogador_ids:
+            jogador_service.marcar_presenca(jogador_ids)
+
+        juiz_partida_service.iniciar_partida(session.get('user_id'))
+        juiz_partida_service.registrar_selecao(len(jogador_ids), jogador_ids)
+
+        return redirect(url_for('juiz.juiz_criar_partida', trocar=1))
+    except Exception as e:
+        logger.error(f"Erro ao trocar jogadores do sorteio {sorteio_id}: {str(e)}")
+        return redirect(url_for('juiz.juiz_times_page', sorteio_id=sorteio_id))
+
+
 @juiz_bp.route('/jogar/cronometro', methods=['GET'])
 @juiz_required
 def juiz_cronometro():
@@ -283,6 +322,10 @@ def juiz_cronometro():
     try:
         estado = _sincronizar_fluxo_juiz()
         sorteio_atual_id = ((estado.get('partida_atual') or {}).get('sorteio_id'))
+        if not sorteio_atual_id:
+            sorteios = historico_service.listar_sorteios() or []
+            maior_id = max((int(s.get('id', 0) or 0) for s in sorteios if isinstance(s, dict)), default=0)
+            sorteio_atual_id = maior_id + 1
         return render_template(
             'juiz_cronometro.html',
             sorteio_atual_id=sorteio_atual_id,
@@ -361,10 +404,12 @@ def api_jogar_resumo():
 def juiz_criar_partida():
     """Inicia criação de partida"""
     try:
+        trocar_modo = request.args.get('trocar', type=int) or request.args.get('modo_edicao', type=int)
         estado_fluxo = _sincronizar_fluxo_juiz()
-        destino_aberto = _destino_partida_oficial_aberta(estado_fluxo)
-        if destino_aberto:
-            return redirect(destino_aberto)
+        if not trocar_modo:
+            destino_aberto = _destino_partida_oficial_aberta(estado_fluxo)
+            if destino_aberto:
+                return redirect(destino_aberto)
 
         if request.method == 'POST':
             jogador_service.limpar_presenca()
