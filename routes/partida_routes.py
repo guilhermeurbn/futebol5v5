@@ -57,6 +57,21 @@ def _usuario_logado():
     }
 
 
+def admin_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if not session.get('user_id'):
+            if request.path.startswith('/api/'):
+                return jsonify({'sucesso': False, 'erro': 'Autenticacao obrigatoria'}), 401
+            return redirect(url_for('auth.login_page'))
+        if not _is_admin():
+            if request.path.startswith('/api/'):
+                return jsonify({'sucesso': False, 'erro': 'Apenas Administradores têm permissão'}), 403
+            return redirect(url_for('partida.historico', erro='Apenas Administradores podem excluir histórico'))
+        return f(*args, **kwargs)
+    return wrapper
+
+
 def admin_or_juiz_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
@@ -440,6 +455,51 @@ def ver_sorteio(sorteio_id):
     except Exception as e:
         logger.error(f"Erro ao visualizar sorteio: {str(e)}")
         return render_template('historico.html', sorteios=[], resumo=_resumo_historico_vazio(), erro='Erro ao carregar sorteio'), 500
+
+
+@partida_bp.route('/sorteio/<int:sorteio_id>/deletar', methods=['POST'])
+@admin_required
+def deletar_sorteio_historico(sorteio_id):
+    """Exclui um sorteio e todos os seus dados vinculados em cascata (partida, votação e estatísticas)."""
+    try:
+        from services.votacao_service import VotacaoService
+        from services.jogador_stats_service import JogadorStatsService
+        from services.db import clear_db_cache
+        votacao_svc = VotacaoService()
+
+        # 1. Apaga do histórico de sorteios
+        historico_service.deletar_sorteio(sorteio_id)
+
+        # 2. Apaga resultados de partidas vinculados
+        partida_service.deletar_partida_do_sorteio(sorteio_id)
+
+        # 3. Apaga rodada de votação vinculada
+        votacao_svc.deletar_votacao_do_sorteio(sorteio_id)
+
+        # 4. Limpa caches globais em memória do banco e atualiza estatísticas dos jogadores
+        clear_db_cache()
+        JogadorStatsService.invalidar_cache_stats()
+        try:
+            from services.jogador_service import sincronizar_dados_e_partidas
+            sincronizar_dados_e_partidas()
+        except Exception:
+            pass
+
+        # 5. Se for a partida ativa do juiz, reseta o fluxo
+        estado_juiz = juiz_partida_service.obter_estado()
+        partida_atual = (estado_juiz.get('partida_atual') or {})
+        if int(partida_atual.get('sorteio_id', 0) or 0) == int(sorteio_id):
+            juiz_partida_service.finalizar_partida()
+
+        msg = f"Sorteio #{sorteio_id} e todos os seus dados foram excluídos com sucesso."
+        if _is_juiz():
+            return redirect(url_for('juiz.juiz_historico', sucesso=msg))
+        return redirect(url_for('partida.historico', sucesso=msg))
+    except Exception as e:
+        logger.error(f"Erro ao deletar sorteio #{sorteio_id}: {str(e)}")
+        if _is_juiz():
+            return redirect(url_for('juiz.juiz_historico', erro='Erro ao excluir sorteio'))
+        return redirect(url_for('partida.historico', erro='Erro ao excluir sorteio'))
 
 
 @partida_bp.route('/api/sorteio/<int:sorteio_id>/times', methods=['POST'])

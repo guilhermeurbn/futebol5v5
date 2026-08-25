@@ -28,30 +28,18 @@ class VotacaoService:
             self._salvar({"ultimo_id": 0, "partidas": []})
 
     def _carregar(self) -> Dict:
-        if os.getenv("DATABASE_URL"):
-            dados = load_json_data("votacoes_partidas", {"ultimo_id": 0, "partidas": []})
-            if not isinstance(dados, dict):
-                return {"ultimo_id": 0, "partidas": []}
-            dados.setdefault("ultimo_id", 0)
-            dados.setdefault("partidas", [])
-            return dados
-        try:
-            with open(self.arquivo, "r", encoding="utf-8") as f:
-                dados = json.load(f)
-            if not isinstance(dados, dict):
-                return {"ultimo_id": 0, "partidas": []}
-            dados.setdefault("ultimo_id", 0)
-            dados.setdefault("partidas", [])
-            return dados
-        except (FileNotFoundError, json.JSONDecodeError):
+        dados = load_json_data("votacoes_partidas", {"ultimo_id": 0, "partidas": []})
+        if not isinstance(dados, dict):
             return {"ultimo_id": 0, "partidas": []}
+        dados.setdefault("ultimo_id", 0)
+        dados.setdefault("partidas", [])
+        return dados
 
     def _salvar(self, dados: Dict) -> None:
-        if os.getenv("DATABASE_URL"):
-            save_json_data("votacoes_partidas", dados)
-            return
-        with open(self.arquivo, "w", encoding="utf-8") as f:
-            json.dump(dados, f, indent=2, ensure_ascii=False)
+        """Salva dados e atualiza cache do db e estatísticas"""
+        save_json_data("votacoes_partidas", dados)
+        from services.jogador_stats_service import JogadorStatsService
+        JogadorStatsService.invalidar_cache_stats()
 
     def _agora(self) -> datetime:
         from services.time_utils import obter_agora_local
@@ -312,9 +300,12 @@ class VotacaoService:
         dados = self._carregar()
         self._encerrar_expiradas_em_dados(dados)
 
-        for p in dados.get("partidas", []):
+        for p in list(dados.get("partidas", [])):
             if p.get("status") == "aberta":
-                raise ValueError("Ja existe uma partida aberta")
+                if sorteio_id and int(p.get("sorteio_id", 0) or 0) == int(sorteio_id):
+                    return p
+                # Encerrar votação antiga aberta para liberar criação de nova rodada
+                self._encerrar_partida_obj(p, "sistema", motivo="nova_rodada_iniciada")
 
         if sorteio_id:
             ja_existente = next(
@@ -979,3 +970,18 @@ class VotacaoService:
     def encerrar_expiradas(self) -> None:
         dados = self._carregar()
         self._encerrar_expiradas_em_dados(dados)
+
+    def deletar_votacao_do_sorteio(self, sorteio_id: int) -> bool:
+        """Deleta a rodada de votação vinculada a um sorteio_id"""
+        dados = self._carregar()
+        partidas = dados.get("partidas", [])
+        sorteio_id_int = int(sorteio_id)
+        novas_partidas = [
+            p for p in partidas
+            if int(p.get("sorteio_id", 0) or 0) != sorteio_id_int and int(p.get("id", 0) or 0) != sorteio_id_int
+        ]
+        if len(novas_partidas) != len(partidas):
+            dados["partidas"] = novas_partidas
+            self._salvar(dados)
+            return True
+        return False

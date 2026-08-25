@@ -323,6 +323,12 @@
                         Abrir votação por 20 horas
                     </button>
                 </form>
+                <form method="post" action="{{ url_for('juiz.juiz_finalizar_partida') }}" style="margin-top: 0.75rem;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn" type="submit" style="width: 100%; background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); font-weight: 700; border-radius: 10px; padding: 0.65rem;" onclick="return confirm('Deseja encerrar a partida sem abrir a votação?');">
+                        Encerrar partida (sem votação)
+                    </button>
+                </form>
                 {% endif %}
             </article>
         </div>

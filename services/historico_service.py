@@ -30,22 +30,14 @@ class HistoricoService:
             self._salvar([])
     
     def _carregar_raw(self) -> List[dict]:
-        """Carrega dados brutos do arquivo"""
-        if os.getenv("DATABASE_URL"):
-            return load_json_data("historico", [])
-        try:
-            with open(self.arquivo, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except (json.JSONDecodeError, FileNotFoundError):
-            return []
+        """Carrega dados brutos do histórico"""
+        return load_json_data("historico", [])
     
     def _salvar(self, dados: List[dict]) -> None:
-        """Salva dados no arquivo"""
-        if os.getenv("DATABASE_URL"):
-            save_json_data("historico", dados)
-            return
-        with open(self.arquivo, "w", encoding="utf-8") as f:
-            json.dump(dados, f, indent=2, ensure_ascii=False)
+        """Salva dados no histórico e invalida estatísticas"""
+        save_json_data("historico", dados)
+        from services.jogador_stats_service import JogadorStatsService
+        JogadorStatsService.invalidar_cache_stats()
     
     def adicionar_sorteio(self, times: List[List[Jogador]], somas: List[int], num_times: int, diferenca: int) -> Dict:
         """
@@ -158,15 +150,13 @@ class HistoricoService:
         return None
     
     def deletar_sorteio(self, sorteio_id: int) -> bool:
-        """Deleta um sorteio"""
+        """Deleta um sorteio sem reindexar IDs dos sorteios restantes"""
         dados = self._carregar_raw()
         original_len = len(dados)
-        dados = [s for s in dados if s.get('id') != sorteio_id]
+        sorteio_id_int = int(sorteio_id)
+        dados = [s for s in dados if int(s.get('id', 0) or 0) != sorteio_id_int]
         
         if len(dados) < original_len:
-            # Reindexar IDs
-            for idx, sorteio in enumerate(dados, 1):
-                sorteio['id'] = idx
             self._salvar(dados)
             return True
         return False

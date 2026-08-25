@@ -17,6 +17,11 @@ class JogadorStatsService:
 
     _cache_stats: Dict[str, Dict] = {}
     _cache_ttl_seconds = 60
+    _cache_partidas_combinadas: Optional[List[dict]] = None
+    _cache_partidas_ts: float = 0.0
+    _cached_usuarios_ext: Optional[List[dict]] = None
+    _cached_jogadores_ext: Optional[List[dict]] = None
+    _cached_aux_ts: float = 0.0
     
     def __init__(self, partidas_arquivo: str = "data/partidas.json", historico_arquivo: str = "data/historico.json"):
         """
@@ -33,6 +38,28 @@ class JogadorStatsService:
     def invalidar_cache_stats(cls) -> None:
         """Limpa cache em memória das estatísticas por jogador."""
         cls._cache_stats.clear()
+        cls._cache_partidas_combinadas = None
+        cls._cache_partidas_ts = 0.0
+        cls._cached_usuarios_ext = None
+        cls._cached_jogadores_ext = None
+        cls._cached_aux_ts = 0.0
+
+    def _obter_auxiliares_extracao(self):
+        now = time.time()
+        if (
+            JogadorStatsService._cached_usuarios_ext is not None
+            and JogadorStatsService._cached_jogadores_ext is not None
+            and (now - JogadorStatsService._cached_aux_ts) < 10
+        ):
+            return JogadorStatsService._cached_usuarios_ext, JogadorStatsService._cached_jogadores_ext
+
+        from services.auth_service import AuthService
+        usuarios = AuthService()._carregar()
+        jogadores = load_json_data("jogadores", [])
+        JogadorStatsService._cached_usuarios_ext = usuarios
+        JogadorStatsService._cached_jogadores_ext = jogadores
+        JogadorStatsService._cached_aux_ts = now
+        return usuarios, jogadores
 
     def _obter_stats_em_cache(self, chave: str) -> Optional[Dict]:
         item = self._cache_stats.get(chave)
@@ -52,10 +79,17 @@ class JogadorStatsService:
     def _chave_cache_stats(self, nome_jogador: str, jogador_id: Optional[str] = None, user_id: Optional[str] = None) -> str:
         """Monta uma chave que evita reaproveitar stats entre fontes diferentes."""
         chave_id = user_id or jogador_id or self._normalizar_nome(nome_jogador)
-        return f"{self.__class__.__name__}:{id(self)}:{chave_id}"
+        return f"JogadorStatsService:{chave_id}"
     
     def _carregar_partidas(self) -> List[dict]:
         """Carrega dados de partidas combinando partidas e votacoes_partidas"""
+        now = time.time()
+        if (
+            JogadorStatsService._cache_partidas_combinadas is not None
+            and (now - JogadorStatsService._cache_partidas_ts) < 10
+        ):
+            return JogadorStatsService._cache_partidas_combinadas
+
         partidas = load_json_data("partidas", [])
         votacoes = load_json_data("votacoes_partidas", {})
 
@@ -120,7 +154,10 @@ class JogadorStatsService:
                     if key not in partidas_dict:
                         partidas_dict[key] = vp_copy
 
-        return list(partidas_dict.values())
+        res = list(partidas_dict.values())
+        JogadorStatsService._cache_partidas_combinadas = res
+        JogadorStatsService._cache_partidas_ts = now
+        return res
     
     def _carregar_historico(self) -> List[dict]:
         """Carrega dados do histórico de sorteios"""
@@ -468,10 +505,7 @@ class JogadorStatsService:
             target_jogador_ids.add(str(jogador_id))
 
         try:
-            from services.auth_service import AuthService
-            usuarios = AuthService()._carregar()
-            jogadores = load_json_data("jogadores", [])
-            partidas = load_json_data("partidas", [])
+            usuarios, jogadores = self._obter_auxiliares_extracao()
 
             u_target = None
             if user_id:

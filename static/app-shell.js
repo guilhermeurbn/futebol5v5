@@ -120,10 +120,25 @@
     return loader;
   }
 
+  let loaderSafetyTimer = null;
+
   function setLoading(isLoading) {
     const loader = ensureLoader();
+    if (loaderSafetyTimer) {
+      clearTimeout(loaderSafetyTimer);
+      loaderSafetyTimer = null;
+    }
+
     loader.hidden = !isLoading;
     document.body.classList.toggle('app-shell-loading', isLoading);
+
+    if (isLoading) {
+      // Trava de segurança: esconde o skeleton no máximo após 1200ms
+      loaderSafetyTimer = setTimeout(() => {
+        loader.hidden = true;
+        document.body.classList.remove('app-shell-loading');
+      }, 1200);
+    }
   }
 
   function rehydrateScripts(container) {
@@ -825,12 +840,12 @@
       }
     }
 
-    // Delayed loader: only show full-screen loader if fetch takes > 150ms
+    // Delayed loader: só ativa o skeleton se a requisição demorar mais de 300ms
     const loadingTimer = setTimeout(() => {
       if (token === navigationToken) {
         setLoading(true);
       }
-    }, 150);
+    }, 300);
 
     try {
       const response = await fetch(targetUrl.href, {
@@ -866,6 +881,7 @@
         } else {
           history.pushState(state, '', targetUrl.href);
         }
+        setLoading(false);
       };
 
       if (shouldUseViewTransition()) {

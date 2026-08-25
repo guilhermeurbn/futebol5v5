@@ -1,5 +1,5 @@
 {
-  "ultimo_id": 10,
+  "ultimo_id": 11,
   "mensagens": [
     {
       "id": 1,
@@ -9,7 +9,7 @@
       "destinatario_nome": "Alex",
       "conteudo": "coe",
       "criado_em": "2026-08-01T01:16:12.696731",
-      "lida": false
+      "lida": true
     },
     {
       "id": 2,
@@ -19,7 +19,7 @@
       "destinatario_nome": "Alex",
       "conteudo": "coe",
       "criado_em": "2026-08-01T01:16:46.299508",
-      "lida": false
+      "lida": true
     },
     {
       "id": 3,
@@ -29,7 +29,7 @@
       "destinatario_nome": "Alex",
       "conteudo": "coe",
       "criado_em": "2026-08-01T01:17:22.228948",
-      "lida": false
+      "lida": true
     },
     {
       "id": 4,
@@ -49,7 +49,7 @@
       "destinatario_nome": "Alex",
       "conteudo": "coe",
       "criado_em": "2026-08-01T01:25:07.940089",
-      "lida": false
+      "lida": true
     },
     {
       "id": 6,
@@ -59,7 +59,7 @@
       "destinatario_nome": "Alex",
       "conteudo": "coe",
       "criado_em": "2026-08-01T01:36:14.501324",
-      "lida": false
+      "lida": true
     },
     {
       "id": 7,
@@ -79,7 +79,7 @@
       "destinatario_nome": "Alex",
       "conteudo": "coe",
       "criado_em": "2026-08-01T01:37:01.691281",
-      "lida": false
+      "lida": true
     },
     {
       "id": 9,
@@ -89,7 +89,7 @@
       "destinatario_nome": "Alex",
       "conteudo": "coe",
       "criado_em": "2026-08-01T13:32:28.870405",
-      "lida": false
+      "lida": true
     },
     {
       "id": 10,
@@ -99,6 +99,16 @@
       "destinatario_nome": "Alex",
       "conteudo": "coe",
       "criado_em": "2026-08-01T13:55:57.528124",
+      "lida": true
+    },
+    {
+      "id": 11,
+      "remetente_id": "19e6a32e-2a20-49a2-81e0-da12aa681505",
+      "remetente_nome": "Alex",
+      "destinatario_id": "0d2e29f6-ddc4-4328-a971-d49157356f8f",
+      "destinatario_nome": "Guilherme Urbano",
+      "conteudo": "coe",
+      "criado_em": "2026-08-26T00:35:51.401346",
       "lida": false
     }
   ]

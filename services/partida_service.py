@@ -29,24 +29,12 @@ class PartidaService:
             self._salvar([])
     
     def _carregar_raw(self) -> List[dict]:
-        """Carrega dados brutos"""
-        if os.getenv("DATABASE_URL"):
-            return load_json_data("partidas", [])
-        try:
-            with open(self.arquivo, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except (json.JSONDecodeError, FileNotFoundError):
-            return []
+        """Carrega dados de partidas"""
+        return load_json_data("partidas", [])
     
     def _salvar(self, dados: List[dict]) -> None:
-        """Salva dados"""
-        if os.getenv("DATABASE_URL"):
-            save_json_data("partidas", dados)
-            from services.jogador_stats_service import JogadorStatsService
-            JogadorStatsService.invalidar_cache_stats()
-            return
-        with open(self.arquivo, "w", encoding="utf-8") as f:
-            json.dump(dados, f, indent=2, ensure_ascii=False)
+        """Salva dados de partidas e invalida estatísticas"""
+        save_json_data("partidas", dados)
         from services.jogador_stats_service import JogadorStatsService
         JogadorStatsService.invalidar_cache_stats()
 
@@ -117,3 +105,16 @@ class PartidaService:
         """Lista as últimas partidas"""
         partidas = self._carregar_raw()
         return sorted(partidas, key=lambda x: x.get('data', ''), reverse=True)[:limite]
+
+    def deletar_partida_do_sorteio(self, sorteio_id: int) -> bool:
+        """Deleta partidas/resultados vinculados a um sorteio_id"""
+        partidas = self._carregar_raw()
+        sorteio_id_int = int(sorteio_id)
+        filtradas = [
+            p for p in partidas
+            if int(p.get('sorteio_id', 0) or 0) != sorteio_id_int and int(p.get('id', 0) or 0) != sorteio_id_int
+        ]
+        if len(filtradas) != len(partidas):
+            self._salvar(filtradas)
+            return True
+        return False

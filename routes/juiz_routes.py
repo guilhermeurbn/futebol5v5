@@ -86,7 +86,7 @@ def _sincronizar_fluxo_juiz():
                 partida_votacao.get('id')
             )
             estado = juiz_partida_service.obter_estado()
-        elif partida_votacao and partida_votacao.get('status') != 'aberta':
+        elif partida_votacao and partida_votacao.get('status') == 'encerrada':
             juiz_partida_service.finalizar_partida(_resumo_encerramento_para_juiz(partida_votacao))
             jogador_service.limpar_presenca()
             estado = juiz_partida_service.obter_estado()
@@ -279,12 +279,8 @@ def juiz_compartilhar_page():
 @juiz_bp.route('/jogar/trocar-jogadores/<int:sorteio_id>', methods=['GET', 'POST'])
 @juiz_required
 def juiz_trocar_jogadores(sorteio_id):
-    """Permite ao juiz trocar/substituir jogadores de um sorteio ativo antes do resultado ser registrado."""
+    """Permite ao juiz trocar/substituir jogadores de um sorteio ativo."""
     try:
-        resultado_partida = _obter_resultado_sorteio(sorteio_id)
-        if resultado_partida:
-            return redirect(url_for('juiz.juiz_times_page', sorteio_id=sorteio_id))
-
         sorteio = historico_service.obter_sorteio(sorteio_id)
         if not sorteio:
             return redirect(url_for('juiz.jogar_page'))

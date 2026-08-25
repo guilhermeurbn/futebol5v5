@@ -6,6 +6,7 @@ import os
 import sys
 import json
 import argparse
+from pathlib import Path
 
 # Cores para terminal
 VERDE = '\033[92m'
@@ -25,19 +26,21 @@ def print_header():
 def criar_dados_exemplo():
     """Cria arquivo de dados de exemplo"""
     exemplo_jogadores = [
-        {"id": "1", "nome": "Cristiano", "nivel": 10, "criado_em": "2026-04-01T10:00:00"},
-        {"id": "2", "nome": "Messi", "nivel": 10, "criado_em": "2026-04-01T10:00:00"},
-        {"id": "3", "nome": "Neymar", "nivel": 9, "criado_em": "2026-04-01T10:00:00"},
-        {"id": "4", "nome": "Mbappé", "nivel": 9, "criado_em": "2026-04-01T10:00:00"},
-        {"id": "5", "nome": "Vinicius Jr", "nivel": 8, "criado_em": "2026-04-01T10:00:00"},
-        {"id": "6", "nome": "Rodrygo", "nivel": 8, "criado_em": "2026-04-01T10:00:00"},
-        {"id": "7", "nome": "João Pedro", "nivel": 7, "criado_em": "2026-04-01T10:00:00"},
-        {"id": "8", "nome": "Lucas", "nivel": 7, "criado_em": "2026-04-01T10:00:00"},
-        {"id": "9", "nome": "Felipe", "nivel": 6, "criado_em": "2026-04-01T10:00:00"},
-        {"id": "10", "nome": "Bruno", "nivel": 6, "criado_em": "2026-04-01T10:00:00"},
+        {"id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033", "nome": "Guilherme Urbano", "nivel": 8.5, "posicao": "linha", "criado_em": "2026-04-01T10:00:00"},
+        {"id": "gabriel-goleiro-id-01", "nome": "Gabriel Silva", "nivel": 8.0, "posicao": "goleiro", "criado_em": "2026-04-01T10:00:00"},
+        {"id": "carlos-ferreira-id-02", "nome": "Carlos Ferreira", "nivel": 7.5, "posicao": "linha", "criado_em": "2026-04-01T10:00:00"},
+        {"id": "lucas-teixeira-id-03", "nome": "Lucas Teixeira", "nivel": 7.0, "posicao": "linha", "criado_em": "2026-04-01T10:00:00"},
+        {"id": "andre-balada-id-04", "nome": "André Balada", "nivel": 7.5, "posicao": "linha", "criado_em": "2026-04-01T10:00:00"},
+        {"id": "renan-costa-id-05", "nome": "Renan Costa", "nivel": 7.0, "posicao": "linha", "criado_em": "2026-04-01T10:00:00"},
+        {"id": "ramon-santos-id-06", "nome": "Ramon Santos", "nivel": 6.5, "posicao": "linha", "criado_em": "2026-04-01T10:00:00"},
+        {"id": "luan-oliveira-id-07", "nome": "Luan Oliveira", "nivel": 7.0, "posicao": "linha", "criado_em": "2026-04-01T10:00:00"},
+        {"id": "94b644ac-65c3-4172-9e68-2d832cf0dfb7", "nome": "Alex", "nivel": 6.5, "posicao": "linha", "criado_em": "2026-04-01T10:00:00"},
+        {"id": "rafael-goleiro-id-09", "nome": "Rafael Souza", "nivel": 7.5, "posicao": "goleiro", "criado_em": "2026-04-01T10:00:00"},
     ]
     
-    with open("jogadores.json", "w", encoding="utf-8") as f:
+    path = Path(__file__).resolve().parent / "data" / "jogadores.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
         json.dump(exemplo_jogadores, f, indent=2, ensure_ascii=False)
     
     print(f"{VERDE}✅ Arquivo de exemplo criado: jogadores.json{RESET}")
@@ -131,11 +134,12 @@ def main():
         return 1
     
     # Criar dados de exemplo
-    if not os.path.exists("jogadores.json"):
+    target_data = Path(__file__).resolve().parent / "data" / "jogadores.json"
+    if not target_data.exists():
         print(f"{BOLD}Criando dados de exemplo...{RESET}")
         criar_dados_exemplo()
     else:
-        print(f"{AMARELO}ℹ️  jogadores.json já existe (não será sobrescrito){RESET}\n")
+        print(f"{AMARELO}ℹ️  data/jogadores.json já existe (não será sobrescrito){RESET}\n")
     
     # Iniciando servidor
     print(f"{BOLD}Iniciando servidor Flask...{RESET}\n")

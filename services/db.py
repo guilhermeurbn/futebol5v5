@@ -96,6 +96,14 @@ def _set_cached(namespace: str, data) -> None:
     _cache[namespace] = (data, time.time())
 
 
+def clear_db_cache(namespace: str = None) -> None:
+    """Limpa o cache em memória do banco/arquivos JSON em db.py."""
+    if namespace:
+        _cache.pop(namespace, None)
+    else:
+        _cache.clear()
+
+
 def load_json_data(namespace: str, default):
     """Carrega dados JSON do cache, banco ou arquivo local como fallback."""
     cached = _get_cached(namespace)
@@ -138,8 +146,8 @@ def load_json_data(namespace: str, default):
                         conn.close()
                 return data
             except (json.JSONDecodeError, OSError) as e:
-                print(f"[DB] Error loading {namespace}.json: {e}")
-                break
+                print(f"[DB] Error loading {namespace}.json ({candidate}): {e}")
+                continue
     
     # Nenhuma fonte disponível
     return default
@@ -147,6 +155,11 @@ def load_json_data(namespace: str, default):
 
 def save_json_data(namespace: str, payload) -> None:
     _set_cached(namespace, payload)
+
+    target_path = _repo_root() / "data" / f"{namespace}.json"
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    with target_path.open("w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2, ensure_ascii=False)
 
     conn = get_conn()
     if conn is not None:
@@ -163,24 +176,10 @@ def save_json_data(namespace: str, payload) -> None:
                         """,
                         (namespace, Json(payload)),
                     )
-            return
         except Exception as e:
             print(f"[DB] Error saving to Postgres: {e}")
         finally:
             conn.close()
-
-    target_path = None
-    for candidate in _candidate_paths(f"{namespace}.json"):
-        if candidate.exists():
-            target_path = candidate
-            break
-
-    if target_path is None:
-        target_path = _repo_root() / "data" / f"{namespace}.json"
-        target_path.parent.mkdir(parents=True, exist_ok=True)
-
-    with target_path.open("w", encoding="utf-8") as f:
-        json.dump(payload, f, indent=2, ensure_ascii=False)
 
 
 def get_database_count() -> int:

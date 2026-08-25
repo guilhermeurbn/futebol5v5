@@ -102,9 +102,12 @@ class AuthService:
             if os.path.exists(self.arquivo):
                 try:
                     with open(self.arquivo, "r", encoding="utf-8") as f:
-                        return json.load(f)
+                        data = json.load(f)
+                        if isinstance(data, list):
+                            return data
                 except Exception:
                     pass
+            return []
         return load_json_data("users", [])
 
     def _salvar(self, dados: List[Dict]) -> None:
@@ -114,9 +117,9 @@ class AuthService:
                     json.dump(dados, f, indent=2, ensure_ascii=False)
             except Exception:
                 pass
-        from services.db import save_json_data, clear_db_cache
+            return
+        from services.db import save_json_data
         save_json_data("users", dados)
-        clear_db_cache()
 
     def listar_usuarios(self) -> List[Dict]:
         usuarios = self._carregar()
