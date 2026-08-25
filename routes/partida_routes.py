@@ -220,8 +220,19 @@ def sortear():
         diferenca = BalanceadorTimes.calcular_diferenca_multiplos(somas)
         melhor_time = BalanceadorTimes.obter_melhor_time(somas)
         
-        # Registrar no histórico
-        sorteio = historico_service.adicionar_sorteio(times, somas, num_times, diferenca)
+        # Registrar no histórico (substitui sorteio pendente caso ainda não haja partidas/resultados)
+        sorteio_existente_id = None
+        if _is_juiz():
+            estado_juiz = juiz_partida_service.obter_estado()
+            candidate_id = (estado_juiz.get('partida_atual') or {}).get('sorteio_id')
+            if candidate_id and not _obter_resultado_sorteio(candidate_id):
+                sorteio_existente_id = candidate_id
+
+        if sorteio_existente_id:
+            sorteio = historico_service.substituir_sorteio(sorteio_existente_id, times, somas, num_times, diferenca)
+        else:
+            sorteio = historico_service.adicionar_sorteio(times, somas, num_times, diferenca)
+
         sorteio_id = sorteio.get('id')
         if _is_juiz():
             juiz_partida_service.registrar_sorteio(sorteio_id)
@@ -260,8 +271,19 @@ def sortear_api():
         diferenca = BalanceadorTimes.calcular_diferenca_multiplos(somas)
         melhor_time = BalanceadorTimes.obter_melhor_time(somas)
         
-        # Registrar no histórico
-        sorteio = historico_service.adicionar_sorteio(times, somas, len(times), diferenca)
+        # Registrar no histórico (substitui sorteio pendente caso ainda não haja partidas/resultados)
+        sorteio_existente_id = None
+        if _is_juiz():
+            estado_juiz = juiz_partida_service.obter_estado()
+            candidate_id = (estado_juiz.get('partida_atual') or {}).get('sorteio_id')
+            if candidate_id and not _obter_resultado_sorteio(candidate_id):
+                sorteio_existente_id = candidate_id
+
+        if sorteio_existente_id:
+            sorteio = historico_service.substituir_sorteio(sorteio_existente_id, times, somas, len(times), diferenca)
+        else:
+            sorteio = historico_service.adicionar_sorteio(times, somas, len(times), diferenca)
+
         if _is_juiz():
             juiz_partida_service.registrar_sorteio(sorteio.get('id'))
 

@@ -82,6 +82,38 @@ class HistoricoService:
         dados.append(sorteio)
         self._salvar(dados)
         return sorteio
+
+    def substituir_sorteio(self, sorteio_id: int, times: List[List[Jogador]], somas: List[int], num_times: int, diferenca: int) -> Dict:
+        """
+        Substitui os dados de um sorteio existente mantendo seu ID.
+        Ideal para quando o juiz altera a seleção ou refaz o sorteio antes de registrar resultados.
+        """
+        dados = self._carregar_raw()
+        sorteio_id_int = int(sorteio_id)
+        
+        for idx, s in enumerate(dados):
+            if int(s.get('id', 0) or 0) == sorteio_id_int:
+                sorteio_atualizado = {
+                    "id": sorteio_id_int,
+                    "data": datetime.now().isoformat(),
+                    "num_times": num_times,
+                    "total_jogadores": sum(len(time) for time in times),
+                    "times": [
+                        {
+                            "numero": i + 1,
+                            "jogadores": [j.para_dict() for j in time],
+                            "soma": somas[i]
+                        }
+                        for i, time in enumerate(times)
+                    ],
+                    "diferenca": diferenca,
+                    "pontuacoes": somas
+                }
+                dados[idx] = sorteio_atualizado
+                self._salvar(dados)
+                return sorteio_atualizado
+
+        return self.adicionar_sorteio(times, somas, num_times, diferenca)
     
     def listar_sorteios(self) -> List[Dict]:
         """Lista todos os sorteios"""
