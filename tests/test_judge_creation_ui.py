@@ -57,9 +57,8 @@ def test_judge_result_only_offers_share_and_voting():
     template = (ROOT / 'templates' / 'juiz_times.html').read_text(encoding='utf-8')
 
     assert 'Compartilhar' in template
-    assert 'Iniciar Rodada' in template
-    assert 'Trocar Jogadores' in template
-    assert 'juiz.juiz_trocar_jogadores' in template
+    assert 'Substituir Jogador' in template
+    assert 'juiz.juiz_substituir_jogador' in template
     assert 'Registrar resultado' not in template
 
 

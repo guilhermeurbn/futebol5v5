@@ -62,7 +62,7 @@
                     </div>
                     {% endif %}
                 </div>
-                {% elif current_user.role in ['admin', 'juiz'] and sorteio_contexto %}
+                {% elif current_user.role in ['admin', 'juiz'] and sorteio_contexto and rodada_iniciada %}
                 <form method="post" action="{{ url_for('votacao.votacao_resultado_juiz') }}" class="judge-result-form">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="hidden" name="sorteio_id" value="{{ selected_sorteio_id }}">
@@ -271,7 +271,16 @@
                     </div>
                 </form>
                 {% else %}
-                <p class="judge-flow-empty">Crie uma partida para começar.</p>
+                <div class="judge-flow-empty-box" style="text-align: center; padding: 1.5rem 1rem;">
+                    <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">⏱️</div>
+                    <strong style="display: block; font-size: 1.05rem; color: #f8fafc; margin-bottom: 0.25rem;">Inicie a partida</strong>
+                    <p class="judge-flow-empty" style="margin-bottom: 1.25rem;">Inicie a partida na tela de times para liberar o lançamento de resultados e votações.</p>
+                    {% if selected_sorteio_id %}
+                    <a href="{{ url_for('juiz.juiz_times_page', sorteio_id=selected_sorteio_id) }}" class="btn btn-primary btn-small" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.6rem 1.25rem; font-weight: 800; border-radius: 10px;">
+                        <span>Ir para a Tela de Times</span> ➔
+                    </a>
+                    {% endif %}
+                </div>
                 {% endif %}
             </article>
 

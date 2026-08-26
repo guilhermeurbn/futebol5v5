@@ -235,30 +235,25 @@ def sortear():
         diferenca = BalanceadorTimes.calcular_diferenca_multiplos(somas)
         melhor_time = BalanceadorTimes.obter_melhor_time(somas)
         
-        # Registrar no histórico (substitui sorteio pendente caso ainda não haja partidas/resultados)
-        sorteio_existente_id = None
-        if _is_juiz():
-            estado_juiz = juiz_partida_service.obter_estado()
-            candidate_id = (estado_juiz.get('partida_atual') or {}).get('sorteio_id')
-            if candidate_id and not _obter_resultado_sorteio(candidate_id):
-                sorteio_existente_id = candidate_id
+        times_json = [
+            {
+                "numero": idx + 1,
+                "jogadores": [j.para_dict() for j in time],
+                "soma": somas[idx]
+            }
+            for idx, time in enumerate(times)
+        ]
 
-        if sorteio_existente_id:
-            sorteio = historico_service.substituir_sorteio(sorteio_existente_id, times, somas, num_times, diferenca)
-        else:
-            sorteio = historico_service.adicionar_sorteio(times, somas, num_times, diferenca)
-
-        sorteio_id = sorteio.get('id')
         if _is_juiz():
-            juiz_partida_service.registrar_sorteio(sorteio_id)
+            juiz_partida_service.salvar_rascunho_sorteio(times_json, somas, diferenca)
 
         # Salvar para download/exportação
         sorteio_data = _montar_sorteio_exportacao(
-            sorteio_id, times, somas, diferenca, melhor_time, tem_aviso, aviso_msg
+            'rascunho', times, somas, diferenca, melhor_time, tem_aviso, aviso_msg
         )
         _salvar_ultimo_sorteio_sessao(sorteio_data)
         undoredo_service.adicionar_sorteio(sorteio_data)
-        return redirect(url_for('juiz.juiz_times_page', sorteio_id=sorteio_id))
+        return redirect(url_for('juiz.juiz_times_page'))
     except ValueError as e:
         logger.error(f"Erro ao sortear: {str(e)}")
         return render_template('index.html', erro=str(e)), 400
@@ -398,7 +393,9 @@ def _resumo_historico_vazio():
 def historico():
     """Página com histórico de sorteios"""
     try:
-        sorteios = list(reversed(historico_service.listar_sorteios()))
+        sorteios_raw = historico_service.listar_sorteios() or []
+        sorteios_raw = [s for s in sorteios_raw if not s.get('rascunho')]
+        sorteios = list(reversed(sorteios_raw))
         sorteios = [_enriquecer_sorteio_historico(sorteio) for sorteio in sorteios]
         resumo = {
             'total_sorteios': len(sorteios),

@@ -34,6 +34,8 @@
                         <span>Nível total: {{ sorteio.pontuacoes[loop.index0] }}</span>
                         {% endif %}
                     </div>
+                    {% set rodada_ja_iniciada = (not sorteio.get('is_rascunho') and sorteio.get('id') != 'rascunho' and (sorteio.get('oficial') or (estado_fluxo is defined and estado_fluxo and estado_fluxo.get('status') in ['resultado_registrado', 'votacao_aberta']))) %}
+                    {% if not rodada_ja_iniciada %}
                     <button class="judge-card-edit-btn" type="button" aria-label="Editar times" title="Editar times">
                         <svg class="edit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round" style="width: 0.9rem; height: 0.9rem;">
@@ -49,6 +51,7 @@
                         </svg>
                         <span class="btn-text">Editar</span>
                     </button>
+                    {% endif %}
                 </div>
 
                 <div class="judge-team-card__players" data-time-numero="{{ time.numero }}">
@@ -99,9 +102,11 @@
                     <span><strong>Exportar PDF</strong><small>Visualizar/Imprimir</small></span>
                 </a>
 
-                <a class="judge-action-btn judge-action-btn--swap"
-                    href="{{ url_for('juiz.juiz_trocar_jogadores', sorteio_id=sorteio.id) }}"
-                    aria-label="Trocar Jogadores" title="Trocar Jogadores">
+                {% set rodada_ja_iniciada = (not sorteio.get('is_rascunho') and sorteio.get('id') != 'rascunho' and (sorteio.get('oficial') or (estado_fluxo is defined and estado_fluxo and estado_fluxo.get('status') in ['resultado_registrado', 'votacao_aberta']))) %}
+                {% if not rodada_ja_iniciada %}
+                <button type="button" class="judge-action-btn judge-action-btn--swap"
+                    onclick="abrirModalSubstituir()"
+                    aria-label="Substituir Jogador" title="Substituir Jogador / Trocar Jogadores">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
                         stroke-linejoin="round">
                         <path d="m16 3 4 4-4 4" />
@@ -109,19 +114,25 @@
                         <path d="m8 21-4-4 4 4" />
                         <path d="M4 17h16" />
                     </svg>
-                    <span><strong>Trocar Jogadores</strong><small>Alterar Seleção</small></span>
-                </a>
+                    <span><strong>Substituir Jogador</strong><small>Trocar 1 atleta</small></span>
+                </button>
 
-                <a class="judge-action-btn judge-action-btn--vote"
-                    href="{{ url_for('votacao.votacao_admin_page', sorteio_id=sorteio.id) }}"
-                    aria-label="Iniciar Rodada" title="Iniciar Rodada">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path d="m9 11 3 3L22 4" />
-                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-                    </svg>
-                    <span><strong>Iniciar Rodada</strong><small>Painel da Rodada</small></span>
-                </a>
+                <form method="post" action="{{ url_for('juiz.juiz_iniciar_rodada') }}" style="display: contents;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    {% if sorteio.id and sorteio.id != 'rascunho' %}
+                    <input type="hidden" name="sorteio_id" value="{{ sorteio.id }}">
+                    {% endif %}
+                    <button class="judge-action-btn judge-action-btn--vote" type="submit"
+                        aria-label="Iniciar Rodada" title="Iniciar Rodada">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                            stroke-linejoin="round">
+                            <path d="m9 11 3 3L22 4" />
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                        </svg>
+                        <span><strong>Iniciar Rodada</strong><small>Painel da Rodada</small></span>
+                    </button>
+                </form>
+                {% endif %}
             </div>
             <p class="judge-copy-feedback" id="copiarSorteioStatus" role="status" aria-live="polite"
                 style="margin-top: 0.75rem; text-align: center; font-size: 0.84rem; min-height: 1.25rem; color: #8e8e99;">
@@ -732,4 +743,175 @@
         }
     }
 </style>
+
+<!-- MODAL SUBSTITUIR JOGADOR -->
+<div class="judge-ranking-modal" id="modalSubstituirJogador" hidden aria-hidden="true">
+    <div class="judge-ranking-modal__backdrop" onclick="fecharModalSubstituir()"></div>
+    <div class="judge-ranking-modal__panel" role="dialog" aria-modal="true" style="max-width: 480px; padding: 1.25rem; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255, 255, 255, 0.15); backdrop-filter: blur(16px); border-radius: 20px;">
+        <div class="judge-ranking-modal__header" style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+            <div>
+                <h3 style="font-size: 1.15rem; font-weight: 800; color: #f8fafc; margin: 0;">🔄 Substituir Jogador</h3>
+                <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 0.25rem;">Escolha quem sai do sorteio e quem entra no lugar.</p>
+            </div>
+            <button type="button" class="judge-ranking-modal__close" onclick="fecharModalSubstituir()" aria-label="Fechar" style="background: rgba(255,255,255,0.08); border: none; color: #94a3b8; font-size: 1.1rem; width: 32px; height: 32px; border-radius: 50%; cursor: pointer;">✕</button>
+        </div>
+
+        <form id="formSubstituirJogador" method="post" action="{{ url_for('juiz.juiz_substituir_jogador', sorteio_id=sorteio.id) }}" style="margin-top: 1.25rem; display: flex; flex-direction: column; gap: 1.1rem;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="confirmar_goleiro_extra" id="confirmarGoleiroExtraInput" value="0">
+
+            {% if request.args.get('pedir_confirmacao_goleiro') == '1' %}
+            <div style="background: rgba(234, 179, 8, 0.15); border: 1px solid rgba(234, 179, 8, 0.4); padding: 0.85rem; border-radius: 12px; color: #fde047; font-size: 0.85rem; line-height: 1.4;">
+                <strong>⚠️ Atenção: Goleiro em duplicidade</strong><br>
+                O <strong>Time {{ request.args.get('time_num') }}</strong> passará a ter mais de 1 goleiro. Você aprova essa substituição?
+            </div>
+            {% endif %}
+
+            <div>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #f87171; margin-bottom: 0.4rem;">
+                    1. Jogador que vai sair (no sorteio atual):
+                </label>
+                <select name="saindo_id" id="selectSaindoId" required style="width: 100%; padding: 0.7rem 0.85rem; background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 12px; color: #f8fafc; font-size: 0.9rem; font-weight: 600;">
+                    <option value="" disabled {% if not request.args.get('saindo_id') %}selected{% endif %}>Selecione quem sai...</option>
+                    {% for t in sorteio.times %}
+                        <optgroup label="Time {{ t.numero }}">
+                        {% for j in t.jogadores %}
+                            <option value="{{ j.id }}" data-time="{{ t.numero }}" data-goleiro="{{ 'true' if (j.goleiro or j.posicao == 'goleiro') else 'false' }}" {% if request.args.get('saindo_id')|int == j.id %}selected{% endif %}>
+                                {{ j.nome }} (Time {{ t.numero }} · Nível {{ j.nivel }}) {% if j.goleiro or j.posicao == 'goleiro' %}🧤{% endif %}
+                            </option>
+                        {% endfor %}
+                        </optgroup>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #4ade80; margin-bottom: 0.4rem;">
+                    2. Jogador substituto (quem entra):
+                </label>
+                {% set ids_no_sorteio = [] %}
+                {% for t in sorteio.times %}{% for j in t.jogadores %}{% set _ = ids_no_sorteio.append(j.id|string) %}{% set _ = ids_no_sorteio.append(j.nome|string) %}{% endfor %}{% endfor %}
+                <select name="entrando_id" id="selectEntrandoId" required style="width: 100%; padding: 0.7rem 0.85rem; background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(74, 222, 128, 0.4); border-radius: 12px; color: #f8fafc; font-size: 0.9rem; font-weight: 600;">
+                    <option value="" disabled {% if not request.args.get('entrando_id') %}selected{% endif %}>Selecione quem entra...</option>
+                    {% if todos_jogadores is defined and todos_jogadores %}
+                        {% for j in todos_jogadores if (j.id|string not in ids_no_sorteio and j.nome|string not in ids_no_sorteio) %}
+                            <option value="{{ j.id }}" data-goleiro="{{ 'true' if (j.goleiro or j.posicao == 'goleiro') else 'false' }}" {% if request.args.get('entrando_id') == (j.id|string) %}selected{% endif %}>
+                                {{ j.nome }} (Nível {{ j.nivel }}) {% if j.goleiro or j.posicao == 'goleiro' %}🧤 Goleiro{% endif %}
+                            </option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+
+            <div id="boxAprovacaoGoleiro" style="display: none; background: rgba(234, 179, 8, 0.15); border: 1px solid rgba(234, 179, 8, 0.4); padding: 0.85rem; border-radius: 12px; color: #fde047; font-size: 0.85rem;">
+                <strong>⚠️ Time <span id="timeGoleiroNum">X</span> passará a ter mais de 1 goleiro!</strong>
+                <p style="margin: 0.3rem 0 0.6rem 0; font-size: 0.78rem; color: #cbd5e1;">Deseja aprovar esta substituição mesmo com 2 goleiros no mesmo time?</p>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button type="button" onclick="aprovarSubstituicaoGoleiro()" style="flex: 1; background: #eab308; color: #0f172a; border: none; padding: 0.45rem 0.75rem; border-radius: 8px; font-weight: 800; font-size: 0.8rem; cursor: pointer;">
+                        ✓ Aprovo
+                    </button>
+                    <button type="button" onclick="recusarSubstituicaoGoleiro()" style="flex: 1; background: rgba(255,255,255,0.1); color: #f8fafc; border: 1px solid rgba(255,255,255,0.2); padding: 0.45rem 0.75rem; border-radius: 8px; font-weight: 700; font-size: 0.8rem; cursor: pointer;">
+                        ✕ Não aprovo
+                    </button>
+                </div>
+            </div>
+
+            <div style="margin-top: 0.6rem; display: flex; gap: 0.6rem;">
+                <button type="button" class="btn" onclick="fecharModalSubstituir()" style="flex: 1; background: rgba(255,255,255,0.08); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 0.7rem; font-weight: 700;">
+                    Cancelar
+                </button>
+                <button type="submit" id="btnConfirmarSubstituicao" class="btn btn-primary" style="flex: 2; border-radius: 12px; padding: 0.7rem; font-weight: 800; background: linear-gradient(135deg, #22c55e, #16a34a);">
+                    Confirmar Substituição
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function abrirModalSubstituir() {
+    const m = document.getElementById('modalSubstituirJogador');
+    if (m) {
+        m.hidden = false;
+        m.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+    }
+}
+function fecharModalSubstituir() {
+    const m = document.getElementById('modalSubstituirJogador');
+    if (m) {
+        m.hidden = true;
+        m.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+    }
+}
+
+function aprovarSubstituicaoGoleiro() {
+    document.getElementById('confirmarGoleiroExtraInput').value = "1";
+    document.getElementById('formSubstituirJogador').submit();
+}
+
+function recusarSubstituicaoGoleiro() {
+    document.getElementById('boxAprovacaoGoleiro').style.display = 'none';
+    document.getElementById('confirmarGoleiroExtraInput').value = "0";
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const selectSaindo = document.getElementById('selectSaindoId');
+    const selectEntrando = document.getElementById('selectEntrandoId');
+    const form = document.getElementById('formSubstituirJogador');
+    const boxGoleiro = document.getElementById('boxAprovacaoGoleiro');
+    const timeGoleiroNumSpan = document.getElementById('timeGoleiroNum');
+    const confirmInput = document.getElementById('confirmarGoleiroExtraInput');
+
+    {% if request.args.get('pedir_confirmacao_goleiro') == '1' %}
+    abrirModalSubstituir();
+    {% endif %}
+
+    function checarRegrasGoleiro() {
+        if (!selectSaindo || !selectEntrando) return false;
+        const optSaindo = selectSaindo.options[selectSaindo.selectedIndex];
+        const optEntrando = selectEntrando.options[selectEntrando.selectedIndex];
+        if (!optSaindo || !optEntrando || optSaindo.disabled || optEntrando.disabled) return false;
+
+        const timeNum = optSaindo.getAttribute('data-time');
+        const entrandoEhGoleiro = optEntrando.getAttribute('data-goleiro') === 'true';
+
+        if (entrandoEhGoleiro) {
+            let goleirosRestantesNoTime = 0;
+            const todosSaindoOpts = selectSaindo.querySelectorAll('option');
+            todosSaindoOpts.forEach(opt => {
+                if (opt.getAttribute('data-time') === timeNum && opt.value !== optSaindo.value) {
+                    if (opt.getAttribute('data-goleiro') === 'true') {
+                        goleirosRestantesNoTime++;
+                    }
+                }
+            });
+
+            if (goleirosRestantesNoTime > 0) {
+                if (timeGoleiroNumSpan) timeGoleiroNumSpan.textContent = timeNum;
+                if (boxGoleiro) boxGoleiro.style.display = 'block';
+                return true;
+            }
+        }
+        if (boxGoleiro) boxGoleiro.style.display = 'none';
+        return false;
+    }
+
+    if (selectSaindo && selectEntrando) {
+        selectSaindo.addEventListener('change', checarRegrasGoleiro);
+        selectEntrando.addEventListener('change', checarRegrasGoleiro);
+    }
+
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const temAlertaGoleiro = checarRegrasGoleiro();
+            if (temAlertaGoleiro && confirmInput.value !== "1") {
+                e.preventDefault();
+                alert("O Time " + (timeGoleiroNumSpan ? timeGoleiroNumSpan.textContent : "") + " passará a ter mais de 1 goleiro. Você precisa clicar em '✓ Aprovo' para prosseguir.");
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

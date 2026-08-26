@@ -88,11 +88,77 @@ class JuizPartidaService:
         self._salvar(dados)
         return dados
 
+    def salvar_rascunho_sorteio(self, times_json: list, somas: list, diferenca: float) -> Dict:
+        dados = self._carregar()
+        partida = dados.get("partida_atual") or {}
+        partida["status"] = "sorteada"
+        partida["rascunho_sorteio"] = {
+            "times": times_json,
+            "somas": somas,
+            "diferenca": diferenca,
+            "num_times": len(times_json),
+            "total_jogadores": sum(len(t.get('jogadores', [])) for t in times_json),
+            "criado_em": datetime.now().isoformat()
+        }
+        partida["sorteio_id"] = None
+        partida["resultado_registrado"] = False
+        partida["resultado_partida_id"] = None
+        partida["votacao_partida_id"] = None
+        partida["votacao_aberta"] = False
+        dados["status"] = "sorteada"
+        dados["partida_atual"] = partida
+        self._salvar(dados)
+        return dados
+
+    def obter_rascunho(self) -> Optional[Dict]:
+        dados = self._carregar()
+        partida = dados.get("partida_atual") or {}
+        return partida.get("rascunho_sorteio")
+
+    def atualizar_rascunho_times(self, times_json: list) -> Optional[Dict]:
+        dados = self._carregar()
+        partida = dados.get("partida_atual") or {}
+        rascunho = partida.get("rascunho_sorteio")
+        if not rascunho:
+            return None
+
+        pontuacoes = []
+        total_jogadores = 0
+        for time in times_json:
+            jogadores = time.get('jogadores', []) or []
+            soma_time = round(sum(float(j.get('nivel', 0) or 0) for j in jogadores), 2)
+            pontuacoes.append(soma_time)
+            total_jogadores += len(jogadores)
+
+        diferenca = 0
+        if pontuacoes:
+            diferenca = round(max(pontuacoes) - min(pontuacoes), 2)
+
+        rascunho['times'] = times_json
+        rascunho['somas'] = pontuacoes
+        rascunho['diferenca'] = diferenca
+        rascunho['total_jogadores'] = total_jogadores
+        rascunho['atualizado_em'] = datetime.now().isoformat()
+
+        partida['rascunho_sorteio'] = rascunho
+        dados['partida_atual'] = partida
+        self._salvar(dados)
+        return rascunho
+
+    def limpar_rascunho(self) -> Dict:
+        dados = self._carregar()
+        partida = dados.get("partida_atual") or {}
+        partida.pop("rascunho_sorteio", None)
+        dados["partida_atual"] = partida
+        self._salvar(dados)
+        return dados
+
     def registrar_sorteio(self, sorteio_id: int) -> Dict:
         dados = self._carregar()
         partida = dados.get("partida_atual") or {}
         partida["status"] = "sorteada"
         partida["sorteio_id"] = int(sorteio_id)
+        partida.pop("rascunho_sorteio", None)
         partida["resultado_registrado"] = False
         partida["resultado_partida_id"] = None
         partida["votacao_partida_id"] = None

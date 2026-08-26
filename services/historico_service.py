@@ -54,19 +54,27 @@ class HistoricoService:
         """
         dados = self._carregar_raw()
         
+        times_processados = []
+        for idx, time in enumerate(times):
+            jogadores_raw = time.get('jogadores', []) if isinstance(time, dict) else time
+            jogadores_dict = [j.para_dict() if hasattr(j, 'para_dict') else (j if isinstance(j, dict) else {'nome': str(j)}) for j in jogadores_raw]
+            soma_val = somas[idx] if idx < len(somas) else 0
+            times_processados.append({
+                "numero": idx + 1,
+                "jogadores": jogadores_dict,
+                "soma": soma_val
+            })
+
+        total_j = sum(len(t["jogadores"]) for t in times_processados)
+
         sorteio = {
             "id": len(dados) + 1,
             "data": datetime.now().isoformat(),
+            "rascunho": False,
+            "oficial": True,
             "num_times": num_times,
-            "total_jogadores": sum(len(time) for time in times),
-            "times": [
-                {
-                    "numero": idx + 1,
-                    "jogadores": [j.para_dict() for j in time],
-                    "soma": somas[idx]
-                }
-                for idx, time in enumerate(times)
-            ],
+            "total_jogadores": total_j,
+            "times": times_processados,
             "diferenca": diferenca,
             "pontuacoes": somas
         }
@@ -88,6 +96,8 @@ class HistoricoService:
                 sorteio_atualizado = {
                     "id": sorteio_id_int,
                     "data": datetime.now().isoformat(),
+                    "rascunho": s.get('rascunho', True),
+                    "oficial": s.get('oficial', False),
                     "num_times": num_times,
                     "total_jogadores": sum(len(time) for time in times),
                     "times": [
@@ -128,7 +138,7 @@ class HistoricoService:
             total_jogadores = 0
             for time in times:
                 jogadores = time.get('jogadores', []) or []
-                soma_time = sum(int(j.get('nivel', 0) or 0) for j in jogadores)
+                soma_time = round(sum(float(j.get('nivel', 0) or 0) for j in jogadores), 2)
                 pontuacoes.append(soma_time)
                 total_jogadores += len(jogadores)
 

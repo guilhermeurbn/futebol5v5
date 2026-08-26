@@ -329,60 +329,67 @@ class JogadorStatsService:
         if not time_numero:
             return "empate"
 
-        # 1. Checar resultado_resumido (formato da VotacaoService)
-        resumo = partida.get("resultado_resumido") or []
-        if resumo and isinstance(resumo, list) and len(resumo) >= 2:
-            meu_gols = None
-            outro_gols = None
-            for item in resumo:
-                if isinstance(item, dict):
-                    if item.get("time_numero") == int(time_numero):
-                        meu_gols = int(item.get("gols", 0) or 0)
-                    else:
-                        outro_gols = int(item.get("gols", 0) or 0)
-            if meu_gols is not None and outro_gols is not None:
-                if meu_gols > outro_gols:
+        # 1. Checar gols_times (placar real da partida)
+        gols_times = partida.get("gols_times") or (partida.get("resultado_partida") or {}).get("gols_times", []) or []
+        indice = int(time_numero) - 1
+        if 0 <= indice < len(gols_times):
+            meu_placar = int(gols_times[indice] or 0)
+            outros_gols = [int(g or 0) for idx, g in enumerate(gols_times) if idx != indice]
+            if outros_gols:
+                maior_outro = max(outros_gols)
+                if meu_placar > maior_outro:
                     return "vitória"
-                elif meu_gols < outro_gols:
+                elif meu_placar < maior_outro:
                     return "derrota"
-                else:
-                    return "empate"
+                elif meu_placar == maior_outro and len(set(gols_times)) > 1:
+                    time_vencedor = partida.get("time_vencedor") or (partida.get("resultado_partida") or {}).get("time_vencedor")
+                    if time_vencedor is not None:
+                        if int(time_numero) == int(time_vencedor):
+                            return "vitória"
+                        else:
+                            return "derrota"
 
-        # 2. Checar times_desempenho
+        # 2. Checar time_vencedor explícito
+        time_vencedor = partida.get("time_vencedor") or (partida.get("resultado_partida") or {}).get("time_vencedor")
+        if time_vencedor is not None and int(time_vencedor) != 0:
+            if int(time_numero) == int(time_vencedor):
+                return "vitória"
+            else:
+                return "derrota"
+
+        # 3. Checar times_desempenho
         for item in partida.get("times_desempenho", []) or []:
             if int(item.get("time_numero", 0) or 0) != int(time_numero):
                 continue
             v = int(item.get("vitorias", 0) or 0)
             d = int(item.get("derrotas", 0) or 0)
             e = int(item.get("empates", 0) or 0)
-            if v == 0 and d == 0 and e == 0:
-                continue
-            if v > 0:
+            if v > d and v > 0:
                 return "vitória"
-            if d > 0:
+            if d > v:
                 return "derrota"
             if e > 0:
                 return "empate"
 
-        # 3. Checar time_vencedor
-        time_vencedor = partida.get("time_vencedor")
-        if time_vencedor is not None:
-            if int(time_numero) == int(time_vencedor):
-                return "vitória"
-            else:
-                return "derrota"
-
-        gols_times = partida.get("gols_times", []) or []
-        indice = int(time_numero) - 1
-        if 0 <= indice < len(gols_times):
-            meu_placar = gols_times[indice]
-            if any(g > meu_placar for idx, g in enumerate(gols_times) if idx != indice):
-                return "derrota"
-            if any(g == meu_placar for idx, g in enumerate(gols_times) if idx != indice):
-                return "empate"
+        # 4. Checar resultado_resumido como fallback
+        resumo = partida.get("resultado_resumido") or []
+        if resumo and isinstance(resumo, list) and len(resumo) >= 2:
+            meu_gols = None
+            outro_gols = None
+            for item in resumo:
+                if isinstance(item, dict):
+                    if int(item.get("time_numero", 0) or 0) == int(time_numero):
+                        meu_gols = int(item.get("gols", 0) or 0)
+                    else:
+                        outro_gols = max(outro_gols or 0, int(item.get("gols", 0) or 0))
+            if meu_gols is not None and outro_gols is not None:
+                if meu_gols > outro_gols:
+                    return "vitória"
+                elif meu_gols < outro_gols:
+                    return "derrota"
 
         return "empate"
-    
+
     def obter_stats_jogador(self, nome_jogador: str, jogador_id: Optional[str] = None, user_id: Optional[str] = None) -> Dict:
         """
         Obtém estatísticas completas de um jogador por nome, jogador_id ou user_id
@@ -441,6 +448,8 @@ class JogadorStatsService:
                     if detalhes.get("gols", 0) == 0:
                         stats["partidas_sem_gols"] += 1
                     
+                    gols_times_val = partida.get("gols_times") or (partida.get("resultado_partida") or {}).get("gols_times", [])
+
                     # Adicionar ao histórico de partidas
                     stats["historico_partidas"].append({
                         "partida_id": partida.get('id'),
@@ -452,6 +461,7 @@ class JogadorStatsService:
                         "cartoes_vermelhos": detalhes.get("cartoes_vermelhos", 0),
                         "resultado": resultado,
                         "time_numero": detalhes.get("time_numero"),
+                        "gols_times": gols_times_val,
                         "posicao": detalhes.get("posicao"),
                         "nota_media": detalhes.get("nota_media", 0.0),
                         "nota_partida": detalhes.get("nota_partida", 0.0)

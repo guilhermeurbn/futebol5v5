@@ -2,7 +2,7 @@
 Rotas do Fluxo do Juiz
 - Criar partida, finalizar partida, seleção de jogadores
 """
-from flask import Blueprint, request, render_template, redirect, url_for, session, jsonify
+from flask import Blueprint, request, render_template, redirect, url_for, session, jsonify, flash
 from functools import wraps
 import logging
 
@@ -11,6 +11,8 @@ from services.juiz_partida_service import JuizPartidaService
 from services.historico_service import HistoricoService
 from services.partida_service import PartidaService
 from services.votacao_service import VotacaoService
+from services.db import clear_db_cache
+from services.jogador_stats_service import JogadorStatsService
 
 juiz_bp = Blueprint('juiz', __name__)
 logger = logging.getLogger(__name__)
@@ -64,13 +66,21 @@ def _sincronizar_fluxo_juiz():
     from services.votacao_service import VotacaoService
     vot_svc = VotacaoService()
 
-    # Auto-recuperar se houver qualquer votação aberta em andamento
-    if not partida_atual or not partida_atual.get('votacao_aberta'):
+    # Auto-recuperar apenas se o juiz estiver num fluxo ativo (não idle)
+    status = estado.get('status') or 'idle'
+    if status != 'idle' and (not partida_atual or not partida_atual.get('votacao_aberta')):
         votacoes = vot_svc.listar()
         abertas = [v for v in votacoes if v.get('status') == 'aberta']
-        if abertas:
-            v_aberta = abertas[0]
+        for v_aberta in abertas:
             s_id = v_aberta.get('sorteio_id')
+            if s_id and not historico_service.obter_sorteio(s_id):
+                # O sorteio foi apagado do histórico: excluir votação órfã
+                try:
+                    vot_svc.deletar_votacao_do_sorteio(s_id)
+                except Exception:
+                    pass
+                continue
+
             if s_id:
                 juiz_partida_service.iniciar_partida()
                 juiz_partida_service.marcar_resultado_registrado(s_id)
@@ -189,33 +199,47 @@ def _salvar_ultimo_sorteio_sessao(payload):
 
 
 def _resolver_sorteio_juiz(sorteio_id_hint=None):
-    """Resolve sorteio prioritariamente pelo hint, depois fluxo atual, depois último histórico."""
-    sorteio_id = None
-
+    """Resolve sorteio dando prioridade ao rascunho temporário do juiz, depois ao histórico."""
     if sorteio_id_hint:
         try:
-            sorteio_id = int(sorteio_id_hint)
+            s_id = int(sorteio_id_hint)
+            s_obj = historico_service.obter_sorteio(s_id)
+            if s_obj:
+                return s_id, s_obj
         except (TypeError, ValueError):
-            sorteio_id = None
+            pass
+
+    rascunho = juiz_partida_service.obter_rascunho()
+    if rascunho:
+        sorteio_draft = {
+            'id': 'rascunho',
+            'is_rascunho': True,
+            'times': rascunho.get('times', []),
+            'num_times': rascunho.get('num_times', len(rascunho.get('times', []))),
+            'pontuacoes': rascunho.get('somas', []),
+            'diferenca': rascunho.get('diferenca', 0),
+            'total_jogadores': rascunho.get('total_jogadores', 0),
+        }
+        return 'rascunho', sorteio_draft
 
     estado = juiz_partida_service.obter_estado()
     sorteio_fluxo = ((estado.get('partida_atual') or {}).get('sorteio_id'))
-    if not sorteio_id and sorteio_fluxo:
+    if sorteio_fluxo:
         try:
-            sorteio_id = int(sorteio_fluxo)
+            s_id = int(sorteio_fluxo)
+            s_obj = historico_service.obter_sorteio(s_id)
+            if s_obj:
+                return s_id, s_obj
         except (TypeError, ValueError):
-            sorteio_id = None
+            pass
 
-    if not sorteio_id:
-        sorteios = historico_service.listar_sorteios() or []
-        if sorteios:
-            sorteio_recente = max(sorteios, key=lambda s: int(s.get('id', 0) or 0))
-            sorteio_id = int(sorteio_recente.get('id', 0) or 0)
+    sorteios = historico_service.listar_sorteios() or []
+    if sorteios:
+        sorteio_recente = max(sorteios, key=lambda s: int(s.get('id', 0) or 0))
+        s_id = int(sorteio_recente.get('id', 0) or 0)
+        return s_id, sorteio_recente
 
-    if not sorteio_id:
-        return None, None
-
-    return sorteio_id, historico_service.obter_sorteio(sorteio_id)
+    return None, None
 
 
 # ============================================================
@@ -231,7 +255,7 @@ def juiz_historico():
         sorteios = sorted(
             historico_service.listar_sorteios() or [],
             key=lambda item: int(item.get('id', 0) or 0),
-            reverse=True,
+            reverse=True
         )
 
         from routes.partida_routes import _enriquecer_sorteio_historico
@@ -247,13 +271,12 @@ def juiz_historico():
             usuario=_usuario_logado(),
         )
     except Exception as e:
-        logger.error(f"Erro ao carregar historico do juiz: {str(e)}")
+        logger.error(f"Erro ao carregar histórico do juiz: {str(e)}")
         return render_template(
             'juiz_historico.html',
             sorteios=[],
-            sorteio_atual_id=None,
             sorteio_destaque_id=None,
-            erro='Erro ao carregar histórico',
+            erro='Erro ao carregar histórico do juiz',
             usuario=_usuario_logado(),
         ), 500
 
@@ -263,7 +286,7 @@ def juiz_historico():
 def juiz_times_page():
     """Tela isolada de times do fluxo do juiz."""
     try:
-        sorteio_id_hint = request.args.get('sorteio_id', type=int)
+        sorteio_id_hint = request.args.get('sorteio_id')
         sorteio_id, sorteio = _resolver_sorteio_juiz(sorteio_id_hint=sorteio_id_hint)
         if not sorteio:
             return redirect(url_for('juiz.jogar_page'))
@@ -277,14 +300,18 @@ def juiz_times_page():
             'diferenca': sorteio.get('diferenca', 0),
         })
 
-        partida_votacao = votacao_service.obter_por_sorteio(sorteio_id)
-        resultado_partida = _obter_resultado_sorteio(sorteio_id)
+        estado_fluxo = _sincronizar_fluxo_juiz()
+        partida_votacao = votacao_service.obter_por_sorteio(sorteio_id) if sorteio_id != 'rascunho' else None
+        resultado_partida = _obter_resultado_sorteio(sorteio_id) if sorteio_id != 'rascunho' else None
+        todos_jogadores = sorted(jogador_service.listar(), key=lambda j: (j.nome or '').lower())
 
         return render_template(
             'juiz_times.html',
             sorteio=sorteio,
+            estado_fluxo=estado_fluxo,
             partida_votacao=partida_votacao,
             resultado_partida=resultado_partida,
+            todos_jogadores=todos_jogadores,
             usuario=_usuario_logado(),
         )
     except Exception as e:
@@ -296,45 +323,212 @@ def juiz_times_page():
 @juiz_required
 def juiz_compartilhar_page():
     """Redireciona para a página de times unificada."""
-    sorteio_id_hint = request.args.get('sorteio_id', type=int)
+    sorteio_id_hint = request.args.get('sorteio_id')
     if sorteio_id_hint:
         return redirect(url_for('juiz.juiz_times_page', sorteio_id=sorteio_id_hint, _anchor='acoes-sorteio'))
     return redirect(url_for('juiz.juiz_times_page', _anchor='acoes-sorteio'))
+
+
+def _ids_iguais(val1, val2):
+    if val1 is None or val2 is None:
+        return False
+    return str(val1).strip().lower() == str(val2).strip().lower()
+
+
+@juiz_bp.route('/jogar/substituir-jogador', defaults={'sorteio_id': None}, methods=['POST'])
+@juiz_bp.route('/jogar/substituir-jogador/<sorteio_id>', methods=['POST'])
+@juiz_required
+def juiz_substituir_jogador(sorteio_id=None):
+    """Substitui 1 jogador específico de um sorteio com suporte total a UUIDs e rascunhos."""
+    try:
+        saindo_id_raw = request.form.get('saindo_id')
+        entrando_id_raw = request.form.get('entrando_id')
+        confirmar_goleiro_extra = request.form.get('confirmar_goleiro_extra', type=int) or 0
+
+        if not saindo_id_raw or not entrando_id_raw:
+            flash("Selecione o jogador que vai sair e o substituto.", "warning")
+            return redirect(url_for('juiz.juiz_times_page'))
+
+        if _ids_iguais(saindo_id_raw, entrando_id_raw):
+            flash("O jogador que entra não pode ser o mesmo que vai sair.", "warning")
+            return redirect(url_for('juiz.juiz_times_page'))
+
+        sorteio_id_resolved, sorteio = _resolver_sorteio_juiz(sorteio_id_hint=sorteio_id if (sorteio_id and str(sorteio_id).isdigit()) else None)
+        if not sorteio:
+            flash("Sorteio não encontrado.", "danger")
+            return redirect(url_for('juiz.jogar_page'))
+
+        todos_jogadores = jogador_service.listar()
+        novo_jogador_obj = next(
+            (j for j in todos_jogadores if _ids_iguais(j.id, entrando_id_raw) or str(j.nome or '').strip().lower() == str(entrando_id_raw).strip().lower()),
+            None
+        )
+        if not novo_jogador_obj:
+            flash("Novo jogador não encontrado no cadastro.", "danger")
+            return redirect(url_for('juiz.juiz_times_page'))
+
+        # Regra 2: O jogador que entra NÃO pode ser um jogador que já está no sorteio
+        ids_no_sorteio = set()
+        for t in sorteio.get('times', []):
+            for j in t.get('jogadores', []):
+                if j.get('id'):
+                    ids_no_sorteio.add(str(j['id']).strip().lower())
+                if j.get('nome'):
+                    ids_no_sorteio.add(str(j['nome']).strip().lower())
+
+        novo_id_norm = str(novo_jogador_obj.id).strip().lower()
+        novo_nome_norm = str(novo_jogador_obj.nome).strip().lower()
+        if (novo_id_norm in ids_no_sorteio or novo_nome_norm in ids_no_sorteio) and not _ids_iguais(saindo_id_raw, novo_jogador_obj.id):
+            flash("O jogador substituto já está escalado neste sorteio.", "warning")
+            return redirect(url_for('juiz.juiz_times_page'))
+
+        # Encontrar o time onde o jogador saindo está
+        time_alvo = None
+        saindo_jogador_dict = None
+        for t in sorteio.get('times', []):
+            for j in t.get('jogadores', []):
+                if _ids_iguais(j.get('id'), saindo_id_raw) or str(j.get('nome') or '').strip().lower() == str(saindo_id_raw).strip().lower():
+                    time_alvo = t
+                    saindo_jogador_dict = j
+                    break
+            if time_alvo:
+                break
+
+        if not time_alvo or not saindo_jogador_dict:
+            flash("Jogador a ser substituído não foi encontrado nas equipes.", "warning")
+            return redirect(url_for('juiz.juiz_times_page'))
+
+        # Regra 3: Se o jogador que entra for goleiro, verificar se o time alvo já possui outro goleiro
+        novo_eh_goleiro = bool(getattr(novo_jogador_obj, 'goleiro', False)) or (getattr(novo_jogador_obj, 'posicao', '') or '').lower() == 'goleiro'
+        if novo_eh_goleiro:
+            goleiros_no_time = [
+                j for j in time_alvo.get('jogadores', [])
+                if not _ids_iguais(j.get('id'), saindo_id_raw) and not (str(j.get('nome') or '').strip().lower() == str(saindo_id_raw).strip().lower()) and (
+                    bool(j.get('goleiro')) or (j.get('posicao') or '').lower() == 'goleiro'
+                )
+            ]
+            if goleiros_no_time and not confirmar_goleiro_extra:
+                time_num = time_alvo.get('numero', 1)
+                flash(
+                    f"⚠️ O Time {time_num} passará a ter mais de 1 goleiro ({novo_jogador_obj.nome} e {goleiros_no_time[0].get('nome')}). "
+                    f"Confirme se aprova ou não.",
+                    "warning"
+                )
+                return redirect(url_for('juiz.juiz_times_page', pedir_confirmacao_goleiro=1, saindo_id=saindo_id_raw, entrando_id=entrando_id_raw, time_num=time_num))
+
+        substituido = False
+        antigo_nome = saindo_jogador_dict.get('nome') or 'Jogador'
+        times_atualizados = []
+
+        for t in sorteio.get('times', []):
+            novos_jogadores_time = []
+            for j in t.get('jogadores', []):
+                if _ids_iguais(j.get('id'), saindo_id_raw) or str(j.get('nome') or '').strip().lower() == str(saindo_id_raw).strip().lower():
+                    substituido = True
+                    novos_jogadores_time.append({
+                        'id': novo_jogador_obj.id,
+                        'nome': novo_jogador_obj.nome,
+                        'nivel': float(getattr(novo_jogador_obj, 'nivel', 3.0) or 3.0),
+                        'tipo': getattr(novo_jogador_obj, 'tipo', 'avulso') or 'avulso',
+                        'goleiro': novo_eh_goleiro,
+                        'posicao': 'goleiro' if novo_eh_goleiro else getattr(novo_jogador_obj, 'posicao', 'linha'),
+                        'foto': getattr(novo_jogador_obj, 'foto_url', None) or getattr(novo_jogador_obj, 'foto', None)
+                    })
+                else:
+                    novos_jogadores_time.append(j)
+            times_atualizados.append({
+                'numero': t.get('numero'),
+                'jogadores': novos_jogadores_time
+            })
+
+        if not substituido:
+            flash("Jogador a ser substituído não foi encontrado nas equipes.", "warning")
+            return redirect(url_for('juiz.juiz_times_page'))
+
+        # Se for rascunho, atualizar no rascunho temporário do juiz
+        if sorteio.get('is_rascunho') or sorteio_id_resolved == 'rascunho':
+            juiz_partida_service.atualizar_rascunho_times(times_atualizados)
+        else:
+            historico_service.atualizar_times_sorteio(sorteio_id_resolved, times_atualizados)
+
+        clear_db_cache()
+        JogadorStatsService.invalidar_cache_stats()
+
+        flash(f"Substituição realizada com sucesso: {antigo_nome} ➔ {novo_jogador_obj.nome}", "success")
+        return redirect(url_for('juiz.juiz_times_page'))
+    except Exception as e:
+        logger.error(f"Erro ao substituir jogador: {str(e)}")
+        flash("Erro ao realizar substituição do jogador.", "danger")
+        return redirect(url_for('juiz.juiz_times_page'))
+
+
+@juiz_bp.route('/jogar/iniciar-rodada', defaults={'sorteio_id': None}, methods=['GET', 'POST'])
+@juiz_bp.route('/jogar/iniciar-rodada/<sorteio_id>', methods=['GET', 'POST'])
+@juiz_required
+def juiz_iniciar_rodada(sorteio_id=None):
+    """Oficializa o rascunho do sorteio e inicia a rodada do juiz."""
+    try:
+        sorteio_id = sorteio_id or request.form.get('sorteio_id')
+        rascunho = juiz_partida_service.obter_rascunho()
+        if rascunho:
+            times = rascunho.get('times', [])
+            somas = rascunho.get('somas', [])
+            num_times = rascunho.get('num_times', len(times))
+            diferenca = rascunho.get('diferenca', 0)
+
+            # Adicionar novo registro oficial no histórico
+            sorteio_oficial = historico_service.adicionar_sorteio(times, somas, num_times, diferenca)
+            novo_id = sorteio_oficial.get('id')
+            sorteio_oficial['rascunho'] = False
+            sorteio_oficial['oficial'] = True
+            historico_service.atualizar_times_sorteio(novo_id, times)
+
+            juiz_partida_service.registrar_sorteio(novo_id)
+            juiz_partida_service.marcar_resultado_registrado(novo_id)
+            juiz_partida_service.limpar_rascunho()
+
+            clear_db_cache()
+            JogadorStatsService.invalidar_cache_stats()
+
+            flash(f"Rodada #{novo_id} iniciada com sucesso! Lançamento de placar e votação liberados.", "success")
+            return redirect(url_for('votacao.votacao_admin_page', sorteio_id=novo_id))
+        else:
+            if not sorteio_id or str(sorteio_id) == 'rascunho':
+                sorteios = historico_service.listar_sorteios() or []
+                if sorteios:
+                    sorteio_recente = max(sorteios, key=lambda s: int(s.get('id', 0) or 0))
+                    sorteio_id = sorteio_recente.get('id')
+
+            if not sorteio_id:
+                flash("Nenhum sorteio ativo para iniciar a rodada.", "warning")
+                return redirect(url_for('juiz.jogar_page'))
+
+            sorteio = historico_service.obter_sorteio(int(sorteio_id))
+            if not sorteio:
+                flash("Sorteio não encontrado.", "danger")
+                return redirect(url_for('juiz.jogar_page'))
+
+            sorteio['rascunho'] = False
+            sorteio['oficial'] = True
+            historico_service.atualizar_times_sorteio(int(sorteio_id), sorteio.get('times', []))
+            juiz_partida_service.marcar_resultado_registrado(int(sorteio_id))
+
+            clear_db_cache()
+            JogadorStatsService.invalidar_cache_stats()
+
+            flash(f"Rodada #{sorteio_id} iniciada com sucesso! Lançamento de placar e votação liberados.", "success")
+            return redirect(url_for('votacao.votacao_admin_page', sorteio_id=sorteio_id))
+    except Exception as e:
+        logger.error(f"Erro ao iniciar rodada {sorteio_id}: {str(e)}")
+        flash("Erro ao iniciar a rodada.", "danger")
+        return redirect(url_for('juiz.juiz_times_page'))
 
 
 @juiz_bp.route('/jogar/trocar-jogadores/<int:sorteio_id>', methods=['GET', 'POST'])
 @juiz_required
 def juiz_trocar_jogadores(sorteio_id):
     """Permite ao juiz trocar/substituir jogadores de um sorteio ativo."""
-    try:
-        sorteio = historico_service.obter_sorteio(sorteio_id)
-        if not sorteio:
-            return redirect(url_for('juiz.jogar_page'))
-
-        todos_jogadores = jogador_service.listar()
-        jogador_ids = []
-        for t in sorteio.get('times', []):
-            for j in t.get('jogadores', []):
-                j_id = j.get('id')
-                if j_id and any(p.id == j_id for p in todos_jogadores):
-                    if j_id not in jogador_ids:
-                        jogador_ids.append(j_id)
-                elif j.get('nome'):
-                    nome_norm = (j.get('nome') or '').strip().lower()
-                    match = next((p for p in todos_jogadores if (p.nome or '').strip().lower() == nome_norm), None)
-                    if match and match.id not in jogador_ids:
-                        jogador_ids.append(match.id)
-
-        if jogador_ids:
-            jogador_service.marcar_presenca(jogador_ids)
-
-        juiz_partida_service.iniciar_partida(session.get('user_id'))
-        juiz_partida_service.registrar_selecao(len(jogador_ids), jogador_ids)
-
-        return redirect(url_for('juiz.juiz_criar_partida', trocar=1))
-    except Exception as e:
-        logger.error(f"Erro ao trocar jogadores do sorteio {sorteio_id}: {str(e)}")
-        return redirect(url_for('juiz.juiz_times_page', sorteio_id=sorteio_id))
+    return redirect(url_for('juiz.juiz_times_page', sorteio_id=sorteio_id))
 
 
 @juiz_bp.route('/jogar/cronometro', methods=['GET'])
@@ -426,14 +620,14 @@ def api_jogar_resumo():
 def juiz_criar_partida():
     """Inicia criação de partida"""
     try:
-        trocar_modo = request.args.get('trocar', type=int) or request.args.get('modo_edicao', type=int)
+        novo_modo = request.args.get('novo', type=int) or request.args.get('trocar', type=int) or request.args.get('modo_edicao', type=int)
         estado_fluxo = _sincronizar_fluxo_juiz()
-        if not trocar_modo:
+        if not novo_modo:
             destino_aberto = _destino_partida_oficial_aberta(estado_fluxo)
             if destino_aberto:
                 return redirect(destino_aberto)
 
-        if request.method == 'POST':
+        if request.method == 'POST' or novo_modo:
             jogador_service.limpar_presenca()
             juiz_partida_service.iniciar_partida(session.get('user_id'))
         

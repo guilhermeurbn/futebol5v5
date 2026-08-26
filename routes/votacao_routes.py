@@ -130,7 +130,7 @@ def _resolver_contexto_admin(sorteio_id_hint=None):
     selecionado = None
     if _is_juiz() and fluxo_partida and fluxo_partida.get('sorteio_id'):
         selecionado = fluxo_partida.get('sorteio_id')
-    elif not _is_juiz():
+    else:
         if sorteio_id_hint:
             selecionado = sorteio_id_hint
         elif ativa_global:
@@ -189,6 +189,26 @@ def _resolver_contexto_admin(sorteio_id_hint=None):
     maior_id = max((int(s.get('id', 0) or 0) for s in sorteios if isinstance(s, dict)), default=0)
     proximo_sorteio_num = int(selecionado) if selecionado else (maior_id + 1)
 
+    if _is_juiz():
+        rodada_iniciada = bool(
+            fluxo_partida
+            and (fluxo_partida.get('status') in ['resultado_registrado', 'votacao_aberta'])
+        )
+    else:
+        rodada_iniciada = bool(
+            sorteio_contexto
+            and not sorteio_contexto.get('rascunho')
+            and (
+                (fluxo_partida and fluxo_partida.get('status') in ['resultado_registrado', 'votacao_aberta', 'encerrada'])
+                or (resultado_partida is not None)
+                or (rodada_selecionada is not None)
+            )
+        )
+
+    if not rodada_iniciada and _is_juiz():
+        resultado_partida = None
+        pode_abrir_votacao = False
+
     return {
         'ativa': ativa,
         'sorteios_disponiveis': sorteios_ordenados,
@@ -199,6 +219,8 @@ def _resolver_contexto_admin(sorteio_id_hint=None):
         'voted_user_ids': voted_user_ids,
         'pode_abrir_votacao': pode_abrir_votacao,
         'resultado_partida': resultado_partida,
+        'resultado_concluido': bool(resultado_partida),
+        'rodada_iniciada': rodada_iniciada,
         'rodada_selecionada': rodada_selecionada,
         'ranking_jogadores_encerrada': ranking_encerrado['ranking_jogadores'],
         'ranking_top10_encerrada': ranking_encerrado['ranking_top10'],
