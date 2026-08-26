@@ -111,7 +111,7 @@ class JogadorService:
             return []
 
     def _enriquecer_fotos(self, dados: List[dict]) -> List[dict]:
-        """Garante que qualquer jogador vinculado a um usuário receba a foto do perfil se não tiver foto própria."""
+        """Garante que qualquer jogador vinculado a um usuário reflita sempre a foto atualizada do perfil do usuário."""
         if not dados:
             return dados
         try:
@@ -122,13 +122,13 @@ class JogadorService:
             user_by_username = {u.get("username", "").strip().lower(): u for u in usuarios if u.get("username")}
 
             for item in dados:
-                foto = item.get("foto_url")
-                if not foto:
-                    owner_id = item.get("owner_user_id")
-                    nome_key = (item.get("nome") or "").strip().lower()
-                    u = user_by_id.get(owner_id) or user_by_name.get(nome_key) or user_by_username.get(nome_key)
-                    if u and u.get("foto_url"):
-                        item["foto_url"] = u.get("foto_url")
+                owner_id = item.get("owner_user_id") or item.get("user_id")
+                nome_key = (item.get("nome") or "").strip().lower()
+                u = user_by_id.get(owner_id) or user_by_name.get(nome_key) or user_by_username.get(nome_key)
+                if u is not None:
+                    u_foto = u.get("foto_url", "") or ""
+                    item["foto_url"] = u_foto
+                    item["foto"] = u_foto
         except Exception:
             pass
         return dados
@@ -288,8 +288,12 @@ class JogadorService:
             owner_user_id=jogador_existente.owner_user_id,
             historico_nivel=jogador_existente.historico_nivel or [],
         )
+        nova_foto = foto_url if foto_url is not None else (getattr(jogador_existente, 'foto_url', None) or getattr(jogador_existente, 'foto', None) or dados[indice].get('foto_url', ''))
 
-        dados[indice] = jogador_atualizado.para_dict()
+        dict_atualizado = jogador_atualizado.para_dict()
+        dict_atualizado["foto_url"] = nova_foto or ""
+        dict_atualizado["foto"] = nova_foto or ""
+        dados[indice] = dict_atualizado
         self._salvar(dados)
         return jogador_atualizado
 

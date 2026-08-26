@@ -1492,16 +1492,21 @@ def perfil_remover_foto():
     foto_antiga = u_atual.get('foto_url')
 
     if foto_antiga:
-        us.remover_foto(foto_antiga)
-        auth_service.atualizar_perfil_usuario(user_id=user_id, foto_url="")
-        session.pop('foto_url', None)
-        session.modified = True
+        try:
+            us.remover_foto(foto_antiga)
+        except Exception as exc:
+            logger.warning(f"Erro ao remover arquivo físico da foto: {exc}")
 
-    return render_template(
-        'editar_perfil.html',
-        usuario=_usuario_logado(),
-        sucesso_perfil='Foto removida com sucesso! O perfil voltou a exibir as iniciais.'
-    )
+    auth_service.atualizar_perfil_usuario(user_id=user_id, foto_url="")
+    session['foto_url'] = ""
+    session.pop('foto_url', None)
+    session.modified = True
+
+    from services.jogador_stats_service import JogadorStatsService
+    JogadorStatsService.invalidar_cache_stats()
+
+    flash("Foto removida com sucesso! O perfil voltou a exibir as iniciais.", "success")
+    return redirect(url_for('auth.editar_perfil_page'))
 
 
 # ============================================================
