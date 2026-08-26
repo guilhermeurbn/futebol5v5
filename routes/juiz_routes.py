@@ -61,11 +61,36 @@ def _sincronizar_fluxo_juiz():
     estado = juiz_partida_service.obter_estado()
     partida_atual = estado.get('partida_atual') or {}
 
+    from services.votacao_service import VotacaoService
+    vot_svc = VotacaoService()
+
+    # Auto-recuperar se houver qualquer votação aberta em andamento
+    if not partida_atual or not partida_atual.get('votacao_aberta'):
+        votacoes = vot_svc.listar()
+        abertas = [v for v in votacoes if v.get('status') == 'aberta']
+        if abertas:
+            v_aberta = abertas[0]
+            s_id = v_aberta.get('sorteio_id')
+            if s_id:
+                juiz_partida_service.iniciar_partida()
+                juiz_partida_service.marcar_resultado_registrado(s_id)
+                juiz_partida_service.marcar_votacao_aberta(s_id, v_aberta.get('id'))
+                return juiz_partida_service.obter_estado()
+
     if not partida_atual:
         return estado
 
     sorteio_id = partida_atual.get('sorteio_id')
     votacao_partida_id = partida_atual.get('votacao_partida_id')
+
+    if not votacao_partida_id and sorteio_id:
+        v_partida = vot_svc.obter_por_sorteio(sorteio_id)
+        if v_partida:
+            votacao_partida_id = v_partida.get('id')
+            juiz_partida_service.marcar_resultado_registrado(sorteio_id)
+            juiz_partida_service.marcar_votacao_aberta(sorteio_id, votacao_partida_id)
+            estado = juiz_partida_service.obter_estado()
+            partida_atual = estado.get('partida_atual') or {}
 
     if sorteio_id and not partida_atual.get('resultado_registrado'):
         resultado = _obter_resultado_sorteio(sorteio_id)
@@ -76,9 +101,7 @@ def _sincronizar_fluxo_juiz():
             votacao_partida_id = partida_atual.get('votacao_partida_id')
 
     if votacao_partida_id:
-        from services.votacao_service import VotacaoService
-        votacao_service = VotacaoService()
-        partida_votacao = votacao_service.obter_partida(votacao_partida_id)
+        partida_votacao = vot_svc.obter_partida(votacao_partida_id)
         
         if partida_votacao and partida_votacao.get('status') == 'aberta' and estado.get('status') != 'votacao_aberta':
             juiz_partida_service.marcar_votacao_aberta(
@@ -88,7 +111,10 @@ def _sincronizar_fluxo_juiz():
             estado = juiz_partida_service.obter_estado()
         elif partida_votacao and partida_votacao.get('status') == 'encerrada':
             juiz_partida_service.finalizar_partida(_resumo_encerramento_para_juiz(partida_votacao))
-            jogador_service.limpar_presenca()
+            try:
+                jogador_service.limpar_presenca()
+            except Exception:
+                pass
             estado = juiz_partida_service.obter_estado()
 
     return estado
