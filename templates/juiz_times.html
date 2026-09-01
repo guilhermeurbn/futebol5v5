@@ -56,8 +56,7 @@
 
                 <div class="judge-team-card__players" data-time-numero="{{ time.numero }}">
                     {% for jogador in time.jogadores %}
-                    {% set jogador_key = (jogador.id|string) if jogador.id is defined and jogador.id is not none else
-                    (jogador.nome ~ '|' ~ jogador.nivel ~ '|' ~ jogador.posicao) %}
+                    {% set jogador_key = (jogador.id|string) if (jogador.id is defined and jogador.id is not none and (jogador.id|string).strip() != '' and (jogador.id|string).strip().lower() != 'none') else (jogador.nome ~ '|' ~ jogador.nivel ~ '|' ~ jogador.posicao) %}
                     <div class="judge-team-player" draggable="false" data-player-key="{{ jogador_key }}"
                         data-posicao="{{ jogador.posicao }}" data-nivel="{{ jogador.nivel }}">
                         <span class="judge-team-player__position" aria-hidden="true">
@@ -599,6 +598,11 @@
 
         btnSalvar.disabled = true;
         btnSalvar.textContent = 'Salvando...';
+        document.querySelectorAll('.judge-card-edit-btn').forEach(btn => {
+            btn.disabled = true;
+            const textSpan = btn.querySelector('.btn-text');
+            if (textSpan) textSpan.textContent = 'Salvando...';
+        });
         try {
             const response = await fetch(`/api/sorteio/${sorteoId}/times`, {
                 method: 'POST',
@@ -617,8 +621,12 @@
             toggleEdit(false);
             snapshot = captureState();
             guidance.textContent = 'Trocas salvas com sucesso.';
+            setTimeout(() => {
+                location.reload();
+            }, 350);
         } catch (error) {
             btnSalvar.disabled = false;
+            document.querySelectorAll('.judge-card-edit-btn').forEach(btn => { btn.disabled = false; });
             guidance.textContent = error.message || 'Erro ao salvar trocas.';
         } finally {
             btnSalvar.textContent = 'Salvar';

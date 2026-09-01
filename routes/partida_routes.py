@@ -19,6 +19,7 @@ from services.export_service import ExportService
 from services.juiz_partida_service import JuizPartidaService
 from services.votacao_service import VotacaoService
 from services.jogador_stats_service import JogadorStatsService
+from services.db import clear_db_cache
 
 partida_bp = Blueprint('partida', __name__)
 logger = logging.getLogger(__name__)
@@ -495,12 +496,35 @@ def deletar_sorteio_historico(sorteio_id):
         return redirect(url_for('partida.historico', erro='Erro ao excluir sorteio'))
 
 
-@partida_bp.route('/api/sorteio/<int:sorteio_id>/times', methods=['POST'])
+@partida_bp.route('/api/sorteio/<sorteio_id>/times', methods=['POST'])
 @admin_or_juiz_required
 def atualizar_times_sorteio(sorteio_id):
-    """Atualiza composição dos times de um sorteio (troca manual pelo juiz)."""
+    """Atualiza composição dos times de um sorteio (troca manual pelo juiz), suportando rascunhos e oficial."""
     try:
-        sorteio = historico_service.obter_sorteio(sorteio_id)
+        sorteio = None
+        is_rascunho = False
+
+        if str(sorteio_id).lower() == 'rascunho' or str(sorteio_id) == '0':
+            from services.juiz_partida_service import JuizPartidaService
+            juiz_svc = JuizPartidaService()
+            rascunho = juiz_svc.obter_rascunho()
+            if rascunho:
+                is_rascunho = True
+                sorteio = {
+                    'id': 'rascunho',
+                    'is_rascunho': True,
+                    'times': rascunho.get('times', []),
+                    'num_times': rascunho.get('num_times', len(rascunho.get('times', []))),
+                    'pontuacoes': rascunho.get('somas', []),
+                    'diferenca': rascunho.get('diferenca', 0),
+                }
+        else:
+            try:
+                s_id_int = int(sorteio_id)
+                sorteio = historico_service.obter_sorteio(s_id_int)
+            except (ValueError, TypeError):
+                sorteio = None
+
         if not sorteio:
             return jsonify({'sucesso': False, 'erro': 'Sorteio não encontrado'}), 404
 
@@ -515,7 +539,7 @@ def atualizar_times_sorteio(sorteio_id):
 
         def _player_key(jogador):
             player_id = jogador.get('id')
-            if player_id is not None and str(player_id).strip() != '':
+            if player_id is not None and str(player_id).strip() != '' and str(player_id).strip().lower() != 'none':
                 return str(player_id)
             return f"{jogador.get('nome', '')}|{jogador.get('nivel', '')}|{jogador.get('posicao', '')}"
 
@@ -555,7 +579,12 @@ def atualizar_times_sorteio(sorteio_id):
         if sorted(chaves_recebidas) != sorted(chaves_originais):
             return jsonify({'sucesso': False, 'erro': 'Os jogadores do sorteio foram alterados de forma inválida'}), 400
 
-        sorteio_atualizado = historico_service.atualizar_times_sorteio(sorteio_id, times_atualizados)
+        if is_rascunho:
+            from services.juiz_partida_service import JuizPartidaService
+            sorteio_atualizado = JuizPartidaService().atualizar_rascunho_times(times_atualizados)
+        else:
+            sorteio_atualizado = historico_service.atualizar_times_sorteio(int(sorteio_id), times_atualizados)
+
         if not sorteio_atualizado:
             return jsonify({'sucesso': False, 'erro': 'Não foi possível salvar as alterações'}), 500
 
@@ -563,10 +592,12 @@ def atualizar_times_sorteio(sorteio_id):
         _salvar_ultimo_sorteio_sessao({
             'sorteio_id': sorteio_atualizado.get('id'),
             'times': sorteio_atualizado.get('times', []),
-            'num_times': sorteio_atualizado.get('num_times', 0),
-            'somas': sorteio_atualizado.get('pontuacoes', []),
-            'diferenca': sorteio_atualizado.get('diferenca', 0),
+            'num_times': len(times_atualizados),
+            'somas': [t.get('soma', 0) for t in times_atualizados],
+            'diferenca': round(max([t.get('soma', 0) for t in times_atualizados]) - min([t.get('soma', 0) for t in times_atualizados]), 2) if times_atualizados else 0,
         })
+        clear_db_cache()
+        JogadorStatsService.invalidar_cache_stats()
 
         return jsonify({'sucesso': True, 'sorteio': sorteio_atualizado})
     except ValueError as e:
