@@ -1354,7 +1354,7 @@
 
             function updateBase64Input() {
                 try {
-                    const dataUrl = canvas.toDataURL('image/png');
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
                     if (inputBase64) inputBase64.value = dataUrl;
                 } catch (e) {
                     console.warn('Erro ao extrair Base64 do canvas 4K:', e);

@@ -15,6 +15,7 @@ class Config:
     TESTING = False
     JSON_SORT_KEYS = False
     PERMANENT_SESSION_LIFETIME = timedelta(days=90)
+    MAX_CONTENT_LENGTH = 32 * 1024 * 1024  # 32 MB
     ENABLE_APP_SHELL = _env_flag('ENABLE_APP_SHELL', '1')
     GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID', '87998320853-mfkte5ili1uuvud8jdq6pvcp0kmknhrs.apps.googleusercontent.com')
     GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET', '')
