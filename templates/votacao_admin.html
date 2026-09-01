@@ -1400,6 +1400,16 @@
                 if (previewWrapper) previewWrapper.style.display = 'none';
             });
         }
+
+        const formFoto = btnCamera?.closest('form');
+        if (formFoto) {
+            formFoto.addEventListener('submit', function() {
+                if (inputBase64 && inputBase64.value) {
+                    if (btnCamera) btnCamera.disabled = true;
+                    if (btnGaleria) btnGaleria.disabled = true;
+                }
+            });
+        }
     })();
 </script>
 {% endblock %}

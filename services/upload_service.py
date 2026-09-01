@@ -133,7 +133,8 @@ class UploadService:
                     folder=folder,
                     public_id=public_id,
                     overwrite=True,
-                    resource_type="image"
+                    resource_type="image",
+                    timeout=12
                 )
                 url_nuvem = res.get("secure_url") or res.get("url")
                 if url_nuvem:
@@ -265,6 +266,12 @@ class UploadService:
 
         if img.mode != "RGB":
             img = img.convert("RGB")
+
+        # Redimensionar se for maior que 1200px de largura para otimizar velocidade de upload
+        if img.width > 1200:
+            ratio = 1200.0 / float(img.width)
+            new_height = int(float(img.height) * ratio)
+            img = img.resize((1200, new_height), Image.Resampling.LANCZOS)
 
         # Tentar upload Cloudinary primeiro
         s_tag = str(sorteio_id) if sorteio_id else uuid.uuid4().hex[:6]
