@@ -345,12 +345,12 @@
                         <label for="btnFotoCamera" class="btn" style="flex: 1; min-width: 100px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #f8fafc; font-weight: 800; font-size: 0.82rem; padding: 0.6rem 0.5rem; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem; cursor: pointer; -webkit-tap-highlight-color: transparent;">
                             <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 15px; height: 15px;"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
                             <span>Tirar Foto</span>
-                            <input type="file" id="btnFotoCamera" name="foto_campeao_cam" accept="image/*" capture="environment" style="display: none;">
+                            <input type="file" id="btnFotoCamera" accept="image/*" capture="environment" style="display: none;">
                         </label>
                         <label for="btnFotoGaleria" class="btn" style="flex: 1; min-width: 100px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #f8fafc; font-weight: 800; font-size: 0.82rem; padding: 0.6rem 0.5rem; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem; cursor: pointer; -webkit-tap-highlight-color: transparent;">
                             <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 15px; height: 15px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                             <span>Galeria</span>
-                            <input type="file" id="btnFotoGaleria" name="foto_campeao" accept="image/*" style="display: none;">
+                            <input type="file" id="btnFotoGaleria" accept="image/*" style="display: none;">
                         </label>
                         <button type="button" id="btnSemFotoTrigger" class="btn" style="flex: 1; min-width: 100px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.12); color: #cbd5e1; font-weight: 800; font-size: 0.82rem; padding: 0.6rem 0.5rem; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem; cursor: pointer; -webkit-tap-highlight-color: transparent;">
                             <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 15px; height: 15px; color: #94a3b8;"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
@@ -358,10 +358,10 @@
                         </button>
                     </div>
 
-                    <!-- Area de Pré-visualização do Card Editorial 4K Ultra HD (2160x3240) -->
+                    <!-- Area de Pré-visualização do Card Editorial Full HD (1080x1620) -->
                     <div id="championCardPreviewWrapper" style="display: none; text-align: center; margin-top: 0.85rem; position: relative;">
                         <div style="display: inline-block; max-width: 280px; width: 100%; aspect-ratio: 2/3; border-radius: 14px; overflow: hidden; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.12); background: #09090b;">
-                            <canvas id="championCanvas" width="2160" height="3240" style="width: 100%; height: auto; display: block;"></canvas>
+                            <canvas id="championCanvas" width="1080" height="1620" style="width: 100%; height: auto; display: block;"></canvas>
                         </div>
                         <div style="margin-top: 0.4rem;">
                             <button type="button" id="btnRemoverFotoCampeao" style="background: none; border: none; color: #f87171; font-size: 0.75rem; font-weight: 700; cursor: pointer; text-decoration: underline;">Trocar foto</button>
@@ -1184,10 +1184,9 @@
         }
 
         function renderChampionCard(userPhotoImg) {
-            // 4K Ultra HD Dimensions (2160 x 3240)
-            // Layout reordenado conforme solicitado: 1. Foto (70% = 2268px), 2. Logo (10% = 324px), 3. Informações (20% = 648px)
-            const width = 2160;
-            const height = 3240;
+            // Full HD Premium Dimensions (1080 x 1620)
+            const width = 1080;
+            const height = 1620;
             canvas.width = width;
             canvas.height = height;
 
@@ -1403,10 +1402,43 @@
 
         const formFoto = btnCamera?.closest('form');
         if (formFoto) {
-            formFoto.addEventListener('submit', function() {
-                if (inputBase64 && inputBase64.value) {
-                    if (btnCamera) btnCamera.disabled = true;
-                    if (btnGaleria) btnGaleria.disabled = true;
+            formFoto.addEventListener('submit', async function(e) {
+                if (inputBase64 && inputBase64.value && inputBase64.value.startsWith('data:image')) {
+                    e.preventDefault();
+                    const submitBtn = formFoto.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.textContent = 'Salvando Foto...';
+                    }
+                    try {
+                        const sorteioIdInput = formFoto.querySelector('input[name="sorteio_id"]');
+                        const csrfTokenInput = formFoto.querySelector('input[name="csrf_token"]');
+                        const response = await fetch(formFoto.action, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrfTokenInput ? csrfTokenInput.value : ''
+                            },
+                            body: JSON.stringify({
+                                sorteio_id: sorteioIdInput ? sorteioIdInput.value : '',
+                                card_campeao_base64: inputBase64.value
+                            })
+                        });
+                        const resData = await response.json();
+                        if (response.ok && resData.sucesso) {
+                            location.reload();
+                        } else {
+                            alert(resData.erro || 'Erro ao salvar a foto do campeão');
+                            if (submitBtn) {
+                                submitBtn.disabled = false;
+                                submitBtn.textContent = 'Salvar Foto do Campeão';
+                            }
+                        }
+                    } catch (err) {
+                        console.error('Erro AJAX foto:', err);
+                        if (submitBtn) submitBtn.textContent = 'Enviando...';
+                        formFoto.submit();
+                    }
                 }
             });
         }

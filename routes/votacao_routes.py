@@ -619,19 +619,25 @@ def votacao_admin_page():
 @votacao_bp.route('/admin/votacao/salvar-foto-campeao', methods=['POST'])
 @admin_or_juiz_required
 def votacao_admin_salvar_foto_campeao():
-    """Salva a foto/card do time campeão para a partida."""
-    sorteio_id = request.form.get('sorteio_id', type=int)
+    """Salva a foto/card do time campeão para a partida com suporte a Form e JSON AJAX."""
+    json_data = request.get_json(silent=True) or {}
+    sorteio_id = request.form.get('sorteio_id', type=int) or json_data.get('sorteio_id')
+    if isinstance(sorteio_id, str) and sorteio_id.isdigit():
+        sorteio_id = int(sorteio_id)
+
     if not sorteio_id and _is_juiz():
         estado = juiz_partida_service.obter_estado()
         sorteio_id = ((estado.get('partida_atual') or {}).get('sorteio_id'))
 
     if not sorteio_id:
+        if request.is_json or json_data:
+            return jsonify({'sucesso': False, 'erro': 'Sorteio não identificado'}), 400
         return redirect(url_for('votacao.votacao_admin_page', erro='Sorteio não identificado'))
 
     partidas_existentes = partida_service.obter_partidas_sorteio(sorteio_id)
     foto_antiga_url = (partidas_existentes[0].get('card_campeao_url') if partidas_existentes else None)
 
-    if request.form.get('remover_sem_foto'):
+    if request.form.get('remover_sem_foto') or json_data.get('remover_sem_foto'):
         # Limpa o status sem_foto para permitir adicionar foto
         if partidas_existentes:
             partida_obj = partidas_existentes[0]
@@ -643,28 +649,34 @@ def votacao_admin_salvar_foto_campeao():
                 times_desempenho=partida_obj.get('times_desempenho', []),
                 card_campeao_url=''
             )
+        if request.is_json or json_data:
+            return jsonify({'sucesso': True, 'card_campeao_url': ''})
         return redirect(url_for('votacao.votacao_admin_page', sorteio_id=sorteio_id))
 
-    if request.form.get('sem_foto'):
+    if request.form.get('sem_foto') or json_data.get('sem_foto'):
         if foto_antiga_url:
             upload_service.remover_card_campeao(foto_antiga_url)
         card_campeao_url = 'sem_foto'
     else:
         card_campeao_url = None
         foto_campeao_file = request.files.get('foto_campeao') or request.files.get('foto_campeao_cam')
-        card_campeao_base64 = request.form.get('card_campeao_base64')
+        card_campeao_base64 = request.form.get('card_campeao_base64') or json_data.get('card_campeao_base64')
 
         if card_campeao_base64 and isinstance(card_campeao_base64, str) and card_campeao_base64.startswith('data:image'):
             try:
                 card_campeao_url = upload_service.processar_foto_campeao(base64_data=card_campeao_base64, sorteio_id=sorteio_id, foto_antiga_url=foto_antiga_url)
             except Exception as exc:
                 logger.warning("Falha ao processar card do campeao por base64: %s", exc)
+                if request.is_json or json_data:
+                    return jsonify({'sucesso': False, 'erro': str(exc)}), 400
                 return redirect(url_for('votacao.votacao_admin_page', sorteio_id=sorteio_id, erro=str(exc)))
         elif foto_campeao_file and foto_campeao_file.filename:
             try:
                 card_campeao_url = upload_service.processar_foto_campeao(file_storage=foto_campeao_file, sorteio_id=sorteio_id, foto_antiga_url=foto_antiga_url)
             except Exception as exc:
                 logger.warning("Falha ao processar foto do campeao por arquivo: %s", exc)
+                if request.is_json or json_data:
+                    return jsonify({'sucesso': False, 'erro': str(exc)}), 400
                 return redirect(url_for('votacao.votacao_admin_page', sorteio_id=sorteio_id, erro=str(exc)))
 
     if card_campeao_url:
@@ -692,9 +704,16 @@ def votacao_admin_salvar_foto_campeao():
                     alvo['resultado_partida']['card_campeao_url'] = card_campeao_url
                 votacao_service._salvar(dados)
 
+        clear_db_cache()
+        JogadorStatsService.invalidar_cache_stats()
+
         msg = 'Opção "Sem foto" salva com sucesso!' if card_campeao_url == 'sem_foto' else 'Foto do time campeão salva com sucesso!'
+        if request.is_json or json_data:
+            return jsonify({'sucesso': True, 'card_campeao_url': card_campeao_url, 'mensagem': msg})
         return redirect(url_for('votacao.votacao_admin_page', sorteio_id=sorteio_id, sucesso=msg))
 
+    if request.is_json or json_data:
+        return jsonify({'sucesso': False, 'erro': 'Erro ao salvar foto do campeão'}), 400
     return redirect(url_for('votacao.votacao_admin_page', sorteio_id=sorteio_id))
 
 
