@@ -56,7 +56,8 @@ class PartidaService:
     
     def registrar_resultado(self, sorteio_id: int, time_vencedor: Optional[int],
                            gols_times: List[int], notas: str = "",
-                           times_desempenho: Optional[List[Dict]] = None) -> Dict:
+                           times_desempenho: Optional[List[Dict]] = None,
+                           card_campeao_url: Optional[str] = None) -> Dict:
         """
         Registra o resultado de uma partida
         
@@ -66,6 +67,7 @@ class PartidaService:
             gols_times: Lista com gols de cada time
             notas: Observações sobre a partida
             times_desempenho: Lista com vitorias/empates/derrotas por time
+            card_campeao_url: URL da foto/card do time campeão com moldura
             
         Returns:
             Dicionário com a partida registrada
@@ -78,6 +80,8 @@ class PartidaService:
             existente["gols_times"] = gols_times
             existente["notas"] = notas
             existente["times_desempenho"] = times_desempenho or []
+            if card_campeao_url:
+                existente["card_campeao_url"] = card_campeao_url
             existente["atualizado_em"] = datetime.now().isoformat()
             partida = existente
         else:
@@ -89,7 +93,8 @@ class PartidaService:
                 "time_vencedor": time_vencedor,
                 "gols_times": gols_times,
                 "notas": notas,
-                "times_desempenho": times_desempenho or []
+                "times_desempenho": times_desempenho or [],
+                "card_campeao_url": card_campeao_url or ""
             }
             partidas.append(partida)
 

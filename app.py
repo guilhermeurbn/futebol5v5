@@ -217,6 +217,29 @@ def criar_app(config_name: str = None) -> Flask:
     _registrar_aliases_jogador(app)
     _registrar_role_url_prefixes(app)
 
+    from flask import url_for as _flask_url_for
+
+    def role_aware_url_for(endpoint, **values):
+        url = _flask_url_for(endpoint, **values)
+        if values.get('_external'):
+            return url
+        
+        role = session.get('role')
+        if not role:
+            return url
+
+        prefix = 'admin' if role in ['admin'] else ('juiz' if role == 'juiz' else 'usuario')
+        for base in ['/ranking', '/historico', '/perfil', '/jogadores', '/votacao']:
+            if url == base:
+                return f"/{prefix}{base}"
+            elif url.startswith(base + '?'):
+                return f"/{prefix}{url}"
+            elif url.startswith(base + '#'):
+                return f"/{prefix}{url}"
+        return url
+
+    app.jinja_env.globals['url_for'] = role_aware_url_for
+
     try:
         from services.jogador_service import sincronizar_dados_e_partidas
         sincronizar_dados_e_partidas()

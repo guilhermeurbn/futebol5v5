@@ -110,3 +110,28 @@ class NotificacaoService:
         dados["notificacoes"] = []
         if arquivadas:
             self._salvar(dados)
+
+    def marcar_como_lida(self, notif_id: str) -> bool:
+        dados = self._carregar()
+        notificacoes = dados.get("notificacoes", [])
+        alvo = None
+        novas = []
+        for n in notificacoes:
+            if n.get("id") == notif_id or str(n.get("id")) == str(notif_id):
+                alvo = n
+            else:
+                novas.append(n)
+        
+        if alvo:
+            alvo["lida"] = True
+            arquivadas = dados.setdefault("arquivadas", [])
+            arquivadas.append(alvo)
+            dados["notificacoes"] = novas
+            self._salvar(dados)
+            return True
+        return False
+
+    def limpar_arquivadas(self) -> None:
+        dados = self._carregar()
+        dados["arquivadas"] = []
+        self._salvar(dados)

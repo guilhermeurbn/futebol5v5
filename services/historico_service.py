@@ -67,8 +67,9 @@ class HistoricoService:
 
         total_j = sum(len(t["jogadores"]) for t in times_processados)
 
+        novo_id = max([int(s.get("id", 0) or 0) for s in dados], default=0) + 1
         sorteio = {
-            "id": len(dados) + 1,
+            "id": novo_id,
             "data": datetime.now().isoformat(),
             "rascunho": False,
             "oficial": True,

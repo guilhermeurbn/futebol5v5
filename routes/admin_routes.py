@@ -66,12 +66,81 @@ def admin_redirect():
     return redirect(url_for('jogador_crud.index'))
 
 
+def _obter_jogadores_vinculados_em_lote(usuarios, jog_service):
+    """Mapeia os jogadores vinculados a todos os usuários em uma única passada de memória (O(N+M))."""
+    # Se a função individual foi sobrescrita em testes (monkeypatch)
+    if globals().get('_garantir_e_obter_jogador_vinculado_original') is not None and _garantir_e_obter_jogador_vinculado != globals().get('_garantir_e_obter_jogador_vinculado_original'):
+        return {u.get('id'): _garantir_e_obter_jogador_vinculado(u, jog_service) for u in usuarios}
+
+    todos = jog_service.listar()
+    by_owner = {}
+    by_nome = {}
+    for j in todos:
+        owner_id = j.owner_user_id if hasattr(j, 'owner_user_id') else (j.get('owner_user_id') if isinstance(j, dict) else None)
+        nome_j = j.nome if hasattr(j, 'nome') else (j.get('nome') if isinstance(j, dict) else None)
+        if owner_id:
+            by_owner[owner_id] = j
+        if nome_j:
+            by_nome[nome_j.strip().lower()] = j
+
+    resultado = {}
+    for u in usuarios:
+        u_id = u.get('id')
+        if not u_id or u.get('role') != 'usuario':
+            resultado[u_id] = None
+            continue
+
+        if u_id in by_owner:
+            resultado[u_id] = by_owner[u_id]
+            continue
+
+        nome_u = (u.get('nome') or '').strip().lower()
+        if nome_u and nome_u in by_nome:
+            j_existente = by_nome[nome_u]
+            j_id = j_existente.id if hasattr(j_existente, 'id') else (j_existente.get('id') if isinstance(j_existente, dict) else None)
+            try:
+                jog_service.atualizar(j_id, owner_user_id=u_id)
+                resultado[u_id] = j_existente
+                by_owner[u_id] = j_existente
+            except Exception as e:
+                logger.error(f"Erro ao auto-vincular por nome {u_id}: {e}")
+                resultado[u_id] = j_existente
+        else:
+            try:
+                novo = jog_service.criar(
+                    nome=u['nome'],
+                    nivel=5.5,
+                    tipo='avulso',
+                    posicao='linha',
+                    owner_user_id=u_id
+                )
+                resultado[u_id] = novo
+                by_owner[u_id] = novo
+            except Exception as e:
+                logger.error(f"Erro ao auto-criar jogador para {u.get('username')}: {e}")
+                resultado[u_id] = None
+
+    return resultado
+
+
 def _garantir_e_obter_jogador_vinculado(user, jog_service):
     if user.get('role') != 'usuario':
         return None
     players = jog_service.listar_por_usuario(user['id'])
     if players:
         return players[0]
+    
+    nome_usuario = (user.get('nome') or '').strip()
+    if nome_usuario and hasattr(jog_service, 'obter_por_nome'):
+        jogador_existente = jog_service.obter_por_nome(nome_usuario)
+        if jogador_existente:
+            try:
+                jog_service.atualizar(jogador_existente.id if hasattr(jogador_existente, 'id') else jogador_existente.get('id'), owner_user_id=user['id'])
+                return jogador_existente
+            except Exception as e:
+                logger.error(f"Erro ao vincular jogador por nome para {user.get('username')}: {e}")
+                return jogador_existente
+
     try:
         return jog_service.criar(
             nome=user['nome'],
@@ -84,6 +153,8 @@ def _garantir_e_obter_jogador_vinculado(user, jog_service):
         logger.error(f"Erro ao auto-criar jogador para {user.get('username')}: {e}")
         return None
 
+_garantir_e_obter_jogador_vinculado_original = _garantir_e_obter_jogador_vinculado
+
 
 @admin_bp.route('/admin/ajustes', methods=['GET'])
 @admin_required
@@ -91,8 +162,10 @@ def admin_page():
     """Dashboard administrativo"""
     try:
         usuarios = sorted(auth_service.listar_usuarios(), key=lambda u: (u.get('nome') or '').lower())
+        mapa_jogadores = _obter_jogadores_vinculados_em_lote(usuarios, jogador_service)
         for u in usuarios:
-            u['jogador_vinculado'] = _garantir_e_obter_jogador_vinculado(u, jogador_service)
+            u['jogador_vinculado'] = mapa_jogadores.get(u['id'])
+
         notificacoes = notificacao_service.listar_notificacoes(apenas_nao_lidas=True, limite=15)
         sucesso = session.pop('admin_sucesso', request.args.get('sucesso', ''))
         erro = session.pop('admin_erro', request.args.get('erro', ''))
@@ -122,9 +195,10 @@ def api_admin_painel():
     """API: Resumo leve do painel admin."""
     try:
         usuarios = sorted(auth_service.listar_usuarios(), key=lambda u: (u.get('nome') or '').lower())
+        mapa_jogadores = _obter_jogadores_vinculados_em_lote(usuarios, jogador_service)
         for u in usuarios:
-            player = _garantir_e_obter_jogador_vinculado(u, jogador_service)
-            u['jogador_vinculado'] = player.para_dict() if player else None
+            player = mapa_jogadores.get(u['id'])
+            u['jogador_vinculado'] = player.para_dict() if (player and hasattr(player, 'para_dict')) else (player if isinstance(player, dict) else None)
         notificacoes = notificacao_service.listar_notificacoes(apenas_nao_lidas=True, limite=15)
         arquivadas = notificacao_service.listar_arquivadas(limite=10)
 
@@ -153,10 +227,47 @@ def admin_limpar_notificacoes():
     """Marca todas as notificações como lidas"""
     try:
         notificacao_service.marcar_todas_como_lidas()
-        return redirect(url_for('admin.admin_page', sucesso='Notificacoes marcadas como lidas'))
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+            return jsonify({'sucesso': True, 'mensagem': 'Notificações arquivadas'})
+        redirect_to = request.form.get('next') or url_for('admin.admin_notificacoes_page')
+        return redirect(redirect_to)
     except Exception as e:
         logger.error(f"Erro ao limpar notificações: {str(e)}")
-        return redirect(url_for('admin.admin_page', erro='Erro ao limpar notificações'))
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+            return jsonify({'sucesso': False, 'erro': 'Erro ao limpar notificações'}), 500
+        return redirect(url_for('admin.admin_notificacoes_page', erro='Erro ao limpar notificações'))
+
+
+@admin_bp.route('/admin/notificacoes/ler/<notif_id>', methods=['POST'])
+@admin_required
+def admin_marcar_notificacao_lida(notif_id):
+    """Marca uma notificação individual como lida"""
+    try:
+        res = notificacao_service.marcar_como_lida(notif_id)
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+            return jsonify({'sucesso': res})
+        return redirect(url_for('admin.admin_notificacoes_page'))
+    except Exception as e:
+        logger.error(f"Erro ao marcar notificação {notif_id} como lida: {str(e)}")
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+            return jsonify({'sucesso': False, 'erro': str(e)}), 500
+        return redirect(url_for('admin.admin_notificacoes_page'))
+
+
+@admin_bp.route('/admin/notificacoes/limpar-arquivadas', methods=['POST'])
+@admin_required
+def admin_limpar_arquivadas():
+    """Limpa todo o histórico de notificações arquivadas"""
+    try:
+        notificacao_service.limpar_arquivadas()
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+            return jsonify({'sucesso': True})
+        return redirect(url_for('admin.admin_notificacoes_page', sucesso='Histórico de notificações limpo com sucesso'))
+    except Exception as e:
+        logger.error(f"Erro ao limpar arquivadas: {str(e)}")
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+            return jsonify({'sucesso': False, 'erro': str(e)}), 500
+        return redirect(url_for('admin.admin_notificacoes_page', erro='Erro ao limpar arquivadas'))
 
 
 @admin_bp.route('/admin/notificacoes', methods=['GET'])

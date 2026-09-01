@@ -2515,6 +2515,7 @@ body.has-site-footer .player-presence-toast {
   border-radius: 28px;
   background: rgba(8, 9, 16, 0.68);
   backdrop-filter: blur(8px);
+  pointer-events: none !important;
 }
 
 .admin-shell__overlay[hidden],
@@ -12717,30 +12718,20 @@ tbody td code {
 
 .judge-voting-step {
   position: relative;
-  background:
-    radial-gradient(circle at top left, rgba(34, 197, 94, 0.09), transparent 40%),
-    radial-gradient(circle at top right, rgba(168, 85, 247, 0.07), transparent 35%),
-    linear-gradient(155deg, rgba(255, 255, 255, 0.03), transparent 45%),
-    #14141b !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: #14141b !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
   border-radius: 20px !important;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4) !important;
 }
 
 .judge-voting-step.is-complete {
-  border-color: rgba(34, 197, 94, 0.4) !important;
-  background:
-    radial-gradient(circle at top left, rgba(34, 197, 94, 0.12), transparent 40%),
-    linear-gradient(155deg, rgba(255, 255, 255, 0.03), transparent 45%),
-    #14141b !important;
+  border-color: rgba(34, 197, 94, 0.3) !important;
+  background: #14141b !important;
 }
 
 .judge-voting-step.is-active {
-  border-color: rgba(168, 85, 247, 0.45) !important;
-  background:
-    radial-gradient(circle at top left, rgba(168, 85, 247, 0.12), transparent 40%),
-    linear-gradient(155deg, rgba(255, 255, 255, 0.03), transparent 45%),
-    #14141b !important;
+  border-color: rgba(168, 85, 247, 0.3) !important;
+  background: #14141b !important;
 }
 
 .judge-voting-step.is-locked {
@@ -12759,17 +12750,19 @@ tbody td code {
   width: 2.6rem !important;
   height: 2.6rem !important;
   border-radius: 12px !important;
-  background: linear-gradient(135deg, #22c55e, #16a34a) !important;
-  color: #000000 !important;
+  background: transparent !important;
+  border: 1.5px solid rgba(34, 197, 94, 0.4) !important;
+  color: #22c55e !important;
   font-weight: 900 !important;
   font-size: 1.1rem !important;
-  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35) !important;
+  box-shadow: none !important;
 }
 
 .judge-voting-step:nth-child(2) .judge-voting-step__number {
-  background: linear-gradient(135deg, #a855f7, #7c3aed) !important;
-  color: #ffffff !important;
-  box-shadow: 0 4px 14px rgba(168, 85, 247, 0.35) !important;
+  background: transparent !important;
+  border: 1.5px solid rgba(34, 197, 94, 0.4) !important;
+  color: #22c55e !important;
+  box-shadow: none !important;
 }
 
 .judge-voting-step__header p {
@@ -16864,30 +16857,18 @@ body,
   transform: translateX(4px);
 }
 
-/* Histórico Target scroll-margin and glow highlight */
+.history-page__list,
+.judge-draw-history__list {
+  padding-bottom: 70vh !important;
+}
+
 .judge-draw-history__item {
   scroll-margin-top: 6.5rem;
 }
 
-.judge-draw-history__item:target {
-  border: 2px solid #22c55e !important;
-  box-shadow:
-    0 0 25px rgba(34, 197, 94, 0.5),
-    0 12px 36px rgba(0, 0, 0, 0.4) !important;
-  background-color: rgba(34, 197, 94, 0.07) !important;
-}
-
-.judge-draw-history__item:target::before {
-  background: #22c55e !important;
-  width: 6px !important;
-  opacity: 1 !important;
-}
-
-.judge-draw-history__item:target .judge-draw-history__number {
-  background: #22c55e !important;
-  color: #000000 !important;
-  font-weight: 800;
-  box-shadow: 0 0 10px rgba(34, 197, 94, 0.6);
+.judge-draw-history__item:target,
+.judge-draw-history__item--target-highlight {
+  border-color: rgba(96, 165, 250, 0.4) !important;
 }
 
 /* ============================================================
@@ -20724,9 +20705,16 @@ html,
 /* Forçar destaque e cor de fundo sólida diferenciada para os cards de histórico */
 .judge-draw-history__item,
 .votacao-admin-history-card {
-  display: block !important;
+  display: block;
   background: #121215 !important;
   background-color: #121215 !important;
+}
+
+.judge-draw-history__item.history-card-hidden,
+.votacao-admin-history-card.history-card-hidden,
+.judge-draw-history__item[style*="display: none"],
+.votacao-admin-history-card[style*="display: none"] {
+  display: none !important;
 }
 
 .judge-draw-history__item:hover,

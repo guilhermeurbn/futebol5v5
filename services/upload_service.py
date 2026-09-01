@@ -82,7 +82,8 @@ class UploadService:
             centering=(0.5, 0.5)
         )
 
-        # 5. Se o Cloudinary estiver configurado nas variáveis de ambiente, enviar para a nuvem
+    def _enviar_para_cloudinary(self, img: Image.Image, folder: str, public_id: str, quality: int = 90) -> Optional[str]:
+        """Envia uma imagem PIL para o Cloudinary se houver credenciais configuradas."""
         cloud_name = (os.getenv("CLOUDINARY_CLOUD_NAME") or "").strip("\"' ")
         api_key = (os.getenv("CLOUDINARY_API_KEY") or "").strip("\"' ")
         api_secret = (os.getenv("CLOUDINARY_API_SECRET") or "").strip("\"' ")
@@ -92,77 +93,130 @@ class UploadService:
             cloudinary_url = cloudinary_url.split("=", 1)[-1]
         cloudinary_url = cloudinary_url.strip("\"' ")
 
-        if cloudinary_url or (cloud_name and api_key and api_secret):
-            try:
-                import io
-                import cloudinary
-                import cloudinary.uploader
-                from urllib.parse import urlparse
+        if not (cloudinary_url or (cloud_name and api_key and api_secret)):
+            return None
 
-                c_cloud = cloud_name
-                c_key = api_key
-                c_secret = api_secret
+        try:
+            import io
+            import cloudinary
+            import cloudinary.uploader
+            from urllib.parse import urlparse
 
-                if cloudinary_url:
-                    parsed = urlparse(cloudinary_url)
-                    if parsed.hostname and parsed.username and parsed.password:
-                        c_cloud = parsed.hostname
-                        c_key = parsed.username
-                        c_secret = parsed.password
+            c_cloud = cloud_name
+            c_key = api_key
+            c_secret = api_secret
 
-                if c_cloud and c_key and c_secret:
-                    cloudinary.config(
-                        cloud_name=c_cloud,
-                        api_key=c_key,
-                        api_secret=c_secret,
-                        secure=True
-                    )
+            if cloudinary_url:
+                parsed = urlparse(cloudinary_url)
+                if parsed.hostname and parsed.username and parsed.password:
+                    c_cloud = parsed.hostname
+                    c_key = parsed.username
+                    c_secret = parsed.password
 
-                    if img_quadrada.mode != "RGB":
-                        img_quadrada = img_quadrada.convert("RGB")
+            if c_cloud and c_key and c_secret:
+                cloudinary.config(
+                    cloud_name=c_cloud,
+                    api_key=c_key,
+                    api_secret=c_secret,
+                    secure=True
+                )
 
-                    buffer = io.BytesIO()
-                    img_quadrada.save(buffer, format="WEBP", quality=85, optimize=True)
-                    buffer.seek(0)
+                if img.mode != "RGB":
+                    img = img.convert("RGB")
 
-                    nome_publico = f"avatar_{user_id}_{uuid.uuid4().hex[:8]}"
-                    res = cloudinary.uploader.upload(
-                        buffer,
-                        folder="futebol5v5/avatars",
-                        public_id=nome_publico,
-                        overwrite=True,
-                        resource_type="image"
-                    )
-                    url_nuvem = res.get("secure_url") or res.get("url")
-                    if url_nuvem:
-                        logger.info("Foto enviada com sucesso ao Cloudinary para user %s: %s", user_id, url_nuvem)
-                        return url_nuvem
-            except Exception as exc:
-                logger.error("Erro ao enviar imagem ao Cloudinary para user %s: %s. Usando fallback local.", user_id, exc)
+                buffer = io.BytesIO()
+                img.save(buffer, format="WEBP", quality=quality, optimize=True)
+                buffer.seek(0)
 
-        # 6. Fallback Local: Gerar nome de arquivo seguro e salvar no disco local
+                res = cloudinary.uploader.upload(
+                    buffer,
+                    folder=folder,
+                    public_id=public_id,
+                    overwrite=True,
+                    resource_type="image"
+                )
+                url_nuvem = res.get("secure_url") or res.get("url")
+                if url_nuvem:
+                    logger.info("Imagem enviada com sucesso ao Cloudinary (%s/%s): %s", folder, public_id, url_nuvem)
+                    return url_nuvem
+        except Exception as exc:
+            logger.error("Erro ao enviar imagem ao Cloudinary (%s/%s): %s. Usando fallback local.", folder, public_id, exc)
+
+        return None
+
+    def processar_foto_perfil(self, file_storage, user_id: str, foto_antiga_url: Optional[str] = None) -> str:
+        """Recebe o FileStorage do Flask, valida a segurança e salva a imagem otimizada no Cloudinary (ou local)."""
+        if not file_storage or not file_storage.filename:
+            raise UploadError("Nenhum arquivo de imagem foi enviado")
+
+        filename = secure_filename(file_storage.filename)
+        ext = os.path.splitext(filename)[1].lower()
+
+        if ext not in EXTENSOES_PERMITIDAS:
+            raise UploadError("Formato de imagem inválido. Use apenas PNG, JPG ou WEBP.")
+
+        # 1. Validação do tamanho do arquivo em memória/disco
+        file_storage.seek(0, os.SEEK_END)
+        tamanho = file_storage.tell()
+        file_storage.seek(0)
+
+        if tamanho == 0:
+            raise UploadError("O arquivo enviado está vazio")
+
+        if tamanho > TAMANHO_MAXIMO_BYTES:
+            raise UploadError("A imagem excede o tamanho máximo de 5MB")
+
+        # 2. Validação profunda de segurança com Pillow
+        try:
+            img = Image.open(file_storage.stream)
+            img.verify()
+        except Exception as e:
+            logger.warning("Falha de segurança ao verificar cabeçalho da imagem para user %s: %s", user_id, e)
+            raise UploadError("O arquivo enviado não é uma imagem válida ou está corrompido")
+
+        file_storage.seek(0)
+        img = Image.open(file_storage.stream)
+
+        try:
+            img = ImageOps.exif_transpose(img)
+        except Exception:
+            pass
+
+        img_quadrada = ImageOps.fit(
+            img,
+            (LARGURA_AVATAR_PX, ALTURA_AVATAR_PX),
+            method=Image.Resampling.LANCZOS,
+            centering=(0.5, 0.5)
+        )
+
+        # Tentar upload Cloudinary primeiro
+        nome_publico = f"avatar_{user_id}_{uuid.uuid4().hex[:8]}"
+        url_nuvem = self._enviar_para_cloudinary(img_quadrada, "futebol5v5/avatars", nome_publico, quality=85)
+        if url_nuvem:
+            if foto_antiga_url:
+                self.remover_foto(foto_antiga_url)
+            return url_nuvem
+
+        # Fallback Local
         nome_unico = f"avatar_{user_id}_{uuid.uuid4().hex[:8]}.webp"
         caminho_final = os.path.join(self.pasta_destino, nome_unico)
 
         try:
             if img_quadrada.mode != "RGB":
                 img_quadrada = img_quadrada.convert("RGB")
-            
             img_quadrada.save(caminho_final, format="WEBP", quality=85, optimize=True)
         except Exception as exc:
             logger.error("Erro ao converter/salvar imagem localmente para user %s: %s", user_id, exc)
             raise UploadError("Erro ao processar imagem no servidor")
 
-        # 7. Apagar a foto antiga do disco se existir
         if foto_antiga_url:
             self.remover_foto(foto_antiga_url)
 
-        url_relativa = f"/static/uploads/avatars/{nome_unico}"
-        return url_relativa
+        return f"/static/uploads/avatars/{nome_unico}"
 
     def remover_foto(self, foto_url: str) -> bool:
-        """Apaga o arquivo físico da foto de perfil do disco."""
-        if not foto_url or not foto_url.startswith("/static/uploads/avatars/"):
+        """Apaga o arquivo físico da foto de perfil do disco se for local."""
+        if not foto_url or not isinstance(foto_url, str) or not foto_url.startswith("/static/uploads/avatars/"):
             return False
 
         nome_arquivo = os.path.basename(foto_url)
@@ -174,5 +228,78 @@ class UploadService:
                 return True
             except Exception as e:
                 logger.warning("Não foi possível apagar foto antiga %s: %s", caminho_arquivo, e)
+                return False
+        return False
+
+    def processar_foto_campeao(self, file_storage=None, base64_data: Optional[str] = None, sorteio_id: Optional[str] = None, foto_antiga_url: Optional[str] = None) -> str:
+        """Processa e salva a foto/card do time campeão diretamente no Cloudinary (com fallback local)."""
+        pasta_cards = os.path.abspath(os.path.join("static", "uploads", "cards"))
+        os.makedirs(pasta_cards, exist_ok=True)
+
+        import base64
+        import io
+        img = None
+
+        if base64_data and isinstance(base64_data, str) and "data:image" in base64_data:
+            try:
+                header, encoded = base64_data.split(",", 1)
+                data_bytes = base64.b64decode(encoded)
+                img = Image.open(io.BytesIO(data_bytes))
+            except Exception as exc:
+                logger.error("Erro ao decodificar base64 do card campeão: %s", exc)
+                raise UploadError("Formato de imagem do card enviado é inválido")
+        elif file_storage and hasattr(file_storage, "filename") and file_storage.filename:
+            try:
+                file_storage.seek(0)
+                img = Image.open(file_storage.stream)
+            except Exception as exc:
+                logger.error("Erro ao abrir arquivo enviado para foto campeão: %s", exc)
+                raise UploadError("Arquivo de imagem enviado é inválido")
+        else:
+            raise UploadError("Nenhuma foto ou card do time campeão foi enviado")
+
+        try:
+            img = ImageOps.exif_transpose(img)
+        except Exception:
+            pass
+
+        if img.mode != "RGB":
+            img = img.convert("RGB")
+
+        # Tentar upload Cloudinary primeiro
+        s_tag = str(sorteio_id) if sorteio_id else uuid.uuid4().hex[:6]
+        nome_publico = f"campeao_{s_tag}_{uuid.uuid4().hex[:6]}"
+        url_nuvem = self._enviar_para_cloudinary(img, "futebol5v5/cards", nome_publico, quality=95)
+        if url_nuvem:
+            if foto_antiga_url:
+                self.remover_card_campeao(foto_antiga_url)
+            return url_nuvem
+
+        # Fallback local
+        nome_unico = f"campeao_{s_tag}_{uuid.uuid4().hex[:6]}.webp"
+        caminho_final = os.path.join(pasta_cards, nome_unico)
+        img.save(caminho_final, format="WEBP", quality=95, optimize=True)
+
+        if foto_antiga_url:
+            self.remover_card_campeao(foto_antiga_url)
+
+        return f"/static/uploads/cards/{nome_unico}"
+
+    def remover_card_campeao(self, card_url: Optional[str]) -> bool:
+        """Apaga o arquivo físico do card do campeão do disco se for local."""
+        if not card_url or not isinstance(card_url, str) or not card_url.startswith("/static/uploads/cards/"):
+            return False
+
+        pasta_cards = os.path.abspath(os.path.join("static", "uploads", "cards"))
+        nome_arquivo = os.path.basename(card_url)
+        caminho_arquivo = os.path.join(pasta_cards, nome_arquivo)
+
+        if os.path.exists(caminho_arquivo):
+            try:
+                os.remove(caminho_arquivo)
+                logger.info("Card campeão local antigo removido do disco: %s", caminho_arquivo)
+                return True
+            except Exception as e:
+                logger.warning("Não foi possível apagar card campeão antigo %s: %s", caminho_arquivo, e)
                 return False
         return False

@@ -119,7 +119,8 @@
     "role": "usuario",
     "criado_em": "2026-08-20T10:00:00",
     "ativo": true,
-    "senha_temporaria_ativa": false
+    "senha_temporaria_ativa": false,
+    "foto_url": ""
   },
   {
     "id": "9ae112c8-8068-41e4-b6c0-e73873935699",
@@ -129,116 +130,6 @@
     "password_hash": "scrypt:32768:8:1$LjNSN4BM5pkG9aUf$86f3916dc366b4bb2a59411d0beecfcaa74b92b5c53b21cfce60502539eb3db8eb3ae4f960af07d4f77adf50e563ebbaf6e40478d26cfa18cecbccd64abb1684",
     "role": "usuario",
     "criado_em": "2026-08-20T10:00:00",
-    "ativo": true,
-    "senha_temporaria_ativa": false
-  },
-  {
-    "id": "3d26e169-2740-47fd-a79c-c1bbbc8f6374",
-    "email": "atleta.c1c354@teste.com",
-    "username": "atleta_novo_c1c354",
-    "nome": "Atleta Editadoc1c354 NovoNome",
-    "password_hash": "scrypt:32768:8:1$LjNSN4BM5pkG9aUf$86f3916dc366b4bb2a59411d0beecfcaa74b92b5c53b21cfce60502539eb3db8eb3ae4f960af07d4f77adf50e563ebbaf6e40478d26cfa18cecbccd64abb1684",
-    "role": "usuario",
-    "criado_em": "2026-08-26T00:17:13.183161",
-    "ativo": true,
-    "senha_temporaria_ativa": false
-  },
-  {
-    "id": "23e2959a-47f4-46c0-ae7b-9bc4ee5b31fb",
-    "email": "gui_goleiro_380d5039@test.com",
-    "username": "guigoleiro380d5039",
-    "nome": "Guilherme Goleiro 380d5039",
-    "password_hash": "scrypt:32768:8:1$LjNSN4BM5pkG9aUf$86f3916dc366b4bb2a59411d0beecfcaa74b92b5c53b21cfce60502539eb3db8eb3ae4f960af07d4f77adf50e563ebbaf6e40478d26cfa18cecbccd64abb1684",
-    "role": "usuario",
-    "criado_em": "2026-08-26T00:17:13.477898",
-    "ativo": true,
-    "senha_temporaria_ativa": false
-  },
-  {
-    "id": "bee41c31-2ab0-496e-8b01-75ecf1a2f00e",
-    "email": "atleta.307d23@teste.com",
-    "username": "atleta_novo_307d23",
-    "nome": "Atleta Editado307d23 NovoNome",
-    "password_hash": "scrypt:32768:8:1$LjNSN4BM5pkG9aUf$86f3916dc366b4bb2a59411d0beecfcaa74b92b5c53b21cfce60502539eb3db8eb3ae4f960af07d4f77adf50e563ebbaf6e40478d26cfa18cecbccd64abb1684",
-    "role": "usuario",
-    "criado_em": "2026-08-26T00:17:31.948844",
-    "ativo": true,
-    "senha_temporaria_ativa": false
-  },
-  {
-    "id": "5fba4a6c-79eb-4424-94ad-96371caed86c",
-    "email": "gui_goleiro_5c7157d2@test.com",
-    "username": "guigoleiro5c7157d2",
-    "nome": "Guilherme Goleiro 5c7157d2",
-    "password_hash": "scrypt:32768:8:1$LjNSN4BM5pkG9aUf$86f3916dc366b4bb2a59411d0beecfcaa74b92b5c53b21cfce60502539eb3db8eb3ae4f960af07d4f77adf50e563ebbaf6e40478d26cfa18cecbccd64abb1684",
-    "role": "usuario",
-    "criado_em": "2026-08-26T00:17:32.242183",
-    "ativo": true,
-    "senha_temporaria_ativa": false
-  },
-  {
-    "id": "c91876d4-e717-41fa-9a74-7f7770b2b231",
-    "email": "atleta.e09e95@teste.com",
-    "username": "atleta_novo_e09e95",
-    "nome": "Atleta Editadoe09e95 NovoNome",
-    "password_hash": "scrypt:32768:8:1$LjNSN4BM5pkG9aUf$86f3916dc366b4bb2a59411d0beecfcaa74b92b5c53b21cfce60502539eb3db8eb3ae4f960af07d4f77adf50e563ebbaf6e40478d26cfa18cecbccd64abb1684",
-    "role": "usuario",
-    "criado_em": "2026-08-26T00:18:40.718481",
-    "ativo": true,
-    "senha_temporaria_ativa": false
-  },
-  {
-    "id": "16263720-9c18-40d9-b152-77b8b9e3a36f",
-    "email": "gui_goleiro_aac3697f@test.com",
-    "username": "guigoleiroaac3697f",
-    "nome": "Guilherme Goleiro aac3697f",
-    "password_hash": "scrypt:32768:8:1$LjNSN4BM5pkG9aUf$86f3916dc366b4bb2a59411d0beecfcaa74b92b5c53b21cfce60502539eb3db8eb3ae4f960af07d4f77adf50e563ebbaf6e40478d26cfa18cecbccd64abb1684",
-    "role": "usuario",
-    "criado_em": "2026-08-26T00:18:41.017197",
-    "ativo": true,
-    "senha_temporaria_ativa": false
-  },
-  {
-    "id": "31f4fed6-399b-4fde-95eb-712deef7e2b0",
-    "email": "atleta.27ee03@teste.com",
-    "username": "atleta_novo_27ee03",
-    "nome": "Atleta Editado27ee03 NovoNome",
-    "password_hash": "scrypt:32768:8:1$LjNSN4BM5pkG9aUf$86f3916dc366b4bb2a59411d0beecfcaa74b92b5c53b21cfce60502539eb3db8eb3ae4f960af07d4f77adf50e563ebbaf6e40478d26cfa18cecbccd64abb1684",
-    "role": "usuario",
-    "criado_em": "2026-08-26T00:20:22.508978",
-    "ativo": true,
-    "senha_temporaria_ativa": false
-  },
-  {
-    "id": "24c38a93-a987-447a-9fa8-41f0147a88d1",
-    "email": "gui_goleiro_08d38f3a@test.com",
-    "username": "guigoleiro08d38f3a",
-    "nome": "Guilherme Goleiro 08d38f3a",
-    "password_hash": "scrypt:32768:8:1$LjNSN4BM5pkG9aUf$86f3916dc366b4bb2a59411d0beecfcaa74b92b5c53b21cfce60502539eb3db8eb3ae4f960af07d4f77adf50e563ebbaf6e40478d26cfa18cecbccd64abb1684",
-    "role": "usuario",
-    "criado_em": "2026-08-26T00:20:22.799335",
-    "ativo": true,
-    "senha_temporaria_ativa": false
-  },
-  {
-    "id": "1008438c-1202-4061-9142-3fa2a5ce7268",
-    "email": "atleta.d472fd@teste.com",
-    "username": "atleta_novo_d472fd",
-    "nome": "Atleta Editadod472fd NovoNome",
-    "password_hash": "scrypt:32768:8:1$JzDj1BU2aJ1gWONO$04a0ae032ceab634b29400a3c84560e33e8f7dc2e98c6c2b7c5ab83481b2d1f5ce7fbde29a5b9f1a8a7968d5eeaa9dbf32be07736859ad6ac83910f6f1a8326a",
-    "role": "usuario",
-    "criado_em": "2026-08-26T00:21:33.367631",
-    "ativo": true,
-    "senha_temporaria_ativa": false
-  },
-  {
-    "id": "2bcc7ef8-7448-4488-adb6-54744010fd75",
-    "email": "gui_goleiro_e840716b@test.com",
-    "username": "guigoleiroe840716b",
-    "nome": "Guilherme Goleiro e840716b",
-    "password_hash": "scrypt:32768:8:1$jPzRU32Pj9lHifgz$2b3d6b0c83e5359a9c9e57651318b3991d7272101409bc93416198a134285f9ee62d657928fbc1866b955aeb0f71be726cee9080a8ec738249e8807347fa55fb",
-    "role": "usuario",
-    "criado_em": "2026-08-26T00:21:33.663137",
     "ativo": true,
     "senha_temporaria_ativa": false
   }

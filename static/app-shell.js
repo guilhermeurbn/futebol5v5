@@ -223,6 +223,9 @@
     if (typeof window.initVotacaoUsuario === 'function') {
       window.initVotacaoUsuario();
     }
+    if (typeof window.initHistoryPagination === 'function') {
+      window.initHistoryPagination();
+    }
     if (window.NaTraveLocalDateTime && typeof window.NaTraveLocalDateTime.apply === 'function') {
       window.NaTraveLocalDateTime.apply(document);
     }
@@ -527,10 +530,11 @@
       return;
     }
 
+    const hasSsrContent = Boolean(shell.querySelector('.premium-user-card'));
     const cached = readCachedJSON(cacheKey);
     if (cached && cached.data) {
       updateAdminDom(cached.data);
-    } else {
+    } else if (!hasSsrContent) {
       const overlay = document.createElement('div');
       overlay.innerHTML = `
         <div class="admin-shell__overlay" aria-busy="true" aria-live="polite">

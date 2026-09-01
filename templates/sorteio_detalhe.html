@@ -130,7 +130,7 @@
                             {% set desempenho = (resultado_partida.times_desempenho | selectattr('time_numero', 'equalto', idx) | list | first) %}
                             <div class="summary-card summary-card--secondary">
                                 <div class="summary-card__label">Time {{ idx }}</div>
-                                <div class="summary-card__value">{{ gols }} gol{{ '' if gols == 1 else 's' }}</div>
+                                <div class="summary-card__value">{{ gols }} {{ 'gol' if (gols == 0 or gols == 1) else 'gols' }}</div>
                                 <div class="summary-card__subtext">
                                     {{ desempenho.vitorias if desempenho else 0 }}V
                                     {{ desempenho.empates if desempenho else 0 }}E

@@ -281,18 +281,8 @@ def sortear_api():
         diferenca = BalanceadorTimes.calcular_diferenca_multiplos(somas)
         melhor_time = BalanceadorTimes.obter_melhor_time(somas)
         
-        # Registrar no histórico (substitui sorteio pendente caso ainda não haja partidas/resultados)
-        sorteio_existente_id = None
-        if _is_juiz():
-            estado_juiz = juiz_partida_service.obter_estado()
-            candidate_id = (estado_juiz.get('partida_atual') or {}).get('sorteio_id')
-            if candidate_id and not _obter_resultado_sorteio(candidate_id):
-                sorteio_existente_id = candidate_id
-
-        if sorteio_existente_id:
-            sorteio = historico_service.substituir_sorteio(sorteio_existente_id, times, somas, len(times), diferenca)
-        else:
-            sorteio = historico_service.adicionar_sorteio(times, somas, len(times), diferenca)
+        # Registrar no histórico como um novo sorteio único e independente
+        sorteio = historico_service.adicionar_sorteio(times, somas, len(times), diferenca)
 
         if _is_juiz():
             juiz_partida_service.registrar_sorteio(sorteio.get('id'))
@@ -366,7 +356,10 @@ def _enriquecer_sorteio_historico(sorteio):
                 'desempenho': desempenho or {'vitorias': 0, 'empates': 0, 'derrotas': 0},
             })
 
+    card_campeao_url = (resultado_partida or {}).get('card_campeao_url') or (partida_votacao or {}).get('card_campeao_url')
+
     item.update({
+        'card_campeao_url': card_campeao_url,
         'resultado_partida': resultado_partida,
         'resultado_resumo': resultado_resumo,
         'partida_votacao': partida_votacao,
@@ -393,6 +386,8 @@ def _resumo_historico_vazio():
 def historico():
     """Página com histórico de sorteios"""
     try:
+        sorteio_id_param = request.args.get('sorteio_id') or request.args.get('sorteio')
+        target_sorteio_id = int(sorteio_id_param) if (sorteio_id_param and sorteio_id_param.isdigit()) else None
         sorteios_raw = historico_service.listar_sorteios() or []
         sorteios_raw = [s for s in sorteios_raw if not s.get('rascunho')]
         sorteios = list(reversed(sorteios_raw))
@@ -403,13 +398,14 @@ def historico():
             'votacoes_encerradas': sum(1 for sorteio in sorteios if sorteio.get('votacao_encerrada')),
             'votacoes_abertas': sum(1 for sorteio in sorteios if sorteio.get('votacao_aberta')),
         }
-        return render_template('historico.html', sorteios=sorteios, resumo=resumo, usuario=_usuario_logado())
+        return render_template('historico.html', sorteios=sorteios, resumo=resumo, usuario=_usuario_logado(), target_sorteio_id=target_sorteio_id)
     except Exception as e:
         logger.error(f"Erro ao carregar histórico: {str(e)}")
         return render_template(
             'historico.html',
             sorteios=[],
             resumo=_resumo_historico_vazio(),
+            target_sorteio_id=None,
             erro='Erro ao carregar histórico',
         ), 500
 

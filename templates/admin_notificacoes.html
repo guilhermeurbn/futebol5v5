@@ -1,80 +1,342 @@
 {% extends 'base.html' %}
 
-{% block title %}Avisos{% endblock %}
+{% block title %}Central de Notificações - NaTrave 5v5{% endblock %}
 
 {% block content %}
-<div class="container page-container-wide judge-workspace-page admin-page admin-page--ecosystem" style="background: #000000 !important; min-height: 100vh; width: 100%;">
-    <header class="header">
-        <div class="header-content">
-            {% set brand_title = 'Avisos' %}
-            {% set brand_subtitle = 'Central de notificações do sistema' %}
-            {% include '_brand_header.html' %}
+<div class="admin-notifications-wrapper" style="background: #09090b; min-height: 100vh; width: 100%; color: #ffffff; padding-bottom: 6rem;">
+    
+    <!-- Top Header Sticky Nav -->
+    <header class="editar-perfil-header" style="position: sticky; top: 0; z-index: 100; background: #000000; border-bottom: 1px solid #1f1f23; padding-top: calc(0.6rem + max(16px, env(safe-area-inset-top, 0px))); padding-bottom: 0.6rem; padding-left: 0.85rem; padding-right: 0.85rem;">
+        <div style="max-width: 950px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 0.4rem; flex-wrap: nowrap;">
+            
+            <!-- Voltar aos Ajustes -->
+            <a href="{{ url_for('jogador_crud.index') }}" 
+               class="btn-back-link"
+               style="display: inline-flex; align-items: center; gap: 0.35rem; color: #22c55e; font-weight: 800; font-size: 0.75rem; text-decoration: none; background: rgba(34, 197, 94, 0.1); padding: 0.32rem 0.65rem; border-radius: 999px; border: 1px solid rgba(34, 197, 94, 0.3); transition: all 0.2s ease; white-space: nowrap; flex-shrink: 0;">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                <span>Voltar aos Ajustes</span>
+            </a>
+
+            <!-- Badge NaTrave -->
+            <div style="display: inline-flex; align-items: center; justify-content: center; background: #18181b; padding: 0.35rem 0.75rem; border-radius: 999px; border: 1px solid #27272a; white-space: nowrap; flex-shrink: 0;">
+                <img src="{{ url_for('static', filename='natrave-text-only.svg', v='20260708-05') }}" alt="NaTrave" style="height: 14px; width: auto; display: block;" />
+            </div>
         </div>
     </header>
 
-    <main class="main">
-        <section class="section admin-notifications-page" style="padding: 2rem 1.5rem;">
-            <div class="admin-notifications-hero">
-                <div class="admin-notifications-hero__copy">
-                    <div class="section-label">Central de avisos</div>
-                    <h2 class="section-title">🔔 Avisos do sistema</h2>
-                    <p class="section-subtitle">Os alertas novos aparecem aqui. O que já foi lido fica arquivado para consulta.</p>
-                </div>
-                <div class="admin-notifications-hero__stats" aria-label="Resumo dos avisos">
-                    <div class="admin-notifications-stat">
-                        <span class="admin-notifications-stat__label">Novos</span>
-                        <strong class="admin-notifications-stat__value">{{ notificacoes|length }}</strong>
+    <main style="max-width: 950px; margin: 1.5rem auto 0 auto; padding: 0 1.25rem;">
+        
+        <!-- Alertas de Feedback -->
+        {% if sucesso or request.args.get('sucesso') %}
+        <div style="margin-bottom: 1.25rem; background: #0c1a12; border: 1px solid #14532d; color: #4ade80; border-radius: 14px; padding: 0.9rem 1.2rem; font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 0.6rem;">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <span>{{ sucesso or request.args.get('sucesso') }}</span>
+        </div>
+        {% endif %}
+
+        {% if erro or request.args.get('erro') %}
+        <div style="margin-bottom: 1.25rem; background: #1c1012; border: 1px solid #7f1d1d; color: #fca5a5; border-radius: 14px; padding: 0.9rem 1.2rem; font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 0.6rem;">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span>{{ erro or request.args.get('erro') }}</span>
+        </div>
+        {% endif %}
+
+        <!-- UNIFIED HEADER PANEL -->
+        <div style="background: linear-gradient(135deg, #121215 0%, #18181b 100%); border: 1px solid #27272a; border-radius: 20px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 1.1rem;">
+            
+            <!-- Top Row: Title & Subtitle -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.3); color: #22c55e; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                     </div>
-                    <div class="admin-notifications-stat">
-                        <span class="admin-notifications-stat__label">Arquivados</span>
-                        <strong class="admin-notifications-stat__value">{{ arquivadas|length }}</strong>
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                            <h1 style="font-size: 1.25rem; font-weight: 900; color: #ffffff; margin: 0; line-height: 1.2;">
+                                Notificações do Sistema
+                            </h1>
+                            <span style="background: rgba(34, 197, 94, 0.12); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3); font-size: 0.65rem; font-weight: 800; padding: 0.15rem 0.5rem; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.04em;">
+                                Admin
+                            </span>
+                        </div>
                     </div>
-                    <a class="btn btn-secondary btn-small" href="{{ url_for('admin.admin_page') }}">Voltar aos ajustes</a>
                 </div>
             </div>
 
-            {% if notificacoes %}
-                <div class="admin-notifications-page__section-title">Novos avisos</div>
-                <div class="admin-notifications-page__list">
-                    {% for n in notificacoes %}
-                    <div class="admin-notification-card admin-notification-card--{{ n.tipo or 'info' }}">
-                        <div class="admin-notification-card__topline">
-                            <div class="admin-notification-card__title">{{ n.titulo }}</div>
-                            <span class="admin-notification-card__badge">{{ (n.tipo or 'info')|upper }}</span>
-                        </div>
-                        <div class="admin-notification-card__text">{{ n.mensagem }}</div>
-                        <div class="admin-notification-card__meta">{{ n.criado_em|dt_pt_hm if n.criado_em else '' }}</div>
-                    </div>
-                    {% endfor %}
-                </div>
-                <form method="post" action="{{ url_for('admin.admin_limpar_notificacoes') }}" style="margin-top: 1.5rem; display: flex; justify-content: flex-end;">
+            <!-- Divisória Elegante -->
+            <div style="height: 1px; background: #27272a; margin: 0;"></div>
+
+            <!-- 4 ÁREAS REDONDAS DE FÁCIL LEITURA (GRID DE 4 PÍLULAS) -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.6rem;">
+                
+                <!-- ÁREA 1: TODAS -->
+                <button type="button" onclick="setFilterTab('todas', this)" class="notif-tab-pill active" 
+                    style="background: #22c55e; color: #000000; font-weight: 800; font-size: 0.82rem; border: 1px solid #22c55e; padding: 0.6rem 0.9rem; border-radius: 999px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.45rem; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    <span>Todas</span>
+                    <span id="tabTotalCount" style="background: rgba(0,0,0,0.15); padding: 0.1rem 0.45rem; border-radius: 999px; font-size: 0.76rem;">{{ (notificacoes|length) + (arquivadas|length) }}</span>
+                </button>
+
+                <!-- ÁREA 2: NÃO LIDAS -->
+                <button type="button" onclick="setFilterTab('nao_lidas', this)" class="notif-tab-pill" 
+                    style="background: #000000; color: #a1a1aa; font-weight: 700; font-size: 0.82rem; border: 1px solid #27272a; padding: 0.6rem 0.9rem; border-radius: 999px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.45rem; transition: all 0.2s ease;">
+                    <svg viewBox="0 0 24 24" width="9" height="9" fill="none" stroke="#22c55e" stroke-width="3"><circle cx="12" cy="12" r="6" fill="#22c55e"/></svg>
+                    <span>Não lidas</span>
+                    <span id="tabNaoLidasCount" style="background: rgba(255,255,255,0.06); padding: 0.1rem 0.45rem; border-radius: 999px; font-size: 0.76rem; color: {% if notificacoes|length > 0 %}#4ade80{% else %}#a1a1aa{% endif %}; font-weight: 800;">{{ notificacoes|length }}</span>
+                </button>
+
+                <!-- ÁREA 3: ARQUIVADAS -->
+                <button type="button" onclick="setFilterTab('arquivadas', this)" class="notif-tab-pill" 
+                    style="background: #000000; color: #a1a1aa; font-weight: 700; font-size: 0.82rem; border: 1px solid #27272a; padding: 0.6rem 0.9rem; border-radius: 999px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.45rem; transition: all 0.2s ease;">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                    <span>Arquivadas</span>
+                    <span id="tabArquivadasCount" style="background: rgba(255,255,255,0.06); padding: 0.1rem 0.45rem; border-radius: 999px; font-size: 0.76rem;">{{ arquivadas|length }}</span>
+                </button>
+
+                <!-- ÁREA 4: AÇÃO DE ARQUIVAR/LIMPAR -->
+                {% if notificacoes %}
+                <form action="{{ url_for('admin.admin_limpar_notificacoes') }}" method="POST" style="margin: 0;">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button class="btn btn-primary" type="submit">Marcar todas como lidas e arquivar</button>
+                    <button type="submit" title="Arquivar todas as não lidas" 
+                        style="width: 100%; background: rgba(34, 197, 94, 0.12); color: #22c55e; font-weight: 800; font-size: 0.82rem; border: 1px solid rgba(34, 197, 94, 0.3); padding: 0.6rem 0.9rem; border-radius: 999px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.45rem; transition: all 0.2s ease; white-space: nowrap;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>Arquivar Todas</span>
+                    </button>
                 </form>
-            {% else %}
-                <div class="admin-notifications-empty">
-                    <div class="admin-notifications-empty__icon">✨</div>
-                    <h3 class="admin-notifications-empty__title">Nenhum aviso novo por enquanto.</h3>
-                    <p class="admin-notifications-empty__text">Quando algo acontecer, ele aparece aqui e no atalho do canto.</p>
+                {% elif arquivadas %}
+                <form action="{{ url_for('admin.admin_limpar_arquivadas') }}" method="POST" style="margin: 0;" onsubmit="return confirm('Deseja realmente apagar o histórico de notificações arquivadas?')">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" title="Limpar histórico arquivado" 
+                        style="width: 100%; background: rgba(239, 68, 68, 0.12); color: #f87171; font-weight: 800; font-size: 0.82rem; border: 1px solid rgba(239, 68, 68, 0.3); padding: 0.6rem 0.9rem; border-radius: 999px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.45rem; transition: all 0.2s ease; white-space: nowrap;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        <span>Limpar Histórico</span>
+                    </button>
+                </form>
+                {% else %}
+                <div style="background: #000000; color: #52525b; font-weight: 700; font-size: 0.82rem; border: 1px solid #27272a; padding: 0.6rem 0.9rem; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 0.45rem;">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <span>Sem Pendências</span>
                 </div>
+                {% endif %}
+
+            </div>
+        </div>
+
+        <!-- LISTA DE NOTIFICAÇÕES (NOVAS & ARQUIVADAS) -->
+        <div id="notifListContainer" style="display: grid; gap: 0.85rem;">
+            
+            <!-- NOVAS NOTIFICAÇÕES (NÃO LIDAS) -->
+            {% if notificacoes %}
+                {% for n in notificacoes %}
+                {% set n_tipo = (n.tipo or 'info')|lower %}
+                <div class="notif-item-card notif-item-card--nao-lida" 
+                     data-status="nao_lida" 
+                     data-tipo="{{ n_tipo }}" 
+                     data-search="{{ n.titulo|lower }} {{ n.mensagem|lower }}"
+                     id="notifCard-{{ n.id }}"
+                     style="background: #121215; border: 1px solid {% if n_tipo == 'cadastro' %}rgba(34, 197, 94, 0.35){% elif n_tipo == 'sorteio' %}rgba(59, 130, 246, 0.35){% elif n_tipo == 'votacao' %}rgba(234, 179, 8, 0.35){% elif n_tipo == 'alerta' %}rgba(239, 68, 68, 0.35){% else %}rgba(168, 85, 247, 0.35){% endif %}; border-radius: 16px; padding: 1.1rem 1.3rem; display: flex; align-items: flex-start; justify-content: space-between; gap: 1.1rem; transition: all 0.25s ease; box-shadow: 0 4px 20px rgba(0,0,0,0.3); position: relative; overflow: hidden;">
+                    
+                    <!-- Indicador Lateral Neon -->
+                    <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: {% if n_tipo == 'cadastro' %}#22c55e{% elif n_tipo == 'sorteio' %}#3b82f6{% elif n_tipo == 'votacao' %}#eab308{% elif n_tipo == 'alerta' %}#ef4444{% else %}#a855f7{% endif %};"></div>
+
+                    <!-- Conteúdo Principal -->
+                    <div style="display: flex; align-items: flex-start; gap: 1rem; flex: 1; min-width: 0;">
+                        <!-- Ícone Temático SVG (Sem Emoji) -->
+                        <div style="width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: {% if n_tipo == 'cadastro' %}rgba(34, 197, 94, 0.12){% elif n_tipo == 'sorteio' %}rgba(59, 130, 246, 0.12){% elif n_tipo == 'votacao' %}rgba(234, 179, 8, 0.12){% elif n_tipo == 'alerta' %}rgba(239, 68, 68, 0.12){% else %}rgba(168, 85, 247, 0.12){% endif %}; color: {% if n_tipo == 'cadastro' %}#22c55e{% elif n_tipo == 'sorteio' %}#3b82f6{% elif n_tipo == 'votacao' %}#eab308{% elif n_tipo == 'alerta' %}#ef4444{% else %}#a855f7{% endif %}; border: 1px solid {% if n_tipo == 'cadastro' %}rgba(34, 197, 94, 0.25){% elif n_tipo == 'sorteio' %}rgba(59, 130, 246, 0.25){% elif n_tipo == 'votacao' %}rgba(234, 179, 8, 0.25){% elif n_tipo == 'alerta' %}rgba(239, 68, 68, 0.25){% else %}rgba(168, 85, 247, 0.25){% endif %};">
+                            {% if n_tipo == 'cadastro' %}
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            {% elif n_tipo == 'sorteio' %}
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>
+                            {% elif n_tipo == 'votacao' %}
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                            {% elif n_tipo == 'alerta' %}
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            {% else %}
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                            {% endif %}
+                        </div>
+
+                        <!-- Texto e Detalhes -->
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.25rem;">
+                                <h3 style="font-size: 1rem; font-weight: 800; color: #ffffff; margin: 0; line-height: 1.2;">{{ n.titulo }}</h3>
+                                
+                                <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; padding: 0.15rem 0.5rem; border-radius: 999px; background: {% if n_tipo == 'cadastro' %}rgba(34, 197, 94, 0.15){% elif n_tipo == 'sorteio' %}rgba(59, 130, 246, 0.15){% elif n_tipo == 'votacao' %}rgba(234, 179, 8, 0.15){% elif n_tipo == 'alerta' %}rgba(239, 68, 68, 0.15){% else %}rgba(168, 85, 247, 0.15){% endif %}; color: {% if n_tipo == 'cadastro' %}#4ade80{% elif n_tipo == 'sorteio' %}#60a5fa{% elif n_tipo == 'votacao' %}#facc15{% elif n_tipo == 'alerta' %}#f87171{% else %}#c084fc{% endif %}; border: 1px solid {% if n_tipo == 'cadastro' %}rgba(34, 197, 94, 0.3){% elif n_tipo == 'sorteio' %}rgba(59, 130, 246, 0.3){% elif n_tipo == 'votacao' %}rgba(234, 179, 8, 0.3){% elif n_tipo == 'alerta' %}rgba(239, 68, 68, 0.3){% else %}rgba(168, 85, 247, 0.3){% endif %};">
+                                    {{ n_tipo|upper }}
+                                </span>
+
+                                <span style="font-size: 0.68rem; font-weight: 800; color: #22c55e; background: rgba(34, 197, 94, 0.12); padding: 0.15rem 0.45rem; border-radius: 6px;">
+                                    NOVO
+                                </span>
+                            </div>
+
+                            <p style="font-size: 0.88rem; color: #d4d4d8; margin: 0; line-height: 1.4; word-break: break-word;">{{ n.mensagem }}</p>
+                            
+                            <div style="font-size: 0.76rem; color: #71717a; margin-top: 0.45rem; display: flex; align-items: center; gap: 0.4rem;">
+                                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                <span>{{ n.criado_em|dt_pt_hm if n.criado_em else '' }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botão Arquivar via AJAX -->
+                    <button type="button" onclick="marcarCardComoLido('{{ n.id }}')" title="Marcar como lido"
+                        style="background: #18181b; color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); font-weight: 800; font-size: 0.78rem; padding: 0.45rem 0.75rem; border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem; transition: all 0.2s ease;"
+                        onmouseover="this.style.background='#22c55e'; this.style.color='#000000';"
+                        onmouseout="this.style.background='#18181b'; this.style.color='#4ade80';">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>Lido</span>
+                    </button>
+                </div>
+                {% endfor %}
             {% endif %}
 
+            <!-- ARQUIVADAS (LIDAS) -->
             {% if arquivadas %}
-                <div class="admin-notifications-page__section-title admin-notifications-page__section-title--muted">Arquivados</div>
-                <div class="admin-notifications-archive-grid">
-                    {% for n in arquivadas %}
-                    <article class="admin-notification-archive-card">
-                        <div class="admin-notification-archive-card__topline">
-                            <div class="admin-notification-archive-card__title">{{ n.titulo }}</div>
-                            <span class="admin-notification-archive-card__badge">LIDO</span>
+                {% for n in arquivadas %}
+                {% set n_tipo = (n.tipo or 'info')|lower %}
+                <div class="notif-item-card notif-item-card--arquivada" 
+                     data-status="arquivada" 
+                     data-tipo="{{ n_tipo }}" 
+                     data-search="{{ n.titulo|lower }} {{ n.mensagem|lower }}"
+                     style="background: #0f0f12; border: 1px solid #27272a; border-radius: 16px; padding: 1rem 1.3rem; display: flex; align-items: flex-start; justify-content: space-between; gap: 1.1rem; opacity: 0.75; transition: all 0.25s ease;">
+                    
+                    <div style="display: flex; align-items: flex-start; gap: 1rem; flex: 1; min-width: 0;">
+                        <!-- Ícone Discreto SVG (Sem Emoji) -->
+                        <div style="width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: #18181b; color: #a1a1aa; border: 1px solid #27272a;">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
                         </div>
-                        <div class="admin-notification-archive-card__text">{{ n.mensagem }}</div>
-                        <div class="admin-notification-archive-card__meta">{{ n.criado_em|dt_pt_hm if n.criado_em else '' }}</div>
-                    </article>
-                    {% endfor %}
+
+                        <!-- Texto Arquivado -->
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.2rem;">
+                                <h3 style="font-size: 0.95rem; font-weight: 700; color: #a1a1aa; margin: 0; line-height: 1.2;">{{ n.titulo }}</h3>
+                                
+                                <span style="font-size: 0.65rem; font-weight: 700; color: #71717a; background: #18181b; padding: 0.15rem 0.45rem; border-radius: 6px; border: 1px solid #27272a; display: inline-flex; align-items: center; gap: 0.25rem;">
+                                    <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                                    <span>ARQUIVADO</span>
+                                </span>
+                            </div>
+
+                            <p style="font-size: 0.85rem; color: #71717a; margin: 0; line-height: 1.4; word-break: break-word;">{{ n.mensagem }}</p>
+                            
+                            <div style="font-size: 0.74rem; color: #52525b; margin-top: 0.4rem; display: flex; align-items: center; gap: 0.4rem;">
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                <span>{{ n.criado_em|dt_pt_hm if n.criado_em else '' }}</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+                {% endfor %}
             {% endif %}
-        </section>
+
+            <!-- EMPTY STATE (SEM NOTIFICAÇÕES) -->
+            <div id="notifEmptyState" style="display: {% if not notificacoes and not arquivadas %}flex{% else %}none{% endif %}; flex-direction: column; align-items: center; justify-content: center; padding: 3.5rem 1.5rem; background: #121215; border: 1px dashed #27272a; border-radius: 20px; text-align: center;">
+                <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.25); color: #22c55e; display: flex; align-items: center; justify-content: center; margin-bottom: 0.85rem;">
+                    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
+                <h3 style="font-size: 1.15rem; font-weight: 800; color: #ffffff; margin: 0 0 0.3rem 0;">Tudo limpo por aqui!</h3>
+                <p style="font-size: 0.85rem; color: #71717a; max-width: 360px; margin: 0;">Nenhum aviso novo ou histórico pendente neste momento.</p>
+            </div>
+
+        </div>
     </main>
 </div>
+
+<script>
+let currentFilterTab = 'todas';
+
+function setFilterTab(tab, btn) {
+    currentFilterTab = tab;
+    document.querySelectorAll('.notif-tab-pill').forEach(b => {
+        b.style.background = '#000000';
+        b.style.color = '#a1a1aa';
+        b.style.borderColor = '#27272a';
+        b.style.boxShadow = 'none';
+        b.classList.remove('active');
+    });
+    if (btn) {
+        btn.style.background = '#22c55e';
+        btn.style.color = '#000000';
+        btn.style.borderColor = '#22c55e';
+        btn.style.boxShadow = '0 4px 12px rgba(34, 197, 94, 0.25)';
+        btn.classList.add('active');
+    }
+    applyNotifFilters();
+}
+
+function applyNotifFilters() {
+    const cards = document.querySelectorAll('.notif-item-card');
+    let visibleCount = 0;
+
+    cards.forEach(card => {
+        const status = card.getAttribute('data-status');
+
+        let matchTab = true;
+        if (currentFilterTab === 'nao_lidas' && status !== 'nao_lida') matchTab = false;
+        if (currentFilterTab === 'arquivadas' && status !== 'arquivada') matchTab = false;
+
+        if (matchTab) {
+            card.style.display = 'flex';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+
+    const emptyState = document.getElementById('notifEmptyState');
+    if (emptyState) {
+        emptyState.style.display = visibleCount === 0 ? 'flex' : 'none';
+    }
+}
+
+async function marcarCardComoLido(notifId) {
+    const card = document.getElementById(`notifCard-${notifId}`);
+    if (card) {
+        card.style.opacity = '0.4';
+        card.style.transform = 'scale(0.98)';
+    }
+
+    try {
+        const resp = await fetch(`/admin/notificacoes/ler/${notifId}`, {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const data = await resp.json();
+        if (data.sucesso) {
+            if (card) {
+                // Atualiza atributos para simular arquivamento dinâmico sem reload
+                card.setAttribute('data-status', 'arquivada');
+                card.className = 'notif-item-card notif-item-card--arquivada';
+                card.style.opacity = '0.75';
+                card.style.transform = 'none';
+                card.style.borderColor = '#27272a';
+                
+                // Remove botão "Lido"
+                const btn = card.querySelector('button');
+                if (btn) btn.remove();
+
+                // Atualiza contadores
+                const naoLidasElem = document.getElementById('statNaoLidasCount');
+                const arquivadasElem = document.getElementById('statArquivadasCount');
+                if (naoLidasElem) {
+                    const currentN = parseInt(naoLidasElem.textContent || '0');
+                    naoLidasElem.textContent = Math.max(0, currentN - 1);
+                }
+                if (arquivadasElem) {
+                    const currentA = parseInt(arquivadasElem.textContent || '0');
+                    arquivadasElem.textContent = currentA + 1;
+                }
+                
+                applyNotifFilters();
+            }
+        }
+    } catch (e) {
+        if (card) card.style.opacity = '1';
+    }
+}
+</script>
 {% endblock %}

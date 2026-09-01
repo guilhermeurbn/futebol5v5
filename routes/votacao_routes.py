@@ -11,6 +11,7 @@ from services.auth_service import AuthService
 from services.juiz_partida_service import JuizPartidaService
 from services.historico_service import HistoricoService
 from services.partida_service import PartidaService
+from services.upload_service import UploadService
 
 votacao_bp = Blueprint('votacao', __name__)
 logger = logging.getLogger(__name__)
@@ -20,6 +21,7 @@ auth_service = AuthService()
 juiz_partida_service = JuizPartidaService()
 historico_service = HistoricoService()
 partida_service = PartidaService()
+upload_service = UploadService()
 
 
 # ============================================================
@@ -162,11 +164,16 @@ def _resolver_contexto_admin(sorteio_id_hint=None):
         juiz_partida_service.finalizar_partida(_resumo_encerramento(rodada_selecionada))
         fluxo_partida = None
 
-    voted_user_ids = {
-        voto.get('user_id')
-        for voto in (ativa or {}).get('votos', [])
-        if voto.get('user_id')
-    }
+    voted_user_ids = set()
+    for voto in (ativa or {}).get('votos', []):
+        uid = voto.get('user_id')
+        if uid is not None:
+            voted_user_ids.add(uid)
+            voted_user_ids.add(str(uid))
+            try:
+                voted_user_ids.add(int(uid))
+            except (ValueError, TypeError):
+                pass
 
     resultado_partida = _obter_resultado_sorteio(selecionado) if selecionado else None
     pode_abrir_votacao = bool(selecionado) and bool(resultado_partida)
@@ -209,6 +216,8 @@ def _resolver_contexto_admin(sorteio_id_hint=None):
         resultado_partida = None
         pode_abrir_votacao = False
 
+    card_campeao_url = (resultado_partida or {}).get('card_campeao_url') or (rodada_selecionada or {}).get('card_campeao_url')
+
     return {
         'ativa': ativa,
         'sorteios_disponiveis': sorteios_ordenados,
@@ -219,6 +228,7 @@ def _resolver_contexto_admin(sorteio_id_hint=None):
         'voted_user_ids': voted_user_ids,
         'pode_abrir_votacao': pode_abrir_votacao,
         'resultado_partida': resultado_partida,
+        'card_campeao_url': card_campeao_url,
         'resultado_concluido': bool(resultado_partida),
         'rodada_iniciada': rodada_iniciada,
         'rodada_selecionada': rodada_selecionada,
@@ -454,8 +464,8 @@ def votacao_resultado_juiz():
 
         estado = juiz_partida_service.obter_estado()
         partida_atual = estado.get('partida_atual') or {}
-        if int(partida_atual.get('sorteio_id', 0) or 0) != int(sorteio_id or 0):
-            raise ValueError('Este sorteio não pertence à partida atual do juiz')
+        if not partida_atual or int(partida_atual.get('sorteio_id', 0) or 0) != int(sorteio_id or 0):
+            juiz_partida_service.registrar_sorteio(sorteio_id)
 
         times_desempenho = []
         numeros_times = []
@@ -505,22 +515,41 @@ def votacao_resultado_juiz():
         ]
         time_vencedor = lideres[0] if len(lideres) == 1 else None
 
+        card_campeao_url = None
+        foto_campeao_file = request.files.get('foto_campeao')
+        card_campeao_base64 = request.form.get('card_campeao_base64')
+        if card_campeao_base64 and isinstance(card_campeao_base64, str) and card_campeao_base64.startswith('data:image'):
+            try:
+                card_campeao_url = upload_service.processar_foto_campeao(base64_data=card_campeao_base64, sorteio_id=sorteio_id)
+            except Exception as exc:
+                logger.warning("Falha ao processar card do campeao por base64: %s", exc)
+        elif foto_campeao_file and foto_campeao_file.filename:
+            try:
+                card_campeao_url = upload_service.processar_foto_campeao(file_storage=foto_campeao_file, sorteio_id=sorteio_id)
+            except Exception as exc:
+                logger.warning("Falha ao processar foto do campeao por arquivo: %s", exc)
+
         partida = partida_service.registrar_resultado(
             sorteio_id=sorteio_id,
             time_vencedor=time_vencedor,
             gols_times=gols_times,
             notas='',
             times_desempenho=times_desempenho,
+            card_campeao_url=card_campeao_url,
         )
         juiz_partida_service.marcar_resultado_registrado(sorteio_id, partida.get('id'))
 
         partida_votacao = votacao_service.obter_por_sorteio(sorteio_id)
         if partida_votacao:
             partida_votacao['resultado_partida'] = partida
+            if card_campeao_url:
+                partida_votacao['card_campeao_url'] = card_campeao_url
             dados = votacao_service._carregar()
             alvo = votacao_service._find_partida_em_dados(dados, partida_votacao['id'])
             if alvo:
                 alvo['resultado_partida'] = partida
+                if card_campeao_url:
+                    alvo['card_campeao_url'] = card_campeao_url
                 votacao_service._salvar(dados)
 
         return redirect(url_for(
@@ -587,6 +616,88 @@ def votacao_admin_page():
     return redirect(url_for('admin.admin_page', sorteio_id=sorteio_id, sucesso=sucesso))
 
 
+@votacao_bp.route('/admin/votacao/salvar-foto-campeao', methods=['POST'])
+@admin_or_juiz_required
+def votacao_admin_salvar_foto_campeao():
+    """Salva a foto/card do time campeão para a partida."""
+    sorteio_id = request.form.get('sorteio_id', type=int)
+    if not sorteio_id and _is_juiz():
+        estado = juiz_partida_service.obter_estado()
+        sorteio_id = ((estado.get('partida_atual') or {}).get('sorteio_id'))
+
+    if not sorteio_id:
+        return redirect(url_for('votacao.votacao_admin_page', erro='Sorteio não identificado'))
+
+    partidas_existentes = partida_service.obter_partidas_sorteio(sorteio_id)
+    foto_antiga_url = (partidas_existentes[0].get('card_campeao_url') if partidas_existentes else None)
+
+    if request.form.get('remover_sem_foto'):
+        # Limpa o status sem_foto para permitir adicionar foto
+        if partidas_existentes:
+            partida_obj = partidas_existentes[0]
+            partida_service.registrar_resultado(
+                sorteio_id=sorteio_id,
+                time_vencedor=partida_obj.get('time_vencedor'),
+                gols_times=partida_obj.get('gols_times', []),
+                notas=partida_obj.get('notas', ''),
+                times_desempenho=partida_obj.get('times_desempenho', []),
+                card_campeao_url=''
+            )
+        return redirect(url_for('votacao.votacao_admin_page', sorteio_id=sorteio_id))
+
+    if request.form.get('sem_foto'):
+        if foto_antiga_url:
+            upload_service.remover_card_campeao(foto_antiga_url)
+        card_campeao_url = 'sem_foto'
+    else:
+        card_campeao_url = None
+        foto_campeao_file = request.files.get('foto_campeao') or request.files.get('foto_campeao_cam')
+        card_campeao_base64 = request.form.get('card_campeao_base64')
+
+        if card_campeao_base64 and isinstance(card_campeao_base64, str) and card_campeao_base64.startswith('data:image'):
+            try:
+                card_campeao_url = upload_service.processar_foto_campeao(base64_data=card_campeao_base64, sorteio_id=sorteio_id, foto_antiga_url=foto_antiga_url)
+            except Exception as exc:
+                logger.warning("Falha ao processar card do campeao por base64: %s", exc)
+                return redirect(url_for('votacao.votacao_admin_page', sorteio_id=sorteio_id, erro=str(exc)))
+        elif foto_campeao_file and foto_campeao_file.filename:
+            try:
+                card_campeao_url = upload_service.processar_foto_campeao(file_storage=foto_campeao_file, sorteio_id=sorteio_id, foto_antiga_url=foto_antiga_url)
+            except Exception as exc:
+                logger.warning("Falha ao processar foto do campeao por arquivo: %s", exc)
+                return redirect(url_for('votacao.votacao_admin_page', sorteio_id=sorteio_id, erro=str(exc)))
+
+    if card_campeao_url:
+        # Salvar em partida_service
+        partidas = partida_service.obter_partidas_sorteio(sorteio_id)
+        if partidas:
+            partida_obj = partidas[0]
+            partida_service.registrar_resultado(
+                sorteio_id=sorteio_id,
+                time_vencedor=partida_obj.get('time_vencedor'),
+                gols_times=partida_obj.get('gols_times', []),
+                notas=partida_obj.get('notas', ''),
+                times_desempenho=partida_obj.get('times_desempenho', []),
+                card_campeao_url=card_campeao_url
+            )
+        # Salvar em votacao_service se houver partida de votacao
+        partida_votacao = votacao_service.obter_por_sorteio(sorteio_id)
+        if partida_votacao:
+            partida_votacao['card_campeao_url'] = card_campeao_url
+            dados = votacao_service._carregar()
+            alvo = votacao_service._find_partida_em_dados(dados, partida_votacao['id'])
+            if alvo:
+                alvo['card_campeao_url'] = card_campeao_url
+                if alvo.get('resultado_partida'):
+                    alvo['resultado_partida']['card_campeao_url'] = card_campeao_url
+                votacao_service._salvar(dados)
+
+        msg = 'Opção "Sem foto" salva com sucesso!' if card_campeao_url == 'sem_foto' else 'Foto do time campeão salva com sucesso!'
+        return redirect(url_for('votacao.votacao_admin_page', sorteio_id=sorteio_id, sucesso=msg))
+
+    return redirect(url_for('votacao.votacao_admin_page', sorteio_id=sorteio_id))
+
+
 @votacao_bp.route('/admin/votacao/criar', methods=['POST'])
 @admin_or_juiz_required
 def votacao_admin_criar():
@@ -647,6 +758,39 @@ def votacao_admin_criar():
         
         if _is_juiz():
             juiz_partida_service.marcar_votacao_aberta(sorteio.get('id'), partida.get('id'))
+
+        # Processar foto/card do time campeão se enviado ao abrir a votação
+        card_campeao_url = None
+        foto_campeao_file = request.files.get('foto_campeao') or request.files.get('foto_campeao_cam')
+        card_campeao_base64 = request.form.get('card_campeao_base64')
+        if card_campeao_base64 and isinstance(card_campeao_base64, str) and card_campeao_base64.startswith('data:image'):
+            try:
+                card_campeao_url = upload_service.processar_foto_campeao(base64_data=card_campeao_base64, sorteio_id=sorteio.get('id'))
+            except Exception as exc:
+                logger.warning("Falha ao processar card do campeao por base64: %s", exc)
+        elif foto_campeao_file and foto_campeao_file.filename:
+            try:
+                card_campeao_url = upload_service.processar_foto_campeao(file_storage=foto_campeao_file, sorteio_id=sorteio.get('id'))
+            except Exception as exc:
+                logger.warning("Falha ao processar foto do campeao enviada por arquivo: %s", exc)
+
+        if card_campeao_url:
+            partida['card_campeao_url'] = card_campeao_url
+            dados = votacao_service._carregar()
+            alvo = votacao_service._find_partida_em_dados(dados, partida['id'])
+            if alvo:
+                alvo['card_campeao_url'] = card_campeao_url
+                votacao_service._salvar(dados)
+            if resultado_partida:
+                resultado_partida['card_campeao_url'] = card_campeao_url
+                partida_service.registrar_resultado(
+                    sorteio_id=sorteio.get('id'),
+                    time_vencedor=resultado_partida.get('time_vencedor'),
+                    gols_times=resultado_partida.get('gols_times', []),
+                    notas=resultado_partida.get('notas', ''),
+                    times_desempenho=resultado_partida.get('times_desempenho', []),
+                    card_campeao_url=card_campeao_url
+                )
 
         # Dispara e-mail de votação aberta APENAS para os participantes da partida
         try:

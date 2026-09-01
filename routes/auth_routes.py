@@ -38,6 +38,9 @@ def _usuario_logado():
         'role': session.get('role', 'usuario'),
         'senha_temporaria_ativa': bool(session.get('senha_temporaria_ativa')),
         'autenticado': bool(user_id),
+        'email': (u.get('email') if isinstance(u, dict) else None),
+        'apple_email': (u.get('apple_email') if isinstance(u, dict) else None),
+        'google_email': (u.get('google_email') if isinstance(u, dict) else None),
         'foto_url': (u.get('foto_url') if isinstance(u, dict) else None) or session.get('foto_url')
     }
 
@@ -624,13 +627,18 @@ def social_complete_username():
             pass
 
         try:
-            jogador_service.criar(
-                nome=nome,
-                nivel=5.5,
-                tipo='avulso',
-                posicao=posicao,
-                owner_user_id=usuario.get('id')
-            )
+            nome_clean = (nome or '').strip()
+            existente = jogador_service.obter_por_nome(nome_clean) if (nome_clean and hasattr(jogador_service, 'obter_por_nome')) else None
+            if existente:
+                jogador_service.atualizar(existente.id, owner_user_id=usuario.get('id'))
+            else:
+                jogador_service.criar(
+                    nome=nome,
+                    nivel=5.5,
+                    tipo='avulso',
+                    posicao=posicao,
+                    owner_user_id=usuario.get('id')
+                )
         except Exception as exc:
             logger.warning(f"Erro ao criar perfil de jogador automático: {exc}")
 
@@ -772,13 +780,18 @@ def cadastro_submit():
         # Cada usuário novo já nasce com seu próprio jogador.
         # Se essa etapa falhar, desfazemos o usuário para evitar conta órfã.
         try:
-            jogador_service.criar(
-                nome=nome,
-                nivel=nivel_val,
-                tipo=tipo,
-                posicao=posicao,
-                owner_user_id=usuario.get('id')
-            )
+            nome_clean = (nome or '').strip()
+            existente = jogador_service.obter_por_nome(nome_clean) if (nome_clean and hasattr(jogador_service, 'obter_por_nome')) else None
+            if existente:
+                jogador_service.atualizar(existente.id, owner_user_id=usuario.get('id'))
+            else:
+                jogador_service.criar(
+                    nome=nome,
+                    nivel=nivel_val,
+                    tipo=tipo,
+                    posicao=posicao,
+                    owner_user_id=usuario.get('id')
+                )
         except Exception as exc:
             try:
                 auth_service.deletar_usuario(usuario.get('id'))
@@ -1479,6 +1492,34 @@ def perfil_editar_dados():
             usuario=_usuario_logado(),
             erro_perfil='Erro ao atualizar perfil'
         ), 500
+
+
+@auth_bp.route('/api/checar-email', methods=['GET', 'POST'])
+def api_checar_email():
+    """Valida formato do e-mail e verifica disponibilidade no sistema."""
+    user_id = session.get('user_id')
+    email = request.args.get('email') or (request.json.get('email') if request.is_json else request.form.get('email'))
+    
+    if not email:
+        return jsonify({'valido': False, 'status': 'vazio', 'mensagem': 'E-mail não pode ficar em branco.'})
+    
+    email_clean = email.strip().lower()
+    import re
+    email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if not re.match(email_regex, email_clean):
+        return jsonify({'valido': False, 'status': 'invalido', 'mensagem': 'Formato de e-mail inválido.'})
+    
+    if user_id:
+        u_atual = auth_service.obter_por_id(user_id) or {}
+        email_atual = (u_atual.get('email') or '').strip().lower()
+        if email_clean == email_atual:
+            return jsonify({'valido': True, 'status': 'atual', 'mensagem': '✓ Este é seu e-mail cadastrado atualmente.'})
+    
+    outros_usuarios = auth_service.listar_usuarios()
+    if any((u.get('email') or '').strip().lower() == email_clean and u.get('id') != user_id for u in outros_usuarios):
+        return jsonify({'valido': False, 'status': 'em_uso', 'mensagem': '✕ Este e-mail já está em uso por outra conta.'})
+    
+    return jsonify({'valido': True, 'status': 'disponivel', 'mensagem': '✓ E-mail válido e disponível!'})
 
 
 @auth_bp.route('/perfil/foto/remover', methods=['POST'])

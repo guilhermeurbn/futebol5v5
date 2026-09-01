@@ -11,11 +11,11 @@
         {% if show_site_footer %}
         {% set current_path = request.path or '' %}
         {% set is_admin_role = session.get('role') in ['admin'] %}
-        {% set is_jogadores = current_path == '/' %}
-        {% set is_perfil = current_path.startswith('/perfil') %}
-        {% set is_votacao = current_path.startswith('/votacao') or current_path.startswith('/admin/votacao') %}
-        {% set is_historico = current_path.startswith('/historico') %}
-        {% set is_ranking = current_path.startswith('/ranking') %}
+        {% set is_jogadores = current_path == '/' or current_path.endswith('/jogadores') or current_path == '/jogadores' %}
+        {% set is_perfil = current_path.endswith('/perfil') or current_path == '/perfil' %}
+        {% set is_votacao = 'votacao' in current_path %}
+        {% set is_historico = current_path.endswith('/historico') or current_path == '/historico' %}
+        {% set is_ranking = current_path.endswith('/ranking') or current_path == '/ranking' %}
         {% set is_admin_page = current_path.startswith('/admin') %}
         {% set role_prefix = '/admin' if is_admin_role else ('/juiz' if session.get('role') == 'juiz' else '/usuario') %}
         {% set href_perfil = role_prefix ~ '/perfil' %}

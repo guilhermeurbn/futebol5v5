@@ -18,6 +18,8 @@ _cache_ttl_seconds = 300  # 5 minutos
 # SQL injection whitelist
 ALLOWED_TABLES = {"app_json_store"}
 
+_db_disabled_until: float = 0.0
+
 
 def _normalize_database_url(url: str) -> str:
     if url.startswith("postgres://"):
@@ -26,22 +28,28 @@ def _normalize_database_url(url: str) -> str:
 
 
 def get_conn():
+    global _db_disabled_until
     url = os.getenv("DATABASE_URL")
     if not url:
+        return None
+
+    now = time.time()
+    if now < _db_disabled_until:
         return None
 
     url = _normalize_database_url(url)
     if psycopg2 is None:
         return None
     try:
-        connect_timeout = int(os.getenv("DB_CONNECT_TIMEOUT", "5"))
+        connect_timeout = int(os.getenv("DB_CONNECT_TIMEOUT", "2"))
         return psycopg2.connect(
             url,
             sslmode=os.getenv("PGSSLMODE", "require"),
             connect_timeout=connect_timeout,
         )
     except Exception as e:
-        print(f"[DB] Error connecting to Postgres: {e}")
+        _db_disabled_until = now + 30.0
+        print(f"[DB] Error connecting to Postgres: {e}. Circuit breaker active for 30s.")
         return None
 
 
@@ -74,18 +82,15 @@ def _candidate_paths(relative_path: str):
     root = _repo_root()
     yield root / relative_path
     yield root / "data" / relative_path
-    yield root / "data" / "seeds" / relative_path
 
 
 def _get_cached(namespace: str):
-    if namespace == "users":
-        return None  # Nunca servir credenciais obsoletas de usuários do cache em memória
-
     if namespace not in _cache:
         return None
 
     data, timestamp = _cache[namespace]
-    if time.time() - timestamp < _cache_ttl_seconds:
+    ttl = 5 if namespace == "users" else _cache_ttl_seconds
+    if time.time() - timestamp < ttl:
         return data
 
     del _cache[namespace]
@@ -135,15 +140,6 @@ def load_json_data(namespace: str, default):
                 with candidate.open("r", encoding="utf-8") as f:
                     data = json.load(f)
                 _set_cached(namespace, data)
-
-                conn = get_conn()
-                if conn is not None:
-                    try:
-                        save_json_data(namespace, data)
-                    except Exception as e:
-                        print(f"[DB] Error saving to Postgres: {e}")
-                    finally:
-                        conn.close()
                 return data
             except (json.JSONDecodeError, OSError) as e:
                 print(f"[DB] Error loading {namespace}.json ({candidate}): {e}")

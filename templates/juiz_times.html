@@ -132,6 +132,16 @@
                         <span><strong>Iniciar Rodada</strong><small>Painel da Rodada</small></span>
                     </button>
                 </form>
+                {% else %}
+                <a class="judge-action-btn judge-action-btn--vote" href="{{ url_for('votacao.votacao_admin_page', sorteio_id=sorteio.id) }}"
+                    aria-label="Ir para Votação" title="Ir para Votação">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="m9 11 3 3L22 4" />
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                    </svg>
+                    <span><strong>Painel da Rodada</strong><small>Lançar Placar / Votação</small></span>
+                </a>
                 {% endif %}
             </div>
             <p class="judge-copy-feedback" id="copiarSorteioStatus" role="status" aria-live="polite"

@@ -584,6 +584,16 @@
                         Sua avaliação foi salva e computada no ranking oficial da temporada dos jogadores!
                     </p>
 
+                    <!-- Card Oficial do Time Campeão -->
+                    {% set card_url = partida.card_campeao_url if (partida and partida.card_campeao_url and partida.card_campeao_url != 'sem_foto') else ((resultado_partida.card_campeao_url if (resultado_partida and resultado_partida.card_campeao_url and resultado_partida.card_campeao_url != 'sem_foto') else None)) %}
+                    {% if card_url %}
+                    <div class="champion-card-hero-display" style="margin-bottom: 1.25rem; text-align: center;">
+                        <div style="display: inline-block; max-width: 520px; width: 100%; aspect-ratio: 16/9; border-radius: 20px; overflow: hidden; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.12); background: #09090b;">
+                            <img src="{{ card_url }}" alt="Card Time Campeão" style="width: 100%; height: auto; display: block; object-fit: cover;">
+                        </div>
+                    </div>
+                    {% endif %}
+
                     <!-- Placar da Partida -->
                     {% if partida and partida.resultado_resumido %}
                     <div class="vote-scoreboard">
@@ -730,6 +740,16 @@
                     </div>
 
                     <h2 class="vote-hero-title">{{ partida.titulo }}</h2>
+
+                    <!-- Card Oficial do Time Campeão -->
+                    {% set card_url = partida.card_campeao_url if (partida and partida.card_campeao_url and partida.card_campeao_url != 'sem_foto') else ((resultado_partida.card_campeao_url if (resultado_partida and resultado_partida.card_campeao_url and resultado_partida.card_campeao_url != 'sem_foto') else None)) %}
+                    {% if card_url %}
+                    <div class="champion-card-hero-display" style="margin-bottom: 1.25rem; text-align: center;">
+                        <div style="display: inline-block; max-width: 300px; width: 100%; border-radius: 20px; overflow: hidden; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.12); background: #09090b;">
+                            <img src="{{ card_url }}" alt="Card Time Campeão" style="width: 100%; height: auto; display: block; object-fit: cover;">
+                        </div>
+                    </div>
+                    {% endif %}
 
                     <!-- Placar de Gols da Partida (Time 1 e Time 2 alinhados na mesma altura, placar abaixo) -->
                     {% if partida.resultado_resumido %}

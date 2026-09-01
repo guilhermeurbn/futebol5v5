@@ -22,7 +22,10 @@
         {% if sorteios %}
             <div class="judge-draw-history__list history-page__list">
                 {% for sorteio in sorteios %}
-                <details id="sorteio-{{ sorteio.id }}" class="judge-draw-history__item votacao-admin-history-card {% if loop.first %}votacao-admin-history-card--featured{% endif %} {% if sorteio.votacao_encerrada %}votacao-admin-history-card--closed{% elif sorteio.votacao_aberta %}votacao-admin-history-card--open{% endif %}">
+                {% set is_target = (target_sorteio_id and (target_sorteio_id|string == sorteio.id|string)) %}
+                {% set is_first_and_no_target = (loop.first and not target_sorteio_id) %}
+                {% set show_by_default = (loop.index <= 15 or is_target) %}
+                <details id="sorteio-{{ sorteio.id }}" {% if is_target or is_first_and_no_target %}open{% endif %} {% if not show_by_default %}style="display: none !important;"{% endif %} class="judge-draw-history__item votacao-admin-history-card {% if not show_by_default %}history-card-hidden{% endif %} {% if sorteio.votacao_encerrada %}votacao-admin-history-card--closed{% elif sorteio.votacao_aberta %}votacao-admin-history-card--open{% endif %}">
                     <summary class="history-page__summary">
                         <span class="judge-draw-history__identity">
                             <span class="judge-draw-history__number">#{{ sorteio.id }}</span>
@@ -57,6 +60,20 @@
                     </summary>
 
                     <div class="judge-draw-history__body history-page__body">
+                        {% if sorteio.card_campeao_url and sorteio.card_campeao_url != 'sem_foto' %}
+                        <div class="champion-card-history-display" style="margin-bottom: 1.25rem; text-align: center;">
+                            <div style="display: inline-block; max-width: 540px; width: 100%; aspect-ratio: 16/9; border-radius: 16px; overflow: hidden; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.12); background: #09090b;">
+                                <img src="{{ sorteio.card_campeao_url }}" alt="Card Time Campeão" loading="lazy" decoding="async" style="width: 100%; height: auto; display: block; object-fit: cover;">
+                            </div>
+                            <div style="margin-top: 0.65rem;">
+                                <a href="{{ sorteio.card_campeao_url }}" download="card_natrave_sorteio_{{ sorteio.id }}.jpg" target="_blank" class="btn" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.55rem 1.1rem; font-weight: 800; font-size: 0.82rem; border-radius: 10px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.18); color: #ffffff; text-decoration: none; transition: all 0.2s ease;">
+                                    <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    <span>Baixar Foto</span>
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
+
                         {% if sorteio.resultado_resumo %}
                         <div class="history-match-scoreboard">
                             {% if sorteio.resultado_resumo|length == 2 %}
@@ -184,6 +201,18 @@
                     <script id="ranking-data-{{ sorteio.id }}" type="application/json">{{ sorteio.ranking_top10 | tojson }}</script>
                 </details>
                 {% endfor %}
+
+                {% if sorteios and sorteios|length > 15 %}
+                <div class="history-pagination-container" id="historyPagination" style="text-align: center; margin: 1.25rem 0 1rem 0; padding: 0.5rem 0;">
+                    <span class="history-pagination-info" style="display: block; font-size: 0.85rem; font-weight: 600; color: rgba(255, 255, 255, 0.55); margin-bottom: 0.85rem;">
+                        Exibindo <span id="historyShownCount">15</span> de {{ sorteios|length }} rodadas
+                    </span>
+                    <button type="button" class="btn" id="historyLoadMoreBtn" style="padding: 0.75rem 1.85rem; border-radius: 12px; font-weight: 700; font-size: 0.9rem; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.18); color: #ffffff; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 0.55rem; box-shadow: 0 4px 16px rgba(0,0,0,0.3);">
+                        <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><polyline points="6 9 12 15 18 9"/></svg>
+                        <span>Carregar Mais Rodadas (+15)</span>
+                    </button>
+                </div>
+                {% endif %}
             </div>
         {% else %}
             <div class="empty-state">
@@ -398,19 +427,128 @@
         }
     });
 
-    // Abrir automaticamente o sorteio selecionado via hash na URL
+    // Paginação e Limite de Rodadas Iniciais
+    const initPagination = () => {
+        const INITIAL_LIMIT = 15;
+        const allItems = Array.from(document.querySelectorAll('details.judge-draw-history__item'));
+        if (allItems.length <= INITIAL_LIMIT) return;
+
+        let currentLimit = INITIAL_LIMIT;
+
+        const hash = window.location.hash;
+        const urlParams = new URLSearchParams(window.location.search);
+        const sorteioParam = urlParams.get('sorteio_id') || urlParams.get('sorteio');
+        const targetId = (hash && hash.startsWith('#sorteio-')) ? hash.replace('#sorteio-', '') : sorteioParam;
+
+        if (targetId) {
+            const targetEl = document.getElementById('sorteio-' + targetId);
+            if (targetEl) {
+                const targetIdx = allItems.indexOf(targetEl);
+                if (targetIdx >= currentLimit) {
+                    currentLimit = targetIdx + 1;
+                }
+            }
+        }
+
+        const paginationContainer = document.getElementById('historyPagination');
+        const loadMoreBtn = document.getElementById('historyLoadMoreBtn');
+        const infoCount = document.getElementById('historyShownCount');
+
+        const updatePagination = () => {
+            allItems.forEach((item, index) => {
+                if (index < currentLimit) {
+                    item.style.display = '';
+                    item.classList.remove('history-card-hidden');
+                } else {
+                    item.style.display = 'none';
+                    item.classList.add('history-card-hidden');
+                }
+            });
+
+            if (infoCount) infoCount.textContent = Math.min(currentLimit, allItems.length);
+
+            if (paginationContainer) {
+                if (currentLimit >= allItems.length) {
+                    paginationContainer.style.display = 'none';
+                } else {
+                    paginationContainer.style.display = 'block';
+                }
+            }
+        };
+
+        if (loadMoreBtn) {
+            loadMoreBtn.addEventListener('click', () => {
+                currentLimit += 15;
+                updatePagination();
+            });
+        }
+
+        updatePagination();
+    };
+
+    window.initHistoryPagination = initPagination;
+    initPagination();
+
+    // Abrir automaticamente APENAS a rodada selecionada e rolar EXATAMENTE ate ela
     const openSorteioFromHash = () => {
         const hash = window.location.hash;
+        const urlParams = new URLSearchParams(window.location.search);
+        const sorteioParam = urlParams.get('sorteio_id') || urlParams.get('sorteio');
+        
+        let targetId = null;
         if (hash && hash.startsWith('#sorteio-')) {
-            const el = document.querySelector(hash);
-            if (el && el.tagName === 'DETAILS') {
-                el.setAttribute('open', '');
-                setTimeout(() => {
-                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            targetId = hash.replace('#sorteio-', '');
+        } else if (sorteioParam) {
+            targetId = sorteioParam;
+        }
+
+        if (targetId) {
+            const allDetails = document.querySelectorAll('details.judge-draw-history__item');
+            const targetEl = document.getElementById('sorteio-' + targetId);
+
+            if (targetEl && targetEl.tagName === 'DETAILS') {
+                // Fecha todos os outros cards para que apenas o card alvo fique aberto
+                allDetails.forEach(d => {
+                    if (d !== targetEl) {
+                        d.removeAttribute('open');
+                        d.open = false;
+                    }
+                });
+
+                // Abre exclusivamente o card alvo
+                targetEl.setAttribute('open', '');
+                targetEl.open = true;
+
+                // Função de rolagem com ajuste contínuo de offset
+                const alignScrollToTarget = (behavior = 'auto') => {
+                    const rect = targetEl.getBoundingClientRect();
+                    const desiredTop = 75; // Distância ideal do topo abaixo da barra de navegacao
+                    const diff = rect.top - desiredTop;
+                    if (Math.abs(diff) > 2) {
+                        window.scrollBy({
+                            top: diff,
+                            behavior: behavior
+                        });
+                    }
+                };
+
+                // Executa rolagem imediata sem animacao para mover a tela instantaneamente
+                alignScrollToTarget('auto');
+
+                // Re-alinha progressivamente caso imagens/fontes alterem a altura da página
+                let attempts = 0;
+                const intervalId = setInterval(() => {
+                    attempts++;
+                    alignScrollToTarget('smooth');
+                    if (attempts >= 10) clearInterval(intervalId);
                 }, 100);
             }
         }
     };
+    openSorteioFromHash();
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', openSorteioFromHash);
+    }
     window.addEventListener('load', openSorteioFromHash);
     window.addEventListener('hashchange', openSorteioFromHash);
 })();
