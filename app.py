@@ -133,6 +133,7 @@ def criar_app(config_name: str = None) -> Flask:
 
     config_obj = config_by_name.get(config_name, config_by_name['default'])
     app.config.from_object(config_obj)
+    app.config['MAX_CONTENT_LENGTH'] = 64 * 1024 * 1024  # 64 MB
 
     # Preserve the original scheme/host when deployed behind a reverse proxy.
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
@@ -522,9 +523,16 @@ def criar_app(config_name: str = None) -> Flask:
             app.jinja_env.auto_reload = True
             logger.info('Templates auto-reload habilitado (development/debug)')
     except Exception:
-        # Segurança: não impedir startup se não for possível ajustar o Jinja env
         logger.debug('Não foi possível habilitar TEMPLATES_AUTO_RELOAD')
-    
+
+    @app.errorhandler(413)
+    def request_entity_too_large(error):
+        logger.warning("Upload de requisição muito grande (413): %s", error)
+        from flask import jsonify, request
+        if request.is_json or request.path.startswith('/api/'):
+            return jsonify({'sucesso': False, 'erro': 'A imagem enviada é muito grande. Escolha uma foto menor.'}), 413
+        return redirect(url_for('votacao.votacao_admin_page', erro='A imagem enviada é muito grande. Escolha uma foto menor.'))
+
     return app
 
 

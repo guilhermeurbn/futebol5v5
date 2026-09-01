@@ -1353,10 +1353,10 @@
 
             function updateBase64Input() {
                 try {
-                    const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.72);
                     if (inputBase64) inputBase64.value = dataUrl;
                 } catch (e) {
-                    console.warn('Erro ao extrair Base64 do canvas 4K:', e);
+                    console.warn('Erro ao extrair Base64 do canvas:', e);
                 }
             }
             updateBase64Input();
@@ -1381,7 +1381,23 @@
             reader.onload = function(evt) {
                 const userImg = new Image();
                 userImg.onload = function() {
-                    renderChampionCard(userImg);
+                    // Redimensionar fotos de alta resolução do celular para economizar memória e tráfego
+                    const maxDim = 1600;
+                    if (userImg.width > maxDim || userImg.height > maxDim) {
+                        const scale = maxDim / Math.max(userImg.width, userImg.height);
+                        const c = document.createElement('canvas');
+                        c.width = Math.round(userImg.width * scale);
+                        c.height = Math.round(userImg.height * scale);
+                        const cx = c.getContext('2d');
+                        cx.drawImage(userImg, 0, 0, c.width, c.height);
+                        const scaledImg = new Image();
+                        scaledImg.onload = function() {
+                            renderChampionCard(scaledImg);
+                        };
+                        scaledImg.src = c.toDataURL('image/jpeg', 0.85);
+                    } else {
+                        renderChampionCard(userImg);
+                    }
                 };
                 userImg.src = evt.target.result;
             };
@@ -1436,8 +1452,11 @@
                         }
                     } catch (err) {
                         console.error('Erro AJAX foto:', err);
-                        if (submitBtn) submitBtn.textContent = 'Enviando...';
-                        formFoto.submit();
+                        alert('Falha ao enviar foto. Verifique a conexão e tente novamente.');
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = 'Salvar Foto do Campeão';
+                        }
                     }
                 }
             });
