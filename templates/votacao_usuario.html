@@ -9,9 +9,34 @@
    ============================================================ */
 
 .voting-workspace-panel {
-    max-width: 760px;
-    margin: 0.5rem auto 3rem auto;
-    padding: 0 0.5rem;
+    max-width: 720px;
+    margin: 0 auto 3rem auto;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+@media (max-width: 768px) {
+    .player-workspace-page.container {
+        padding-left: 0.6rem !important;
+        padding-right: 0.6rem !important;
+    }
+    .voting-workspace-panel {
+        margin-top: 0 !important;
+    }
+    .vote-hero-card {
+        padding: 1rem 0.75rem !important;
+        border-radius: 20px !important;
+    }
+    .champion-card-hero-display > div {
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+    .champion-card-hero-display button {
+        max-width: 100% !important;
+        width: 100% !important;
+    }
 }
 
 /* 1. Hero Scoreboard Card (Sem radial glow verde no topo) */
