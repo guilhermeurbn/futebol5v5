@@ -565,77 +565,35 @@
             <section class="section voting-workspace-panel">
                 
                 <!-- 1. Hero Confirmation Card -->
-                <div class="vote-hero-card">
-                    <div class="vote-hero-top">
-                        <div class="vote-hero-tag">
+                <div class="vote-hero-card" style="padding: 1.25rem; text-align: center;">
+                    <div class="vote-hero-top" style="justify-content: center; margin-bottom: 1rem;">
+                        <div class="vote-hero-tag" style="padding: 0.35rem 0.85rem; font-size: 0.78rem;">
                             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="20 6 9 17 4 12"/>
                             </svg>
                             VOTO CONFIRMADO
                         </div>
-                        <span class="vote-hero-status" style="background: rgba(91, 245, 0, 0.15); border-color: rgba(91, 245, 0, 0.35);">
-                            <span class="vote-hero-status-dot"></span>
-                            Computado
-                        </span>
                     </div>
-
-                    <h2 class="vote-hero-title">Sua Avaliação da Rodada</h2>
-                    <p style="color: #94a3b8; font-size: 0.9rem; margin-top: -0.4rem; margin-bottom: 1.1rem; line-height: 1.5;">
-                        Sua avaliação foi salva e computada no ranking oficial da temporada dos jogadores!
-                    </p>
 
                     <!-- Card Oficial do Time Campeão -->
                     {% set card_url = partida.card_campeao_url if (partida and partida.card_campeao_url and partida.card_campeao_url != 'sem_foto') else ((resultado_partida.card_campeao_url if (resultado_partida and resultado_partida.card_campeao_url and resultado_partida.card_campeao_url != 'sem_foto') else None)) %}
                     {% if card_url %}
-                    <div class="champion-card-hero-display" style="margin-bottom: 1.25rem; text-align: center;">
-                        <div style="display: inline-block; max-width: 520px; width: 100%; aspect-ratio: 16/9; border-radius: 20px; overflow: hidden; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.12); background: #09090b;">
-                            <img src="{{ card_url }}" alt="Card Time Campeão" style="width: 100%; height: auto; display: block; object-fit: cover;">
+                    <div class="champion-card-hero-display" style="text-align: center;">
+                        <div style="display: inline-block; max-width: 520px; width: 100%; border-radius: 20px; overflow: hidden; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.12); background: #09090b;">
+                            <img src="{{ card_url }}" alt="Card Time Campeão" style="width: 100%; height: auto; display: block; object-fit: contain;">
+                        </div>
+                        <div style="margin-top: 1rem;">
+                            <button type="button" onclick="baixarImagemCard('{{ card_url }}')" class="btn" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%; max-width: 520px; height: 46px; background: #5bf500; color: #000000; font-weight: 850; font-size: 0.92rem; border-radius: 14px; border: none; cursor: pointer; box-shadow: 0 4px 16px rgba(91, 245, 0, 0.3); transition: all 0.2s ease;">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="7 10 12 15 17 10"/>
+                                    <line x1="12" y1="15" x2="12" y2="3"/>
+                                </svg>
+                                <span>Baixar Imagem</span>
+                            </button>
                         </div>
                     </div>
                     {% endif %}
-
-                    <!-- Placar da Partida -->
-                    {% if partida and partida.resultado_resumido %}
-                    <div class="vote-scoreboard">
-                        {% set t1 = partida.resultado_resumido[0] if partida.resultado_resumido|length > 0 else {'gols': 0, 'time_numero': 1} %}
-                        {% set t2 = partida.resultado_resumido[1] if partida.resultado_resumido|length > 1 else {'gols': 0, 'time_numero': 2} %}
-                        
-                        <div class="vote-scoreboard-header">
-                            <span class="vote-team-title">Time {{ t1.time_numero }}</span>
-                            <span class="vote-vs-tag">VS</span>
-                            <span class="vote-team-title">Time {{ t2.time_numero }}</span>
-                        </div>
-
-                        <div class="vote-scoreboard-body">
-                            <span class="vote-team-score">{{ t1.gols }}</span>
-                            <span class="vote-score-divider">-</span>
-                            <span class="vote-team-score">{{ t2.gols }}</span>
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <!-- Meta Badges -->
-                    <div class="vote-hero-chips">
-                        <span class="vote-chip">
-                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M19 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-                            </svg>
-                            {{ participante.jogador_nome if participante else (usuario.nome or usuario.username) }}
-                        </span>
-                        {% if participante and participante.time_numero %}
-                        <span class="vote-chip vote-chip--highlight">
-                            Time {{ participante.time_numero }}
-                        </span>
-                        {% endif %}
-                        <span class="vote-chip" style="background: rgba(91, 245, 0, 0.12); color: #5bf500; border-color: rgba(91, 245, 0, 0.3);">
-                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/><path d="m12 12 4-4"/><path d="M12 12v6"/><path d="m12 12-4-4"/></svg>
-                            {{ voto.get('gols_marcados', 0) }} {{ 'Gol' if voto.get('gols_marcados', 0) == 1 else 'Gols' }}
-                        </span>
-                        <span class="vote-chip">
-                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                            {{ voto.atualizado_em|dt_pt_hm }}
-                        </span>
-                    </div>
                 </div>
 
                 <!-- 2. Metrics Summary Grid -->
@@ -650,7 +608,7 @@
                 {% endfor %}
                 {% set media_dada = (total_notas.soma / (voto.votos|length))|round(1) if voto.votos|length > 0 else 0 %}
 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem; margin-bottom: 1.25rem;">
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-bottom: 1.25rem;">
                     <div style="background: rgba(18, 18, 26, 0.9); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; padding: 1rem; text-align: center;">
                         <div style="font-size: 0.72rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem;">Avaliados</div>
                         <div style="font-size: 1.6rem; font-weight: 900; color: #ffffff;">{{ voto.votos|length }}</div>
@@ -659,16 +617,6 @@
                     <div style="background: rgba(18, 18, 26, 0.9); border: 1px solid rgba(91, 245, 0, 0.25); border-radius: 18px; padding: 1rem; text-align: center;">
                         <div style="font-size: 0.72rem; font-weight: 800; color: #5bf500; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem;">Média Dada</div>
                         <div style="font-size: 1.6rem; font-weight: 900; color: #5bf500;">{{ media_dada }}</div>
-                    </div>
-
-                    <div style="background: rgba(18, 18, 26, 0.9); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; padding: 1rem; text-align: center;">
-                        <div style="font-size: 0.72rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem;">Maior Nota</div>
-                        <div style="font-size: 1.6rem; font-weight: 900; color: #f59e0b;">{{ total_notas.max_nota }}</div>
-                    </div>
-
-                    <div style="background: rgba(18, 18, 26, 0.9); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; padding: 1rem; text-align: center;">
-                        <div style="font-size: 0.72rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem;">Status</div>
-                        <div style="font-size: 1.1rem; font-weight: 900; color: #4ade80; margin-top: 0.3rem;">Computado</div>
                     </div>
                 </div>
 
@@ -794,145 +742,145 @@
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="partida_id" value="{{ partida.id }}">
 
-                        <!-- PASSO 1: Seleção de Gols Marcados -->
-                        <div id="step-gols-container" style="margin-bottom: 1.25rem;">
-                            <div class="vote-goals-card" style="background: rgba(18, 18, 26, 0.95); border: 1px solid rgba(91, 245, 0, 0.28); border-radius: 20px; padding: 1.2rem; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6); transition: all 0.3s ease;">
-                                <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.85rem;">
-                                    <div style="display: flex; align-items: center; gap: 0.6rem;">
-                                        <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(91, 245, 0, 0.12); border: 1px solid rgba(91, 245, 0, 0.3); color: #5bf500; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                                <circle cx="12" cy="12" r="10"/>
-                                                <path d="M12 2a10 10 0 0 1 10 10"/>
-                                                <path d="m12 12 4-4"/>
-                                                <path d="M12 12v6"/>
-                                                <path d="m12 12-4-4"/>
-                                            </svg>
+                        <div id="votacao-container">
+                            <!-- ETAPA 1: Seleção de Gols Marcados -->
+                            <div id="etapa-gols" style="margin-bottom: 1.25rem;">
+                                <div class="vote-goals-card" style="background: rgba(18, 18, 26, 0.95); border: 1px solid rgba(91, 245, 0, 0.28); border-radius: 20px; padding: 1.2rem; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6); transition: all 0.3s ease;">
+                                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.85rem;">
+                                        <div style="display: flex; align-items: center; gap: 0.6rem;">
+                                            <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(91, 245, 0, 0.12); border: 1px solid rgba(91, 245, 0, 0.3); color: #5bf500; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <circle cx="12" cy="12" r="10"/>
+                                                    <path d="M12 2a10 10 0 0 1 10 10"/>
+                                                    <path d="m12 12 4-4"/>
+                                                    <path d="M12 12v6"/>
+                                                    <path d="m12 12-4-4"/>
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <h3 style="font-size: 1.02rem; font-weight: 850; color: #ffffff; margin: 0; letter-spacing: -0.01em;">Quantos gols você fez nesta partida?</h3>
+                                                <p style="font-size: 0.78rem; color: #94a3b8; margin: 0.15rem 0 0 0;">Selecione os seus gols para desbloquear a votação dos jogadores</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h3 style="font-size: 1.02rem; font-weight: 850; color: #ffffff; margin: 0; letter-spacing: -0.01em;">Quantos gols você fez nesta partida?</h3>
-                                            <p style="font-size: 0.78rem; color: #94a3b8; margin: 0.15rem 0 0 0;">Selecione os seus gols para desbloquear a votação dos jogadores</p>
-                                        </div>
+                                        <span style="font-size: 0.78rem; font-weight: 800; color: #5bf500; background: rgba(91, 245, 0, 0.12); border: 1px solid rgba(91, 245, 0, 0.25); padding: 0.2rem 0.65rem; border-radius: 8px; flex-shrink: 0;">
+                                            <span id="selected-goals-val">0</span> gols
+                                        </span>
                                     </div>
-                                    <span style="font-size: 0.78rem; font-weight: 800; color: #5bf500; background: rgba(91, 245, 0, 0.12); border: 1px solid rgba(91, 245, 0, 0.25); padding: 0.2rem 0.65rem; border-radius: 8px; flex-shrink: 0;">
-                                        <span id="selected-goals-val">0</span> gols
-                                    </span>
+
+                                    <input type="hidden" name="gols_marcados" id="gols_marcados_input" value="0">
+
+                                    <!-- Seletor minimalista de pills (0 a 6+ gols) -->
+                                    <div class="goals-pill-grid" style="display: flex; align-items: center; justify-content: space-between; gap: 0.35rem; margin-bottom: 0.85rem;">
+                                        {% for g in [0, 1, 2, 3, 4, 5, 6] %}
+                                        <button type="button" class="goal-pill-btn {% if g == 0 %}selected active{% endif %}" data-goal-val="{{ g }}" style="flex: 1; height: 38px; border-radius: 10px; background: {% if g == 0 %}#5bf500{% else %}rgba(255, 255, 255, 0.04){% endif %}; border: 1px solid {% if g == 0 %}#5bf500{% else %}rgba(255, 255, 255, 0.07){% endif %}; color: {% if g == 0 %}#000000{% else %}#94a3b8{% endif %}; font-weight: 850; font-size: 0.88rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s ease; -webkit-tap-highlight-color: transparent;">
+                                            {{ g }}
+                                        </button>
+                                        {% endfor %}
+                                    </div>
+
+                                    <!-- Botão para Confirmar Gols e Desbloquear Votação -->
+                                    <button type="button" id="btn-confirmar-gols" class="btn" style="width: 100%; height: 44px; border-radius: 12px; background: #5bf500; color: #000000; font-weight: 850; font-size: 0.92rem; border: none; display: flex; align-items: center; justify-content: center; gap: 0.45rem; cursor: pointer; box-shadow: 0 4px 14px rgba(91, 245, 0, 0.3); transition: all 0.2s ease;">
+                                        <span>Confirmar e Votar nos Jogadores</span>
+                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                                            <polyline points="12 5 19 12 12 19"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- ETAPA 2: Avaliação dos Jogadores (Escondida por padrão) -->
+                            <div id="etapa-jogadores" style="display: none;">
+                                <!-- Card de Instrução & Barra de Progresso -->
+                                <div class="vote-progress-card">
+                                    <div class="vote-progress-header">
+                                        <div>
+                                            <h3 class="vote-progress-title">
+                                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#5bf500" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                                Avalie 5+ jogadores
+                                            </h3>
+                                            <p class="vote-progress-subtitle">Deslize o controle ou toque nas notas rápidas</p>
+                                        </div>
+                                        <span class="vote-progress-badge" id="notas-progresso-badge">
+                                            <span id="notas-preenchidas">0</span>/5
+                                        </span>
+                                    </div>
+                                    
+                                    <!-- Track Fill Bar -->
+                                    <div class="vote-track-container">
+                                        <div id="vote-progress-bar" class="vote-track-fill"></div>
+                                    </div>
                                 </div>
 
-                                <input type="hidden" name="gols_marcados" id="gols_marcados_input" value="0">
+                                <!-- Lista de Cards dos Jogadores -->
+                                <div class="votacao-list">
+                                    {% for j in jogadores_votaveis %}
+                                    <div class="votacao-card" data-card-index="{{ loop.index0 }}">
+                                        <div class="votacao-card__top">
+                                            <div class="vote-card-player-info">
+                                                {% if j.foto_url %}
+                                                <img src="{{ j.foto_url }}" alt="{{ j.jogador_nome }}" class="vote-player-avatar" onerror="this.style.display='none';">
+                                                {% else %}
+                                                <div class="vote-player-avatar-fallback">
+                                                    {{ j.jogador_nome[:1]|upper }}
+                                                </div>
+                                                {% endif %}
+                                                <div>
+                                                    <div class="votacao-card__name">{{ j.jogador_nome }}</div>
+                                                    <span class="votacao-card-team-badge">Time {{ j.time_numero }}</span>
+                                                </div>
+                                            </div>
 
-                                <!-- Seletor minimalista de pills (0 a 6+ gols) -->
-                                <div class="goals-pill-grid" style="display: flex; align-items: center; justify-content: space-between; gap: 0.35rem; margin-bottom: 0.85rem;">
-                                    {% for g in [0, 1, 2, 3, 4, 5, 6] %}
-                                    <button type="button" class="goal-pill-btn {% if g == 0 %}active{% endif %}" data-goal-val="{{ g }}" style="flex: 1; height: 38px; border-radius: 10px; background: {% if g == 0 %}#5bf500{% else %}rgba(255, 255, 255, 0.04){% endif %}; border: 1px solid {% if g == 0 %}#5bf500{% else %}rgba(255, 255, 255, 0.07){% endif %}; color: {% if g == 0 %}#000000{% else %}#94a3b8{% endif %}; font-weight: 850; font-size: 0.88rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s ease; -webkit-tap-highlight-color: transparent;">
-                                        {{ g }}
-                                    </button>
+                                            <!-- Score Display Badge -->
+                                            <div class="votacao-card__score" data-score-for="{{ loop.index0 }}">
+                                                <div class="vote-score-badge">
+                                                    <span class="vote-score-val" data-score-val="{{ loop.index0 }}">0.0</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Slider Input -->
+                                        <div class="votacao-slider-wrap" style="touch-action: manipulation; -webkit-tap-highlight-color: transparent;">
+                                            <input class="votacao-slider" type="range" min="0" max="10" step="0.5" value="0" name="nota" data-score-index="{{ loop.index0 }}" style="touch-action: manipulation; cursor: pointer; -webkit-tap-highlight-color: transparent;">
+                                        </div>
+
+                                        <!-- Quick Rate Touch Pills -->
+                                        <div class="vote-quick-pills">
+                                            <div class="vote-quick-btn" data-target-idx="{{ loop.index0 }}" data-val="5">5.0</div>
+                                            <div class="vote-quick-btn" data-target-idx="{{ loop.index0 }}" data-val="6">6.0</div>
+                                            <div class="vote-quick-btn" data-target-idx="{{ loop.index0 }}" data-val="7">7.0</div>
+                                            <div class="vote-quick-btn" data-target-idx="{{ loop.index0 }}" data-val="8">8.0</div>
+                                            <div class="vote-quick-btn" data-target-idx="{{ loop.index0 }}" data-val="9">9.0</div>
+                                            <div class="vote-quick-btn" data-target-idx="{{ loop.index0 }}" data-val="10">10.0</div>
+                                        </div>
+
+                                        <input type="hidden" name="jogador_nome" value="{{ j.jogador_nome }}">
+                                        <input type="hidden" name="time_numero" value="{{ j.time_numero }}">
+                                    </div>
                                     {% endfor %}
                                 </div>
 
-                                <!-- Botão para Confirmar Gols e Desbloquear Votação -->
-                                <button type="button" id="btn-confirmar-gols" class="btn" style="width: 100%; height: 44px; border-radius: 12px; background: #5bf500; color: #000000; font-weight: 850; font-size: 0.92rem; border: none; display: flex; align-items: center; justify-content: center; gap: 0.45rem; cursor: pointer; box-shadow: 0 4px 14px rgba(91, 245, 0, 0.3); transition: all 0.2s ease;">
-                                    <span>Confirmar e Votar nos Jogadores</span>
-                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                                        <polyline points="12 5 19 12 12 19"></polyline>
-                                    </svg>
-                                </button>
+                                <!-- Banner Alerta se tentar enviar sem o mínimo -->
+                                <div id="aviso-obrigatorios" class="alert alert-warning" style="display:none; margin-top: 1.25rem; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; border-radius: 14px;">
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                        <span>Você precisa dar nota para pelo menos 5 jogadores.</span>
+                                    </div>
+                                </div>
+
+                                <!-- Floating Action Submit Bar -->
+                                <div class="vote-action-footer">
+                                    <button class="btn btn-primary vote-submit-btn" type="submit" id="btn-salvar-votos" disabled>
+                                        <span id="btn-salvar-texto">Avalie mais 5 jogadores</span>
+                                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                                            <polyline points="12 5 19 12 12 19"></polyline>
+                                        </svg>
+                                        <span style="display:none;">>Salvar</button></span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-
-                        <!-- PASSO 2: Avaliação dos Jogadores (Desbloqueado após informar gols) -->
-                        <div id="step-avaliacao-container" style="display: none; opacity: 0; transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);">
-                            <!-- 2. Card de Instrução & Barra de Progresso -->
-                            <div class="vote-progress-card">
-                                <div class="vote-progress-header">
-                                    <div>
-                                        <h3 class="vote-progress-title">
-                                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#5bf500" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                                            Avalie 5+ jogadores
-                                        </h3>
-                                        <p class="vote-progress-subtitle">Deslize o controle ou toque nas notas rápidas</p>
-                                    </div>
-                                    <span class="vote-progress-badge" id="notas-progresso-badge">
-                                        <span id="notas-preenchidas">0</span>/5
-                                    </span>
-                                </div>
-                                
-                                <!-- Track Fill Bar -->
-                                <div class="vote-track-container">
-                                    <div id="vote-progress-bar" class="vote-track-fill"></div>
-                                </div>
-                            </div>
-
-                            <!-- 3. Lista de Cards dos Jogadores (Time campeão ordenado primeiro via backend) -->
-                            <div class="votacao-list">
-                                {% for j in jogadores_votaveis %}
-                                <div class="votacao-card" data-card-index="{{ loop.index0 }}">
-                                    <div class="votacao-card__top">
-                                        <div class="vote-card-player-info">
-                                            {% if j.foto_url %}
-                                            <img src="{{ j.foto_url }}" alt="{{ j.jogador_nome }}" class="vote-player-avatar" onerror="this.style.display='none';">
-                                            {% else %}
-                                            <div class="vote-player-avatar-fallback">
-                                                {{ j.jogador_nome[:1]|upper }}
-                                            </div>
-                                            {% endif %}
-                                            <div>
-                                                <div class="votacao-card__name">{{ j.jogador_nome }}</div>
-                                                <span class="votacao-card-team-badge">Time {{ j.time_numero }}</span>
-                                            </div>
-                                        </div>
-
-                                        <!-- Score Display Badge -->
-                                        <div class="votacao-card__score" data-score-for="{{ loop.index0 }}">
-                                            <div class="vote-score-badge">
-                                                <span class="vote-score-val" data-score-val="{{ loop.index0 }}">0.0</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Slider Input -->
-                                    <div class="votacao-slider-wrap" style="touch-action: manipulation; -webkit-tap-highlight-color: transparent;">
-                                        <input class="votacao-slider" type="range" min="0" max="10" step="0.5" value="0" name="nota" data-score-index="{{ loop.index0 }}" style="touch-action: manipulation; cursor: pointer; -webkit-tap-highlight-color: transparent;">
-                                    </div>
-
-                                    <!-- Quick Rate Touch Pills -->
-                                    <div class="vote-quick-pills">
-                                        <div class="vote-quick-btn" data-target-idx="{{ loop.index0 }}" data-val="5">5.0</div>
-                                        <div class="vote-quick-btn" data-target-idx="{{ loop.index0 }}" data-val="6">6.0</div>
-                                        <div class="vote-quick-btn" data-target-idx="{{ loop.index0 }}" data-val="7">7.0</div>
-                                        <div class="vote-quick-btn" data-target-idx="{{ loop.index0 }}" data-val="8">8.0</div>
-                                        <div class="vote-quick-btn" data-target-idx="{{ loop.index0 }}" data-val="9">9.0</div>
-                                        <div class="vote-quick-btn" data-target-idx="{{ loop.index0 }}" data-val="10">10.0</div>
-                                    </div>
-
-                                    <input type="hidden" name="jogador_nome" value="{{ j.jogador_nome }}">
-                                    <input type="hidden" name="time_numero" value="{{ j.time_numero }}">
-                                </div>
-                                {% endfor %}
-                            </div>
-
-                            <!-- Banner Alerta se tentar enviar sem o mínimo -->
-                            <div id="aviso-obrigatorios" class="alert alert-warning" style="display:none; margin-top: 1.25rem; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; border-radius: 14px;">
-                                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                                    <span>Você precisa dar nota para pelo menos 5 jogadores.</span>
-                                </div>
-                            </div>
-
-                            <!-- 4. Floating Action Submit Bar -->
-                            <div class="vote-action-footer">
-                                <button class="btn btn-primary vote-submit-btn" type="submit" id="btn-salvar-votos" disabled>
-                                    <span id="btn-salvar-texto">Avalie mais 5 jogadores</span>
-                                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                                        <polyline points="12 5 19 12 12 19"></polyline>
-                                    </svg>
-                                    <span style="display:none;">>Salvar</button></span>
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
                     </form>
                 </div>
             </section>
@@ -942,6 +890,24 @@
 
 <script>
 (function () {
+    function baixarImagemCard(url) {
+        if (!url) return;
+        fetch(url)
+            .then(res => res.blob())
+            .then(blob => {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'card-time-campeao.png';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            })
+            .catch(() => {
+                window.open(url, '_blank');
+            });
+    }
+    window.baixarImagemCard = baixarImagemCard;
+
     function atualizarProgressoGeral() {
         const notasInputs = Array.from(document.querySelectorAll('input[name="nota"]'));
         const totalVotaveis = notasInputs.length;
@@ -1014,48 +980,31 @@
         }
     }
 
-    function desbloquearAvaliacaoJogadores() {
-        const container = document.getElementById('step-avaliacao-container');
-        if (!container) return;
-        if (container.style.display === 'none' || !container.classList.contains('is-unlocked')) {
-            container.style.display = 'block';
-            requestAnimationFrame(() => {
-                container.style.opacity = '1';
-                container.classList.add('is-unlocked');
-                container.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            });
-        }
-    }
-    window.desbloquearAvaliacaoJogadores = desbloquearAvaliacaoJogadores;
-
-    function initVotacaoUsuario() {
-        const inputs = document.querySelectorAll('input[name="nota"]');
-        inputs.forEach(input => {
-            atualizarEstadoSlider(input);
-        });
-        atualizarProgressoGeral();
-    }
-
-    if (!window._votacaoDelegationBound) {
+    function bindVotacaoDelegation() {
+        if (window._votacaoDelegationBound) return;
         window._votacaoDelegationBound = true;
+        console.log('[VOTACAO] delegation inicializada');
 
         document.addEventListener('click', function (e) {
             // 1. Goal Pill Buttons
             const goalBtn = e.target && e.target.closest ? e.target.closest('.goal-pill-btn') : null;
             if (goalBtn) {
                 e.preventDefault();
+                const val = parseInt(goalBtn.dataset.goalVal || '0', 10);
+                console.log('[VOTACAO] CLIQUE NO GOL:', val);
+
                 document.querySelectorAll('.goal-pill-btn').forEach(b => {
-                    b.classList.remove('active');
+                    b.classList.remove('selected', 'active');
                     b.style.background = 'rgba(255, 255, 255, 0.04)';
                     b.style.borderColor = 'rgba(255, 255, 255, 0.07)';
                     b.style.color = '#94a3b8';
                 });
-                goalBtn.classList.add('active');
+
+                goalBtn.classList.add('selected', 'active');
                 goalBtn.style.background = '#5bf500';
                 goalBtn.style.borderColor = '#5bf500';
                 goalBtn.style.color = '#000000';
 
-                const val = parseInt(goalBtn.dataset.goalVal || '0', 10);
                 const input = document.getElementById('gols_marcados_input');
                 const badge = document.getElementById('selected-goals-val');
                 if (input) input.value = val;
@@ -1067,7 +1016,13 @@
             const confirmBtn = e.target && e.target.closest ? e.target.closest('#btn-confirmar-gols') : null;
             if (confirmBtn) {
                 e.preventDefault();
-                desbloquearAvaliacaoJogadores();
+                const etapaGols = document.getElementById('etapa-gols');
+                const etapaJogadores = document.getElementById('etapa-jogadores');
+                if (etapaGols) etapaGols.style.display = 'none';
+                if (etapaJogadores) {
+                    etapaJogadores.style.display = 'block';
+                    etapaJogadores.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
                 return;
             }
 
@@ -1136,6 +1091,44 @@
                 });
             }
         });
+    }
+
+    function initVotacaoUsuario() {
+        console.log('[VOTACAO] initVotacaoUsuario executou');
+
+        bindVotacaoDelegation();
+        const inputs = document.querySelectorAll('input[name="nota"]');
+        inputs.forEach(input => {
+            atualizarEstadoSlider(input);
+        });
+        atualizarProgressoGeral();
+
+        // Sincronizar botões de gols e valor exibido
+        const inputGols = document.getElementById('gols_marcados_input');
+        if (inputGols) {
+            const currentVal = parseInt(inputGols.value || '0', 10);
+            const badge = document.getElementById('selected-goals-val');
+            if (badge) badge.textContent = currentVal;
+
+            document.querySelectorAll('.goal-pill-btn').forEach(b => {
+                const btnVal = parseInt(b.dataset.goalVal || '0', 10);
+                if (btnVal === currentVal) {
+                    b.classList.add('selected', 'active');
+                    b.style.background = '#5bf500';
+                    b.style.borderColor = '#5bf500';
+                    b.style.color = '#000000';
+                } else {
+                    b.classList.remove('selected', 'active');
+                    b.style.background = 'rgba(255, 255, 255, 0.04)';
+                    b.style.borderColor = 'rgba(255, 255, 255, 0.07)';
+                    b.style.color = '#94a3b8';
+                }
+            });
+        }
+    }
+
+    if (!window._votacaoDelegationBound) {
+        bindVotacaoDelegation();
     }
 
     window.initVotacaoUsuario = initVotacaoUsuario;

@@ -152,11 +152,13 @@
       if (script.src) {
         replacement.src = script.src;
         replacement.async = false;
+        script.replaceWith(replacement);
       } else {
         replacement.textContent = script.textContent;
+        script.remove();
+        document.body.appendChild(replacement);
+        replacement.remove();
       }
-
-      script.replaceWith(replacement);
     });
   }
 
