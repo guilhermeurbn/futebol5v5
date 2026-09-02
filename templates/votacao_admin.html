@@ -1200,8 +1200,8 @@
             ctx.fillStyle = bgGrad;
             ctx.fillRect(0, 0, width, height);
 
-            // 2. FOTO DO USUÁRIO - 70% DO CARD (2268px de altura: 0 a 2268px)
-            const photoH = Math.round(height * 0.70); // 2268px
+            // 2. FOTO DO USUÁRIO - 65% DO CARD (1050px)
+            const photoH = Math.round(height * 0.65);
             if (userPhotoImg) {
                 const pRatio = userPhotoImg.width / userPhotoImg.height;
                 const vRatio = width / photoH;
@@ -1225,26 +1225,26 @@
                 ctx.clip();
                 ctx.drawImage(userPhotoImg, drawX, drawY, drawW, drawH);
 
-                // Gradiente suave de transição na parte inferior da foto (1700px a 2268px)
-                const gradFade = ctx.createLinearGradient(0, photoH - 500, 0, photoH);
+                // Gradiente suave de transição na parte inferior da foto
+                const gradFade = ctx.createLinearGradient(0, photoH - 240, 0, photoH);
                 gradFade.addColorStop(0, 'rgba(4, 5, 8, 0)');
                 gradFade.addColorStop(0.7, 'rgba(4, 5, 8, 0.85)');
                 gradFade.addColorStop(1, '#040508');
                 ctx.fillStyle = gradFade;
-                ctx.fillRect(0, photoH - 500, width, 500);
+                ctx.fillRect(0, photoH - 240, width, 240);
                 ctx.restore();
             }
 
-            // 3. ÁREA DA LOGO NO MEIO - 10% DO CARD (2268px a 2592px)
-            const logoAreaStartY = photoH; // 2268px
-            const logoAreaHeight = Math.round(height * 0.10); // 324px
+            // 3. ÁREA DA LOGO NO MEIO (1050px a 1170px)
+            const logoAreaStartY = photoH;
+            const logoAreaHeight = 120;
             function drawMiddleLogoSVG() {
                 if (logoImg.complete && logoImg.naturalWidth > 0) {
                     ctx.save();
                     ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
-                    ctx.shadowBlur = 32;
+                    ctx.shadowBlur = 14;
 
-                    const targetWidth = 627; // Reduzido 15% (de 738px para 627px)
+                    const targetWidth = 280;
                     const svgNativeRatio = logoImg.naturalWidth / logoImg.naturalHeight;
                     const calculatedHeight = targetWidth / svgNativeRatio;
 
@@ -1257,59 +1257,60 @@
             }
             drawMiddleLogoSVG();
 
-            // 4. INFORMAÇÕES DO CAMPEÃO & ELENCO NA BASE - 20% DO CARD (2592px a 3240px)
-            const infoY = logoAreaStartY + logoAreaHeight + 10; // ~2602px
-            const infoBoxX = 60;
-            const infoBoxWidth = width - 120; // 2040px
-            const infoBoxHeight = Math.round(height * 0.20) - 20; // ~628px
+            // 4. INFORMAÇÕES DO CAMPEÃO & ELENCO NA BASE (1170px a 1580px - Painel Minimalista)
+            const infoY = logoAreaStartY + logoAreaHeight;
+            const infoBoxX = 36;
+            const infoBoxWidth = width - 72;
+            const infoBoxHeight = 410;
 
             ctx.save();
             ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
-            ctx.shadowBlur = 40;
+            ctx.shadowBlur = 20;
             ctx.fillStyle = 'rgba(14, 16, 24, 0.95)';
             if (ctx.roundRect) {
-                ctx.beginPath(); ctx.roundRect(infoBoxX, infoY, infoBoxWidth, infoBoxHeight, 36); ctx.fill();
+                ctx.beginPath(); ctx.roundRect(infoBoxX, infoY, infoBoxWidth, infoBoxHeight, 20); ctx.fill();
             } else {
                 ctx.fillRect(infoBoxX, infoY, infoBoxWidth, infoBoxHeight);
             }
 
-            ctx.strokeStyle = winInfo.isEmpate ? 'rgba(251, 191, 36, 0.4)' : 'rgba(255, 255, 255, 0.18)';
-            ctx.lineWidth = 3.5;
+            ctx.strokeStyle = winInfo.isEmpate ? 'rgba(251, 191, 36, 0.4)' : 'rgba(255, 255, 255, 0.16)';
+            ctx.lineWidth = 1.8;
             ctx.stroke();
             ctx.restore();
 
-            // Título Principal com Letras Grandes (Ex: CAMPEÃO • TIME 2)
+            // Título Principal (Ex: CAMPEÃO • TIME 1)
             ctx.save();
             ctx.textAlign = 'center';
-            ctx.font = '900 88px system-ui, -apple-system, sans-serif';
+            ctx.font = '900 38px system-ui, -apple-system, sans-serif';
             ctx.fillStyle = winInfo.isEmpate ? '#fbbf24' : '#ffffff';
-            ctx.fillText(winInfo.isEmpate ? 'RODADA EMPATADA' : `CAMPEÃO  •  TIME ${winInfo.numero}`, width / 2, infoY + 130);
+            ctx.fillText(winInfo.isEmpate ? 'RODADA EMPATADA' : `CAMPEÃO  •  TIME ${winInfo.numero}`, width / 2, infoY + 52);
             ctx.restore();
 
             // Linha divisória limpa
             ctx.save();
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.10)';
-            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+            ctx.lineWidth = 1.5;
             ctx.beginPath();
-            ctx.moveTo(infoBoxX + 80, infoY + 200);
-            ctx.lineTo(infoBoxX + infoBoxWidth - 80, infoY + 200);
+            ctx.moveTo(infoBoxX + 36, infoY + 78);
+            ctx.lineTo(infoBoxX + infoBoxWidth - 36, infoY + 78);
             ctx.stroke();
             ctx.restore();
 
-            // Nomes dos Atletas do Elenco com Ícones Vetoriais (Chuteira para linha, Luva para goleiro)
+            // Subtítulo
             if (winInfo.jogadores && winInfo.jogadores.length > 0) {
                 ctx.save();
                 ctx.textAlign = 'center';
-                ctx.font = '800 28px system-ui, -apple-system, sans-serif';
+                ctx.font = '800 13px system-ui, -apple-system, sans-serif';
                 ctx.fillStyle = '#64748b';
-                ctx.fillText('ELENCO CAMPEÃO', width / 2, infoY + 250);
+                ctx.fillText('ELENCO CAMPEÃO', width / 2, infoY + 102);
                 ctx.restore();
 
                 const players = winInfo.jogadores;
                 const pCount = players.length;
-                const colWidth = (infoBoxWidth - 120) / Math.min(pCount, 5);
-                const startX = infoBoxX + 60;
-                const pRowY = infoY + 300;
+                const availableW = infoBoxWidth - 36;
+                const colWidth = availableW / Math.min(pCount, 5);
+                const startX = infoBoxX + 18;
+                const pRowY = infoY + 118;
 
                 players.slice(0, 5).forEach((pObj, idx) => {
                     const pName = (typeof pObj === 'string') ? pObj : (pObj.nome || 'Jogador');
@@ -1317,36 +1318,36 @@
 
                     const itemX = startX + (idx * colWidth);
                     ctx.save();
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
                     if (ctx.roundRect) {
-                        ctx.beginPath(); ctx.roundRect(itemX + 10, pRowY, colWidth - 20, 180, 20); ctx.fill();
+                        ctx.beginPath(); ctx.roundRect(itemX + 4, pRowY, colWidth - 8, 260, 14); ctx.fill();
                     } else {
-                        ctx.fillRect(itemX + 10, pRowY, colWidth - 20, 180);
+                        ctx.fillRect(itemX + 4, pRowY, colWidth - 8, 260);
                     }
 
-                    ctx.strokeStyle = isGoleiro ? 'rgba(251, 191, 36, 0.35)' : 'rgba(255, 255, 255, 0.08)';
-                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = isGoleiro ? 'rgba(251, 191, 36, 0.35)' : 'rgba(255, 255, 255, 0.07)';
+                    ctx.lineWidth = 1.2;
                     ctx.stroke();
 
                     // ÍCONE DE CHUTEIRA (Linha) OU LUVA (Goleiro)
                     const iconCenterX = itemX + (colWidth / 2);
-                    const iconCenterY = pRowY + 62;
+                    const iconCenterY = pRowY + 75;
                     if (isGoleiro) {
-                        drawGloveIcon(ctx, iconCenterX, iconCenterY, 44, '#fbbf24');
+                        drawGloveIcon(ctx, iconCenterX, iconCenterY, 28, '#fbbf24');
                     } else {
-                        drawCleatIcon(ctx, iconCenterX, iconCenterY, 44, '#cbd5e1');
+                        drawCleatIcon(ctx, iconCenterX, iconCenterY, 28, '#cbd5e1');
                     }
 
                     // Nome do Jogador
                     ctx.fillStyle = isGoleiro ? '#fbbf24' : '#ffffff';
-                    ctx.font = '800 40px system-ui, -apple-system, sans-serif';
+                    ctx.font = '800 19px system-ui, -apple-system, sans-serif';
                     ctx.textAlign = 'center';
                     
                     let nameToShow = pName.toUpperCase();
                     if (nameToShow.length > 10) {
                         nameToShow = nameToShow.substring(0, 9) + '.';
                     }
-                    ctx.fillText(nameToShow, itemX + (colWidth / 2), pRowY + 135);
+                    ctx.fillText(nameToShow, itemX + (colWidth / 2), pRowY + 195);
                     ctx.restore();
                 });
             }
@@ -1419,40 +1420,59 @@
         const formFoto = btnCamera?.closest('form');
         if (formFoto) {
             formFoto.addEventListener('submit', async function(e) {
-                if (inputBase64 && inputBase64.value && inputBase64.value.startsWith('data:image')) {
+                if (canvas && previewWrapper && previewWrapper.style.display !== 'none') {
                     e.preventDefault();
                     const submitBtn = formFoto.querySelector('button[type="submit"]');
+                    const sorteioIdInput = formFoto.querySelector('input[name="sorteio_id"]');
+                    const csrfTokenInput = formFoto.querySelector('input[name="csrf_token"]');
+                    const sorteioId = sorteioIdInput ? sorteioIdInput.value : '';
+                    const csrfToken = csrfTokenInput ? csrfTokenInput.value : '';
+
                     if (submitBtn) {
                         submitBtn.disabled = true;
-                        submitBtn.textContent = 'Salvando Foto...';
                     }
+
                     try {
-                        const sorteioIdInput = formFoto.querySelector('input[name="sorteio_id"]');
-                        const csrfTokenInput = formFoto.querySelector('input[name="csrf_token"]');
-                        const response = await fetch(formFoto.action, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRFToken': csrfTokenInput ? csrfTokenInput.value : ''
-                            },
-                            body: JSON.stringify({
-                                sorteio_id: sorteioIdInput ? sorteioIdInput.value : '',
-                                card_campeao_base64: inputBase64.value
-                            })
-                        });
-                        const resData = await response.json();
-                        if (response.ok && resData.sucesso) {
+                        if (window.NaTraveCloudinaryUploader) {
+                            await window.NaTraveCloudinaryUploader.uploadCanvasDirect(canvas, {
+                                tipo: 'card',
+                                entityId: sorteioId,
+                                csrfToken: csrfToken,
+                                onStatusChange: (status, msg) => {
+                                    if (submitBtn) {
+                                        submitBtn.textContent = msg || 'Processando...';
+                                    }
+                                }
+                            });
                             location.reload();
                         } else {
-                            alert(resData.erro || 'Erro ao salvar a foto do campeão');
-                            if (submitBtn) {
-                                submitBtn.disabled = false;
-                                submitBtn.textContent = 'Salvar Foto do Campeão';
+                            // Fallback AJAX se o módulo JS não tiver carregado
+                            if (submitBtn) submitBtn.textContent = 'Salvando Foto...';
+                            const response = await fetch(formFoto.action, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRFToken': csrfToken
+                                },
+                                body: JSON.stringify({
+                                    sorteio_id: sorteioId,
+                                    card_campeao_base64: inputBase64 ? inputBase64.value : ''
+                                })
+                            });
+                            const resData = await response.json();
+                            if (response.ok && resData.sucesso) {
+                                location.reload();
+                            } else {
+                                alert(resData.erro || 'Erro ao salvar a foto do campeão');
+                                if (submitBtn) {
+                                    submitBtn.disabled = false;
+                                    submitBtn.textContent = 'Salvar Foto do Campeão';
+                                }
                             }
                         }
                     } catch (err) {
-                        console.error('Erro AJAX foto:', err);
-                        alert('Falha ao enviar foto. Verifique a conexão e tente novamente.');
+                        console.error('Erro ao salvar foto:', err);
+                        alert('Falha ao enviar foto. ' + (err.message || 'Verifique sua conexão.'));
                         if (submitBtn) {
                             submitBtn.disabled = false;
                             submitBtn.textContent = 'Salvar Foto do Campeão';
@@ -1463,4 +1483,5 @@
         }
     })();
 </script>
+<script src="{{ url_for('static', filename='js/cloudinary_upload.js') }}"></script>
 {% endblock %}

@@ -34,6 +34,7 @@ from routes import (
     stats_bp,
     votacao_bp,
 )
+from routes.cloudinary_routes import cloudinary_bp
 from services.notificacao_service import NotificacaoService
 from services.votacao_service import VotacaoService
 from services.db import auto_seed_on_init
@@ -215,6 +216,7 @@ def criar_app(config_name: str = None) -> Flask:
     app.register_blueprint(admin_bp)
     app.register_blueprint(juiz_bp)
     app.register_blueprint(stats_bp)
+    app.register_blueprint(cloudinary_bp)
     _registrar_aliases_jogador(app)
     _registrar_role_url_prefixes(app)
 
@@ -457,9 +459,15 @@ def criar_app(config_name: str = None) -> Flask:
                 nomes_abrev.append(abreviar_nome(nome))
         return ", ".join(nomes_abrev)
 
+    from services.upload_service import UploadService
+
+    def jinja_cloudinary_url(val, width=None, height=None, crop='fill', quality='auto'):
+        return UploadService.gerar_url_otimizada(val, width=width, height=height, crop=crop, quality=quality)
+
     app.jinja_env.filters['abreviar_nome'] = abreviar_nome
     app.jinja_env.filters['formatar_nome_perfil'] = formatar_nome_perfil
     app.jinja_env.filters['abreviar_nomes_lista'] = abreviar_nomes_lista
+    app.jinja_env.filters['cloudinary_url'] = jinja_cloudinary_url
 
     @app.context_processor
     def inject_notificacoes_globais():

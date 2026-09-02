@@ -346,3 +346,62 @@ def clear_db_cache() -> None:
     _cache.clear()
 
 
+def salvar_image_asset(asset_data: dict) -> dict:
+    """Salva os metadados de uma imagem (Cloudinary) no namespace image_assets."""
+    if not isinstance(asset_data, dict):
+        return {}
+
+    assets = load_json_data("image_assets", [])
+    if not isinstance(assets, list):
+        assets = []
+
+    public_id = asset_data.get("public_id")
+    asset_id = asset_data.get("asset_id")
+
+    # Verificar se já existe registro com mesmo public_id ou asset_id (idempotência)
+    indice_existente = -1
+    for idx, item in enumerate(assets):
+        if isinstance(item, dict):
+            if (public_id and item.get("public_id") == public_id) or (asset_id and item.get("asset_id") == asset_id):
+                indice_existente = idx
+                break
+
+    record = {
+        "asset_id": asset_id or f"local_{int(time.time())}",
+        "public_id": public_id or "",
+        "resource_type": asset_data.get("resource_type", "image"),
+        "format": asset_data.get("format", "jpg"),
+        "width": asset_data.get("width", 0),
+        "height": asset_data.get("height", 0),
+        "bytes": asset_data.get("bytes", 0),
+        "secure_url": asset_data.get("secure_url") or asset_data.get("url") or "",
+        "url": asset_data.get("url") or asset_data.get("secure_url") or "",
+        "created_at": asset_data.get("created_at") or time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "entity_type": asset_data.get("entity_type", "unknown"),
+        "entity_id": str(asset_data.get("entity_id", "")),
+    }
+
+    if indice_existente >= 0:
+        assets[indice_existente].update(record)
+    else:
+        assets.append(record)
+
+    save_json_data("image_assets", assets)
+    return record
+
+
+def obter_image_asset(public_id_ou_asset_id: str) -> dict:
+    """Busca os metadados de uma imagem pelo public_id ou asset_id."""
+    if not public_id_ou_asset_id:
+        return {}
+    assets = load_json_data("image_assets", [])
+    if not isinstance(assets, list):
+        return {}
+    for item in assets:
+        if isinstance(item, dict):
+            if item.get("public_id") == public_id_ou_asset_id or item.get("asset_id") == public_id_ou_asset_id:
+                return item
+    return {}
+
+
+

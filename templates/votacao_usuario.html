@@ -917,18 +917,22 @@
 (function () {
     function baixarImagemCard(url) {
         if (!url) return;
-        fetch(url)
+        let downloadUrl = url;
+        if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
+            downloadUrl = url.replace('/upload/', '/upload/fl_attachment:card-campeao,w_1080,h_1620,q_auto/');
+        }
+        fetch(downloadUrl)
             .then(res => res.blob())
             .then(blob => {
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
-                a.download = 'card-time-campeao.png';
+                a.download = 'card-time-campeao.jpg';
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
             })
             .catch(() => {
-                window.open(url, '_blank');
+                window.open(downloadUrl, '_blank');
             });
     }
     window.baixarImagemCard = baixarImagemCard;

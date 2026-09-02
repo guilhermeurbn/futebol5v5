@@ -105,6 +105,33 @@ class PartidaService:
         """Obtém todas as partidas de um sorteio"""
         partidas = self._carregar_raw()
         return [p for p in partidas if p.get('sorteio_id') == sorteio_id]
+
+    def atualizar_foto_campeao(self, sorteio_id: int, card_campeao_url: str) -> Dict:
+        """Atualiza a foto/card do time campeão de um sorteio existente ou cria registro."""
+        partidas = self._carregar_raw()
+        sorteio_id_int = int(sorteio_id)
+        existente = next((p for p in partidas if int(p.get("sorteio_id", 0) or 0) == sorteio_id_int), None)
+        
+        if existente:
+            existente["card_campeao_url"] = card_campeao_url
+            existente["atualizado_em"] = datetime.now().isoformat()
+            self._salvar(partidas)
+            return existente
+        else:
+            ultimo_id = max((int(p.get("id", 0) or 0) for p in partidas), default=0)
+            partida = {
+                "id": ultimo_id + 1,
+                "sorteio_id": sorteio_id_int,
+                "data": datetime.now().isoformat(),
+                "time_vencedor": None,
+                "gols_times": [],
+                "notas": "Atualizado pelo Admin",
+                "times_desempenho": [],
+                "card_campeao_url": card_campeao_url
+            }
+            partidas.append(partida)
+            self._salvar(partidas)
+            return partida
     
     def listar_partidas(self, limite: int = 10) -> List[Dict]:
         """Lista as últimas partidas"""

@@ -1,0 +1,58 @@
+[
+  {
+    "asset_id": "asset_test_999",
+    "public_id": "futebol5v5/cards/campeao_99",
+    "resource_type": "image",
+    "format": "jpg",
+    "width": 1080,
+    "height": 1620,
+    "bytes": 250000,
+    "secure_url": "https://res.cloudinary.com/test_cloud/image/upload/futebol5v5/cards/campeao_99.jpg",
+    "url": "https://res.cloudinary.com/test_cloud/image/upload/futebol5v5/cards/campeao_99.jpg",
+    "created_at": "2026-09-02T19:45:39Z",
+    "entity_type": "card",
+    "entity_id": "99"
+  },
+  {
+    "asset_id": "asset_reg_123",
+    "public_id": "futebol5v5/avatars/avatar_user789",
+    "resource_type": "image",
+    "format": "jpg",
+    "width": 300,
+    "height": 300,
+    "bytes": 0,
+    "secure_url": "https://res.cloudinary.com/test_cloud/image/upload/futebol5v5/avatars/avatar_user789.jpg",
+    "url": "https://res.cloudinary.com/test_cloud/image/upload/futebol5v5/avatars/avatar_user789.jpg",
+    "created_at": "2026-09-02T19:45:39Z",
+    "entity_type": "avatar",
+    "entity_id": "user_test_789"
+  },
+  {
+    "asset_id": "local_2e89aa59",
+    "public_id": "local_avatar_user_test_local",
+    "resource_type": "image",
+    "format": "jpg",
+    "width": 0,
+    "height": 0,
+    "bytes": 0,
+    "secure_url": "/static/uploads/cards/campeao_user_test_local_dafe69.webp",
+    "url": "/static/uploads/cards/campeao_user_test_local_dafe69.webp",
+    "created_at": "2026-09-02T19:45:39Z",
+    "entity_type": "avatar",
+    "entity_id": "user_test_local"
+  },
+  {
+    "asset_id": "local_6c8af33d",
+    "public_id": "local_card_55",
+    "resource_type": "image",
+    "format": "jpg",
+    "width": 0,
+    "height": 0,
+    "bytes": 0,
+    "secure_url": "/static/uploads/cards/campeao_55_2b592b.webp",
+    "url": "/static/uploads/cards/campeao_55_2b592b.webp",
+    "created_at": "2026-09-02T17:31:07Z",
+    "entity_type": "card",
+    "entity_id": "55"
+  }
+]

@@ -31,6 +31,93 @@ class UploadService:
         self.pasta_destino = os.path.abspath(pasta_destino)
         os.makedirs(self.pasta_destino, exist_ok=True)
 
+    def obter_credenciais_cloudinary(self) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+        """Extrai credenciais validas do Cloudinary a partir das variaveis de ambiente."""
+        cloud_name = (os.getenv("CLOUDINARY_CLOUD_NAME") or "").strip("\"' ")
+        api_key = (os.getenv("CLOUDINARY_API_KEY") or "").strip("\"' ")
+        api_secret = (os.getenv("CLOUDINARY_API_SECRET") or "").strip("\"' ")
+        cloudinary_url = (os.getenv("CLOUDINARY_URL") or "").strip()
+
+        if "=" in cloudinary_url and "cloudinary://" in cloudinary_url:
+            cloudinary_url = cloudinary_url.split("=", 1)[-1]
+        cloudinary_url = cloudinary_url.strip("\"' ")
+
+        if cloudinary_url:
+            from urllib.parse import urlparse
+            parsed = urlparse(cloudinary_url)
+            if parsed.hostname and parsed.username and parsed.password:
+                cloud_name = parsed.hostname
+                api_key = parsed.username
+                api_secret = parsed.password
+
+        return cloud_name or None, api_key or None, api_secret or None
+
+    def gerar_assinatura_upload(self, folder: str, public_id: str, timestamp: Optional[int] = None) -> dict:
+        """Gera assinatura HMAC-SHA1 no servidor para upload direto do frontend ao Cloudinary."""
+        cloud_name, api_key, api_secret = self.obter_credenciais_cloudinary()
+        if not (cloud_name and api_key and api_secret):
+            raise UploadError("Credenciais do Cloudinary não configuradas no servidor")
+
+        import time
+        import hashlib
+
+        if not timestamp:
+            timestamp = int(time.time())
+
+        params_to_sign = {
+            "folder": folder,
+            "public_id": public_id,
+            "timestamp": timestamp,
+        }
+
+        to_sign_str = "&".join([f"{k}={params_to_sign[k]}" for k in sorted(params_to_sign.keys())])
+        to_sign_str += api_secret
+
+        signature = hashlib.sha1(to_sign_str.encode("utf-8")).hexdigest()
+
+        return {
+            "signature": signature,
+            "timestamp": timestamp,
+            "api_key": api_key,
+            "cloud_name": cloud_name,
+            "folder": folder,
+            "public_id": public_id,
+            "upload_url": f"https://api.cloudinary.com/v1_1/{cloud_name}/image/upload"
+        }
+
+    @staticmethod
+    def gerar_url_otimizada(url_ou_public_id: str, width: Optional[int] = None, height: Optional[int] = None, crop: str = "fill", quality: str = "auto") -> str:
+        """Gera URL com transformacoes automaticas (f_auto, q_auto) da CDN do Cloudinary."""
+        if not url_ou_public_id or not isinstance(url_ou_public_id, str):
+            return ""
+
+        if url_ou_public_id.startswith("/") or url_ou_public_id.startswith("static/") or url_ou_public_id == "sem_foto":
+            return url_ou_public_id
+
+        if "res.cloudinary.com" in url_ou_public_id and "/upload/" in url_ou_public_id:
+            partes = url_ou_public_id.split("/upload/")
+            transformations = ["f_auto", f"q_{quality}"]
+            if width:
+                transformations.append(f"w_{width}")
+            if height:
+                transformations.append(f"h_{height}")
+            if crop and width and height:
+                transformations.append(f"c_{crop}")
+
+            trans_str = ",".join(transformations)
+            return f"{partes[0]}/upload/{trans_str}/{partes[1]}"
+
+        cloud_name = (os.getenv("CLOUDINARY_CLOUD_NAME") or "natrave").strip("\"' ")
+        transformations = ["f_auto", f"q_{quality}"]
+        if width:
+            transformations.append(f"w_{width}")
+        if height:
+            transformations.append(f"h_{height}")
+        if crop and width and height:
+            transformations.append(f"c_{crop}")
+        trans_str = ",".join(transformations)
+        return f"https://res.cloudinary.com/{cloud_name}/image/upload/{trans_str}/{url_ou_public_id}"
+
     def processar_foto_perfil(self, file_storage, user_id: str, foto_antiga_url: Optional[str] = None) -> str:
         """Recebe o FileStorage do Flask, valida a segurança e salva a imagem otimizada.
 
@@ -293,20 +380,53 @@ class UploadService:
         return f"/static/uploads/cards/{nome_unico}"
 
     def remover_card_campeao(self, card_url: Optional[str]) -> bool:
-        """Apaga o arquivo físico do card do campeão do disco se for local."""
-        if not card_url or not isinstance(card_url, str) or not card_url.startswith("/static/uploads/cards/"):
+        """Apaga a foto/card do campeão do Cloudinary (se for nuvem) ou do disco local de forma segura."""
+        if not card_url or not isinstance(card_url, str) or card_url in ("sem_foto", ""):
             return False
 
-        pasta_cards = os.path.abspath(os.path.join("static", "uploads", "cards"))
-        nome_arquivo = os.path.basename(card_url)
-        caminho_arquivo = os.path.join(pasta_cards, nome_arquivo)
-
-        if os.path.exists(caminho_arquivo):
+        # 1. Se for imagem no Cloudinary
+        if "res.cloudinary.com" in card_url:
             try:
-                os.remove(caminho_arquivo)
-                logger.info("Card campeão local antigo removido do disco: %s", caminho_arquivo)
-                return True
+                cloud_name, api_key, api_secret = self.obter_credenciais_cloudinary()
+                if cloud_name and api_key and api_secret:
+                    import cloudinary
+                    import cloudinary.uploader
+                    cloudinary.config(
+                        cloud_name=cloud_name,
+                        api_key=api_key,
+                        api_secret=api_secret,
+                        secure=True
+                    )
+                    if "/upload/" in card_url:
+                        path_after_upload = card_url.split("/upload/", 1)[1]
+                        partes = path_after_upload.split("/")
+                        idx = 0
+                        for i, p in enumerate(partes):
+                            if (p.startswith("v") and p[1:].isdigit()) or "," in p or p.startswith(("f_", "q_", "w_", "h_", "c_")):
+                                idx = i + 1
+                        
+                        public_id_com_ext = "/".join(partes[idx:])
+                        public_id = os.path.splitext(public_id_com_ext)[0]
+                        
+                        res = cloudinary.uploader.destroy(public_id)
+                        logger.info("Foto/Card antigo do campeão excluído com sucesso do Cloudinary (%s): %s", public_id, res)
+                        return True
             except Exception as e:
-                logger.warning("Não foi possível apagar card campeão antigo %s: %s", caminho_arquivo, e)
+                logger.warning("Erro ao tentar excluir foto antiga do Cloudinary (%s): %s", card_url, e)
                 return False
+
+        # 2. Se for imagem salva no disco local
+        if card_url.startswith("/static/uploads/cards/"):
+            pasta_cards = os.path.abspath(os.path.join("static", "uploads", "cards"))
+            nome_arquivo = os.path.basename(card_url)
+            caminho_arquivo = os.path.join(pasta_cards, nome_arquivo)
+
+            if os.path.exists(caminho_arquivo):
+                try:
+                    os.remove(caminho_arquivo)
+                    logger.info("Card campeão local antigo removido do disco: %s", caminho_arquivo)
+                    return True
+                except Exception as e:
+                    logger.warning("Não foi possível apagar card campeão antigo %s: %s", caminho_arquivo, e)
+                    return False
         return False

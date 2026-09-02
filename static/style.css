@@ -22541,3 +22541,134 @@ body.is-capacitor-app .auth-label-app {
   background: none !important;
   border-top: none !important;
 }
+
+/* Removendo TODAS as linhas de acento e bordas horizontais no Histórico */
+.history-page__accent,
+.history-page__accent::before,
+.history-page__accent::after {
+  display: none !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  width: 0 !important;
+}
+
+/* Header Retrátil Limpo sem Linhas, sem Caixas e sem Efeito Neon */
+.collapsible-brand-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: #000000 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  width: 100%;
+  padding: 1.2rem 0 0.6rem 0;
+}
+
+.collapsible-brand-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  background: transparent !important;
+  border: none !important;
+}
+
+.collapsible-brand-header__logo {
+  height: 54px;
+  width: auto;
+  display: block;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+  drop-shadow: none !important;
+  transition: height 0.28s cubic-bezier(0.16, 1, 0.3, 1), transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Quando rola para baixo: Header encolhe suavemente */
+.collapsible-brand-header.is-scrolled {
+  padding: 0.45rem 0;
+  background: rgba(0, 0, 0, 0.94) !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+.collapsible-brand-header.is-scrolled .collapsible-brand-header__logo {
+  height: 32px;
+}
+
+/* Design Premium Moderno e Atraente dos Cards de Histórico */
+.history-page.edge-to-edge-page {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+.history-page.edge-to-edge-page .main {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  width: 100% !important;
+}
+
+.history-page__list {
+  padding: 0.5rem 0 2rem 0 !important;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem !important;
+  width: 100% !important;
+}
+
+.judge-draw-history__item,
+.votacao-admin-history-card {
+  width: calc(100% - 1.2rem) !important;
+  margin: 0 auto !important;
+  background: #0d0e12 !important;
+  border: 1px solid rgba(34, 197, 94, 0.16) !important;
+  border-radius: 18px !important;
+  overflow: hidden;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
+}
+
+.judge-draw-history__item:hover {
+  background: #12131b !important;
+  border-color: rgba(34, 197, 94, 0.32) !important;
+  transform: translateY(-1px);
+}
+
+.judge-draw-history__item[open] {
+  background: #11131a !important;
+  border-color: rgba(34, 197, 94, 0.38) !important;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.7) !important;
+}
+
+.judge-draw-history__item[open] .history-card-toggle-btn {
+  background: rgba(34, 197, 94, 0.18) !important;
+  border-color: rgba(34, 197, 94, 0.38) !important;
+  color: #22c55e !important;
+}
+
+.judge-draw-history__item[open] .toggle-icon-plus {
+  display: none !important;
+}
+
+.judge-draw-history__item[open] .toggle-icon-minus {
+  display: inline !important;
+}
+
+.history-page__summary::-webkit-details-marker,
+.history-page__summary::marker,
+.judge-draw-history__item>summary::after,
+.judge-draw-history__item[open]>summary::after,
+.votacao-admin-history-card summary::after {
+  display: none !important;
+  opacity: 0 !important;
+  content: "" !important;
+  width: 0 !important;
+  height: 0 !important;
+}

@@ -87,3 +87,6 @@ node_modules/
 .secrets/
 client_secret*.json
 *.secret
+
+# Uploads locais de teste
+static/uploads/cards/

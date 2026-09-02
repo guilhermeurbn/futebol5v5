@@ -98,7 +98,7 @@
                 </button>
 
                 <div class="accordion-content" style="display: {% if erro_perfil and 'foto' in erro_perfil|lower %}block{% else %}none{% endif %}; padding: 1.6rem 1.7rem; border-top: 1px solid #1f1f23; background: #0c0c0e;">
-                    <form action="{{ url_for('auth.perfil_editar_dados') }}" method="POST" enctype="multipart/form-data">
+                    <form id="formEditarAvatar" action="{{ url_for('auth.perfil_editar_dados') }}" method="POST" enctype="multipart/form-data">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         
                         <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem;">
@@ -111,9 +111,9 @@
 
                             <div style="flex: 1; min-width: 240px;">
                                 <label style="display: block; font-size: 0.88rem; font-weight: 700; color: #cbd5e1; margin-bottom: 0.45rem;">Escolher nova imagem de perfil</label>
-                                <input type="file" name="foto" id="fotoInput" accept="image/png, image/jpeg, image/webp" onchange="previewAvatarImage(this)"
+                                <input type="file" id="fotoInput" accept="image/png, image/jpeg, image/webp" onchange="previewAvatarImage(this)"
                                     style="width: 100%; background: #000000; border: 1px dashed #3f3f46; border-radius: 12px; padding: 0.75rem 1rem; color: #a1a1aa; font-size: 0.88rem; outline: none; cursor: pointer;">
-                                <small style="display: block; color: #71717a; font-size: 0.78rem; margin-top: 0.4rem;">Formatos aceitos: PNG, JPG ou WEBP (Máximo: 5 MB). O sistema ajusta o corte automaticamente.</small>
+                                <small style="display: block; color: #71717a; font-size: 0.78rem; margin-top: 0.4rem;">Formatos aceitos: PNG, JPG ou WEBP. Ajuste de resolução automático.</small>
                             </div>
                         </div>
 
@@ -127,7 +127,7 @@
                             <div></div>
                             {% endif %}
 
-                            <button type="submit" 
+                            <button type="submit" id="btnSalvarAvatar"
                                 style="background: #22c55e; color: #000000; font-weight: 800; font-size: 0.92rem; padding: 0.75rem 1.7rem; border-radius: 12px; border: none; cursor: pointer; box-shadow: 0 0 16px rgba(34, 197, 94, 0.25);">
                                 Salvar Foto de Perfil
                             </button>
@@ -504,6 +504,7 @@ function toggleEditAccordion(button) {
 
 function previewAvatarImage(input) {
     if (input.files && input.files[0]) {
+        const file = input.files[0];
         const reader = new FileReader();
         reader.onload = function(e) {
             const preview = document.getElementById('avatarPreview');
@@ -515,12 +516,67 @@ function previewAvatarImage(input) {
             if (fallback) {
                 fallback.style.display = 'none';
             }
+
+            // Criar Canvas 300x300 Center-Crop
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                canvas.width = 300;
+                canvas.height = 300;
+                const ctx = canvas.getContext('2d');
+
+                const minDim = Math.min(img.width, img.height);
+                const sx = (img.width - minDim) / 2;
+                const sy = (img.height - minDim) / 2;
+
+                ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, 300, 300);
+                window._avatarCanvas = canvas;
+            };
+            img.src = e.target.result;
         };
-        reader.readAsDataURL(input.files[0]);
+        reader.readAsDataURL(file);
     }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    const formAvatar = document.getElementById('formEditarAvatar');
+    if (formAvatar) {
+        formAvatar.addEventListener('submit', async function(e) {
+            if (window._avatarCanvas) {
+                e.preventDefault();
+                const btnSubmit = document.getElementById('btnSalvarAvatar');
+                const csrfTokenInput = formAvatar.querySelector('input[name="csrf_token"]');
+                const csrfToken = csrfTokenInput ? csrfTokenInput.value : '';
+                const userId = "{{ usuario.id }}";
+
+                if (btnSubmit) btnSubmit.disabled = true;
+
+                try {
+                    if (window.NaTraveCloudinaryUploader) {
+                        await window.NaTraveCloudinaryUploader.uploadCanvasDirect(window._avatarCanvas, {
+                            tipo: 'avatar',
+                            entityId: userId,
+                            csrfToken: csrfToken,
+                            onStatusChange: (status, msg) => {
+                                if (btnSubmit) btnSubmit.textContent = msg || 'Processando...';
+                            }
+                        });
+                        location.reload();
+                    } else {
+                        formAvatar.submit();
+                    }
+                } catch (err) {
+                    console.error('Erro ao salvar avatar:', err);
+                    alert('Falha ao enviar foto de perfil: ' + (err.message || 'Verifique sua conexão.'));
+                    if (btnSubmit) {
+                        btnSubmit.disabled = false;
+                        btnSubmit.textContent = 'Salvar Foto de Perfil';
+                    }
+                }
+            }
+        });
+    }
+
     if (window.location.hash === '#cardItemFoto' || window.location.search.includes('tab=foto')) {
         const btnFoto = document.querySelector('#cardItemFoto button');
         if (btnFoto) toggleEditAccordion(btnFoto);
@@ -724,4 +780,5 @@ async function desvincularSocial(provider) {
     }
 }
 </script>
+<script src="{{ url_for('static', filename='js/cloudinary_upload.js') }}"></script>
 {% endblock %}

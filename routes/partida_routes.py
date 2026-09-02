@@ -3,7 +3,7 @@ Rotas de Partidas e Sorteios
 - Sorteios, histórico de partidas, undo/redo
 - QR codes e compartilhamento
 """
-from flask import Blueprint, request, render_template, redirect, url_for, jsonify, session, send_file, Response
+from flask import Blueprint, request, render_template, redirect, url_for, jsonify, session, send_file, Response, flash
 from functools import wraps
 import io
 import random
@@ -494,6 +494,98 @@ def deletar_sorteio_historico(sorteio_id):
         if _is_juiz():
             return redirect(url_for('juiz.juiz_historico', erro='Erro ao excluir sorteio'))
         return redirect(url_for('partida.historico', erro='Erro ao excluir sorteio'))
+
+
+@partida_bp.route('/sorteio/<int:sorteio_id>/trocar-foto', methods=['POST'])
+@admin_required
+def trocar_foto_sorteio(sorteio_id):
+    """Substitui a foto do time campeão de um sorteio de forma totalmente segura com exclusão da foto anterior."""
+    try:
+        from services.upload_service import UploadService, UploadError
+        from services.partida_service import PartidaService
+        from services.votacao_service import VotacaoService
+        from services.jogador_stats_service import JogadorStatsService
+        from services.db import clear_db_cache
+
+        upload_svc = UploadService()
+        partida_svc = PartidaService()
+        votacao_svc = VotacaoService()
+
+        json_data = request.get_json(silent=True) or {}
+        file_storage = request.files.get('foto_campeao') or request.files.get('foto') or request.files.get('file')
+        base64_data = request.form.get('card_campeao_base64') or json_data.get('card_campeao_base64') or request.form.get('foto_base64') or json_data.get('foto_base64')
+        remover_foto = request.form.get('remover_foto') == '1' or json_data.get('remover_foto')
+
+        # 1. Obter URL da foto antiga antes da substituição
+        partidas_existentes = partida_svc.obter_partidas_sorteio(sorteio_id)
+        foto_antiga_url = (partidas_existentes[0].get('card_campeao_url') if partidas_existentes else None)
+        if not foto_antiga_url:
+            partida_v = votacao_svc.obter_por_sorteio(sorteio_id)
+            if partida_v:
+                foto_antiga_url = partida_v.get('card_campeao_url')
+
+        nova_url = None
+
+        if remover_foto:
+            nova_url = "sem_foto"
+            if foto_antiga_url:
+                upload_svc.remover_card_campeao(foto_antiga_url)
+        elif file_storage or base64_data:
+            nova_url = upload_svc.processar_foto_campeao(
+                file_storage=file_storage,
+                base64_data=base64_data,
+                sorteio_id=str(sorteio_id),
+                foto_antiga_url=foto_antiga_url
+            )
+        else:
+            msg_erro = "Selecione uma imagem ou foto válida para enviar."
+            if request.is_json or json_data:
+                return jsonify({'sucesso': False, 'erro': msg_erro}), 400
+            flash(msg_erro, 'warning')
+            return redirect(request.referrer or url_for('partida.historico'))
+
+        # 2. Atualiza no partida_service
+        partida_svc.atualizar_foto_campeao(sorteio_id, nova_url)
+
+        # 3. Atualiza no votacao_service se houver
+        partida_votacao = votacao_svc.obter_por_sorteio(sorteio_id)
+        if partida_votacao:
+            partida_votacao['card_campeao_url'] = nova_url
+            dados = votacao_svc._carregar()
+            alvo = votacao_svc._find_partida_em_dados(dados, partida_votacao['id'])
+            if alvo:
+                alvo['card_campeao_url'] = nova_url
+                if alvo.get('resultado_partida'):
+                    alvo['resultado_partida']['card_campeao_url'] = nova_url
+                votacao_svc._salvar(dados)
+
+        # 4. Limpa caches globais em memória
+        clear_db_cache()
+        JogadorStatsService.invalidar_cache_stats()
+
+        # 5. Apaga a foto antiga de forma segura se a nova foi salva com sucesso e a foto antiga for diferente
+        if foto_antiga_url and foto_antiga_url != nova_url and foto_antiga_url != "sem_foto":
+            upload_svc.remover_card_campeao(foto_antiga_url)
+
+        msg_sucesso = f"Foto do Sorteio #{sorteio_id} atualizada com sucesso!"
+        if request.is_json or json_data:
+            return jsonify({'sucesso': True, 'card_campeao_url': nova_url, 'mensagem': msg_sucesso})
+
+        flash(msg_sucesso, 'success')
+        return redirect(url_for('partida.historico', sucesso=msg_sucesso))
+
+    except UploadError as ue:
+        logger.warning("Erro de validação ao trocar foto do sorteio #%s: %s", sorteio_id, ue)
+        if request.is_json:
+            return jsonify({'sucesso': False, 'erro': str(ue)}), 400
+        flash(f"Erro ao enviar foto: {str(ue)}", 'danger')
+        return redirect(url_for('partida.historico', erro=str(ue)))
+    except Exception as e:
+        logger.error("Erro inesperado ao trocar foto do sorteio #%s: %s", sorteio_id, e, exc_info=True)
+        if request.is_json:
+            return jsonify({'sucesso': False, 'erro': 'Erro interno ao processar a substituição de foto'}), 500
+        flash("Erro ao processar a substituição de foto.", 'danger')
+        return redirect(url_for('partida.historico', erro='Erro ao processar a substituição de foto.'))
 
 
 @partida_bp.route('/api/sorteio/<sorteio_id>/times', methods=['POST'])
