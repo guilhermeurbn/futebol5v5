@@ -689,6 +689,8 @@ class JogadorStatsService:
         
         # 3. Procurar no sorteio (historico)
         if sorteio:
+            if sorteio.get('rascunho') or not sorteio.get('oficial', True):
+                return None
             times = sorteio.get('times', [])
             for time_idx, time_data in enumerate(times):
                 jogadores = time_data.get('jogadores', [])

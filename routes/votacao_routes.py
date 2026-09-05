@@ -12,6 +12,8 @@ from services.juiz_partida_service import JuizPartidaService
 from services.historico_service import HistoricoService
 from services.partida_service import PartidaService
 from services.upload_service import UploadService
+from services.db import clear_db_cache
+from services.jogador_stats_service import JogadorStatsService
 
 votacao_bp = Blueprint('votacao', __name__)
 logger = logging.getLogger(__name__)

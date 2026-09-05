@@ -475,10 +475,17 @@ def juiz_iniciar_rodada(sorteio_id=None):
             somas = rascunho.get('somas', [])
             num_times = rascunho.get('num_times', len(times))
             diferenca = rascunho.get('diferenca', 0)
+            existing_sid = rascunho.get('sorteio_id') or sorteio_id
 
-            # Adicionar novo registro oficial no histórico
-            sorteio_oficial = historico_service.adicionar_sorteio(times, somas, num_times, diferenca)
-            novo_id = sorteio_oficial.get('id')
+            if existing_sid and str(existing_sid).isdigit():
+                # Atualizar o sorteio existente sem criar duplicado no histórico
+                sorteio_oficial = historico_service.substituir_sorteio(int(existing_sid), times, somas, num_times, diferenca)
+                novo_id = int(existing_sid)
+            else:
+                # Adicionar novo registro oficial no histórico
+                sorteio_oficial = historico_service.adicionar_sorteio(times, somas, num_times, diferenca)
+                novo_id = sorteio_oficial.get('id')
+
             sorteio_oficial['rascunho'] = False
             sorteio_oficial['oficial'] = True
             historico_service.atualizar_times_sorteio(novo_id, times)

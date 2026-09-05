@@ -81,16 +81,16 @@
       "total_votos": 5
     },
     "u1": {
-      "reliability": 0.908,
-      "total_votos": 12442
+      "reliability": 0.9729,
+      "total_votos": 13430
     },
     "u2": {
       "reliability": 0.9032,
-      "total_votos": 426
+      "total_votos": 410
     },
     "u3_hater": {
       "reliability": 0.5753,
-      "total_votos": 426
+      "total_votos": 410
     }
   },
   "relationships": {
@@ -743,43 +743,43 @@
       "cumulative_offset": 0.0
     },
     "u1:Alex": {
-      "match_count": 213,
-      "cumulative_offset": 745.5
+      "match_count": 205,
+      "cumulative_offset": 717.5
     },
     "u2:Alex": {
-      "match_count": 213,
-      "cumulative_offset": 745.5
+      "match_count": 205,
+      "cumulative_offset": 717.5
     },
     "u3_hater:Alex": {
-      "match_count": 213,
-      "cumulative_offset": -1491.0
+      "match_count": 205,
+      "cumulative_offset": -1435.0
     },
     "u1:Bruno": {
-      "match_count": 213,
+      "match_count": 205,
       "cumulative_offset": 0.0
     },
     "u2:Bruno": {
-      "match_count": 213,
+      "match_count": 205,
       "cumulative_offset": 0.0
     },
     "u3_hater:Bruno": {
-      "match_count": 213,
+      "match_count": 205,
       "cumulative_offset": 0.0
     },
     "u1:Jogador 2": {
-      "match_count": 3004,
+      "match_count": 3255,
       "cumulative_offset": 0.0
     },
     "u1:Jogador 3": {
-      "match_count": 3004,
+      "match_count": 3255,
       "cumulative_offset": 0.0
     },
     "u1:Jogador 4": {
-      "match_count": 3004,
+      "match_count": 3255,
       "cumulative_offset": 0.0
     },
     "u1:Jogador 5": {
-      "match_count": 3004,
+      "match_count": 3255,
       "cumulative_offset": 0.0
     }
   },
@@ -820,9 +820,9 @@
       "historical_avg": 4.92
     },
     "Alex": {
-      "sum_scores": 3664.5,
-      "count": 648,
-      "historical_avg": 5.66
+      "sum_scores": 3528.5,
+      "count": 624,
+      "historical_avg": 5.65
     },
     "Markinhos": {
       "sum_scores": 21.5,
@@ -985,28 +985,28 @@
       "historical_avg": 8.0
     },
     "Bruno": {
-      "sum_scores": 4473.0,
-      "count": 639,
+      "sum_scores": 4305.0,
+      "count": 615,
       "historical_avg": 7.0
     },
     "Jogador 2": {
-      "sum_scores": 24032.0,
-      "count": 3004,
+      "sum_scores": 26040.0,
+      "count": 3255,
       "historical_avg": 8.0
     },
     "Jogador 3": {
-      "sum_scores": 24032.0,
-      "count": 3004,
+      "sum_scores": 26040.0,
+      "count": 3255,
       "historical_avg": 8.0
     },
     "Jogador 4": {
-      "sum_scores": 24032.0,
-      "count": 3004,
+      "sum_scores": 26040.0,
+      "count": 3255,
       "historical_avg": 8.0
     },
     "Jogador 5": {
-      "sum_scores": 24032.0,
-      "count": 3004,
+      "sum_scores": 26040.0,
+      "count": 3255,
       "historical_avg": 8.0
     }
   }
