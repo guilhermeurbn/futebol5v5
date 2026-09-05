@@ -719,6 +719,26 @@ def votacao_admin_salvar_foto_campeao():
     return redirect(url_for('votacao.votacao_admin_page', sorteio_id=sorteio_id))
 
 
+@votacao_bp.route('/admin/limpar-sorteios-duplicados', methods=['GET', 'POST'])
+def admin_limpar_sorteios_duplicados():
+    """Executa a limpeza de sorteios duplicados órfãos diretamente pelo navegador."""
+    if not session.get('user_id') or session.get('role') not in ['admin']:
+        flash("Acesso não autorizado.", "danger")
+        return redirect(url_for('votacao.votacao_admin_page'))
+    try:
+        from scripts.limpar_sorteio_duplicado import identificar_duplicados, executar_limpeza
+        historico, candidatos = identificar_duplicados()
+        if not candidatos:
+            flash("Nenhum sorteio duplicado órfão foi encontrado. O banco de dados já está 100% limpo!", "info")
+        else:
+            executar_limpeza(apply=True)
+            flash(f"Limpeza executada com sucesso! Removido(s) {len(candidatos)} sorteio(s) duplicado(s).", "success")
+    except Exception as e:
+        logger.error(f"Erro ao executar limpeza de duplicados: {str(e)}")
+        flash(f"Erro ao executar limpeza: {str(e)}", "danger")
+    return redirect(url_for('votacao.votacao_admin_page'))
+
+
 @votacao_bp.route('/admin/votacao/criar', methods=['POST'])
 @admin_or_juiz_required
 def votacao_admin_criar():
