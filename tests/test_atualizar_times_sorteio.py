@@ -56,41 +56,50 @@ def test_api_atualizar_times_rascunho(client):
 
     juiz_svc.limpar_rascunho()
 
-def test_api_atualizar_times_oficial(client):
+def test_api_atualizar_times_oficial(client, monkeypatch):
     """Testa a atualização de times de um sorteio oficial salvo no histórico"""
-    hist_svc = HistoricoService()
-    sorteios = hist_svc.listar_sorteios()
-    if not sorteios:
-        pytest.skip("Sem sorteio no histórico para testar")
+    from services.db import clear_db_cache
+    from services.juiz_partida_service import JuizPartidaService
+    clear_db_cache()
+    JuizPartidaService().limpar_rascunho()
 
-    sorteio_alvo = sorteios[0]
-    sorteio_id = sorteio_alvo['id']
-    times_originais = sorteio_alvo.get('times', [])
-    if len(times_originais) < 2:
-        pytest.skip("Sorteio possui menos de 2 times")
+    with client.session_transaction() as sess:
+        sess.clear()
+        sess['user_id'] = 1
+        sess['username'] = 'juiz_teste'
+        sess['role'] = 'juiz'
 
-    # Inverter a ordem dos jogadores no primeiro time para simular troca interna
-    time1 = times_originais[0]
-    jogadores1 = time1.get('jogadores', [])
-    if len(jogadores1) < 2:
-        pytest.skip("Time 1 tem menos de 2 jogadores")
+    sorteio_id = 99991
+    sorteio_mock = {
+        'id': sorteio_id,
+        'oficial': True,
+        'num_times': 2,
+        'times': [
+            {
+                'numero': 1,
+                'jogadores': [
+                    {'id': 201, 'nome': 'Jogador A', 'nivel': 4.0, 'posicao': 'linha'},
+                    {'id': 202, 'nome': 'Jogador B', 'nivel': 3.5, 'posicao': 'linha'}
+                ]
+            },
+            {
+                'numero': 2,
+                'jogadores': [
+                    {'id': 203, 'nome': 'Jogador C', 'nivel': 4.5, 'posicao': 'linha'},
+                    {'id': 204, 'nome': 'Jogador D', 'nivel': 3.0, 'posicao': 'linha'}
+                ]
+            }
+        ]
+    }
 
-    keys = []
-    for j in jogadores1:
-        if j.get('id'):
-            keys.append(str(j['id']))
-        else:
-            keys.append(f"{j.get('nome')}|{j.get('nivel')}|{j.get('posicao')}")
+    from routes.partida_routes import historico_service
+    monkeypatch.setattr(historico_service, 'obter_sorteio', lambda s_id: sorteio_mock if str(s_id) == str(sorteio_id) else None)
+    monkeypatch.setattr(historico_service, 'atualizar_times_sorteio', lambda s_id, times: sorteio_mock)
 
-    keys_invertidos = list(reversed(keys))
     payload = {
         'times': [
-            {'numero': 1, 'jogadores': keys_invertidos}
-        ] + [
-            {'numero': t['numero'], 'jogadores': [
-                (str(j['id']) if j.get('id') else f"{j.get('nome')}|{j.get('nivel')}|{j.get('posicao')}")
-                for j in t.get('jogadores', [])
-            ]} for t in times_originais[1:]
+            {'numero': 1, 'jogadores': ['202', '201']},
+            {'numero': 2, 'jogadores': ['203', '204']}
         ]
     }
 
@@ -98,3 +107,4 @@ def test_api_atualizar_times_oficial(client):
     assert res.status_code == 200
     data = res.get_json()
     assert data['sucesso'] is True
+

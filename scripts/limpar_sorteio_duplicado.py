@@ -46,15 +46,16 @@ def identificar_duplicados():
 
     candidatos_remocao = []
     
-    # Agrupar sorteios por data (YYYY-MM-DD) para detectar duplicatas no mesmo dia
+    # 1. Agrupar sorteios por data (YYYY-MM-DD) para detectar duplicatas no mesmo dia
     por_data = {}
     for item in historico:
         dt_str = str(item.get("data") or "")[:10]
-        por_data.setdefault(dt_str, []).append(item)
+        if dt_str:
+            por_data.setdefault(dt_str, []).append(item)
 
     for dt, lista in por_data.items():
         if len(lista) > 1:
-            # Procurar se um dos sorteios tem partida vinculada e o outro é rascunho/sem partida
+            # Caso A: Sorteios sem partida quando existe pelo menos 1 sorteio com partida no mesmo dia
             com_partida = [s for s in lista if str(s.get("id")) in sorteios_com_resultados]
             sem_partida = [s for s in lista if str(s.get("id")) not in sorteios_com_resultados]
 
@@ -66,10 +67,78 @@ def identificar_duplicados():
                         "rascunho": orfao.get("rascunho", False),
                         "oficial": orfao.get("oficial", True),
                         "total_jogadores": orfao.get("total_jogadores", 0),
-                        "motivo": "Sorteio rascunho/órfão sem partida ou votação associada"
+                        "motivo": "Sorteio rascunho/órfão sem partida associada no mesmo dia"
                     })
 
-    return historico, candidatos_remocao
+            # Caso B: Múltiplos sorteios oficiais com partidas vazias/shell no mesmo dia (troca/substituição durante setup)
+            # Mantém apenas o sorteio mais recente do dia que foi a partida final oficial
+            if len(com_partida) > 1:
+                # Ordenar por data/hora (mais recente por último)
+                com_partida_ordenados = sorted(com_partida, key=lambda s: str(s.get("data") or ""))
+                # Os anteriores são candidatos a remoção/desativação se não tiverem votação/detalhes
+                superseeding_testes = com_partida_ordenados[:-1]
+                for teste in superseeding_testes:
+                    sid_str = str(teste.get("id"))
+                    # Verificar se este teste antigo possui votacao/ranking associado
+                    tem_votacao_real = any(
+                        isinstance(vp, dict) and str(vp.get("sorteio_id") or vp.get("id")) == sid_str and (vp.get("votos") or vp.get("ranking"))
+                        for vp in votacoes_list
+                    )
+                    if not tem_votacao_real:
+                        candidatos_remocao.append({
+                            "id": teste.get("id"),
+                            "data": teste.get("data"),
+                            "rascunho": teste.get("rascunho", False),
+                            "oficial": teste.get("oficial", True),
+                            "total_jogadores": teste.get("total_jogadores", 0),
+                            "motivo": "Sorteio de teste/setup substituído por sorteio mais recente no mesmo dia"
+                        })
+
+    # 2. Detectar sorteios/partidas de teste vazios sem votos, sem notas e sem gols em qualquer data
+    from services.juiz_partida_service import JuizPartidaService
+    sid_atual = ""
+    try:
+        estado_juiz = JuizPartidaService().obter_estado()
+        partida_atual = estado_juiz.get("partida_atual") or {}
+        sid_atual = str(partida_atual.get("sorteio_id") or "")
+    except Exception:
+        pass
+
+    for item in historico:
+        sid_str = str(item.get("id"))
+        if sid_str == sid_atual:
+            continue
+
+        tem_votacao_real = any(
+            isinstance(vp, dict) and str(vp.get("sorteio_id") or vp.get("id")) == sid_str and (vp.get("votos") or vp.get("ranking"))
+            for vp in votacoes_list
+        )
+        tem_partida_com_gols = any(
+            isinstance(p, dict) and str(p.get("sorteio_id") or p.get("id")) == sid_str and (
+                (p.get("gols_time1", 0) or 0) > 0 or (p.get("gols_time2", 0) or 0) > 0 or p.get("tem_voto", False) or p.get("votos_contabilizados", False)
+            )
+            for p in partidas
+        )
+
+        if not tem_votacao_real and not tem_partida_com_gols and len(historico) > 1:
+            candidatos_remocao.append({
+                "id": item.get("id"),
+                "data": item.get("data"),
+                "rascunho": item.get("rascunho", False),
+                "oficial": item.get("oficial", True),
+                "total_jogadores": item.get("total_jogadores", 0),
+                "motivo": "Sorteio/partida de teste sem votos, sem notas e sem gols gravados"
+            })
+
+    # Remover duplicatas da lista de candidatos por ID
+    candidatos_unicos = []
+    ids_vistos = set()
+    for c in candidatos_remocao:
+        if c["id"] not in ids_vistos:
+            ids_vistos.add(c["id"])
+            candidatos_unicos.append(c)
+
+    return historico, candidatos_unicos
 
 
 def executar_limpeza(apply: bool = False):
@@ -113,13 +182,22 @@ def executar_limpeza(apply: bool = False):
 
     # Filtrar removendo os duplicados
     ids_remover = {c["id"] for c in candidatos}
+    ids_remover_str = {str(c["id"]) for c in candidatos}
+
     novo_historico = [s for s in historico if s.get("id") not in ids_remover]
 
+    partidas = load_json_data("partidas", [])
+    novas_partidas = [
+        p for p in partidas
+        if isinstance(p, dict) and str(p.get("sorteio_id")) not in ids_remover_str and str(p.get("id")) not in ids_remover_str
+    ]
+
     save_json_data("historico", novo_historico)
+    save_json_data("partidas", novas_partidas)
     clear_db_cache()
     JogadorStatsService.invalidar_cache_stats()
 
-    print(f"✅ Sorteio(s) {ids_remover} removido(s) com sucesso!")
+    print(f"✅ Sorteio(s) e partida(s) {ids_remover} removido(s) com sucesso!")
     print("🚀 Cache limpo. O histórico dos jogadores está agora desduplicado.")
 
 

@@ -125,7 +125,7 @@ class HistoricoService:
     def obter_sorteio(self, sorteio_id: int) -> Optional[Dict]:
         """Obtém um sorteio por ID"""
         sorteios = self.listar_sorteios()
-        return next((s for s in sorteios if s.get('id') == sorteio_id), None)
+        return next((s for s in sorteios if str(s.get('id')) == str(sorteio_id)), None)
 
     def atualizar_times_sorteio(self, sorteio_id: int, times: List[Dict]) -> Optional[Dict]:
         """Atualiza os times de um sorteio e recalcula metadados derivados."""

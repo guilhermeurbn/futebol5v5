@@ -84,6 +84,8 @@ def _candidate_paths(relative_path: str):
     yield root / "data" / relative_path
 
 
+import copy
+
 def _get_cached(namespace: str):
     if namespace not in _cache:
         return None
@@ -91,7 +93,7 @@ def _get_cached(namespace: str):
     data, timestamp = _cache[namespace]
     ttl = 5 if namespace == "users" else _cache_ttl_seconds
     if time.time() - timestamp < ttl:
-        return data
+        return copy.deepcopy(data)
 
     del _cache[namespace]
     return None

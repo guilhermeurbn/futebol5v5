@@ -467,19 +467,35 @@ class JogadorStatsService:
                         "nota_partida": detalhes.get("nota_partida", 0.0)
                     })
             
+            # Desduplicar partidas geradas por testes/substituições no mesmo dia
+            stats["historico_partidas"] = self._desduplicar_historico_partidas(stats["historico_partidas"])
+
+            # Recalcular métricas após desduplicação
+            stats["total_partidas"] = len(stats["historico_partidas"])
+            stats["gols"] = sum(p.get("gols", 0) for p in stats["historico_partidas"])
+            stats["assistencias"] = sum(p.get("assistencias", 0) for p in stats["historico_partidas"])
+            stats["cartoes_amarelos"] = sum(p.get("cartoes_amarelos", 0) for p in stats["historico_partidas"])
+            stats["cartoes_vermelhos"] = sum(p.get("cartoes_vermelhos", 0) for p in stats["historico_partidas"])
+            stats["vitórias"] = sum(1 for p in stats["historico_partidas"] if p.get("resultado") == "vitória")
+            stats["derrotas"] = sum(1 for p in stats["historico_partidas"] if p.get("resultado") == "derrota")
+            stats["empates"] = sum(1 for p in stats["historico_partidas"] if p.get("resultado") == "empate")
+            stats["vitorias"] = stats["vitórias"]
+            stats["melhor_artilheiro_partida"] = max([p.get("gols", 0) for p in stats["historico_partidas"]], default=0)
+            stats["partidas_sem_gols"] = sum(1 for p in stats["historico_partidas"] if p.get("gols", 0) == 0)
+
             # Calcular taxas
             if stats["total_partidas"] > 0:
                 stats["win_rate"] = round((stats["vitórias"] / stats["total_partidas"]) * 100, 1)
                 stats["gols_por_partida"] = round(stats["gols"] / stats["total_partidas"], 2)
                 stats["assistencias_por_partida"] = round(stats["assistencias"] / stats["total_partidas"], 2)
-            stats["vitorias"] = stats["vitórias"]
-            
+            else:
+                stats["win_rate"] = 0.0
+                stats["gols_por_partida"] = 0.0
+                stats["assistencias_por_partida"] = 0.0
+
             # Verificar se é o maior artilheiro (por total de gols)
             if gols_todos and max(gols_todos.values(), default=0) == stats["gols"] and stats["gols"] > 0:
                 stats["maior_artilheiro"] = True
-            
-            # Ordenar histórico por data (mais recente primeiro, com tratamento seguro para None)
-            stats["historico_partidas"].sort(key=lambda x: str(x.get('data') or ''), reverse=True)
 
             # Dashboard e dados para planilha/exportação
             stats["ultimos_resultados"] = self._build_recent_form(stats["historico_partidas"], limite=5)
@@ -495,6 +511,49 @@ class JogadorStatsService:
             import sys
             print(f"Erro ao calcular stats para {nome_jogador}: {str(e)}", file=sys.stderr)
             return self._stats_vazio(nome_jogador)
+
+    def _desduplicar_historico_partidas(self, historico_partidas: List[Dict]) -> List[Dict]:
+        """
+        Remove partidas duplicadas/rascunho geradas no mesmo dia durante o setup de substituições,
+        e desconsidera cascas de partidas de teste sem notas, sem votos e sem estatísticas reais.
+        """
+        if not historico_partidas:
+            return []
+
+        def _is_partida_valida(x: dict) -> bool:
+            nota = float(x.get("nota_media", 0) or x.get("nota_partida", 0) or x.get("nota", 0) or 0)
+            gols = int(x.get("gols", 0) or 0)
+            assist = int(x.get("assistencias", 0) or 0)
+            has_voto = x.get("tem_voto", False) or x.get("votos_contabilizados", False)
+            has_resultado = bool(x.get("resultado") or x.get("times_desempenho"))
+            return nota > 0 or gols > 0 or assist > 0 or has_voto or has_resultado
+
+        tem_partidas_reais = any(_is_partida_valida(x) for x in historico_partidas)
+
+        partidas_filtradas = []
+        for p in historico_partidas:
+            if tem_partidas_reais:
+                if _is_partida_valida(p):
+                    partidas_filtradas.append(p)
+            else:
+                partidas_filtradas.append(p)
+
+        por_data = {}
+        for p in partidas_filtradas:
+            dt = str(p.get("data") or "")[:10]
+            por_data.setdefault(dt, []).append(p)
+
+        resultado_final = []
+        for dt, items in por_data.items():
+            com_avaliacao = [x for x in items if _is_partida_valida(x)]
+            if com_avaliacao:
+                resultado_final.extend(com_avaliacao)
+            else:
+                items_ordenados = sorted(items, key=lambda x: str(x.get("data") or ""), reverse=True)
+                resultado_final.append(items_ordenados[0])
+
+        resultado_final.sort(key=lambda x: str(x.get("data") or ""), reverse=True)
+        return resultado_final
     
     def _extrair_detalhes_jogador(self, partida: dict, nome_jogador: str, sorteio: dict, jogador_id: Optional[str] = None, user_id: Optional[str] = None) -> Optional[dict]:
         """
