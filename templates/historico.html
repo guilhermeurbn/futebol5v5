@@ -927,24 +927,53 @@ function gerarCardCampeaoComFrame(userImg, sorteioMeta) {
             ctx.restore();
         }
 
-        // Extrair resultado e times do sorteioMeta
+        // Extração Inteligente de Vencedor / Empate (Checa time_vencedor explícito e desempate por vitórias)
         const resPartida = (sorteioMeta && sorteioMeta.resultado_partida) ? sorteioMeta.resultado_partida : {};
         const rawWinner = resPartida.time_vencedor;
-        const isEmpate = Boolean(resPartida.empate) || rawWinner === null || rawWinner === undefined || rawWinner === 0 || rawWinner === '0' || rawWinner === '';
-
+        let isEmpate = Boolean(resPartida.empate);
         let winTeamNum = 1;
         let winPlayers = [];
-        let tiedTeams = [];
+        let tiedTeams = (sorteioMeta && sorteioMeta.times) ? sorteioMeta.times : [];
 
-        if (sorteioMeta && sorteioMeta.times && sorteioMeta.times.length > 0) {
-            if (isEmpate) {
-                tiedTeams = sorteioMeta.times;
+        if (!isEmpate && rawWinner !== null && rawWinner !== undefined && rawWinner !== '' && rawWinner !== 0 && rawWinner !== '0') {
+            winTeamNum = parseInt(rawWinner, 10);
+            const found = (sorteioMeta && sorteioMeta.times) ? sorteioMeta.times.find(t => parseInt(t.numero, 10) === winTeamNum) : null;
+            if (found) {
+                winTeamNum = found.numero || winTeamNum;
+                winPlayers = found.jogadores || [];
+            }
+        } else if (!isEmpate) {
+            // Se time_vencedor não veio explícito, calcular o time com maior número de vitórias
+            const desempenhos = (resPartida.times_desempenho && resPartida.times_desempenho.length > 0)
+                ? resPartida.times_desempenho
+                : (sorteioMeta && sorteioMeta.resultado_resumo) ? sorteioMeta.resultado_resumo : [];
+
+            let maxVit = -1;
+            let topTeamNum = null;
+            let temEmpateVit = false;
+
+            if (desempenhos && desempenhos.length > 0) {
+                desempenhos.forEach(des => {
+                    const tNum = parseInt(des.time_numero || 0, 10);
+                    const desData = des.desempenho || des;
+                    const vits = parseInt(desData.vitorias || 0, 10);
+                    if (vits > maxVit) {
+                        maxVit = vits;
+                        topTeamNum = tNum;
+                        temEmpateVit = false;
+                    } else if (vits === maxVit && vits > 0) {
+                        temEmpateVit = true;
+                    }
+                });
+            }
+
+            if (!temEmpateVit && topTeamNum && maxVit > 0) {
+                winTeamNum = topTeamNum;
+                const found = (sorteioMeta && sorteioMeta.times) ? sorteioMeta.times.find(t => parseInt(t.numero, 10) === winTeamNum) : null;
+                winPlayers = found ? (found.jogadores || []) : [];
+                isEmpate = false;
             } else {
-                winTeamNum = parseInt(rawWinner, 10) || 1;
-                const found = sorteioMeta.times.find(t => parseInt(t.numero, 10) === winTeamNum);
-                const winTeamObj = found || sorteioMeta.times[0];
-                winTeamNum = winTeamObj.numero || winTeamNum;
-                winPlayers = winTeamObj.jogadores || [];
+                isEmpate = true;
             }
         }
 
