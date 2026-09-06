@@ -30,3 +30,20 @@ def test_registrar_resultado_com_card_campeao():
         card_campeao_url=card_url
     )
     assert partida.get("card_campeao_url") == card_url
+
+
+def test_atualizar_foto_campeao_sorteio_sem_foto_anterior():
+    partida_svc = PartidaService()
+    sorteio_id = 8888
+    card_url = "/static/uploads/cards/campeao_8888_novo.webp"
+    
+    # Atualizar foto em sorteio que não possuía partida nem foto prévia
+    partida = partida_svc.atualizar_foto_campeao(sorteio_id, card_url)
+    assert partida is not None
+    assert partida.get("card_campeao_url") == card_url
+
+    # Verificar que obter_partidas_sorteio retorna a foto atualizada
+    partidas = partida_svc.obter_partidas_sorteio(sorteio_id)
+    assert len(partidas) >= 1
+    assert partidas[0].get("card_campeao_url") == card_url
+

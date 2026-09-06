@@ -497,7 +497,7 @@ def deletar_sorteio_historico(sorteio_id):
 
 
 @partida_bp.route('/sorteio/<int:sorteio_id>/trocar-foto', methods=['POST'])
-@admin_required
+@admin_or_juiz_required
 def trocar_foto_sorteio(sorteio_id):
     """Substitui a foto do time campeão de um sorteio de forma totalmente segura com exclusão da foto anterior."""
     try:
@@ -572,7 +572,7 @@ def trocar_foto_sorteio(sorteio_id):
             return jsonify({'sucesso': True, 'card_campeao_url': nova_url, 'mensagem': msg_sucesso})
 
         flash(msg_sucesso, 'success')
-        return redirect(url_for('partida.historico', sucesso=msg_sucesso))
+        return redirect(request.referrer or url_for('partida.historico', sucesso=msg_sucesso))
 
     except UploadError as ue:
         logger.warning("Erro de validação ao trocar foto do sorteio #%s: %s", sorteio_id, ue)

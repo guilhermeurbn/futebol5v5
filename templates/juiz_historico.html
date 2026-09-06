@@ -194,12 +194,14 @@
                         {% endif %}
 
                         {% set current_user = usuario if usuario is defined and usuario else auth_user %}
-                        {% if current_user and current_user.role == 'admin' %}
+                        {% if current_user and current_user.role in ['admin', 'juiz'] %}
                         <div class="judge-draw-history__admin-actions" style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: flex-end; align-items: center; gap: 0.5rem;">
+                            {% set tem_foto_campeao = item.card_campeao_url and item.card_campeao_url != 'sem_foto' %}
                             <button type="button" class="btn btn-secondary btn-small" onclick="abrirModalTrocarFoto('{{ item.id }}', '{{ item.card_campeao_url or '' }}')" style="background: rgba(34, 197, 94, 0.12); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); font-size: 0.78rem; font-weight: 700; padding: 0.35rem 0.75rem; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem;">
                                 <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                                <span>Trocar Foto</span>
+                                <span>{{ 'Trocar Foto' if tem_foto_campeao else 'Adicionar Foto' }}</span>
                             </button>
+                            {% if current_user.role == 'admin' %}
                             <form method="post" action="{{ url_for('partida.deletar_sorteio_historico', sorteio_id=item.id) }}" onsubmit="return confirm('Tem certeza que deseja excluir o Sorteio #{{ item.id }}? Todos os resultados de jogos e votações deste sorteio serão apagados permanentemente.');">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="btn btn-danger btn-small" style="background: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); font-size: 0.78rem; font-weight: 700; padding: 0.35rem 0.75rem; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem;">
@@ -207,6 +209,7 @@
                                     <span>Excluir Sorteio</span>
                                 </button>
                             </form>
+                            {% endif %}
                         </div>
                         {% endif %}
                     </div>
@@ -582,13 +585,13 @@
             </p>
 
             <div style="margin-bottom: 1.25rem;">
-                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #cbd5e1; margin-bottom: 0.5rem;">Selecione a Nova Foto:</label>
-                <input type="file" id="inputFotoTrocar" accept="image/*" onchange="processarSelecaoFotoTrocar(this)" style="width: 100%; padding: 0.65rem; background: rgba(255, 255, 255, 0.05); border: 1px dashed rgba(34, 197, 94, 0.4); border-radius: 12px; color: #ffffff; font-size: 0.85rem; cursor: pointer;">
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #cbd5e1; margin-bottom: 0.5rem;">Selecione a Foto:</label>
+                <input type="file" id="inputFotoTrocar" name="foto_campeao" accept="image/*" onchange="processarSelecaoFotoTrocar(this)" style="width: 100%; padding: 0.65rem; background: rgba(255, 255, 255, 0.05); border: 1px dashed rgba(34, 197, 94, 0.4); border-radius: 12px; color: #ffffff; font-size: 0.85rem; cursor: pointer;">
             </div>
 
             <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem;">
                 <button type="button" onclick="fecharModalTrocarFoto()" class="btn" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12); color: #cbd5e1; font-weight: 700; padding: 0.6rem 1.2rem; border-radius: 10px; cursor: pointer;">Cancelar</button>
-                <button type="submit" id="btnSalvarFotoTrocar" class="btn btn-success" style="background: #22c55e; border: none; color: #000000; font-weight: 850; padding: 0.6rem 1.4rem; border-radius: 10px; cursor: pointer;">Salvar e Substituir</button>
+                <button type="submit" id="btnSalvarFotoTrocar" class="btn btn-success" style="background: #22c55e; border: none; color: #000000; font-weight: 850; padding: 0.6rem 1.4rem; border-radius: 10px; cursor: pointer;">Salvar Foto</button>
             </div>
         </form>
     </div>
@@ -600,11 +603,12 @@
 let currentTrocarSorteioId = null;
 let currentTrocarMeta = null;
 
-function abrirModalTrocarFoto(sorteioId) {
+function abrirModalTrocarFoto(sorteioId, cardUrl) {
     currentTrocarSorteioId = sorteioId;
     const modal = document.getElementById('modalTrocarFoto');
     const form = document.getElementById('formTrocarFoto');
     const title = document.getElementById('modalTrocarFotoTitle');
+    const btnSalvar = document.getElementById('btnSalvarFotoTrocar');
     const metaScript = document.getElementById('sorteio-meta-' + sorteioId);
     
     if (metaScript) {
@@ -615,11 +619,19 @@ function abrirModalTrocarFoto(sorteioId) {
         }
     }
 
+    const temFoto = cardUrl && cardUrl !== '' && cardUrl !== 'sem_foto';
+
     if (modal && form) {
         form.action = '/sorteio/' + sorteioId + '/trocar-foto';
         if (title) {
             const labelSpan = title.querySelector('span');
-            if (labelSpan) labelSpan.textContent = 'Trocar Foto - Sorteio #' + sorteioId;
+            if (labelSpan) {
+                labelSpan.textContent = (temFoto ? 'Trocar Foto' : 'Adicionar Foto') + ' - Sorteio #' + sorteioId;
+            }
+        }
+        if (btnSalvar) {
+            btnSalvar.textContent = temFoto ? 'Salvar e Substituir' : 'Salvar Foto';
+            btnSalvar.disabled = false;
         }
         document.getElementById('inputFotoTrocar').value = '';
         document.getElementById('card_campeao_base64').value = '';
@@ -635,11 +647,54 @@ function fecharModalTrocarFoto() {
 function processarSelecaoFotoTrocar(input) {
     if (!input.files || !input.files[0]) return;
     const file = input.files[0];
+    const btnSalvar = document.getElementById('btnSalvarFotoTrocar');
+    if (btnSalvar) {
+        btnSalvar.disabled = true;
+        btnSalvar.innerHTML = '⏳ Processando foto...';
+    }
+
     const reader = new FileReader();
+    reader.onerror = function() {
+        alert("Erro ao ler arquivo da imagem. Tente selecionar outra foto.");
+        if (btnSalvar) {
+            btnSalvar.disabled = false;
+        }
+    };
     reader.onload = function(e) {
         const userImg = new Image();
+        userImg.onerror = function() {
+            alert("Formato de imagem inválido. Selecione um arquivo JPG ou PNG.");
+            if (btnSalvar) {
+                btnSalvar.disabled = false;
+            }
+        };
         userImg.onload = function() {
-            gerarCardCampeaoComFrame(userImg, currentTrocarMeta);
+            // Otimização e pré-escala de segurança para imagens gigantes de smartphone (ex: >1920px)
+            const maxDim = 1920;
+            if (userImg.width > maxDim || userImg.height > maxDim) {
+                const offCanvas = document.createElement('canvas');
+                let w = userImg.width;
+                let h = userImg.height;
+                if (w > h) {
+                    h = Math.round((h * maxDim) / w);
+                    w = maxDim;
+                } else {
+                    w = Math.round((w * maxDim) / h);
+                    h = maxDim;
+                }
+                offCanvas.width = w;
+                offCanvas.height = h;
+                const offCtx = offCanvas.getContext('2d');
+                offCtx.drawImage(userImg, 0, 0, w, h);
+                
+                const scaledImg = new Image();
+                scaledImg.onload = function() {
+                    gerarCardCampeaoComFrame(scaledImg, currentTrocarMeta);
+                };
+                scaledImg.src = offCanvas.toDataURL('image/jpeg', 0.9);
+            } else {
+                gerarCardCampeaoComFrame(userImg, currentTrocarMeta);
+            }
         };
         userImg.src = e.target.result;
     };
@@ -843,8 +898,12 @@ function gerarCardCampeaoComFrame(userImg, sorteioMeta) {
             });
         }
 
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
         document.getElementById('card_campeao_base64').value = dataUrl;
+        const btnSalvar = document.getElementById('btnSalvarFotoTrocar');
+        if (btnSalvar) {
+            btnSalvar.disabled = false;
+        }
     };
 
     logoImg.onload = desenharBaseEFinalizar;
