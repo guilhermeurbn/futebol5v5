@@ -3,7 +3,7 @@ Serviço de Jogadores - Gerenciamento de dados
 """
 import json
 import os
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Union
 from models.jogadores import Jogador
 from services.db import load_json_data, save_json_data
 
@@ -220,9 +220,10 @@ class JogadorService:
         self,
         jogador_id: str,
         nome: Optional[str] = None,
-        nivel: Optional[int] = None,
+        nivel: Optional[Union[float, int]] = None,
         tipo: Optional[str] = None,
         posicao: Optional[str] = None,
+        foto_url: Optional[str] = None,
     ) -> Optional[Jogador]:
         """
         Atualiza um jogador com campos opcionais.

@@ -332,38 +332,47 @@ def editar_jogador_page(jogador_id):
 @admin_required
 def editar_jogador_post(jogador_id):
     """Form handler: atualiza jogador via form (admin)"""
-    nome = request.form.get('nome', '').strip()
-    if not nome or len(nome) < 2:
-        raise ValueError('Nome deve ter ao menos 2 caracteres')
-    nome_partes = [p for p in nome.split() if p]
-    if len(nome_partes) < 2:
-        raise ValueError('Por favor, insira o nome e sobrenome do jogador.')
-    nivel = request.form.get('nivel')
-    tipo = request.form.get('tipo')
-    posicao = request.form.get('posicao')
     next_url = request.form.get('next') or request.args.get('next', '')
+    jogador_existente = jogador_service.obter_por_id(jogador_id)
+    if not jogador_existente:
+        return redirect(url_for('jogador_crud.index'))
 
     try:
+        nome = request.form.get('nome', '').strip()
+        if not nome or len(nome) < 2:
+            raise ValueError('Nome deve ter ao menos 2 caracteres')
+        
+        nome_antigo = (jogador_existente.nome or '').strip()
+        era_nome_unico = len([p for p in nome_antigo.split() if p]) < 2
+
+        nome_partes = [p for p in nome.split() if p]
+        if not era_nome_unico and len(nome_partes) < 2:
+            raise ValueError('Por favor, insira o nome e sobrenome do jogador.')
+        
+        nivel = request.form.get('nivel')
+        tipo = request.form.get('tipo')
+        posicao = request.form.get('posicao')
+
         jogador = jogador_service.atualizar(
             jogador_id,
             nome=nome or None,
-            nivel=float(nivel) if nivel else None,
+            nivel=float(nivel) if (nivel is not None and str(nivel).strip() != '') else None,
             tipo=tipo or None,
             posicao=posicao or None
         )
         if not jogador:
-            return "Jogador não encontrado", 404
+            return redirect(url_for('jogador_crud.index'))
+
         if next_url:
             return redirect(next_url)
         return redirect(url_for('auth.perfil_jogador_publico', jogador_id=jogador.id))
     except ValueError as e:
-        jogador = jogador_service.obter_por_id(jogador_id)
-        return render_template('editar_jogador.html', jogador=jogador, usuario=_usuario_logado(), erro=str(e), next_url=next_url), 400
+        return render_template('editar_jogador.html', jogador=jogador_existente, usuario=_usuario_logado(), erro=str(e), next_url=next_url), 400
     except Exception as e:
         import logging
         logger = logging.getLogger(__name__)
-        logger.error(f"Erro ao editar jogador: {str(e)}")
-        return render_template('editar_jogador.html', jogador=None, usuario=_usuario_logado(), erro="Erro interno", next_url=next_url), 500
+        logger.error(f"Erro ao editar jogador {jogador_id}: {str(e)}", exc_info=True)
+        return render_template('editar_jogador.html', jogador=jogador_existente, usuario=_usuario_logado(), erro=f"Erro ao atualizar: {str(e)}", next_url=next_url), 500
 
 
 @jogador_bp.route('/perfil/<jogador_id>', methods=['GET'])

@@ -19054,167 +19054,223 @@ body.is-referee-layout .judge-timer-reset:hover {
 }
 
 .premium-player-card-inner {
-  padding: 1.25rem;
+  padding: 0.9rem;
   display: flex;
   flex-direction: column;
+  gap: 0.75rem;
   height: 100%;
+  box-sizing: border-box;
 }
 
-.premium-player-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
+/* Top Hero Block */
+.premium-player-hero {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.85rem !important;
+  width: 100% !important;
 }
 
-/* Avatar styling matching profile */
 .premium-player-card .premium-player-avatar-wrap {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  padding: 2.5px;
-  background: linear-gradient(135deg, #a78bfa, #3b82f6, #10b981);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+  min-height: 48px !important;
+  border-radius: 50% !important;
+  padding: 2px !important;
+  background: linear-gradient(135deg, #a78bfa, #3b82f6, #22c55e) !important;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.2) !important;
+  flex-shrink: 0 !important;
 }
 
 .premium-player-card .premium-player-avatar-inner {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: #120f19;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: #ffffff;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 50% !important;
+  background: #121319 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 0.95rem !important;
+  font-weight: 850 !important;
+  color: #ffffff !important;
 }
 
-.premium-player-rating-badge {
-  background: rgba(34, 197, 94, 0.15);
-  border: 1px solid rgba(34, 197, 94, 0.3);
-  color: #22c55e;
-  font-size: 0.8rem;
-  font-weight: 700;
-  padding: 0.15rem 0.45rem;
-  border-radius: 20px;
+.premium-player-info {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+  gap: 0.25rem !important;
 }
 
-.premium-player-card-body {
-  flex-grow: 1;
+.premium-player-title-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 0.4rem !important;
+  width: 100% !important;
 }
 
 .premium-player-name {
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: #ffffff;
-  margin: 0 0 0.5rem 0;
-  line-height: 1.2;
+  font-size: 1.05rem !important;
+  font-weight: 850 !important;
+  color: #ffffff !important;
+  margin: 0 !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.premium-player-rating-badge {
+  background: rgba(34, 197, 94, 0.12) !important;
+  border: 1px solid rgba(34, 197, 94, 0.3) !important;
+  color: #22c55e !important;
+  font-size: 0.8rem !important;
+  font-weight: 850 !important;
+  padding: 0.15rem 0.55rem !important;
+  border-radius: 999px !important;
+  flex-shrink: 0 !important;
 }
 
 .premium-player-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  row-gap: 0.25rem;
-  margin-bottom: 1rem;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+  margin: 0 !important;
 }
 
 .premium-player-tag {
-  display: inline-flex;
-  align-items: center;
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 0.15rem 0.45rem;
-  border-radius: 6px;
-  text-transform: uppercase;
-  white-space: nowrap;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.25rem !important;
+  font-size: 0.68rem !important;
+  font-weight: 700 !important;
+  padding: 0.15rem 0.45rem !important;
+  border-radius: 6px !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
 }
 
 .premium-player-tag--pos {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #aaa3b5;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #cbd5e1 !important;
 }
 
 .premium-player-tag--type {
-  background: rgba(139, 92, 246, 0.1);
-  border: 1px solid rgba(139, 92, 246, 0.25);
-  color: #a78bfa;
+  background: rgba(139, 92, 246, 0.12) !important;
+  border: 1px solid rgba(139, 92, 246, 0.28) !important;
+  color: #c4b5fd !important;
 }
 
 .premium-player-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.5rem;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  border-radius: 12px;
-  padding: 0.65rem 0.35rem;
-  margin-bottom: 1rem;
-  text-align: center;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-around !important;
+  background: rgba(255, 255, 255, 0.025) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-radius: 12px !important;
+  padding: 0.45rem 0.25rem !important;
+  margin: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .premium-player-stat {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 1 !important;
+  position: relative !important;
+}
+
+.premium-player-stat:not(:last-child)::after {
+  content: "" !important;
+  position: absolute !important;
+  right: 0 !important;
+  top: 15% !important;
+  height: 70% !important;
+  width: 1px !important;
+  background: rgba(255, 255, 255, 0.06) !important;
 }
 
 .premium-player-stat-val {
-  font-size: 0.95rem;
-  font-weight: 800;
-  color: #ffffff;
+  font-size: 0.95rem !important;
+  font-weight: 850 !important;
+  color: #ffffff !important;
+  line-height: 1.1 !important;
 }
 
 .premium-player-stat-val--pct {
-  color: #22c55e;
+  color: #22c55e !important;
 }
 
 .premium-player-stat-label {
-  font-size: 0.6rem;
-  color: #aaa3b5;
-  font-weight: 600;
-  text-transform: uppercase;
+  font-size: 0.62rem !important;
+  color: #64748b !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+  margin-top: 0.15rem !important;
 }
 
 /* Actions */
 .premium-player-card-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-top: auto;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+  margin-top: auto !important;
+  width: 100% !important;
 }
 
 .premium-player-card-btn {
-  width: 100% !important;
-  padding: 0.5rem 1rem !important;
-  font-size: 0.85rem !important;
-  font-weight: 700 !important;
-  border-radius: 10px !important;
+  flex: 1.3 !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  padding: 0 0.5rem !important;
+  font-size: 0.72rem !important;
+  font-weight: 800 !important;
+  border-radius: 999px !important;
   background: #22c55e !important;
   color: #ffffff !important;
   border: none !important;
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2) !important;
-  transition: all 0.2s ease !important;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.25) !important;
+  transition: all 0.15s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-decoration: none !important;
+  white-space: nowrap !important;
 }
 
 .premium-player-card-btn:active {
-  transform: scale(0.97) !important;
+  transform: scale(0.96) !important;
   background: #16a34a !important;
 }
 
 .premium-player-admin-actions {
-  display: flex;
-  gap: 0.35rem;
+  display: flex !important;
+  flex: 2 !important;
+  gap: 0.35rem !important;
 }
 
 .premium-player-admin-actions .btn {
-  flex: 1;
-  padding: 0.35rem !important;
-  font-size: 0.75rem !important;
+  flex: 1 !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  padding: 0 0.45rem !important;
+  font-size: 0.7rem !important;
+  font-weight: 700 !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.25rem !important;
+  white-space: nowrap !important;
 }
 
 /* Ensure mobile compatibility and override legacy list row mobile hides */
@@ -22679,4 +22735,541 @@ body.is-capacitor-app .auth-label-app {
   content: "" !important;
   width: 0 !important;
   height: 0 !important;
+}
+
+/* ============================================================
+   🚀 FULL-WIDTH UNCONTAINED PLAYERS SECTION (PAGE-INDEX)
+   ============================================================ */
+body.page-index #app-content,
+body.page-index .container,
+body.page-index .main,
+body.page-index.player-workspace-page .main,
+body.page-index.judge-workspace-page .main,
+body.page-index.admin-page--ecosystem .main,
+body.page-index.admin-page .main,
+body.page-index .page-container-wide {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding-left: 0.4rem !important;
+  padding-right: 0.4rem !important;
+  box-sizing: border-box !important;
+}
+
+@media (min-width: 768px) {
+  body.page-index #app-content,
+  body.page-index .container,
+  body.page-index .main,
+  body.page-index.player-workspace-page .main,
+  body.page-index.judge-workspace-page .main,
+  body.page-index.admin-page--ecosystem .main,
+  body.page-index.admin-page .main,
+  body.page-index .page-container-wide {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+    box-sizing: border-box !important;
+  }
+}
+
+/* Remove outer section card box, borders, shadows & padding */
+body.page-index .players-showcase-section,
+.page-index .players-showcase-section,
+.players-showcase-section {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 0 1.5rem 0 !important;
+  width: 100% !important;
+}
+
+body.page-index .players-showcase-section::before,
+body.page-index .players-showcase-section::after,
+.players-showcase-section::before,
+.players-showcase-section::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Un-carded filter tabs bar */
+body.page-index .premium-filter-tabs-container,
+.premium-filter-tabs-container {
+  display: flex !important;
+  justify-content: flex-start !important;
+  margin: 0.5rem 0 1rem 0 !important;
+  width: 100% !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+body.page-index .premium-filter-tabs,
+.premium-filter-tabs {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+  background: transparent !important;
+  padding: 0 0 0.25rem 0 !important;
+  border-radius: 0 !important;
+  border: none !important;
+  width: 100% !important;
+  overflow-x: auto !important;
+  scrollbar-width: none !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+body.page-index .premium-filter-tabs::-webkit-scrollbar,
+.premium-filter-tabs::-webkit-scrollbar {
+  display: none !important;
+}
+
+body.page-index .premium-filter-tab,
+.premium-filter-tab {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #94a3b8 !important;
+  padding: 0.35rem 0.75rem !important;
+  font-size: 0.76rem !important;
+  font-weight: 700 !important;
+  border-radius: 999px !important;
+  cursor: pointer;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.3rem !important;
+  transition: all 0.2s ease !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+}
+
+body.page-index .premium-filter-tab:hover,
+.premium-filter-tab:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+body.page-index .premium-filter-tab.is-active,
+.premium-filter-tab.is-active {
+  background: #22c55e !important;
+  color: #ffffff !important;
+  border-color: #22c55e !important;
+  box-shadow: 0 2px 10px rgba(34, 197, 94, 0.25) !important;
+}
+
+/* Ensure players grid fills 100% width */
+body.page-index .players-grid {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0.25rem 0 !important;
+}
+
+/* Home topbar header styling: Logo left 20% larger (~33px), Title + (+) Button right */
+body.page-index .home-topbar-header {
+  padding: 0.6rem 0.5rem 0.4rem 0.5rem !important;
+  margin: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.page-index .home-topbar-header img {
+  height: 38px !important;
+  width: auto !important;
+}
+
+body.page-index .btn-topbar-add:hover {
+  transform: scale(1.08);
+  background: #16a34a !important;
+}
+
+/* Modal Scroll Lock & Boundary enforcement */
+body.modal-open-lock,
+html.modal-open-lock {
+  overflow: hidden !important;
+  height: 100vh !important;
+  touch-action: none !important;
+}
+
+#createPlayerModal.profile-security-dialog {
+  max-height: 85vh !important;
+  max-width: min(92vw, 420px) !important;
+  box-sizing: border-box !important;
+}
+
+/* Unified Topbar Search Capsule */
+.topbar-search-capsule {
+  display: flex !important;
+  align-items: center !important;
+  position: relative !important;
+  height: 36px !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 999px !important;
+  padding: 0 !important;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  width: 36px;
+}
+
+.topbar-search-capsule:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.topbar-search-toggle-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  border-radius: 50% !important;
+  background: transparent !important;
+  border: none !important;
+  color: #94a3b8 !important;
+  cursor: pointer !important;
+  transition: color 0.2s ease !important;
+  padding: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+.topbar-search-toggle-btn:hover {
+  color: #ffffff !important;
+}
+
+.topbar-search-capsule.is-open {
+  width: 190px !important;
+  background: rgba(18, 20, 28, 0.95) !important;
+  border-color: rgba(34, 197, 94, 0.4) !important;
+  box-shadow: 0 0 14px rgba(34, 197, 94, 0.2) !important;
+}
+
+.topbar-search-capsule.is-open .topbar-search-toggle-btn {
+  color: #22c55e !important;
+}
+
+.topbar-search-input-box {
+  display: flex !important;
+  align-items: center !important;
+  flex: 1 !important;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  padding-right: 0.4rem;
+  min-width: 0;
+}
+
+.topbar-search-capsule.is-open .topbar-search-input-box {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.topbar-search-input {
+  width: 100% !important;
+  height: 32px !important;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  color: #ffffff !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  padding: 0 0.3rem !important;
+  box-shadow: none !important;
+}
+
+.topbar-search-input::placeholder {
+  color: #64748b !important;
+  font-weight: 500 !important;
+}
+
+.topbar-search-clear-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 22px !important;
+  height: 22px !important;
+  min-width: 22px !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: none !important;
+  color: #94a3b8 !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  transition: all 0.15s ease !important;
+  flex-shrink: 0 !important;
+}
+
+.topbar-search-clear-btn:hover {
+  background: rgba(239, 68, 68, 0.25) !important;
+  color: #ef4444 !important;
+}
+
+.topbar-search-toggle-btn .search-icon-main {
+  width: 16px;
+  height: 16px;
+}
+
+.topbar-search-clear-btn svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* ============================================================
+   🏆 LUXURY NO-AURA CREATE PLAYER MODAL (IMAGE 1 & 2 DESIGN)
+   ============================================================ */
+
+#createPlayerModal.profile-security-dialog {
+  background: #0d0f17 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 24px !important;
+  padding: 0 !important;
+  color: #ffffff !important;
+}
+
+#createPlayerModal .profile-security-dialog__shell {
+  background: transparent !important;
+}
+
+#createPlayerModal .profile-security-dialog__header {
+  background: rgba(255, 255, 255, 0.02) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+  padding: 1.25rem 1.25rem 1rem 1.25rem !important;
+}
+
+#createPlayerModal .profile-security-dialog__close {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #94a3b8 !important;
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+}
+
+#createPlayerModal .profile-security-dialog__close:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+  transform: scale(1.06) !important;
+}
+
+#createPlayerModal .profile-security-dialog__close:active {
+  transform: scale(0.94) !important;
+}
+
+/* Modal Group Cards - Exact #161926 background */
+#createPlayerModal .modal-form-card {
+  background: #161926 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 16px !important;
+  transition: border-color 0.2s ease !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+#createPlayerModal .modal-form-card:focus-within {
+  border-color: rgba(34, 197, 94, 0.4) !important;
+}
+
+/* Inputs - Obsidian Inset Dark */
+#createPlayerModal .form-input {
+  background: #0d0f17 !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 12px !important;
+  color: #ffffff !important;
+  font-size: 0.92rem !important;
+  padding: 0.75rem 1rem !important;
+  transition: border-color 0.2s ease !important;
+  box-shadow: none !important;
+  outline: none !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+#createPlayerModal .form-input:focus {
+  border-color: #22c55e !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+#createPlayerModal .form-input::placeholder {
+  color: #64748b !important;
+}
+
+/* Level Badge Display */
+#createPlayerModal #nivelValDisplay {
+  background: rgba(34, 197, 94, 0.15) !important;
+  border: 1px solid rgba(34, 197, 94, 0.35) !important;
+  color: #22c55e !important;
+  border-radius: 999px !important;
+  padding: 0.18rem 0.65rem !important;
+  font-weight: 900 !important;
+  font-size: 0.88rem !important;
+  box-shadow: none !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* Stepper Buttons (- and +) */
+#createPlayerModal .slider-step-btn {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 10px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: #1f2334 !important;
+  color: #ffffff !important;
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: all 0.18s ease !important;
+  box-shadow: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+#createPlayerModal .slider-step-btn:hover {
+  background: #2a2f45 !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+}
+
+#createPlayerModal .slider-step-btn:active {
+  transform: scale(0.93) !important;
+  background: rgba(34, 197, 94, 0.25) !important;
+  border-color: #22c55e !important;
+}
+
+/* Range Slider - Exact Image 2 style with dynamic green track fill */
+#createPlayerModal .votacao-slider {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background: #282c3c !important;
+  height: 8px !important;
+  border-radius: 999px !important;
+  outline: none !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+#createPlayerModal .votacao-slider::-webkit-slider-runnable-track {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  background: transparent !important;
+  border-radius: 999px !important;
+  border: none !important;
+  height: 8px !important;
+}
+
+#createPlayerModal .votacao-slider::-moz-range-track {
+  background: transparent !important;
+  border-radius: 999px !important;
+  border: none !important;
+  height: 8px !important;
+}
+
+#createPlayerModal .votacao-slider::-webkit-slider-thumb {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  width: 22px !important;
+  height: 22px !important;
+  border-radius: 50% !important;
+  background: #22c55e !important;
+  cursor: pointer !important;
+  transition: transform 0.15s ease, background-color 0.15s ease !important;
+  border: 2px solid #ffffff !important;
+  margin-top: -7px !important;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.5) !important;
+}
+
+#createPlayerModal .votacao-slider::-moz-range-thumb {
+  width: 22px !important;
+  height: 22px !important;
+  border-radius: 50% !important;
+  background: #22c55e !important;
+  cursor: pointer !important;
+  transition: transform 0.15s ease, background-color 0.15s ease !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.5) !important;
+}
+
+#createPlayerModal .votacao-slider::-webkit-slider-thumb:hover,
+#createPlayerModal .votacao-slider::-moz-range-thumb:hover {
+  transform: scale(1.12) !important;
+  background: #16a34a !important;
+}
+
+/* Option Cards (Tipo & Posicao) - Exact Image 1 Design */
+#createPlayerModal .tipo-option {
+  background: #252938 !important;
+  border: 1.5px solid transparent !important;
+  border-radius: 14px !important;
+  padding: 0 !important;
+  color: #ffffff !important;
+  transition: all 0.18s ease !important;
+  font-weight: 700 !important;
+}
+
+#createPlayerModal .tipo-option svg {
+  stroke: #ffffff !important;
+}
+
+#createPlayerModal .tipo-option:hover {
+  background: #2f3448 !important;
+  color: #ffffff !important;
+}
+
+#createPlayerModal .tipo-option:has(.tipo-radio:checked),
+#createPlayerModal .tipo-option.is-checked {
+  background: #142b20 !important;
+  border: 1.5px solid #22c55e !important;
+  color: #ffffff !important;
+}
+
+#createPlayerModal .tipo-option:has(.tipo-radio:checked) .tipo-label,
+#createPlayerModal .tipo-option.is-checked .tipo-label {
+  color: #ffffff !important;
+}
+
+#createPlayerModal .tipo-option:has(.tipo-radio:checked) svg,
+#createPlayerModal .tipo-option.is-checked svg {
+  stroke: #22c55e !important;
+}
+
+/* Submit Button - Matching Image 2 "Ver Perfil" Vibrant Green Pill Button */
+#createPlayerModal .premium-submit-btn {
+  background: #22c55e !important;
+  color: #ffffff !important;
+  border-radius: 999px !important;
+  min-height: 48px !important;
+  font-weight: 850 !important;
+  font-size: 0.95rem !important;
+  border: none !important;
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.4) !important;
+  transition: all 0.18s ease !important;
+  cursor: pointer !important;
+  letter-spacing: 0.01em !important;
+  width: 100% !important;
+}
+
+#createPlayerModal .premium-submit-btn:hover {
+  background: linear-gradient(135deg, #16a34a 0%, #166534 100%) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: none !important;
+}
+
+#createPlayerModal .premium-submit-btn:active {
+  transform: translateY(0) scale(0.99) !important;
 }

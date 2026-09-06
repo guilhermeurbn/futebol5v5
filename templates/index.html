@@ -42,15 +42,41 @@
     .auth-field-helper.success {
         color: #22c55e !important;
     }
+    .modal-open-lock {
+        overflow: hidden !important;
+        height: 100vh !important;
+    }
 </style>
     <div class="container profile-page{% if auth_user.role in ['admin'] %} page-container-wide judge-workspace-page admin-page admin-page--ecosystem{% elif auth_user.role == 'usuario' %} page-container-wide player-workspace-page{% endif %}" style="background: #000000 !important; min-height:100vh; width:100%;">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-content">
-                {% set brand_title = 'NaTrave' %}
-                {% set brand_tagline = 'Sorteio de times com equilíbrio e estilo' %}
-                {% set brand_subtitle = 'Organize e equilibre seus times de futebol' %}
-                {% include '_brand_header.html' %}
+        <!-- Topbar Header: Logo left (+15% bigger: 38px), Search icon toggle + Admin (+) button right -->
+        <header class="home-topbar-header" style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; padding: 0.6rem 0.5rem; width: 100%; box-sizing: border-box;">
+            <a href="{{ url_for('jogador.index') }}" aria-label="NaTrave 5v5" style="display: inline-flex; align-items: center; flex-shrink: 0;">
+                <img src="{{ url_for('static', filename='natrave.svg', v='20260708-03') }}" alt="NaTrave 5v5" style="height: 38px; width: auto; object-fit: contain;">
+            </a>
+
+            <div class="topbar-actions-right" style="display: flex; align-items: center; gap: 0.4rem; justify-content: flex-end;">
+                <!-- Unified Expandable Search Capsule -->
+                <div id="topbarSearchWrap" class="topbar-search-capsule">
+                    <button type="button" id="toggleSearchBtn" class="topbar-search-toggle-btn" aria-label="Buscar Jogador" onclick="window.toggleSearchInput()">
+                        <svg class="lucide-icon search-icon-main" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                    </button>
+                    <div class="topbar-search-input-box">
+                        <input type="text" id="playerSearchInput" class="topbar-search-input" placeholder="Buscar por nome..." oninput="window.filterPlayers()" autocomplete="off">
+                        <button type="button" class="topbar-search-clear-btn" aria-label="Fechar busca" onclick="window.toggleSearchInput(true)">
+                            <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                {% if auth_user.role in ['admin'] %}
+                <button type="button" id="toggleCreatePlayerBtn" class="btn-topbar-add" aria-label="Adicionar Jogador" onclick="openCreatePlayerModal()" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; min-width: 36px; border-radius: 50%; background: #22c55e; border: none; color: #ffffff; font-size: 1.35rem; font-weight: bold; cursor: pointer; box-shadow: 0 2px 10px rgba(34, 197, 94, 0.35); transition: transform 0.15s ease; line-height: 1; padding: 0; flex-shrink: 0;">
+                    <span style="display: block; transform: translateY(-1px);">+</span>
+                </button>
+                {% endif %}
             </div>
         </header>
 
@@ -64,42 +90,33 @@
 
             <!-- Players Showcase -->
             <section class="section players-showcase-section">
-                <div class="section-header players-showcase-header">
-                    <div class="players-showcase-heading">
-                        <h2 class="section-title players-showcase-title">
-                            <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 0.5rem; color: #22c55e;"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                            Jogadores Cadastrados
-                        </h2>
-                    </div>
-                    <div class="section-header-actions players-showcase-actions">
-                        {% if auth_user.role in ['admin'] %}
-                        <button type="button" id="toggleCreatePlayerBtn" class="btn premium-add-player-btn" aria-expanded="false" aria-controls="createPlayerModal" onclick="const m = document.getElementById('createPlayerModal'); if (m) { m.showModal(); const inp = m.querySelector('#player-nome'); if (inp) setTimeout(() => inp.focus(), 100); }">
-                            <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width: 16px; height: 16px; margin-right: 0.35rem; color: white;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                            <span>Adicionar Jogador</span>
-                        </button>
-                        {% endif %}
-                    </div>
-                </div>
-
                 {% if auth_user.role in ['admin'] %}
                     <!-- Player Creation Modal (Native Dialog) -->
-                    <dialog class="profile-security-dialog" id="createPlayerModal">
-                        <div class="profile-security-dialog__shell" style="padding: 1.75rem 1.5rem;">
-                            <header class="profile-security-dialog__header" style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;">
-                                <div>
-                                    <div class="section-label">Cadastrar</div>
-                                    <h2 style="font-size: 1.4rem; font-weight: 800; color: #ffffff; margin: 0.25rem 0 0.15rem 0;">Novo Jogador</h2>
-                                    <p style="font-size: 0.82rem; color: #9a95a4; margin: 0;">Preencha os dados básicos para adicionar o jogador.</p>
+                    <dialog class="profile-security-dialog" id="createPlayerModal" style="max-height: 88vh; max-width: min(92vw, 440px); overflow: hidden;">
+                        <div class="profile-security-dialog__shell" style="max-height: 88vh; display: flex; flex-direction: column; overflow: hidden;">
+                            <header class="profile-security-dialog__header" style="margin-bottom: 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-shrink: 0; padding: 1.25rem 1.25rem 1rem 1.25rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/></svg>
+                                    </div>
+                                    <div>
+                                        <h2 style="font-size: 1.25rem; font-weight: 850; color: #ffffff; margin: 0; line-height: 1.2; letter-spacing: -0.01em;">Novo Jogador</h2>
+                                        <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.15rem; font-weight: 500;">Cadastrar atleta na partida</div>
+                                    </div>
                                 </div>
-                                <button type="button" class="profile-security-dialog__close" id="closeCreatePlayerModalBtn" aria-label="Fechar" style="background: none; border: none; color: #9a95a4; font-size: 1.25rem; cursor: pointer; padding: 0.25rem;" onclick="document.getElementById('createPlayerModal')?.close();">✕</button>
+                                <button type="button" class="profile-security-dialog__close" id="closeCreatePlayerModalBtn" aria-label="Fechar" onclick="closeCreatePlayerModal()">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                </button>
                             </header>
 
-                            <div class="profile-security-dialog__body">
-                                <form action="{{ url_for('jogador.adicionar_jogador') }}" method="post" class="player-create-form">
+                            <div class="profile-security-dialog__body" style="overflow-y: auto; -webkit-overflow-scrolling: touch; flex: 1; min-height: 0; padding: 1.1rem 1.25rem 1.25rem 1.25rem;">
+                                <form action="{{ url_for('jogador.adicionar_jogador') }}" method="post" class="player-create-form" style="display: flex; flex-direction: column; gap: 1rem; width: 100%;">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                    <div class="form-group" style="margin-bottom: 1.25rem;">
-                                        <label for="player-nome" class="form-label">Nome do Jogador</label>
-                                        <div class="auth-input-wrap" id="player-nome-wrap">
+                                    
+                                    <!-- Card 1: Nome -->
+                                    <div class="modal-form-card" style="width: 100%; box-sizing: border-box; background: #161926; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 0.9rem 1rem;">
+                                        <label for="player-nome" class="form-label" style="font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.5rem; display: block;">Nome do Jogador</label>
+                                        <div class="auth-input-wrap" id="player-nome-wrap" style="position: relative; width: 100%;">
                                             <input
                                                 type="text"
                                                 id="player-nome"
@@ -110,19 +127,23 @@
                                                 pattern="^[A-Za-zÀ-ÖØ-öø-ÿ]+(?:\s+[A-Za-zÀ-ÖØ-öø-ÿ]+)+$"
                                                 title="Por favor, insira o nome e sobrenome do jogador."
                                                 autocomplete="off"
+                                                style="width: 100%; box-sizing: border-box; box-shadow: none !important;"
                                             >
                                             <span class="auth-input-status" id="player-nome-status"></span>
                                         </div>
                                         <div class="auth-field-helper" id="player-nome-helper"></div>
                                     </div>
 
-                                    <div class="form-group" style="margin-bottom: 1.25rem;">
-                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                                            <label for="nivel" class="form-label" style="margin-bottom: 0;">Nível de Habilidade</label>
-                                            <span id="nivelValDisplay" style="font-weight: 800; color: #a78bfa; background: rgba(167, 139, 250, 0.1); padding: 0.2rem 0.6rem; border-radius: 8px; font-size: 0.9rem;">5.5</span>
+                                    <!-- Card 2: Nível de Habilidade (Image 2 style) -->
+                                    <div class="modal-form-card" style="width: 100%; box-sizing: border-box; background: #161926; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 0.9rem 1rem;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                                            <label for="nivel" class="form-label" style="margin-bottom: 0; font-size: 0.72rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.07em;">Nível de Habilidade</label>
+                                            <div style="display: flex; align-items: center; gap: 0.4rem;">
+                                                <span style="font-size: 0.7rem; color: #64748b; font-weight: 600;">NOTA</span>
+                                                <span id="nivelValDisplay" style="font-weight: 900; color: #22c55e; background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.35); padding: 0.18rem 0.65rem; border-radius: 999px; font-size: 0.88rem;">5.5</span>
+                                            </div>
                                         </div>
-                                        <div class="slider-control-container" style="display: flex; align-items: center; gap: 0.75rem; margin: 0.5rem 0;">
-                                            <button type="button" class="slider-step-btn" id="btnNivelDec" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: #ffffff; font-size: 1.25rem; font-weight: bold; cursor: pointer; user-select: none; transition: all 0.15s ease;">−</button>
+                                        <div class="slider-control-container" style="display: flex; align-items: center; width: 100%; margin-top: 0.25rem;">
                                             <input
                                                 type="range"
                                                 id="nivel"
@@ -132,54 +153,57 @@
                                                 step="0.5"
                                                 value="5.5"
                                                 class="votacao-slider"
-                                                style="flex: 1; cursor: pointer; margin: 0 !important;"
+                                                style="width: 100%; cursor: pointer; margin: 0 !important;"
                                             >
-                                            <button type="button" class="slider-step-btn" id="btnNivelInc" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: #ffffff; font-size: 1.25rem; font-weight: bold; cursor: pointer; user-select: none; transition: all 0.15s ease;">+</button>
                                         </div>
                                     </div>
 
-                                    <div class="form-group" style="margin-bottom: 1.25rem;">
-                                        <label class="form-label">Tipo</label>
-                                        <div class="tipo-selector" style="display: flex; gap: 1rem;">
-                                            <label class="tipo-option" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.75rem; cursor: pointer; transition: all 0.2s ease;">
-                                                <input type="radio" name="tipo" value="fixo" class="tipo-radio" required>
-                                                <span class="tipo-label" style="color: #f4f1f8; font-size: 0.85rem; display: flex; align-items: center; gap: 0.35rem;">
-                                                    <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; color: #a78bfa;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                    <!-- Card 3: Tipo de Atleta -->
+                                    <div class="modal-form-card" style="width: 100%; box-sizing: border-box; background: #161926; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 0.9rem 1rem;">
+                                        <label class="form-label" style="font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.6rem; display: block;">Tipo de Atleta</label>
+                                        <div class="tipo-selector" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; width: 100%; box-sizing: border-box;">
+                                            <label class="tipo-option" style="cursor: pointer; margin: 0; width: 100%;">
+                                                <input type="radio" name="tipo" value="fixo" class="tipo-radio" required style="display: none;">
+                                                <span class="tipo-label" style="font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 0; width: 100%;">
+                                                    <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                                                     Fixo
                                                 </span>
                                             </label>
-                                            <label class="tipo-option" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.75rem; cursor: pointer; transition: all 0.2s ease;">
-                                                <input type="radio" name="tipo" value="avulso" class="tipo-radio" checked required>
-                                                <span class="tipo-label" style="color: #f4f1f8; font-size: 0.85rem; display: flex; align-items: center; gap: 0.35rem;">
-                                                    <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; color: #a78bfa;"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                            <label class="tipo-option is-checked" style="cursor: pointer; margin: 0; width: 100%;">
+                                                <input type="radio" name="tipo" value="avulso" class="tipo-radio" checked required style="display: none;">
+                                                <span class="tipo-label" style="font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 0; width: 100%;">
+                                                    <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                                                     Avulso
                                                 </span>
                                             </label>
                                         </div>
                                     </div>
 
-                                    <div class="form-group" style="margin-bottom: 2rem;">
-                                        <label class="form-label">Posição</label>
-                                        <div class="tipo-selector" style="display: flex; gap: 1rem;">
-                                            <label class="tipo-option" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.75rem; cursor: pointer; transition: all 0.2s ease;">
-                                                <input type="radio" name="posicao" value="linha" class="tipo-radio" checked required>
-                                                <span class="tipo-label" style="color: #f4f1f8; font-size: 0.85rem; display: flex; align-items: center; gap: 0.35rem;">
-                                                    <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; color: #a78bfa;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="2" x2="12" y2="22"></line></svg>
+                                    <!-- Card 4: Posição (Exact Pitch & Glove Icons from Image 1) -->
+                                    <div class="modal-form-card" style="width: 100%; box-sizing: border-box; background: #161926; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 0.9rem 1rem;">
+                                        <label class="form-label" style="font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.6rem; display: block;">Posição</label>
+                                        <div class="tipo-selector" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; width: 100%; box-sizing: border-box;">
+                                            <label class="tipo-option is-checked" style="cursor: pointer; margin: 0; width: 100%;">
+                                                <input type="radio" name="posicao" value="linha" class="tipo-radio" checked required style="display: none;">
+                                                <span class="tipo-label" style="font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 0; width: 100%;">
+                                                    <!-- Football Pitch Icon -->
+                                                    <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;"><rect x="3" y="5" width="18" height="14" rx="2"></rect><line x1="12" y1="5" x2="12" y2="19"></line><circle cx="12" cy="12" r="3"></circle></svg>
                                                     Linha
                                                 </span>
                                             </label>
-                                            <label class="tipo-option" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.75rem; cursor: pointer; transition: all 0.2s ease;">
-                                                <input type="radio" name="posicao" value="goleiro" class="tipo-radio" required>
-                                                <span class="tipo-label" style="color: #f4f1f8; font-size: 0.85rem; display: flex; align-items: center; gap: 0.35rem;">
-                                                    <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px; color: #a78bfa;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                            <label class="tipo-option" style="cursor: pointer; margin: 0; width: 100%;">
+                                                <input type="radio" name="posicao" value="goleiro" class="tipo-radio" required style="display: none;">
+                                                <span class="tipo-label" style="font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 0; width: 100%;">
+                                                    <!-- Goalkeeper Glove Icon -->
+                                                    <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;"><path d="M7 11V6a2 2 0 0 1 4 0v4"></path><path d="M11 10V3.5a2 2 0 0 1 4 0v6.5"></path><path d="M15 10V5.5a2 2 0 0 1 4 0v6.5"></path><path d="M7 11a2 2 0 0 0-2 2v2a7 7 0 0 0 7 7h3a6 6 0 0 0 6-6v-3a2 2 0 0 0-2-2h-1"></path></svg>
                                                     Goleiro
                                                 </span>
                                             </label>
                                         </div>
                                     </div>
 
-                                    <div class="form-group">
-                                        <button type="submit" class="btn btn-primary premium-submit-btn" style="width: 100%; min-height: 48px;">
+                                    <div class="form-group" style="margin-top: 0.4rem; width: 100%;">
+                                        <button type="submit" class="btn btn-primary premium-submit-btn" style="width: 100%; min-height: 48px; border-radius: 999px; background: #22c55e !important; color: #ffffff !important; font-weight: 850; font-size: 0.95rem; border: none; box-shadow: none !important; filter: none !important; letter-spacing: 0.01em;">
                                             <span>Adicionar Jogador</span>
                                         </button>
                                     </div>
@@ -188,40 +212,75 @@
                         </div>
                     </dialog>
                     <script>
+                        function openCreatePlayerModal() {
+                            const createModal = document.getElementById('createPlayerModal');
+                            if (!createModal) return;
+                            createModal.showModal();
+                            document.body.classList.add('modal-open-lock');
+                            document.documentElement.classList.add('modal-open-lock');
+                            const playerNomeInput = createModal.querySelector('#player-nome');
+                            if (playerNomeInput) setTimeout(() => playerNomeInput.focus(), 100);
+                        }
+
+                        function closeCreatePlayerModal() {
+                            const createModal = document.getElementById('createPlayerModal');
+                            if (!createModal) return;
+                            createModal.close();
+                            document.body.classList.remove('modal-open-lock');
+                            document.documentElement.classList.remove('modal-open-lock');
+                        }
+
                         (() => {
                             const createModal = document.getElementById('createPlayerModal');
                             if (!createModal) return;
 
+                            createModal.addEventListener('close', () => {
+                                document.body.classList.remove('modal-open-lock');
+                                document.documentElement.classList.remove('modal-open-lock');
+                            });
+
+                            createModal.addEventListener('click', (e) => {
+                                const rect = createModal.getBoundingClientRect();
+                                const isInDialog = (
+                                    rect.top <= e.clientY && e.clientY <= rect.top + rect.height &&
+                                    rect.left <= e.clientX && e.clientX <= rect.left + rect.width
+                                );
+                                if (!isInDialog) {
+                                    closeCreatePlayerModal();
+                                }
+                            });
+
+                            createModal.querySelectorAll('.tipo-radio').forEach(radio => {
+                                radio.addEventListener('change', () => {
+                                    const groupName = radio.name;
+                                    createModal.querySelectorAll(`input[name="${groupName}"]`).forEach(r => {
+                                        const opt = r.closest('.tipo-option');
+                                        if (opt) {
+                                            if (r.checked) opt.classList.add('is-checked');
+                                            else opt.classList.remove('is-checked');
+                                        }
+                                    });
+                                });
+                            });
+
                             const slider = createModal.querySelector('#nivel');
                             const display = createModal.querySelector('#nivelValDisplay');
-                            const decBtn = createModal.querySelector('#btnNivelDec');
-                            const incBtn = createModal.querySelector('#btnNivelInc');
 
                             const updateDisplay = () => {
-                                display.textContent = parseFloat(slider.value).toFixed(1);
+                                if (!slider) return;
+                                const val = parseFloat(slider.value);
+                                if (display) display.textContent = val.toFixed(1);
+                                const min = parseFloat(slider.min) || 1;
+                                const max = parseFloat(slider.max) || 10;
+                                const pct = ((val - min) / (max - min)) * 100;
+                                slider.style.background = `linear-gradient(to right, #22c55e 0%, #22c55e ${pct}%, #282c3c ${pct}%, #282c3c 100%)`;
                             };
 
-                            if (slider && display) {
+                            if (slider) {
                                 slider.addEventListener('input', updateDisplay);
-
-                                if (decBtn) {
-                                    decBtn.addEventListener('click', () => {
-                                        const val = Math.max(1, parseFloat(slider.value) - 0.5);
-                                        slider.value = val;
-                                        slider.dispatchEvent(new Event('input'));
-                                    });
-                                }
-
-                                if (incBtn) {
-                                    incBtn.addEventListener('click', () => {
-                                        const val = Math.min(10, parseFloat(slider.value) + 0.5);
-                                        slider.value = val;
-                                        slider.dispatchEvent(new Event('input'));
-                                    });
-                                }
+                                updateDisplay();
                             }
 
-                            // Dynamic player name verification
                             const playerNomeInput = createModal.querySelector('#player-nome');
                             const playerNomeWrap = createModal.querySelector('#player-nome-wrap');
                             const playerNomeStatus = createModal.querySelector('#player-nome-status');
@@ -230,7 +289,7 @@
 
                             const playerIcons = {
                                 success: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
-                                error: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`
+                                error: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`
                             };
 
                             function validatePlayerName() {
@@ -286,7 +345,6 @@
 
                             if (playerNomeInput) {
                                 playerNomeInput.addEventListener('input', validatePlayerName);
-                                // Initial trigger to disable by default (since name is empty initially)
                                 validatePlayerName();
                             }
                         })();
@@ -294,26 +352,22 @@
                 {% endif %}
 
                 {% if jogadores %}
-                    <!-- Filtros de Categoria Inteligente (Lucide Icons) -->
+                    <!-- Filtros de Categoria (Fixos, Avulsos, Goleiro, Linha - Sem "Todos") -->
                     <div class="premium-filter-tabs-container">
                         <div class="premium-filter-tabs">
-                            <button type="button" class="premium-filter-tab is-active" data-filter="all">
-                                <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                                <span>Todos</span>
-                            </button>
-                            <button type="button" class="premium-filter-tab" data-filter="fixo">
+                            <button type="button" class="premium-filter-tab" data-filter="fixo" onclick="window.handleFilterClick(this, event)">
                                 <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                                 <span>Fixos</span>
                             </button>
-                            <button type="button" class="premium-filter-tab" data-filter="avulso">
+                            <button type="button" class="premium-filter-tab" data-filter="avulso" onclick="window.handleFilterClick(this, event)">
                                 <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                                 <span>Avulsos</span>
                             </button>
-                            <button type="button" class="premium-filter-tab" data-filter="goleiro">
+                            <button type="button" class="premium-filter-tab" data-filter="goleiro" onclick="window.handleFilterClick(this, event)">
                                 <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                                 <span>Goleiro</span>
                             </button>
-                            <button type="button" class="premium-filter-tab" data-filter="linha">
+                            <button type="button" class="premium-filter-tab" data-filter="linha" onclick="window.handleFilterClick(this, event)">
                                 <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                                 <span>Linha</span>
                             </button>
@@ -327,7 +381,7 @@
                             {% set perfil_href = url_for('jogador.perfil_jogador_publico', jogador_id=jogador.id) %}
                             <article id="player-{{ jogador.id }}" class="player-card premium-player-card player-list-row" data-name="{{ jogador.nome|lower }}" data-player-id="{{ jogador.id }}" data-nivel="{{ jogador.nivel }}" data-tipo="{{ jogador.tipo }}" data-posicao="{{ jogador.posicao }}">
                                 <div class="premium-player-card-inner">
-                                    <div class="premium-player-card-header">
+                                    <div class="premium-player-hero">
                                         <div class="premium-player-avatar-wrap">
                                             {% if jogador.foto_url %}
                                             <div class="premium-player-avatar-inner" style="padding: 0; overflow: hidden; border-radius: 50%;">
@@ -337,42 +391,44 @@
                                             <div class="premium-player-avatar-inner">{{ avatar_text|upper }}</div>
                                             {% endif %}
                                         </div>
-                                        <span class="premium-player-rating-badge">{{ '%.1f'|format(jogador.nivel|float) }}</span>
+
+                                        <div class="premium-player-info">
+                                            <div class="premium-player-title-row">
+                                                <h3 class="premium-player-name">{{ jogador.nome | abreviar_nome }}</h3>
+                                                <span class="premium-player-rating-badge">{{ '%.1f'|format(jogador.nivel|float) }}</span>
+                                            </div>
+                                            <div class="premium-player-tags">
+                                                <span class="premium-player-tag premium-player-tag--pos">
+                                                    {% if jogador.posicao == 'goleiro' %}
+                                                        <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Goleiro
+                                                    {% else %}
+                                                        <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Linha
+                                                    {% endif %}
+                                                </span>
+                                                <span class="premium-player-tag premium-player-tag--type">
+                                                    {% if jogador.tipo == 'fixo' %}
+                                                        <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Fixo
+                                                    {% else %}
+                                                        <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Avulso
+                                                    {% endif %}
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    <div class="premium-player-card-body">
-                                        <h3 class="premium-player-name">{{ jogador.nome | abreviar_nome }}</h3>
-                                        <div class="premium-player-tags">
-                                            <span class="premium-player-tag premium-player-tag--pos">
-                                                {% if jogador.posicao == 'goleiro' %}
-                                                    <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Goleiro
-                                                {% else %}
-                                                    <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Linha
-                                                {% endif %}
-                                            </span>
-                                            <span class="premium-player-tag premium-player-tag--type">
-                                                {% if jogador.tipo == 'fixo' %}
-                                                    <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Fixo
-                                                {% else %}
-                                                    <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Avulso
-                                                {% endif %}
-                                            </span>
+                                    <div class="premium-player-stats">
+                                        <div class="premium-player-stat">
+                                            <span class="premium-player-stat-val">{{ jogador.stats_card.matches }}</span>
+                                            <span class="premium-player-stat-label">Partidas</span>
                                         </div>
-
-                                        <div class="premium-player-stats">
-                                            <div class="premium-player-stat">
-                                                <span class="premium-player-stat-val">{{ jogador.stats_card.matches }}</span>
-                                                <span class="premium-player-stat-label">Partidas</span>
-                                            </div>
-                                            <div class="premium-player-stat">
-                                                <span class="premium-player-stat-val">{{ jogador.stats_card.wins }}</span>
-                                                <span class="premium-player-stat-label">Vitórias</span>
-                                            </div>
-                                            <div class="premium-player-stat">
-                                                {% set win_rate = jogador.stats_card.approval|float %}
-                                                <span class="premium-player-stat-val premium-player-stat-val--pct">{{ '%.0f'|format(win_rate) }}%</span>
-                                                <span class="premium-player-stat-label">Aproveit.</span>
-                                            </div>
+                                        <div class="premium-player-stat">
+                                            <span class="premium-player-stat-val">{{ jogador.stats_card.wins }}</span>
+                                            <span class="premium-player-stat-label">Vitórias</span>
+                                        </div>
+                                        <div class="premium-player-stat">
+                                            {% set win_rate = jogador.stats_card.approval|float %}
+                                            <span class="premium-player-stat-val premium-player-stat-val--pct">{{ '%.0f'|format(win_rate) }}%</span>
+                                            <span class="premium-player-stat-label">Aproveit.</span>
                                         </div>
                                     </div>
 
@@ -442,77 +498,122 @@
     <!-- Scripts -->
     <script>
         // ===== CONTROLE DO MODAL DE CRIAÇÃO =====
-        const toggleCreatePlayerBtn = document.getElementById('toggleCreatePlayerBtn');
-        const createPlayerModal = document.getElementById('createPlayerModal');
-        const closeCreatePlayerModalBtn = document.getElementById('closeCreatePlayerModalBtn');
-        const nomeJogadorInput = document.getElementById('player-nome');
-
-        if (toggleCreatePlayerBtn && createPlayerModal) {
-            const openModal = () => {
-                if (createPlayerModal.hasAttribute('open')) createPlayerModal.removeAttribute('open');
-                if (!createPlayerModal.open) createPlayerModal.showModal();
-                setTimeout(() => {
-                    if (nomeJogadorInput) nomeJogadorInput.focus();
-                }, 100);
-            };
-
-            const closeModal = () => {
-                createPlayerModal.close();
-            };
-
-            toggleCreatePlayerBtn.addEventListener('click', openModal);
-            if (closeCreatePlayerModalBtn) {
-                closeCreatePlayerModalBtn.addEventListener('click', closeModal);
+        window.openCreatePlayerModal = function() {
+            const createModal = document.getElementById('createPlayerModal');
+            if (!createModal) return;
+            if (!createModal.open) {
+                try {
+                    createModal.showModal();
+                } catch (e) {
+                    createModal.setAttribute('open', '');
+                }
             }
+            document.body.classList.add('modal-open-lock');
+            document.documentElement.classList.add('modal-open-lock');
+            const playerNomeInput = createModal.querySelector('#player-nome');
+            if (playerNomeInput) {
+                setTimeout(() => playerNomeInput.focus(), 100);
+            }
+        };
 
-            createPlayerModal.addEventListener('click', (e) => {
-                if (e.target === createPlayerModal) {
-                    closeModal();
+        window.closeCreatePlayerModal = function() {
+            const createModal = document.getElementById('createPlayerModal');
+            if (!createModal) return;
+            if (createModal.open || createModal.hasAttribute('open')) {
+                try {
+                    createModal.close();
+                } catch (e) {
+                    createModal.removeAttribute('open');
+                }
+            }
+            document.body.classList.remove('modal-open-lock');
+            document.documentElement.classList.remove('modal-open-lock');
+        };
+
+        // ===== REMOÇÃO DE ACENTOS PARA BUSCA INTELIGENTE =====
+        function normalizeSearchText(str) {
+            return String(str || '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase()
+                .trim();
+        }
+
+        // ===== CONTROLE DA BARRA DE BUSCA EXPANSÍVEL (CÁPSULA UNIFICADA) =====
+        window.toggleSearchInput = function(forceClose) {
+            const wrap = document.getElementById('topbarSearchWrap');
+            const input = document.getElementById('playerSearchInput');
+            if (!wrap || !input) return;
+
+            const isOpen = wrap.classList.contains('is-open');
+            if (forceClose || isOpen) {
+                wrap.classList.remove('is-open');
+                input.value = '';
+                window.filterPlayers();
+            } else {
+                wrap.classList.add('is-open');
+                setTimeout(() => input.focus(), 80);
+            }
+        };
+
+        // ===== LÓGICA DE FILTRAGEM UNIFICADA (NOME INSENSÍVEL A ACENTOS E CATEGORIA) =====
+        window.filterPlayers = function() {
+            const searchInput = document.getElementById('playerSearchInput');
+            const rawQuery = searchInput ? searchInput.value : '';
+            const query = normalizeSearchText(rawQuery);
+
+            const activeTab = document.querySelector('.premium-filter-tab.is-active');
+            const filterValue = activeTab ? activeTab.getAttribute('data-filter') : null;
+
+            document.querySelectorAll('.player-card').forEach(card => {
+                const name = normalizeSearchText(card.getAttribute('data-name') || '');
+                const tipo = normalizeSearchText(card.getAttribute('data-tipo') || '');
+                const posicao = normalizeSearchText(card.getAttribute('data-posicao') || '');
+
+                let nameMatches = !query || name.includes(query);
+
+                let categoryMatches = false;
+                if (!filterValue || filterValue === 'all') {
+                    categoryMatches = true;
+                } else if (filterValue === 'fixo' && tipo === 'fixo') {
+                    categoryMatches = true;
+                } else if (filterValue === 'avulso' && tipo === 'avulso') {
+                    categoryMatches = true;
+                } else if (filterValue === 'goleiro' && posicao === 'goleiro') {
+                    categoryMatches = true;
+                } else if (filterValue === 'linha' && posicao === 'linha') {
+                    categoryMatches = true;
+                }
+
+                if (nameMatches && categoryMatches) {
+                    card.style.removeProperty('display');
+                } else {
+                    card.style.setProperty('display', 'none', 'important');
                 }
             });
-        }
+        };
 
-        // ===== DELEGAÇÃO DE CLIQUE PARA FILTROS (INLINE COM PROTEÇÃO CONTRA DUPLICAÇÃO) =====
-        if (!window.NaTraveFilterBound) {
-            window.NaTraveFilterBound = true;
-            document.addEventListener('click', (e) => {
-                const tab = e.target.closest('.premium-filter-tab');
-                if (!tab) return;
+        window.handleFilterClick = function(btn, evt) {
+            if (evt) {
+                if (evt._handledFilter) return;
+                evt._handledFilter = true;
+                evt.stopPropagation();
+            }
+            if (!btn) return;
 
-                e.preventDefault();
-                const filterValue = tab.getAttribute('data-filter');
+            const isAlreadyActive = btn.classList.contains('is-active');
 
-                // 1. Atualizar classe ativa das abas de filtro
-                document.querySelectorAll('.premium-filter-tab').forEach(t => {
-                    t.classList.toggle('is-active', t === tab);
-                });
+            // 1. Remover destaque de todas as abas
+            document.querySelectorAll('.premium-filter-tab').forEach(t => t.classList.remove('is-active'));
 
-                // 2. Filtrar os cards de jogadores baseando-se em tipo/posição
-                document.querySelectorAll('.player-card').forEach(card => {
-                    const tipo = String(card.getAttribute('data-tipo') || '').trim().toLowerCase();
-                    const posicao = String(card.getAttribute('data-posicao') || '').trim().toLowerCase();
+            // 2. Se não estava ativa, destacar (Toggle ON/OFF)
+            if (!isAlreadyActive) {
+                btn.classList.add('is-active');
+            }
 
-                    let matches = false;
-                    if (filterValue === 'all') {
-                        matches = true;
-                    } else if (filterValue === 'fixo' && tipo === 'fixo') {
-                        matches = true;
-                    } else if (filterValue === 'avulso' && tipo === 'avulso') {
-                        matches = true;
-                    } else if (filterValue === 'goleiro' && posicao === 'goleiro') {
-                        matches = true;
-                    } else if (filterValue === 'linha' && posicao === 'linha') {
-                        matches = true;
-                    }
-
-                    if (matches) {
-                        card.style.removeProperty('display');
-                    } else {
-                        card.style.setProperty('display', 'none', 'important');
-                    }
-                });
-            });
-        }
+            // 3. Filtrar com busca e filtro de categoria unificados
+            window.filterPlayers();
+        };
 
 
 

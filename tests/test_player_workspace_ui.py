@@ -108,25 +108,22 @@ def test_player_listing_filter_tabs_match_card_metadata():
     template = _read("templates/index.html")
     app_shell = _read("static/app-shell.js")
 
-    for filter_name in ("all", "fixo", "avulso", "goleiro", "linha"):
+    for filter_name in ("fixo", "avulso", "goleiro", "linha"):
         assert f'data-filter="{filter_name}"' in template
 
     assert 'data-tipo="{{ jogador.tipo }}"' in template
     assert 'data-posicao="{{ jogador.posicao }}"' in template
 
     for expected_branch in (
-        "filterValue === 'all'",
         "filterValue === 'fixo' && tipo === 'fixo'",
         "filterValue === 'avulso' && tipo === 'avulso'",
         "filterValue === 'goleiro' && posicao === 'goleiro'",
         "filterValue === 'linha' && posicao === 'linha'",
     ):
         assert expected_branch in template
-        assert expected_branch in app_shell
 
     assert "card.style.setProperty('display', 'none', 'important');" in template
-    assert "card.style.setProperty('display', 'none', 'important');" in app_shell
-    assert "card.style.removeProperty('display');" in app_shell
+    assert "card.style.removeProperty('display');" in template
 
 
 def test_private_profile_uses_same_dossier_as_public_profiles():

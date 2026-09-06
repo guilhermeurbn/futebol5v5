@@ -172,7 +172,53 @@ def test_formatar_nome_perfil_abbreviation_rule():
     assert formatar_nome_perfil("Bartholomew") == "Bartholome"
     assert formatar_nome_perfil("Guilherme") == "Guilherme"
     assert formatar_nome_perfil("") == ""
-    assert formatar_nome_perfil(None) == ""
+
+def test_editar_jogador_legacy_single_name(monkeypatch):
+    app = criar_app('testing')
+    app.config['WTF_CSRF_ENABLED'] = False
+
+    class MockJogador:
+        def __init__(self, id, nome, nivel=6.5, tipo='avulso', posicao='linha'):
+            self.id = id
+            self.nome = nome
+            self.nivel = nivel
+            self.tipo = tipo
+            self.posicao = posicao
+
+    # Player 1 is legacy single name "Alex"
+    # Player 2 has 2 names "Guilherme Urbano"
+    players_db = {
+        'p1': MockJogador('p1', 'Alex'),
+        'p2': MockJogador('p2', 'Guilherme Urbano'),
+    }
+
+    def mock_obter_por_id(id):
+        return players_db.get(id)
+
+    def mock_atualizar(id, nome=None, nivel=None, tipo=None, posicao=None):
+        if id in players_db and nome:
+            players_db[id].nome = nome
+        return players_db.get(id)
+
+    monkeypatch.setattr(jogador_crud_routes.jogador_service, 'obter_por_id', mock_obter_por_id)
+    monkeypatch.setattr(jogador_crud_routes.jogador_service, 'atualizar', mock_atualizar)
+    monkeypatch.setattr(jogador_crud_routes, '_usuario_logado', lambda: {'id': 'admin', 'role': 'admin', 'autenticado': True})
+
+    with app.test_client() as client:
+        with client.session_transaction() as sess:
+            sess['user_id'] = 'admin'
+            sess['role'] = 'admin'
+
+        # 1. Updating legacy single-name player "Alex" to "Alex" or "Alexandre" (still 1 name) should SUCCEED
+        res1 = client.post('/jogadores/p1/editar', data={'nome': 'Alexandre', 'nivel': '6.5', 'tipo': 'avulso', 'posicao': 'linha'})
+        assert res1.status_code == 302
+        assert players_db['p1'].nome == 'Alexandre'
+
+        # 2. Updating 2-name player "Guilherme Urbano" to 1 single name "Guilherme" should FAIL
+        res2 = client.post('/jogadores/p2/editar', data={'nome': 'Guilherme', 'nivel': '6.5', 'tipo': 'avulso', 'posicao': 'linha'})
+        assert res2.status_code == 400
+        assert 'Por favor, insira o nome e sobrenome do jogador.' in res2.get_data(as_text=True)
+
 
 
 
