@@ -112,3 +112,40 @@ def test_cache_stats_e_invalidacao_global():
 
     JogadorStatsService.invalidar_cache_stats()
     assert len(JogadorStatsService._cache_stats) == 0
+
+
+def test_carregar_partidas_sorteio_id_priority(monkeypatch):
+    """Garante que a união de partidas e votações prioriza sorteio_id quando partida.id != votacao.id"""
+    partidas_mock = [
+        {"id": 4, "sorteio_id": 5, "data": "2026-08-26T00:05:03"},
+        {"id": 5, "sorteio_id": 6, "data": "2026-09-01T20:37:49"},
+    ]
+    votacoes_mock = {
+        "partidas": [
+            {"id": 5, "sorteio_id": 5, "data": "2026-08-26T01:00:00", "ranking": {"ranking_jogadores": []}},
+            {"id": 6, "sorteio_id": 6, "data": "2026-09-02T14:01:41", "ranking": {"ranking_jogadores": []}},
+        ]
+    }
+
+    def fake_load_json_data(chave, default=None):
+        if chave == "partidas":
+            return partidas_mock
+        if chave == "votacoes_partidas":
+            return votacoes_mock
+        return default or []
+
+    monkeypatch.setattr("services.jogador_stats_service.load_json_data", fake_load_json_data)
+    
+    service = JogadorStatsService()
+    JogadorStatsService.invalidar_cache_stats()
+    combinadas = service._carregar_partidas()
+
+    assert len(combinadas) == 2
+    # Partida id=5 (sorteio_id=6) deve ter vinculado com Votacao id=6 (sorteio_id=6), nao com Votacao id=5
+    p_sorteio_6 = next((p for p in combinadas if str(p.get("sorteio_id")) == "6"), None)
+    assert p_sorteio_6 is not None
+    assert str(p_sorteio_6.get("id")) == "5"
+    assert p_sorteio_6.get("data") == "2026-09-01T20:37:49"
+    assert "ranking" in p_sorteio_6
+
+

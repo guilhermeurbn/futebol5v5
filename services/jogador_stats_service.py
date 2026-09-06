@@ -117,12 +117,12 @@ class JogadorStatsService:
                 sid = str(p.get("sorteio_id") or "")
                 if pid or sid:
                     p_copy = dict(p)
-                    # Priorizar id exato, depois sorteio_id
+                    # Priorizar sorteio_id para garantir vinculo correto entre sorteio, partida e votacao
                     vp = None
-                    if pid and pid in v_by_id:
-                        vp = v_by_id[pid]
-                    elif sid and sid in v_by_sorteio:
+                    if sid and sid in v_by_sorteio:
                         vp = v_by_sorteio[sid]
+                    elif pid and pid in v_by_id:
+                        vp = v_by_id[pid]
                     elif pid and pid in v_by_sorteio:
                         vp = v_by_sorteio[pid]
                     elif sid and sid in v_by_id:
