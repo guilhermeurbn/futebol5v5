@@ -828,7 +828,24 @@ function gerarCardCampeaoComFrame(userImg, sorteioMeta) {
             drawY = - (drawH - height) / 2;
         }
         ctx.save();
-        ctx.drawImage(userImg, drawX, drawY, drawW, drawH);
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+
+        // Downscaling HD em 2 passos para nitidez maxima em fotos de alta resolucao do celular
+        if (userImg.width > drawW * 1.3 || userImg.height > drawH * 1.3) {
+            const stepCanvas = document.createElement('canvas');
+            const stepW = Math.round(userImg.width * 0.5);
+            const stepH = Math.round(userImg.height * 0.5);
+            stepCanvas.width = stepW;
+            stepCanvas.height = stepH;
+            const stepCtx = stepCanvas.getContext('2d');
+            stepCtx.imageSmoothingEnabled = true;
+            stepCtx.imageSmoothingQuality = 'high';
+            stepCtx.drawImage(userImg, 0, 0, stepW, stepH);
+            ctx.drawImage(stepCanvas, drawX, drawY, drawW, drawH);
+        } else {
+            ctx.drawImage(userImg, drawX, drawY, drawW, drawH);
+        }
 
         // Degradê sutil na parte inferior da foto (super leve para transparência real do painel)
         const gradFade = ctx.createLinearGradient(0, height - 400, 0, height);
@@ -1090,7 +1107,15 @@ function gerarCardCampeaoComFrame(userImg, sorteioMeta) {
             }
         }
 
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+        let dataUrl = '';
+        try {
+            dataUrl = canvas.toDataURL('image/webp', 0.95);
+        } catch(e) {
+            dataUrl = '';
+        }
+        if (!dataUrl || !dataUrl.startsWith('data:image/webp')) {
+            dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+        }
         document.getElementById('card_campeao_base64').value = dataUrl;
         const btnSalvar = document.getElementById('btnSalvarFotoTrocar');
         if (btnSalvar) {

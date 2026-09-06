@@ -1223,7 +1223,23 @@
                 ctx.beginPath();
                 ctx.rect(0, 0, width, photoH);
                 ctx.clip();
-                ctx.drawImage(userPhotoImg, drawX, drawY, drawW, drawH);
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+
+                if (userPhotoImg.width > drawW * 1.3 || userPhotoImg.height > drawH * 1.3) {
+                    const stepCanvas = document.createElement('canvas');
+                    const stepW = Math.round(userPhotoImg.width * 0.5);
+                    const stepH = Math.round(userPhotoImg.height * 0.5);
+                    stepCanvas.width = stepW;
+                    stepCanvas.height = stepH;
+                    const stepCtx = stepCanvas.getContext('2d');
+                    stepCtx.imageSmoothingEnabled = true;
+                    stepCtx.imageSmoothingQuality = 'high';
+                    stepCtx.drawImage(userPhotoImg, 0, 0, stepW, stepH);
+                    ctx.drawImage(stepCanvas, drawX, drawY, drawW, drawH);
+                } else {
+                    ctx.drawImage(userPhotoImg, drawX, drawY, drawW, drawH);
+                }
 
                 // Gradiente suave de transição na parte inferior da foto
                 const gradFade = ctx.createLinearGradient(0, photoH - 240, 0, photoH);
