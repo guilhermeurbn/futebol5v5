@@ -3,8 +3,17 @@ import io
 import base64
 import pytest
 from PIL import Image
+from app import criar_app
 from services.upload_service import UploadService
 from services.partida_service import PartidaService
+
+@pytest.fixture
+def client():
+    app = criar_app('testing')
+    app.config['TESTING'] = True
+    app.config['WTF_CSRF_ENABLED'] = False
+    with app.test_client() as client:
+        yield client
 
 def test_processar_foto_campeao_base64(tmp_path):
     # Criar uma imagem simples 100x100 para o teste em base64
@@ -46,4 +55,24 @@ def test_atualizar_foto_campeao_sorteio_sem_foto_anterior():
     partidas = partida_svc.obter_partidas_sorteio(sorteio_id)
     assert len(partidas) >= 1
     assert partidas[0].get("card_campeao_url") == card_url
+
+
+def test_trocar_foto_suporta_payload_base64_grande(client):
+    # Payload base64 de 700KB (maior que o limite de 500KB padrão do Werkzeug)
+    base64_grande = "data:image/jpeg;base64," + ("A" * (700 * 1024))
+    
+    # Fazer login como admin no test client
+    with client.session_transaction() as sess:
+        sess['user_id'] = 'user_admin'
+        sess['is_admin'] = True
+
+    response = client.post(
+        '/sorteio/1/trocar-foto',
+        data={'card_campeao_base64': base64_grande},
+        content_type='multipart/form-data',
+        follow_redirects=False
+    )
+    # Não deve retornar HTTP 413 (Request Entity Too Large)
+    assert response.status_code != 413
+
 

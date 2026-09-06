@@ -135,6 +135,7 @@ def criar_app(config_name: str = None) -> Flask:
     config_obj = config_by_name.get(config_name, config_by_name['default'])
     app.config.from_object(config_obj)
     app.config['MAX_CONTENT_LENGTH'] = 64 * 1024 * 1024  # 64 MB
+    app.config['MAX_FORM_MEMORY_SIZE'] = 32 * 1024 * 1024  # 32 MB
 
     # Preserve the original scheme/host when deployed behind a reverse proxy.
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)

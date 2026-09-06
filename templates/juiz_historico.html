@@ -602,6 +602,7 @@
 <script>
 let currentTrocarSorteioId = null;
 let currentTrocarMeta = null;
+let currentTrocarHasFoto = false;
 
 function abrirModalTrocarFoto(sorteioId, cardUrl) {
     currentTrocarSorteioId = sorteioId;
@@ -620,9 +621,39 @@ function abrirModalTrocarFoto(sorteioId, cardUrl) {
     }
 
     const temFoto = cardUrl && cardUrl !== '' && cardUrl !== 'sem_foto';
+    currentTrocarHasFoto = Boolean(temFoto);
 
     if (modal && form) {
         form.action = '/sorteio/' + sorteioId + '/trocar-foto';
+        form.onsubmit = async function(e) {
+            const canvas = document.getElementById('canvasTrocarFoto');
+            const csrfTokenInput = form.querySelector('input[name="csrf_token"]');
+            const csrfToken = csrfTokenInput ? csrfTokenInput.value : '';
+
+            if (window.NaTraveCloudinaryUploader && canvas && canvas.width > 0 && currentTrocarSorteioId) {
+                e.preventDefault();
+                if (btnSalvar) btnSalvar.disabled = true;
+                try {
+                    await window.NaTraveCloudinaryUploader.uploadCanvasDirect(canvas, {
+                        tipo: 'card',
+                        entityId: currentTrocarSorteioId,
+                        csrfToken: csrfToken,
+                        onStatusChange: (status, msg) => {
+                            if (btnSalvar) btnSalvar.textContent = msg || 'Enviando...';
+                        }
+                    });
+                    location.reload();
+                    return;
+                } catch(err) {
+                    console.warn('[JuizHistorico] Fallback para POST tradicional:', err);
+                }
+            }
+
+            if (btnSalvar) {
+                btnSalvar.disabled = true;
+                btnSalvar.textContent = '⏳ Enviando foto...';
+            }
+        };
         if (title) {
             const labelSpan = title.querySelector('span');
             if (labelSpan) {
@@ -903,6 +934,7 @@ function gerarCardCampeaoComFrame(userImg, sorteioMeta) {
         const btnSalvar = document.getElementById('btnSalvarFotoTrocar');
         if (btnSalvar) {
             btnSalvar.disabled = false;
+            btnSalvar.textContent = currentTrocarHasFoto ? 'Salvar e Substituir' : 'Salvar Foto';
         }
     };
 
@@ -911,4 +943,5 @@ function gerarCardCampeaoComFrame(userImg, sorteioMeta) {
     logoImg.src = '/static/natrave-text-only.svg';
 }
 </script>
+<script src="{{ url_for('static', filename='js/cloudinary_upload.js') }}"></script>
 {% endblock %}
