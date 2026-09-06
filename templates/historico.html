@@ -241,7 +241,7 @@
                     </div>
 
                     <script id="ranking-data-{{ sorteio.id }}" type="application/json">{{ sorteio.ranking_top10 | tojson }}</script>
-                    <script id="sorteio-meta-{{ sorteio.id }}" type="application/json">{"id": {{ sorteio.id | tojson }}, "resultado_resumo": {{ (sorteio.resultado_resumo or []) | tojson }}, "times": {{ (sorteio.times or []) | tojson }}}</script>
+                    <script id="sorteio-meta-{{ sorteio.id }}" type="application/json">{"id": {{ sorteio.id | tojson }}, "resultado_resumo": {{ (sorteio.resultado_resumo or []) | tojson }}, "times": {{ (sorteio.times or []) | tojson }}, "resultado_partida": {{ (sorteio.resultado_partida or {}) | tojson }}}</script>
                 </details>
                 {% endfor %}
 
@@ -804,6 +804,21 @@ function drawCleatIcon(ctx, cx, cy, size, color) {
     ctx.restore();
 }
 
+function extractPlayerInfo(pObj) {
+    if (!pObj) return { nome: 'JOGADOR', isGoleiro: false };
+    if (typeof pObj === 'string') {
+        const isGoleiro = pObj.toLowerCase().includes('(g)') || pObj.toLowerCase().includes('goleiro');
+        const nome = pObj.replace(/\(G\)/gi, '').trim();
+        return { nome, isGoleiro };
+    }
+    const rawNome = pObj.nome || pObj.name || pObj.username || 'JOGADOR';
+    const isGoleiro = Boolean(pObj.isGoleiro) || Boolean(pObj.goleiro) ||
+                      (pObj.posicao && String(pObj.posicao).toLowerCase().includes('goleiro')) ||
+                      rawNome.toLowerCase().includes('(g)');
+    const cleanNome = rawNome.replace(/\(G\)/gi, '').trim();
+    return { nome: cleanNome, isGoleiro };
+}
+
 function drawGloveIcon(ctx, cx, cy, size, color) {
     ctx.save();
     ctx.translate(cx, cy);
@@ -880,17 +895,17 @@ function gerarCardCampeaoComFrame(userImg, sorteioMeta) {
     const logoImg = new Image();
 
     const desenharBaseEFinalizar = () => {
-        // 3. Painel Flutuante INSIDE a imagem (Glassmorphism Transparente 38%)
+        // 3. Painel Flutuante INSIDE a imagem (Glassmorphism Transparente 42%)
         const infoBoxX = 36;
         const infoBoxWidth = width - 72;
-        const infoBoxHeight = 165;
-        const infoY = height - infoBoxHeight - 30; // 30px de margem do fundo
+        const infoBoxHeight = 175;
+        const infoY = height - infoBoxHeight - 25; // 25px de margem do fundo
 
-        // Desenhar caixa flutuante com efeito Glassmorphism ultra cristalino (38% de opacidade, sem borda)
+        // Desenhar caixa flutuante com efeito Glassmorphism ultra cristalino (42% de opacidade, sem borda)
         ctx.save();
         ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
         ctx.shadowBlur = 25;
-        ctx.fillStyle = 'rgba(10, 12, 18, 0.38)';
+        ctx.fillStyle = 'rgba(10, 12, 18, 0.42)';
         if (ctx.roundRect) {
             ctx.beginPath(); ctx.roundRect(infoBoxX, infoY, infoBoxWidth, infoBoxHeight, 18); ctx.fill();
         } else {
@@ -898,15 +913,7 @@ function gerarCardCampeaoComFrame(userImg, sorteioMeta) {
         }
         ctx.restore();
 
-        // Extrair info do vencedor
-        let winTeamNum = 1;
-        let winPlayers = [];
-        if (sorteioMeta && sorteioMeta.times && sorteioMeta.times.length > 0) {
-            winTeamNum = sorteioMeta.times[0].numero || 1;
-            winPlayers = sorteioMeta.times[0].jogadores || [];
-        }
-
-        // 1. Logo Apenas Texto "NaTrave 5v5" (natrave-text-only.svg) EM CIMA DA LINHA VERDE (sem cortar o topo)
+        // 1. Logo Apenas Texto "NaTrave 5v5" (natrave-text-only.svg)
         if (logoImg.complete && logoImg.naturalWidth > 0) {
             ctx.save();
             ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
@@ -915,64 +922,189 @@ function gerarCardCampeaoComFrame(userImg, sorteioMeta) {
             const svgNativeRatio = logoImg.naturalWidth / logoImg.naturalHeight;
             const calculatedHeight = targetWidth / (svgNativeRatio || 3.38);
             const logoX = (width - targetWidth) / 2;
-            const logoY = infoY - calculatedHeight - 4; // Fica perfeitamente visível e sem corte em cima da linha verde
+            const logoY = infoY - calculatedHeight - 4;
             ctx.drawImage(logoImg, logoX, logoY, targetWidth, calculatedHeight);
             ctx.restore();
         }
 
-        // 2. Título Principal (CAMPEÃO • TIME X) alinhado no centro dentro da caixa sem sobreposição
-        ctx.save();
-        ctx.textAlign = 'center';
-        ctx.font = '900 32px system-ui, -apple-system, sans-serif';
-        ctx.fillStyle = '#ffffff';
-        ctx.shadowColor = 'rgba(0,0,0,0.9)';
-        ctx.shadowBlur = 10;
-        ctx.fillText(`CAMPEÃO  •  TIME ${winTeamNum}`, width / 2, infoY + 44);
-        ctx.restore();
+        // Extrair resultado e times do sorteioMeta
+        const resPartida = (sorteioMeta && sorteioMeta.resultado_partida) ? sorteioMeta.resultado_partida : {};
+        const rawWinner = resPartida.time_vencedor;
+        const isEmpate = Boolean(resPartida.empate) || rawWinner === null || rawWinner === undefined || rawWinner === 0 || rawWinner === '0' || rawWinner === '';
 
-        // Linha Divisória
-        ctx.save();
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(infoBoxX + 36, infoY + 66);
-        ctx.lineTo(infoBoxX + infoBoxWidth - 36, infoY + 66);
-        ctx.stroke();
-        ctx.restore();
+        let winTeamNum = 1;
+        let winPlayers = [];
+        let tiedTeams = [];
 
-        // Elenco com ícone individual (Chuteira para linha, Luva para goleiro)
-        if (winPlayers.length > 0) {
-            const pCount = Math.min(winPlayers.length, 6);
-            const availableW = infoBoxWidth - 72;
-            const colW = availableW / pCount;
-            const startX = infoBoxX + 36;
+        if (sorteioMeta && sorteioMeta.times && sorteioMeta.times.length > 0) {
+            if (isEmpate) {
+                tiedTeams = sorteioMeta.times;
+            } else {
+                winTeamNum = parseInt(rawWinner, 10) || 1;
+                const found = sorteioMeta.times.find(t => parseInt(t.numero, 10) === winTeamNum);
+                const winTeamObj = found || sorteioMeta.times[0];
+                winTeamNum = winTeamObj.numero || winTeamNum;
+                winPlayers = winTeamObj.jogadores || [];
+            }
+        }
 
-            winPlayers.slice(0, pCount).forEach((pObj, idx) => {
-                const pName = (typeof pObj === 'string') ? pObj : (pObj.nome || 'Jogador');
-                const isGoleiro = (typeof pObj === 'object' && pObj !== null)
-                    ? Boolean(pObj.isGoleiro)
-                    : (pName.toLowerCase().includes('(g)') || pName.toLowerCase().includes('goleiro'));
+        if (isEmpate) {
+            // --- CASO DE EMPATE (EXIBIR AMBOS OS TIMES LADO A LADO DE FORMA PEQUENA) ---
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.font = '900 28px system-ui, -apple-system, sans-serif';
+            ctx.fillStyle = '#fbbf24';
+            ctx.shadowColor = 'rgba(0,0,0,0.9)';
+            ctx.shadowBlur = 10;
+            ctx.fillText('RODADA EMPATADA', width / 2, infoY + 38);
+            ctx.restore();
 
-                const itemCenterX = startX + (idx * colW) + (colW / 2);
+            // Linha Divisória Horizontal
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(infoBoxX + 36, infoY + 56);
+            ctx.lineTo(infoBoxX + infoBoxWidth - 36, infoY + 56);
+            ctx.stroke();
+            ctx.restore();
 
-                // Ícone: Luva amarela para Goleiro, Chuteira verde esmeralda para Linha
-                if (isGoleiro) {
-                    drawGloveIcon(ctx, itemCenterX, infoY + 98, 24, '#fbbf24');
-                } else {
-                    drawCleatIcon(ctx, itemCenterX, infoY + 98, 24, '#4ade80');
-                }
+            const t1 = (tiedTeams.length > 0) ? tiedTeams[0] : { numero: 1, jogadores: [] };
+            const t2 = (tiedTeams.length > 1) ? tiedTeams[1] : { numero: 2, jogadores: [] };
 
-                // Nome do Jogador
-                ctx.save();
-                ctx.fillStyle = isGoleiro ? '#fbbf24' : '#ffffff';
-                ctx.font = '800 17px system-ui, -apple-system, sans-serif';
-                ctx.textAlign = 'center';
-                
-                let nameToShow = pName.replace(/\(G\)/gi, '').trim().toUpperCase();
-                if (nameToShow.length > 10) nameToShow = nameToShow.substring(0, 9) + '.';
-                ctx.fillText(nameToShow, itemCenterX, infoY + 138);
-                ctx.restore();
-            });
+            // Linha Divisória Vertical entre os 2 times no meio do painel
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(width / 2, infoY + 62);
+            ctx.lineTo(width / 2, infoY + infoBoxHeight - 10);
+            ctx.stroke();
+            ctx.restore();
+
+            // Desenhar Time 1 (Lado Esquerdo)
+            const leftCenterX = infoBoxX + (infoBoxWidth / 4);
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.font = '800 15px system-ui, -apple-system, sans-serif';
+            ctx.fillStyle = '#fbbf24';
+            ctx.fillText(`TIME ${t1.numero || 1}`, leftCenterX, infoY + 76);
+            ctx.restore();
+
+            const t1Players = t1.jogadores || [];
+            if (t1Players.length > 0) {
+                const pCount1 = Math.min(t1Players.length, 5);
+                const availW1 = (infoBoxWidth / 2) - 40;
+                const colW1 = availW1 / pCount1;
+                const startX1 = infoBoxX + 20;
+
+                t1Players.slice(0, pCount1).forEach((pObj, idx) => {
+                    const info = extractPlayerInfo(pObj);
+                    const itemX = startX1 + (idx * colW1) + (colW1 / 2);
+
+                    if (info.isGoleiro) {
+                        drawGloveIcon(ctx, itemX, infoY + 102, 20, '#fbbf24');
+                    } else {
+                        drawCleatIcon(ctx, itemX, infoY + 102, 20, '#4ade80');
+                    }
+
+                    ctx.save();
+                    ctx.fillStyle = info.isGoleiro ? '#fbbf24' : '#ffffff';
+                    ctx.font = '800 13px system-ui, -apple-system, sans-serif';
+                    ctx.textAlign = 'center';
+                    let nShow = info.nome.toUpperCase();
+                    if (nShow.length > 9) nShow = nShow.substring(0, 8) + '.';
+                    ctx.fillText(nShow, itemX, infoY + 140);
+                    ctx.restore();
+                });
+            }
+
+            // Desenhar Time 2 (Lado Direito)
+            const rightCenterX = infoBoxX + (infoBoxWidth * 3 / 4);
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.font = '800 15px system-ui, -apple-system, sans-serif';
+            ctx.fillStyle = '#fbbf24';
+            ctx.fillText(`TIME ${t2.numero || 2}`, rightCenterX, infoY + 76);
+            ctx.restore();
+
+            const t2Players = t2.jogadores || [];
+            if (t2Players.length > 0) {
+                const pCount2 = Math.min(t2Players.length, 5);
+                const availW2 = (infoBoxWidth / 2) - 40;
+                const colW2 = availW2 / pCount2;
+                const startX2 = (width / 2) + 20;
+
+                t2Players.slice(0, pCount2).forEach((pObj, idx) => {
+                    const info = extractPlayerInfo(pObj);
+                    const itemX = startX2 + (idx * colW2) + (colW2 / 2);
+
+                    if (info.isGoleiro) {
+                        drawGloveIcon(ctx, itemX, infoY + 102, 20, '#fbbf24');
+                    } else {
+                        drawCleatIcon(ctx, itemX, infoY + 102, 20, '#4ade80');
+                    }
+
+                    ctx.save();
+                    ctx.fillStyle = info.isGoleiro ? '#fbbf24' : '#ffffff';
+                    ctx.font = '800 13px system-ui, -apple-system, sans-serif';
+                    ctx.textAlign = 'center';
+                    let nShow = info.nome.toUpperCase();
+                    if (nShow.length > 9) nShow = nShow.substring(0, 8) + '.';
+                    ctx.fillText(nShow, itemX, infoY + 140);
+                    ctx.restore();
+                });
+            }
+
+        } else {
+            // --- CASO COM VENCEDOR (CAMPEÃO • TIME X) ---
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.font = '900 32px system-ui, -apple-system, sans-serif';
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowColor = 'rgba(0,0,0,0.9)';
+            ctx.shadowBlur = 10;
+            ctx.fillText(`CAMPEÃO  •  TIME ${winTeamNum}`, width / 2, infoY + 44);
+            ctx.restore();
+
+            // Linha Divisória
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(infoBoxX + 36, infoY + 66);
+            ctx.lineTo(infoBoxX + infoBoxWidth - 36, infoY + 66);
+            ctx.stroke();
+            ctx.restore();
+
+            // Elenco com ícone individual (Chuteira para linha, Luva para goleiro)
+            if (winPlayers.length > 0) {
+                const pCount = Math.min(winPlayers.length, 6);
+                const availableW = infoBoxWidth - 72;
+                const colW = availableW / pCount;
+                const startX = infoBoxX + 36;
+
+                winPlayers.slice(0, pCount).forEach((pObj, idx) => {
+                    const info = extractPlayerInfo(pObj);
+                    const itemCenterX = startX + (idx * colW) + (colW / 2);
+
+                    if (info.isGoleiro) {
+                        drawGloveIcon(ctx, itemCenterX, infoY + 98, 24, '#fbbf24');
+                    } else {
+                        drawCleatIcon(ctx, itemCenterX, infoY + 98, 24, '#4ade80');
+                    }
+
+                    ctx.save();
+                    ctx.fillStyle = info.isGoleiro ? '#fbbf24' : '#ffffff';
+                    ctx.font = '800 17px system-ui, -apple-system, sans-serif';
+                    ctx.textAlign = 'center';
+
+                    let nameToShow = info.nome.toUpperCase();
+                    if (nameToShow.length > 10) nameToShow = nameToShow.substring(0, 9) + '.';
+                    ctx.fillText(nameToShow, itemCenterX, infoY + 138);
+                    ctx.restore();
+                });
+            }
         }
 
         const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
