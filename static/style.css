@@ -22653,12 +22653,20 @@ body.is-capacitor-app .auth-label-app {
   color: #22c55e !important;
 }
 
+.history-card-toggle-btn .toggle-icon-plus,
+.history-card-toggle-btn .toggle-icon-minus {
+  display: inline-block;
+  transform: translateY(-1.5px);
+  line-height: 1;
+}
+
 .judge-draw-history__item[open] .toggle-icon-plus {
   display: none !important;
 }
 
 .judge-draw-history__item[open] .toggle-icon-minus {
-  display: inline !important;
+  display: inline-block !important;
+  transform: translateY(-1px);
 }
 
 .history-page__summary::-webkit-details-marker,

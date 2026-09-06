@@ -33,9 +33,8 @@
             <div class="judge-draw-history__list history-page__list">
                 {% for sorteio in sorteios %}
                 {% set is_target = (target_sorteio_id and (target_sorteio_id|string == sorteio.id|string)) %}
-                {% set is_first_and_no_target = (loop.first and not target_sorteio_id) %}
                 {% set show_by_default = (loop.index <= 15 or is_target) %}
-                <details id="sorteio-{{ sorteio.id }}" {% if is_target or is_first_and_no_target %}open{% endif %} {% if not show_by_default %}style="display: none !important;"{% endif %} class="judge-draw-history__item votacao-admin-history-card {% if not show_by_default %}history-card-hidden{% endif %} {% if sorteio.votacao_encerrada %}votacao-admin-history-card--closed{% elif sorteio.votacao_aberta %}votacao-admin-history-card--open{% endif %}">
+                <details id="sorteio-{{ sorteio.id }}" {% if is_target %}open{% endif %} {% if not show_by_default %}style="display: none !important;"{% endif %} class="judge-draw-history__item votacao-admin-history-card {% if not show_by_default %}history-card-hidden{% endif %} {% if sorteio.votacao_encerrada %}votacao-admin-history-card--closed{% elif sorteio.votacao_aberta %}votacao-admin-history-card--open{% endif %}">
                     <summary class="history-page__summary" style="display: flex; flex-direction: column; gap: 0.75rem; padding: 1.1rem 1.2rem; cursor: pointer; user-select: none;">
                         <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
                             <div style="display: flex; align-items: center; gap: 0.85rem;">
@@ -51,8 +50,8 @@
 
                             <!-- Botão Circular + / - de Expansão (Estilo Imagem 2) -->
                             <div class="history-card-toggle-btn" style="width: 36px; height: 36px; border-radius: 50%; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.10); color: #cbd5e1; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; font-weight: 700; flex-shrink: 0; transition: all 0.2s ease;">
-                                <span class="toggle-icon-plus">+</span>
-                                <span class="toggle-icon-minus" style="display: none;">−</span>
+                                <span class="toggle-icon-plus" style="display: inline-block; transform: translateY(-1.5px); line-height: 1;">+</span>
+                                <span class="toggle-icon-minus" style="display: none; transform: translateY(-1px); line-height: 1;">−</span>
                             </div>
                         </div>
 
@@ -101,7 +100,7 @@
                                 <img src="{{ sorteio.card_campeao_url }}" alt="Card Time Campeão" loading="lazy" decoding="async" style="width: 100%; height: auto; display: block; object-fit: cover;">
                             </div>
                             <div style="margin-top: 0.65rem;">
-                                <a href="{{ sorteio.card_campeao_url }}" download="card_natrave_sorteio_{{ sorteio.id }}.jpg" target="_blank" class="btn" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.55rem 1.1rem; font-weight: 800; font-size: 0.82rem; border-radius: 10px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.18); color: #ffffff; text-decoration: none; transition: all 0.2s ease;">
+                                <a href="{{ sorteio.card_campeao_url }}" download="card_natrave_sorteio_{{ sorteio.id }}.jpg" target="_blank" onclick="if (window.baixarFotoDirecta) { event.preventDefault(); window.baixarFotoDirecta('{{ sorteio.card_campeao_url }}', 'card_natrave_sorteio_{{ sorteio.id }}.jpg'); }" class="btn" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.55rem 1.1rem; font-weight: 800; font-size: 0.82rem; border-radius: 10px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.18); color: #ffffff; text-decoration: none; transition: all 0.2s ease;">
                                     <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                                     <span>Baixar Foto</span>
                                 </a>
@@ -536,7 +535,7 @@
     const openSorteioFromHash = () => {
         const hash = window.location.hash;
         const urlParams = new URLSearchParams(window.location.search);
-        const sorteioParam = urlParams.get('sorteio_id') || urlParams.get('sorteio');
+        const sorteioParam = urlParams.get('sorteio_id') || urlParams.get('sorteio') || urlParams.get('partida_id') || urlParams.get('partida');
         
         let targetId = null;
         if (hash && hash.startsWith('#sorteio-')) {

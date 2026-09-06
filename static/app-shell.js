@@ -30,6 +30,53 @@
     }
   };
 
+  // Utilidade global para download direto de fotos (Blob + Native Web Share no mobile + Cloudinary Attachment)
+  window.baixarFotoDirecta = async function (url, filename) {
+    if (!url) return;
+    filename = filename || 'card-natrave.jpg';
+
+    let downloadUrl = url;
+    if (url.includes('res.cloudinary.com') && url.includes('/upload/') && !url.includes('fl_attachment')) {
+      const cleanName = filename.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '_');
+      downloadUrl = url.replace('/upload/', `/upload/fl_attachment:${cleanName}/`);
+    }
+
+    try {
+      const response = await fetch(downloadUrl, { mode: 'cors' });
+      if (!response.ok) throw new Error('Fetch failed');
+      const blob = await response.blob();
+
+      // No mobile iOS/Android, aciona o menu nativo do celular para salvar foto na galeria
+      const file = new File([blob], filename, { type: blob.type || 'image/jpeg' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: 'Baixar Foto',
+            text: 'NaTrave 5v5'
+          });
+          return;
+        } catch (shareErr) {
+          if (shareErr.name === 'AbortError') return;
+        }
+      }
+
+      // Fallback local via Blob (mesmo origin natrave.pt) para download direto sem abrir nova aba
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        a.remove();
+        URL.revokeObjectURL(blobUrl);
+      }, 1000);
+    } catch (err) {
+      window.open(downloadUrl, '_blank');
+    }
+  };
+
   document.addEventListener('click', function (e) {
     const target = e.target.closest('.btn, button, .nav-tab, .bottom-nav-item');
     if (target) {
@@ -755,7 +802,7 @@
     }
   }
 
-  function updateShell(nextDocument, nextUrl) {
+  function updateShell(nextDocument, nextUrl, options = {}) {
     const nextContent = getContent(nextDocument);
     const currentContent = getContent(document);
 
@@ -782,14 +829,21 @@
     refreshFooterState(nextUrl);
     runPageHooks();
 
-    // Preservar e restaurar a posição do scroll ao voltar para a lista de jogadores
+    // Preservar e restaurar a posição do scroll ao voltar (popstate) ou para a lista de jogadores
+    const targetScrollKey = 'page_scroll_' + nextUrl.pathname + nextUrl.search;
+    const savedPageY = sessionStorage.getItem(targetScrollKey);
     const isTargetingJogadores = nextUrl.pathname === '/' || nextUrl.pathname.includes('/jogadores');
-    const savedY = sessionStorage.getItem('jogadores_scroll_y');
+    const savedJogadoresY = sessionStorage.getItem('jogadores_scroll_y');
 
-    if (isTargetingJogadores && savedY !== null) {
-      const scrollPos = parseInt(savedY, 10);
+    if (options && options.isPopState && savedPageY !== null) {
+      const scrollPos = parseInt(savedPageY, 10);
+      window.scrollTo({ top: isNaN(scrollPos) ? 0 : scrollPos, behavior: 'instant' });
+    } else if (isTargetingJogadores && savedJogadoresY !== null) {
+      const scrollPos = parseInt(savedJogadoresY, 10);
       window.scrollTo({ top: isNaN(scrollPos) ? 0 : scrollPos, behavior: 'instant' });
       sessionStorage.removeItem('jogadores_scroll_y');
+    } else if (nextUrl.hash) {
+      // Se a URL contém âncora, permite que o navegador ou o script da página role até o alvo
     } else {
       window.scrollTo(0, 0);
     }
@@ -809,11 +863,8 @@
       });
       if (response.ok) {
         const html = await response.text();
+        // Atualiza apenas o cache em memória silenciosamente sem re-renderizar o DOM nem resetar o scroll do usuário
         pageCache.set(targetUrl.href, { html, timestamp: Date.now() });
-        if (token === navigationToken && window.location.pathname === targetUrl.pathname) {
-          const nextDocument = new DOMParser().parseFromString(html, 'text/html');
-          updateShell(nextDocument, targetUrl);
-        }
       }
     } catch (err) {
       // Ignore background errors
@@ -831,7 +882,7 @@
     if (cachedItem && cachedItem.html) {
       try {
         const nextDocument = new DOMParser().parseFromString(cachedItem.html, 'text/html');
-        if (updateShell(nextDocument, targetUrl)) {
+        if (updateShell(nextDocument, targetUrl, options)) {
           const state = { path: targetUrl.pathname + targetUrl.search };
           if (replace) {
             history.replaceState(state, '', targetUrl.href);
@@ -988,6 +1039,9 @@
       return;
     }
 
+    const currentScrollKey = 'page_scroll_' + window.location.pathname + window.location.search;
+    sessionStorage.setItem(currentScrollKey, String(window.scrollY));
+
     if (window.location.pathname === '/' || window.location.pathname.includes('/jogadores')) {
       sessionStorage.setItem('jogadores_scroll_y', String(window.scrollY));
     }
@@ -1134,7 +1188,7 @@
   });
 
   window.addEventListener('popstate', () => {
-    loadPage(window.location.href, { replace: true });
+    loadPage(window.location.href, { replace: true, isPopState: true });
   });
 
   if (document.readyState === 'loading') {
