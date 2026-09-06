@@ -536,10 +536,10 @@ def criar_app(config_name: str = None) -> Flask:
     @app.errorhandler(413)
     def request_entity_too_large(error):
         logger.warning("Upload de requisição muito grande (413): %s", error)
-        from flask import jsonify, request
+        from flask import jsonify, request, redirect, url_for
         if request.is_json or request.path.startswith('/api/'):
             return jsonify({'sucesso': False, 'erro': 'A imagem enviada é muito grande. Escolha uma foto menor.'}), 413
-        return redirect(url_for('votacao.votacao_admin_page', erro='A imagem enviada é muito grande. Escolha uma foto menor.'))
+        return redirect(request.referrer or url_for('partida.historico', erro='A imagem enviada é muito grande. Escolha uma foto menor.'))
 
     return app
 
