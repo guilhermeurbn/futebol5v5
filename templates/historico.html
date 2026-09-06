@@ -76,6 +76,7 @@
                                 data-sorteio-data="{{ sorteio.data }}"
                                 data-media-geral="{{ '%.2f'|format(sorteio.ranking_media_geral or 0) }}"
                                 data-total-jogadores="{{ sorteio.ranking_total_jogadores or 0 }}"
+                                data-ranking='{{ (sorteio.ranking_top10 or []) | tojson }}'
                                 style="font-size: 0.78rem; font-weight: 800; color: #22c55e; background: rgba(34, 197, 94, 0.12); border: 1px solid rgba(34, 197, 94, 0.3); padding: 0.32rem 0.85rem; border-radius: 999px; cursor: pointer; margin-left: auto;"
                                 {% if not sorteio.ranking_top10 %}disabled title="Sem ranking para este sorteio"{% endif %}
                             >
@@ -373,9 +374,10 @@
             const dataEl = document.getElementById(`ranking-data-${sorteioId}`);
 
             let ranking = [];
-            if (dataEl && dataEl.textContent) {
+            const rawRanking = button.dataset.ranking || (dataEl ? dataEl.textContent : null);
+            if (rawRanking) {
                 try {
-                    ranking = JSON.parse(dataEl.textContent);
+                    ranking = typeof rawRanking === 'string' ? JSON.parse(rawRanking) : rawRanking;
                 } catch (error) {
                     ranking = [];
                 }

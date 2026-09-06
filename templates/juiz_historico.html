@@ -53,6 +53,7 @@
                                 data-sorteio-data="{{ item.data }}"
                                 data-media-geral="{{ '%.2f'|format(item.ranking_media_geral or 0) }}"
                                 data-total-jogadores="{{ item.ranking_total_jogadores or 0 }}"
+                                data-ranking='{{ (item.ranking_top10 or []) | tojson }}'
                                 {% if not item.ranking_top10 %}disabled title="Sem ranking para este sorteio"{% endif %}
                             >
                                 Ver ranking
@@ -342,9 +343,10 @@
                 const dataEl = document.getElementById(`ranking-data-${sorteioId}`);
 
                 let ranking = [];
-                if (dataEl && dataEl.textContent) {
+                const rawRanking = button.dataset.ranking || (dataEl ? dataEl.textContent : null);
+                if (rawRanking) {
                     try {
-                        ranking = JSON.parse(dataEl.textContent);
+                        ranking = typeof rawRanking === 'string' ? JSON.parse(rawRanking) : rawRanking;
                     } catch (error) {
                         ranking = [];
                     }

@@ -876,9 +876,10 @@
     const token = ++navigationToken;
     const replace = Boolean(options && options.replace);
 
-    // Instant tab navigation from cache (skip for dynamic user voting route)
+    // Instant tab navigation from cache (skip for dynamic routes like voting and history)
     const isDynamicVotingRoute = targetUrl.pathname.startsWith('/votacao');
-    const cachedItem = !isDynamicVotingRoute ? pageCache.get(targetUrl.href) : null;
+    const isDynamicHistoryRoute = targetUrl.pathname.startsWith('/historico');
+    const cachedItem = (!isDynamicVotingRoute && !isDynamicHistoryRoute) ? pageCache.get(targetUrl.href) : null;
     if (cachedItem && cachedItem.html) {
       try {
         const nextDocument = new DOMParser().parseFromString(cachedItem.html, 'text/html');
