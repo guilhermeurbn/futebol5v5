@@ -233,3 +233,14 @@ def test_judge_last_match_clickable_card_and_deep_links():
     assert "judge-card-edit-btn" in times_template
     assert "copiarSorteio" in times_template
     assert "stats.export_sorteio_pdf" in times_template
+
+
+def test_judge_history_matches_admin_except_delete():
+    history_template = (ROOT / 'templates' / 'juiz_historico.html').read_text(encoding='utf-8')
+    assert "abrirModalTrocarFoto" in history_template
+    assert "Trocar Foto" in history_template
+    assert "Adicionar Foto" in history_template
+    assert "current_user.role in ['admin', 'juiz']" in history_template
+    assert "{% if current_user.role == 'admin' %}" in history_template
+    assert "Excluir Sorteio" in history_template
+

@@ -2,7 +2,7 @@
   "evaluators": {
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033": {
       "reliability": 1.0,
-      "total_votos": 20
+      "total_votos": 450
     },
     "0d2e29f6-ddc4-4328-a971-d49157356f8f": {
       "reliability": 0.9888,
@@ -81,16 +81,16 @@
       "total_votos": 5
     },
     "u1": {
-      "reliability": 0.9032,
-      "total_votos": 13904
+      "reliability": 0.9219,
+      "total_votos": 14978
     },
     "u2": {
       "reliability": 0.9032,
-      "total_votos": 560
+      "total_votos": 610
     },
     "u3_hater": {
       "reliability": 0.5753,
-      "total_votos": 560
+      "total_votos": 610
     }
   },
   "relationships": {
@@ -103,7 +103,7 @@
       "cumulative_offset": 0.0
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Lucas Teixeira": {
-      "match_count": 1,
+      "match_count": 87,
       "cumulative_offset": 0.0
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Rafael": {
@@ -123,7 +123,7 @@
       "cumulative_offset": 0.0
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Alex": {
-      "match_count": 1,
+      "match_count": 87,
       "cumulative_offset": 0.0
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Markinhos": {
@@ -743,43 +743,55 @@
       "cumulative_offset": 0.0
     },
     "u1:Alex": {
-      "match_count": 280,
-      "cumulative_offset": 980.0
+      "match_count": 305,
+      "cumulative_offset": 1067.5
     },
     "u2:Alex": {
-      "match_count": 280,
-      "cumulative_offset": 980.0
+      "match_count": 305,
+      "cumulative_offset": 1067.5
     },
     "u3_hater:Alex": {
-      "match_count": 280,
-      "cumulative_offset": -1960.0
+      "match_count": 305,
+      "cumulative_offset": -2135.0
     },
     "u1:Bruno": {
-      "match_count": 280,
+      "match_count": 305,
       "cumulative_offset": 0.0
     },
     "u2:Bruno": {
-      "match_count": 280,
+      "match_count": 305,
       "cumulative_offset": 0.0
     },
     "u3_hater:Bruno": {
-      "match_count": 280,
+      "match_count": 305,
       "cumulative_offset": 0.0
     },
     "u1:Jogador 2": {
-      "match_count": 3336,
+      "match_count": 3592,
       "cumulative_offset": 0.0
     },
     "u1:Jogador 3": {
-      "match_count": 3336,
+      "match_count": 3592,
       "cumulative_offset": 0.0
     },
     "u1:Jogador 4": {
-      "match_count": 3336,
+      "match_count": 3592,
       "cumulative_offset": 0.0
     },
     "u1:Jogador 5": {
-      "match_count": 3336,
+      "match_count": 3592,
+      "cumulative_offset": 0.0
+    },
+    "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Gabriel Silva": {
+      "match_count": 86,
+      "cumulative_offset": 0.0
+    },
+    "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Ramon Santos": {
+      "match_count": 86,
+      "cumulative_offset": 0.0
+    },
+    "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Renan Costa": {
+      "match_count": 86,
       "cumulative_offset": 0.0
     }
   },
@@ -795,9 +807,9 @@
       "historical_avg": 5.62
     },
     "Lucas Teixeira": {
-      "sum_scores": 46.0,
-      "count": 7,
-      "historical_avg": 6.57
+      "sum_scores": 562.0,
+      "count": 93,
+      "historical_avg": 6.04
     },
     "Rafael": {
       "sum_scores": 5.0,
@@ -820,9 +832,9 @@
       "historical_avg": 4.92
     },
     "Alex": {
-      "sum_scores": 4803.5,
-      "count": 849,
-      "historical_avg": 5.66
+      "sum_scores": 5830.5,
+      "count": 1010,
+      "historical_avg": 5.77
     },
     "Markinhos": {
       "sum_scores": 21.5,
@@ -985,29 +997,44 @@
       "historical_avg": 8.0
     },
     "Bruno": {
-      "sum_scores": 5880.0,
-      "count": 840,
+      "sum_scores": 6405.0,
+      "count": 915,
       "historical_avg": 7.0
     },
     "Jogador 2": {
-      "sum_scores": 26688.0,
-      "count": 3336,
+      "sum_scores": 28736.0,
+      "count": 3592,
       "historical_avg": 8.0
     },
     "Jogador 3": {
-      "sum_scores": 26688.0,
-      "count": 3336,
+      "sum_scores": 28736.0,
+      "count": 3592,
       "historical_avg": 8.0
     },
     "Jogador 4": {
-      "sum_scores": 26688.0,
-      "count": 3336,
+      "sum_scores": 28736.0,
+      "count": 3592,
       "historical_avg": 8.0
     },
     "Jogador 5": {
-      "sum_scores": 26688.0,
-      "count": 3336,
+      "sum_scores": 28736.0,
+      "count": 3592,
       "historical_avg": 8.0
+    },
+    "Gabriel Silva": {
+      "sum_scores": 516.0,
+      "count": 86,
+      "historical_avg": 6.0
+    },
+    "Ramon Santos": {
+      "sum_scores": 430.0,
+      "count": 86,
+      "historical_avg": 5.0
+    },
+    "Renan Costa": {
+      "sum_scores": 430.0,
+      "count": 86,
+      "historical_avg": 5.0
     }
   }
 }

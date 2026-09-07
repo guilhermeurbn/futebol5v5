@@ -3,80 +3,108 @@
 {% block title %}Histórico de Sorteios{% endblock %}
 
 {% block content %}
-<div class="container page-container-wide judge-workspace-page judge-history-page">
-    <header class="header">
-        <div class="header-content">
-            {% set brand_title = 'Histórico' %}
-            {% set brand_subtitle = 'Sorteios anteriores' %}
-            {% include '_brand_header.html' %}
+{% set current_user = usuario if (usuario is defined and usuario and usuario.autenticado) else (auth_user if auth_user is defined and auth_user else None) %}
+<div class="container page-container-wide history-page edge-to-edge-page{% if current_user and current_user.role in ['admin'] %} judge-workspace-page admin-page admin-page--ecosystem{% elif current_user and current_user.role == 'usuario' %} player-workspace-page{% elif current_user and current_user.role == 'juiz' %} judge-workspace-page judge-history-page{% endif %}" style="background:#000000; min-height:100vh; width:100%; padding-left:0; padding-right:0;">
+    <!-- Header Fixo 100% Imóvel no Topo da Tela com Logo Centralizada -->
+    <header class="profile-topbar-sticky" style="position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; z-index: 1000 !important; background: rgba(0, 0, 0, 0.94) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; border-bottom: 1px solid rgba(34, 197, 94, 0.18) !important; padding: calc(0.55rem + max(10px, env(safe-area-inset-top, 0px))) 0.85rem 0.55rem 0.85rem !important; width: 100% !important; box-sizing: border-box !important;">
+        <div style="max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: center; position: relative; min-height: 36px;">
+            
+            <!-- Logo Centralizada no Centro Exato -->
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <a href="{{ url_for('jogador.index') }}" aria-label="NaTrave 5v5" style="display: inline-flex; align-items: center;">
+                    <img src="{{ url_for('static', filename='natrave.svg', v='20260708-03') }}" alt="NaTrave 5v5" style="height: 36px; width: auto; object-fit: contain;">
+                </a>
+            </div>
+
+            <!-- Badge da Conta Ativa do Usuário na Direita -->
+            <div style="position: absolute; right: 0; display: inline-flex; align-items: center; gap: 0.4rem; color: #94a3b8; font-size: 0.78rem; font-weight: 700; background: rgba(255,255,255,0.04); padding: 0.35rem 0.75rem; border-radius: 999px; border: 1px solid rgba(255,255,255,0.08); white-space: nowrap; flex-shrink: 0; max-width: 40%; overflow: hidden; text-overflow: ellipsis;">
+                <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #22c55e; flex-shrink: 0;"></span>
+                <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ current_user.nome or current_user.username if (current_user and (current_user.nome or current_user.username)) else 'Histórico' }}</span>
+            </div>
+
         </div>
     </header>
 
-    <main class="main">
+    <main class="main" style="padding-left:0; padding-right:0; padding-top: calc(4.2rem + max(10px, env(safe-area-inset-top, 0px))) !important;">
+        <h1 style="display:none;">Histórico de sorteios</h1>
         {% if erro %}
         <div class="alert alert-warning" role="alert">{{ erro }}</div>
         {% endif %}
 
-        <section class="judge-flow-card judge-draw-history">
-            <div class="judge-flow-card__heading">
-                <div>
-                    <span class="judge-flow-kicker">Sorteios salvos</span>
-                    <h1>Histórico de sorteios</h1>
-                    <p>Veja as formações mais recentes em um só lugar.</p>
-                </div>
-                <span class="judge-history-count">{{ sorteios | length }}</span>
-            </div>
+        {% if sorteios %}
+            <div class="judge-draw-history__list history-page__list">
+                {% for sorteio in sorteios %}
+                {% set item = sorteio %}
+                {% set is_target = (target_sorteio_id and (target_sorteio_id|string == sorteio.id|string)) or (sorteio_destaque_id and (sorteio_destaque_id|string == sorteio.id|string)) or (sorteio_atual_id and (sorteio_atual_id|string == sorteio.id|string)) %}
+                {% set show_by_default = (loop.index <= 15 or is_target) %}
+                <details id="sorteio-{{ item.id }}" {% if is_target %}open{% endif %} {% if not show_by_default %}style="display: none !important;"{% endif %} class="judge-draw-history__item votacao-admin-history-card {% if not show_by_default %}history-card-hidden{% endif %} {% if sorteio.votacao_encerrada %}votacao-admin-history-card--closed{% elif sorteio.votacao_aberta %}votacao-admin-history-card--open{% endif %}">
+                    <summary class="history-page__summary" style="display: flex; flex-direction: column; gap: 0.75rem; padding: 1.1rem 1.2rem; cursor: pointer; user-select: none;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                            <div style="display: flex; align-items: center; gap: 0.85rem;">
+                                <!-- #55 Badge Quadrado Arredondado Verde Discreto -->
+                                <div style="width: 48px; height: 48px; border-radius: 16px; background: linear-gradient(135deg, rgba(34, 197, 94, 0.16), rgba(16, 185, 129, 0.06)); border: 1px solid rgba(34, 197, 94, 0.28); color: #ffffff; font-size: 1.15rem; font-weight: 900; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);">
+                                    #{{ sorteio.id }}
+                                </div>
+                                <div>
+                                    <div style="font-size: 1.05rem; font-weight: 850; color: #ffffff; line-height: 1.2;">Sorteio #{{ sorteio.id }}</div>
+                                    <div style="font-size: 0.82rem; color: #94a3b8; margin-top: 0.25rem; font-weight: 600;">{{ sorteio.data|dt_pt_hm }}</div>
+                                </div>
+                            </div>
 
-            {% if sorteios %}
-            <div class="judge-draw-history__list">
-                {% for item in sorteios %}
-                {% set is_target_j = (item.id == sorteio_atual_id or item.id == sorteio_destaque_id) %}
-                {% set show_by_default_j = (loop.index <= 15 or is_target_j) %}
-                <details class="judge-draw-history__item {% if not show_by_default_j %}history-card-hidden{% endif %}" {% if is_target_j %}open{% endif %} {% if not show_by_default_j %}style="display: none !important;"{% endif %} id="sorteio-{{ item.id }}">
-                    <summary>
-                        <span class="judge-draw-history__identity">
-                            <span class="judge-draw-history__number">#{{ item.id }}</span>
-                            <span>
-                                <strong>Sorteio #{{ item.id }}</strong>
-                                <small>{{ item.data|dt_pt_hm }}</small>
+                            <!-- Botão Circular + / - de Expansão (Estilo Imagem 2) -->
+                            <div class="history-card-toggle-btn" style="width: 36px; height: 36px; border-radius: 50%; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.10); color: #cbd5e1; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; font-weight: 700; flex-shrink: 0; transition: all 0.2s ease;">
+                                <span class="toggle-icon-plus" style="display: inline-block; transform: translateY(-1.5px); line-height: 1;">+</span>
+                                <span class="toggle-icon-minus" style="display: none; transform: translateY(-1px); line-height: 1;">−</span>
+                            </div>
+                        </div>
+
+                        <!-- Linha de Badges Arredondados e Status Pill -->
+                        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; width: 100%; margin-top: 0.1rem;">
+                            <span style="font-size: 0.78rem; font-weight: 700; color: #cbd5e1; background: rgba(255, 255, 255, 0.05); padding: 0.32rem 0.75rem; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.08);">
+                                {{ sorteio.total_jogadores }} jogadores
                             </span>
-                        </span>
-                        <span class="judge-draw-history__meta history-page__meta">
-                            <span>{{ item.total_jogadores }} jogadores</span>
-                            <span>{{ item.num_times }} times</span>
-                            {% if item.votacao_encerrada %}
+                            <span style="font-size: 0.78rem; font-weight: 700; color: #cbd5e1; background: rgba(255, 255, 255, 0.05); padding: 0.32rem 0.75rem; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.08);">
+                                {{ sorteio.num_times }} times
+                            </span>
+
+                            {% if sorteio.votacao_encerrada %}
+                            <span style="font-size: 0.78rem; font-weight: 700; color: #fbbf24; background: rgba(251, 191, 36, 0.12); padding: 0.32rem 0.75rem; border-radius: 999px; border: 1px solid rgba(251, 191, 36, 0.3); display: inline-flex; align-items: center; gap: 0.3rem;">
+                                🏆 Resultado
+                            </span>
                             <button
                                 type="button"
                                 class="judge-draw-history__ranking-btn"
                                 data-ranking-trigger
-                                data-sorteio-id="{{ item.id }}"
-                                data-sorteio-data="{{ item.data }}"
-                                data-media-geral="{{ '%.2f'|format(item.ranking_media_geral or 0) }}"
-                                data-total-jogadores="{{ item.ranking_total_jogadores or 0 }}"
-                                data-ranking='{{ (item.ranking_top10 or []) | tojson }}'
-                                {% if not item.ranking_top10 %}disabled title="Sem ranking para este sorteio"{% endif %}
+                                data-sorteio-id="{{ sorteio.id }}"
+                                data-sorteio-data="{{ sorteio.data }}"
+                                data-media-geral="{{ '%.2f'|format(sorteio.ranking_media_geral or 0) }}"
+                                data-total-jogadores="{{ sorteio.ranking_total_jogadores or 0 }}"
+                                data-ranking='{{ (sorteio.ranking_top10 or []) | tojson }}'
+                                style="font-size: 0.78rem; font-weight: 800; color: #22c55e; background: rgba(34, 197, 94, 0.12); border: 1px solid rgba(34, 197, 94, 0.3); padding: 0.32rem 0.85rem; border-radius: 999px; cursor: pointer; margin-left: auto;"
+                                {% if not sorteio.ranking_top10 %}disabled title="Sem ranking para este sorteio"{% endif %}
                             >
                                 Ver ranking
                             </button>
-                            {% elif item.votacao_aberta %}
-                            <span class="history-page__status history-page__status--open">Votação aberta</span>
+                            {% elif sorteio.votacao_aberta %}
+                            <span style="font-size: 0.78rem; font-weight: 700; color: #4ade80; background: rgba(34, 197, 94, 0.14); padding: 0.32rem 0.75rem; border-radius: 999px; border: 1px solid rgba(34, 197, 94, 0.3); display: inline-flex; align-items: center; gap: 0.3rem;">
+                                🟢 Votação aberta
+                            </span>
                             {% else %}
-                            <span class="history-page__status">Sem votação</span>
+                            <span style="font-size: 0.78rem; font-weight: 700; color: #94a3b8; background: rgba(255, 255, 255, 0.05); padding: 0.32rem 0.75rem; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.08);">
+                                Sem votação
+                            </span>
                             {% endif %}
-                            {% if item.id == sorteio_atual_id %}
-                            <span class="judge-draw-history__current">Atual</span>
-                            {% endif %}
-                        </span>
+                        </div>
                     </summary>
 
                     <div class="judge-draw-history__body history-page__body">
-                        {% if item.card_campeao_url and item.card_campeao_url != 'sem_foto' %}
+                        {% if sorteio.card_campeao_url and sorteio.card_campeao_url != 'sem_foto' %}
                         <div class="champion-card-history-display" style="margin-bottom: 1.25rem; text-align: center;">
                             <div style="display: inline-block; max-width: 320px; width: 100%; border-radius: 16px; overflow: hidden; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.12); background: #09090b;">
-                                <img src="{{ item.card_campeao_url }}" alt="Card Time Campeão" loading="lazy" decoding="async" style="width: 100%; height: auto; display: block; object-fit: contain;">
+                                <img src="{{ sorteio.card_campeao_url }}" alt="Card Time Campeão" loading="lazy" decoding="async" style="width: 100%; height: auto; display: block; object-fit: contain;">
                             </div>
                             <div style="margin-top: 0.65rem;">
-                                <a href="{{ item.card_campeao_url }}" download="card_natrave_sorteio_{{ item.id }}.jpg" target="_blank" onclick="if (window.baixarFotoDirecta) { event.preventDefault(); window.baixarFotoDirecta('{{ item.card_campeao_url }}', 'card_natrave_sorteio_{{ item.id }}.jpg'); }" class="btn" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.55rem 1.1rem; font-weight: 800; font-size: 0.82rem; border-radius: 10px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.18); color: #ffffff; text-decoration: none; transition: all 0.2s ease;">
+                                <a href="{{ sorteio.card_campeao_url }}" download="card_natrave_sorteio_{{ sorteio.id }}.jpg" target="_blank" onclick="if (window.baixarFotoDirecta) { event.preventDefault(); window.baixarFotoDirecta('{{ sorteio.card_campeao_url }}', 'card_natrave_sorteio_{{ sorteio.id }}.jpg'); }" class="btn" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.55rem 1.1rem; font-weight: 800; font-size: 0.82rem; border-radius: 10px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.18); color: #ffffff; text-decoration: none; transition: all 0.2s ease;">
                                     <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                                     <span>Baixar Foto</span>
                                 </a>
@@ -84,50 +112,50 @@
                         </div>
                         {% endif %}
 
-                        {% if item.resultado_resumo %}
+                        {% if sorteio.resultado_resumo %}
                         <div class="history-match-scoreboard">
-                            {% if item.resultado_resumo|length == 2 %}
+                            {% if sorteio.resultado_resumo|length == 2 %}
                                 <div class="scoreboard-vs">
                                     <div class="scoreboard-team">
-                                        <span class="scoreboard-team-name">Time {{ item.resultado_resumo[0].time_numero }}</span>
+                                        <span class="scoreboard-team-name">Time {{ sorteio.resultado_resumo[0].time_numero }}</span>
                                     </div>
                                     <div class="scoreboard-score-wrapper">
-                                        <span class="scoreboard-score">{{ item.resultado_resumo[0].gols }}</span>
+                                        <span class="scoreboard-score">{{ sorteio.resultado_resumo[0].gols }}</span>
                                         <span class="scoreboard-divider">×</span>
-                                        <span class="scoreboard-score">{{ item.resultado_resumo[1].gols }}</span>
+                                        <span class="scoreboard-score">{{ sorteio.resultado_resumo[1].gols }}</span>
                                     </div>
                                     <div class="scoreboard-team text-right">
-                                        <span class="scoreboard-team-name">Time {{ item.resultado_resumo[1].time_numero }}</span>
+                                        <span class="scoreboard-team-name">Time {{ sorteio.resultado_resumo[1].time_numero }}</span>
                                     </div>
                                 </div>
                                 <div class="scoreboard-stats">
                                     <div class="scoreboard-team-record-pill">
-                                        {% set v0 = item.resultado_resumo[0].desempenho.vitorias if item.resultado_resumo[0].desempenho else 0 %}
-                                        {% set e0 = item.resultado_resumo[0].desempenho.empates if item.resultado_resumo[0].desempenho else 0 %}
-                                        {% set d0 = item.resultado_resumo[0].desempenho.derrotas if item.resultado_resumo[0].desempenho else 0 %}
+                                        {% set v0 = sorteio.resultado_resumo[0].desempenho.vitorias if sorteio.resultado_resumo[0].desempenho else 0 %}
+                                        {% set e0 = sorteio.resultado_resumo[0].desempenho.empates if sorteio.resultado_resumo[0].desempenho else 0 %}
+                                        {% set d0 = sorteio.resultado_resumo[0].desempenho.derrotas if sorteio.resultado_resumo[0].desempenho else 0 %}
                                         <strong>{{ v0 }} Vitóri{{ 'a' if v0 == 1 else 'as' }}</strong>
-                                        <span style="display: block; font-size: 0.65rem; color: rgba(255,255,255,0.4); margin-top: 2px;">{{ item.resultado_resumo[0].gols }}G - {{ d0 }}D - {{ e0 }}E</span>
+                                        <span style="display: block; font-size: 0.65rem; color: rgba(255,255,255,0.4); margin-top: 2px;">{{ sorteio.resultado_resumo[0].gols }}G - {{ d0 }}D - {{ e0 }}E</span>
                                     </div>
                                     <div class="scoreboard-label">Placar Final</div>
                                     <div class="scoreboard-team-record-pill text-right">
-                                        {% set v1 = item.resultado_resumo[1].desempenho.vitorias if item.resultado_resumo[1].desempenho else 0 %}
-                                        {% set e1 = item.resultado_resumo[1].desempenho.empates if item.resultado_resumo[1].desempenho else 0 %}
-                                        {% set d1 = item.resultado_resumo[1].desempenho.derrotas if item.resultado_resumo[1].desempenho else 0 %}
+                                        {% set v1 = sorteio.resultado_resumo[1].desempenho.vitorias if sorteio.resultado_resumo[1].desempenho else 0 %}
+                                        {% set e1 = sorteio.resultado_resumo[1].desempenho.empates if sorteio.resultado_resumo[1].desempenho else 0 %}
+                                        {% set d1 = sorteio.resultado_resumo[1].desempenho.derrotas if sorteio.resultado_resumo[1].desempenho else 0 %}
                                         <strong>{{ v1 }} Vitóri{{ 'a' if v1 == 1 else 'as' }}</strong>
-                                        <span style="display: block; font-size: 0.65rem; color: rgba(255,255,255,0.4); margin-top: 2px;">{{ item.resultado_resumo[1].gols }}G - {{ d1 }}D - {{ e1 }}E</span>
+                                        <span style="display: block; font-size: 0.65rem; color: rgba(255,255,255,0.4); margin-top: 2px;">{{ sorteio.resultado_resumo[1].gols }}G - {{ d1 }}D - {{ e1 }}E</span>
                                     </div>
                                 </div>
                             {% else %}
                                 <div class="scoreboard-grid">
-                                    {% for r in item.resultado_resumo %}
-                                        {% set v_item = r.desempenho.vitorias if r.desempenho else 0 %}
-                                        {% set e_item = r.desempenho.empates if r.desempenho else 0 %}
-                                        {% set d_item = r.desempenho.derrotas if r.desempenho else 0 %}
+                                    {% for item in sorteio.resultado_resumo %}
+                                        {% set v_item = item.desempenho.vitorias if item.desempenho else 0 %}
+                                        {% set e_item = item.desempenho.empates if item.desempenho else 0 %}
+                                        {% set d_item = item.desempenho.derrotas if item.desempenho else 0 %}
                                         <div class="scoreboard-grid-item">
-                                            <span class="grid-item-team">Time {{ r.time_numero }}</span>
+                                            <span class="grid-item-team">Time {{ item.time_numero }}</span>
                                             <span class="grid-item-score">{{ v_item }} Vitóri{{ 'a' if v_item == 1 else 'as' }}</span>
                                             <span class="grid-item-record">
-                                                {{ r.gols }}G - {{ d_item }}D - {{ e_item }}E
+                                                {{ item.gols }}G - {{ d_item }}D - {{ e_item }}E
                                             </span>
                                         </div>
                                     {% endfor %}
@@ -137,7 +165,7 @@
                         {% endif %}
 
                         <div class="history-page__teams-compact">
-                            {% for time in item.times %}
+                            {% for time in sorteio.times %}
                                 <div class="history-team-row">
                                     <div class="history-team-header">
                                         <span class="history-team-name">Time {{ time.numero }}</span>
@@ -181,14 +209,14 @@
                             {% endfor %}
                         </div>
 
-                        {% if item.votacao_encerrada and item.melhor_jogador %}
+                        {% if sorteio.votacao_encerrada and sorteio.melhor_jogador %}
                         <div class="votacao-admin-history-ranking-summary">
                             <span class="votacao-admin-history-ranking-summary__label">Mais votado</span>
-                            <strong class="votacao-admin-history-ranking-summary__name">{{ item.melhor_jogador.jogador_nome | abreviar_nome }}</strong>
-                            <span class="votacao-admin-history-ranking-summary__pill">{{ item.melhor_jogador.votos }} voto(s)</span>
-                            <span class="votacao-admin-history-ranking-summary__pill">Média {{ item.melhor_jogador.nota_media }}</span>
+                            <strong class="votacao-admin-history-ranking-summary__name">{{ sorteio.melhor_jogador.jogador_nome | abreviar_nome }}</strong>
+                            <span class="votacao-admin-history-ranking-summary__pill">{{ sorteio.melhor_jogador.votos }} voto(s)</span>
+                            <span class="votacao-admin-history-ranking-summary__pill">Média {{ sorteio.melhor_jogador.nota_media }}</span>
                         </div>
-                        {% elif item.votacao_aberta %}
+                        {% elif sorteio.votacao_aberta %}
                         <div class="surface-panel surface-panel--soft votacao-admin-history-open-note">
                             <p class="hero-empty__text">A votação dessa rodada está aberta. O ranking final aparece aqui quando for encerrada.</p>
                         </div>
@@ -197,13 +225,13 @@
                         {% set current_user = usuario if usuario is defined and usuario else auth_user %}
                         {% if current_user and current_user.role in ['admin', 'juiz'] %}
                         <div class="judge-draw-history__admin-actions" style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: flex-end; align-items: center; gap: 0.5rem;">
-                            {% set tem_foto_campeao = item.card_campeao_url and item.card_campeao_url != 'sem_foto' %}
-                            <button type="button" class="btn btn-secondary btn-small" onclick="abrirModalTrocarFoto('{{ item.id }}', '{{ item.card_campeao_url or '' }}')" style="background: rgba(34, 197, 94, 0.12); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); font-size: 0.78rem; font-weight: 700; padding: 0.35rem 0.75rem; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem;">
+                            {% set tem_foto_campeao = sorteio.card_campeao_url and sorteio.card_campeao_url != 'sem_foto' %}
+                            <button type="button" class="btn btn-secondary btn-small" onclick="abrirModalTrocarFoto('{{ sorteio.id }}', '{{ sorteio.card_campeao_url or '' }}')" style="background: rgba(34, 197, 94, 0.12); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); font-size: 0.78rem; font-weight: 700; padding: 0.35rem 0.75rem; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem;">
                                 <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                                 <span>{{ 'Trocar Foto' if tem_foto_campeao else 'Adicionar Foto' }}</span>
                             </button>
                             {% if current_user.role == 'admin' %}
-                            <form method="post" action="{{ url_for('partida.deletar_sorteio_historico', sorteio_id=item.id) }}" onsubmit="return confirm('Tem certeza que deseja excluir o Sorteio #{{ item.id }}? Todos os resultados de jogos e votações deste sorteio serão apagados permanentemente.');">
+                            <form method="post" action="{{ url_for('partida.deletar_sorteio_historico', sorteio_id=sorteio.id) }}" onsubmit="return confirm('⚠️ ATENÇÃO: Tem certeza que deseja excluir permanentemente o Sorteio #{{ sorteio.id }}?\n\nIsso irá APAGAR todos os jogos, placares e VOTOS que os jogadores já enviaram para esta rodada.');">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="btn btn-danger btn-small" style="background: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); font-size: 0.78rem; font-weight: 700; padding: 0.35rem 0.75rem; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem;">
                                     <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
@@ -215,9 +243,8 @@
                         {% endif %}
                     </div>
 
-                    <script id="ranking-data-{{ item.id }}"
-                        type="application/json">{{ item.ranking_top10 | tojson }}</script>
-                    <script id="sorteio-meta-{{ item.id }}" type="application/json">{"id": {{ item.id | tojson }}, "resultado_resumo": {{ (item.resultado_resumo or []) | tojson }}, "times": {{ (item.times or []) | tojson }}, "resultado_partida": {{ (item.resultado_partida or {}) | tojson }}}</script>
+                    <script id="ranking-data-{{ sorteio.id }}" type="application/json">{{ sorteio.ranking_top10 | tojson }}</script>
+                    <script id="sorteio-meta-{{ sorteio.id }}" type="application/json">{"id": {{ sorteio.id | tojson }}, "resultado_resumo": {{ (sorteio.resultado_resumo or []) | tojson }}, "times": {{ (sorteio.times or []) | tojson }}, "resultado_partida": {{ (sorteio.resultado_partida or {}) | tojson }}}</script>
                 </details>
                 {% endfor %}
 
@@ -233,27 +260,34 @@
                 </div>
                 {% endif %}
             </div>
-            {% else %}
-            <p class="judge-flow-empty">Os sorteios aparecerão aqui após a primeira partida.</p>
-            {% endif %}
-        </section>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📜</div>
+                <p>Nenhum sorteio realizado ainda</p>
+                <p class="empty-hint">Assim que uma rodada for criada, ela aparecerá aqui com o resumo completo.</p>
+            </div>
+        {% endif %}
     </main>
+
+    <footer class="footer">
+        <p>⚽ NaTrave • Desenvolvido por Guilherme Urbano com ❤️</p>
+    </footer>
 </div>
 
-<div class="judge-ranking-modal" id="judgeRankingModal" hidden aria-hidden="true">
+<div class="judge-ranking-modal" id="historyRankingModal" hidden aria-hidden="true">
     <div class="judge-ranking-modal__backdrop" data-ranking-close></div>
-    <div class="judge-ranking-modal__panel" role="dialog" aria-modal="true" aria-labelledby="judgeRankingModalTitle">
+    <div class="judge-ranking-modal__panel" role="dialog" aria-modal="true" aria-labelledby="historyRankingModalTitle">
         <div class="judge-ranking-modal__header">
             <div>
-                <small id="judgeRankingModalSorteio">Sorteio</small>
-                <h2 id="judgeRankingModalTitle">Ranking dos jogadores</h2>
+                <small id="historyRankingModalSorteio">Sorteio</small>
+                <h2 id="historyRankingModalTitle">Ranking da rodada</h2>
             </div>
             <button type="button" class="judge-ranking-modal__close" data-ranking-close aria-label="Fechar">✕</button>
         </div>
 
         <div class="judge-ranking-modal__summary">
-            <span id="judgeRankingModalMedia">Média geral: 0.00</span>
-            <span id="judgeRankingModalTotal">0 jogador(es)</span>
+            <span id="historyRankingModalMedia">Média geral: 0.00</span>
+            <span id="historyRankingModalTotal">0 jogador(es)</span>
         </div>
 
         <div class="judge-ranking-modal__body">
@@ -267,7 +301,7 @@
                         <th>Média</th>
                     </tr>
                 </thead>
-                <tbody id="judgeRankingModalBody">
+                <tbody id="historyRankingModalBody">
                     <tr>
                         <td colspan="5">Sem ranking para este sorteio.</td>
                     </tr>
@@ -278,293 +312,307 @@
 </div>
 
 <script>
-    (() => {
-        const modal = document.getElementById('judgeRankingModal');
-        if (!modal) return;
+(() => {
+    const modal = document.getElementById('historyRankingModal');
+    if (!modal) return;
 
-        const modalSorteio = document.getElementById('judgeRankingModalSorteio');
-        const modalMedia = document.getElementById('judgeRankingModalMedia');
-        const modalTotal = document.getElementById('judgeRankingModalTotal');
-        const modalBody = document.getElementById('judgeRankingModalBody');
-        const triggers = document.querySelectorAll('[data-ranking-trigger]');
-        const closers = modal.querySelectorAll('[data-ranking-close]');
+    const modalSorteio = document.getElementById('historyRankingModalSorteio');
+    const modalMedia = document.getElementById('historyRankingModalMedia');
+    const modalTotal = document.getElementById('historyRankingModalTotal');
+    const modalBody = document.getElementById('historyRankingModalBody');
+    const triggers = document.querySelectorAll('[data-ranking-trigger]');
+    const closers = modal.querySelectorAll('[data-ranking-close]');
 
-        const closeModal = () => {
-            modal.hidden = true;
-            modal.setAttribute('aria-hidden', 'true');
-            document.body.classList.remove('modal-open');
+    const closeModal = () => {
+        modal.hidden = true;
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+    };
+
+    const openModal = () => {
+        modal.hidden = false;
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+    };
+
+    const renderRows = (ranking) => {
+        if (!Array.isArray(ranking) || ranking.length === 0) {
+            modalBody.innerHTML = '<tr><td colspan="5">Sem ranking para este sorteio.</td></tr>';
+            return;
+        }
+
+        const abbreviateName = (name) => {
+            if (!name) return "";
+            const parts = name.trim().split(/\s+/);
+            if (parts.length <= 1) return name;
+            return `${parts[0]} ${parts[1][0].toUpperCase()}.`;
         };
+        modalBody.innerHTML = ranking.map((jogador, index) => {
+            const nome = abbreviateName(jogador.jogador_nome) || 'Jogador';
+            const time = jogador.time_numero ?? '-';
+            const votos = jogador.votos ?? 0;
+            const media = Number(jogador.nota_media ?? 0).toFixed(2);
 
-        const openModal = () => {
-            modal.hidden = false;
-            modal.setAttribute('aria-hidden', 'false');
-            document.body.classList.add('modal-open');
-        };
-
-        const renderRows = (ranking) => {
-            if (!Array.isArray(ranking) || ranking.length === 0) {
-                modalBody.innerHTML = '<tr><td colspan="5">Sem ranking para este sorteio.</td></tr>';
-                return;
-            }
-
-            const abbreviateName = (name) => {
-                if (!name) return "";
-                const parts = name.trim().split(/\s+/);
-                if (parts.length <= 1) return name;
-                return `${parts[0]} ${parts[1][0].toUpperCase()}.`;
-            };
-            modalBody.innerHTML = ranking.map((jogador, index) => {
-                const nome = abbreviateName(jogador.jogador_nome) || 'Jogador';
-                const time = jogador.time_numero ?? '-';
-                const votos = jogador.votos ?? 0;
-                const media = Number(jogador.nota_media ?? 0).toFixed(2);
-
-                return `<tr>
+            return `<tr>
                 <td>${index + 1}</td>
                 <td><strong>${nome}</strong></td>
                 <td>Time ${time}</td>
                 <td>${votos}</td>
                 <td>${media}</td>
             </tr>`;
-            }).join('');
-        };
+        }).join('');
+    };
 
-        triggers.forEach((button) => {
-            button.addEventListener('click', (event) => {
-                event.preventDefault();
-                event.stopPropagation();
+    triggers.forEach((button) => {
+        button.addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
 
-                const sorteioId = button.dataset.sorteioId;
-                const sorteioData = window.NaTraveLocalDateTime
-                    ? window.NaTraveLocalDateTime.formatDateTime(button.dataset.sorteioData)
-                    : (button.dataset.sorteioData || '-');
-                const mediaGeralAttr = button.dataset.mediaGeral || '0.00';
-                const totalJogadoresAttr = button.dataset.totalJogadores || '0';
-                const dataEl = document.getElementById(`ranking-data-${sorteioId}`);
+            const sorteioId = button.dataset.sorteioId;
+            const sorteioData = window.NaTraveLocalDateTime
+                ? window.NaTraveLocalDateTime.formatDateTime(button.dataset.sorteioData)
+                : (button.dataset.sorteioData || '-');
+            const mediaGeralAttr = button.dataset.mediaGeral || '0.00';
+            const totalJogadoresAttr = button.dataset.totalJogadores || '0';
+            const dataEl = document.getElementById(`ranking-data-${sorteioId}`);
 
-                let ranking = [];
-                const rawRanking = button.dataset.ranking || (dataEl ? dataEl.textContent : null);
-                if (rawRanking) {
-                    try {
-                        ranking = typeof rawRanking === 'string' ? JSON.parse(rawRanking) : rawRanking;
-                    } catch (error) {
-                        ranking = [];
-                    }
+            let ranking = [];
+            const rawRanking = button.dataset.ranking || (dataEl ? dataEl.textContent : null);
+            if (rawRanking) {
+                try {
+                    ranking = typeof rawRanking === 'string' ? JSON.parse(rawRanking) : rawRanking;
+                } catch (error) {
+                    ranking = [];
                 }
+            }
 
-                let mediaGeralNum = Number(mediaGeralAttr);
-                if ((!mediaGeralNum || mediaGeralNum === 0) && Array.isArray(ranking) && ranking.length > 0) {
-                    const validNotas = ranking.map(j => Number(j.nota_media || 0)).filter(n => n > 0);
-                    if (validNotas.length > 0) {
-                        mediaGeralNum = validNotas.reduce((a, b) => a + b, 0) / validNotas.length;
-                    }
+            let mediaGeralNum = Number(mediaGeralAttr);
+            if ((!mediaGeralNum || mediaGeralNum === 0) && Array.isArray(ranking) && ranking.length > 0) {
+                const validNotas = ranking.map(j => Number(j.nota_media || 0)).filter(n => n > 0);
+                if (validNotas.length > 0) {
+                    mediaGeralNum = validNotas.reduce((a, b) => a + b, 0) / validNotas.length;
                 }
-                const displayMedia = (mediaGeralNum || 0).toFixed(2);
-                const displayTotal = (Array.isArray(ranking) && ranking.length > 0) ? ranking.length : totalJogadoresAttr;
+            }
+            const displayMedia = (mediaGeralNum || 0).toFixed(2);
+            const displayTotal = (Array.isArray(ranking) && ranking.length > 0) ? ranking.length : totalJogadoresAttr;
 
-                modalSorteio.textContent = `Sorteio #${sorteioId} · ${sorteioData}`;
-                modalMedia.textContent = `Média geral: ${displayMedia}`;
-                modalTotal.textContent = `${displayTotal} jogador(es)`;
-                renderRows(ranking);
-                openModal();
-            });
+            modalSorteio.textContent = `Sorteio #${sorteioId} · ${sorteioData}`;
+            modalMedia.textContent = `Média geral: ${displayMedia}`;
+            modalTotal.textContent = `${displayTotal} jogador(es)`;
+            renderRows(ranking);
+            openModal();
         });
+    });
 
-        closers.forEach((closeButton) => {
-            closeButton.addEventListener('click', closeModal);
-        });
+    closers.forEach((closeButton) => {
+        closeButton.addEventListener('click', closeModal);
+    });
 
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape' && !modal.hidden) {
-                closeModal();
-            }
-        });
-
-        let activeBalloon = null;
-        document.addEventListener('click', (e) => {
-            const btn = e.target.closest('.player-dot-btn');
-            if (btn) {
-                e.stopPropagation();
-                if (activeBalloon) {
-                    activeBalloon.remove();
-                }
-                const playerId = btn.getAttribute('data-player-id');
-                const playerName = btn.getAttribute('data-player-name');
-                const playerUrl = btn.getAttribute('data-player-url');
-
-                const balloon = document.createElement('div');
-                balloon.className = 'player-profile-balloon';
-                balloon.innerHTML = `
-                    <div class="player-profile-balloon__text">Deseja ver o perfil de <strong>${playerName}</strong>?</div>
-                    <div class="player-profile-balloon__actions">
-                        <a href="${playerUrl}" class="player-profile-balloon__btn player-profile-balloon__btn--confirm">Sim</a>
-                        <button type="button" class="player-profile-balloon__btn player-profile-balloon__btn--cancel">Não</button>
-                    </div>
-                    <div class="player-profile-balloon__arrow"></div>
-                `;
-                document.body.appendChild(balloon);
-
-                const rect = btn.getBoundingClientRect();
-                const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-                balloon.style.left = `${rect.left + rect.width / 2 + scrollLeft}px`;
-                balloon.style.top = `${rect.top + scrollTop - 8}px`;
-
-                activeBalloon = balloon;
-
-                balloon.querySelector('.player-profile-balloon__btn--cancel').addEventListener('click', () => {
-                    balloon.remove();
-                    activeBalloon = null;
-                });
-                return;
-            }
-
-            if (activeBalloon && !e.target.closest('.player-profile-balloon')) {
-                activeBalloon.remove();
-                activeBalloon = null;
-            }
-        });
-
-        window.addEventListener('scroll', () => {
-            if (activeBalloon) {
-                activeBalloon.remove();
-                activeBalloon = null;
-            }
-        }, { passive: true });
-
-        window.addEventListener('resize', () => {
-            if (activeBalloon) {
-                activeBalloon.remove();
-                activeBalloon = null;
-            }
-        });
-
-        // Abrir automaticamente APENAS a rodada selecionada e rolar EXATAMENTE ate ela
-        // Paginação e Limite de Rodadas Iniciais
-        const initPagination = () => {
-            const INITIAL_LIMIT = 15;
-            const allItems = Array.from(document.querySelectorAll('details.judge-draw-history__item'));
-            if (allItems.length <= INITIAL_LIMIT) return;
-
-            let currentLimit = INITIAL_LIMIT;
-
-            const hash = window.location.hash;
-            const urlParams = new URLSearchParams(window.location.search);
-            const sorteioParam = urlParams.get('sorteio_id') || urlParams.get('sorteio');
-            const targetId = (hash && hash.startsWith('#sorteio-')) ? hash.replace('#sorteio-', '') : sorteioParam;
-
-            if (targetId) {
-                const targetEl = document.getElementById('sorteio-' + targetId);
-                if (targetEl) {
-                    const targetIdx = allItems.indexOf(targetEl);
-                    if (targetIdx >= currentLimit) {
-                        currentLimit = targetIdx + 1;
-                    }
-                }
-            }
-
-            const paginationContainer = document.getElementById('historyPagination');
-            const loadMoreBtn = document.getElementById('historyLoadMoreBtn');
-            const infoCount = document.getElementById('historyShownCount');
-
-            const updatePagination = () => {
-                allItems.forEach((item, index) => {
-                    if (index < currentLimit) {
-                        item.style.display = '';
-                        item.classList.remove('history-card-hidden');
-                    } else {
-                        item.style.display = 'none';
-                        item.classList.add('history-card-hidden');
-                    }
-                });
-
-                if (infoCount) infoCount.textContent = Math.min(currentLimit, allItems.length);
-
-                if (paginationContainer) {
-                    if (currentLimit >= allItems.length) {
-                        paginationContainer.style.display = 'none';
-                    } else {
-                        paginationContainer.style.display = 'block';
-                    }
-                }
-            };
-
-            if (loadMoreBtn) {
-                loadMoreBtn.addEventListener('click', () => {
-                    currentLimit += 15;
-                    updatePagination();
-                });
-            }
-
-            updatePagination();
-        };
-
-        window.initHistoryPagination = initPagination;
-        initPagination();
-
-        const openSorteioFromHash = () => {
-            const hash = window.location.hash;
-            const urlParams = new URLSearchParams(window.location.search);
-            const sorteioParam = urlParams.get('sorteio_id') || urlParams.get('sorteio');
-            
-            let targetId = null;
-            if (hash && hash.startsWith('#sorteio-')) {
-                targetId = hash.replace('#sorteio-', '');
-            } else if (sorteioParam) {
-                targetId = sorteioParam;
-            }
-
-            if (targetId) {
-                const allDetails = document.querySelectorAll('details.judge-draw-history__item');
-                const targetEl = document.getElementById('sorteio-' + targetId);
-
-                if (targetEl && targetEl.tagName === 'DETAILS') {
-                    // Fecha todos os outros cards para que apenas o card alvo fique aberto
-                    allDetails.forEach(d => {
-                        if (d !== targetEl) {
-                            d.removeAttribute('open');
-                            d.open = false;
-                        }
-                    });
-
-                    // Abre exclusivamente o card alvo
-                    targetEl.setAttribute('open', '');
-                    targetEl.open = true;
-
-                    // Função de rolagem com ajuste contínuo de offset
-                    const alignScrollToTarget = (behavior = 'auto') => {
-                        const rect = targetEl.getBoundingClientRect();
-                        const desiredTop = 75; // Distância ideal do topo abaixo da barra de navegacao
-                        const diff = rect.top - desiredTop;
-                        if (Math.abs(diff) > 2) {
-                            window.scrollBy({
-                                top: diff,
-                                behavior: behavior
-                            });
-                        }
-                    };
-
-                    // Executa rolagem imediata sem animacao para mover a tela instantaneamente
-                    alignScrollToTarget('auto');
-
-                    // Re-alinha progressivamente caso imagens/fontes alterem a altura da página
-                    let attempts = 0;
-                    const intervalId = setInterval(() => {
-                        attempts++;
-                        alignScrollToTarget('smooth');
-                        if (attempts >= 10) clearInterval(intervalId);
-                    }, 100);
-                }
-            }
-        };
-        openSorteioFromHash();
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', openSorteioFromHash);
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !modal.hidden) {
+            closeModal();
         }
-        window.addEventListener('load', openSorteioFromHash);
-        window.addEventListener('hashchange', openSorteioFromHash);
-    })();
+    });
+
+    let activeBalloon = null;
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.player-dot-btn');
+        if (btn) {
+            e.stopPropagation();
+            if (activeBalloon) {
+                activeBalloon.remove();
+            }
+            const playerId = btn.getAttribute('data-player-id');
+            const playerName = btn.getAttribute('data-player-name');
+            const playerUrl = btn.getAttribute('data-player-url');
+
+            const balloon = document.createElement('div');
+            balloon.className = 'player-profile-balloon';
+            balloon.innerHTML = `
+                <div class="player-profile-balloon__text">Deseja ver o perfil de <strong>${playerName}</strong>?</div>
+                <div class="player-profile-balloon__actions">
+                    <a href="${playerUrl}" class="player-profile-balloon__btn player-profile-balloon__btn--confirm">Sim</a>
+                    <button type="button" class="player-profile-balloon__btn player-profile-balloon__btn--cancel">Não</button>
+                </div>
+                <div class="player-profile-balloon__arrow"></div>
+            `;
+            document.body.appendChild(balloon);
+
+            const rect = btn.getBoundingClientRect();
+            const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+            balloon.style.left = `${rect.left + rect.width / 2 + scrollLeft}px`;
+            balloon.style.top = `${rect.top + scrollTop - 8}px`;
+
+            activeBalloon = balloon;
+
+            balloon.querySelector('.player-profile-balloon__btn--cancel').addEventListener('click', () => {
+                balloon.remove();
+                activeBalloon = null;
+            });
+            return;
+        }
+
+        if (activeBalloon && !e.target.closest('.player-profile-balloon')) {
+            activeBalloon.remove();
+            activeBalloon = null;
+        }
+    });
+
+    window.addEventListener('scroll', () => {
+        if (activeBalloon) {
+            activeBalloon.remove();
+            activeBalloon = null;
+        }
+    }, { passive: true });
+
+    window.addEventListener('resize', () => {
+        if (activeBalloon) {
+            activeBalloon.remove();
+            activeBalloon = null;
+        }
+    });
+
+    // Paginação e Limite de Rodadas Iniciais
+    const initPagination = () => {
+        const INITIAL_LIMIT = 15;
+        const allItems = Array.from(document.querySelectorAll('details.judge-draw-history__item'));
+        if (allItems.length <= INITIAL_LIMIT) return;
+
+        let currentLimit = INITIAL_LIMIT;
+
+        const hash = window.location.hash;
+        const urlParams = new URLSearchParams(window.location.search);
+        const sorteioParam = urlParams.get('sorteio_id') || urlParams.get('sorteio');
+        const targetId = (hash && hash.startsWith('#sorteio-')) ? hash.replace('#sorteio-', '') : sorteioParam;
+
+        if (targetId) {
+            const targetEl = document.getElementById('sorteio-' + targetId);
+            if (targetEl) {
+                const targetIdx = allItems.indexOf(targetEl);
+                if (targetIdx >= currentLimit) {
+                    currentLimit = targetIdx + 1;
+                }
+            }
+        }
+
+        const paginationContainer = document.getElementById('historyPagination');
+        const loadMoreBtn = document.getElementById('historyLoadMoreBtn');
+        const infoCount = document.getElementById('historyShownCount');
+
+        const updatePagination = () => {
+            allItems.forEach((item, index) => {
+                if (index < currentLimit) {
+                    item.style.display = '';
+                    item.classList.remove('history-card-hidden');
+                } else {
+                    item.style.display = 'none';
+                    item.classList.add('history-card-hidden');
+                }
+            });
+
+            if (infoCount) infoCount.textContent = Math.min(currentLimit, allItems.length);
+
+            if (paginationContainer) {
+                if (currentLimit >= allItems.length) {
+                    paginationContainer.style.display = 'none';
+                } else {
+                    paginationContainer.style.display = 'block';
+                }
+            }
+        };
+
+        if (loadMoreBtn) {
+            loadMoreBtn.addEventListener('click', () => {
+                currentLimit += 15;
+                updatePagination();
+            });
+        }
+
+        updatePagination();
+    };
+
+    window.initHistoryPagination = initPagination;
+    initPagination();
+
+    // Abrir automaticamente APENAS a rodada selecionada e rolar EXATAMENTE ate ela
+    const openSorteioFromHash = () => {
+        const hash = window.location.hash;
+        const urlParams = new URLSearchParams(window.location.search);
+        const sorteioParam = urlParams.get('sorteio_id') || urlParams.get('sorteio') || urlParams.get('partida_id') || urlParams.get('partida');
+        
+        let targetId = null;
+        if (hash && hash.startsWith('#sorteio-')) {
+            targetId = hash.replace('#sorteio-', '');
+        } else if (sorteioParam) {
+            targetId = sorteioParam;
+        }
+
+        if (targetId) {
+            const allDetails = document.querySelectorAll('details.judge-draw-history__item');
+            const targetEl = document.getElementById('sorteio-' + targetId);
+
+            if (targetEl && targetEl.tagName === 'DETAILS') {
+                // Fecha todos os outros cards para que apenas o card alvo fique aberto
+                allDetails.forEach(d => {
+                    if (d !== targetEl) {
+                        d.removeAttribute('open');
+                        d.open = false;
+                    }
+                });
+
+                // Abre exclusivamente o card alvo
+                targetEl.setAttribute('open', '');
+                targetEl.open = true;
+
+                // Função de rolagem com ajuste contínuo de offset
+                const alignScrollToTarget = (behavior = 'auto') => {
+                    const rect = targetEl.getBoundingClientRect();
+                    const desiredTop = 75; // Distância ideal do topo abaixo da barra de navegacao
+                    const diff = rect.top - desiredTop;
+                    if (Math.abs(diff) > 2) {
+                        window.scrollBy({
+                            top: diff,
+                            behavior: behavior
+                        });
+                    }
+                };
+
+                // Executa rolagem imediata sem animacao para mover a tela instantaneamente
+                alignScrollToTarget('auto');
+
+                // Re-alinha progressivamente caso imagens/fontes alterem a altura da página
+                let attempts = 0;
+                const intervalId = setInterval(() => {
+                    attempts++;
+                    alignScrollToTarget('smooth');
+                    if (attempts >= 10) clearInterval(intervalId);
+                }, 100);
+            }
+        }
+    };
+    openSorteioFromHash();
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', openSorteioFromHash);
+    }
+    window.addEventListener('load', openSorteioFromHash);
+    window.addEventListener('hashchange', openSorteioFromHash);
+
+    // Header Retrátil no Scroll
+    const collapsibleHeader = document.getElementById('collapsibleHeader');
+    if (collapsibleHeader) {
+        function handleHeaderScroll() {
+            if (window.scrollY > 20) {
+                collapsibleHeader.classList.add('is-scrolled');
+            } else {
+                collapsibleHeader.classList.remove('is-scrolled');
+            }
+        }
+        window.addEventListener('scroll', handleHeaderScroll, { passive: true });
+        handleHeaderScroll();
+    }
+})();
 </script>
 
 <!-- Modal Trocar Foto (Admin) -->
@@ -647,7 +695,7 @@ function abrirModalTrocarFoto(sorteioId, cardUrl) {
                     location.reload();
                     return;
                 } catch(err) {
-                    console.warn('[JuizHistorico] Fallback para POST tradicional:', err);
+                    console.warn('[Historico] Fallback para POST tradicional:', err);
                 }
             }
 

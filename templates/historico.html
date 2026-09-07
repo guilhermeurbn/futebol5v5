@@ -3,7 +3,8 @@
 {% block title %}Histórico de Sorteios{% endblock %}
 
 {% block content %}
-<div class="container page-container-wide history-page edge-to-edge-page{% if auth_user.role in ['admin'] %} judge-workspace-page admin-page admin-page--ecosystem{% elif auth_user.role == 'usuario' %} player-workspace-page{% elif auth_user.role == 'juiz' %} judge-workspace-page{% endif %}" style="background:#000000; min-height:100vh; width:100%; padding-left:0; padding-right:0;">
+{% set current_user = usuario if (usuario is defined and usuario and usuario.autenticado) else (auth_user if auth_user is defined and auth_user else None) %}
+<div class="container page-container-wide history-page edge-to-edge-page{% if current_user and current_user.role in ['admin'] %} judge-workspace-page admin-page admin-page--ecosystem{% elif current_user and current_user.role == 'usuario' %} player-workspace-page{% elif current_user and current_user.role == 'juiz' %} judge-workspace-page judge-history-page{% endif %}" style="background:#000000; min-height:100vh; width:100%; padding-left:0; padding-right:0;">
     <!-- Header Fixo 100% Imóvel no Topo da Tela com Logo Centralizada -->
     <header class="profile-topbar-sticky" style="position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; z-index: 1000 !important; background: rgba(0, 0, 0, 0.94) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; border-bottom: 1px solid rgba(34, 197, 94, 0.18) !important; padding: calc(0.55rem + max(10px, env(safe-area-inset-top, 0px))) 0.85rem 0.55rem 0.85rem !important; width: 100% !important; box-sizing: border-box !important;">
         <div style="max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: center; position: relative; min-height: 36px;">
@@ -18,13 +19,14 @@
             <!-- Badge da Conta Ativa do Usuário na Direita -->
             <div style="position: absolute; right: 0; display: inline-flex; align-items: center; gap: 0.4rem; color: #94a3b8; font-size: 0.78rem; font-weight: 700; background: rgba(255,255,255,0.04); padding: 0.35rem 0.75rem; border-radius: 999px; border: 1px solid rgba(255,255,255,0.08); white-space: nowrap; flex-shrink: 0; max-width: 40%; overflow: hidden; text-overflow: ellipsis;">
                 <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #22c55e; flex-shrink: 0;"></span>
-                <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ auth_user.nome or auth_user.username if (auth_user and (auth_user.nome or auth_user.username)) else 'Histórico' }}</span>
+                <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ current_user.nome or current_user.username if (current_user and (current_user.nome or current_user.username)) else 'Histórico' }}</span>
             </div>
 
         </div>
     </header>
 
     <main class="main" style="padding-left:0; padding-right:0; padding-top: calc(4.2rem + max(10px, env(safe-area-inset-top, 0px))) !important;">
+        <h1 style="display:none;">Histórico de sorteios</h1>
         {% if erro %}
         <div class="alert alert-warning" role="alert">{{ erro }}</div>
         {% endif %}
@@ -32,9 +34,10 @@
         {% if sorteios %}
             <div class="judge-draw-history__list history-page__list">
                 {% for sorteio in sorteios %}
-                {% set is_target = (target_sorteio_id and (target_sorteio_id|string == sorteio.id|string)) %}
+                {% set item = sorteio %}
+                {% set is_target = (target_sorteio_id and (target_sorteio_id|string == sorteio.id|string)) or (sorteio_destaque_id and (sorteio_destaque_id|string == sorteio.id|string)) or (sorteio_atual_id and (sorteio_atual_id|string == sorteio.id|string)) %}
                 {% set show_by_default = (loop.index <= 15 or is_target) %}
-                <details id="sorteio-{{ sorteio.id }}" {% if is_target %}open{% endif %} {% if not show_by_default %}style="display: none !important;"{% endif %} class="judge-draw-history__item votacao-admin-history-card {% if not show_by_default %}history-card-hidden{% endif %} {% if sorteio.votacao_encerrada %}votacao-admin-history-card--closed{% elif sorteio.votacao_aberta %}votacao-admin-history-card--open{% endif %}">
+                <details id="sorteio-{{ item.id }}" {% if is_target %}open{% endif %} {% if not show_by_default %}style="display: none !important;"{% endif %} class="judge-draw-history__item votacao-admin-history-card {% if not show_by_default %}history-card-hidden{% endif %} {% if sorteio.votacao_encerrada %}votacao-admin-history-card--closed{% elif sorteio.votacao_aberta %}votacao-admin-history-card--open{% endif %}">
                     <summary class="history-page__summary" style="display: flex; flex-direction: column; gap: 0.75rem; padding: 1.1rem 1.2rem; cursor: pointer; user-select: none;">
                         <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
                             <div style="display: flex; align-items: center; gap: 0.85rem;">

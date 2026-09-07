@@ -251,31 +251,46 @@ def _resolver_sorteio_juiz(sorteio_id_hint=None):
 def juiz_historico():
     """Lista os sorteios anteriores em uma pagina dedicada ao juiz."""
     try:
-        sorteio_destaque_id = request.args.get('sorteio_id', type=int)
-        sorteios = sorted(
-            historico_service.listar_sorteios() or [],
-            key=lambda item: int(item.get('id', 0) or 0),
-            reverse=True
-        )
+        sorteio_id_param = request.args.get('sorteio_id') or request.args.get('sorteio')
+        target_sorteio_id = int(sorteio_id_param) if (sorteio_id_param and str(sorteio_id_param).isdigit()) else None
+        sorteio_destaque_id = target_sorteio_id
+
+        sorteios_raw = historico_service.listar_sorteios() or []
+        sorteios_raw = [s for s in sorteios_raw if not s.get('rascunho')]
+        sorteios = list(reversed(sorteios_raw))
 
         from routes.partida_routes import _enriquecer_sorteio_historico
         sorteios = [_enriquecer_sorteio_historico(item) for item in sorteios]
 
+        resumo = {
+            'total_sorteios': len(sorteios),
+            'com_resultado': sum(1 for sorteio in sorteios if sorteio.get('resultado_partida')),
+            'votacoes_encerradas': sum(1 for sorteio in sorteios if sorteio.get('votacao_encerrada')),
+            'votacoes_abertas': sum(1 for sorteio in sorteios if sorteio.get('votacao_aberta')),
+        }
+
         estado = juiz_partida_service.obter_estado()
         sorteio_atual_id = ((estado.get('partida_atual') or {}).get('sorteio_id'))
+
         return render_template(
             'juiz_historico.html',
             sorteios=sorteios,
+            resumo=resumo,
             sorteio_atual_id=sorteio_atual_id,
             sorteio_destaque_id=sorteio_destaque_id,
+            target_sorteio_id=target_sorteio_id,
             usuario=_usuario_logado(),
         )
     except Exception as e:
         logger.error(f"Erro ao carregar histórico do juiz: {str(e)}")
+        from routes.partida_routes import _resumo_historico_vazio
         return render_template(
             'juiz_historico.html',
             sorteios=[],
+            resumo=_resumo_historico_vazio(),
+            sorteio_atual_id=None,
             sorteio_destaque_id=None,
+            target_sorteio_id=None,
             erro='Erro ao carregar histórico do juiz',
             usuario=_usuario_logado(),
         ), 500

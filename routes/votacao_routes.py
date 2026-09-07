@@ -132,8 +132,11 @@ def _resolver_contexto_admin(sorteio_id_hint=None):
         fluxo_partida = estado.get('partida_atual')
 
     selecionado = None
-    if _is_juiz() and fluxo_partida and fluxo_partida.get('sorteio_id'):
-        selecionado = fluxo_partida.get('sorteio_id')
+    if _is_juiz() and fluxo_partida:
+        if fluxo_partida.get('sorteio_id'):
+            selecionado = fluxo_partida.get('sorteio_id')
+        elif sorteio_id_hint:
+            selecionado = sorteio_id_hint
     else:
         if sorteio_id_hint:
             selecionado = sorteio_id_hint
@@ -216,6 +219,7 @@ def _resolver_contexto_admin(sorteio_id_hint=None):
 
     if not rodada_iniciada and _is_juiz():
         resultado_partida = None
+        rodada_selecionada = None
         pode_abrir_votacao = False
 
     card_campeao_url = (resultado_partida or {}).get('card_campeao_url') or (rodada_selecionada or {}).get('card_campeao_url')

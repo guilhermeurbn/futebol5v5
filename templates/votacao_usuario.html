@@ -511,15 +511,21 @@
 </style>
 
 <div class="container page-container-wide player-workspace-page" style="background: #000000 !important;">
-    <header class="header">
-        <div class="header-content">
-            {% set brand_title = 'Votação' %}
-            {% set brand_subtitle = 'Avalie a rodada' %}
-            {% include '_brand_header.html' %}
+    {% set current_user = usuario if (usuario is defined and usuario and usuario.autenticado) else (auth_user if auth_user is defined and auth_user else None) %}
+    <!-- Header Fixo Topbar: Logo na esquerda, Nome do Jogador na direita -->
+    <header class="home-topbar-header" style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; padding: 0.6rem 0.5rem 0.4rem 0.5rem; width: 100%; box-sizing: border-box;">
+        <a href="{{ url_for('jogador.index') }}" aria-label="NaTrave 5v5" style="display: inline-flex; align-items: center; flex-shrink: 0;">
+            <img src="{{ url_for('static', filename='natrave.svg', v='20260708-03') }}" alt="NaTrave 5v5" style="height: 38px; width: auto; object-fit: contain;">
+        </a>
+
+        <!-- Badge do Jogador Logado na Direita -->
+        <div style="display: inline-flex; align-items: center; gap: 0.4rem; color: #94a3b8; font-size: 0.78rem; font-weight: 700; background: rgba(255,255,255,0.04); padding: 0.35rem 0.75rem; border-radius: 999px; border: 1px solid rgba(255,255,255,0.08); white-space: nowrap; flex-shrink: 0; max-width: 50%; overflow: hidden; text-overflow: ellipsis;">
+            <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #22c55e; flex-shrink: 0;"></span>
+            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ current_user.nome or current_user.username if (current_user and (current_user.nome or current_user.username)) else 'Votação' }}</span>
         </div>
     </header>
 
-    <main class="main">
+    <main class="main" style="padding-top: 0.25rem !important;">
         {% if erro %}
             <div class="alert alert-warning" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; border-radius: 14px; display: flex; align-items: center; gap: 0.5rem;">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -604,18 +610,14 @@
                     {% set card_url = partida.card_campeao_url if (partida and partida.card_campeao_url and partida.card_campeao_url != 'sem_foto') else ((resultado_partida.card_campeao_url if (resultado_partida and resultado_partida.card_campeao_url and resultado_partida.card_campeao_url != 'sem_foto') else None)) %}
                     {% if card_url %}
                     <div class="champion-card-hero-display" style="text-align: center;">
-                        <div style="display: inline-block; max-width: 520px; width: 100%; border-radius: 20px; overflow: hidden; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.12); background: #09090b;">
+                        <div style="display: inline-block; max-width: 442px; width: 100%; border-radius: 20px; overflow: hidden; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.12); background: #09090b;">
                             <img src="{{ card_url }}" alt="Card Time Campeão" style="width: 100%; height: auto; display: block; object-fit: contain;">
                         </div>
-                        <div style="margin-top: 1rem;">
-                            <button type="button" onclick="baixarImagemCard('{{ card_url }}')" class="btn" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%; max-width: 520px; height: 46px; background: #5bf500; color: #000000; font-weight: 850; font-size: 0.92rem; border-radius: 14px; border: none; cursor: pointer; box-shadow: 0 4px 16px rgba(91, 245, 0, 0.3); transition: all 0.2s ease;">
-                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                    <polyline points="7 10 12 15 17 10"/>
-                                    <line x1="12" y1="15" x2="12" y2="3"/>
-                                </svg>
-                                <span>Baixar Imagem</span>
-                            </button>
+                        <div style="margin-top: 0.65rem;">
+                            <a href="{{ card_url }}" download="card_natrave_sorteio_{{ partida.id }}.jpg" target="_blank" onclick="if (window.baixarFotoDirecta) { event.preventDefault(); window.baixarFotoDirecta('{{ card_url }}', 'card_natrave_sorteio_{{ partida.id }}.jpg'); } else if (window.baixarImagemCard) { event.preventDefault(); window.baixarImagemCard('{{ card_url }}'); }" class="btn" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.55rem 1.1rem; font-weight: 800; font-size: 0.82rem; border-radius: 10px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.18); color: #ffffff; text-decoration: none; transition: all 0.2s ease;">
+                                <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                <span>Baixar Foto</span>
+                            </a>
                         </div>
                     </div>
                     {% endif %}
@@ -699,47 +701,18 @@
                 
                 <!-- 1. Hero Card da Rodada (vote-mobile-hero mantido para compatibilidade) -->
                 <div class="vote-hero-card vote-mobile-hero">
-                    <div class="vote-hero-top">
-                        <div class="vote-hero-tag">
-                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                            </svg>
-                            RODADA DE JOGO
-                        </div>
-                        <span class="vote-hero-status">
-                            <span class="vote-hero-status-dot"></span>
-                            Aberta
-                        </span>
-                    </div>
-
-                    <h2 class="vote-hero-title">{{ partida.titulo }}</h2>
-
                     <!-- Card Oficial do Time Campeão -->
                     {% set card_url = partida.card_campeao_url if (partida and partida.card_campeao_url and partida.card_campeao_url != 'sem_foto') else ((resultado_partida.card_campeao_url if (resultado_partida and resultado_partida.card_campeao_url and resultado_partida.card_campeao_url != 'sem_foto') else None)) %}
                     {% if card_url %}
                     <div class="champion-card-hero-display" style="margin-bottom: 1.25rem; text-align: center;">
-                        <div style="display: inline-block; max-width: 300px; width: 100%; border-radius: 20px; overflow: hidden; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.12); background: #09090b;">
+                        <div style="display: inline-block; max-width: 255px; width: 100%; border-radius: 20px; overflow: hidden; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.12); background: #09090b;">
                             <img src="{{ card_url }}" alt="Card Time Campeão" style="width: 100%; height: auto; display: block; object-fit: cover;">
                         </div>
-                    </div>
-                    {% endif %}
-
-                    <!-- Placar de Gols da Partida (Time 1 e Time 2 alinhados na mesma altura, placar abaixo) -->
-                    {% if partida.resultado_resumido %}
-                    <div class="vote-scoreboard">
-                        {% set t1 = partida.resultado_resumido[0] if partida.resultado_resumido|length > 0 else {'gols': 0, 'time_numero': 1} %}
-                        {% set t2 = partida.resultado_resumido[1] if partida.resultado_resumido|length > 1 else {'gols': 0, 'time_numero': 2} %}
-                        
-                        <div class="vote-scoreboard-header">
-                            <span class="vote-team-title">Time {{ t1.time_numero }}</span>
-                            <span class="vote-vs-tag">VS</span>
-                            <span class="vote-team-title">Time {{ t2.time_numero }}</span>
-                        </div>
-
-                        <div class="vote-scoreboard-body">
-                            <span class="vote-team-score">{{ t1.gols }}</span>
-                            <span class="vote-score-divider">-</span>
-                            <span class="vote-team-score">{{ t2.gols }}</span>
+                        <div style="margin-top: 0.65rem;">
+                            <a href="{{ card_url }}" download="card_natrave_sorteio_{{ partida.id }}.jpg" target="_blank" onclick="if (window.baixarFotoDirecta) { event.preventDefault(); window.baixarFotoDirecta('{{ card_url }}', 'card_natrave_sorteio_{{ partida.id }}.jpg'); } else if (window.baixarImagemCard) { event.preventDefault(); window.baixarImagemCard('{{ card_url }}'); }" class="btn" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.55rem 1.1rem; font-weight: 800; font-size: 0.82rem; border-radius: 10px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.18); color: #ffffff; text-decoration: none; transition: all 0.2s ease;">
+                                <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                <span>Baixar Foto</span>
+                            </a>
                         </div>
                     </div>
                     {% endif %}

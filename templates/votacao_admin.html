@@ -1184,48 +1184,37 @@
         }
 
         function renderChampionCard(userPhotoImg) {
-            // Full HD Premium Dimensions (1080 x 1620)
+            // Standard HD Card Dimensions (1080 x 1350)
             const width = 1080;
-            const height = 1620;
+            const height = 1350;
             canvas.width = width;
             canvas.height = height;
 
             const winInfo = getWinningTeamInfo();
 
-            // 1. Dark Premium Background
-            const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
-            bgGrad.addColorStop(0, '#040508');
-            bgGrad.addColorStop(0.5, '#0a0c12');
-            bgGrad.addColorStop(1, '#030406');
-            ctx.fillStyle = bgGrad;
-            ctx.fillRect(0, 0, width, height);
-
-            // 2. FOTO DO USUÁRIO - 65% DO CARD (1050px)
-            const photoH = Math.round(height * 0.65);
+            // 1. FOTO DO USUÁRIO OCUPA 100% DE TODO O CANVAS
             if (userPhotoImg) {
                 const pRatio = userPhotoImg.width / userPhotoImg.height;
-                const vRatio = width / photoH;
+                const vRatio = width / height;
                 let drawW, drawH, drawX, drawY;
 
                 if (pRatio > vRatio) {
-                    drawH = photoH;
-                    drawW = photoH * pRatio;
+                    drawH = height;
+                    drawW = height * pRatio;
                     drawY = 0;
                     drawX = - (drawW - width) / 2;
                 } else {
                     drawW = width;
                     drawH = width / pRatio;
                     drawX = 0;
-                    drawY = 0;
+                    drawY = - (drawH - height) / 2;
                 }
 
                 ctx.save();
-                ctx.beginPath();
-                ctx.rect(0, 0, width, photoH);
-                ctx.clip();
                 ctx.imageSmoothingEnabled = true;
                 ctx.imageSmoothingQuality = 'high';
 
+                // Downscaling HD em 2 passos para nitidez máxima
                 if (userPhotoImg.width > drawW * 1.3 || userPhotoImg.height > drawH * 1.3) {
                     const stepCanvas = document.createElement('canvas');
                     const stepW = Math.round(userPhotoImg.width * 0.5);
@@ -1241,147 +1230,143 @@
                     ctx.drawImage(userPhotoImg, drawX, drawY, drawW, drawH);
                 }
 
-                // Gradiente suave de transição na parte inferior da foto
-                const gradFade = ctx.createLinearGradient(0, photoH - 240, 0, photoH);
+                // Degradê sutil na parte inferior da foto (super leve para transparência real do painel)
+                const gradFade = ctx.createLinearGradient(0, height - 400, 0, height);
                 gradFade.addColorStop(0, 'rgba(4, 5, 8, 0)');
-                gradFade.addColorStop(0.7, 'rgba(4, 5, 8, 0.85)');
-                gradFade.addColorStop(1, '#040508');
+                gradFade.addColorStop(1, 'rgba(4, 5, 8, 0.35)');
                 ctx.fillStyle = gradFade;
-                ctx.fillRect(0, photoH - 240, width, 240);
+                ctx.fillRect(0, height - 400, width, 400);
                 ctx.restore();
+            } else {
+                const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+                bgGrad.addColorStop(0, '#040508');
+                bgGrad.addColorStop(1, '#0a0c12');
+                ctx.fillStyle = bgGrad;
+                ctx.fillRect(0, 0, width, height);
             }
 
-            // 3. ÁREA DA LOGO NO MEIO (1050px a 1170px)
-            const logoAreaStartY = photoH;
-            const logoAreaHeight = 120;
-            function drawMiddleLogoSVG() {
+            // 2. PAINEL FLUTUANTE (GLASSMORPHISM TRANSPARENTE 42%) E LOGO
+            function drawCardOverlay() {
+                const infoBoxX = 36;
+                const infoBoxWidth = width - 72;
+                const infoBoxHeight = 175;
+                const infoY = height - infoBoxHeight - 25; // 25px de margem do fundo
+
+                // Desenhar caixa flutuante com efeito Glassmorphism cristalino (42% de opacidade, sem borda)
+                ctx.save();
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+                ctx.shadowBlur = 25;
+                ctx.fillStyle = 'rgba(10, 12, 18, 0.42)';
+                if (ctx.roundRect) {
+                    ctx.beginPath(); ctx.roundRect(infoBoxX, infoY, infoBoxWidth, infoBoxHeight, 18); ctx.fill();
+                } else {
+                    ctx.fillRect(infoBoxX, infoY, infoBoxWidth, infoBoxHeight);
+                }
+                ctx.restore();
+
+                // Logo Apenas Texto "NaTrave 5v5" (natrave-text-only.svg)
                 if (logoImg.complete && logoImg.naturalWidth > 0) {
                     ctx.save();
                     ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
                     ctx.shadowBlur = 14;
-
-                    const targetWidth = 280;
+                    const targetWidth = 200;
                     const svgNativeRatio = logoImg.naturalWidth / logoImg.naturalHeight;
-                    const calculatedHeight = targetWidth / svgNativeRatio;
-
+                    const calculatedHeight = targetWidth / (svgNativeRatio || 3.38);
                     const logoX = (width - targetWidth) / 2;
-                    const logoY = logoAreaStartY + ((logoAreaHeight - calculatedHeight) / 2);
-
+                    const logoY = infoY - calculatedHeight - 4;
                     ctx.drawImage(logoImg, logoX, logoY, targetWidth, calculatedHeight);
                     ctx.restore();
                 }
-            }
-            drawMiddleLogoSVG();
 
-            // 4. INFORMAÇÕES DO CAMPEÃO & ELENCO NA BASE (1170px a 1580px - Painel Minimalista)
-            const infoY = logoAreaStartY + logoAreaHeight;
-            const infoBoxX = 36;
-            const infoBoxWidth = width - 72;
-            const infoBoxHeight = 410;
-
-            ctx.save();
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
-            ctx.shadowBlur = 20;
-            ctx.fillStyle = 'rgba(14, 16, 24, 0.95)';
-            if (ctx.roundRect) {
-                ctx.beginPath(); ctx.roundRect(infoBoxX, infoY, infoBoxWidth, infoBoxHeight, 20); ctx.fill();
-            } else {
-                ctx.fillRect(infoBoxX, infoY, infoBoxWidth, infoBoxHeight);
-            }
-
-            ctx.strokeStyle = winInfo.isEmpate ? 'rgba(251, 191, 36, 0.4)' : 'rgba(255, 255, 255, 0.16)';
-            ctx.lineWidth = 1.8;
-            ctx.stroke();
-            ctx.restore();
-
-            // Título Principal (Ex: CAMPEÃO • TIME 1)
-            ctx.save();
-            ctx.textAlign = 'center';
-            ctx.font = '900 38px system-ui, -apple-system, sans-serif';
-            ctx.fillStyle = winInfo.isEmpate ? '#fbbf24' : '#ffffff';
-            ctx.fillText(winInfo.isEmpate ? 'RODADA EMPATADA' : `CAMPEÃO  •  TIME ${winInfo.numero}`, width / 2, infoY + 52);
-            ctx.restore();
-
-            // Linha divisória limpa
-            ctx.save();
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.moveTo(infoBoxX + 36, infoY + 78);
-            ctx.lineTo(infoBoxX + infoBoxWidth - 36, infoY + 78);
-            ctx.stroke();
-            ctx.restore();
-
-            // Subtítulo
-            if (winInfo.jogadores && winInfo.jogadores.length > 0) {
-                ctx.save();
-                ctx.textAlign = 'center';
-                ctx.font = '800 13px system-ui, -apple-system, sans-serif';
-                ctx.fillStyle = '#64748b';
-                ctx.fillText('ELENCO CAMPEÃO', width / 2, infoY + 102);
-                ctx.restore();
-
-                const players = winInfo.jogadores;
-                const pCount = players.length;
-                const availableW = infoBoxWidth - 36;
-                const colWidth = availableW / Math.min(pCount, 5);
-                const startX = infoBoxX + 18;
-                const pRowY = infoY + 118;
-
-                players.slice(0, 5).forEach((pObj, idx) => {
-                    const pName = (typeof pObj === 'string') ? pObj : (pObj.nome || 'Jogador');
-                    const isGoleiro = (typeof pObj === 'object' && pObj !== null) ? Boolean(pObj.isGoleiro) : false;
-
-                    const itemX = startX + (idx * colWidth);
+                if (winInfo.isEmpate) {
+                    // --- CASO DE EMPATE ---
                     ctx.save();
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
-                    if (ctx.roundRect) {
-                        ctx.beginPath(); ctx.roundRect(itemX + 4, pRowY, colWidth - 8, 260, 14); ctx.fill();
-                    } else {
-                        ctx.fillRect(itemX + 4, pRowY, colWidth - 8, 260);
-                    }
-
-                    ctx.strokeStyle = isGoleiro ? 'rgba(251, 191, 36, 0.35)' : 'rgba(255, 255, 255, 0.07)';
-                    ctx.lineWidth = 1.2;
-                    ctx.stroke();
-
-                    // ÍCONE DE CHUTEIRA (Linha) OU LUVA (Goleiro)
-                    const iconCenterX = itemX + (colWidth / 2);
-                    const iconCenterY = pRowY + 75;
-                    if (isGoleiro) {
-                        drawGloveIcon(ctx, iconCenterX, iconCenterY, 28, '#fbbf24');
-                    } else {
-                        drawCleatIcon(ctx, iconCenterX, iconCenterY, 28, '#cbd5e1');
-                    }
-
-                    // Nome do Jogador
-                    ctx.fillStyle = isGoleiro ? '#fbbf24' : '#ffffff';
-                    ctx.font = '800 19px system-ui, -apple-system, sans-serif';
                     ctx.textAlign = 'center';
-                    
-                    let nameToShow = pName.toUpperCase();
-                    if (nameToShow.length > 10) {
-                        nameToShow = nameToShow.substring(0, 9) + '.';
-                    }
-                    ctx.fillText(nameToShow, itemX + (colWidth / 2), pRowY + 195);
+                    ctx.font = '900 28px system-ui, -apple-system, sans-serif';
+                    ctx.fillStyle = '#fbbf24';
+                    ctx.shadowColor = 'rgba(0,0,0,0.9)';
+                    ctx.shadowBlur = 10;
+                    ctx.fillText('RODADA EMPATADA', width / 2, infoY + 38);
                     ctx.restore();
-                });
+
+                    // Linha Divisória Horizontal
+                    ctx.save();
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(infoBoxX + 36, infoY + 56);
+                    ctx.lineTo(infoBoxX + infoBoxWidth - 36, infoY + 56);
+                    ctx.stroke();
+                    ctx.restore();
+                } else {
+                    // --- CASO COM VENCEDOR (CAMPEÃO • TIME X) ---
+                    ctx.save();
+                    ctx.textAlign = 'center';
+                    ctx.font = '900 32px system-ui, -apple-system, sans-serif';
+                    ctx.fillStyle = '#ffffff';
+                    ctx.shadowColor = 'rgba(0,0,0,0.9)';
+                    ctx.shadowBlur = 10;
+                    ctx.fillText(`CAMPEÃO  •  TIME ${winInfo.numero}`, width / 2, infoY + 44);
+                    ctx.restore();
+
+                    // Linha Divisória
+                    ctx.save();
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(infoBoxX + 36, infoY + 66);
+                    ctx.lineTo(infoBoxX + infoBoxWidth - 36, infoY + 66);
+                    ctx.stroke();
+                    ctx.restore();
+
+                    // Elenco com ícone individual (Chuteira verde para linha, Luva amarela para goleiro)
+                    if (winInfo.jogadores && winInfo.jogadores.length > 0) {
+                        const pCount = Math.min(winInfo.jogadores.length, 6);
+                        const availableW = infoBoxWidth - 72;
+                        const colW = availableW / pCount;
+                        const startX = infoBoxX + 36;
+
+                        winInfo.jogadores.slice(0, pCount).forEach((pObj, idx) => {
+                            const pName = (typeof pObj === 'string') ? pObj : (pObj.nome || 'Jogador');
+                            const isGoleiro = (typeof pObj === 'object' && pObj !== null) ? Boolean(pObj.isGoleiro) : false;
+                            const itemCenterX = startX + (idx * colW) + (colW / 2);
+
+                            if (isGoleiro) {
+                                drawGloveIcon(ctx, itemCenterX, infoY + 98, 24, '#fbbf24');
+                            } else {
+                                drawCleatIcon(ctx, itemCenterX, infoY + 98, 24, '#4ade80');
+                            }
+
+                            ctx.save();
+                            ctx.fillStyle = isGoleiro ? '#fbbf24' : '#ffffff';
+                            ctx.font = '800 17px system-ui, -apple-system, sans-serif';
+                            ctx.textAlign = 'center';
+
+                            let nameToShow = pName.toUpperCase();
+                            if (nameToShow.length > 10) nameToShow = nameToShow.substring(0, 9) + '.';
+                            ctx.fillText(nameToShow, itemCenterX, infoY + 138);
+                            ctx.restore();
+                        });
+                    }
+                }
+
+                updateBase64Input();
             }
 
             function updateBase64Input() {
                 try {
-                    const dataUrl = canvas.toDataURL('image/jpeg', 0.72);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
                     if (inputBase64) inputBase64.value = dataUrl;
                 } catch (e) {
                     console.warn('Erro ao extrair Base64 do canvas:', e);
                 }
             }
-            updateBase64Input();
+
+            drawCardOverlay();
 
             if (!logoImg.complete) {
                 logoImg.onload = function() {
-                    drawMiddleLogoSVG();
-                    updateBase64Input();
+                    drawCardOverlay();
                 };
             }
 
