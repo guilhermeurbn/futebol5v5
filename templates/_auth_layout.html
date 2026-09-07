@@ -132,6 +132,19 @@
                 });
             });
 
+            document.querySelectorAll('form.auth-form').forEach(form => {
+                form.addEventListener('submit', function () {
+                    try {
+                        sessionStorage.removeItem('jogadores_scroll_y');
+                        Object.keys(sessionStorage).forEach(key => {
+                            if (key.startsWith('page_scroll_')) {
+                                sessionStorage.removeItem(key);
+                            }
+                        });
+                    } catch (e) {}
+                });
+            });
+
             if (!document.body.classList.contains('auth-page--login')) return;
 
             if ('scrollRestoration' in history) {

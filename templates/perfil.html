@@ -1206,7 +1206,7 @@
 {% endif %}
 
 <script>
-    window.switchPerfilTab = function(targetOrElement) {
+    window.switchPerfilTab = function(targetOrElement, updateHash = true) {
         let target = '';
         if (typeof targetOrElement === 'string') {
             target = targetOrElement.replace('#', '').replace('tab-', '');
@@ -1248,9 +1248,11 @@
             }
         });
 
-        try {
-            history.replaceState(null, null, `#${targetId}`);
-        } catch (e) {}
+        if (updateHash) {
+            try {
+                history.replaceState(null, null, `#${targetId}`);
+            } catch (e) {}
+        }
 
         if (target === 'duelo') {
             const select = document.getElementById('dueloOponenteSelect');
@@ -1278,21 +1280,22 @@
         tabs.forEach(tab => {
             tab.onclick = (e) => {
                 if (e) e.preventDefault();
-                window.switchPerfilTab(tab);
+                window.switchPerfilTab(tab, true);
             };
         });
 
         // Restaurar aba ativa por hash na URL ou manter a aba ativa inicial
         const hash = window.location.hash;
         if (hash && hash.startsWith('#tab-')) {
-            window.switchPerfilTab(hash);
+            window.switchPerfilTab(hash, false);
         } else {
             const activeTab = document.querySelector('.premium-profile-tab.is-active');
             if (activeTab) {
-                window.switchPerfilTab(activeTab);
+                window.switchPerfilTab(activeTab, false);
             } else if (tabs.length > 0) {
-                window.switchPerfilTab(tabs[0]);
+                window.switchPerfilTab(tabs[0], false);
             }
+            window.scrollTo(0, 0);
         }
 
         // --- DIALOG ALTERAR SENHA ---
