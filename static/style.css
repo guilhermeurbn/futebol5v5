@@ -3856,6 +3856,29 @@ body.app-shell #app-content .footer {
   text-shadow: none !important;
 }
 
+/* Falsa sensação de toque (Tactile Touch Feedback) para a aba já ativa no rodapé */
+@keyframes navActiveTouchFeedback {
+  0% { transform: scale(0.9); }
+  35% { transform: scale(0.78); opacity: 0.85; }
+  70% { transform: scale(0.94); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 1; }
+}
+
+@keyframes topbarActiveTouchFeedback {
+  0% { transform: scale(1); }
+  35% { transform: scale(0.88); opacity: 0.85; }
+  70% { transform: scale(1.04); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.site-footer__link.is-tapped-active-nav {
+  animation: navActiveTouchFeedback 240ms cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+.site-topbar__link.is-tapped-active-nav {
+  animation: topbarActiveTouchFeedback 240ms cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
 .site-footer__link:focus-visible {
   outline: 2px solid #22c55e;
   outline-offset: 2px;
@@ -18834,6 +18857,38 @@ body.is-referee-layout .judge-timer-reset:hover {
   color: #eab308;
 }
 
+.premium-profile-match-delta-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.15rem 0.42rem;
+  border-radius: 6px;
+  margin-right: 0.4rem;
+  letter-spacing: 0.02em;
+}
+
+.premium-profile-match-delta-badge--up {
+  background: rgba(34, 197, 94, 0.18);
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  color: #4ade80;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.15);
+}
+
+.premium-profile-match-delta-badge--down {
+  background: rgba(239, 68, 68, 0.18);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #f87171;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.15);
+}
+
+.premium-profile-match-delta-badge--neutral {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #94a3b8;
+}
+
 .premium-profile-match-chevron {
   width: 16px;
   height: 16px;
@@ -22799,7 +22854,7 @@ body.page-index .players-showcase-section::after,
 body.page-index .premium-filter-tabs-container,
 .premium-filter-tabs-container {
   display: flex !important;
-  justify-content: flex-start !important;
+  justify-content: center !important;
   margin: 0.5rem 0 1rem 0 !important;
   width: 100% !important;
   background: transparent !important;
@@ -22811,7 +22866,7 @@ body.page-index .premium-filter-tabs,
 .premium-filter-tabs {
   display: flex !important;
   flex-wrap: nowrap !important;
-  justify-content: flex-start !important;
+  justify-content: center !important;
   align-items: center !important;
   gap: 0.35rem !important;
   background: transparent !important;

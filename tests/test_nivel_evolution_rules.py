@@ -70,3 +70,18 @@ def test_arredondamento_e_limite_global():
     )
     assert nivel_novo == 1.0
     assert tendencia == "manteve"
+
+def test_variacao_nivel_historico_partidas():
+    from services.jogador_stats_service import JogadorStatsService
+    svc = JogadorStatsService()
+    stats = {
+        "historico_partidas": [
+            {"sorteio_id": 2, "nota_media": 8.5, "nota_partida": 8.5},
+            {"sorteio_id": 1, "nota_media": 6.5, "nota_partida": 6.5},
+        ]
+    }
+    svc._enriquecer_variacao_nivel(stats, "Test Player")
+    for p in stats["historico_partidas"]:
+        assert "variacao_nivel" in p
+        assert "variacao_nivel_str" in p
+

@@ -29,12 +29,20 @@
 
                 {% if temporada and tipo_ranking != 'geral' %}
                 <div style="display: flex; align-items: center; gap: 0.45rem; color: #94a3b8; font-size: 0.8rem; flex-wrap: wrap;">
-                    <span style="background: rgba(255, 255, 255, 0.05); padding: 0.2rem 0.55rem; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.06); font-weight: 600;">
-                        {{ temporada.data_inicio_fmt }} → {{ temporada.data_fim_fmt }}
+                    <span style="background: rgba(255, 255, 255, 0.05); padding: 0.2rem 0.55rem; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.06); font-weight: 600; display: inline-flex; align-items: center; gap: 0.35rem;">
+                        <span>{{ temporada.data_inicio_fmt }} → {{ temporada.data_fim_fmt }}</span>
                     </span>
                     <span style="background: rgba(34, 197, 94, 0.12); color: #4ade80; padding: 0.2rem 0.55rem; border-radius: 999px; border: 1px solid rgba(34, 197, 94, 0.25); font-weight: 700;">
                         {{ temporada.progresso_pct }}% concluído
                     </span>
+                    {% if eh_admin %}
+                    <button type="button" onclick="document.getElementById('modalEditarCompeticao').showModal()" title="Editar datas da competição" aria-label="Editar datas da competição" style="background: rgba(167, 139, 250, 0.16); color: #c4b5fd; border: 1px solid rgba(167, 139, 250, 0.35); border-radius: 999px; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; margin-left: 0.15rem;" onmouseover="this.style.transform='scale(1.1)'; this.style.background='rgba(167, 139, 250, 0.3)';" onmouseout="this.style.transform='scale(1)'; this.style.background='rgba(167, 139, 250, 0.16)';">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20h9"/>
+                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                        </svg>
+                    </button>
+                    {% endif %}
                 </div>
                 {% endif %}
             </div>
@@ -339,6 +347,97 @@ async function submeterNovaCompeticao() {
     } catch(e) {
         console.error("Erro ao abrir competição:", e);
         alert("Erro de conexão ao abrir competição.");
+    }
+}
+</script>
+
+<!-- Modal: Editar Datas da Competição -->
+<dialog id="modalEditarCompeticao" style="background: #121217; border: 1px solid rgba(167, 139, 250, 0.3); border-radius: 20px; color: #ffffff; padding: 1.5rem; max-width: 500px; width: 92%; box-shadow: 0 20px 50px rgba(0,0,0,0.85); outline: none;">
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1.1rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.8rem;">
+        <div>
+            <div style="font-size: 0.75rem; font-weight: 800; color: #a78bfa; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.2rem; display: inline-flex; align-items: center; gap: 0.35rem;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                Editar Período da Competição
+            </div>
+            <h3 style="font-size: 1.25rem; font-weight: 850; margin: 0;">Ajustar datas da competição</h3>
+        </div>
+        <button type="button" onclick="document.getElementById('modalEditarCompeticao').close()" style="background: none; border: none; color: #94a3b8; font-size: 1.4rem; cursor: pointer; line-height: 1;">×</button>
+    </div>
+
+    <form id="formEditarCompeticao" onsubmit="event.preventDefault(); submeterEdicaoCompeticao();">
+        <div style="margin-bottom: 1rem;">
+            <label style="display: block; font-size: 0.78rem; font-weight: 800; color: #cbd5e1; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.04em;">Nome da Competição</label>
+            <input type="text" id="editCompNome" value="{{ temporada.nome if temporada else '' }}" placeholder="Ex: Temporada #1 - Edição de Prêmios" required
+                   style="width: 100%; background: #181823; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; padding: 0.65rem 0.85rem; color: #fff; font-size: 0.9rem; font-weight: 600; outline: none;">
+        </div>
+
+        <div style="margin-bottom: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
+            <div>
+                <label style="display: block; font-size: 0.78rem; font-weight: 800; color: #cbd5e1; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.04em;">Data de Início 📅</label>
+                <input type="date" id="editCompDataInicio" value="{{ temporada.data_inicio_input if temporada else '' }}" required
+                       style="width: 100%; background: #181823; border: 1px solid rgba(167, 139, 250, 0.35); border-radius: 10px; padding: 0.65rem 0.85rem; color: #fff; font-size: 0.9rem; font-weight: 700; outline: none; cursor: pointer;">
+            </div>
+            <div>
+                <label style="display: block; font-size: 0.78rem; font-weight: 800; color: #cbd5e1; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.04em;">Data de Término 📅</label>
+                <input type="date" id="editCompDataFim" value="{{ temporada.data_fim_input if temporada else '' }}" required
+                       style="width: 100%; background: #181823; border: 1px solid rgba(167, 139, 250, 0.35); border-radius: 10px; padding: 0.65rem 0.85rem; color: #fff; font-size: 0.9rem; font-weight: 700; outline: none; cursor: pointer;">
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1.1rem;">
+            <label style="display: block; font-size: 0.78rem; font-weight: 800; color: #cbd5e1; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.04em;">Descrição do Prêmio / Detalhes</label>
+            <input type="text" id="editCompDescricao" value="{{ temporada.descricao_premio if temporada else '' }}" placeholder="Ex: 🏆 1º Lugar: Prêmio Especial da Temporada!"
+                   style="width: 100%; background: #181823; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; padding: 0.65rem 0.85rem; color: #fff; font-size: 0.9rem; outline: none;">
+        </div>
+
+        <div style="background: rgba(167, 139, 250, 0.08); border: 1px solid rgba(167, 139, 250, 0.2); border-radius: 10px; padding: 0.75rem; margin-bottom: 1.1rem; font-size: 0.82rem; color: #ddd6fe; line-height: 1.45;">
+            💡 <strong>Atualização em tempo real:</strong> Ao alterar a data inicial ou final, o percentual de progresso e as partidas acumuladas serão recalculados para o novo período.
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.6rem;">
+            <button type="button" class="btn btn-secondary" onclick="document.getElementById('modalEditarCompeticao').close()" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 0.6rem 1rem; color: #cbd5e1;">Cancelar</button>
+            <button type="submit" class="btn" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: #ffffff; font-weight: 800; border-radius: 10px; padding: 0.6rem 1.15rem; border: none; cursor: pointer; box-shadow: 0 0 14px rgba(139,92,246,0.35);">Salvar alterações</button>
+        </div>
+    </form>
+</dialog>
+
+<script>
+async function submeterEdicaoCompeticao() {
+    const nome = document.getElementById('editCompNome').value.trim();
+    const data_inicio = document.getElementById('editCompDataInicio').value;
+    const data_fim = document.getElementById('editCompDataFim').value;
+    const descricao_premio = document.getElementById('editCompDescricao').value.trim();
+
+    if (!data_inicio || !data_fim) {
+        alert("Por favor, selecione as datas de início e fim da competição.");
+        return;
+    }
+
+    try {
+        const token = "{{ csrf_token() }}";
+        const resp = await fetch("{{ url_for('stats.api_competicao_editar') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': token
+            },
+            body: JSON.stringify({
+                nome: nome,
+                data_inicio: data_inicio,
+                data_fim: data_fim,
+                descricao_premio: descricao_premio,
+                csrf_token: token
+            })
+        });
+        const data = await resp.json();
+        if (data.sucesso) {
+            window.location.reload();
+        } else {
+            alert(data.erro || "Erro ao editar datas da competição.");
+        }
+    } catch(e) {
+        console.error("Erro ao editar competição:", e);
+        alert("Erro de conexão ao editar competição.");
     }
 }
 </script>

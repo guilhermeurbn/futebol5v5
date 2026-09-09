@@ -102,6 +102,8 @@ class TemporadaService:
             "partidas_jogadas": total_partidas_periodo,
             "data_inicio_fmt": dt_inicio.strftime("%d/%m/%Y"),
             "data_fim_fmt": dt_fim.strftime("%d/%m/%Y"),
+            "data_inicio_input": dt_inicio.strftime("%Y-%m-%d"),
+            "data_fim_input": dt_fim.strftime("%Y-%m-%d"),
         })
         return res
 
@@ -156,11 +158,20 @@ class TemporadaService:
         self._salvar_dados()
         return self.obter_temporada_ativa()
 
-    def atualizar_temporada(self, nome: str, data_inicio: str, data_fim: str, descricao_premio: str):
+    def atualizar_temporada(self, nome: Optional[str] = None, data_inicio: Optional[str] = None, data_fim: Optional[str] = None, descricao_premio: Optional[str] = None):
         temp = self.dados.setdefault("temporada_ativa", {})
-        temp["nome"] = nome
-        temp["data_inicio"] = data_inicio
-        temp["data_fim"] = data_fim
-        temp["descricao_premio"] = descricao_premio
+        if nome:
+            temp["nome"] = nome
+        if data_inicio:
+            if len(data_inicio) == 10 and "-" in data_inicio:
+                data_inicio = f"{data_inicio}T00:00:00"
+            temp["data_inicio"] = data_inicio
+        if data_fim:
+            if len(data_fim) == 10 and "-" in data_fim:
+                data_fim = f"{data_fim}T23:59:59"
+            temp["data_fim"] = data_fim
+        if descricao_premio is not None:
+            temp["descricao_premio"] = descricao_premio
         temp["ativa"] = True
         self._salvar_dados()
+        return self.obter_temporada_ativa()

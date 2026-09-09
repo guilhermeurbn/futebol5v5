@@ -360,6 +360,26 @@ def criar_app(config_name: str = None) -> Flask:
         if request_path in {'/robots.txt', '/sitemap.xml'}:
             response.headers['Cache-Control'] = 'public, max-age=86400'
 
+        # Global Security Headers (including CSP)
+        if 'Content-Security-Policy' not in response.headers:
+            response.headers['Content-Security-Policy'] = (
+                "default-src 'self'; "
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; "
+                "style-src 'self' 'unsafe-inline' https:; "
+                "img-src 'self' data: blob: https:; "
+                "font-src 'self' data: https:; "
+                "connect-src 'self' https:; "
+                "frame-ancestors 'self';"
+            )
+        if 'X-Content-Type-Options' not in response.headers:
+            response.headers['X-Content-Type-Options'] = 'nosniff'
+        if 'X-Frame-Options' not in response.headers:
+            response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+        if 'X-XSS-Protection' not in response.headers:
+            response.headers['X-XSS-Protection'] = '1; mode=block'
+        if 'Referrer-Policy' not in response.headers:
+            response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+
         return response
 
     if CSRFError is not None:

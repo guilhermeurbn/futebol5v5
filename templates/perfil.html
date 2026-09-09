@@ -599,11 +599,26 @@
                         </div>
 
                         <div style="display: flex; align-items: center;">
-                            {% set n_val = jogo.get('nota_partida', '7.0')|float %}
+                            {% set n_val = (jogo.get('nota_partida') or jogo.get('nota_media') or 7.0)|float %}
                             <span
                                 class="premium-profile-match-rating-badge {% if n_val >= 7.5 %}premium-profile-match-rating-badge--high{% elif n_val >= 6.0 %}premium-profile-match-rating-badge--mid{% endif %}">
-                                {{ jogo.get('nota_partida', '7.0') }}
+                                {{ "%.1f"|format(n_val) }}
                             </span>
+                            {% set delta_val = jogo.get('variacao_nivel') %}
+                            {% set d_num = delta_val|default(0.0)|float %}
+                            {% if d_num > 0 %}
+                            <span class="premium-profile-match-delta-badge premium-profile-match-delta-badge--up" title="Evolução de nível">
+                                +{{ "%.1f"|format(d_num) }}
+                            </span>
+                            {% elif d_num < 0 %}
+                            <span class="premium-profile-match-delta-badge premium-profile-match-delta-badge--down" title="Evolução de nível">
+                                {{ "%.1f"|format(d_num) }}
+                            </span>
+                            {% else %}
+                            <span class="premium-profile-match-delta-badge premium-profile-match-delta-badge--neutral" title="Evolução de nível">
+                                =0.0
+                            </span>
+                            {% endif %}
                             <svg class="premium-profile-match-chevron" viewBox="0 0 24 24" fill="none"
                                 stroke="currentColor" stroke-width="2.5">
                                 <polyline points="9 18 15 12 9 6" />
@@ -779,6 +794,23 @@
                                 N/A
                             </span>
                             {% endif %}
+
+                            {% set delta_val = jogo.get('variacao_nivel') %}
+                            {% set d_num = delta_val|default(0.0)|float %}
+                            {% if d_num > 0 %}
+                            <span class="premium-profile-match-delta-badge premium-profile-match-delta-badge--up" title="Evolução de nível">
+                                +{{ "%.1f"|format(d_num) }}
+                            </span>
+                            {% elif d_num < 0 %}
+                            <span class="premium-profile-match-delta-badge premium-profile-match-delta-badge--down" title="Evolução de nível">
+                                {{ "%.1f"|format(d_num) }}
+                            </span>
+                            {% else %}
+                            <span class="premium-profile-match-delta-badge premium-profile-match-delta-badge--neutral" title="Evolução de nível">
+                                =0.0
+                            </span>
+                            {% endif %}
+
                             <svg class="premium-profile-match-chevron" viewBox="0 0 24 24" fill="none"
                                 stroke="currentColor" stroke-width="2.5">
                                 <polyline points="9 18 15 12 9 6" />

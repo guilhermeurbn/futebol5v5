@@ -516,6 +516,45 @@
         </form>
     </footer>
     {% endif %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.addEventListener('click', function (e) {
+                const link = e.target.closest('.site-footer__link, .site-topbar__link');
+                if (!link) return;
+
+                const isActive = link.classList.contains('is-active') || link.getAttribute('aria-current') === 'page';
+                const rawHref = link.getAttribute('href');
+                let isSamePath = false;
+
+                if (rawHref && !rawHref.startsWith('javascript:')) {
+                    try {
+                        const linkPath = new URL(link.href, window.location.origin).pathname.replace(/\/$/, '');
+                        const currentPath = window.location.pathname.replace(/\/$/, '');
+                        isSamePath = (linkPath === currentPath) ||
+                                     ((currentPath === '' || currentPath === '/jogadores' || currentPath.endsWith('/jogadores')) &&
+                                      (linkPath === '' || linkPath === '/jogadores' || linkPath.endsWith('/jogadores')));
+                    } catch (_) {}
+                }
+
+                if (isActive || isSamePath) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    link.classList.remove('is-tapped-active-nav');
+                    void link.offsetWidth; // Force reflow
+                    link.classList.add('is-tapped-active-nav');
+
+                    if (navigator.vibrate) {
+                        try { navigator.vibrate(10); } catch (_) {}
+                    }
+
+                    setTimeout(function () {
+                        link.classList.remove('is-tapped-active-nav');
+                    }, 250);
+                }
+            }, true);
+        });
+    </script>
 </body>
 
 </html>

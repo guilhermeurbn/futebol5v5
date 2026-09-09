@@ -651,6 +651,40 @@ def api_competicao_abrir():
         return jsonify({'sucesso': False, 'erro': 'Erro interno ao abrir competição'}), 500
 
 
+@stats_bp.route('/api/competicao/editar', methods=['POST'])
+@login_required
+def api_competicao_editar():
+    """API: Edita as datas, nome e prêmios da competição ativa (apenas Admin)"""
+    user = _usuario_logado()
+    if not user or user.get('role') not in ['admin']:
+        return jsonify({'sucesso': False, 'erro': 'Apenas administradores podem editar a competição'}), 403
+
+    dados = request.get_json(silent=True) or request.form
+    nome = (dados.get('nome') or '').strip()
+    data_inicio = (dados.get('data_inicio') or '').strip()
+    data_fim = (dados.get('data_fim') or '').strip()
+    descricao_premio = dados.get('descricao_premio')
+
+    if not data_inicio or not data_fim:
+        return jsonify({'sucesso': False, 'erro': 'As datas de início e fim da competição são obrigatórias'}), 400
+
+    try:
+        temp_atualizada = temporada_service.atualizar_temporada(
+            nome=nome,
+            data_inicio=data_inicio,
+            data_fim=data_fim,
+            descricao_premio=descricao_premio
+        )
+        return jsonify({
+            'sucesso': True,
+            'competicao': temp_atualizada,
+            'mensagem': 'Datas da competição atualizadas com sucesso!'
+        })
+    except Exception as e:
+        logger.error(f"Erro ao editar competição: {str(e)}")
+        return jsonify({'sucesso': False, 'erro': 'Erro interno ao editar competição'}), 500
+
+
 @stats_bp.route('/api/ranking/periodo/<int:dias>')
 def api_ranking_periodo(dias):
     """API: Ranking de um período (desativado)"""

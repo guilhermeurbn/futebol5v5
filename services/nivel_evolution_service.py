@@ -9,7 +9,7 @@ As 6 Regras de Evolução:
    Tabela: 10 jogadores -> min 4 votos; 15 -> min 6; 20 -> min 8.
    Caso contrário, mantém-se inalterado.
 2. Nota da partida: Média dos votos recebidos multiplicada por 2 (se escala original for 5) ou como está (se escala original for 10).
-3. Fórmula de mistura: NovaNotaCalculada = (NivelAtual * 0.70) + (NotaDaPartida * 0.30).
+3. Fórmula de mistura: NovaNotaCalculada = (NivelAtual * 0.50) + (NotaDaPartida * 0.50).
 4. Velocidade de evolução:
    - |Diferenca| < 0.20 -> variação = 0
    - 0.20 <= |Diferenca| < 0.80 -> variação = +0.1 ou -0.1
@@ -59,8 +59,8 @@ def calcular_novo_nivel(
     else:
         nota_partida = media
         
-    # Regra 3: Misturar histórico com desempenho atual (70% histórico, 30% atual)
-    nova_nota_calculada = (nivel_atual * 0.70) + (nota_partida * 0.30)
+    # Regra 3: Misturar histórico com desempenho atual (50% histórico, 50% atual)
+    nova_nota_calculada = (nivel_atual * 0.50) + (nota_partida * 0.50)
     
     # Regra 4: Limitar a velocidade de evolução
     diferenca = nova_nota_calculada - nivel_atual

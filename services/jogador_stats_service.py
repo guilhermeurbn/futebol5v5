@@ -68,7 +68,14 @@ class JogadorStatsService:
         if time.time() - item.get("ts", 0) > self._cache_ttl_seconds:
             self._cache_stats.pop(chave, None)
             return None
-        return item.get("data")
+        data = item.get("data")
+        if data and isinstance(data, dict):
+            hist = data.get("historico_partidas", [])
+            if hist and isinstance(hist, list) and len(hist) > 0:
+                if "variacao_nivel" not in hist[0]:
+                    self._cache_stats.pop(chave, None)
+                    return None
+        return data
 
     def _salvar_stats_em_cache(self, chave: str, data: Dict) -> None:
         self._cache_stats[chave] = {
@@ -470,6 +477,9 @@ class JogadorStatsService:
             # Desduplicar partidas geradas por testes/substituições no mesmo dia
             stats["historico_partidas"] = self._desduplicar_historico_partidas(stats["historico_partidas"])
 
+            # Enriquecer partidas com variação de nível (+0.1, -0.1, 0.0)
+            self._enriquecer_variacao_nivel(stats, nome_jogador, jogador_id=jogador_id, user_id=user_id)
+
             # Recalcular métricas após desduplicação
             stats["total_partidas"] = len(stats["historico_partidas"])
             stats["gols"] = sum(p.get("gols", 0) for p in stats["historico_partidas"])
@@ -554,7 +564,96 @@ class JogadorStatsService:
 
         resultado_final.sort(key=lambda x: str(x.get("data") or ""), reverse=True)
         return resultado_final
-    
+
+    def _enriquecer_variacao_nivel(self, stats: Dict, nome_jogador: str, jogador_id: Optional[str] = None, user_id: Optional[str] = None) -> None:
+        """
+        Calcula e anexa a variação de nível (ex: +0.1, -0.1, =0.0) para cada partida no histórico do jogador.
+        """
+        historico_partidas = stats.get("historico_partidas", [])
+        if not historico_partidas:
+            return
+
+        historico_nivel_records = []
+        nivel_base = 7.0
+        try:
+            from services.jogador_service import JogadorService
+            js = JogadorService()
+            j_obj = None
+            if jogador_id:
+                j_obj = js.obter_por_id(jogador_id)
+            if not j_obj and user_id:
+                j_list = js.listar_por_usuario(user_id)
+                if j_list:
+                    j_obj = j_list[0]
+            if not j_obj and nome_jogador:
+                j_obj = js.obter_por_nome(nome_jogador)
+
+            if j_obj:
+                nivel_base = float(getattr(j_obj, 'nivel', 7.0) or 7.0)
+                historico_nivel_records = getattr(j_obj, 'historico_nivel', []) or []
+        except Exception:
+            pass
+
+        dict_historico_nivel = {}
+        if isinstance(historico_nivel_records, list):
+            for r in historico_nivel_records:
+                if isinstance(r, dict):
+                    motivo = str(r.get("motivo") or "")
+                    if motivo:
+                        dict_historico_nivel[motivo] = r
+
+        partidas_cronologicas = list(reversed(historico_partidas))
+        current_level = nivel_base
+
+        for p in partidas_cronologicas:
+            if not isinstance(p, dict):
+                continue
+
+            sid = str(p.get("sorteio_id") or p.get("partida_id") or "")
+            match_rec = None
+            if sid:
+                for k, r in dict_historico_nivel.items():
+                    if sid in k:
+                        match_rec = r
+                        break
+
+            if match_rec:
+                ant = float(match_rec.get("nivel_anterior", 0.0) or 0.0)
+                novo = float(match_rec.get("nivel_novo", 0.0) or 0.0)
+                delta = round(novo - ant, 1)
+                p["variacao_nivel"] = delta
+                if delta > 0:
+                    p["variacao_nivel_str"] = f"+{delta:.1f}"
+                elif delta < 0:
+                    p["variacao_nivel_str"] = f"{delta:.1f}"
+                else:
+                    p["variacao_nivel_str"] = "=0.0"
+            else:
+                nota = float(p.get("nota_media") or p.get("nota_partida") or p.get("nota") or 0.0)
+                if nota > 0:
+                    nova_nota_calc = (current_level * 0.50) + (nota * 0.50)
+                    diferenca = nova_nota_calc - current_level
+                    abs_diff = abs(diferenca)
+
+                    if abs_diff < 0.20:
+                        delta = 0.0
+                    elif abs_diff < 0.80:
+                        delta = 0.1 if diferenca > 0 else -0.1
+                    else:
+                        delta = 0.2 if diferenca > 0 else -0.2
+
+                    current_level = round(max(1.0, min(10.0, current_level + delta)), 1)
+                else:
+                    delta = 0.0
+
+                p["variacao_nivel"] = delta
+                if delta > 0:
+                    p["variacao_nivel_str"] = f"+{delta:.1f}"
+                elif delta < 0:
+                    p["variacao_nivel_str"] = f"{delta:.1f}"
+                else:
+                    p["variacao_nivel_str"] = "=0.0"
+
     def _extrair_detalhes_jogador(self, partida: dict, nome_jogador: str, sorteio: dict, jogador_id: Optional[str] = None, user_id: Optional[str] = None) -> Optional[dict]:
         """
         Extrai detalhes de um jogador específico em uma partida usando ID único (jogador_id / user_id)
