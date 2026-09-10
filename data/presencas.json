@@ -17,6 +17,12 @@
       "nome": "User RSVP",
       "status": "confirmado",
       "atualizado_em": "2026-09-10T12:20:08.966632"
+    },
+    "74ed5850-0f05-431a-834f-50dbbc10ccd7": {
+      "user_id": "74ed5850-0f05-431a-834f-50dbbc10ccd7",
+      "nome": "User RSVP",
+      "status": "confirmado",
+      "atualizado_em": "2026-09-10T14:22:30.373308"
     }
   },
   "partida_alvo_id": null,

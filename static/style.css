@@ -23040,10 +23040,20 @@ html.modal-open-lock {
   border: none !important;
   outline: none !important;
   color: #ffffff !important;
-  font-size: 0.78rem !important;
+  font-size: 16px !important; /* Previne auto-zoom indesejado do iOS Safari/WebView */
   font-weight: 600 !important;
   padding: 0 0.3rem !important;
   box-shadow: none !important;
+}
+
+/* Previne zoom automático do iOS Safari em inputs/selects/textareas no mobile */
+@media screen and (max-width: 768px) {
+  input,
+  select,
+  textarea,
+  .topbar-search-input {
+    font-size: 16px !important;
+  }
 }
 
 .topbar-search-input::placeholder {

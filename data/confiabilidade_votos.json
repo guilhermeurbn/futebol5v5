@@ -81,16 +81,16 @@
       "total_votos": 5
     },
     "u1": {
-      "reliability": 0.9167,
-      "total_votos": 15362
+      "reliability": 0.9146,
+      "total_votos": 15364
     },
     "u2": {
       "reliability": 0.9032,
-      "total_votos": 642
+      "total_votos": 644
     },
     "u3_hater": {
       "reliability": 0.5753,
-      "total_votos": 642
+      "total_votos": 644
     }
   },
   "relationships": {
@@ -743,27 +743,27 @@
       "cumulative_offset": 0.0
     },
     "u1:Alex": {
-      "match_count": 321,
-      "cumulative_offset": 1123.5
+      "match_count": 322,
+      "cumulative_offset": 1127.0
     },
     "u2:Alex": {
-      "match_count": 321,
-      "cumulative_offset": 1123.5
+      "match_count": 322,
+      "cumulative_offset": 1127.0
     },
     "u3_hater:Alex": {
-      "match_count": 321,
-      "cumulative_offset": -2247.0
+      "match_count": 322,
+      "cumulative_offset": -2254.0
     },
     "u1:Bruno": {
-      "match_count": 321,
+      "match_count": 322,
       "cumulative_offset": 0.0
     },
     "u2:Bruno": {
-      "match_count": 321,
+      "match_count": 322,
       "cumulative_offset": 0.0
     },
     "u3_hater:Bruno": {
-      "match_count": 321,
+      "match_count": 322,
       "cumulative_offset": 0.0
     },
     "u1:Jogador 2": {
@@ -840,8 +840,8 @@
       "historical_avg": 4.92
     },
     "Alex": {
-      "sum_scores": 6527.5,
-      "count": 1143,
+      "sum_scores": 6544.5,
+      "count": 1146,
       "historical_avg": 5.71
     },
     "Markinhos": {
@@ -1005,8 +1005,8 @@
       "historical_avg": 8.0
     },
     "Bruno": {
-      "sum_scores": 6741.0,
-      "count": 963,
+      "sum_scores": 6762.0,
+      "count": 966,
       "historical_avg": 7.0
     },
     "Jogador 2": {
