@@ -817,6 +817,7 @@ def registrar_resultado_partida():
 
         partida['jogadores_detalhes'] = jogadores_detalhes
         votacao_service.atualizar_resultado_da_rodada(sorteio_id, partida)
+        juiz_partida_service.limpar_rascunho_resultado(sorteio_id)
         if _is_juiz():
             juiz_partida_service.marcar_resultado_registrado(sorteio_id, partida.get('id'))
 

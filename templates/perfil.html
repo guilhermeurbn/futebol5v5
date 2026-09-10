@@ -164,12 +164,16 @@
                             {% set ult = hist[-1] %}
                             {% set ant = (ult.nivel_anterior|float) if ult.nivel_anterior is defined else (ult.get('nivel_anterior')|float if ult.get is defined else 0.0) %}
                             {% set nov = (ult.nivel_novo|float) if ult.nivel_novo is defined else (ult.get('nivel_novo')|float if ult.get is defined else 0.0) %}
-                            {% set diff = (nov - ant)|round(2) %}
+                            {% set diff = (nov - ant)|round(1) %}
                             {% if diff > 0 %}
-                                {% set v_rodada = {'variacao': diff, 'direcao': 'subiu', 'texto': '+' ~ ('%.2f'|format(diff)).rstrip('0').rstrip('.')} %}
+                                {% set v_rodada = {'variacao': diff, 'direcao': 'subiu', 'texto': '+' ~ ('%.1f'|format(diff))} %}
                             {% elif diff < 0 %}
-                                {% set v_rodada = {'variacao': diff, 'direcao': 'desceu', 'texto': ('%.2f'|format(diff)).rstrip('0').rstrip('.')} %}
+                                {% set v_rodada = {'variacao': diff, 'direcao': 'desceu', 'texto': ('%.1f'|format(diff))} %}
+                            {% else %}
+                                {% set v_rodada = {'variacao': 0.0, 'direcao': 'manteve', 'texto': '=0.0'} %}
                             {% endif %}
+                        {% else %}
+                            {% set v_rodada = {'variacao': 0.0, 'direcao': 'manteve', 'texto': '=0.0'} %}
                         {% endif %}
                     {% endif %}
 
@@ -179,9 +183,9 @@
                         {% if tem_jogador %}
                         <div style="display: inline-flex; align-items: center; gap: 0.4rem;">
                             <span class="premium-profile-rating-badge">{{ '%.1f'|format(jogador.nivel|float) }}</span>
-                            {% if v_rodada and v_rodada.direcao in ['subiu', 'desceu'] %}
+                            {% if v_rodada and v_rodada.direcao in ['subiu', 'desceu', 'manteve', 'neutro'] %}
                             <span class="rating-delta-badge rating-delta-{{ v_rodada.direcao }}" 
-                                  title="Variação na última rodada: {{ v_rodada.texto }}">
+                                  title="Variação na última partida: {{ v_rodada.texto }}">
                                 {% if v_rodada.direcao == 'subiu' %}
                                 <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                                     <polyline points="18 15 12 9 6 15"></polyline>
@@ -190,6 +194,8 @@
                                 <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                                     <polyline points="6 9 12 15 18 9"></polyline>
                                 </svg>
+                                {% else %}
+                                <span style="font-size: 0.75rem; font-weight: 800; line-height: 1; padding: 0 1px;">=</span>
                                 {% endif %}
                                 <span>{{ v_rodada.texto }}</span>
                             </span>

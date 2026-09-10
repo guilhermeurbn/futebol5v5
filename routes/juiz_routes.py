@@ -66,9 +66,9 @@ def _sincronizar_fluxo_juiz():
     from services.votacao_service import VotacaoService
     vot_svc = VotacaoService()
 
-    # Auto-recuperar apenas se o juiz estiver num fluxo ativo (não idle)
+    # Auto-recuperar apenas se o juiz estiver num fluxo ativo (não idle e não selecionando)
     status = estado.get('status') or 'idle'
-    if status != 'idle' and (not partida_atual or not partida_atual.get('votacao_aberta')):
+    if status not in ['idle', 'selecionando'] and (not partida_atual or not partida_atual.get('votacao_aberta')):
         votacoes = vot_svc.listar()
         abertas = [v for v in votacoes if v.get('status') == 'aberta']
         for v_aberta in abertas:
@@ -82,7 +82,6 @@ def _sincronizar_fluxo_juiz():
                 continue
 
             if s_id:
-                juiz_partida_service.iniciar_partida()
                 juiz_partida_service.marcar_resultado_registrado(s_id)
                 juiz_partida_service.marcar_votacao_aberta(s_id, v_aberta.get('id'))
                 return juiz_partida_service.obter_estado()
@@ -500,6 +499,7 @@ def juiz_iniciar_rodada(sorteio_id=None):
                 # Adicionar novo registro oficial no histórico
                 sorteio_oficial = historico_service.adicionar_sorteio(times, somas, num_times, diferenca)
                 novo_id = sorteio_oficial.get('id')
+                partida_service.deletar_partida_do_sorteio(novo_id)
 
             sorteio_oficial['rascunho'] = False
             sorteio_oficial['oficial'] = True
@@ -508,6 +508,7 @@ def juiz_iniciar_rodada(sorteio_id=None):
             juiz_partida_service.registrar_sorteio(novo_id)
             juiz_partida_service.marcar_resultado_registrado(novo_id)
             juiz_partida_service.limpar_rascunho()
+            juiz_partida_service.limpar_rascunho_resultado(novo_id)
 
             clear_db_cache()
             JogadorStatsService.invalidar_cache_stats()
@@ -652,6 +653,9 @@ def juiz_criar_partida():
         if request.method == 'POST' or novo_modo:
             jogador_service.limpar_presenca()
             juiz_partida_service.iniciar_partida(session.get('user_id'))
+            juiz_partida_service.limpar_rascunho()
+            juiz_partida_service.limpar_rascunho_resultado()
+            session.pop('ultimo_sorteio', None)
         
         todos_jogadores = sorted(jogador_service.listar(), key=lambda j: j.nome.lower())
         fixos = [j for j in todos_jogadores if j.tipo == "fixo"]
@@ -761,3 +765,42 @@ def juiz_finalizar_partida():
     except Exception as e:
         logger.error(f"Erro ao finalizar partida: {str(e)}")
         return redirect(url_for('juiz.jogar_page', erro='Erro ao finalizar'))
+
+
+@juiz_bp.route('/api/juiz/rascunho_resultado', methods=['POST'])
+def api_salvar_rascunho_resultado():
+    """API: Salva o rascunho em andamento dos gols/resultados anotados pelo juiz."""
+    try:
+        dados = request.get_json(silent=True) or {}
+        sorteio_id = dados.get('sorteio_id')
+        if not sorteio_id:
+            return jsonify({'sucesso': False, 'erro': 'sorteio_id obrigatorio'}), 400
+        juiz_partida_service.salvar_rascunho_resultado(sorteio_id, dados)
+        return jsonify({'sucesso': True})
+    except Exception as e:
+        logger.error(f"Erro ao salvar rascunho resultado: {str(e)}")
+        return jsonify({'sucesso': False, 'erro': str(e)}), 500
+
+
+@juiz_bp.route('/api/juiz/rascunho_resultado/<int:sorteio_id>', methods=['GET'])
+def api_obter_rascunho_resultado(sorteio_id: int):
+    """API: Obtém o rascunho em andamento dos gols/resultados da partida."""
+    try:
+        rascunho = juiz_partida_service.obter_rascunho_resultado(sorteio_id)
+        return jsonify({'sucesso': True, 'rascunho': rascunho})
+    except Exception as e:
+        logger.error(f"Erro ao obter rascunho resultado: {str(e)}")
+        return jsonify({'sucesso': False, 'erro': str(e)}), 500
+
+
+@juiz_bp.route('/api/juiz/limpar_rascunho_resultado', methods=['POST'])
+def api_limpar_rascunho_resultado():
+    """API: Limpa o rascunho de resultado salvo."""
+    try:
+        dados = request.get_json(silent=True) or {}
+        sorteio_id = dados.get('sorteio_id')
+        juiz_partida_service.limpar_rascunho_resultado(sorteio_id)
+        return jsonify({'sucesso': True})
+    except Exception as e:
+        logger.error(f"Erro ao limpar rascunho resultado: {str(e)}")
+        return jsonify({'sucesso': False, 'erro': str(e)}), 500

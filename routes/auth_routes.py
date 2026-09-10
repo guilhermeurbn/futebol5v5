@@ -6,6 +6,7 @@ from flask import Blueprint, request, render_template, redirect, url_for, sessio
 from functools import wraps
 import logging
 import os
+from typing import Optional
 from services.auth_service import AuthService
 from services.email_service import EmailService
 from services.jogador_service import JogadorService
@@ -956,38 +957,48 @@ def logout():
 # PERFIL E SENHA
 # ============================================================
 
-def _obter_variacao_rodada(jogador) -> dict:
-    """Calcula a variação do nível do jogador na última rodada com base no histórico."""
+def _obter_variacao_rodada(jogador, stats: Optional[dict] = None) -> dict:
+    """Calcula a variação do nível do jogador referente à última partida em que participou."""
     if not jogador:
-        return {'variacao': 0.0, 'direcao': 'neutro', 'texto': ''}
-        
-    hist = getattr(jogador, 'historico_nivel', None) or []
-    if not isinstance(hist, list) and isinstance(jogador, dict):
-        hist = jogador.get('historico_nivel', []) or []
-        
+        return {'variacao': 0.0, 'direcao': 'manteve', 'texto': '=0.0'}
+
+    hist = getattr(jogador, 'historico_nivel', None)
+    if hist is None and isinstance(jogador, dict):
+        hist = jogador.get('historico_nivel')
+    if not isinstance(hist, list):
+        hist = []
+
     if hist:
         ultimo = hist[-1]
         ant = float(ultimo.get('nivel_anterior', 0) or 0)
         nov = float(ultimo.get('nivel_novo', 0) or 0)
-        
+
         if nov == 0:
             nov = float(getattr(jogador, 'nivel', 0) or (jogador.get('nivel', 0) if isinstance(jogador, dict) else 0))
-            
-        diff = round(nov - ant, 2)
-        if diff > 0:
-            formatted_diff = f"+{diff:.2f}".rstrip('0').rstrip('.')
-            if formatted_diff == "+0":
-                formatted_diff = "+0.0"
-            return {'variacao': diff, 'direcao': 'subiu', 'texto': formatted_diff}
-        elif diff < 0:
-            formatted_diff = f"{diff:.2f}".rstrip('0').rstrip('.')
-            if formatted_diff == "-0":
-                formatted_diff = "-0.0"
-            return {'variacao': diff, 'direcao': 'desceu', 'texto': formatted_diff}
-        else:
-            return {'variacao': 0.0, 'direcao': 'neutro', 'texto': '0.0'}
 
-    return {'variacao': 0.0, 'direcao': 'sem_historico', 'texto': ''}
+        diff = round(nov - ant, 1)
+        if diff > 0:
+            return {'variacao': diff, 'direcao': 'subiu', 'texto': f"+{diff:.1f}"}
+        elif diff < 0:
+            return {'variacao': diff, 'direcao': 'desceu', 'texto': f"{diff:.1f}"}
+        else:
+            return {'variacao': 0.0, 'direcao': 'manteve', 'texto': '=0.0'}
+
+    # Fallback: consultar stats -> historico_partidas
+    if stats and isinstance(stats, dict):
+        partidas = stats.get('historico_partidas', [])
+        if partidas and isinstance(partidas, list) and len(partidas) > 0:
+            ult_p = partidas[0]
+            delta = float(ult_p.get('variacao_nivel', 0.0) or 0.0)
+            delta_str = str(ult_p.get('variacao_nivel_str') or '')
+            if delta > 0:
+                return {'variacao': delta, 'direcao': 'subiu', 'texto': delta_str or f"+{delta:.1f}"}
+            elif delta < 0:
+                return {'variacao': delta, 'direcao': 'desceu', 'texto': delta_str or f"{delta:.1f}"}
+            else:
+                return {'variacao': 0.0, 'direcao': 'manteve', 'texto': delta_str or '=0.0'}
+
+    return {'variacao': 0.0, 'direcao': 'manteve', 'texto': '=0.0'}
 
 
 @auth_bp.route('/perfil', methods=['GET'])
@@ -1077,7 +1088,7 @@ def perfil_page():
     if aba_ativa not in ['mensagem', 'estatisticas', 'partidas', 'duelo', 'mais']:
         aba_ativa = 'partidas' if jogador_proprio else 'mensagem'
 
-    variacao_rodada = _obter_variacao_rodada(jogador_proprio)
+    variacao_rodada = _obter_variacao_rodada(jogador_proprio, stats=stats_jogador)
 
     return render_template(
         'perfil.html',
@@ -1249,7 +1260,7 @@ def perfil_jogador_publico(jogador_id):
         except Exception:
             pass
 
-        variacao_rodada = _obter_variacao_rodada(jogador)
+        variacao_rodada = _obter_variacao_rodada(jogador, stats=stats_jogador)
 
         return render_template(
             'perfil.html',

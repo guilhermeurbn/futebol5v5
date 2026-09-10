@@ -18307,6 +18307,13 @@ body.is-referee-layout .judge-timer-reset:hover {
   color: #f87171;
 }
 
+.rating-delta-badge.rating-delta-manteve,
+.rating-delta-badge.rating-delta-neutro {
+  background: rgba(148, 163, 184, 0.15);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  color: #94a3b8;
+}
+
 .rating-delta-badge svg {
   display: inline-block;
   vertical-align: middle;

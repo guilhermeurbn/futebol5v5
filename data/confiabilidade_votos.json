@@ -2,7 +2,7 @@
   "evaluators": {
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033": {
       "reliability": 1.0,
-      "total_votos": 450
+      "total_votos": 875
     },
     "0d2e29f6-ddc4-4328-a971-d49157356f8f": {
       "reliability": 0.9888,
@@ -81,16 +81,16 @@
       "total_votos": 5
     },
     "u1": {
-      "reliability": 0.9535,
-      "total_votos": 15346
+      "reliability": 0.9167,
+      "total_votos": 15362
     },
     "u2": {
       "reliability": 0.9032,
-      "total_votos": 626
+      "total_votos": 642
     },
     "u3_hater": {
       "reliability": 0.5753,
-      "total_votos": 626
+      "total_votos": 642
     }
   },
   "relationships": {
@@ -123,7 +123,7 @@
       "cumulative_offset": 0.0
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Alex": {
-      "match_count": 87,
+      "match_count": 172,
       "cumulative_offset": 0.0
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Markinhos": {
@@ -151,7 +151,7 @@
       "cumulative_offset": 0.0
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:André Balada": {
-      "match_count": 1,
+      "match_count": 86,
       "cumulative_offset": 0.0
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Luan": {
@@ -743,27 +743,27 @@
       "cumulative_offset": 0.0
     },
     "u1:Alex": {
-      "match_count": 313,
-      "cumulative_offset": 1095.5
+      "match_count": 321,
+      "cumulative_offset": 1123.5
     },
     "u2:Alex": {
-      "match_count": 313,
-      "cumulative_offset": 1095.5
+      "match_count": 321,
+      "cumulative_offset": 1123.5
     },
     "u3_hater:Alex": {
-      "match_count": 313,
-      "cumulative_offset": -2191.0
+      "match_count": 321,
+      "cumulative_offset": -2247.0
     },
     "u1:Bruno": {
-      "match_count": 313,
+      "match_count": 321,
       "cumulative_offset": 0.0
     },
     "u2:Bruno": {
-      "match_count": 313,
+      "match_count": 321,
       "cumulative_offset": 0.0
     },
     "u3_hater:Bruno": {
-      "match_count": 313,
+      "match_count": 321,
       "cumulative_offset": 0.0
     },
     "u1:Jogador 2": {
@@ -783,7 +783,7 @@
       "cumulative_offset": 0.0
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Gabriel Silva": {
-      "match_count": 86,
+      "match_count": 171,
       "cumulative_offset": 0.0
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Ramon Santos": {
@@ -792,6 +792,14 @@
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Renan Costa": {
       "match_count": 86,
+      "cumulative_offset": 0.0
+    },
+    "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Rafael Souza": {
+      "match_count": 85,
+      "cumulative_offset": 0.0
+    },
+    "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Luan Oliveira": {
+      "match_count": 85,
       "cumulative_offset": 0.0
     }
   },
@@ -832,9 +840,9 @@
       "historical_avg": 4.92
     },
     "Alex": {
-      "sum_scores": 5966.5,
-      "count": 1034,
-      "historical_avg": 5.77
+      "sum_scores": 6527.5,
+      "count": 1143,
+      "historical_avg": 5.71
     },
     "Markinhos": {
       "sum_scores": 21.5,
@@ -867,9 +875,9 @@
       "historical_avg": 5.75
     },
     "André Balada": {
-      "sum_scores": 35.0,
-      "count": 6,
-      "historical_avg": 5.83
+      "sum_scores": 375.0,
+      "count": 91,
+      "historical_avg": 4.12
     },
     "Luan": {
       "sum_scores": 23.5,
@@ -997,8 +1005,8 @@
       "historical_avg": 8.0
     },
     "Bruno": {
-      "sum_scores": 6573.0,
-      "count": 939,
+      "sum_scores": 6741.0,
+      "count": 963,
       "historical_avg": 7.0
     },
     "Jogador 2": {
@@ -1022,9 +1030,9 @@
       "historical_avg": 8.0
     },
     "Gabriel Silva": {
-      "sum_scores": 516.0,
-      "count": 86,
-      "historical_avg": 6.0
+      "sum_scores": 983.5,
+      "count": 171,
+      "historical_avg": 5.75
     },
     "Ramon Santos": {
       "sum_scores": 430.0,
@@ -1035,6 +1043,16 @@
       "sum_scores": 430.0,
       "count": 86,
       "historical_avg": 5.0
+    },
+    "Rafael Souza": {
+      "sum_scores": 425.0,
+      "count": 85,
+      "historical_avg": 5.0
+    },
+    "Luan Oliveira": {
+      "sum_scores": 297.5,
+      "count": 85,
+      "historical_avg": 3.5
     }
   }
 }

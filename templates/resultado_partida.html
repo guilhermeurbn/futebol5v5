@@ -184,13 +184,190 @@
 <script>
 let timeVencedorSelecionado = null;
 const offlineStatus = document.getElementById('offline-status');
+const SORTEIO_ID = parseInt(document.getElementById('sorteio_id')?.value) || 0;
+const DRAFT_STORAGE_KEY = 'natrave:juiz_resultado_draft:' + SORTEIO_ID;
+let debounceTimer = null;
 
 function mostrarOfflineStatus(msg) {
-    if (!offlineStatus) {
-        return;
-    }
+    if (!offlineStatus) return;
     offlineStatus.textContent = msg;
     offlineStatus.style.display = 'block';
+}
+
+function mostrarMensagem(msg) {
+    const msgDiv = document.getElementById('info-message');
+    if (!msgDiv) return;
+    document.getElementById('message-content').textContent = msg;
+    msgDiv.style.display = 'block';
+}
+
+function serializarRascunho() {
+    const jogadoresDetalhes = [];
+    document.querySelectorAll('.jogador-gols').forEach(input => {
+        const team = parseInt(input.dataset.team);
+        const jogador = input.dataset.jogador;
+        const posicao = input.dataset.posicao || 'linha';
+        const gols = parseInt(input.value) || 0;
+        
+        const safeJogador = CSS.escape(jogador);
+        const aEl = document.querySelector(`.jogador-assists[data-team="${team}"][data-jogador="${safeJogador}"]`);
+        const yEl = document.querySelector(`.jogador-amarelo[data-team="${team}"][data-jogador="${safeJogador}"]`);
+        const assists = aEl ? (parseInt(aEl.value) || 0) : 0;
+        const amarelo = yEl ? (parseInt(yEl.value) || 0) : 0;
+
+        jogadoresDetalhes.push({
+            nome: jogador,
+            gols: gols,
+            assistencias: assists,
+            cartoes_amarelos: amarelo,
+            cartoes_vermelhos: 0,
+            time_numero: team,
+            posicao: posicao
+        });
+    });
+
+    const golsInputs = document.querySelectorAll('.gols-input');
+    const gols = Array.from(golsInputs).map(input => parseInt(input.value) || 0);
+
+    const timesDesempenho = [];
+    document.querySelectorAll('.team-card').forEach(card => {
+        const team = parseInt(card.dataset.team);
+        const vEl = document.querySelector(`.time-vitorias[data-team="${team}"]`);
+        const eEl = document.querySelector(`.time-empates[data-team="${team}"]`);
+        const dEl = document.querySelector(`.time-derrotas[data-team="${team}"]`);
+        timesDesempenho.push({
+            time_numero: team,
+            vitorias: vEl ? (parseInt(vEl.value) || 0) : 0,
+            empates: eEl ? (parseInt(eEl.value) || 0) : 0,
+            derrotas: dEl ? (parseInt(dEl.value) || 0) : 0
+        });
+    });
+
+    const notasEl = document.getElementById('notas-input');
+    const notas = notasEl ? notasEl.value : '';
+
+    return {
+        sorteio_id: SORTEIO_ID,
+        time_vencedor: timeVencedorSelecionado,
+        gols_times: gols,
+        notas: notas,
+        jogadores_detalhes: jogadoresDetalhes,
+        times_desempenho: timesDesempenho
+    };
+}
+
+function salvarRascunhoLocal() {
+    const draft = serializarRascunho();
+    try {
+        localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+    } catch (_) {}
+
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        fetch('/api/juiz/rascunho_resultado', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify(draft)
+        }).catch(() => {});
+    }, 1200);
+}
+
+function aplicarRascunho(draft) {
+    if (!draft) return false;
+    let alterouAlgo = false;
+
+    if (draft.time_vencedor) {
+        timeVencedorSelecionado = parseInt(draft.time_vencedor);
+        document.querySelectorAll('.team-card').forEach(card => card.classList.remove('selected'));
+        const targetCard = document.getElementById(`team-${timeVencedorSelecionado}`);
+        if (targetCard) targetCard.classList.add('selected');
+        alterouAlgo = true;
+    }
+
+    if (Array.isArray(draft.jogadores_detalhes)) {
+        draft.jogadores_detalhes.forEach(d => {
+            if (d.gols || d.assistencias || d.cartoes_amarelos) alterouAlgo = true;
+            const safeJogador = CSS.escape(d.nome);
+            const gEl = document.querySelector(`.jogador-gols[data-team="${d.time_numero}"][data-jogador="${safeJogador}"]`);
+            const aEl = document.querySelector(`.jogador-assists[data-team="${d.time_numero}"][data-jogador="${safeJogador}"]`);
+            const yEl = document.querySelector(`.jogador-amarelo[data-team="${d.time_numero}"][data-jogador="${safeJogador}"]`);
+
+            if (gEl && d.gols !== undefined) gEl.value = d.gols;
+            if (aEl && d.assistencias !== undefined) aEl.value = d.assistencias;
+            if (yEl && d.cartoes_amarelos !== undefined) yEl.value = d.cartoes_amarelos;
+        });
+    }
+
+    if (Array.isArray(draft.gols_times)) {
+        const inputs = document.querySelectorAll('.gols-input');
+        draft.gols_times.forEach((g, idx) => {
+            if (g > 0) alterouAlgo = true;
+            if (inputs[idx]) inputs[idx].value = g;
+        });
+    }
+
+    if (Array.isArray(draft.times_desempenho)) {
+        draft.times_desempenho.forEach(td => {
+            if (td.vitorias || td.empates || td.derrotas) alterouAlgo = true;
+            const vEl = document.querySelector(`.time-vitorias[data-team="${td.time_numero}"]`);
+            const eEl = document.querySelector(`.time-empates[data-team="${td.time_numero}"]`);
+            const dEl = document.querySelector(`.time-derrotas[data-team="${td.time_numero}"]`);
+            if (vEl) vEl.value = td.vitorias || 0;
+            if (eEl) eEl.value = td.empates || 0;
+            if (dEl) dEl.value = td.derrotas || 0;
+        });
+    }
+
+    if (draft.notas) {
+        const notasEl = document.getElementById('notas-input');
+        if (notasEl) {
+            notasEl.value = draft.notas;
+            alterouAlgo = true;
+        }
+    }
+
+    return alterouAlgo;
+}
+
+function limparRascunhoLocal() {
+    try {
+        localStorage.removeItem(DRAFT_STORAGE_KEY);
+    } catch (_) {}
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    fetch('/api/juiz/limpar_rascunho_resultado', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+        body: JSON.stringify({ sorteio_id: SORTEIO_ID })
+    }).catch(() => {});
+}
+
+async function restaurarAoCarregar() {
+    let restaurado = false;
+    let localData = null;
+    try {
+        const str = localStorage.getItem(DRAFT_STORAGE_KEY);
+        if (str) localData = JSON.parse(str);
+    } catch (_) {}
+
+    if (localData) {
+        restaurado = aplicarRascunho(localData);
+    } else if (SORTEIO_ID > 0) {
+        try {
+            const resp = await fetch(`/api/juiz/rascunho_resultado/${SORTEIO_ID}`);
+            const data = await resp.json();
+            if (data.sucesso && data.rascunho) {
+                restaurado = aplicarRascunho(data.rascunho);
+            }
+        } catch (_) {}
+    }
+
+    if (restaurado) {
+        mostrarMensagem('✏️ Restauramos os gols, estatísticas e vencedor que você já tinha anotado!');
+    }
 }
 
 // Listeners para seleção de vencedor
@@ -209,15 +386,18 @@ document.querySelectorAll('.btn-vencedor').forEach(btn => {
         
         // Mostrar mensagem
         mostrarMensagem(`✅ Time ${team} selecionado como vencedor`);
+        salvarRascunhoLocal();
     });
 });
 
-// Função para mostrar mensagem
-function mostrarMensagem(msg) {
-    const msgDiv = document.getElementById('info-message');
-    document.getElementById('message-content').textContent = msg;
-    msgDiv.style.display = 'block';
-}
+// Registrar ouvintes para salvar rascunho em tempo real ao digitar ou alterar números
+document.querySelectorAll('input[type="number"], textarea').forEach(input => {
+    input.addEventListener('input', salvarRascunhoLocal);
+    input.addEventListener('change', salvarRascunhoLocal);
+});
+
+// Restaurar rascunho quando a página carrega
+document.addEventListener('DOMContentLoaded', restaurarAoCarregar);
 
 // Coletar dados de todos os jogadores
 function coletarDetalhesJogadores() {
@@ -228,8 +408,11 @@ function coletarDetalhesJogadores() {
         const jogador = input.dataset.jogador;
         const posicao = input.dataset.posicao || 'linha';
         const gols = parseInt(input.value) || 0;
-        const assists = parseInt(document.querySelector(`.jogador-assists[data-team="${team}"][data-jogador="${jogador}"]`).value) || 0;
-        const amarelo = parseInt(document.querySelector(`.jogador-amarelo[data-team="${team}"][data-jogador="${jogador}"]`).value) || 0;
+        const safeJogador = CSS.escape(jogador);
+        const aEl = document.querySelector(`.jogador-assists[data-team="${team}"][data-jogador="${safeJogador}"]`);
+        const yEl = document.querySelector(`.jogador-amarelo[data-team="${team}"][data-jogador="${safeJogador}"]`);
+        const assists = aEl ? (parseInt(aEl.value) || 0) : 0;
+        const amarelo = yEl ? (parseInt(yEl.value) || 0) : 0;
 
         detalhes.push({
             nome: jogador,
@@ -295,6 +478,7 @@ document.getElementById('btn-registrar').addEventListener('click', function() {
                 body: JSON.stringify(dados),
                 kind: 'resultado_partida'
             });
+            limparRascunhoLocal();
             mostrarMensagem('📴 Resultado salvo localmente. Ele será sincronizado quando a conexão voltar.');
             mostrarOfflineStatus('O resultado foi colocado na fila offline.');
             this.disabled = false;
@@ -319,6 +503,7 @@ document.getElementById('btn-registrar').addEventListener('click', function() {
     .then(response => response.json())
     .then(data => {
         if (data.sucesso) {
+            limparRascunhoLocal();
             mostrarMensagem('✅ Resultado e estatísticas registrados com sucesso!');
             setTimeout(() => {
                 window.location.href = data.proximo_passo_url || '{{ url_for("juiz.jogar_page") if auth_user and auth_user.role == "juiz" else url_for("admin.admin_page") }}';

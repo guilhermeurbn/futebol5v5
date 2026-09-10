@@ -168,6 +168,32 @@ class JuizPartidaService:
         self._salvar(dados)
         return dados
 
+    def salvar_rascunho_resultado(self, sorteio_id: int, rascunho: Dict) -> Dict:
+        dados = self._carregar()
+        partida = dados.get("partida_atual") or {}
+        partida["sorteio_id"] = int(sorteio_id)
+        if isinstance(rascunho, dict):
+            rascunho["atualizado_em"] = datetime.now().isoformat()
+        partida["rascunho_resultado"] = rascunho
+        dados["partida_atual"] = partida
+        self._salvar(dados)
+        return dados
+
+    def obter_rascunho_resultado(self, sorteio_id: Optional[int] = None) -> Optional[Dict]:
+        dados = self._carregar()
+        partida = dados.get("partida_atual") or {}
+        if sorteio_id and int(partida.get("sorteio_id", 0) or 0) != int(sorteio_id):
+            return None
+        return partida.get("rascunho_resultado")
+
+    def limpar_rascunho_resultado(self, sorteio_id: Optional[int] = None) -> Dict:
+        dados = self._carregar()
+        partida = dados.get("partida_atual") or {}
+        partida.pop("rascunho_resultado", None)
+        dados["partida_atual"] = partida
+        self._salvar(dados)
+        return dados
+
     def marcar_resultado_registrado(self, sorteio_id: int, resultado_partida_id: Optional[int] = None) -> Dict:
         dados = self._carregar()
         partida = dados.get("partida_atual") or {}
@@ -175,6 +201,7 @@ class JuizPartidaService:
         partida["sorteio_id"] = int(sorteio_id)
         partida["resultado_registrado"] = True
         partida["resultado_partida_id"] = resultado_partida_id
+        partida.pop("rascunho_resultado", None)
         dados["status"] = "resultado_registrado"
         dados["partida_atual"] = partida
         self._salvar(dados)

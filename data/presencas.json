@@ -1,8 +1,27 @@
 {
-  "respostas": {},
+  "respostas": {
+    "d0ba86dc-0e10-423d-a2a4-14e5ab1de033": {
+      "user_id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033",
+      "nome": "Guilherme Urbano",
+      "status": "confirmado",
+      "atualizado_em": "2026-09-10T11:48:21.537501"
+    },
+    "3f2510d5-b07f-439e-8176-486e66dfb8f2": {
+      "user_id": "3f2510d5-b07f-439e-8176-486e66dfb8f2",
+      "nome": "User RSVP",
+      "status": "confirmado",
+      "atualizado_em": "2026-09-10T12:19:37.725008"
+    },
+    "009ae361-3206-4e06-9f4d-315c87e9709c": {
+      "user_id": "009ae361-3206-4e06-9f4d-315c87e9709c",
+      "nome": "User RSVP",
+      "status": "confirmado",
+      "atualizado_em": "2026-09-10T12:20:08.966632"
+    }
+  },
   "partida_alvo_id": null,
   "status_lista": "fechada",
   "titulo": "Rodada da Próxima Terça-Feira",
-  "data_jogo": "Terça-feira, 11/08/2026",
-  "aberta_em": "2026-08-05T22:25:57.256457"
+  "data_jogo": "Terça-feira, 15/09/2026",
+  "aberta_em": "2026-09-10T11:47:30.222083"
 }

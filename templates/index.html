@@ -395,7 +395,27 @@
                                         <div class="premium-player-info">
                                             <div class="premium-player-title-row">
                                                 <h3 class="premium-player-name">{{ jogador.nome | abreviar_nome }}</h3>
-                                                <span class="premium-player-rating-badge">{{ '%.1f'|format(jogador.nivel|float) }}</span>
+                                                <div style="display: inline-flex; align-items: center; gap: 0.35rem; flex-shrink: 0;">
+                                                    <span class="premium-player-rating-badge">{{ '%.1f'|format(jogador.nivel|float) }}</span>
+                                                    {% set v_rodada = jogador.variacao_rodada if (jogador is defined and jogador and jogador.variacao_rodada is defined) else None %}
+                                                    {% if v_rodada and v_rodada.direcao in ['subiu', 'desceu', 'manteve', 'neutro'] %}
+                                                    <span class="rating-delta-badge rating-delta-{{ v_rodada.direcao }}" 
+                                                          title="Variação na última partida: {{ v_rodada.texto }}">
+                                                        {% if v_rodada.direcao == 'subiu' %}
+                                                        <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                                            <polyline points="18 15 12 9 6 15"></polyline>
+                                                        </svg>
+                                                        {% elif v_rodada.direcao == 'desceu' %}
+                                                        <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                                        </svg>
+                                                        {% else %}
+                                                        <span style="font-size: 0.7rem; font-weight: 800; line-height: 1;">=</span>
+                                                        {% endif %}
+                                                        <span>{{ v_rodada.texto }}</span>
+                                                    </span>
+                                                    {% endif %}
+                                                </div>
                                             </div>
                                             <div class="premium-player-tags">
                                                 <span class="premium-player-tag premium-player-tag--pos">

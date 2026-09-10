@@ -136,6 +136,7 @@ def index():
         return redirect(url_for('juiz.jogar_page'))
 
     try:
+        from routes.auth_routes import _obter_variacao_rodada
         jogadores = _preparar_jogadores_para_lista(jogador_service.listar_para_dict())
         jogadores_premium = []
 
@@ -145,8 +146,10 @@ def index():
                 jogador_id=jogador.get('id'),
                 user_id=jogador.get('owner_user_id') or jogador.get('user_id')
             )
+            v_rodada = _obter_variacao_rodada(jogador, stats=stats)
             jogadores_premium.append({
                 **jogador,
+                'variacao_rodada': v_rodada,
                 'stats_card': {
                     'wins': stats.get('vitórias', stats.get('vitorias', 0)),
                     'matches': stats.get('total_partidas', 0),

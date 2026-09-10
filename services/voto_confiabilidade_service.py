@@ -21,25 +21,23 @@ class VotoConfiabilidadeService:
         self.dados = self._carregar_dados()
 
     def _carregar_dados(self) -> Dict[str, Any]:
-        if os.path.exists(self.data_file):
-            try:
-                with open(self.data_file, 'r', encoding='utf-8') as f:
-                    return json.load(f)
-            except Exception as e:
-                logger.error(f"Erro ao carregar confiabilidade_votos.json: {str(e)}")
-        return {
+        padrao = {
             "evaluators": {},
             "relationships": {},
             "target_baselines": {}
         }
+        from services.db import load_json_data
+        dados = load_json_data("confiabilidade_votos", padrao)
+        if not isinstance(dados, dict):
+            return padrao
+        dados.setdefault("evaluators", {})
+        dados.setdefault("relationships", {})
+        dados.setdefault("target_baselines", {})
+        return dados
 
     def _salvar_dados(self):
-        os.makedirs(os.path.dirname(self.data_file), exist_ok=True)
-        try:
-            with open(self.data_file, 'w', encoding='utf-8') as f:
-                json.dump(self.dados, f, ensure_ascii=False, indent=2)
-        except Exception as e:
-            logger.error(f"Erro ao salvar confiabilidade_votos.json: {str(e)}")
+        from services.db import save_json_data
+        save_json_data("confiabilidade_votos", self.dados)
 
     def _obter_rel_avaliador(self, evaluator_id: str) -> float:
         ev = self.dados["evaluators"].get(str(evaluator_id), {})

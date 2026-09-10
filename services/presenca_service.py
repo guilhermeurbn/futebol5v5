@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional
 from services.auth_service import AuthService
 from services.jogador_service import JogadorService
+from services.db import load_json_data, save_json_data
 
 logger = logging.getLogger(__name__)
 
@@ -14,14 +15,17 @@ DATA_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "pr
 class PresencaService:
     """
     Gerencia a confirmação de presença pré-jogo dos atletas (Roster RSVP).
-    Salva escolhas (confirmado/ausente/duvida) em data/presencas.json.
+    Persiste no banco de dados PostgreSQL (app_json_store) em produção e em data/presencas.json em localhost.
     """
 
     def __init__(self, data_file: Optional[str] = None):
         self.data_file = data_file or DATA_FILE
-        self.dados = self._carregar_dados()
         self.auth_service = AuthService()
         self.jogador_service = JogadorService()
+
+    @property
+    def dados(self) -> Dict[str, Any]:
+        return self._carregar_dados()
 
     @staticmethod
     def proxima_terca_feira() -> str:
@@ -32,31 +36,25 @@ class PresencaService:
         return f"Terça-feira, {data_terca.strftime('%d/%m/%Y')}"
 
     def _carregar_dados(self) -> Dict[str, Any]:
-        if os.path.exists(self.data_file):
-            try:
-                with open(self.data_file, 'r', encoding='utf-8') as f:
-                    return json.load(f)
-            except Exception as e:
-                logger.error(f"Erro ao carregar presencas.json: {str(e)}")
-        
         padrao = {
             "respostas": {},  # user_id: { status, nome, atualizado_em }
             "status_lista": "fechada",  # "aberta" ou "fechada"
             "titulo": f"Próxima Partida • {self.proxima_terca_feira()}",
             "aberta_em": datetime.now().isoformat()
         }
-        self._salvar_dados(padrao)
-        return padrao
+        dados = load_json_data("presencas", padrao)
+        if not isinstance(dados, dict):
+            return padrao
+        dados.setdefault("respostas", {})
+        dados.setdefault("status_lista", "fechada")
+        dados.setdefault("titulo", f"Próxima Partida • {self.proxima_terca_feira()}")
+        dados.setdefault("aberta_em", datetime.now().isoformat())
+        return dados
 
     def _salvar_dados(self, dados: Optional[Dict[str, Any]] = None):
         if dados is None:
             dados = self.dados
-        os.makedirs(os.path.dirname(self.data_file), exist_ok=True)
-        try:
-            with open(self.data_file, 'w', encoding='utf-8') as f:
-                json.dump(dados, f, ensure_ascii=False, indent=2)
-        except Exception as e:
-            logger.error(f"Erro ao salvar presencas.json: {str(e)}")
+        save_json_data("presencas", dados)
 
     def registrar_resposta(self, user_id: str, status: str) -> Dict[str, Any]:
         status = (status or "").strip().lower()
@@ -69,14 +67,15 @@ class PresencaService:
 
         nome = usuario.get("nome") or usuario.get("username") or "Jogador"
         
-        respostas = self.dados.setdefault("respostas", {})
+        dados = self._carregar_dados()
+        respostas = dados.setdefault("respostas", {})
         respostas[user_id] = {
             "user_id": user_id,
             "nome": nome,
             "status": status,
             "atualizado_em": datetime.now().isoformat()
         }
-        self._salvar_dados()
+        self._salvar_dados(dados)
         return respostas[user_id]
 
     def obter_resposta(self, user_id: str) -> Optional[Dict[str, Any]]:
@@ -84,40 +83,43 @@ class PresencaService:
 
     def abrir_lista(self, titulo: Optional[str] = None) -> Dict[str, Any]:
         """Abre a lista de presença pré-jogo para a próxima terça-feira e zera as respostas anteriores."""
-        self.dados["status_lista"] = "aberta"
-        self.dados["titulo"] = titulo or f"Próxima Partida • {self.proxima_terca_feira()}"
-        self.dados["data_jogo"] = self.proxima_terca_feira()
-        self.dados["aberta_em"] = datetime.now().isoformat()
-        self.dados["respostas"] = {}
-        self._salvar_dados()
+        dados = self._carregar_dados()
+        dados["status_lista"] = "aberta"
+        dados["titulo"] = titulo or f"Próxima Partida • {self.proxima_terca_feira()}"
+        dados["data_jogo"] = self.proxima_terca_feira()
+        dados["aberta_em"] = datetime.now().isoformat()
+        dados["respostas"] = {}
+        self._salvar_dados(dados)
 
         try:
             from services.email_service import EmailService
-            EmailService().notify_presenca_aberta(data_rodada=self.dados["titulo"])
+            EmailService().notify_presenca_aberta(data_rodada=dados["titulo"])
         except Exception as _exc:
             logger.warning(f"Falha ao disparar e-mail de presença aberta: {_exc}")
 
-        return self.dados
+        return dados
 
     def fechar_lista(self) -> Dict[str, Any]:
         """Encerra a lista de presença pré-jogo."""
-        self.dados["status_lista"] = "fechada"
-        self._salvar_dados()
-        return self.dados
+        dados = self._carregar_dados()
+        dados["status_lista"] = "fechada"
+        self._salvar_dados(dados)
+        return dados
 
     def is_aberta(self) -> bool:
         """Retorna True se a lista de presença estiver aberta pelo Juiz/Admin."""
         return self.dados.get("status_lista", "aberta") == "aberta"
 
     def obter_resumo(self) -> Dict[str, Any]:
-        respostas = self.dados.get("respostas", {})
+        dados = self._carregar_dados()
+        respostas = dados.get("respostas", {})
         confirmados = [item for item in respostas.values() if item.get("status") == "confirmado"]
         ausentes = [item for item in respostas.values() if item.get("status") == "ausente"]
         duvidas = [item for item in respostas.values() if item.get("status") == "duvida"]
 
         return {
-            "status_lista": self.dados.get("status_lista", "aberta"),
-            "titulo": self.dados.get("titulo", "Próxima Pelada"),
+            "status_lista": dados.get("status_lista", "aberta"),
+            "titulo": dados.get("titulo", "Próxima Pelada"),
             "confirmados": confirmados,
             "ausentes": ausentes,
             "duvidas": duvidas,
@@ -134,5 +136,6 @@ class PresencaService:
 
     def limpar_respostas(self):
         """Limpa as respostas de presença para a próxima rodada."""
-        self.dados["respostas"] = {}
-        self._salvar_dados()
+        dados = self._carregar_dados()
+        dados["respostas"] = {}
+        self._salvar_dados(dados)
