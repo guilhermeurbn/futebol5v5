@@ -567,7 +567,7 @@ class JogadorStatsService:
 
     def _enriquecer_variacao_nivel(self, stats: Dict, nome_jogador: str, jogador_id: Optional[str] = None, user_id: Optional[str] = None) -> None:
         """
-        Calcula e anexa a variação de nível (ex: +0.1, -0.1, =0.0) para cada partida no histórico do jogador.
+        Calcula e anexa a variação de nível (ex: +0.1, -0.1, 0.0) para cada partida no histórico do jogador.
         """
         historico_partidas = stats.get("historico_partidas", [])
         if not historico_partidas:
@@ -627,7 +627,7 @@ class JogadorStatsService:
                 elif delta < 0:
                     p["variacao_nivel_str"] = f"{delta:.1f}"
                 else:
-                    p["variacao_nivel_str"] = "=0.0"
+                    p["variacao_nivel_str"] = "0.0"
             else:
                 nota = float(p.get("nota_media") or p.get("nota_partida") or p.get("nota") or 0.0)
                 if nota > 0:
@@ -652,7 +652,7 @@ class JogadorStatsService:
                 elif delta < 0:
                     p["variacao_nivel_str"] = f"{delta:.1f}"
                 else:
-                    p["variacao_nivel_str"] = "=0.0"
+                    p["variacao_nivel_str"] = "0.0"
 
     def _extrair_detalhes_jogador(self, partida: dict, nome_jogador: str, sorteio: dict, jogador_id: Optional[str] = None, user_id: Optional[str] = None) -> Optional[dict]:
         """

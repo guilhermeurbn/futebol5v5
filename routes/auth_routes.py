@@ -960,7 +960,7 @@ def logout():
 def _obter_variacao_rodada(jogador, stats: Optional[dict] = None) -> dict:
     """Calcula a variação do nível do jogador referente à última partida em que participou."""
     if not jogador:
-        return {'variacao': 0.0, 'direcao': 'manteve', 'texto': '=0.0'}
+        return {'variacao': 0.0, 'direcao': 'manteve', 'texto': '0.0'}
 
     hist = getattr(jogador, 'historico_nivel', None)
     if hist is None and isinstance(jogador, dict):
@@ -982,7 +982,7 @@ def _obter_variacao_rodada(jogador, stats: Optional[dict] = None) -> dict:
         elif diff < 0:
             return {'variacao': diff, 'direcao': 'desceu', 'texto': f"{diff:.1f}"}
         else:
-            return {'variacao': 0.0, 'direcao': 'manteve', 'texto': '=0.0'}
+            return {'variacao': 0.0, 'direcao': 'manteve', 'texto': '0.0'}
 
     # Fallback: consultar stats -> historico_partidas
     if stats and isinstance(stats, dict):
@@ -996,9 +996,9 @@ def _obter_variacao_rodada(jogador, stats: Optional[dict] = None) -> dict:
             elif delta < 0:
                 return {'variacao': delta, 'direcao': 'desceu', 'texto': delta_str or f"{delta:.1f}"}
             else:
-                return {'variacao': 0.0, 'direcao': 'manteve', 'texto': delta_str or '=0.0'}
+                return {'variacao': 0.0, 'direcao': 'manteve', 'texto': delta_str or '0.0'}
 
-    return {'variacao': 0.0, 'direcao': 'manteve', 'texto': '=0.0'}
+    return {'variacao': 0.0, 'direcao': 'manteve', 'texto': '0.0'}
 
 
 @auth_bp.route('/perfil', methods=['GET'])

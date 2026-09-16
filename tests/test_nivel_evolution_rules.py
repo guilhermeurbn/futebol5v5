@@ -21,36 +21,46 @@ def test_regra_1_votos_suficientes():
     )
     assert tendencia != "votos_insuficientes"
 
-def test_regra_5_tetos_assimetricos_opcao_1():
-    # Faixa 1.0 a 3.0: subida máx +0.15 / queda máx -0.08
-    nivel_novo, _ = calcular_novo_nivel(nivel_atual=2.5, notas_recebidas=[5.0, 5.0, 5.0, 5.0], total_jogadores_partida=10)
-    assert nivel_novo == 2.65
-    nivel_novo, _ = calcular_novo_nivel(nivel_atual=2.5, notas_recebidas=[0.1, 0.1, 0.1, 0.1], total_jogadores_partida=10)
-    assert nivel_novo == 2.42
+def test_evolucao_dinamica_e_bonus_top5():
+    # Desempenho excelente (notas 10 na escala 10): alteracao_base = +0.30
+    # Com bônus de Top 1 (+0.08): 6.5 + 0.38 = 6.88
+    nivel_novo, tendencia = calcular_novo_nivel(
+        nivel_atual=6.5,
+        notas_recebidas=[10.0, 10.0, 10.0, 10.0],
+        total_jogadores_partida=10,
+        bonus_destaque=0.08
+    )
+    assert nivel_novo == 6.88
+    assert tendencia == "subiu"
 
-    # Faixa 3.1 a 5.0: subida máx +0.10 / queda máx -0.05
-    nivel_novo, _ = calcular_novo_nivel(nivel_atual=4.0, notas_recebidas=[5.0, 5.0, 5.0, 5.0], total_jogadores_partida=10)
-    assert nivel_novo == 4.10
-    nivel_novo, _ = calcular_novo_nivel(nivel_atual=4.0, notas_recebidas=[0.1, 0.1, 0.1, 0.1], total_jogadores_partida=10)
-    assert nivel_novo == 3.95
+    # Desempenho excelente sem bônus: 6.5 + 0.30 = 6.80
+    nivel_novo, tendencia = calcular_novo_nivel(
+        nivel_atual=6.5,
+        notas_recebidas=[10.0, 10.0, 10.0, 10.0],
+        total_jogadores_partida=10,
+        bonus_destaque=0.0
+    )
+    assert nivel_novo == 6.80
+    assert tendencia == "subiu"
 
-    # Faixa 5.1 a 7.0: subida máx +0.08 / queda máx -0.04
-    nivel_novo, _ = calcular_novo_nivel(nivel_atual=6.5, notas_recebidas=[5.0, 5.0, 5.0, 5.0], total_jogadores_partida=10)
-    assert nivel_novo == 6.58
-    nivel_novo, _ = calcular_novo_nivel(nivel_atual=6.5, notas_recebidas=[0.1, 0.1, 0.1, 0.1], total_jogadores_partida=10)
-    assert nivel_novo == 6.46
+    # Desempenho abaixo (notas 0.1): alteracao_base = -0.20
+    nivel_novo, tendencia = calcular_novo_nivel(
+        nivel_atual=6.5,
+        notas_recebidas=[0.1, 0.1, 0.1, 0.1],
+        total_jogadores_partida=10
+    )
+    assert nivel_novo == 6.30
+    assert tendencia == "desceu"
 
-    # Faixa 7.1 a 8.5: subida máx +0.05 / queda máx -0.03
-    nivel_novo, _ = calcular_novo_nivel(nivel_atual=8.0, notas_recebidas=[5.0, 5.0, 5.0, 5.0], total_jogadores_partida=10)
-    assert nivel_novo == 8.05
-    nivel_novo, _ = calcular_novo_nivel(nivel_atual=8.0, notas_recebidas=[0.1, 0.1, 0.1, 0.1], total_jogadores_partida=10)
-    assert nivel_novo == 7.97
-
-    # Faixa 8.6 a 10.0: subida máx +0.03 / queda máx -0.02
-    nivel_novo, _ = calcular_novo_nivel(nivel_atual=9.0, notas_recebidas=[5.0, 5.0, 5.0, 5.0], total_jogadores_partida=10)
-    assert nivel_novo == 9.03
-    nivel_novo, _ = calcular_novo_nivel(nivel_atual=9.0, notas_recebidas=[0.1, 0.1, 0.1, 0.1], total_jogadores_partida=10)
-    assert nivel_novo == 8.98
+    # Desempenho moderado acima: 6.0 com notas 7.0 (dif = 0.50 -> +0.20)
+    nivel_novo, tendencia = calcular_novo_nivel(
+        nivel_atual=6.0,
+        notas_recebidas=[7.0, 7.0, 7.0, 7.0],
+        total_jogadores_partida=10,
+        bonus_destaque=0.05
+    )
+    assert nivel_novo == 6.25
+    assert tendencia == "subiu"
 
 def test_arredondamento_e_limite_global():
     # Limite global máximo (10.0)
