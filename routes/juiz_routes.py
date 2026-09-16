@@ -581,6 +581,9 @@ def juiz_cronometro():
 
 
 @juiz_bp.route('/jogar', methods=['GET'])
+@juiz_bp.route('/juiz', methods=['GET'])
+@juiz_bp.route('/juiz/', methods=['GET'])
+@juiz_bp.route('/juiz/jogar', methods=['GET'])
 @juiz_required
 def jogar_page():
     """Hub principal do fluxo do juiz"""

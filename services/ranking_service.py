@@ -31,41 +31,33 @@ class RankingService:
                     return candidato
         return None
     
-    def _carregar_historico(self) -> List[dict]:
-        """Carregar histórico de sorteios"""
-        if os.getenv("DATABASE_URL"):
-            return load_json_data("historico", [])
-        caminho = self._resolver_caminho_existente([
-            self.historico_path,
-            'data/historico.json'
-        ])
-
-        if not caminho:
-            return []
-        
+    def _obter_clube_codigo(self, clube_codigo: Optional[str] = None) -> str:
+        if clube_codigo and str(clube_codigo).strip():
+            c = str(clube_codigo).strip()
+            return c.zfill(3) if c.isdigit() else c
         try:
-            with open(caminho, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except (json.JSONDecodeError, OSError):
-            return []
-    
-    def _carregar_partidas(self) -> List[dict]:
-        """Carregar histórico de partidas"""
-        if os.getenv("DATABASE_URL"):
-            return load_json_data("partidas", [])
-        caminho = self._resolver_caminho_existente([
-            self.partidas_path,
-            'partidas.json'
-        ])
+            from flask import g, session
+            if hasattr(g, 'clube_codigo') and g.clube_codigo:
+                c = str(g.clube_codigo).strip()
+                return c.zfill(3) if c.isdigit() else c
+            if session.get('clube_codigo'):
+                c = str(session.get('clube_codigo')).strip()
+                return c.zfill(3) if c.isdigit() else c
+        except Exception:
+            pass
+        return "001"
 
-        if not caminho:
-            return []
-        
-        try:
-            with open(caminho, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except (json.JSONDecodeError, OSError):
-            return []
+    def _carregar_historico(self, clube_codigo: Optional[str] = None) -> List[dict]:
+        """Carregar histórico de sorteios filtrados pelo clube ativo/fornecido"""
+        cod = self._obter_clube_codigo(clube_codigo)
+        todos = load_json_data("historico", [])
+        return [h for h in todos if h.get("clube_codigo", "001") == cod]
+
+    def _carregar_partidas(self, clube_codigo: Optional[str] = None) -> List[dict]:
+        """Carregar histórico de partidas filtradas pelo clube ativo/fornecido"""
+        cod = self._obter_clube_codigo(clube_codigo)
+        todos = load_json_data("partidas", [])
+        return [p for p in todos if p.get("clube_codigo", "001") == cod]
     
     def _gerar_assinatura_time(self, jogadores: List[dict]) -> str:
         """

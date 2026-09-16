@@ -919,25 +919,26 @@
         throw new Error(`HTTP ${response.status}`);
       }
 
+      const finalUrl = (response.redirected && response.url) ? normalizeUrl(response.url) : targetUrl;
       const html = await response.text();
       if (token !== navigationToken) {
         return;
       }
 
-      pageCache.set(targetUrl.href, { html, timestamp: Date.now() });
+      pageCache.set(finalUrl.href, { html, timestamp: Date.now() });
 
       const nextDocument = new DOMParser().parseFromString(html, 'text/html');
       const rendered = () => {
-        if (!updateShell(nextDocument, targetUrl)) {
-          window.location.assign(targetUrl.href);
+        if (!updateShell(nextDocument, finalUrl)) {
+          window.location.assign(finalUrl.href);
           return;
         }
 
-        const state = { path: targetUrl.pathname + targetUrl.search };
+        const state = { path: finalUrl.pathname + finalUrl.search };
         if (replace) {
-          history.replaceState(state, '', targetUrl.href);
+          history.replaceState(state, '', finalUrl.href);
         } else {
-          history.pushState(state, '', targetUrl.href);
+          history.pushState(state, '', finalUrl.href);
         }
         setLoading(false);
       };

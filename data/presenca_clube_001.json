@@ -1,0 +1,189 @@
+[
+  {
+    "id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033",
+    "nome": "Guilherme Urbano",
+    "nivel": 8.5,
+    "nivel_preciso": 8.5,
+    "posicao": "linha",
+    "tipo": "fixo",
+    "presente": false,
+    "owner_user_id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033",
+    "historico_nivel": [],
+    "criado_em": "2026-08-20T10:00:00.000000",
+    "foto_url": "https://res.cloudinary.com/nt547vdb/image/upload/v1787698996/futebol5v5/avatars/avatar_d0ba86dc-0e10-423d-a2a4-14e5ab1de033_456c5877.webp",
+    "foto": "https://res.cloudinary.com/nt547vdb/image/upload/v1787698996/futebol5v5/avatars/avatar_d0ba86dc-0e10-423d-a2a4-14e5ab1de033_456c5877.webp",
+    "clubes_codigos": [
+      "001"
+    ],
+    "niveis_por_clube": {
+      "001": 8.5,
+      "002": 5.5,
+      "003": 5.5,
+      "008": 5.5,
+      "095": 5.5,
+      "006": 5.5
+    },
+    "confirmado": true
+  },
+  {
+    "id": "gabriel-goleiro-id-01",
+    "nome": "Gabriel Silva",
+    "nivel": 8.0,
+    "nivel_preciso": 8.0,
+    "posicao": "goleiro",
+    "tipo": "fixo",
+    "presente": false,
+    "owner_user_id": null,
+    "historico_nivel": [],
+    "criado_em": "2026-08-20T10:00:00.000000",
+    "foto_url": null,
+    "clubes_codigos": [
+      "001"
+    ],
+    "confirmado": true
+  },
+  {
+    "id": "carlos-ferreira-id-02",
+    "nome": "Carlos Ferreira",
+    "nivel": 7.5,
+    "nivel_preciso": 7.5,
+    "posicao": "linha",
+    "tipo": "fixo",
+    "presente": false,
+    "owner_user_id": "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7",
+    "historico_nivel": [],
+    "criado_em": "2026-08-20T10:00:00.000000",
+    "foto_url": "",
+    "foto": "",
+    "clubes_codigos": [
+      "001"
+    ],
+    "confirmado": true
+  },
+  {
+    "id": "lucas-teixeira-id-03",
+    "nome": "Lucas Teixeira",
+    "nivel": 7.0,
+    "nivel_preciso": 7.0,
+    "posicao": "linha",
+    "tipo": "fixo",
+    "presente": false,
+    "owner_user_id": "263d73cf-5a95-44b4-a538-bb4c69ba068e",
+    "historico_nivel": [],
+    "criado_em": "2026-08-20T10:00:00.000000",
+    "foto_url": "",
+    "foto": "",
+    "clubes_codigos": [
+      "001"
+    ],
+    "confirmado": true
+  },
+  {
+    "id": "andre-balada-id-04",
+    "nome": "André Balada",
+    "nivel": 7.5,
+    "nivel_preciso": 7.5,
+    "posicao": "linha",
+    "tipo": "fixo",
+    "presente": false,
+    "owner_user_id": "db1314a8-2d4e-4384-829e-8075b1e33737",
+    "historico_nivel": [],
+    "criado_em": "2026-08-20T10:00:00.000000",
+    "foto_url": "",
+    "foto": "",
+    "clubes_codigos": [
+      "001"
+    ],
+    "confirmado": true
+  },
+  {
+    "id": "renan-costa-id-05",
+    "nome": "Renan Costa",
+    "nivel": 7.0,
+    "nivel_preciso": 7.0,
+    "posicao": "linha",
+    "tipo": "fixo",
+    "presente": false,
+    "owner_user_id": "6a5290cd-317b-4764-b1df-6969f849adc5",
+    "historico_nivel": [],
+    "criado_em": "2026-08-20T10:00:00.000000",
+    "foto_url": "",
+    "foto": "",
+    "clubes_codigos": [
+      "001"
+    ],
+    "confirmado": true
+  },
+  {
+    "id": "ramon-santos-id-06",
+    "nome": "Ramon Santos",
+    "nivel": 6.5,
+    "nivel_preciso": 6.5,
+    "posicao": "linha",
+    "tipo": "fixo",
+    "presente": false,
+    "owner_user_id": "6cb9f4f5-f4ad-4786-8aca-183e88333730",
+    "historico_nivel": [],
+    "criado_em": "2026-08-20T10:00:00.000000",
+    "foto_url": "",
+    "foto": "",
+    "clubes_codigos": [
+      "001"
+    ],
+    "confirmado": true
+  },
+  {
+    "id": "luan-oliveira-id-07",
+    "nome": "Luan Oliveira",
+    "nivel": 7.0,
+    "nivel_preciso": 7.0,
+    "posicao": "linha",
+    "tipo": "fixo",
+    "presente": false,
+    "owner_user_id": "2faa1197-c93f-4239-b490-4afa38cfa89c",
+    "historico_nivel": [],
+    "criado_em": "2026-08-20T10:00:00.000000",
+    "foto_url": "",
+    "foto": "",
+    "clubes_codigos": [
+      "001"
+    ],
+    "confirmado": true
+  },
+  {
+    "id": "94b644ac-65c3-4172-9e68-2d832cf0dfb7",
+    "nome": "Alex",
+    "nivel": 6.5,
+    "nivel_preciso": 6.5,
+    "posicao": "linha",
+    "tipo": "fixo",
+    "presente": false,
+    "owner_user_id": "19e6a32e-2a20-49a2-81e0-da12aa681505",
+    "historico_nivel": [],
+    "criado_em": "2026-08-20T10:00:00.000000",
+    "foto_url": "",
+    "foto": "",
+    "clubes_codigos": [
+      "001"
+    ],
+    "confirmado": true
+  },
+  {
+    "id": "rafael-goleiro-id-09",
+    "nome": "Rafael Souza",
+    "nivel": 7.5,
+    "nivel_preciso": 7.5,
+    "posicao": "goleiro",
+    "tipo": "fixo",
+    "presente": false,
+    "owner_user_id": "9ae112c8-8068-41e4-b6c0-e73873935699",
+    "historico_nivel": [],
+    "criado_em": "2026-08-20T10:00:00.000000",
+    "foto_url": "",
+    "foto": "",
+    "clubes_codigos": [
+      "001"
+    ],
+    "confirmado": true
+  }
+]

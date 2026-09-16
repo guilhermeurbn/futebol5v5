@@ -55,32 +55,53 @@ class UndoRedoService:
 
         return {"pilha": [], "indice_atual": -1}
     
-    def _carregar_raw(self) -> Dict:
-        """Carrega dados brutos"""
-        if os.getenv("DATABASE_URL"):
-            dados = load_json_data("sorteios_stack", {"pilha": [], "indice_atual": -1})
-            dados = self._normalizar_dados(dados)
-            return dados
+    def _obter_clube_codigo(self, clube_codigo: Optional[str] = None) -> str:
+        if clube_codigo and str(clube_codigo).strip():
+            c = str(clube_codigo).strip()
+            return c.zfill(3) if c.isdigit() else c
         try:
-            with open(self.arquivo, "r", encoding="utf-8") as f:
-                dados = json.load(f)
-                dados_normalizados = self._normalizar_dados(dados)
+            from flask import g, session
+            if hasattr(g, 'clube_codigo') and g.clube_codigo:
+                c = str(g.clube_codigo).strip()
+                return c.zfill(3) if c.isdigit() else c
+            if session.get('clube_codigo'):
+                c = str(session.get('clube_codigo')).strip()
+                return c.zfill(3) if c.isdigit() else c
+        except Exception:
+            pass
+        return "001"
 
-                # Migra automaticamente arquivo legado para estrutura nova
-                if dados != dados_normalizados:
-                    self._salvar(dados_normalizados)
-
-                return dados_normalizados
-        except (json.JSONDecodeError, FileNotFoundError):
-            return {"pilha": [], "indice_atual": -1}
-    
-    def _salvar(self, dados: Dict) -> None:
-        """Salva dados"""
+    def _carregar_todos(self) -> Dict:
         if os.getenv("DATABASE_URL"):
-            save_json_data("sorteios_stack", dados)
+            raw = load_json_data("sorteios_stack", {})
+        else:
+            try:
+                with open(self.arquivo, "r", encoding="utf-8") as f:
+                    raw = json.load(f)
+            except (json.JSONDecodeError, FileNotFoundError):
+                raw = {}
+        if not isinstance(raw, dict):
+            raw = {}
+        if "pilha" in raw or "indice_atual" in raw or isinstance(raw, list):
+            raw = {"001": self._normalizar_dados(raw)}
+        return raw
+
+    def _carregar_raw(self, clube_codigo: Optional[str] = None) -> Dict:
+        cod = self._obter_clube_codigo(clube_codigo)
+        todos = self._carregar_todos()
+        clube_stack = todos.get(cod)
+        return self._normalizar_dados(clube_stack)
+    
+    def _salvar(self, dados: Dict, clube_codigo: Optional[str] = None) -> None:
+        cod = self._obter_clube_codigo(clube_codigo)
+        todos = self._carregar_todos()
+        todos[cod] = self._normalizar_dados(dados)
+        if os.getenv("DATABASE_URL"):
+            save_json_data("sorteios_stack", todos)
             return
+        os.makedirs(os.path.dirname(self.arquivo), exist_ok=True)
         with open(self.arquivo, "w", encoding="utf-8") as f:
-            json.dump(dados, f, indent=2, ensure_ascii=False)
+            json.dump(todos, f, indent=2, ensure_ascii=False)
     
     def adicionar_sorteio(self, sorteio_data: Dict) -> Tuple[int, int]:
         """

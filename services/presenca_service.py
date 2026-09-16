@@ -35,26 +35,55 @@ class PresencaService:
         data_terca = hoje + timedelta(days=dias_ate_terca)
         return f"Terça-feira, {data_terca.strftime('%d/%m/%Y')}"
 
-    def _carregar_dados(self) -> Dict[str, Any]:
+    def _obter_clube_codigo(self, clube_codigo: Optional[str] = None) -> str:
+        if clube_codigo and str(clube_codigo).strip():
+            c = str(clube_codigo).strip()
+            return c.zfill(3) if c.isdigit() else c
+        try:
+            from flask import g, session
+            if hasattr(g, 'clube_codigo') and g.clube_codigo:
+                c = str(g.clube_codigo).strip()
+                return c.zfill(3) if c.isdigit() else c
+            if session.get('clube_codigo'):
+                c = str(session.get('clube_codigo')).strip()
+                return c.zfill(3) if c.isdigit() else c
+        except Exception:
+            pass
+        return "001"
+
+    def _carregar_todos(self) -> Dict[str, Any]:
+        dados = load_json_data("presencas", {})
+        if not isinstance(dados, dict):
+            dados = {}
+        if "respostas" in dados or "status_lista" in dados:
+            dados = {"001": dados}
+        return dados
+
+    def _carregar_dados(self, clube_codigo: Optional[str] = None) -> Dict[str, Any]:
+        cod = self._obter_clube_codigo(clube_codigo)
+        todos = self._carregar_todos()
         padrao = {
-            "respostas": {},  # user_id: { status, nome, atualizado_em }
-            "status_lista": "fechada",  # "aberta" ou "fechada"
+            "respostas": {},
+            "status_lista": "fechada",
             "titulo": f"Próxima Partida • {self.proxima_terca_feira()}",
             "aberta_em": datetime.now().isoformat()
         }
-        dados = load_json_data("presencas", padrao)
-        if not isinstance(dados, dict):
-            return padrao
-        dados.setdefault("respostas", {})
-        dados.setdefault("status_lista", "fechada")
-        dados.setdefault("titulo", f"Próxima Partida • {self.proxima_terca_feira()}")
-        dados.setdefault("aberta_em", datetime.now().isoformat())
-        return dados
+        clube_dados = todos.get(cod)
+        if not isinstance(clube_dados, dict):
+            clube_dados = dict(padrao)
+        clube_dados.setdefault("respostas", {})
+        clube_dados.setdefault("status_lista", "fechada")
+        clube_dados.setdefault("titulo", f"Próxima Partida • {self.proxima_terca_feira()}")
+        clube_dados.setdefault("aberta_em", datetime.now().isoformat())
+        return clube_dados
 
-    def _salvar_dados(self, dados: Optional[Dict[str, Any]] = None):
+    def _salvar_dados(self, dados: Optional[Dict[str, Any]] = None, clube_codigo: Optional[str] = None):
+        cod = self._obter_clube_codigo(clube_codigo)
+        todos = self._carregar_todos()
         if dados is None:
-            dados = self.dados
-        save_json_data("presencas", dados)
+            dados = self._carregar_dados(cod)
+        todos[cod] = dados
+        save_json_data("presencas", todos)
 
     def registrar_resposta(self, user_id: str, status: str) -> Dict[str, Any]:
         status = (status or "").strip().lower()

@@ -1,0 +1,130 @@
+{
+  "ultimo_id": 1,
+  "partidas": [
+    {
+      "id": 1,
+      "sorteio_id": 10,
+      "titulo": "Rodada 1",
+      "status": "aberta",
+      "criado_em": "2026-09-12T22:25:30.446135",
+      "aberta_em": "2026-09-12T22:25:30.446135",
+      "fecha_em": "2026-09-13T10:25:30.446135",
+      "duracao_horas": 12,
+      "criado_por": "juiz",
+      "encerrado_em": null,
+      "encerrado_por": null,
+      "encerramento_motivo": null,
+      "times": [
+        {
+          "numero": 1,
+          "jogadores": [
+            {
+              "nome": "Jogador 1",
+              "owner_user_id": "u1"
+            },
+            {
+              "nome": "Jogador 2",
+              "owner_user_id": "u2"
+            },
+            {
+              "nome": "Jogador 3",
+              "owner_user_id": "u3"
+            },
+            {
+              "nome": "Jogador 4",
+              "owner_user_id": "u4"
+            },
+            {
+              "nome": "Jogador 5",
+              "owner_user_id": "u5"
+            }
+          ]
+        }
+      ],
+      "participantes": [
+        {
+          "jogador_id": null,
+          "user_id": "u1",
+          "username": "user1",
+          "nome_usuario": "Usuario 1",
+          "jogador_nome": "Jogador 1",
+          "time_numero": 1,
+          "externo": false,
+          "gols": 3
+        },
+        {
+          "jogador_id": null,
+          "user_id": "u2",
+          "username": "user2",
+          "nome_usuario": "Usuario 2",
+          "jogador_nome": "Jogador 2",
+          "time_numero": 1,
+          "externo": false
+        },
+        {
+          "jogador_id": null,
+          "user_id": "u3",
+          "username": "user3",
+          "nome_usuario": "Usuario 3",
+          "jogador_nome": "Jogador 3",
+          "time_numero": 1,
+          "externo": false
+        },
+        {
+          "jogador_id": null,
+          "user_id": "u4",
+          "username": "user4",
+          "nome_usuario": "Usuario 4",
+          "jogador_nome": "Jogador 4",
+          "time_numero": 1,
+          "externo": false
+        },
+        {
+          "jogador_id": null,
+          "user_id": "u5",
+          "username": "user5",
+          "nome_usuario": "Usuario 5",
+          "jogador_nome": "Jogador 5",
+          "time_numero": 1,
+          "externo": false
+        }
+      ],
+      "votos": [
+        {
+          "user_id": "u1",
+          "votos": [
+            {
+              "jogador_nome": "Jogador 2",
+              "time_numero": 1,
+              "nota": 8.0,
+              "obrigatorio": true
+            },
+            {
+              "jogador_nome": "Jogador 3",
+              "time_numero": 1,
+              "nota": 8.0,
+              "obrigatorio": true
+            },
+            {
+              "jogador_nome": "Jogador 4",
+              "time_numero": 1,
+              "nota": 8.0,
+              "obrigatorio": true
+            },
+            {
+              "jogador_nome": "Jogador 5",
+              "time_numero": 1,
+              "nota": 8.0,
+              "obrigatorio": true
+            }
+          ],
+          "gols_marcados": 3,
+          "atualizado_em": "2026-09-12T22:25:30.446418"
+        }
+      ],
+      "ranking": null,
+      "resultado_partida": null,
+      "resultado_resumido": []
+    }
+  ]
+}

@@ -39,7 +39,23 @@ class HistoricoService:
         from services.jogador_stats_service import JogadorStatsService
         JogadorStatsService.invalidar_cache_stats()
     
-    def adicionar_sorteio(self, times: List[List[Jogador]], somas: List[int], num_times: int, diferenca: int) -> Dict:
+    def _obter_clube_codigo(self, clube_codigo: Optional[str] = None) -> str:
+        if clube_codigo and str(clube_codigo).strip():
+            c = str(clube_codigo).strip()
+            return c.zfill(3) if c.isdigit() else c
+        try:
+            from flask import g, session
+            if hasattr(g, 'clube_codigo') and g.clube_codigo:
+                c = str(g.clube_codigo).strip()
+                return c.zfill(3) if c.isdigit() else c
+            if session.get('clube_codigo'):
+                c = str(session.get('clube_codigo')).strip()
+                return c.zfill(3) if c.isdigit() else c
+        except Exception:
+            pass
+        return "001"
+
+    def adicionar_sorteio(self, times: List[List[Jogador]], somas: List[int], num_times: int, diferenca: int, clube_codigo: Optional[str] = None) -> Dict:
         """
         Adiciona um novo sorteio ao histórico
         
@@ -53,6 +69,7 @@ class HistoricoService:
             Dicionário do sorteio adicionado
         """
         dados = self._carregar_raw()
+        cod = self._obter_clube_codigo(clube_codigo)
         
         times_processados = []
         for idx, time in enumerate(times):
@@ -70,6 +87,7 @@ class HistoricoService:
         novo_id = max([int(s.get("id", 0) or 0) for s in dados], default=0) + 1
         sorteio = {
             "id": novo_id,
+            "clube_codigo": cod,
             "data": datetime.now().isoformat(),
             "rascunho": False,
             "oficial": True,
@@ -84,18 +102,20 @@ class HistoricoService:
         self._salvar(dados)
         return sorteio
 
-    def substituir_sorteio(self, sorteio_id: int, times: List[List[Jogador]], somas: List[int], num_times: int, diferenca: int) -> Dict:
+    def substituir_sorteio(self, sorteio_id: int, times: List[List[Jogador]], somas: List[int], num_times: int, diferenca: int, clube_codigo: Optional[str] = None) -> Dict:
         """
         Substitui os dados de um sorteio existente mantendo seu ID.
         Ideal para quando o juiz altera a seleção ou refaz o sorteio antes de registrar resultados.
         """
         dados = self._carregar_raw()
         sorteio_id_int = int(sorteio_id)
+        cod = self._obter_clube_codigo(clube_codigo)
         
         for idx, s in enumerate(dados):
             if int(s.get('id', 0) or 0) == sorteio_id_int:
                 sorteio_atualizado = {
                     "id": sorteio_id_int,
+                    "clube_codigo": s.get("clube_codigo", cod),
                     "data": datetime.now().isoformat(),
                     "rascunho": s.get('rascunho', True),
                     "oficial": s.get('oficial', False),
@@ -116,16 +136,18 @@ class HistoricoService:
                 self._salvar(dados)
                 return sorteio_atualizado
 
-        return self.adicionar_sorteio(times, somas, num_times, diferenca)
+        return self.adicionar_sorteio(times, somas, num_times, diferenca, clube_codigo=cod)
     
-    def listar_sorteios(self) -> List[Dict]:
-        """Lista todos os sorteios"""
-        return self._carregar_raw()
+    def listar_sorteios(self, clube_codigo: Optional[str] = None) -> List[Dict]:
+        """Lista sorteios pertencentes ao clube especificado ou ativo."""
+        cod = self._obter_clube_codigo(clube_codigo)
+        dados = self._carregar_raw()
+        return [s for s in dados if s.get("clube_codigo", "001") == cod]
     
     def obter_sorteio(self, sorteio_id: int) -> Optional[Dict]:
         """Obtém um sorteio por ID"""
-        sorteios = self.listar_sorteios()
-        return next((s for s in sorteios if str(s.get('id')) == str(sorteio_id)), None)
+        dados = self._carregar_raw()
+        return next((s for s in dados if str(s.get('id')) == str(sorteio_id)), None)
 
     def atualizar_times_sorteio(self, sorteio_id: int, times: List[Dict]) -> Optional[Dict]:
         """Atualiza os times de um sorteio e recalcula metadados derivados."""

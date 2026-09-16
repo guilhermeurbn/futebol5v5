@@ -470,6 +470,76 @@
                 </div>
             </div>
 
+            <!-- Item 5: Meus Clubes & Troca de Ambiente -->
+            <div class="edit-accordion-card" id="cardItemClubes" style="background: #121215; border: 1px solid #27272a; border-radius: 18px; overflow: hidden; transition: all 0.2s ease; box-shadow: 0 8px 24px rgba(0,0,0,0.35);">
+                <button type="button" onclick="toggleEditAccordion(this)" style="width: 100%; background: none; border: none; padding: 1.4rem 1.7rem; color: #ffffff; display: flex; align-items: center; justify-content: space-between; gap: 1.2rem; cursor: pointer; text-align: left;">
+                    <div style="display: flex; align-items: center; gap: 1.1rem;">
+                        <div style="width: 46px; height: 46px; border-radius: 12px; background: rgba(34, 197, 94, 0.12); border: 1px solid rgba(34, 197, 94, 0.3); color: #22c55e; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div style="font-size: 1.12rem; font-weight: 800; color: #ffffff;">Meus Clubes</div>
+                            <div style="font-size: 0.82rem; color: #71717a; margin-top: 0.15rem;">
+                                {{ meus_clubes|length if meus_clubes else 1 }} clube(s)
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center;">
+                        <div style="width: 34px; height: 34px; border-radius: 50%; background: #18181b; border: 1px solid #27272a; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <svg class="accordion-arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.25s ease;">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                </button>
+
+                <div class="accordion-content" style="display: none; padding: 1.2rem 1.4rem; border-top: 1px solid #1f1f23; background: #0c0c0e;">
+                    <div style="display: grid; gap: 0.75rem; margin-bottom: 1.2rem;">
+                        {% for c in meus_clubes or [] %}
+                        {% set is_atual = (c.codigo_formatado == clube_atual_codigo or c.slug == session.get('clube_slug')) %}
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; background: {% if is_atual %}rgba(34, 197, 94, 0.06){% else %}#18181b{% endif %}; padding: 0.85rem 1.1rem; border-radius: 12px; border: 1px solid {% if is_atual %}rgba(34, 197, 94, 0.3){% else %}#27272a{% endif %}; transition: all 0.2s ease;">
+                            <div style="display: flex; align-items: center; gap: 0.75rem; min-width: 0;">
+                                <div style="width: 38px; height: 38px; border-radius: 10px; background: {% if is_atual %}rgba(34, 197, 94, 0.18){% else %}#27272a{% endif %}; border: 1px solid {% if is_atual %}rgba(34, 197, 94, 0.35){% else %}#3f3f46{% endif %}; color: {% if is_atual %}#22c55e{% else %}#ffffff{% endif %}; font-weight: 900; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    ⚽
+                                </div>
+                                <div style="min-width: 0; display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;">
+                                    <span style="font-size: 0.96rem; font-weight: 800; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ c.nome }}</span>
+                                    <span style="font-size: 0.72rem; background: rgba(255, 255, 255, 0.06); color: #94a3b8; padding: 0.1rem 0.45rem; border-radius: 6px; font-weight: 700; flex-shrink: 0;">
+                                        #{{ c.codigo_formatado }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div style="flex-shrink: 0;">
+                                {% if is_atual %}
+                                <span style="display: inline-flex; align-items: center; gap: 0.35rem; background: rgba(34, 197, 94, 0.12); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.25); padding: 0.35rem 0.75rem; border-radius: 999px; font-weight: 800; font-size: 0.78rem;">
+                                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #4ade80;"></span>
+                                    Atual
+                                </span>
+                                {% else %}
+                                <a href="{{ url_for('clube.trocar_clube_direto', clube_ref=c.codigo_formatado) }}"
+                                    style="display: inline-flex; align-items: center; justify-content: center; background: #22c55e; color: #000000; font-weight: 800; font-size: 0.8rem; padding: 0.45rem 0.95rem; border-radius: 9px; text-decoration: none; transition: all 0.2s ease;">
+                                    Entrar →
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div style="border-top: 1px solid #1f1f23; padding-top: 0.85rem; display: flex; justify-content: flex-end;">
+                        <a href="{{ url_for('clube.buscar_clube_page') }}"
+                            style="display: inline-flex; align-items: center; gap: 0.35rem; background: #18181b; color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.25); font-weight: 800; font-size: 0.8rem; padding: 0.5rem 0.95rem; border-radius: 10px; text-decoration: none; transition: all 0.2s ease;">
+                            <span>+ Buscar outro clube</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+
         </div>
     </main>
 </div>
@@ -777,6 +847,12 @@ async function desvincularSocial(provider) {
         }
     } catch (e) {
         alert('Erro de conexão ao desvincular conta');
+    }
+}
+
+function trocarClubeAtivo(clubeRef) {
+    if (clubeRef) {
+        window.location.href = '/clube/trocar/' + encodeURIComponent(clubeRef);
     }
 }
 </script>

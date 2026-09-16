@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+
+{% block title %}Criar Novo Clube — NaTrave 5v5{% endblock %}
+
+{% block content %}
+<div class="criar-clube-page-wrapper" style="background: radial-gradient(circle at 50% 10%, rgba(34, 197, 94, 0.12), transparent 60%), #000000; min-height: 100vh; width: 100%; color: #ffffff; padding: 2rem 1rem clamp(6rem, 10vh, 9rem) 1rem;">
+    <div style="max-width: 580px; margin: 0 auto;">
+        
+        <!-- Voltar e Header -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+            <a href="javascript:history.back()" style="display: inline-flex; align-items: center; gap: 0.4rem; color: #22c55e; font-weight: 800; font-size: 0.85rem; text-decoration: none; background: rgba(34, 197, 94, 0.1); padding: 0.4rem 0.85rem; border-radius: 999px; border: 1px solid rgba(34, 197, 94, 0.28);">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                <span>Voltar</span>
+            </a>
+            <span style="font-size: 0.78rem; font-weight: 800; color: #94a3b8; letter-spacing: 0.05em; text-transform: uppercase;">Novo Clube</span>
+        </div>
+
+        <!-- Hero Card Form -->
+        <div style="background: rgba(18, 18, 23, 0.95); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 24px; padding: 2.2rem 1.8rem; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6); backdrop-filter: blur(12px);">
+            
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <div style="width: 56px; height: 56px; border-radius: 18px; background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(16, 185, 129, 0.1)); border: 1px solid rgba(34, 197, 94, 0.4); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto; color: #22c55e;">
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                </div>
+                <h1 style="font-size: 1.6rem; font-weight: 900; color: #ffffff; margin: 0 0 0.4rem 0; letter-spacing: -0.02em;">Criar Novo NaTrave</h1>
+                <p style="font-size: 0.88rem; color: #94a3b8; margin: 0; line-height: 1.5;">Cadastre seu clube de futebol 5v5 com nome único, sorteio equilibrado e estatísticas completas.</p>
+            </div>
+
+            <form id="formCriarClube" onsubmit="submeterCriacaoClube(event)" style="display: grid; gap: 1.5rem;">
+                
+                <!-- Campo Nome do Clube com Validação AJAX em tempo real -->
+                <div>
+                    <label for="nomeClube" style="display: block; font-size: 0.78rem; font-weight: 800; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.6rem;">Nome do Clube</label>
+                    <div style="position: relative;">
+                        <input type="text" id="nomeClube" name="nome" placeholder="Ex: Pelada dos Amigos, Real Resenha FC" required minlength="2" maxlength="60" oninput="validarNomeClubeTempoReal(this.value)" style="width: 100%; padding: 0.85rem 1rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 14px; color: #ffffff; font-size: 1rem; font-weight: 700; outline: none; transition: all 0.2s ease;">
+                        <div id="validacaoStatusIcon" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); display: none;"></div>
+                    </div>
+                    <div id="validacaoFeedback" style="font-size: 0.8rem; font-weight: 700; margin-top: 0.45rem; min-height: 1.2rem;"></div>
+                </div>
+
+                <!-- Seletor de Tema de Cores -->
+                <div>
+                    <label style="display: block; font-size: 0.78rem; font-weight: 800; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.6rem;">Cor Tema do Clube</label>
+                    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.6rem;">
+                        <label class="color-option" style="cursor: pointer; text-align: center;">
+                            <input type="radio" name="cor_tema" value="neon-green" checked style="display: none;" onchange="atualizarSeletorCor(this)">
+                            <div style="height: 44px; border-radius: 12px; background: #22c55e; border: 2px solid #ffffff; transition: all 0.2s ease; box-shadow: 0 0 12px rgba(34, 197, 94, 0.5);"></div>
+                            <span style="font-size: 0.7rem; font-weight: 700; color: #94a3b8; display: block; margin-top: 0.3rem;">Verde</span>
+                        </label>
+                        <label class="color-option" style="cursor: pointer; text-align: center;">
+                            <input type="radio" name="cor_tema" value="electric-blue" style="display: none;" onchange="atualizarSeletorCor(this)">
+                            <div style="height: 44px; border-radius: 12px; background: #3b82f6; border: 2px solid transparent; opacity: 0.7; transition: all 0.2s ease;"></div>
+                            <span style="font-size: 0.7rem; font-weight: 700; color: #94a3b8; display: block; margin-top: 0.3rem;">Azul</span>
+                        </label>
+                        <label class="color-option" style="cursor: pointer; text-align: center;">
+                            <input type="radio" name="cor_tema" value="sunset-purple" style="display: none;" onchange="atualizarSeletorCor(this)">
+                            <div style="height: 44px; border-radius: 12px; background: #a855f7; border: 2px solid transparent; opacity: 0.7; transition: all 0.2s ease;"></div>
+                            <span style="font-size: 0.7rem; font-weight: 700; color: #94a3b8; display: block; margin-top: 0.3rem;">Roxo</span>
+                        </label>
+                        <label class="color-option" style="cursor: pointer; text-align: center;">
+                            <input type="radio" name="cor_tema" value="gold-ember" style="display: none;" onchange="atualizarSeletorCor(this)">
+                            <div style="height: 44px; border-radius: 12px; background: #eab308; border: 2px solid transparent; opacity: 0.7; transition: all 0.2s ease;"></div>
+                            <span style="font-size: 0.7rem; font-weight: 700; color: #94a3b8; display: block; margin-top: 0.3rem;">Dourado</span>
+                        </label>
+                        <label class="color-option" style="cursor: pointer; text-align: center;">
+                            <input type="radio" name="cor_tema" value="crimson-red" style="display: none;" onchange="atualizarSeletorCor(this)">
+                            <div style="height: 44px; border-radius: 12px; background: #ef4444; border: 2px solid transparent; opacity: 0.7; transition: all 0.2s ease;"></div>
+                            <span style="font-size: 0.7rem; font-weight: 700; color: #94a3b8; display: block; margin-top: 0.3rem;">Vermelho</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Botão de Criação -->
+                <button type="submit" id="btnSubmitCriarClube" style="width: 100%; padding: 0.95rem; background: linear-gradient(135deg, #22c55e, #16a34a); border: none; border-radius: 14px; color: #000000; font-size: 1rem; font-weight: 900; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 0 20px rgba(34, 197, 94, 0.4); margin-top: 0.5rem;">
+                    Criar Clube NaTrave
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+let timerDebounce = null;
+let nomeValido = false;
+
+function validarNomeClubeTempoReal(val) {
+    clearTimeout(timerDebounce);
+    const feedback = document.getElementById('validacaoFeedback');
+    const iconWrap = document.getElementById('validacaoStatusIcon');
+    const input = document.getElementById('nomeClube');
+
+    if (!val || val.trim().length < 2) {
+        feedback.textContent = 'Digite pelo menos 2 caracteres.';
+        feedback.style.color = '#94a3b8';
+        iconWrap.style.display = 'none';
+        input.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+        nomeValido = false;
+        return;
+    }
+
+    timerDebounce = setTimeout(async () => {
+        try {
+            const resp = await fetch('/api/clube/validar-nome', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nome: val.trim() })
+            });
+            const data = await resp.json();
+
+            if (data.disponivel) {
+                feedback.textContent = '✓ ' + data.mensagem;
+                feedback.style.color = '#22c55e';
+                input.style.borderColor = '#22c55e';
+                iconWrap.innerHTML = '✨';
+                iconWrap.style.display = 'block';
+                nomeValido = true;
+            } else {
+                feedback.textContent = '⚠️ ' + data.mensagem;
+                feedback.style.color = '#ef4444';
+                input.style.borderColor = '#ef4444';
+                iconWrap.innerHTML = '❌';
+                iconWrap.style.display = 'block';
+                nomeValido = false;
+            }
+        } catch (e) {
+            console.error('Erro na validação:', e);
+        }
+    }, 300);
+}
+
+function atualizarSeletorCor(radio) {
+    document.querySelectorAll('.color-option div').forEach(el => {
+        el.style.border = '2px solid transparent';
+        el.style.opacity = '0.7';
+        el.style.boxShadow = 'none';
+    });
+    const parentBox = radio.nextElementSibling;
+    if (parentBox) {
+        parentBox.style.border = '2px solid #ffffff';
+        parentBox.style.opacity = '1';
+        parentBox.style.boxShadow = '0 0 12px ' + parentBox.style.backgroundColor;
+    }
+}
+
+async function submeterCriacaoClube(event) {
+    event.preventDefault();
+    const nome = document.getElementById('nomeClube').value.trim();
+    const corTema = document.querySelector('input[name="cor_tema"]:checked')?.value || 'neon-green';
+    const btn = document.getElementById('btnSubmitCriarClube');
+
+    if (!nomeValido && nome.length < 2) {
+        alert('Por favor, digite um nome válido e disponível para seu clube.');
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Criando Clube...';
+
+    try {
+        const resp = await fetch('/api/clube/criar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nome: nome, cor_tema: corTema })
+        });
+        const data = await resp.json();
+
+        if (data.sucesso) {
+            window.location.href = data.redirect_url || '/';
+        } else {
+            alert('Erro: ' + (data.mensagem || 'Não foi possível criar o clube.'));
+            btn.disabled = false;
+            btn.textContent = 'Criar Clube NaTrave';
+        }
+    } catch (e) {
+        alert('Erro ao conectar com o servidor. Tente novamente.');
+        btn.disabled = false;
+        btn.textContent = 'Criar Clube NaTrave';
+    }
+}
+</script>
+{% endblock %}

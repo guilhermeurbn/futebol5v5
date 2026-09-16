@@ -1,0 +1,51 @@
+{
+  "respostas": {
+    "d0ba86dc-0e10-423d-a2a4-14e5ab1de033": {
+      "user_id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033",
+      "nome": "Guilherme Urbano",
+      "status": "confirmado",
+      "atualizado_em": "2026-09-10T11:48:21.537501"
+    },
+    "3f2510d5-b07f-439e-8176-486e66dfb8f2": {
+      "user_id": "3f2510d5-b07f-439e-8176-486e66dfb8f2",
+      "nome": "User RSVP",
+      "status": "confirmado",
+      "atualizado_em": "2026-09-10T12:19:37.725008"
+    },
+    "009ae361-3206-4e06-9f4d-315c87e9709c": {
+      "user_id": "009ae361-3206-4e06-9f4d-315c87e9709c",
+      "nome": "User RSVP",
+      "status": "confirmado",
+      "atualizado_em": "2026-09-10T12:20:08.966632"
+    },
+    "74ed5850-0f05-431a-834f-50dbbc10ccd7": {
+      "user_id": "74ed5850-0f05-431a-834f-50dbbc10ccd7",
+      "nome": "User RSVP",
+      "status": "confirmado",
+      "atualizado_em": "2026-09-10T14:22:30.373308"
+    },
+    "8140cf98-5769-44d0-b147-b2a589424bdf": {
+      "user_id": "8140cf98-5769-44d0-b147-b2a589424bdf",
+      "nome": "User RSVP",
+      "status": "confirmado",
+      "atualizado_em": "2026-09-11T00:40:05.704199"
+    },
+    "f744873e-8573-4e67-b98f-187ad653f635": {
+      "user_id": "f744873e-8573-4e67-b98f-187ad653f635",
+      "nome": "User RSVP",
+      "status": "confirmado",
+      "atualizado_em": "2026-09-12T22:23:43.013368"
+    },
+    "d50449fb-2fc9-445e-9233-90a2bd2099e8": {
+      "user_id": "d50449fb-2fc9-445e-9233-90a2bd2099e8",
+      "nome": "User RSVP",
+      "status": "confirmado",
+      "atualizado_em": "2026-09-12T22:25:19.495226"
+    }
+  },
+  "partida_alvo_id": null,
+  "status_lista": "fechada",
+  "titulo": "Rodada da Próxima Terça-Feira",
+  "data_jogo": "Terça-feira, 15/09/2026",
+  "aberta_em": "2026-09-10T11:47:30.222083"
+}

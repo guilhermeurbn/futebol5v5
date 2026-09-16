@@ -4,7 +4,7 @@ Servico de notificacoes internas para administradores.
 import json
 import os
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Optional
 from services.db import load_json_data, save_json_data
 
 
@@ -51,15 +51,33 @@ class NotificacaoService:
         with open(self.arquivo, "w", encoding="utf-8") as f:
             json.dump(dados, f, indent=2, ensure_ascii=False)
 
+    def _obter_clube_codigo(self, clube_codigo: Optional[str] = None) -> str:
+        if clube_codigo and str(clube_codigo).strip():
+            c = str(clube_codigo).strip()
+            return c.zfill(3) if c.isdigit() else c
+        try:
+            from flask import g, session
+            if hasattr(g, 'clube_codigo') and g.clube_codigo:
+                c = str(g.clube_codigo).strip()
+                return c.zfill(3) if c.isdigit() else c
+            if session.get('clube_codigo'):
+                c = str(session.get('clube_codigo')).strip()
+                return c.zfill(3) if c.isdigit() else c
+        except Exception:
+            pass
+        return "001"
+
     def _normalizar_tipo(self, tipo: str) -> str:
         tipo_normalizado = (tipo or "info").strip().lower()
         return tipo_normalizado if tipo_normalizado in self._TIPOS_VALIDOS else "info"
 
-    def criar_notificacao(self, titulo: str, mensagem: str, tipo: str = "info") -> Dict:
+    def criar_notificacao(self, titulo: str, mensagem: str, tipo: str = "info", clube_codigo: Optional[str] = None) -> Dict:
         dados = self._carregar()
         novo_id = int(dados.get("ultimo_id", 0)) + 1
+        cod = self._obter_clube_codigo(clube_codigo)
         notificacao = {
             "id": novo_id,
+            "clube_codigo": cod,
             "titulo": (titulo or "Notificacao").strip(),
             "mensagem": (mensagem or "").strip(),
             "tipo": self._normalizar_tipo(tipo),
@@ -71,9 +89,11 @@ class NotificacaoService:
         self._salvar(dados)
         return notificacao
 
-    def listar_notificacoes(self, apenas_nao_lidas: bool = False, limite: int = 20) -> List[Dict]:
+    def listar_notificacoes(self, apenas_nao_lidas: bool = False, limite: int = 20, clube_codigo: Optional[str] = None) -> List[Dict]:
+        cod = self._obter_clube_codigo(clube_codigo)
         dados = self._carregar()
-        notificacoes = list(reversed(dados.get("notificacoes", [])))
+        notificacoes = [n for n in dados.get("notificacoes", []) if n.get("clube_codigo", "001") == cod]
+        notificacoes = list(reversed(notificacoes))
         if apenas_nao_lidas:
             notificacoes = [n for n in notificacoes if not n.get("lida", False)]
         retorno = []
@@ -83,9 +103,11 @@ class NotificacaoService:
             retorno.append(item)
         return retorno
 
-    def listar_arquivadas(self, limite: int = 20) -> List[Dict]:
+    def listar_arquivadas(self, limite: int = 20, clube_codigo: Optional[str] = None) -> List[Dict]:
+        cod = self._obter_clube_codigo(clube_codigo)
         dados = self._carregar()
-        arquivadas = list(reversed(dados.get("arquivadas", [])))
+        arquivadas = [n for n in dados.get("arquivadas", []) if n.get("clube_codigo", "001") == cod]
+        arquivadas = list(reversed(arquivadas))
         retorno = []
         for n in arquivadas[:max(1, int(limite))]:
             item = dict(n)
@@ -93,21 +115,27 @@ class NotificacaoService:
             retorno.append(item)
         return retorno
 
-    def contar_nao_lidas(self) -> int:
+    def contar_nao_lidas(self, clube_codigo: Optional[str] = None) -> int:
+        cod = self._obter_clube_codigo(clube_codigo)
         dados = self._carregar()
-        return sum(1 for n in dados.get("notificacoes", []) if not n.get("lida", False))
+        return sum(1 for n in dados.get("notificacoes", []) if n.get("clube_codigo", "001") == cod and not n.get("lida", False))
 
-    def marcar_todas_como_lidas(self) -> None:
+    def marcar_todas_como_lidas(self, clube_codigo: Optional[str] = None) -> None:
+        cod = self._obter_clube_codigo(clube_codigo)
         dados = self._carregar()
         notificacoes_ativas = dados.get("notificacoes", [])
         if not notificacoes_ativas:
             return
 
         arquivadas = dados.setdefault("arquivadas", [])
+        novas_ativas = []
         for n in notificacoes_ativas:
-            n["lida"] = True
-        arquivadas.extend(notificacoes_ativas)
-        dados["notificacoes"] = []
+            if n.get("clube_codigo", "001") == cod:
+                n["lida"] = True
+                arquivadas.append(n)
+            else:
+                novas_ativas.append(n)
+        dados["notificacoes"] = novas_ativas
         if arquivadas:
             self._salvar(dados)
 

@@ -183,7 +183,7 @@
                         {% if tem_jogador %}
                         <div style="display: inline-flex; align-items: center; gap: 0.4rem;">
                             <span class="premium-profile-rating-badge">{{ '%.1f'|format(jogador.nivel|float) }}</span>
-                            {% if v_rodada and v_rodada.direcao in ['subiu', 'desceu', 'manteve', 'neutro'] %}
+                            {% if v_rodada and v_rodada.direcao in ['subiu', 'desceu'] %}
                             <span class="rating-delta-badge rating-delta-{{ v_rodada.direcao }}" 
                                   title="Variação na última partida: {{ v_rodada.texto }}">
                                 {% if v_rodada.direcao == 'subiu' %}
@@ -194,8 +194,6 @@
                                 <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                                     <polyline points="6 9 12 15 18 9"></polyline>
                                 </svg>
-                                {% else %}
-                                <span style="font-size: 0.75rem; font-weight: 800; line-height: 1; padding: 0 1px;">=</span>
                                 {% endif %}
                                 <span>{{ v_rodada.texto }}</span>
                             </span>
@@ -620,10 +618,6 @@
                             <span class="premium-profile-match-delta-badge premium-profile-match-delta-badge--down" title="Evolução de nível">
                                 {{ "%.1f"|format(d_num) }}
                             </span>
-                            {% else %}
-                            <span class="premium-profile-match-delta-badge premium-profile-match-delta-badge--neutral" title="Evolução de nível">
-                                =0.0
-                            </span>
                             {% endif %}
                             <svg class="premium-profile-match-chevron" viewBox="0 0 24 24" fill="none"
                                 stroke="currentColor" stroke-width="2.5">
@@ -810,10 +804,6 @@
                             {% elif d_num < 0 %}
                             <span class="premium-profile-match-delta-badge premium-profile-match-delta-badge--down" title="Evolução de nível">
                                 {{ "%.1f"|format(d_num) }}
-                            </span>
-                            {% else %}
-                            <span class="premium-profile-match-delta-badge premium-profile-match-delta-badge--neutral" title="Evolução de nível">
-                                =0.0
                             </span>
                             {% endif %}
 

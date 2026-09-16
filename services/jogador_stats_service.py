@@ -83,10 +83,27 @@ class JogadorStatsService:
             "data": data,
         }
 
-    def _chave_cache_stats(self, nome_jogador: str, jogador_id: Optional[str] = None, user_id: Optional[str] = None) -> str:
-        """Monta uma chave que evita reaproveitar stats entre fontes diferentes."""
+    def _obter_clube_codigo(self, clube_codigo: Optional[str] = None) -> str:
+        if clube_codigo and str(clube_codigo).strip():
+            c = str(clube_codigo).strip()
+            return c.zfill(3) if c.isdigit() else c
+        try:
+            from flask import g, session
+            if hasattr(g, 'clube_codigo') and g.clube_codigo:
+                c = str(g.clube_codigo).strip()
+                return c.zfill(3) if c.isdigit() else c
+            if session.get('clube_codigo'):
+                c = str(session.get('clube_codigo')).strip()
+                return c.zfill(3) if c.isdigit() else c
+        except Exception:
+            pass
+        return "001"
+
+    def _chave_cache_stats(self, nome_jogador: str, jogador_id: Optional[str] = None, user_id: Optional[str] = None, clube_codigo: Optional[str] = None) -> str:
+        """Monta uma chave que evita reaproveitar stats entre fontes diferentes ou entre clubes distintos."""
+        cod = self._obter_clube_codigo(clube_codigo)
         chave_id = user_id or jogador_id or self._normalizar_nome(nome_jogador)
-        return f"JogadorStatsService:{chave_id}"
+        return f"JogadorStatsService:{cod}:{chave_id}"
     
     def _carregar_partidas(self) -> List[dict]:
         """Carrega dados de partidas combinando partidas e votacoes_partidas"""
@@ -397,18 +414,22 @@ class JogadorStatsService:
 
         return "empate"
 
-    def obter_stats_jogador(self, nome_jogador: str, jogador_id: Optional[str] = None, user_id: Optional[str] = None) -> Dict:
+    def obter_stats_jogador(self, nome_jogador: str, jogador_id: Optional[str] = None, user_id: Optional[str] = None, clube_codigo: Optional[str] = None) -> Dict:
         """
-        Obtém estatísticas completas de um jogador por nome, jogador_id ou user_id
+        Obtém estatísticas completas de um jogador por nome, jogador_id ou user_id isolado por clube
         """
         try:
-            chave_cache = self._chave_cache_stats(nome_jogador, jogador_id=jogador_id, user_id=user_id)
+            cod = self._obter_clube_codigo(clube_codigo)
+            chave_cache = self._chave_cache_stats(nome_jogador, jogador_id=jogador_id, user_id=user_id, clube_codigo=cod)
             cache_hit = self._obter_stats_em_cache(chave_cache)
             if cache_hit is not None:
                 return cache_hit
 
-            partidas = self._carregar_partidas()
-            historico = self._carregar_historico()
+            partidas_raw = self._carregar_partidas()
+            historico_raw = self._carregar_historico()
+
+            partidas = [p for p in partidas_raw if p.get("clube_codigo", "001") == cod]
+            historico = [h for h in historico_raw if h.get("clube_codigo", "001") == cod]
             stats = self._stats_vazio(nome_jogador)
             
             if not partidas:
@@ -903,17 +924,12 @@ class JogadorStatsService:
         stats = self.obter_stats_jogador(nome_jogador)
         return stats.get("historico_partidas", [])[:limite]
     
-    def obter_ranking_artilheiros(self, limite: int = 10) -> List[Dict]:
+    def obter_ranking_artilheiros(self, limite: int = 10, clube_codigo: Optional[str] = None) -> List[Dict]:
         """
-        Obtém ranking dos maiores artilheiros
-        
-        Args:
-            limite: Número máximo de jogadores a retornar
-            
-        Returns:
-            Lista com ranking de artilheiros
+        Obtém ranking dos maiores artilheiros isolado por clube
         """
-        partidas = self._carregar_partidas()
+        cod = self._obter_clube_codigo(clube_codigo)
+        partidas = [p for p in self._carregar_partidas() if p.get("clube_codigo", "001") == cod]
         gols_por_jogador = defaultdict(lambda: {"gols": 0, "partidas": 0})
         
         for partida in partidas:
@@ -938,17 +954,12 @@ class JogadorStatsService:
         ranking.sort(key=lambda x: x["gols"], reverse=True)
         return ranking[:limite]
     
-    def obter_ranking_assistencias(self, limite: int = 10) -> List[Dict]:
+    def obter_ranking_assistencias(self, limite: int = 10, clube_codigo: Optional[str] = None) -> List[Dict]:
         """
-        Obtém ranking de maiores assistentes
-        
-        Args:
-            limite: Número máximo de jogadores a retornar
-            
-        Returns:
-            Lista com ranking de assistências
+        Obtém ranking de maiores assistentes isolado por clube
         """
-        partidas = self._carregar_partidas()
+        cod = self._obter_clube_codigo(clube_codigo)
+        partidas = [p for p in self._carregar_partidas() if p.get("clube_codigo", "001") == cod]
         assist_por_jogador = defaultdict(lambda: {"assistencias": 0, "partidas": 0})
         
         for partida in partidas:

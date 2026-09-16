@@ -213,7 +213,7 @@ class AuthService:
             raise ValueError("Nome deve ter ao menos 2 caracteres")
         if not password or len(password) < 6:
             raise ValueError("Senha deve ter ao menos 6 caracteres")
-        if role not in ["admin", "juiz", "usuario"]:
+        if role not in ["admin", "juiz", "usuario", "organizador"]:
             raise ValueError("Role invalida")
 
         usuarios = self._carregar()
@@ -672,9 +672,21 @@ class AuthService:
         alvo.pop(f"{provider}_email", None)
         alvo.pop(f"{provider}_id", None)
         social_accounts = alvo.get("social_accounts") or {}
-        social_accounts.pop(provider, None)
-        alvo["social_accounts"] = social_accounts
-
         self._salvar(usuarios)
         return alvo
+
+    def salvar_ultimo_clube(self, user_id: str, clube_codigo: str, clube_slug: str) -> None:
+        """Salva a referência do último clube ativo selecionado pelo usuário."""
+        if not user_id:
+            return
+        usuarios = self._carregar()
+        alterou = False
+        for u in usuarios:
+            if u.get("id") == user_id:
+                u["ultimo_clube_codigo"] = str(clube_codigo).strip()
+                u["ultimo_clube_slug"] = str(clube_slug).strip()
+                alterou = True
+                break
+        if alterou:
+            self._salvar(usuarios)
 

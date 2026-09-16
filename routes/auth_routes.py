@@ -289,6 +289,9 @@ def login_submit():
         session['nome'] = usuario['nome']
         session['role'] = usuario['role']
         session['senha_temporaria_ativa'] = bool(usuario.get('senha_temporaria_ativa'))
+        if usuario.get('ultimo_clube_slug'):
+            session['clube_slug'] = usuario.get('ultimo_clube_slug')
+            session['clube_codigo'] = usuario.get('ultimo_clube_codigo')
         session.modified = True
         if session['senha_temporaria_ativa']:
             return redirect(url_for('auth.perfil_page'))
@@ -1378,10 +1381,17 @@ def perfil_marcar_mensagem_lida(msg_id):
 @auth_bp.route('/editar-perfil', methods=['GET'])
 @login_required
 def editar_perfil_page():
-    """Página dedicada de edição de perfil e dados pessoais"""
+    """Página dedicada de edição de perfil, dados pessoais e gestão de clubes"""
+    from services.clube_service import ClubeService
+    user_id = session.get('user_id')
+    meus_clubes = ClubeService.obter_clubes_do_usuario(user_id)
+    clube_atual_codigo = session.get('clube_codigo') or '001'
+
     return render_template(
         'editar_perfil.html',
-        usuario=_usuario_logado()
+        usuario=_usuario_logado(),
+        meus_clubes=meus_clubes,
+        clube_atual_codigo=clube_atual_codigo
     )
 
 

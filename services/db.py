@@ -2,7 +2,7 @@ import json
 import os
 import time
 from pathlib import Path
-from typing import Dict, Tuple, Any
+from typing import Dict, Tuple, Any, Optional
 
 try:
     import psycopg2
@@ -80,11 +80,70 @@ def _repo_root() -> Path:
 
 def _candidate_paths(relative_path: str):
     root = _repo_root()
-    yield root / relative_path
     yield root / "data" / relative_path
+    yield root / relative_path
 
 
-import copy
+def _obter_contexto_clube_codigo(clube_codigo: Optional[str] = None) -> str:
+    """Extrai e normaliza o código do clube (ex: '001', '002')."""
+    if clube_codigo and str(clube_codigo).strip():
+        c = str(clube_codigo).strip()
+        return c.zfill(3) if c.isdigit() else c
+    try:
+        from flask import g, session, has_request_context
+        if has_request_context():
+            if hasattr(g, 'clube_codigo') and g.clube_codigo:
+                c = str(g.clube_codigo).strip()
+                return c.zfill(3) if c.isdigit() else c
+            if session.get('clube_codigo'):
+                c = str(session.get('clube_codigo')).strip()
+                return c.zfill(3) if c.isdigit() else c
+    except Exception:
+        pass
+    return "001"
+
+
+def resolver_namespace_clube(namespace: str, clube_codigo: Optional[str] = None) -> str:
+    """
+    Garante particionamento inteligente por clube.
+    Namespaces globais ('users', 'clubes', 'image_assets', 'migration_user_player_link_done', 'admin_notificacoes')
+    permanecem globais.
+    Para o Clube 001 (oficial), usa o namespace padrão legado (ex: 'partidas').
+    Para novos clubes (ex: 002, 003), particiona como 'clube_{codigo}_{namespace}'.
+    """
+    NAMESPACES_GLOBAIS = {
+        "users",
+        "clubes",
+        "image_assets",
+        "migration_user_player_link_done",
+        "admin_notificacoes",
+    }
+    if namespace in NAMESPACES_GLOBAIS:
+        return namespace
+
+    cod = _obter_contexto_clube_codigo(clube_codigo)
+    if not cod or cod == "001":
+        return namespace
+
+    prefix = f"clube_{cod}_"
+    if namespace.startswith(prefix) or namespace.startswith(f"{cod}_"):
+        return namespace
+    return f"{prefix}{namespace}"
+
+
+def _copiar_dado_cache(data):
+    """
+    Cópia estrutural rápida e eficiente para cache em memória,
+    substituindo o uso excessivo e custoso de copy.deepcopy().
+    """
+    if data is None:
+        return None
+    if isinstance(data, list):
+        return [dict(x) if isinstance(x, dict) else (list(x) if isinstance(x, list) else x) for x in data]
+    if isinstance(data, dict):
+        return {k: dict(v) if isinstance(v, dict) else (list(v) if isinstance(v, list) else v) for k, v in data.items()}
+    return data
+
 
 def _get_cached(namespace: str):
     if namespace not in _cache:
@@ -93,7 +152,7 @@ def _get_cached(namespace: str):
     data, timestamp = _cache[namespace]
     ttl = 5 if namespace == "users" else _cache_ttl_seconds
     if time.time() - timestamp < ttl:
-        return copy.deepcopy(data)
+        return _copiar_dado_cache(data)
 
     del _cache[namespace]
     return None
@@ -111,9 +170,10 @@ def clear_db_cache(namespace: str = None) -> None:
         _cache.clear()
 
 
-def load_json_data(namespace: str, default):
-    """Carrega dados JSON do cache, banco ou arquivo local como fallback."""
-    cached = _get_cached(namespace)
+def load_json_data(namespace: str, default, clube_codigo: Optional[str] = None):
+    """Carrega dados JSON do cache, banco ou arquivo local como fallback com suporte a particionamento por clube."""
+    ns = resolver_namespace_clube(namespace, clube_codigo)
+    cached = _get_cached(ns)
     if cached is not None:
         return cached
 
@@ -124,37 +184,50 @@ def load_json_data(namespace: str, default):
             with conn.cursor() as cur:
                 cur.execute(
                     f"select payload from {json_store_table_name()} where namespace = %s",
-                    (namespace,),
+                    (ns,),
                 )
                 row = cur.fetchone()
                 if row:
                     data = row[0]
-                    _set_cached(namespace, data)
-                    return data
+                    _set_cached(ns, data)
+                    return _copiar_dado_cache(data)
         except Exception as e:
-            print(f"[DB] Error loading from Postgres: {e}")
+            print(f"[DB] Error loading from Postgres ({ns}): {e}")
         finally:
             conn.close()
 
-    for candidate in _candidate_paths(f"{namespace}.json"):
+    for candidate in _candidate_paths(f"{ns}.json"):
         if candidate.exists():
             try:
                 with candidate.open("r", encoding="utf-8") as f:
                     data = json.load(f)
-                _set_cached(namespace, data)
-                return data
+                _set_cached(ns, data)
+                return _copiar_dado_cache(data)
             except (json.JSONDecodeError, OSError) as e:
-                print(f"[DB] Error loading {namespace}.json ({candidate}): {e}")
+                print(f"[DB] Error loading {ns}.json ({candidate}): {e}")
                 continue
-    
+
+    # Fallback para template padrão de novos clubes em data/schema_clube_novo_5v5/
+    if ns != namespace:
+        template_candidate = _repo_root() / "data" / "schema_clube_novo_5v5" / f"{namespace}.json"
+        if template_candidate.exists():
+            try:
+                with template_candidate.open("r", encoding="utf-8") as f:
+                    data = json.load(f)
+                _set_cached(ns, data)
+                return _copiar_dado_cache(data)
+            except Exception:
+                pass
+
     # Nenhuma fonte disponível
     return default
 
 
-def save_json_data(namespace: str, payload) -> None:
-    _set_cached(namespace, payload)
+def save_json_data(namespace: str, payload, clube_codigo: Optional[str] = None) -> None:
+    ns = resolver_namespace_clube(namespace, clube_codigo)
+    _set_cached(ns, payload)
 
-    target_path = _repo_root() / "data" / f"{namespace}.json"
+    target_path = _repo_root() / "data" / f"{ns}.json"
     target_path.parent.mkdir(parents=True, exist_ok=True)
     with target_path.open("w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2, ensure_ascii=False)
@@ -172,10 +245,10 @@ def save_json_data(namespace: str, payload) -> None:
                         on conflict (namespace)
                         do update set payload = excluded.payload, updated_at = now()
                         """,
-                        (namespace, Json(payload)),
+                        (ns, Json(payload)),
                     )
         except Exception as e:
-            print(f"[DB] Error saving to Postgres: {e}")
+            print(f"[DB] Error saving to Postgres ({ns}): {e}")
         finally:
             conn.close()
 

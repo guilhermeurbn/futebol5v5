@@ -24,7 +24,7 @@
             <div style="display: inline-flex; align-items: center; gap: 0.4rem; color: #94a3b8; font-size: 0.75rem; font-weight: 700; background: rgba(255,255,255,0.04); padding: 0.32rem 0.65rem; border-radius: 999px; border: 1px solid rgba(255,255,255,0.08); white-space: nowrap; flex-shrink: 0;">
                 <img src="{{ url_for('static', filename='natrave-text-only.svg', v='20260708-05') }}" alt="NaTrave" style="height: 14px; width: auto; display: inline-block; vertical-align: middle;" />
                 <span style="color: rgba(255,255,255,0.2);">•</span>
-                <span style="color: #22c55e; font-weight: 800;">{{ app_version }}</span>
+                <span style="color: #22c55e; font-weight: 800;">{{ (clube.codigo_formatado if (clube is defined and clube and clube.codigo_formatado is defined) else None) or (clube_codigo if clube_codigo is defined else 'Clube 001') }}</span>
             </div>
         </div>
     </header>

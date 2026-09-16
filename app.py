@@ -23,11 +23,18 @@ try:
     from flask_talisman import Talisman
 except Exception:
     Talisman = None
+
+try:
+    from flask_compress import Compress
+except Exception:
+    Compress = None
+
 from werkzeug.middleware.proxy_fix import ProxyFix
 from config import config_by_name
 from routes import (
     admin_bp,
     auth_bp,
+    clube_bp,
     jogador_bp,
     juiz_bp,
     partida_bp,
@@ -174,6 +181,15 @@ def criar_app(config_name: str = None) -> Flask:
     else:
         logger.warning("flask-talisman nao instalado; headers de seguranca extras desativados")
 
+    # Initialize HTTP response compression (Gzip / Brotli)
+    if Compress is not None:
+        try:
+            compress = Compress()
+            compress.init_app(app)
+            logger.info("Flask-Compress ativado (Gzip/Brotli)")
+        except Exception as e:
+            logger.warning(f"Falha ao iniciar Flask-Compress: {e}")
+
     # Enable CSRF protection for mutating requests
     if CSRFProtect is None or generate_csrf is None:
         logger.error("CRÍTICO: Flask-WTF não instalado; CSRF não protegido!")
@@ -217,7 +233,12 @@ def criar_app(config_name: str = None) -> Flask:
     app.register_blueprint(admin_bp)
     app.register_blueprint(juiz_bp)
     app.register_blueprint(stats_bp)
+    app.register_blueprint(clube_bp)
     app.register_blueprint(cloudinary_bp)
+    if 'clube.api_validar_nome_clube' in app.view_functions:
+        csrf.exempt(app.view_functions['clube.api_validar_nome_clube'])
+    if 'clube.api_criar_clube' in app.view_functions:
+        csrf.exempt(app.view_functions['clube.api_criar_clube'])
     _registrar_aliases_jogador(app)
     _registrar_role_url_prefixes(app)
 
@@ -336,11 +357,16 @@ def criar_app(config_name: str = None) -> Flask:
             response.headers['Pragma'] = 'no-cache'
             response.headers['Expires'] = '0'
 
-        if request_path in {'/manifest.json', '/static/service-worker.js'}:
+        if request_path in {'/manifest.json', '/static/service-worker.js', '/static/offline-judge.js'}:
             response.headers['Cache-Control'] = 'no-cache, max-age=0'
 
-        if request_path in {'/static/style.css', '/static/offline-judge.js'}:
-            response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+        # Assets estáticos (style.css, scripts, imagens, fontes)
+        if request_path.startswith('/static/'):
+            # Se possui versão na query string (?v=...), o asset é imutável e tem cache de 1 ano
+            if request.args.get('v'):
+                response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+            elif request_path not in {'/static/service-worker.js', '/static/offline-judge.js'}:
+                response.headers['Cache-Control'] = 'public, max-age=86400, stale-while-revalidate=604800'
 
         # Caching para favicons e manifesto
         if request_path in {
@@ -490,6 +516,59 @@ def criar_app(config_name: str = None) -> Flask:
     app.jinja_env.filters['abreviar_nomes_lista'] = abreviar_nomes_lista
     app.jinja_env.filters['cloudinary_url'] = jinja_cloudinary_url
 
+    @app.before_request
+    def resolver_contexto_clube():
+        from flask import g
+        from services.clube_service import ClubeService
+
+        clube_001 = ClubeService.garantir_clube_natrave_001()
+        clube_ativo = None
+
+        if request.view_args and 'clube_slug' in request.view_args:
+            slug_param = request.view_args.pop('clube_slug', None)
+            if slug_param:
+                clube_ativo = (
+                    ClubeService.obter_clube_por_slug(slug_param)
+                    or ClubeService.obter_clube_por_codigo(slug_param)
+                )
+
+        if not clube_ativo:
+            parts = [p for p in request.path.strip('/').split('/') if p]
+            if parts:
+                p0 = parts[0]
+                if p0 == 'clube' and len(parts) > 1:
+                    p0 = parts[1]
+                if p0 not in {'static', 'api', 'admin', 'juiz', 'usuario', 'login', 'logout', 'cadastro', 'configuracoes', 'criar-clube'}:
+                    clube_ativo = (
+                        ClubeService.obter_clube_por_slug(p0)
+                        or ClubeService.obter_clube_por_codigo(p0)
+                    )
+
+        if not clube_ativo and session.get('user_id'):
+            from services.auth_service import AuthService
+            u = AuthService().obter_por_id(session.get('user_id'))
+            if u and u.get('ultimo_clube_slug'):
+                clube_ativo = (
+                    ClubeService.obter_clube_por_slug(u.get('ultimo_clube_slug'))
+                    or ClubeService.obter_clube_por_codigo(u.get('ultimo_clube_codigo'))
+                )
+
+        if not clube_ativo and session.get('clube_slug'):
+            clube_ativo = ClubeService.obter_clube_por_slug(session.get('clube_slug'))
+
+        if not clube_ativo and session.get('clube_codigo'):
+            clube_ativo = ClubeService.obter_clube_por_codigo(session.get('clube_codigo'))
+
+        if not clube_ativo:
+            clube_ativo = clube_001
+
+        session['clube_slug'] = clube_ativo.get('slug', 'natrave')
+        session['clube_codigo'] = clube_ativo.get('codigo_formatado', '001')
+
+        g.clube = clube_ativo
+        g.clube_slug = clube_ativo.get('slug', 'natrave')
+        g.clube_codigo = clube_ativo.get('codigo_formatado', '001')
+
     @app.context_processor
     def inject_notificacoes_globais():
         total_notificacoes = 0
@@ -534,6 +613,10 @@ def criar_app(config_name: str = None) -> Flask:
             pass
         formatted_version = f"v{version_str}" if not version_str.startswith('v') else version_str
 
+        from flask import g
+        from services.clube_service import ClubeService
+        clube_ativo = getattr(g, 'clube', None) or ClubeService.garantir_clube_natrave_001()
+
         return {
             'total_notificacoes': total_notificacoes,
             'notificacoes_url': notificacoes_url,
@@ -542,6 +625,9 @@ def criar_app(config_name: str = None) -> Flask:
             'presenca_pendente': presenca_pendente,
             'app_version': formatted_version,
             'app_version_num': version_str,
+            'clube': clube_ativo,
+            'clube_slug': clube_ativo.get('slug', 'natrave'),
+            'clube_codigo': clube_ativo.get('codigo_formatado', '001'),
         }
 
     # Em desenvolvimento, garantir que mudanças em templates sejam recarregadas

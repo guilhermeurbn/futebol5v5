@@ -26,6 +26,10 @@ class Jogador:
     historico_nivel: Optional[List[dict]] = None
     nivel_preciso: Optional[float] = None
     foto_url: Optional[str] = None
+    clubes_codigos: Optional[List[str]] = None
+    niveis_por_clube: Optional[dict] = None
+    username: Optional[str] = None
+    user_id: Optional[str] = None
 
     def __post_init__(self):
         """Validação e normalização pós-inicialização."""
@@ -56,6 +60,15 @@ class Jogador:
         if self.historico_nivel is None:
             self.historico_nivel = []
 
+        if self.clubes_codigos is None:
+            if self.niveis_por_clube and isinstance(self.niveis_por_clube, dict):
+                self.clubes_codigos = list(self.niveis_por_clube.keys())
+            else:
+                self.clubes_codigos = ["001"]
+
+        if self.niveis_por_clube is None:
+            self.niveis_por_clube = {cod: self.nivel for cod in (self.clubes_codigos or ["001"])}
+
         if self.nivel_preciso is None:
             self.nivel_preciso = self.nivel
         else:
@@ -65,12 +78,17 @@ class Jogador:
         """Converte jogador para dicionário."""
         return asdict(self)
 
+    def to_dict(self) -> dict:
+        """Alias para para_dict()."""
+        return self.para_dict()
+
     @classmethod
     def do_dict(cls, data: dict) -> 'Jogador':
         """Cria jogador a partir de dicionário (tolerante a campos extras)."""
         campos_validos = {
             "nome", "nivel", "tipo", "posicao",
-            "presente", "id", "criado_em", "owner_user_id", "historico_nivel", "nivel_preciso", "foto_url"
+            "presente", "id", "criado_em", "owner_user_id", "historico_nivel", "nivel_preciso", "foto_url",
+            "clubes_codigos", "niveis_por_clube", "username", "user_id"
         }
         filtrado = {k: v for k, v in data.items() if k in campos_validos}
         return cls(**filtrado)

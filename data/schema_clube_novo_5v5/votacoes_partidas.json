@@ -1,0 +1,276 @@
+{
+  "ultimo_id": 1,
+  "partidas": [
+    {
+      "id": 1,
+      "sorteio_id": 10,
+      "titulo": "Rodada 1",
+      "status": "encerrada",
+      "criado_em": "2026-09-11T00:40:16.416377",
+      "aberta_em": "2026-09-11T00:40:16.416377",
+      "fecha_em": "2026-09-11T12:40:16.416377",
+      "duracao_horas": 12,
+      "criado_por": "juiz",
+      "encerrado_em": "2026-09-12T22:25:12.998501",
+      "encerrado_por": "sistema",
+      "encerramento_motivo": "automatico",
+      "times": [
+        {
+          "numero": 1,
+          "jogadores": [
+            {
+              "nome": "Jogador 1",
+              "owner_user_id": "u1"
+            },
+            {
+              "nome": "Jogador 2",
+              "owner_user_id": "u2"
+            },
+            {
+              "nome": "Jogador 3",
+              "owner_user_id": "u3"
+            },
+            {
+              "nome": "Jogador 4",
+              "owner_user_id": "u4"
+            },
+            {
+              "nome": "Jogador 5",
+              "owner_user_id": "u5"
+            }
+          ]
+        }
+      ],
+      "participantes": [
+        {
+          "jogador_id": null,
+          "user_id": "u1",
+          "username": "user1",
+          "nome_usuario": "Usuario 1",
+          "jogador_nome": "Jogador 1",
+          "time_numero": 1,
+          "externo": false,
+          "gols": 3
+        },
+        {
+          "jogador_id": null,
+          "user_id": "u2",
+          "username": "user2",
+          "nome_usuario": "Usuario 2",
+          "jogador_nome": "Jogador 2",
+          "time_numero": 1,
+          "externo": false
+        },
+        {
+          "jogador_id": null,
+          "user_id": "u3",
+          "username": "user3",
+          "nome_usuario": "Usuario 3",
+          "jogador_nome": "Jogador 3",
+          "time_numero": 1,
+          "externo": false
+        },
+        {
+          "jogador_id": null,
+          "user_id": "u4",
+          "username": "user4",
+          "nome_usuario": "Usuario 4",
+          "jogador_nome": "Jogador 4",
+          "time_numero": 1,
+          "externo": false
+        },
+        {
+          "jogador_id": null,
+          "user_id": "u5",
+          "username": "user5",
+          "nome_usuario": "Usuario 5",
+          "jogador_nome": "Jogador 5",
+          "time_numero": 1,
+          "externo": false
+        }
+      ],
+      "votos": [
+        {
+          "user_id": "u1",
+          "votos": [
+            {
+              "jogador_nome": "Jogador 2",
+              "time_numero": 1,
+              "nota": 8.0,
+              "obrigatorio": true
+            },
+            {
+              "jogador_nome": "Jogador 3",
+              "time_numero": 1,
+              "nota": 8.0,
+              "obrigatorio": true
+            },
+            {
+              "jogador_nome": "Jogador 4",
+              "time_numero": 1,
+              "nota": 8.0,
+              "obrigatorio": true
+            },
+            {
+              "jogador_nome": "Jogador 5",
+              "time_numero": 1,
+              "nota": 8.0,
+              "obrigatorio": true
+            }
+          ],
+          "gols_marcados": 3,
+          "atualizado_em": "2026-09-11T00:40:16.416853"
+        }
+      ],
+      "ranking": {
+        "total_votos": 1,
+        "total_jogadores": 5,
+        "media_geral": 8.0,
+        "confiabilidade_media_rodada": 0.3448,
+        "ranking_times": [
+          {
+            "time_numero": 1,
+            "nota_total": 11.0336,
+            "soma_pesos": 1.3792,
+            "votos": 4,
+            "nota_media": 8.0
+          }
+        ],
+        "ranking_jogadores": [
+          {
+            "jogador_nome": "Jogador 2",
+            "time_numero": 1,
+            "nota_total": 2.7584,
+            "soma_pesos": 0.3448,
+            "votos": 1,
+            "pontos": 2.7584,
+            "notas_lista": [
+              8.0
+            ],
+            "gols": 0,
+            "nota_media": 8.0,
+            "confiabilidade_media": 0.3448
+          },
+          {
+            "jogador_nome": "Jogador 3",
+            "time_numero": 1,
+            "nota_total": 2.7584,
+            "soma_pesos": 0.3448,
+            "votos": 1,
+            "pontos": 2.7584,
+            "notas_lista": [
+              8.0
+            ],
+            "gols": 0,
+            "nota_media": 8.0,
+            "confiabilidade_media": 0.3448
+          },
+          {
+            "jogador_nome": "Jogador 4",
+            "time_numero": 1,
+            "nota_total": 2.7584,
+            "soma_pesos": 0.3448,
+            "votos": 1,
+            "pontos": 2.7584,
+            "notas_lista": [
+              8.0
+            ],
+            "gols": 0,
+            "nota_media": 8.0,
+            "confiabilidade_media": 0.3448
+          },
+          {
+            "jogador_nome": "Jogador 5",
+            "time_numero": 1,
+            "nota_total": 2.7584,
+            "soma_pesos": 0.3448,
+            "votos": 1,
+            "pontos": 2.7584,
+            "notas_lista": [
+              8.0
+            ],
+            "gols": 0,
+            "nota_media": 8.0,
+            "confiabilidade_media": 0.3448
+          },
+          {
+            "jogador_nome": "Jogador 1",
+            "user_id": "u1",
+            "jogador_id": null,
+            "time_numero": 1,
+            "nota_total": 0.0,
+            "soma_pesos": 0.0,
+            "votos": 0,
+            "pontos": 0.0,
+            "notas_lista": [],
+            "gols": 3,
+            "nota_media": 0,
+            "confiabilidade_media": 1.0
+          }
+        ],
+        "melhor_jogador": {
+          "jogador_nome": "Jogador 2",
+          "time_numero": 1,
+          "nota_total": 2.7584,
+          "soma_pesos": 0.3448,
+          "votos": 1,
+          "pontos": 2.7584,
+          "notas_lista": [
+            8.0
+          ],
+          "gols": 0,
+          "nota_media": 8.0,
+          "confiabilidade_media": 0.3448
+        },
+        "melhor_time": {
+          "time_numero": 1,
+          "nota_total": 11.0336,
+          "soma_pesos": 1.3792,
+          "votos": 4,
+          "nota_media": 8.0
+        },
+        "participantes_pendentes": [
+          {
+            "jogador_id": null,
+            "user_id": "u2",
+            "username": "user2",
+            "nome_usuario": "Usuario 2",
+            "jogador_nome": "Jogador 2",
+            "time_numero": 1,
+            "externo": false
+          },
+          {
+            "jogador_id": null,
+            "user_id": "u3",
+            "username": "user3",
+            "nome_usuario": "Usuario 3",
+            "jogador_nome": "Jogador 3",
+            "time_numero": 1,
+            "externo": false
+          },
+          {
+            "jogador_id": null,
+            "user_id": "u4",
+            "username": "user4",
+            "nome_usuario": "Usuario 4",
+            "jogador_nome": "Jogador 4",
+            "time_numero": 1,
+            "externo": false
+          },
+          {
+            "jogador_id": null,
+            "user_id": "u5",
+            "username": "user5",
+            "nome_usuario": "Usuario 5",
+            "jogador_nome": "Jogador 5",
+            "time_numero": 1,
+            "externo": false
+          }
+        ]
+      },
+      "resultado_partida": null,
+      "resultado_resumido": [],
+      "evolucao_nivel": []
+    }
+  ]
+}

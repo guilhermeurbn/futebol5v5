@@ -81,16 +81,16 @@
       "total_votos": 5
     },
     "u1": {
-      "reliability": 0.9055,
-      "total_votos": 16600
+      "reliability": 0.9729,
+      "total_votos": 15702
     },
     "u2": {
       "reliability": 0.9032,
-      "total_votos": 788
+      "total_votos": 650
     },
     "u3_hater": {
       "reliability": 0.5753,
-      "total_votos": 788
+      "total_votos": 650
     }
   },
   "relationships": {
@@ -743,43 +743,43 @@
       "cumulative_offset": 0.0
     },
     "u1:Alex": {
-      "match_count": 394,
-      "cumulative_offset": 1379.0
+      "match_count": 325,
+      "cumulative_offset": 1137.5
     },
     "u2:Alex": {
-      "match_count": 394,
-      "cumulative_offset": 1379.0
+      "match_count": 325,
+      "cumulative_offset": 1137.5
     },
     "u3_hater:Alex": {
-      "match_count": 394,
-      "cumulative_offset": -2758.0
+      "match_count": 325,
+      "cumulative_offset": -2275.0
     },
     "u1:Bruno": {
-      "match_count": 394,
+      "match_count": 325,
       "cumulative_offset": 0.0
     },
     "u2:Bruno": {
-      "match_count": 394,
+      "match_count": 325,
       "cumulative_offset": 0.0
     },
     "u3_hater:Bruno": {
-      "match_count": 394,
+      "match_count": 325,
       "cumulative_offset": 0.0
     },
     "u1:Jogador 2": {
-      "match_count": 3953,
+      "match_count": 3763,
       "cumulative_offset": 0.0
     },
     "u1:Jogador 3": {
-      "match_count": 3953,
+      "match_count": 3763,
       "cumulative_offset": 0.0
     },
     "u1:Jogador 4": {
-      "match_count": 3953,
+      "match_count": 3763,
       "cumulative_offset": 0.0
     },
     "u1:Jogador 5": {
-      "match_count": 3953,
+      "match_count": 3763,
       "cumulative_offset": 0.0
     },
     "d0ba86dc-0e10-423d-a2a4-14e5ab1de033:Gabriel Silva": {
@@ -840,9 +840,9 @@
       "historical_avg": 4.92
     },
     "Alex": {
-      "sum_scores": 7768.5,
-      "count": 1362,
-      "historical_avg": 5.7
+      "sum_scores": 6595.5,
+      "count": 1155,
+      "historical_avg": 5.71
     },
     "Markinhos": {
       "sum_scores": 21.5,
@@ -1005,28 +1005,28 @@
       "historical_avg": 8.0
     },
     "Bruno": {
-      "sum_scores": 8274.0,
-      "count": 1182,
+      "sum_scores": 6825.0,
+      "count": 975,
       "historical_avg": 7.0
     },
     "Jogador 2": {
-      "sum_scores": 31624.0,
-      "count": 3953,
+      "sum_scores": 30104.0,
+      "count": 3763,
       "historical_avg": 8.0
     },
     "Jogador 3": {
-      "sum_scores": 31624.0,
-      "count": 3953,
+      "sum_scores": 30104.0,
+      "count": 3763,
       "historical_avg": 8.0
     },
     "Jogador 4": {
-      "sum_scores": 31624.0,
-      "count": 3953,
+      "sum_scores": 30104.0,
+      "count": 3763,
       "historical_avg": 8.0
     },
     "Jogador 5": {
-      "sum_scores": 31624.0,
-      "count": 3953,
+      "sum_scores": 30104.0,
+      "count": 3763,
       "historical_avg": 8.0
     },
     "Gabriel Silva": {

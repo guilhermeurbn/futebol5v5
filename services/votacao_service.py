@@ -45,6 +45,22 @@ class VotacaoService:
         from services.time_utils import obter_agora_local
         return obter_agora_local()
 
+    def _obter_clube_codigo(self, clube_codigo: Optional[str] = None) -> str:
+        if clube_codigo and str(clube_codigo).strip():
+            c = str(clube_codigo).strip()
+            return c.zfill(3) if c.isdigit() else c
+        try:
+            from flask import g, session
+            if hasattr(g, 'clube_codigo') and g.clube_codigo:
+                c = str(g.clube_codigo).strip()
+                return c.zfill(3) if c.isdigit() else c
+            if session.get('clube_codigo'):
+                c = str(session.get('clube_codigo')).strip()
+                return c.zfill(3) if c.isdigit() else c
+        except Exception:
+            pass
+        return "001"
+
     def _parse_iso(self, valor: Optional[str]) -> Optional[datetime]:
         if not valor:
             return None
@@ -196,19 +212,22 @@ class VotacaoService:
                     candidatos[chave] = usuario
         return candidatos
 
-    def listar(self) -> List[Dict]:
+    def listar(self, clube_codigo: Optional[str] = None) -> List[Dict]:
+        cod = self._obter_clube_codigo(clube_codigo)
         dados = self._carregar()
         self._encerrar_expiradas_em_dados(dados)
-        return list(reversed(dados.get("partidas", [])))
+        partidas = [p for p in dados.get("partidas", []) if p.get("clube_codigo", "001") == cod]
+        return list(reversed(partidas))
 
     def _enriquecer_participantes_fotos(self, partida: Optional[Dict]) -> Optional[Dict]:
         if not partida or not partida.get("participantes"):
             return partida
         try:
             from services.jogador_service import JogadorService
+            cod = partida.get("clube_codigo") or self._obter_clube_codigo()
             jogadores_map = {
                 (j.get("nome") or "").strip().lower(): j
-                for j in JogadorService().listar_para_dict()
+                for j in JogadorService().listar_para_dict(clube_codigo=cod)
             }
             for p in partida.get("participantes", []):
                 if not p.get("foto_url"):
@@ -220,10 +239,11 @@ class VotacaoService:
             pass
         return partida
 
-    def obter_ativa(self) -> Optional[Dict]:
+    def obter_ativa(self, clube_codigo: Optional[str] = None) -> Optional[Dict]:
+        cod = self._obter_clube_codigo(clube_codigo)
         dados = self._carregar()
         self._encerrar_expiradas_em_dados(dados)
-        partidas = dados.get("partidas", [])
+        partidas = [p for p in dados.get("partidas", []) if p.get("clube_codigo", "001") == cod]
         for p in reversed(partidas):
             if p.get("status") == "aberta":
                 return self._enriquecer_participantes_fotos(p)
@@ -296,12 +316,14 @@ class VotacaoService:
         sorteio_id: Optional[int] = None,
         resultado_partida: Optional[Dict] = None,
         duracao_horas: int = 20,
+        clube_codigo: Optional[str] = None,
     ) -> Dict:
+        cod = self._obter_clube_codigo(clube_codigo)
         dados = self._carregar()
         self._encerrar_expiradas_em_dados(dados)
 
         for p in list(dados.get("partidas", [])):
-            if p.get("status") == "aberta":
+            if p.get("clube_codigo", "001") == cod and p.get("status") == "aberta":
                 if sorteio_id and int(p.get("sorteio_id", 0) or 0) == int(sorteio_id):
                     return p
                 # Encerrar votação antiga aberta para liberar criação de nova rodada
@@ -349,6 +371,7 @@ class VotacaoService:
 
         partida = {
             "id": ultimo_id,
+            "clube_codigo": cod,
             "sorteio_id": sorteio_id,
             "titulo": (titulo or f"Rodada {ultimo_id}").strip(),
             "status": "aberta",
@@ -601,7 +624,8 @@ class VotacaoService:
         self._salvar(dados)
         return alvo
 
-    def _obter_mapeamento_canonico(self):
+    def _obter_mapeamento_canonico(self, clube_codigo: Optional[str] = None):
+        cod = self._obter_clube_codigo(clube_codigo)
         from services.auth_service import AuthService
         from services.db import load_json_data
         import unicodedata
@@ -616,8 +640,8 @@ class VotacaoService:
         alias_to_canonical = {}
         try:
             usuarios = AuthService()._carregar()
-            jogadores = load_json_data("jogadores", [])
-            partidas = load_json_data("partidas", [])
+            jogadores = load_json_data("jogadores", [], clube_codigo=cod)
+            partidas = load_json_data("partidas", [], clube_codigo=cod)
 
             for u in usuarios:
                 uid = str(u.get("id") or "")
@@ -806,9 +830,10 @@ class VotacaoService:
             "participantes_pendentes": pendentes,
         }
 
-    def ranking_jogadores_geral(self, limite: int = 50, data_inicio: Optional[str] = None, data_fim: Optional[str] = None) -> Dict:
+    def ranking_jogadores_geral(self, limite: int = 50, data_inicio: Optional[str] = None, data_fim: Optional[str] = None, clube_codigo: Optional[str] = None) -> Dict:
         """Retorna classificacao de jogadores usando rodadas encerradas no intervalo especificado."""
-        partidas = self.listar()
+        cod = self._obter_clube_codigo(clube_codigo)
+        partidas = self.listar(clube_codigo=cod)
         encerradas = [p for p in partidas if p.get("status") == "encerrada"]
 
         if data_inicio and data_fim:
@@ -832,7 +857,7 @@ class VotacaoService:
         acumulado: Dict[str, Dict] = {}
         total_votos = 0
 
-        resolver_canonical = self._obter_mapeamento_canonico()
+        resolver_canonical = self._obter_mapeamento_canonico(clube_codigo=cod)
 
         for partida in encerradas:
             votos = partida.get("votos", [])
@@ -906,7 +931,7 @@ class VotacaoService:
                     item["destaques"] += 1
 
         if not (data_inicio and data_fim):
-            for jogador in self.jogador_service.listar_para_dict():
+            for jogador in self.jogador_service.listar_para_dict(clube_codigo=cod):
                 nome = (jogador.get("nome") or "").strip()
                 if not nome:
                     continue
@@ -926,7 +951,7 @@ class VotacaoService:
 
         jogadores_dict_map = {
             (j.get("nome") or "").strip().lower(): j
-            for j in self.jogador_service.listar_para_dict()
+            for j in self.jogador_service.listar_para_dict(clube_codigo=cod)
         }
 
         for item in acumulado.values():

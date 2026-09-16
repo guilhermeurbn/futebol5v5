@@ -253,11 +253,11 @@ def _resolver_contexto_admin(sorteio_id_hint=None):
 @votacao_bp.route('/votacao', methods=['GET'])
 def votacao_page():
     """Página para votação de usuários"""
-    if _is_admin():
-        return redirect(url_for('admin.admin_page'))
+    if not session.get('user_id'):
+        return redirect(url_for('auth.login_page'))
 
-    if session.get('role') != 'usuario':
-        return _resposta_voto_somente_usuario()
+    if session.get('role') == 'juiz':
+        return redirect(url_for('juiz.jogar_page'))
 
     try:
         current_user_id = session.get('user_id')

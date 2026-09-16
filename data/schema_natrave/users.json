@@ -1,0 +1,180 @@
+[
+  {
+    "id": "f58341a0-14ec-4076-9da5-931c866ebcac",
+    "username": "admin",
+    "nome": "Administrador",
+    "password_hash": "scrypt:32768:8:1$LjNSN4BM5pkG9aUf$86f3916dc366b4bb2a59411d0beecfcaa74b92b5c53b21cfce60502539eb3db8eb3ae4f960af07d4f77adf50e563ebbaf6e40478d26cfa18cecbccd64abb1684",
+    "role": "admin",
+    "criado_em": "2026-08-20T10:00:00",
+    "ativo": true,
+    "senha_temporaria_ativa": false,
+    "email": "teste@gmail.com"
+  },
+  {
+    "id": "juiz-id-001",
+    "username": "juiz",
+    "nome": "Juiz Oficial",
+    "password_hash": "scrypt:32768:8:1$LjNSN4BM5pkG9aUf$86f3916dc366b4bb2a59411d0beecfcaa74b92b5c53b21cfce60502539eb3db8eb3ae4f960af07d4f77adf50e563ebbaf6e40478d26cfa18cecbccd64abb1684",
+    "role": "juiz",
+    "criado_em": "2026-08-20T10:00:00",
+    "ativo": true,
+    "senha_temporaria_ativa": false,
+    "email": "teste1@gmail.com"
+  },
+  {
+    "id": "d0ba86dc-0e10-423d-a2a4-14e5ab1de033",
+    "username": "guilherme",
+    "nome": "Guilherme Urbano",
+    "email": "guiurbano11@gmail.com",
+    "password_hash": "scrypt:32768:8:1$LjNSN4BM5pkG9aUf$86f3916dc366b4bb2a59411d0beecfcaa74b92b5c53b21cfce60502539eb3db8eb3ae4f960af07d4f77adf50e563ebbaf6e40478d26cfa18cecbccd64abb1684",
+    "role": "usuario",
+    "criado_em": "2026-08-20T10:00:00",
+    "ativo": true,
+    "senha_temporaria_ativa": false,
+    "foto_url": "https://res.cloudinary.com/nt547vdb/image/upload/v1787698996/futebol5v5/avatars/avatar_d0ba86dc-0e10-423d-a2a4-14e5ab1de033_456c5877.webp"
+  },
+  {
+    "id": "guigui-id-001",
+    "username": "guiguiurbano",
+    "nome": "Guilherme Urbano",
+    "email": "guiguiurbano@teste.com",
+    "password_hash": "scrypt:32768:8:1$LjNSN4BM5pkG9aUf$86f3916dc366b4bb2a59411d0beecfcaa74b92b5c53b21cfce60502539eb3db8eb3ae4f960af07d4f77adf50e563ebbaf6e40478d26cfa18cecbccd64abb1684",
+    "role": "usuario",
+    "criado_em": "2026-08-20T10:00:00",
+    "ativo": true,
+    "senha_temporaria_ativa": false
+  },
+  {
+    "id": "ba13cd16-ceac-4b2d-bcd0-ada34a8390a7",
+    "username": "carlos",
+    "nome": "Carlos Ferreira",
+    "email": "carlos@teste.com",
+    "password_hash": "scrypt:32768:8:1$LjNSN4BM5pkG9aUf$86f3916dc366b4bb2a59411d0beecfcaa74b92b5c53b21cfce60502539eb3db8eb3ae4f960af07d4f77adf50e563ebbaf6e40478d26cfa18cecbccd64abb1684",
+    "role": "usuario",
+    "criado_em": "2026-08-20T10:00:00",
+    "ativo": true,
+    "senha_temporaria_ativa": false
+  },
+  {
+    "id": "263d73cf-5a95-44b4-a538-bb4c69ba068e",
+    "username": "lucas_teixeira",
+    "nome": "Lucas Teixeira",
+    "email": "lucas@teste.com",
+    "password_hash": "scrypt:32768:8:1$LjNSN4BM5pkG9aUf$86f3916dc366b4bb2a59411d0beecfcaa74b92b5c53b21cfce60502539eb3db8eb3ae4f960af07d4f77adf50e563ebbaf6e40478d26cfa18cecbccd64abb1684",
+    "role": "usuario",
+    "criado_em": "2026-08-20T10:00:00",
+    "ativo": true,
+    "senha_temporaria_ativa": false
+  },
+  {
+    "id": "db1314a8-2d4e-4384-829e-8075b1e33737",
+    "username": "andre_balada",
+    "nome": "André Balada",
+    "email": "andre@teste.com",
+    "password_hash": "scrypt:32768:8:1$LjNSN4BM5pkG9aUf$86f3916dc366b4bb2a59411d0beecfcaa74b92b5c53b21cfce60502539eb3db8eb3ae4f960af07d4f77adf50e563ebbaf6e40478d26cfa18cecbccd64abb1684",
+    "role": "usuario",
+    "criado_em": "2026-08-20T10:00:00",
+    "ativo": true,
+    "senha_temporaria_ativa": false
+  },
+  {
+    "id": "6a5290cd-317b-4764-b1df-6969f849adc5",
+    "username": "renan",
+    "nome": "Renan Costa",
+    "email": "renan@teste.com",
+    "password_hash": "scrypt:32768:8:1$LjNSN4BM5pkG9aUf$86f3916dc366b4bb2a59411d0beecfcaa74b92b5c53b21cfce60502539eb3db8eb3ae4f960af07d4f77adf50e563ebbaf6e40478d26cfa18cecbccd64abb1684",
+    "role": "usuario",
+    "criado_em": "2026-08-20T10:00:00",
+    "ativo": true,
+    "senha_temporaria_ativa": false
+  },
+  {
+    "id": "6cb9f4f5-f4ad-4786-8aca-183e88333730",
+    "username": "ramon",
+    "nome": "Ramon Santos",
+    "email": "ramon@teste.com",
+    "password_hash": "scrypt:32768:8:1$LjNSN4BM5pkG9aUf$86f3916dc366b4bb2a59411d0beecfcaa74b92b5c53b21cfce60502539eb3db8eb3ae4f960af07d4f77adf50e563ebbaf6e40478d26cfa18cecbccd64abb1684",
+    "role": "usuario",
+    "criado_em": "2026-08-20T10:00:00",
+    "ativo": true,
+    "senha_temporaria_ativa": false
+  },
+  {
+    "id": "2faa1197-c93f-4239-b490-4afa38cfa89c",
+    "username": "luan",
+    "nome": "Luan Oliveira",
+    "email": "luan@teste.com",
+    "password_hash": "scrypt:32768:8:1$LjNSN4BM5pkG9aUf$86f3916dc366b4bb2a59411d0beecfcaa74b92b5c53b21cfce60502539eb3db8eb3ae4f960af07d4f77adf50e563ebbaf6e40478d26cfa18cecbccd64abb1684",
+    "role": "usuario",
+    "criado_em": "2026-08-20T10:00:00",
+    "ativo": true,
+    "senha_temporaria_ativa": false
+  },
+  {
+    "id": "19e6a32e-2a20-49a2-81e0-da12aa681505",
+    "username": "alex",
+    "nome": "Alex",
+    "email": "alex@teste.com",
+    "password_hash": "scrypt:32768:8:1$LjNSN4BM5pkG9aUf$86f3916dc366b4bb2a59411d0beecfcaa74b92b5c53b21cfce60502539eb3db8eb3ae4f960af07d4f77adf50e563ebbaf6e40478d26cfa18cecbccd64abb1684",
+    "role": "usuario",
+    "criado_em": "2026-08-20T10:00:00",
+    "ativo": true,
+    "senha_temporaria_ativa": false,
+    "foto_url": ""
+  },
+  {
+    "id": "9ae112c8-8068-41e4-b6c0-e73873935699",
+    "username": "rafael",
+    "nome": "Rafael Souza",
+    "email": "rafael@teste.com",
+    "password_hash": "scrypt:32768:8:1$LjNSN4BM5pkG9aUf$86f3916dc366b4bb2a59411d0beecfcaa74b92b5c53b21cfce60502539eb3db8eb3ae4f960af07d4f77adf50e563ebbaf6e40478d26cfa18cecbccd64abb1684",
+    "role": "usuario",
+    "criado_em": "2026-08-20T10:00:00",
+    "ativo": true,
+    "senha_temporaria_ativa": false
+  },
+  {
+    "id": "c01fe048-c585-466f-bbcc-9f255f579b77",
+    "email": "atleta.d01d96@teste.com",
+    "username": "atleta_novo_d01d96",
+    "nome": "Atleta Editadod01d96 NovoNome",
+    "password_hash": "scrypt:32768:8:1$POKDc4HrerZ7joPf$8db4c01c62402c7b0dd1cb26bfb22ec30f283290f3c1253fa9d65aab1492590a464c44c0145489624e233922af0a54c93641748ce993e9459ead632c2e14ba7c",
+    "role": "usuario",
+    "criado_em": "2026-09-12T22:23:42.248408",
+    "ativo": true,
+    "senha_temporaria_ativa": false
+  },
+  {
+    "id": "11782f9b-08f1-4a6d-a9d4-9f8593a4562d",
+    "email": "gui_goleiro_12b4b999@test.com",
+    "username": "guigoleiro12b4b999",
+    "nome": "Guilherme Goleiro 12b4b999",
+    "password_hash": "scrypt:32768:8:1$83Hm8gwMEADqH0hq$b91f16246cd62e9b33b312d525cb9aead74176deff469679c1a799a55a568c5536acf15b5a4746e883227543656757342a05f73d9c26b117473c8bc8608d4215",
+    "role": "usuario",
+    "criado_em": "2026-09-12T22:23:42.698181",
+    "ativo": true,
+    "senha_temporaria_ativa": false
+  },
+  {
+    "id": "bfde20bc-71cc-4c32-b741-79b631038034",
+    "email": "atleta.29fcab@teste.com",
+    "username": "atleta_novo_29fcab",
+    "nome": "Atleta Editado29fcab NovoNome",
+    "password_hash": "scrypt:32768:8:1$xEMyMX3CdZeQyn4j$683606194634a9bb1328df1b374c7807de055a94f32607ba198a26e94afd4815de4943c0a604819483cf27804ccf93d5ea4d0beffdba067c0e22b3800c6ef7fb",
+    "role": "usuario",
+    "criado_em": "2026-09-12T22:25:18.750975",
+    "ativo": true,
+    "senha_temporaria_ativa": false
+  },
+  {
+    "id": "b2de7575-f254-4e41-8c1a-c69d97e7b9a5",
+    "email": "gui_goleiro_b66c51d4@test.com",
+    "username": "guigoleirob66c51d4",
+    "nome": "Guilherme Goleiro b66c51d4",
+    "password_hash": "scrypt:32768:8:1$y8mK72o4Lx9LjXnV$0dbd1da64c30dad9a94749d5c54caa7c9e85cbbe1bb3609603d49ccaa6f1a319668b33cc614d7def6ae1df93bb5f54ccde336fd6fbd32cfc666022b763a8463b",
+    "role": "usuario",
+    "criado_em": "2026-09-12T22:25:19.152706",
+    "ativo": true,
+    "senha_temporaria_ativa": false
+  }
+]

@@ -48,7 +48,7 @@ def test_ranking_jogadores_geral_date_filter(monkeypatch):
         }
     ]
 
-    monkeypatch.setattr(service, 'listar', lambda: partidas_mock)
+    monkeypatch.setattr(service, 'listar', lambda *args, **kwargs: partidas_mock)
 
     # Filtrar no periodo da temporada #1
     resultado_temporada = service.ranking_jogadores_geral(

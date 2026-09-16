@@ -26,38 +26,63 @@ class JuizPartidaService:
         if os.getenv("DATABASE_URL"):
             return
         if not os.path.exists(self.arquivo):
-            self._salvar(self._estado_vazio())
+            self._salvar_raw_todos({"001": self._estado_vazio()})
 
-    def _carregar(self) -> Dict:
-        if os.getenv("DATABASE_URL"):
-            dados = load_json_data("juiz_partida_atual", self._estado_vazio())
-            if not isinstance(dados, dict):
-                return self._estado_vazio()
-            dados.setdefault("status", "idle")
-            dados.setdefault("partida_atual", None)
-            dados.setdefault("ultima_partida_encerrada", None)
-            return dados
+    def _obter_clube_codigo(self, clube_codigo: Optional[str] = None) -> str:
+        if clube_codigo and str(clube_codigo).strip():
+            c = str(clube_codigo).strip()
+            return c.zfill(3) if c.isdigit() else c
         try:
-            with open(self.arquivo, "r", encoding="utf-8") as f:
-                dados = json.load(f)
-            if not isinstance(dados, dict):
-                return self._estado_vazio()
-            dados.setdefault("status", "idle")
-            dados.setdefault("partida_atual", None)
-            dados.setdefault("ultima_partida_encerrada", None)
-            return dados
-        except (FileNotFoundError, json.JSONDecodeError):
-            return self._estado_vazio()
+            from flask import g, session
+            if hasattr(g, 'clube_codigo') and g.clube_codigo:
+                c = str(g.clube_codigo).strip()
+                return c.zfill(3) if c.isdigit() else c
+            if session.get('clube_codigo'):
+                c = str(session.get('clube_codigo')).strip()
+                return c.zfill(3) if c.isdigit() else c
+        except Exception:
+            pass
+        return "001"
 
-    def _salvar(self, dados: Dict) -> None:
+    def _carregar_todos(self) -> Dict:
         if os.getenv("DATABASE_URL"):
-            save_json_data("juiz_partida_atual", dados)
-            return
-        with open(self.arquivo, "w", encoding="utf-8") as f:
-            json.dump(dados, f, indent=2, ensure_ascii=False)
+            dados = load_json_data("juiz_partida_atual", {})
+        else:
+            try:
+                with open(self.arquivo, "r", encoding="utf-8") as f:
+                    dados = json.load(f)
+            except (FileNotFoundError, json.JSONDecodeError):
+                dados = {}
+        if not isinstance(dados, dict):
+            dados = {}
+        if "status" in dados or "partida_atual" in dados:
+            dados = {"001": dados}
+        return dados
 
-    def obter_estado(self) -> Dict:
-        return self._carregar()
+    def _carregar(self, clube_codigo: Optional[str] = None) -> Dict:
+        cod = self._obter_clube_codigo(clube_codigo)
+        todos = self._carregar_todos()
+        estado = todos.get(cod)
+        if not isinstance(estado, dict):
+            estado = self._estado_vazio()
+        estado.setdefault("status", "idle")
+        estado.setdefault("partida_atual", None)
+        estado.setdefault("ultima_partida_encerrada", None)
+        return estado
+
+    def _salvar(self, dados: Dict, clube_codigo: Optional[str] = None) -> None:
+        cod = self._obter_clube_codigo(clube_codigo)
+        todos = self._carregar_todos()
+        todos[cod] = dados
+        if os.getenv("DATABASE_URL"):
+            save_json_data("juiz_partida_atual", todos)
+            return
+        os.makedirs(os.path.dirname(self.arquivo), exist_ok=True)
+        with open(self.arquivo, "w", encoding="utf-8") as f:
+            json.dump(todos, f, indent=2, ensure_ascii=False)
+
+    def obter_estado(self, clube_codigo: Optional[str] = None) -> Dict:
+        return self._carregar(clube_codigo)
 
     def iniciar_partida(self, criado_por: Optional[str] = None) -> Dict:
         dados = self._carregar()

@@ -18,6 +18,7 @@ from .votacao_routes import votacao_bp
 from .admin_routes import admin_bp
 from .juiz_routes import juiz_bp
 from .stats_routes import stats_bp
+from .clube_routes import clube_bp
 
 __all__ = [
     'auth_bp',
@@ -27,4 +28,5 @@ __all__ = [
     'admin_bp',
     'juiz_bp',
     'stats_bp',
+    'clube_bp',
 ]

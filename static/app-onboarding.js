@@ -1,5 +1,5 @@
 /**
- * ⚽ NATRAVE 5v5 - CONTROLLER DE ONBOARDING & MODO APP
+ * NATRAVE 5v5 - CONTROLLER DE ONBOARDING & MODO APP
  * Gerencia o layout unificado do aplicativo e os controles de onboarding (Cards explicativos).
  */
 document.addEventListener('DOMContentLoaded', () => {
@@ -281,19 +281,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Animação 3D Flip do Card (Login x Cadastro x Recuperar Senha)
+  // Animação 3D Flip do Card (Login x Cadastro x Recuperar Senha x Entrar Clube x Criar Clube)
   const cardFlipInner = document.getElementById('authCardFlipInner');
   const btnShowRegister = document.getElementById('btn-show-register');
   const btnShowLogin = document.getElementById('btn-show-login');
   const btnShowForgot = document.getElementById('btn-show-forgot') || document.querySelector('.auth-forgot-link');
   const btnForgotBack = document.getElementById('btn-forgot-back');
+  const btnShowJoinClub = document.getElementById('btn-show-join-club');
+  const btnShowCreateClub = document.getElementById('btn-show-create-club');
 
   if (cardFlipInner) {
     if (btnShowRegister) {
       btnShowRegister.addEventListener('click', (e) => {
         e.preventDefault();
         triggerHaptic();
-        cardFlipInner.classList.remove('is-flipped-forgot');
+        cardFlipInner.classList.remove('is-flipped-forgot', 'is-flipped-join-club', 'is-flipped-create-club');
         cardFlipInner.classList.add('is-flipped', 'is-flipped-register');
       });
     }
@@ -302,7 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
       btnShowLogin.addEventListener('click', (e) => {
         e.preventDefault();
         triggerHaptic();
-        cardFlipInner.classList.remove('is-flipped', 'is-flipped-register', 'is-flipped-forgot');
+        cardFlipInner.classList.remove('is-flipped', 'is-flipped-register', 'is-flipped-forgot', 'is-flipped-join-club', 'is-flipped-create-club');
       });
     }
 
@@ -310,7 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
       btnShowForgot.addEventListener('click', (e) => {
         e.preventDefault();
         triggerHaptic();
-        cardFlipInner.classList.remove('is-flipped', 'is-flipped-register');
+        cardFlipInner.classList.remove('is-flipped', 'is-flipped-register', 'is-flipped-join-club', 'is-flipped-create-club');
         cardFlipInner.classList.add('is-flipped-forgot');
         const emailInput = document.getElementById('forgot_email');
         if (emailInput) setTimeout(() => emailInput.focus(), 350);
@@ -321,10 +323,1026 @@ document.addEventListener('DOMContentLoaded', () => {
       btnForgotBack.addEventListener('click', (e) => {
         e.preventDefault();
         triggerHaptic();
-        cardFlipInner.classList.remove('is-flipped-forgot', 'is-flipped-register', 'is-flipped');
+        cardFlipInner.classList.remove('is-flipped-forgot', 'is-flipped-register', 'is-flipped-join-club', 'is-flipped-create-club', 'is-flipped');
       });
     }
+
+    if (btnShowJoinClub) {
+      btnShowJoinClub.addEventListener('click', (e) => {
+        e.preventDefault();
+        triggerHaptic();
+        cardFlipInner.classList.remove('is-flipped', 'is-flipped-register', 'is-flipped-forgot', 'is-flipped-create-club');
+        cardFlipInner.classList.add('is-flipped', 'is-flipped-join-club');
+        if (window.filtrarClubesBuscaCard) window.filtrarClubesBuscaCard('');
+      });
+    }
+
+    if (btnShowCreateClub) {
+      btnShowCreateClub.addEventListener('click', (e) => {
+        e.preventDefault();
+        triggerHaptic();
+        cardFlipInner.classList.remove('is-flipped', 'is-flipped-register', 'is-flipped-forgot', 'is-flipped-join-club');
+        cardFlipInner.classList.add('is-flipped', 'is-flipped-create-club');
+      });
+    }
+
+    document.querySelectorAll('.js-back-to-login').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        triggerHaptic();
+        cardFlipInner.classList.remove('is-flipped', 'is-flipped-register', 'is-flipped-forgot', 'is-flipped-join-club', 'is-flipped-create-club');
+      });
+    });
   }
+
+  // Funções Globais de Busca e Seleção de Clube no Card
+  let clubeSelecionadoCard = null;
+
+  window.filtrarClubesBuscaCard = async function(query) {
+    const listWrap = document.getElementById('joinClubResultsList');
+    if (!listWrap) return;
+
+    try {
+      const resp = await fetch('/api/clube/buscar?q=' + encodeURIComponent(query || ''));
+      const data = await resp.json();
+      const clubes = data.clubes || [];
+
+      if (clubes.length === 0) {
+        listWrap.innerHTML = `
+          <div style="text-align: center; padding: 1.2rem; color: #94a3b8; font-size: 0.84rem;">
+            Nenhum clube encontrado para "${query}".
+          </div>
+        `;
+        return;
+      }
+
+      listWrap.innerHTML = clubes.map(c => `
+        <div class="mc-club-item" onclick='selecionarClubeNoCard(${JSON.stringify(c)})'>
+          <div>
+            <div class="mc-club-name">${c.nome}</div>
+            <div class="mc-club-code-badge">Código: <span class="mc-club-code-num">${c.codigo_formatado}</span></div>
+          </div>
+          <span class="mc-club-join-pill">Entrar</span>
+        </div>
+      `).join('');
+    } catch (e) {
+      console.error('Erro ao buscar clubes:', e);
+    }
+  };
+
+  let usuarioAutenticadoClube = null;
+
+  window.selecionarClubeNoCard = function(clube) {
+    clubeSelecionadoCard = clube;
+    document.getElementById('joinStepSearch').style.display = 'none';
+    document.getElementById('joinStepChoice').style.display = 'block';
+    document.getElementById('joinStepInlineLogin').style.display = 'none';
+    document.getElementById('joinStepConfirmAccount').style.display = 'none';
+    document.getElementById('joinStepInlineRegister').style.display = 'none';
+
+    document.getElementById('chosenClubName').textContent = clube.nome;
+    document.getElementById('chosenClubBadge').textContent = 'Clube ' + clube.codigo_formatado;
+
+    const lbl1 = document.getElementById('inlineLoginClubName');
+    if (lbl1) lbl1.textContent = clube.nome;
+    const lbl2 = document.getElementById('inlineRegisterClubName');
+    if (lbl2) lbl2.textContent = clube.nome;
+  };
+
+  window.abrirStepInlineLogin = function() {
+    document.getElementById('joinStepChoice').style.display = 'none';
+    document.getElementById('joinStepConfirmAccount').style.display = 'none';
+    document.getElementById('joinStepInlineRegister').style.display = 'none';
+    if (document.getElementById('joinStepJudgeLogin')) document.getElementById('joinStepJudgeLogin').style.display = 'none';
+    const inlinePane = document.getElementById('joinStepInlineLogin');
+    if (inlinePane) {
+      inlinePane.style.display = 'block';
+      const userInput = document.getElementById('joinUsername');
+      if (userInput && userInput.value === 'admin') {
+        userInput.value = '';
+      }
+    }
+  };
+
+  window.abrirStepAdminLogin = function() {
+    document.getElementById('joinStepChoice').style.display = 'none';
+    document.getElementById('joinStepConfirmAccount').style.display = 'none';
+    document.getElementById('joinStepInlineRegister').style.display = 'none';
+    if (document.getElementById('joinStepJudgeLogin')) document.getElementById('joinStepJudgeLogin').style.display = 'none';
+    const inlinePane = document.getElementById('joinStepInlineLogin');
+    if (inlinePane) {
+      inlinePane.style.display = 'block';
+      const userInput = document.getElementById('joinUsername');
+      if (userInput) {
+        userInput.value = 'admin';
+      }
+      const pwdInput = document.getElementById('joinPassword');
+      if (pwdInput) {
+        pwdInput.focus();
+      }
+    }
+  };
+
+  window.abrirStepInlineRegister = function() {
+    document.getElementById('joinStepChoice').style.display = 'none';
+    document.getElementById('joinStepInlineLogin').style.display = 'none';
+    document.getElementById('joinStepConfirmAccount').style.display = 'none';
+    if (document.getElementById('joinStepJudgeLogin')) document.getElementById('joinStepJudgeLogin').style.display = 'none';
+    document.getElementById('joinStepInlineRegister').style.display = 'block';
+
+    const lbl = document.getElementById('inlineRegisterClubName');
+    if (lbl && clubeSelecionadoCard) lbl.textContent = clubeSelecionadoCard.nome;
+
+    if (typeof goToRegStep === 'function') {
+      goToRegStep(1);
+    }
+  };
+
+  window.abrirStepJudgeLogin = function() {
+    document.getElementById('joinStepChoice').style.display = 'none';
+    document.getElementById('joinStepInlineLogin').style.display = 'none';
+    document.getElementById('joinStepConfirmAccount').style.display = 'none';
+    document.getElementById('joinStepInlineRegister').style.display = 'none';
+    const judgePane = document.getElementById('joinStepJudgeLogin');
+    if (judgePane) {
+      judgePane.style.display = 'block';
+      const lbl = document.getElementById('judgeLoginClubName');
+      if (lbl && clubeSelecionadoCard) lbl.textContent = clubeSelecionadoCard.nome;
+    }
+  };
+
+  window.voltarParaEscolhaClube = function() {
+    document.getElementById('joinStepInlineLogin').style.display = 'none';
+    document.getElementById('joinStepConfirmAccount').style.display = 'none';
+    document.getElementById('joinStepInlineRegister').style.display = 'none';
+    if (document.getElementById('joinStepJudgeLogin')) document.getElementById('joinStepJudgeLogin').style.display = 'none';
+    document.getElementById('joinStepChoice').style.display = 'block';
+  };
+
+  window.voltarParaBuscaClube = function() {
+    clubeSelecionadoCard = null;
+    document.getElementById('joinStepChoice').style.display = 'none';
+    document.getElementById('joinStepInlineLogin').style.display = 'none';
+    document.getElementById('joinStepConfirmAccount').style.display = 'none';
+    document.getElementById('joinStepInlineRegister').style.display = 'none';
+    if (document.getElementById('joinStepJudgeLogin')) document.getElementById('joinStepJudgeLogin').style.display = 'none';
+    document.getElementById('joinStepSearch').style.display = 'block';
+  };
+
+  window.voltarFluxoClube = function() {
+    const confirmAccountPane = document.getElementById('joinStepConfirmAccount');
+    const inlineLoginPane = document.getElementById('joinStepInlineLogin');
+    const inlineRegisterPane = document.getElementById('joinStepInlineRegister');
+    const judgePane = document.getElementById('joinStepJudgeLogin');
+    const choicePane = document.getElementById('joinStepChoice');
+    const searchPane = document.getElementById('joinStepSearch');
+
+    // 1. Se estiver na confirmação de perfil vinculado -> volta para o login de conta
+    if (confirmAccountPane && confirmAccountPane.style.display !== 'none') {
+      confirmAccountPane.style.display = 'none';
+      if (inlineLoginPane) inlineLoginPane.style.display = 'block';
+      return;
+    }
+
+    // 2. Se estiver no cadastro do clube (Wizard 5 passos) -> navega 1 passo atrás por vez
+    if (inlineRegisterPane && inlineRegisterPane.style.display !== 'none') {
+      if (typeof currentRegStep === 'number' && currentRegStep > 1) {
+        goToRegStep(currentRegStep - 1);
+        return;
+      }
+      window.voltarParaEscolhaClube();
+      return;
+    }
+
+    // 3. Se estiver em outro formulário interno (Login ou Juiz) -> volta para a escolha de acesso do clube
+    if ((inlineLoginPane && inlineLoginPane.style.display !== 'none') ||
+        (judgePane && judgePane.style.display !== 'none')) {
+      window.voltarParaEscolhaClube();
+      return;
+    }
+
+    // 4. Se estiver nas opções de acesso do clube (Passo 2) -> volta para a busca de clubes (Passo 1)
+    if (choicePane && choicePane.style.display !== 'none' && searchPane) {
+      window.voltarParaBuscaClube();
+      return;
+    }
+
+    // 5. Se estiver na busca de clubes (Passo 1) ou topo -> volta para a frente do card (Login Principal)
+    if (cardFlipInner && cardFlipInner.classList.contains('is-flipped-join-club')) {
+      cardFlipInner.classList.remove('is-flipped', 'is-flipped-join-club', 'is-flipped-register', 'is-flipped-forgot', 'is-flipped-create-club');
+    } else if (window.history && window.history.length > 1) {
+      window.history.back();
+    }
+  };
+
+  function obterCodigoClubeContexto() {
+    if (clubeSelecionadoCard && (clubeSelecionadoCard.codigo_formatado || clubeSelecionadoCard.codigo)) {
+      return clubeSelecionadoCard.codigo_formatado || clubeSelecionadoCard.codigo;
+    }
+    if (window.TARGET_CLUBE_INITIAL && (window.TARGET_CLUBE_INITIAL.codigo_formatado || window.TARGET_CLUBE_INITIAL.codigo)) {
+      return window.TARGET_CLUBE_INITIAL.codigo_formatado || window.TARGET_CLUBE_INITIAL.codigo;
+    }
+    if (window.CURRENT_CLUBE_CODIGO) {
+      return window.CURRENT_CLUBE_CODIGO;
+    }
+    return '001';
+  }
+
+  window.submeterInlineLoginClube = async function() {
+    const userIn = document.getElementById('joinUsername');
+    const passIn = document.getElementById('joinPassword');
+    const msgBox = document.getElementById('joinInlineLoginMsg');
+
+    const username = userIn ? userIn.value.trim() : '';
+    const senha = passIn ? passIn.value.trim() : '';
+
+    if (!username || !senha) {
+      if (msgBox) {
+        msgBox.textContent = 'Por favor, informe seu usuário e senha.';
+        msgBox.style.color = '#ef4444';
+      }
+      return;
+    }
+
+    try {
+      const resp = await fetch('/api/clube/entrar-com-conta-existente', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCsrfToken()
+        },
+        body: JSON.stringify({
+          username: username,
+          senha: senha,
+          clube_codigo: obterCodigoClubeContexto()
+        })
+      });
+      const data = await resp.json();
+
+      if (data.sucesso && data.requer_confirmacao) {
+        usuarioAutenticadoClube = data.user;
+        document.getElementById('confirmUserNome').textContent = data.user.nome;
+        document.getElementById('confirmClubNome').textContent = data.clube.nome;
+
+        document.getElementById('joinStepInlineLogin').style.display = 'none';
+        document.getElementById('joinStepConfirmAccount').style.display = 'block';
+      } else {
+        if (msgBox) {
+          msgBox.textContent = data.mensagem || 'Usuário ou senha incorretos.';
+          msgBox.style.color = '#ef4444';
+        }
+      }
+    } catch (e) {
+      if (msgBox) {
+        msgBox.textContent = 'Erro ao conectar ao servidor.';
+        msgBox.style.color = '#ef4444';
+      }
+    }
+  };
+
+  window.confirmarEntradaNoClube = async function() {
+    const msgBox = document.getElementById('joinConfirmMsg');
+    const cod = (clubeSelecionadoCard && (clubeSelecionadoCard.codigo_formatado || clubeSelecionadoCard.codigo)) || obterCodigoClubeContexto();
+    if (!usuarioAutenticadoClube) return;
+
+    try {
+      const resp = await fetch('/api/clube/confirmar-entrada', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCsrfToken()
+        },
+        body: JSON.stringify({
+          user_id: usuarioAutenticadoClube.id,
+          clube_codigo: cod
+        })
+      });
+      const data = await resp.json();
+
+      if (data.sucesso && data.redirect_url) {
+        window.location.href = data.redirect_url;
+      } else {
+        if (msgBox) {
+          msgBox.textContent = data.mensagem || 'Não foi possível associar a este clube.';
+          msgBox.style.color = '#ef4444';
+        }
+      }
+    } catch (e) {
+      if (msgBox) {
+        msgBox.textContent = 'Erro de conexão com o servidor.';
+        msgBox.style.color = '#ef4444';
+      }
+    }
+  };
+
+  // --- VERIFICAÇÃO INSTANTÂNEA E NAVEGAÇÃO DO WIZARD DE CADASTRO NO CLUBE (3 PASSOS) ---
+  let inlineUserCheckDebounce = null;
+  let inlineUsernameValid = false;
+
+  function updateWizardDots(step) {
+    const d1 = document.getElementById('wizardDot1');
+    const d2 = document.getElementById('wizardDot2');
+    const d3 = document.getElementById('wizardDot3');
+    if (d1) d1.style.background = step >= 1 ? '#22c55e' : 'rgba(255, 255, 255, 0.2)';
+    if (d2) d2.style.background = step >= 2 ? '#22c55e' : 'rgba(255, 255, 255, 0.2)';
+    if (d3) d3.style.background = step >= 3 ? '#22c55e' : 'rgba(255, 255, 255, 0.2)';
+  }
+
+  window.validarNomeInstantaneo = function(val) {
+    const statusEl = document.getElementById('regNomeStatus');
+    const wrapEl = document.getElementById('regNomeWrap');
+    const nome = (val || '').trim();
+    const partes = nome.split(/\s+/).filter(Boolean);
+
+    if (!statusEl) return true;
+
+    if (nome.length === 0) {
+      statusEl.style.display = 'none';
+      statusEl.textContent = '';
+      if (wrapEl) wrapEl.style.borderColor = 'rgba(255, 255, 255, 0.14)';
+      return false;
+    }
+
+    if (partes.length < 2) {
+      statusEl.style.display = 'block';
+      statusEl.style.color = '#f59e0b';
+      statusEl.textContent = '⚠ Digite seu nome e sobrenome (mínimo 2 nomes)';
+      if (wrapEl) wrapEl.style.borderColor = '#f59e0b';
+      return false;
+    }
+
+    statusEl.style.display = 'block';
+    statusEl.style.color = '#10b981';
+    statusEl.textContent = '✓ Nome completo válido';
+    if (wrapEl) wrapEl.style.borderColor = '#10b981';
+    return true;
+  };
+
+  window.validarUsernameInstantaneo = function(val) {
+    const statusEl = document.getElementById('regUsernameStatus');
+    const wrapEl = document.getElementById('regUsernameWrap');
+    const username = (val || '').trim().toLowerCase();
+    inlineUsernameValid = false;
+
+    if (inlineUserCheckDebounce) clearTimeout(inlineUserCheckDebounce);
+
+    if (!statusEl) return;
+
+    if (username.length === 0) {
+      statusEl.style.display = 'none';
+      statusEl.textContent = '';
+      if (wrapEl) wrapEl.style.borderColor = 'rgba(255, 255, 255, 0.14)';
+      return;
+    }
+
+    if (username.length < 3) {
+      statusEl.style.display = 'block';
+      statusEl.style.color = '#f59e0b';
+      statusEl.textContent = '⚠ Mínimo de 3 caracteres';
+      if (wrapEl) wrapEl.style.borderColor = '#f59e0b';
+      return;
+    }
+
+    const usernameRegex = /^[a-z0-9._]{3,30}$/;
+    if (!usernameRegex.test(username)) {
+      statusEl.style.display = 'block';
+      statusEl.style.color = '#ef4444';
+      statusEl.textContent = '✗ Apenas letras, números, ponto ou underline';
+      if (wrapEl) wrapEl.style.borderColor = '#ef4444';
+      return;
+    }
+
+    statusEl.style.display = 'block';
+    statusEl.style.color = '#94a3b8';
+    statusEl.textContent = 'Verificando disponibilidade do @...';
+    if (wrapEl) wrapEl.style.borderColor = '#3b82f6';
+
+    inlineUserCheckDebounce = setTimeout(async () => {
+      try {
+        const res = await fetch(`/checar-username?username=${encodeURIComponent(username)}`);
+        const data = await res.json();
+        if (data.available) {
+          inlineUsernameValid = true;
+          statusEl.style.color = '#10b981';
+          statusEl.textContent = `✓ ${data.message || '@ disponível'}`;
+          if (wrapEl) wrapEl.style.borderColor = '#10b981';
+        } else {
+          inlineUsernameValid = false;
+          statusEl.style.color = '#ef4444';
+          statusEl.textContent = `✗ ${data.message || '@ indisponível'}`;
+          if (wrapEl) wrapEl.style.borderColor = '#ef4444';
+        }
+      } catch (err) {
+        statusEl.style.color = '#f59e0b';
+        statusEl.textContent = '⚠ Erro ao verificar disponibilidade';
+      }
+    }, 250);
+  };
+
+  window.validarSenhaInstantanea = function(val) {
+    const statusEl = document.getElementById('regSenhaStatus');
+    const wrapEl = document.getElementById('regSenhaWrap');
+    const senha = (val || '').trim();
+
+    if (!statusEl) return true;
+
+    if (senha.length === 0) {
+      statusEl.style.display = 'none';
+      statusEl.textContent = '';
+      if (wrapEl) wrapEl.style.borderColor = 'rgba(255, 255, 255, 0.14)';
+      return false;
+    }
+
+    if (senha.length < 6) {
+      statusEl.style.display = 'block';
+      statusEl.style.color = '#f59e0b';
+      statusEl.textContent = `⚠ Faltam ${6 - senha.length} caracteres (mínimo 6)`;
+      if (wrapEl) wrapEl.style.borderColor = '#f59e0b';
+      return false;
+    }
+
+    statusEl.style.display = 'block';
+    statusEl.style.color = '#10b981';
+    statusEl.textContent = '✓ Senha segura!';
+    if (wrapEl) wrapEl.style.borderColor = '#10b981';
+    return true;
+  };
+
+  window.avancarWizardPasso2 = function() {
+    const elNome = document.getElementById('regNome');
+    const val = elNome ? elNome.value : '';
+    if (!window.validarNomeInstantaneo(val)) {
+      if (elNome) elNome.focus();
+      return;
+    }
+    const s1 = document.getElementById('joinRegStep1');
+    const s2 = document.getElementById('joinRegStep2');
+    if (s1) s1.style.display = 'none';
+    if (s2) s2.style.display = 'block';
+    updateWizardDots(2);
+  };
+
+  window.avancarWizardPasso3 = function() {
+    const elUser = document.getElementById('regUsername');
+    const username = elUser ? elUser.value.trim().toLowerCase() : '';
+    const statusEl = document.getElementById('regUsernameStatus');
+
+    if (!username || username.length < 3) {
+      if (statusEl) {
+        statusEl.style.display = 'block';
+        statusEl.style.color = '#ef4444';
+        statusEl.textContent = '⚠ Digite um @ de usuário válido (mínimo 3 caracteres)';
+      }
+      if (elUser) elUser.focus();
+      return;
+    }
+
+    if (!inlineUsernameValid) {
+      if (statusEl) {
+        statusEl.style.display = 'block';
+        statusEl.style.color = '#ef4444';
+        statusEl.textContent = '⚠ O @ escolhido não está disponível. Escolha outro.';
+      }
+      if (elUser) elUser.focus();
+      return;
+    }
+
+    const s2 = document.getElementById('joinRegStep2');
+    const s3 = document.getElementById('joinRegStep3');
+    if (s2) s2.style.display = 'none';
+    if (s3) s3.style.display = 'block';
+    updateWizardDots(3);
+  };
+
+  window.voltarWizardPasso1 = function() {
+    const s1 = document.getElementById('joinRegStep1');
+    const s2 = document.getElementById('joinRegStep2');
+    if (s2) s2.style.display = 'none';
+    if (s1) s1.style.display = 'block';
+    updateWizardDots(1);
+  };
+
+  window.voltarWizardPasso2 = function() {
+    const s2 = document.getElementById('joinRegStep2');
+    const s3 = document.getElementById('joinRegStep3');
+    if (s3) s3.style.display = 'none';
+    if (s2) s2.style.display = 'block';
+    updateWizardDots(2);
+  };
+
+  window.selecionarPosicao = function(pos) {
+    const inputPos = document.getElementById('reg_posicao');
+    if (inputPos) inputPos.value = pos;
+
+    const cardLinha = document.getElementById('posCardLinha');
+    const cardGoleiro = document.getElementById('posCardGoleiro');
+
+    if (pos === 'Linha') {
+      if (cardLinha) {
+        cardLinha.style.background = 'rgba(34, 197, 94, 0.14)';
+        cardLinha.style.border = '2px solid #22c55e';
+        cardLinha.style.boxShadow = '0 4px 14px rgba(34, 197, 94, 0.15)';
+        const icon = cardLinha.querySelector('.pos-card-icon');
+        if (icon) icon.style.color = '#22c55e';
+      }
+      if (cardGoleiro) {
+        cardGoleiro.style.background = 'rgba(255, 255, 255, 0.04)';
+        cardGoleiro.style.border = '1px solid rgba(255, 255, 255, 0.12)';
+        cardGoleiro.style.boxShadow = 'none';
+        const icon = cardGoleiro.querySelector('.pos-card-icon');
+        if (icon) icon.style.color = '#64748b';
+      }
+    } else {
+      if (cardGoleiro) {
+        cardGoleiro.style.background = 'rgba(34, 197, 94, 0.14)';
+        cardGoleiro.style.border = '2px solid #22c55e';
+        cardGoleiro.style.boxShadow = '0 4px 14px rgba(34, 197, 94, 0.15)';
+        const icon = cardGoleiro.querySelector('.pos-card-icon');
+        if (icon) icon.style.color = '#22c55e';
+      }
+      if (cardLinha) {
+        cardLinha.style.background = 'rgba(255, 255, 255, 0.04)';
+        cardLinha.style.border = '1px solid rgba(255, 255, 255, 0.12)';
+        cardLinha.style.boxShadow = 'none';
+        const icon = cardLinha.querySelector('.pos-card-icon');
+        if (icon) icon.style.color = '#64748b';
+      }
+    }
+  };
+
+  window.submeterInlineCadastroClube = async function() {
+    const elNome = document.getElementById('reg_nome') || document.getElementById('regNome');
+    const elEmail = document.getElementById('reg_email');
+    const elUser = document.getElementById('reg_username') || document.getElementById('regUsername');
+    const elPos = document.getElementById('reg_posicao') || document.getElementById('regPosicao');
+    const elSenha = document.getElementById('reg_password') || document.getElementById('regSenha');
+    const msgBox = document.getElementById('reg-step5-status') || document.getElementById('joinInlineRegMsg');
+    const btnNext = document.getElementById('reg-btn-next');
+
+    const nome = elNome ? elNome.value.trim() : '';
+    const email = elEmail ? elEmail.value.trim() : '';
+    const username = elUser ? elUser.value.trim().toLowerCase() : '';
+    const posicao = elPos ? elPos.value : 'Linha';
+    const senha = elSenha ? elSenha.value.trim() : '';
+
+    if (msgBox) {
+      msgBox.style.display = 'none';
+      msgBox.textContent = '';
+    }
+
+    if (btnNext) {
+      btnNext.disabled = true;
+      btnNext.innerHTML = '<span>Criando conta e entrando...</span>';
+    }
+
+    try {
+      const resp = await fetch('/api/clube/cadastrar-e-entrar', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCsrfToken()
+        },
+        body: JSON.stringify({
+          nome: nome,
+          email: email,
+          username: username,
+          posicao: posicao,
+          senha: senha,
+          clube_codigo: obterCodigoClubeContexto()
+        })
+      });
+      const data = await resp.json();
+
+      if (data.sucesso && data.redirect_url) {
+        window.location.href = data.redirect_url;
+      } else {
+        if (msgBox) {
+          msgBox.textContent = data.mensagem || 'Não foi possível criar a conta.';
+          msgBox.className = 'reg-live-status reg-live-status--err';
+          msgBox.style.display = 'block';
+        }
+        if (btnNext) {
+          btnNext.disabled = false;
+          btnNext.innerHTML = '<span>Continuar</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px; margin-left: 6px;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
+        }
+      }
+    } catch (e) {
+      if (msgBox) {
+        msgBox.textContent = 'Erro ao conectar ao servidor.';
+        msgBox.className = 'reg-live-status reg-live-status--err';
+        msgBox.style.display = 'block';
+      }
+      if (btnNext) {
+        btnNext.disabled = false;
+        btnNext.innerHTML = '<span>Continuar</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px; margin-left: 6px;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
+      }
+    }
+  };
+
+  window.submeterEntradaJuizClube = async function() {
+    const passIn = document.getElementById('joinJudgeSenha');
+    const msgBox = document.getElementById('joinJudgeLoginMsg');
+
+    const senhaJuiz = passIn ? passIn.value.trim() : '';
+
+    if (!senhaJuiz) {
+      if (msgBox) {
+        msgBox.textContent = 'Por favor, informe a senha do juiz.';
+        msgBox.style.color = '#ef4444';
+      }
+      return;
+    }
+
+    try {
+      const resp = await fetch('/api/clube/entrar-como-juiz', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCsrfToken()
+        },
+        body: JSON.stringify({
+          clube_codigo: obterCodigoClubeContexto(),
+          senha_juiz: senhaJuiz
+        })
+      });
+      const data = await resp.json();
+
+      if (data.sucesso && data.redirect_url) {
+        window.location.href = data.redirect_url;
+      } else {
+        if (msgBox) {
+          msgBox.textContent = data.mensagem || 'Senha do Juiz incorreta.';
+          msgBox.style.color = '#ef4444';
+        }
+      }
+    } catch (e) {
+      if (msgBox) {
+        msgBox.textContent = 'Erro ao conectar ao servidor.';
+        msgBox.style.color = '#ef4444';
+      }
+    }
+  };
+
+  /* FLUXO CRIAR CLUBE DO ZERO */
+  let corTemaClubeSelecionadoCard = 'neon-green';
+  window.selecionarCorCard = function(radioInput, hexColor) {
+    document.querySelectorAll('.mc-color-dot').forEach(dot => {
+      dot.classList.remove('is-active');
+    });
+    if (radioInput) {
+      corTemaClubeSelecionadoCard = radioInput.value || 'neon-green';
+      const parentLabel = radioInput.closest('.mc-color-dot');
+      if (parentLabel) parentLabel.classList.add('is-active');
+    }
+  };
+
+  let timerCardCreate = null;
+  let timerAdminEmail = null;
+
+  function setFieldVisualState(wrap, feedback, state, msg) {
+    if (wrap) {
+      wrap.classList.remove('is-valid', 'is-invalid', 'is-warning');
+      if (state) wrap.classList.add(state);
+    }
+    if (feedback) {
+      if (!msg) {
+        feedback.style.display = 'none';
+        feedback.textContent = '';
+      } else {
+        feedback.style.display = 'block';
+        feedback.textContent = msg;
+        if (state === 'is-valid') feedback.style.color = '#10b981';
+        else if (state === 'is-invalid') feedback.style.color = '#ef4444';
+        else if (state === 'is-warning') feedback.style.color = '#f59e0b';
+        else feedback.style.color = '#94a3b8';
+      }
+    }
+  }
+
+  // 1. VALIDAÇÃO INSTANTÂNEA: NOME DO CLUBE
+  window.validarNomeCardCriarClube = function(val) {
+    clearTimeout(timerCardCreate);
+    const feedback = document.getElementById('createClubCardFeedback');
+    const wrap = document.getElementById('wrapCreateClubName');
+    const nome = (val || '').trim();
+
+    if (!nome) {
+      setFieldVisualState(wrap, feedback, '', '');
+      return;
+    }
+    if (nome.length < 2) {
+      setFieldVisualState(wrap, feedback, 'is-warning', '⚠ O nome do clube deve ter no mínimo 2 caracteres.');
+      return;
+    }
+
+    setFieldVisualState(wrap, feedback, '', 'Verificando disponibilidade no NaTrave...');
+
+    timerCardCreate = setTimeout(async () => {
+      try {
+        const resp = await fetch('/api/clube/validar-nome', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken()
+          },
+          body: JSON.stringify({ nome: nome })
+        });
+        const data = await resp.json();
+        if (data.disponivel) {
+          setFieldVisualState(wrap, feedback, 'is-valid', '✓ ' + (data.mensagem || 'Nome de clube disponível!'));
+        } else {
+          setFieldVisualState(wrap, feedback, 'is-invalid', '✗ ' + (data.mensagem || 'Já existe um clube com este nome.'));
+        }
+      } catch (e) {
+        setFieldVisualState(wrap, feedback, 'is-warning', '⚠ Não foi possível verificar o nome no momento.');
+      }
+    }, 250);
+  };
+
+  // 2. VALIDAÇÃO INSTANTÂNEA: E-MAIL DO ADMIN (VERIFICAÇÃO NA BASE COMPLETA)
+  window.validarEmailAdminInstantaneo = function(val) {
+    clearTimeout(timerAdminEmail);
+    const feedback = document.getElementById('createRegEmailFeedback');
+    const wrap = document.getElementById('wrapCreateRegEmail');
+    const email = (val || '').trim().toLowerCase();
+
+    if (!email) {
+      setFieldVisualState(wrap, feedback, '', '');
+      return;
+    }
+
+    if (!email.includes('@') || !email.split('@')[1]?.includes('.')) {
+      setFieldVisualState(wrap, feedback, 'is-warning', '⚠ Digite um formato válido (ex: seu-email@exemplo.com)');
+      return;
+    }
+
+    setFieldVisualState(wrap, feedback, '', 'Consultando e-mail na base de dados...');
+
+    timerAdminEmail = setTimeout(async () => {
+      try {
+        const resp = await fetch(`/checar-email?email=${encodeURIComponent(email)}`);
+        const data = await resp.json();
+        if (data.available) {
+          setFieldVisualState(wrap, feedback, 'is-valid', '✓ E-mail disponível para criar o clube!');
+        } else {
+          setFieldVisualState(wrap, feedback, 'is-warning', 'ℹ E-mail já cadastrado no NaTrave. Se for sua conta, use sua senha para vincular.');
+        }
+      } catch (e) {
+        setFieldVisualState(wrap, feedback, 'is-warning', '⚠ Erro ao consultar a base de e-mails.');
+      }
+    }, 250);
+  };
+
+  // 3. VALIDAÇÃO INSTANTÂNEA: SENHA DO ADMIN
+  window.validarSenhaAdminInstantaneo = function(val) {
+    const feedback = document.getElementById('createRegSenhaFeedback');
+    const wrap = document.getElementById('wrapCreateRegSenha');
+    const senha = (val || '').trim();
+
+    if (!senha) {
+      setFieldVisualState(wrap, feedback, '', '');
+      return;
+    }
+
+    if (senha.length < 6) {
+      setFieldVisualState(wrap, feedback, 'is-warning', `⚠ Mínimo 6 caracteres (faltam ${6 - senha.length})`);
+    } else {
+      setFieldVisualState(wrap, feedback, 'is-valid', '✓ Senha de administrador válida!');
+    }
+  };
+
+  // 4. VALIDAÇÃO INSTANTÂNEA: SENHA DO JUIZ
+  window.validarSenhaJuizInstantaneo = function(val) {
+    const feedback = document.getElementById('createRegSenhaJuizFeedback');
+    const wrap = document.getElementById('wrapCreateRegSenhaJuiz');
+    const senha = (val || '').trim();
+
+    if (!senha) {
+      setFieldVisualState(wrap, feedback, '', '');
+      return;
+    }
+
+    if (senha.length < 4) {
+      setFieldVisualState(wrap, feedback, 'is-warning', `⚠ Mínimo 4 caracteres (faltam ${4 - senha.length})`);
+    } else {
+      setFieldVisualState(wrap, feedback, 'is-valid', '✓ Senha do Juiz definida!');
+    }
+  };
+
+  function atualizarHeaderCriacaoClube(passo) {
+    const sub = document.getElementById('createClubHeaderSub');
+    const dot1 = document.getElementById('createClubDot1');
+    const dot2 = document.getElementById('createClubDot2');
+    const dot3 = document.getElementById('createClubDot3');
+    const num = document.getElementById('createClubStepNum');
+
+    if (num) num.textContent = String(passo);
+    if (dot1) dot1.style.background = '#22c55e';
+
+    if (passo === 1) {
+      if (sub) sub.textContent = 'Passo 1: Identificação do Clube';
+      if (dot2) dot2.style.background = 'rgba(255,255,255,0.2)';
+      if (dot3) dot3.style.background = 'rgba(255,255,255,0.2)';
+    } else if (passo === 2) {
+      if (sub) sub.textContent = 'Passo 2: Conta do Administrador';
+      if (dot2) dot2.style.background = '#22c55e';
+      if (dot3) dot3.style.background = 'rgba(255,255,255,0.2)';
+    } else if (passo === 3) {
+      if (sub) sub.textContent = 'Passo 3: Acesso do Juiz e Confirmação';
+      if (dot2) dot2.style.background = '#22c55e';
+      if (dot3) dot3.style.background = '#22c55e';
+    }
+  }
+
+  window.avancarCriacaoClubeStep2 = function() {
+    const input = document.getElementById('inputCreateClubNameCard');
+    const val = input ? input.value.trim() : '';
+    const feedback = document.getElementById('createClubCardFeedback');
+    if (!val || val.length < 2) {
+      if (feedback) {
+        feedback.textContent = 'Informe um nome com pelo menos 2 caracteres.';
+        feedback.style.color = '#ef4444';
+      }
+      if (input) input.focus();
+      return;
+    }
+    const lbl = document.getElementById('targetNewClubName');
+    if (lbl) lbl.textContent = val;
+    const summaryClub = document.getElementById('summaryClubName');
+    if (summaryClub) summaryClub.textContent = val;
+
+    atualizarHeaderCriacaoClube(2);
+    document.getElementById('createStepDetails').style.display = 'none';
+    document.getElementById('createStepAdminAuth').style.display = 'block';
+    const step3 = document.getElementById('createStepJudgeAuth');
+    if (step3) step3.style.display = 'none';
+
+    // Foco automático no e-mail
+    setTimeout(() => {
+      const emailIn = document.getElementById('createRegEmail');
+      if (emailIn) emailIn.focus();
+    }, 100);
+  };
+
+  window.avancarCriacaoClubeStep3 = function() {
+    const emailIn = document.getElementById('createRegEmail');
+    const email = emailIn ? emailIn.value.trim() : '';
+    const senhaIn = document.getElementById('createRegSenha');
+    const senha = senhaIn ? senhaIn.value.trim() : '';
+    const msgBox = document.getElementById('createStep2Msg');
+
+    if (!email || !email.includes('@') || !email.includes('.')) {
+      if (msgBox) {
+        msgBox.textContent = 'Por favor, informe um e-mail válido para o Admin.';
+        msgBox.style.color = '#ef4444';
+      }
+      return;
+    }
+
+    if (!senha || senha.length < 6) {
+      if (msgBox) {
+        msgBox.textContent = 'A senha do Admin deve ter pelo menos 6 caracteres.';
+        msgBox.style.color = '#ef4444';
+      }
+      return;
+    }
+
+    if (msgBox) msgBox.textContent = '';
+
+    const summaryEmail = document.getElementById('summaryAdminEmail');
+    if (summaryEmail) summaryEmail.textContent = email;
+
+    atualizarHeaderCriacaoClube(3);
+    document.getElementById('createStepAdminAuth').style.display = 'none';
+    const step3 = document.getElementById('createStepJudgeAuth');
+    if (step3) step3.style.display = 'block';
+
+    // Foco na senha do juiz
+    setTimeout(() => {
+      const juizIn = document.getElementById('createRegSenhaJuiz');
+      if (juizIn) juizIn.focus();
+    }, 100);
+  };
+
+  window.voltarParaPasso1CriarClube = function() {
+    atualizarHeaderCriacaoClube(1);
+    const step2 = document.getElementById('createStepAdminAuth');
+    if (step2) step2.style.display = 'none';
+    const step3 = document.getElementById('createStepJudgeAuth');
+    if (step3) step3.style.display = 'none';
+    document.getElementById('createStepDetails').style.display = 'block';
+  };
+
+  window.voltarParaPasso2CriarClube = function() {
+    atualizarHeaderCriacaoClube(2);
+    const step3 = document.getElementById('createStepJudgeAuth');
+    if (step3) step3.style.display = 'none';
+    const step2 = document.getElementById('createStepAdminAuth');
+    if (step2) step2.style.display = 'block';
+  };
+
+  window.voltarFluxoCriarClube = function() {
+    const step3 = document.getElementById('createStepJudgeAuth');
+    if (step3 && step3.style.display !== 'none') {
+      window.voltarParaPasso2CriarClube();
+      return;
+    }
+    const step2 = document.getElementById('createStepAdminAuth');
+    if (step2 && step2.style.display !== 'none') {
+      window.voltarParaPasso1CriarClube();
+      return;
+    }
+
+    if (cardFlipInner && cardFlipInner.classList.contains('is-flipped-create-club')) {
+      cardFlipInner.classList.remove('is-flipped', 'is-flipped-join-club', 'is-flipped-register', 'is-flipped-forgot', 'is-flipped-create-club');
+    } else if (window.history && window.history.length > 1) {
+      window.history.back();
+    }
+  };
+
+  window.processarCriacaoClubeComCadastro = async function() {
+    const input = document.getElementById('inputCreateClubNameCard');
+    const nomeClube = input ? input.value.trim() : '';
+    const nome = document.getElementById('createRegNome') ? document.getElementById('createRegNome').value.trim() : 'Administrador';
+    const emailIn = document.getElementById('createRegEmail');
+    const email = emailIn ? emailIn.value.trim() : '';
+    const username = document.getElementById('createRegUsername') ? document.getElementById('createRegUsername').value.trim() : 'admin';
+    const senha = document.getElementById('createRegSenha') ? document.getElementById('createRegSenha').value.trim() : '';
+    const senhaJuizIn = document.getElementById('createRegSenhaJuiz');
+    const senhaJuiz = senhaJuizIn ? senhaJuizIn.value.trim() : '';
+    const msgBox = document.getElementById('createInlineRegMsg');
+
+    if (!nomeClube) {
+      if (msgBox) {
+        msgBox.textContent = 'Por favor, informe o nome do clube no Passo 1.';
+        msgBox.style.color = '#ef4444';
+      }
+      return;
+    }
+
+    if (!email || !email.includes('@')) {
+      if (msgBox) {
+        msgBox.textContent = 'Por favor, informe um e-mail válido para o Admin.';
+        msgBox.style.color = '#ef4444';
+      }
+      return;
+    }
+
+    if (!senha) {
+      if (msgBox) {
+        msgBox.textContent = 'Por favor, defina a senha do Admin.';
+        msgBox.style.color = '#ef4444';
+      }
+      return;
+    }
+
+    if (!senhaJuiz) {
+      if (msgBox) {
+        msgBox.textContent = 'Por favor, defina a senha do Juiz do clube.';
+        msgBox.style.color = '#ef4444';
+      }
+      return;
+    }
+
+    try {
+      const resp = await fetch('/api/clube/criar-com-autenticacao', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCsrfToken()
+        },
+        body: JSON.stringify({
+          nome_clube: nomeClube,
+          cor_tema: corTemaClubeSelecionadoCard,
+          modo_auth: 'novo',
+          nome: nome,
+          email: email,
+          username: username,
+          senha: senha,
+          senha_juiz: senhaJuiz
+        })
+      });
+      let data = {};
+      try {
+        data = await resp.json();
+      } catch (jsonErr) {
+        data = { mensagem: 'Ocorreu um erro no servidor. Tente novamente.' };
+      }
+      if (data.sucesso && data.redirect_url) {
+        window.location.href = data.redirect_url;
+      } else {
+        if (msgBox) {
+          msgBox.textContent = data.mensagem || 'Não foi possível criar o clube.';
+          msgBox.style.color = '#ef4444';
+        }
+      }
+    } catch (e) {
+      if (msgBox) {
+        msgBox.textContent = 'Erro ao conectar ao servidor. Verifique sua conexão e tente novamente.';
+        msgBox.style.color = '#ef4444';
+      }
+    }
+  };
 
   // Handler AJAX para formulário de Recuperar Senha
   const forgotForm = document.getElementById('forgot-password-form');
@@ -360,18 +1378,18 @@ document.addEventListener('DOMContentLoaded', () => {
           forgotStatus.style.display = 'flex';
           if (data.ok) {
             forgotStatus.className = 'auth-message auth-message--success';
-            forgotStatus.innerHTML = `<strong>✅</strong><span>${data.sucesso || 'Link de recuperação enviado com sucesso! Verifique seu e-mail.'}</span>`;
+            forgotStatus.innerHTML = `<span>${data.sucesso || 'Link de recuperação enviado com sucesso! Verifique seu e-mail.'}</span>`;
             if (emailInput) emailInput.value = '';
           } else {
             forgotStatus.className = 'auth-message auth-message--warning';
-            forgotStatus.innerHTML = `<strong>⚠️</strong><span>${data.erro || 'Erro ao enviar e-mail. Tente novamente.'}</span>`;
+            forgotStatus.innerHTML = `<span>${data.erro || 'Erro ao enviar e-mail. Tente novamente.'}</span>`;
           }
         }
       } catch (err) {
         if (forgotStatus) {
           forgotStatus.style.display = 'flex';
           forgotStatus.className = 'auth-message auth-message--warning';
-          forgotStatus.innerHTML = '<strong>⚠️</strong><span>Erro ao conectar com o servidor. Tente novamente.</span>';
+          forgotStatus.innerHTML = '<span>Erro ao conectar com o servidor. Tente novamente.</span>';
         }
       } finally {
         if (btnForgotSubmit) {
@@ -437,7 +1455,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (targetStatus) {
-      targetStatus.textContent = `⚠ ${msg}`;
+      targetStatus.textContent = msg;
       targetStatus.className = 'reg-live-status reg-live-status--err';
       targetStatus.style.display = 'block';
     }
@@ -461,7 +1479,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function goToRegStep(step) {
     clearError();
-    currentRegStep = Math.max(1, Math.min(5, step));
+    currentRegStep = Math.max(1, Math.min(3, step));
 
     document.querySelectorAll('.js-reg-step').forEach(pane => {
       const paneStep = parseInt(pane.getAttribute('data-step'), 10);
@@ -474,8 +1492,15 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    if (regCounter) regCounter.innerHTML = `<strong style="color: #5bf500;">${currentRegStep}</strong> de 5`;
-    if (regProgressFill) regProgressFill.style.width = `${currentRegStep * 20}%`;
+    if (regCounter) regCounter.innerHTML = `<strong style="color: #22c55e;">${currentRegStep}</strong> de 3`;
+    
+    // Atualizar dots de progresso
+    const d1 = document.getElementById('wizardDot1');
+    const d2 = document.getElementById('wizardDot2');
+    const d3 = document.getElementById('wizardDot3');
+    if (d1) d1.style.background = currentRegStep >= 1 ? '#22c55e' : 'rgba(255,255,255,0.2)';
+    if (d2) d2.style.background = currentRegStep >= 2 ? '#22c55e' : 'rgba(255,255,255,0.2)';
+    if (d3) d3.style.background = currentRegStep >= 3 ? '#22c55e' : 'rgba(255,255,255,0.2)';
 
     if (regBtnPrev) {
       regBtnPrev.style.visibility = currentRegStep > 1 ? 'visible' : 'hidden';
@@ -483,25 +1508,61 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (regBtnNext) {
       regBtnNext.style.display = 'flex';
-      if (currentRegStep === 5) {
-        if (regSummaryName && regNomeInput) regSummaryName.textContent = regNomeInput.value.trim();
-        if (regSummaryUser && regUsernameInput) regSummaryUser.textContent = `@${regUsernameInput.value.trim()}`;
+      if (currentRegStep === 3) {
+        if (regSummaryName && regNomeInput) regSummaryName.textContent = regNomeInput.value.trim() || 'Atleta';
+        if (regSummaryUser && regUsernameInput) regSummaryUser.textContent = `@${regUsernameInput.value.trim() || 'username'}`;
+        const summaryEmail = document.getElementById('reg-summary-email-val');
+        if (summaryEmail && regEmailInput) summaryEmail.textContent = regEmailInput.value.trim();
+        const summaryAvatar = document.getElementById('reg-summary-avatar-initial');
+        if (summaryAvatar && regNomeInput && regNomeInput.value.trim().length > 0) {
+          summaryAvatar.textContent = regNomeInput.value.trim()[0].toUpperCase();
+        }
+
+        const summaryPos = document.getElementById('reg-summary-pos-val');
+        const posEl = document.getElementById('reg_posicao');
+        const posVal = posEl ? posEl.value : 'Linha';
+        if (summaryPos) {
+          if (posVal === 'Goleiro') {
+            summaryPos.innerHTML = `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 20V5a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v15"/></svg> <span>Goleiro</span>`;
+            summaryPos.style.background = 'rgba(56, 189, 248, 0.12)';
+            summaryPos.style.borderColor = 'rgba(56, 189, 248, 0.25)';
+            summaryPos.style.color = '#38bdf8';
+          } else {
+            summaryPos.innerHTML = `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> <span>Linha</span>`;
+            summaryPos.style.background = 'rgba(34, 197, 94, 0.12)';
+            summaryPos.style.borderColor = 'rgba(34, 197, 94, 0.25)';
+            summaryPos.style.color = '#4ade80';
+          }
+        }
       }
     }
   }
 
-  // Validação ao vivo do Nome (Passo 1)
+  // Validação ao vivo do Nome (Card 1)
   if (regNomeInput) {
     regNomeInput.addEventListener('input', () => {
       regNomeInput.classList.remove('is-invalid');
-      if (regNomeStatus && regNomeStatus.classList.contains('reg-live-status--err')) {
-        regNomeStatus.style.display = 'none';
-        regNomeStatus.textContent = '';
+      const val = regNomeInput.value.trim();
+      const partes = val.split(/\s+/).filter(Boolean);
+
+      if (regNomeStatus) {
+        if (!val) {
+          regNomeStatus.style.display = 'none';
+          regNomeStatus.textContent = '';
+        } else if (partes.length < 2) {
+          regNomeStatus.textContent = 'Informe nome e sobrenome';
+          regNomeStatus.className = 'reg-live-status reg-live-status--err';
+          regNomeStatus.style.display = 'block';
+        } else {
+          regNomeStatus.textContent = 'Nome válido!';
+          regNomeStatus.className = 'reg-live-status reg-live-status--ok';
+          regNomeStatus.style.display = 'block';
+        }
       }
     });
   }
 
-  // Validação ao vivo do E-mail (Passo 2)
+  // Validação ao vivo do E-mail (Card 1)
   if (regEmailInput) {
     regEmailInput.addEventListener('input', () => {
       regEmailInput.classList.remove('is-invalid');
@@ -511,7 +1572,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (!email || !email.includes('@') || !email.split('@')[1]?.includes('.')) {
         if (regEmailStatus) {
-          regEmailStatus.textContent = email.length > 0 ? '⚠ Digite um e-mail em formato válido' : '';
+          regEmailStatus.textContent = email.length > 0 ? 'Digite um e-mail em formato válido' : '';
           regEmailStatus.className = 'reg-live-status reg-live-status--err';
           regEmailStatus.style.display = email.length > 0 ? 'block' : 'none';
         }
@@ -530,7 +1591,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const data = await res.json();
           emailValidAndAvailable = Boolean(data.available);
           if (regEmailStatus) {
-            regEmailStatus.textContent = data.message || '';
+            regEmailStatus.textContent = data.message || (data.available ? 'E-mail disponível!' : 'E-mail já cadastrado');
             regEmailStatus.className = data.available ? 'reg-live-status reg-live-status--ok' : 'reg-live-status reg-live-status--err';
           }
         } catch (err) {
@@ -540,29 +1601,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Validação ao vivo da Senha (Passo 3)
-  if (regPasswordInput) {
-    regPasswordInput.addEventListener('input', () => {
-      const pwd = regPasswordInput.value;
-      if (regConfirmHidden) regConfirmHidden.value = pwd;
-
-      if (!pwd || pwd.length < 6) {
-        if (regPwdStatus) {
-          regPwdStatus.textContent = pwd.length > 0 ? `⚠ Faltam ${6 - pwd.length} caracteres (mínimo 6)` : '';
-          regPwdStatus.className = 'reg-live-status reg-live-status--err';
-          regPwdStatus.style.display = pwd.length > 0 ? 'block' : 'none';
-        }
-      } else {
-        if (regPwdStatus) {
-          regPwdStatus.textContent = '✓ Senha válida!';
-          regPwdStatus.className = 'reg-live-status reg-live-status--ok';
-          regPwdStatus.style.display = 'block';
-        }
-      }
-    });
-  }
-
-  // Validação ao vivo do Username (Passo 4)
+  // Validação ao vivo do Username (Card 2)
   if (regUsernameInput) {
     regUsernameInput.addEventListener('input', () => {
       const username = regUsernameInput.value.trim();
@@ -571,7 +1610,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (!username || username.length < 3) {
         if (regUserStatus) {
-          regUserStatus.textContent = username.length > 0 ? '⚠ Mínimo de 3 caracteres' : '';
+          regUserStatus.textContent = username.length > 0 ? 'Mínimo de 3 caracteres' : '';
           regUserStatus.className = 'reg-live-status reg-live-status--err';
           regUserStatus.style.display = username.length > 0 ? 'block' : 'none';
         }
@@ -590,7 +1629,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const data = await res.json();
           usernameValidAndAvailable = Boolean(data.available);
           if (regUserStatus) {
-            regUserStatus.textContent = data.message || '';
+            regUserStatus.textContent = data.message || (data.available ? 'Usuário disponível!' : 'Usuário indisponível');
             regUserStatus.className = data.available ? 'reg-live-status reg-live-status--ok' : 'reg-live-status reg-live-status--err';
           }
         } catch (err) {
@@ -600,13 +1639,35 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Validação ao vivo da Senha (Card 3)
+  if (regPasswordInput) {
+    regPasswordInput.addEventListener('input', () => {
+      const pwd = regPasswordInput.value;
+      if (regConfirmHidden) regConfirmHidden.value = pwd;
+
+      if (!pwd || pwd.length < 6) {
+        if (regPwdStatus) {
+          regPwdStatus.textContent = pwd.length > 0 ? `Faltam ${6 - pwd.length} caracteres (mínimo 6)` : '';
+          regPwdStatus.className = 'reg-live-status reg-live-status--err';
+          regPwdStatus.style.display = pwd.length > 0 ? 'block' : 'none';
+        }
+      } else {
+        if (regPwdStatus) {
+          regPwdStatus.textContent = 'Senha válida!';
+          regPwdStatus.className = 'reg-live-status reg-live-status--ok';
+          regPwdStatus.style.display = 'block';
+        }
+      }
+    });
+  }
+
   // Avanço entre os Passos do Wizard
   if (regBtnNext) {
     regBtnNext.addEventListener('click', async (e) => {
       e.preventDefault();
       triggerHaptic();
 
-      // Validação do Passo 1: Nome Completo (Nome + Sobrenome)
+      // Card 1: Nome + E-mail
       if (currentRegStep === 1) {
         const nome = regNomeInput ? regNomeInput.value.trim() : '';
         const partes = nome.split(/\s+/).filter(Boolean);
@@ -615,7 +1676,13 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-        // Sugerir Username para o Passo 4 caso ainda não tenha sido preenchido
+        const email = regEmailInput ? regEmailInput.value.trim() : '';
+        if (!email || !email.includes('@')) {
+          showError('Por favor, informe um e-mail válido.');
+          return;
+        }
+
+        // Sugerir Username para o Card 2 caso ainda esteja vazio
         try {
           const sugRes = await fetch(`/sugerir-username?nome=${encodeURIComponent(nome)}`);
           const sugData = await sugRes.json();
@@ -623,7 +1690,7 @@ document.addEventListener('DOMContentLoaded', () => {
             regUsernameInput.value = sugData.suggestion;
             usernameValidAndAvailable = Boolean(sugData.available);
             if (regUserStatus) {
-              regUserStatus.textContent = sugData.message || '';
+              regUserStatus.textContent = sugData.message || 'Username sugerido disponível!';
               regUserStatus.className = sugData.available ? 'reg-live-status reg-live-status--ok' : 'reg-live-status reg-live-status--err';
               regUserStatus.style.display = 'block';
             }
@@ -636,50 +1703,26 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Validação do Passo 2: E-mail
+      // Card 2: Username + Posição
       if (currentRegStep === 2) {
-        const email = regEmailInput ? regEmailInput.value.trim() : '';
-        if (!email || !email.includes('@')) {
-          showError('Por favor, informe um e-mail válido.');
+        const username = regUsernameInput ? regUsernameInput.value.trim() : '';
+        if (!username || username.length < 3) {
+          showError('Escolha um nome de usuário com pelo menos 3 caracteres.');
           return;
         }
-        if (!emailValidAndAvailable) {
-          showError('Por favor, informe um e-mail válido e que não esteja cadastrado.');
-          return;
-        }
+
         goToRegStep(3);
         return;
       }
 
-      // Validação do Passo 3: Senha
+      // Card 3: Senha + Submissão
       if (currentRegStep === 3) {
         const pwd = regPasswordInput ? regPasswordInput.value : '';
         if (!pwd || pwd.length < 6) {
           showError('A senha deve ter pelo menos 6 caracteres.');
           return;
         }
-        goToRegStep(4);
-        return;
-      }
-
-      // Validação do Passo 4: Username
-      if (currentRegStep === 4) {
-        const username = regUsernameInput ? regUsernameInput.value.trim() : '';
-        if (!username || username.length < 3) {
-          showError('Escolha um nome de usuário com pelo menos 3 caracteres.');
-          return;
-        }
-        if (!usernameValidAndAvailable) {
-          showError('Este nome de usuário já está em uso ou é inválido. Escolha outro.');
-          return;
-        }
-        goToRegStep(5);
-        return;
-      }
-
-      // Passo 5: Submeter Formulário
-      if (currentRegStep === 5) {
-        if (regForm) regForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+        await window.submeterInlineCadastroClube();
         return;
       }
     });
@@ -693,61 +1736,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Submissão Final do Wizard (Passo 5)
+  // Submissão Final do Wizard
   if (regForm) {
     regForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       triggerHaptic();
-
-      if (regBtnNext) {
-        regBtnNext.disabled = true;
-        regBtnNext.innerHTML = '<span>Criando conta...</span>';
-      }
-
-      const nome = regNomeInput ? regNomeInput.value.trim() : '';
-      const email = regEmailInput ? regEmailInput.value.trim() : '';
-      const password = regPasswordInput ? regPasswordInput.value : '';
-      const username = regUsernameInput ? regUsernameInput.value.trim() : '';
-      const posicaoSelect = document.getElementById('reg_posicao');
-      const posicao = posicaoSelect ? posicaoSelect.value : 'linha';
-
-      try {
-        const resp = await fetch(regForm.action, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRFToken': getCsrfToken()
-          },
-          body: JSON.stringify({
-            nome,
-            email,
-            password,
-            confirmar_password: password,
-            username,
-            posicao,
-            nivel: 5.5,
-            tipo: 'avulso'
-          })
-        });
-
-        const data = await resp.json();
-        if (data.success && data.redirect_url) {
-          window.location.href = data.redirect_url;
-        } else {
-          showError(data.error || 'Erro ao realizar cadastro. Tente novamente.');
-          if (regBtnNext) {
-            regBtnNext.disabled = false;
-            regBtnNext.innerHTML = '<span>Continuar</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px; margin-left: 6px;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
-          }
-        }
-      } catch (err) {
-        showError('Erro de conexão ao enviar cadastro.');
-        if (regBtnNext) {
-          regBtnNext.disabled = false;
-          regBtnNext.innerHTML = '<span>Continuar</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px; margin-left: 6px;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
-        }
-      }
+      await window.submeterInlineCadastroClube();
     });
   }
 
