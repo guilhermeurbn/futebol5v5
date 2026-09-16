@@ -1,30 +1,31 @@
 """
 Serviço de Evolução de Nível (Rating) do NaTrave
 
-Aplica evolução inteligente do nível/rating dos jogadores com base nas votações de cada partida.
+Aplica evolução inteligente e dinâmica do nível/rating dos jogadores com base nas votações de cada rodada.
 
-As 6 Regras de Evolução:
--------------------------
+Regras de Evolução (Dinâmica + Bônus Top 5):
+--------------------------------------------
 1. Mínimo de votos: Apenas atualiza se o jogador recebeu votos de pelo menos 40% dos participantes.
-   Tabela: 10 jogadores -> min 4 votos; 15 -> min 6; 20 -> min 8.
-   Caso contrário, mantém-se inalterado.
-2. Nota da partida: Média dos votos recebidos multiplicada por 2 (se escala original for 5) ou como está (se escala original for 10).
+   Caso contrário, mantém-se inalterado ("votos_insuficientes").
+2. Nota da partida: Média dos votos recebidos normalizada para a escala de 10.
 3. Fórmula de mistura: NovaNotaCalculada = (NivelAtual * 0.50) + (NotaDaPartida * 0.50).
-4. Velocidade de evolução:
-   - |Diferenca| < 0.20 -> variação = 0
-   - 0.20 <= |Diferenca| < 0.80 -> variação = +0.1 ou -0.1
-   - |Diferenca| >= 0.80 -> variação = +0.2 ou -0.2
-5. Tetos Assimétricos por faixa de nível (Proteção ao Jogador):
-   - 1.0 até 3.0: subida máx +0.15 / queda máx -0.08
-   - 3.1 até 5.0: subida máx +0.10 / queda máx -0.05
-   - 5.1 até 7.0: subida máx +0.08 / queda máx -0.04
-   - 7.1 até 8.5: subida máx +0.05 / queda máx -0.03
-   - 8.6 até 10.0: subida máx +0.03 / queda máx -0.02
-6. Arredondamento e limites: Nível final arredondado para múltiplos de 0.1 e limitado entre 1.0 e 10.0.
-   Utiliza nivel_preciso para acumular pequenas variações e evitar perda de evolução em faixas muito estreitas.
+4. Velocidade de evolução dinâmica:
+   - |Diferenca| < 0.08  -> Variação base = 0.0 (manteve)
+   - 0.08 <= |Diferenca| < 0.35 -> Variação base = +0.10 ou -0.08
+   - 0.35 <= |Diferenca| < 0.75 -> Variação base = +0.20 ou -0.15
+   - |Diferenca| >= 0.75 -> Variação base = +0.30 ou -0.20
+5. Bônus Top 5 da Rodada (Destaques da Quadra):
+   - Top 1: +0.08
+   - Top 2: +0.07
+   - Top 3: +0.06
+   - Top 4: +0.05
+   - Top 5: +0.04
+6. Tetos de segurança e limites globais:
+   - Variação máxima positiva por rodada: +0.40
+   - Variação máxima negativa por rodada: -0.25
+   - Nível limitado estritamente entre 1.0 e 10.0.
 """
 import logging
-import math
 from typing import Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
@@ -36,12 +37,14 @@ def calcular_novo_nivel(
     nivel_atual: float,
     notas_recebidas: List[float],
     total_jogadores_partida: int,
+    bonus_destaque: float = 0.0,
 ) -> Tuple[float, str]:
     """
-    Calcula o novo nível e retorna (novo_nivel_preciso, tendencia).
+    Calcula o novo nível do jogador com base nos votos recebidos e eventuais bônus de destaque (Top 5).
+    Retorna (novo_nivel_preciso, tendencia).
     nivel_atual recebido aqui deve ser o nivel_preciso (alta precisão).
     """
-    # Regra 1: Quantidade mínima de votos (aproximadamente 40% dos participantes)
+    # Regra 1: Quantidade mínima de votos (40% dos participantes)
     minimo_votos = int(total_jogadores_partida * 0.4)
     num_votos = len(notas_recebidas)
     
@@ -49,11 +52,7 @@ def calcular_novo_nivel(
         return nivel_atual, "votos_insuficientes"
         
     # Regra 2: Calcular a nota da partida
-    # 1. calcular a média das notas recebidas
     media = sum(notas_recebidas) / num_votos
-    
-    # 2. converter a nota para a escala de 10
-    # Se a maior nota na lista for <= 5.0, assumimos que está na escala de 5 e multiplicamos por 2
     if max(notas_recebidas) <= 5.0:
         nota_partida = media * 2.0
     else:
@@ -61,43 +60,29 @@ def calcular_novo_nivel(
         
     # Regra 3: Misturar histórico com desempenho atual (50% histórico, 50% atual)
     nova_nota_calculada = (nivel_atual * 0.50) + (nota_partida * 0.50)
-    
-    # Regra 4: Limitar a velocidade de evolução
     diferenca = nova_nota_calculada - nivel_atual
     abs_diferenca = abs(diferenca)
     
-    if abs_diferenca < 0.20:
-        alteracao_tentativa = 0.0
-    elif abs_diferenca < 0.80:
-        alteracao_tentativa = 0.1 if diferenca > 0 else -0.1
+    # Regra 4: Velocidade de evolução dinâmica e perceptível
+    if abs_diferenca < 0.08:
+        alteracao_base = 0.0
+    elif abs_diferenca < 0.35:
+        alteracao_base = 0.10 if diferenca > 0 else -0.08
+    elif abs_diferenca < 0.75:
+        alteracao_base = 0.20 if diferenca > 0 else -0.15
     else:
-        alteracao_tentativa = 0.2 if diferenca > 0 else -0.2
+        alteracao_base = 0.30 if diferenca > 0 else -0.20
         
-    # Regra 5: Tetos assimétricos por faixa de nível (Proteção ao Jogador)
-    if nivel_atual <= 3.0:
-        limite_subida, limite_queda = 0.15, 0.08
-    elif nivel_atual <= 5.0:
-        limite_subida, limite_queda = 0.10, 0.05
-    elif nivel_atual <= 7.0:
-        limite_subida, limite_queda = 0.08, 0.04
-    elif nivel_atual <= 8.5:
-        limite_subida, limite_queda = 0.05, 0.03
-    else:
-        limite_subida, limite_queda = 0.03, 0.02
-        
-    # Aplicar limite de subida ou queda
-    if alteracao_tentativa > 0:
-        alteracao_real = min(alteracao_tentativa, limite_subida)
-    elif alteracao_tentativa < 0:
-        alteracao_real = -min(abs(alteracao_tentativa), limite_queda)
-    else:
-        alteracao_real = 0.0
+    # Regra 5: Aplicar bônus do Top 5 da rodada
+    alteracao_real = alteracao_base + (bonus_destaque if diferenca >= -0.15 else (bonus_destaque * 0.5))
+    
+    # Regra 6: Tetos de segurança por rodada
+    alteracao_real = max(-0.25, min(0.40, alteracao_real))
         
     # Calcular o novo nível preciso
     novo_nivel_preciso = round(nivel_atual + alteracao_real, 4)
     novo_nivel_preciso = max(1.0, min(10.0, novo_nivel_preciso))
     
-    # Regra 6: O nível visível (arredondado) final será obtido via round(novo_nivel_preciso, 1)
     novo_nivel_arredondado = round(novo_nivel_preciso, 1)
     nivel_atual_arredondado = round(nivel_atual, 1)
     
@@ -113,16 +98,59 @@ def calcular_novo_nivel(
 
 # ---------------------- aplicação integrada ----------------------
 
+def _encontrar_jogador(jogador_service, nome: str, jogador_id: Optional[str] = None):
+    """Encontra o objeto Jogador mesmo quando o nome da conta difere do nome cadastrado."""
+    if jogador_id:
+        j = jogador_service.obter_por_id(jogador_id)
+        if j:
+            return j
+
+    j = jogador_service.obter_por_nome(nome)
+    if j:
+        return j
+
+    todos = jogador_service.obter_todos()
+    nome_norm = (nome or "").strip().lower()
+
+    # 1. Busca exata case-insensitive
+    for jog in todos:
+        if (getattr(jog, "nome", "") or "").strip().lower() == nome_norm:
+            return jog
+
+    # 2. Busca pelo vínculo com User (owner_user_id)
+    try:
+        from services.auth_service import AuthService
+        auth_svc = AuthService()
+        user = auth_svc.obter_por_nome(nome) or auth_svc.obter_por_username(nome)
+        if user:
+            uid = user.get("id")
+            for jog in todos:
+                if getattr(jog, "owner_user_id", None) == uid:
+                    return jog
+    except Exception:
+        pass
+
+    # 3. Busca por substring ou primeiro e último nome
+    partes = [p for p in nome_norm.split() if len(p) > 2]
+    for jog in todos:
+        j_nome = (getattr(jog, "nome", "") or "").strip().lower()
+        if nome_norm in j_nome or j_nome in nome_norm:
+            return jog
+        if partes and all(p in j_nome for p in [partes[0], partes[-1]]):
+            return jog
+
+    return None
+
+
 def aplicar_evolucao_pos_votacao(
     ranking_jogadores: List[Dict],
     jogador_service,
     sorteio_id: Optional[int] = None,
 ) -> List[Dict]:
-    """Aplica evolução de nível para todos os jogadores do ranking encerrado."""
+    """Aplica evolução de nível para todos os jogadores do ranking encerrado com bônus para o Top 5."""
     resultados: List[Dict] = []
     
-    # Tentar carregar dados do sorteio para saber total_jogadores exato
-    total_jogadores_partida = 10  # fallback padrão se não encontrado
+    total_jogadores_partida = 10
     try:
         from services.historico_service import HistoricoService
         _historico_svc = HistoricoService()
@@ -134,24 +162,24 @@ def aplicar_evolucao_pos_votacao(
     except Exception as e:
         logger.warning("Não foi possível carregar o sorteio #%s para total_jogadores: %s", sorteio_id, e)
         
-    # Caso não seja possível obter do sorteio, usar a quantidade de participantes/itens
     if total_jogadores_partida <= 0:
         total_jogadores_partida = len(ranking_jogadores) if ranking_jogadores else 10
 
-    for item in ranking_jogadores:
+    # Tabela de bônus para o Top 5 mais votados da rodada
+    bonus_top5_tabela = [0.08, 0.07, 0.06, 0.05, 0.04]
+
+    for posicao, item in enumerate(ranking_jogadores):
         nome = (item.get("jogador_nome") or "").strip()
         if not nome:
             continue
 
-        jogador = jogador_service.obter_por_nome(nome)
+        jogador = _encontrar_jogador(jogador_service, nome, item.get("jogador_id"))
         if not jogador:
             logger.debug("Evolução: jogador '%s' não encontrado, pulando.", nome)
             continue
 
         # Extrair notas brutas recebidas
         notas_recebidas = item.get("notas_lista", [])
-        
-        # Retrocompatibilidade com testes ou dados antigos que não possuem notas_lista
         if not notas_recebidas and item.get("votos"):
             notas_recebidas = [float(item.get("nota_media", 0))] * int(item.get("votos", 0))
 
@@ -159,19 +187,21 @@ def aplicar_evolucao_pos_votacao(
         nivel_atual = float(jogador.nivel)
         nivel_preciso_atual = float(getattr(jogador, "nivel_preciso", None) or jogador.nivel)
 
+        # Bônus se estiver no Top 5
+        bonus_destaque = bonus_top5_tabela[posicao] if posicao < len(bonus_top5_tabela) else 0.0
+
         # Calcular novo rating preciso
         novo_nivel_preciso, tendencia = calcular_novo_nivel(
             nivel_atual=nivel_preciso_atual,
             notas_recebidas=notas_recebidas,
-            total_jogadores_partida=total_jogadores_partida
+            total_jogadores_partida=total_jogadores_partida,
+            bonus_destaque=bonus_destaque,
         )
 
         novo_nivel_arredondado = round(novo_nivel_preciso, 1)
-
         motivo = f"votacao_sorteio_{sorteio_id}" if sorteio_id else "votacao"
         nota_media = round(sum(notas_recebidas)/len(notas_recebidas), 2) if notas_recebidas else 0.0
 
-        # Atualiza o banco se houver qualquer variação (mesmo pequena) no nível preciso
         if novo_nivel_preciso != nivel_preciso_atual:
             jogador_service.aplicar_evolucao_nivel(
                 jogador_id=jogador.id,
@@ -182,9 +212,9 @@ def aplicar_evolucao_pos_votacao(
                 novo_nivel_preciso=novo_nivel_preciso,
             )
             logger.info(
-                "Evolução: %s %.1f (preciso %.4f) → %.1f (preciso %.4f) (%s) [votos=%d, media=%.2f]",
+                "Evolução: %s %.1f (preciso %.4f) → %.1f (preciso %.4f) (%s) [votos=%d, media=%.2f, bonus_top=%s]",
                 nome, nivel_atual, nivel_preciso_atual, novo_nivel_arredondado, novo_nivel_preciso,
-                tendencia, len(notas_recebidas), nota_media
+                tendencia, len(notas_recebidas), nota_media, bonus_destaque
             )
 
         resultados.append({
@@ -195,6 +225,8 @@ def aplicar_evolucao_pos_votacao(
             "tendencia": tendencia,
             "nota_media_votacao": nota_media,
             "num_votos": len(notas_recebidas),
+            "posicao_rodada": posicao + 1,
+            "bonus_top5": bonus_destaque,
         })
 
     return resultados

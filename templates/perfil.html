@@ -170,10 +170,10 @@
                             {% elif diff < 0 %}
                                 {% set v_rodada = {'variacao': diff, 'direcao': 'desceu', 'texto': ('%.1f'|format(diff))} %}
                             {% else %}
-                                {% set v_rodada = {'variacao': 0.0, 'direcao': 'manteve', 'texto': '=0.0'} %}
+                                {% set v_rodada = {'variacao': 0.0, 'direcao': 'manteve', 'texto': '0.0'} %}
                             {% endif %}
                         {% else %}
-                            {% set v_rodada = {'variacao': 0.0, 'direcao': 'manteve', 'texto': '=0.0'} %}
+                            {% set v_rodada = {'variacao': 0.0, 'direcao': 'manteve', 'texto': '0.0'} %}
                         {% endif %}
                     {% endif %}
 
@@ -618,6 +618,10 @@
                             <span class="premium-profile-match-delta-badge premium-profile-match-delta-badge--down" title="Evolução de nível">
                                 {{ "%.1f"|format(d_num) }}
                             </span>
+                            {% else %}
+                            <span class="premium-profile-match-delta-badge premium-profile-match-delta-badge--neutral" title="Evolução de nível">
+                                0.0
+                            </span>
                             {% endif %}
                             <svg class="premium-profile-match-chevron" viewBox="0 0 24 24" fill="none"
                                 stroke="currentColor" stroke-width="2.5">
@@ -804,6 +808,10 @@
                             {% elif d_num < 0 %}
                             <span class="premium-profile-match-delta-badge premium-profile-match-delta-badge--down" title="Evolução de nível">
                                 {{ "%.1f"|format(d_num) }}
+                            </span>
+                            {% else %}
+                            <span class="premium-profile-match-delta-badge premium-profile-match-delta-badge--neutral" title="Evolução de nível">
+                                0.0
                             </span>
                             {% endif %}
 
