@@ -1,6 +1,6 @@
 [
   {
-    "id": 1,
+    "id": "clb_00000000-0000-0000-0000-000000000001",
     "id_num": 1,
     "code": "001",
     "codigo_formatado": "001",
@@ -13,5 +13,29 @@
     "admin_user_ids": [
       "admin"
     ]
+  },
+  {
+    "id": "clb_5a6c8530-7f94-4e2a-8486-e4cd4b3ecef8",
+    "id_num": 2,
+    "nome": "resenha",
+    "slug": "resenha",
+    "cor_tema": "neon-green",
+    "admin_user_id": "5a6c8530-7f94-4e2a-8486-e4cd4b3ecef8",
+    "senha_juiz_hash": "scrypt:32768:8:1$vXXq6n6zBUYJnd1v$d7317c6dded0d9f1b9d97dd5605eac8c5519567027d20cef61f91ea5e30a6aa045faea01ed95cf8fd29edfcb99f65daf7beefd78b32728da5d1f3ef4ceb7a226",
+    "criado_em": "2026-09-16T11:42:38.808109+00:00",
+    "ativo": true,
+    "codigo_formatado": "002"
+  },
+  {
+    "id": "clb_0d1e2c20-5d3c-4538-bb66-2692f45e87c3",
+    "id_num": 3,
+    "nome": "pe de muleka",
+    "slug": "pe-de-muleka",
+    "cor_tema": "neon-green",
+    "admin_user_id": "0d1e2c20-5d3c-4538-bb66-2692f45e87c3",
+    "senha_juiz_hash": "scrypt:32768:8:1$x7QGU5wlmqiU7Ucd$af2338a85fcb7d55a6c7a91acbbeb46760f2bc87a49717cfbaafd388185a34f66fa391a642eb993d40a8c800a2a6f9d2eb5eb0fbc3a4ed107f77888007a8f778",
+    "criado_em": "2026-09-18T15:03:51.159874+00:00",
+    "ativo": true,
+    "codigo_formatado": "003"
   }
 ]

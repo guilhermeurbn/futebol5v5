@@ -8,6 +8,7 @@ from typing import Optional, List, Dict, Any, Tuple
 from datetime import datetime, timezone
 import re
 import unicodedata
+import uuid
 from pydantic import BaseModel, Field, field_validator
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -43,6 +44,7 @@ def gerar_slug(nome: str) -> str:
 
 class ClubeSchema(BaseModel):
     """Schema Pydantic de Validação do Clube"""
+    id: str = Field(default_factory=lambda: f"clb_{uuid.uuid4()}", description="ID forte exclusivo e imutável (UUID)")
     id_num: int = Field(gt=0, description="ID numérico sequencial do clube (ex: 1 -> 001)")
     nome: str = Field(min_length=2, max_length=60, description="Nome oficial e único do clube")
     slug: str = Field(min_length=2, max_length=60, description="Identificador único de URL")
@@ -72,12 +74,38 @@ class ClubeSchema(BaseModel):
 class ClubeService:
     """Serviço de gerenciamento de clubes na plataforma NaTrave"""
 
+    ID_FORTE_NATRAVE_001 = "clb_00000000-0000-0000-0000-000000000001"
+
     @classmethod
     def _carregar_clubes(cls) -> List[dict]:
-        """Carrega a lista de clubes do armazenamento de dados"""
+        """Carrega a lista de clubes do armazenamento de dados e garante migração para ID forte."""
         clubes = load_json_data("clubes", [])
         if not isinstance(clubes, list):
             clubes = []
+
+        precisa_salvar = False
+        for c in clubes:
+            # 1. Garante ID forte imutável
+            c_id = c.get('id')
+            if not c_id or isinstance(c_id, int) or not str(c_id).startswith("clb_"):
+                if c.get('id_num') == 1 or c.get('slug') == 'natrave':
+                    c['id'] = cls.ID_FORTE_NATRAVE_001
+                else:
+                    c['id'] = f"clb_{uuid.uuid4()}"
+                precisa_salvar = True
+
+            # 2. Garante id_num e codigo_formatado
+            id_n = c.get('id_num') or 1
+            if isinstance(id_n, str) and id_n.isdigit():
+                id_n = int(id_n)
+            elif not isinstance(id_n, int):
+                id_n = 1
+            c['id_num'] = id_n
+            c['codigo_formatado'] = formatar_id_clube(id_n)
+
+        if precisa_salvar:
+            cls._salvar_clubes(clubes)
+
         return clubes
 
     @classmethod
@@ -95,12 +123,13 @@ class ClubeService:
 
         clube_001 = None
         for c in clubes:
-            if c.get('id_num') == 1 or c.get('slug') == 'natrave':
+            if c.get('id_num') == 1 or c.get('slug') == 'natrave' or c.get('id') == cls.ID_FORTE_NATRAVE_001:
                 clube_001 = c
                 break
 
         if not clube_001:
             novo_clube = ClubeSchema(
+                id=cls.ID_FORTE_NATRAVE_001,
                 id_num=1,
                 nome="NaTrave",
                 slug="natrave",
@@ -112,6 +141,7 @@ class ClubeService:
             clubes.insert(0, clube_001)
             cls._salvar_clubes(clubes)
         else:
+            clube_001['id'] = cls.ID_FORTE_NATRAVE_001
             clube_001['id_num'] = 1
             clube_001['codigo_formatado'] = "001"
             if not clube_001.get('slug'):
@@ -125,30 +155,70 @@ class ClubeService:
         cls.garantir_clube_natrave_001()
         clubes = cls._carregar_clubes()
         for c in clubes:
-            id_n = c.get('id_num') or c.get('id') or 1
+            id_n = c.get('id_num') or 1
             if isinstance(id_n, str) and id_n.isdigit():
                 id_n = int(id_n)
             elif not isinstance(id_n, int):
                 id_n = 1
             c['id_num'] = id_n
             c['codigo_formatado'] = formatar_id_clube(id_n)
+            if not c.get('id') or not str(c.get('id')).startswith("clb_"):
+                c['id'] = cls.ID_FORTE_NATRAVE_001 if id_n == 1 else f"clb_{uuid.uuid4()}"
         return clubes
 
     @classmethod
-    def obter_clube_por_id(cls, id_num: int) -> Optional[dict]:
-        """Obtém um clube pelo seu ID numérico (ex: 1 para Clube 001)."""
+    def obter_clube_por_id_forte(cls, id_forte: str) -> Optional[dict]:
+        """Obtém um clube pelo seu ID forte interno (ex: 'clb_...')."""
+        if not id_forte:
+            return None
+        id_str = str(id_forte).strip()
         clubes = cls.obter_todos_clubes()
         for c in clubes:
-            if c.get('id_num') == id_num:
+            if c.get('id') == id_str:
                 return c
         return None
 
     @classmethod
+    def obter_clube_por_id(cls, identificador: Any) -> Optional[dict]:
+        """
+        Obtém um clube pelo seu ID numérico (ex: 1 para Clube 001)
+        ou pelo ID forte (ex: 'clb_...').
+        """
+        if identificador is None:
+            return None
+
+        # Se for string iniciando com clb_, busca pelo ID forte
+        if isinstance(identificador, str) and identificador.startswith("clb_"):
+            res = cls.obter_clube_por_id_forte(identificador)
+            if res:
+                return res
+
+        # Tenta por ID numérico
+        try:
+            id_n = int(identificador)
+            clubes = cls.obter_todos_clubes()
+            for c in clubes:
+                if c.get('id_num') == id_n:
+                    return c
+        except (ValueError, TypeError):
+            pass
+
+        # Fallback para string como ID forte ou slug
+        return cls.obter_clube_por_id_forte(str(identificador)) or cls.obter_clube_por_slug(str(identificador))
+
+    @classmethod
     def obter_clube_por_codigo(cls, codigo: str) -> Optional[dict]:
-        """Obtém um clube pelo código formatado (ex: "001", "002", "1000") ou pelo slug."""
+        """
+        Obtém um clube pelo código formatado (ex: '001', '002', '1000'),
+        pelo ID forte ('clb_...') ou pelo slug ('natrave').
+        """
         if not codigo:
             return None
-        cod_clean = str(codigo).strip().lstrip('0') or '0'
+        cod_str = str(codigo).strip()
+        if cod_str.startswith("clb_"):
+            return cls.obter_clube_por_id_forte(cod_str)
+
+        cod_clean = cod_str.lstrip('0') or '0'
         try:
             id_n = int(cod_clean)
             res = cls.obter_clube_por_id(id_n)
@@ -156,7 +226,7 @@ class ClubeService:
                 return res
         except ValueError:
             pass
-        return cls.obter_clube_por_slug(codigo)
+        return cls.obter_clube_por_slug(cod_str)
 
     @classmethod
     def obter_clube_por_slug(cls, slug: str) -> Optional[dict]:
@@ -233,7 +303,9 @@ class ClubeService:
         novo_id = cls.proximo_id_disponivel()
         senha_juiz_hash = generate_password_hash(senha_juiz) if senha_juiz else None
 
+        novo_id_forte = f"clb_{uuid.uuid4()}"
         schema_clube = ClubeSchema(
+            id=novo_id_forte,
             id_num=novo_id,
             nome=nome,
             slug=slug_final,
@@ -247,6 +319,14 @@ class ClubeService:
         clube_dict = schema_clube.to_dict()
         clubes.append(clube_dict)
         cls._salvar_clubes(clubes)
+
+        # Garantir coleções do novo clube 100% vazias e limpas
+        cod_fmt = formatar_id_clube(novo_id)
+        from services.db import clear_db_cache
+        save_json_data("partidas", [], clube_codigo=cod_fmt)
+        save_json_data("historico", [], clube_codigo=cod_fmt)
+        save_json_data("votacoes_partidas", {"partidas": [], "ultimo_id": 0}, clube_codigo=cod_fmt)
+        clear_db_cache()
 
         return clube_dict
 

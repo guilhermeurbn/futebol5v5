@@ -17,12 +17,12 @@ def setup_clean_db(monkeypatch):
     """Garante um armazenamento em memória limpo antes de cada teste de clube"""
     storage = {"clubes": []}
 
-    def fake_load(namespace, default):
+    def fake_load(namespace, default=None, *args, **kwargs):
         if namespace == "clubes":
             return storage["clubes"]
         return default
 
-    def fake_save(namespace, payload):
+    def fake_save(namespace, payload, *args, **kwargs):
         if namespace == "clubes":
             storage["clubes"] = payload
 
@@ -111,3 +111,48 @@ def test_busca_clube_por_codigo_e_slug():
     b_slug = ClubeService.obter_clube_por_slug("liga-campeoes")
     assert b_slug is not None
     assert b_slug["id_num"] == 2
+
+
+def test_id_forte_clube_e_codigo_amigavel():
+    """Testa se cada clube recebe um ID forte único (clb_...) e mantém o código amigável (001, 002...)"""
+    c1 = ClubeService.garantir_clube_natrave_001()
+    assert c1["id"] == ClubeService.ID_FORTE_NATRAVE_001
+    assert c1["codigo_formatado"] == "001"
+
+    c2 = ClubeService.criar_clube("Clube Alfa")
+    assert c2["id"].startswith("clb_")
+    assert c2["codigo_formatado"] == "002"
+    assert c2["id"] != c1["id"]
+
+    c3 = ClubeService.criar_clube("Clube Beta")
+    assert c3["id"].startswith("clb_")
+    assert c3["codigo_formatado"] == "003"
+    assert c3["id"] != c2["id"]
+
+
+def test_busca_por_id_forte_ou_codigo():
+    """Testa busca unificada por ID forte e por código público amigável"""
+    ClubeService.garantir_clube_natrave_001()
+    c2 = ClubeService.criar_clube("Clube Especial")
+    id_forte = c2["id"]
+
+    # Busca por ID forte
+    busca_forte = ClubeService.obter_clube_por_id_forte(id_forte)
+    assert busca_forte is not None
+    assert busca_forte["nome"] == "Clube Especial"
+    assert busca_forte["codigo_formatado"] == "002"
+
+    # Busca genérica via obter_clube_por_id usando ID forte
+    busca_gen = ClubeService.obter_clube_por_id(id_forte)
+    assert busca_gen is not None
+    assert busca_gen["id"] == id_forte
+
+    # Busca via obter_clube_por_codigo usando ID forte
+    busca_cod = ClubeService.obter_clube_por_codigo(id_forte)
+    assert busca_cod is not None
+    assert busca_cod["id"] == id_forte
+
+    # Busca pelo código numérico e amigável
+    busca_num = ClubeService.obter_clube_por_id(2)
+    assert busca_num is not None
+    assert busca_num["id"] == id_forte

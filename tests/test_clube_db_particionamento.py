@@ -15,9 +15,15 @@ from services.db import (
 
 @pytest.fixture(autouse=True)
 def limpar_cache_antes_depois():
+    import glob, os
     clear_db_cache()
     yield
     clear_db_cache()
+    for f in glob.glob("data/*test_*"):
+        try:
+            os.remove(f)
+        except OSError:
+            pass
 
 
 def test_resolver_namespace_globais():
@@ -25,6 +31,7 @@ def test_resolver_namespace_globais():
     assert resolver_namespace_clube("users", "001") == "users"
     assert resolver_namespace_clube("users", "002") == "users"
     assert resolver_namespace_clube("clubes", "002") == "clubes"
+    assert resolver_namespace_clube("jogadores", "002") == "jogadores"
     assert resolver_namespace_clube("image_assets", "003") == "image_assets"
 
 

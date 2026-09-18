@@ -103,7 +103,7 @@ def test_admin_reset_user_without_email(monkeypatch):
     monkeypatch.setattr(admin_routes.auth_service, 'resetar_senha_por_admin', lambda user_id, executor_id: fake_reset_data)
     monkeypatch.setattr(admin_routes.auth_service, 'listar_usuarios', lambda: [fake_reset_data])
     monkeypatch.setattr(admin_routes.notificacao_service, 'listar_notificacoes', lambda **kw: [])
-    monkeypatch.setattr(admin_routes.notificacao_service, 'contar_nao_lidas', lambda: 0)
+    monkeypatch.setattr(admin_routes.notificacao_service, 'contar_nao_lidas', lambda *a, **kw: 0)
 
     with app.test_client() as client:
         with client.session_transaction() as sess:

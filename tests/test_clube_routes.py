@@ -12,12 +12,12 @@ def app_client(monkeypatch):
     """Fixture que cria uma instância de testes do app Flask com armazenamento em memória limpo"""
     storage = {"clubes": []}
 
-    def fake_load(namespace, default):
+    def fake_load(namespace, default=None, *args, **kwargs):
         if namespace == "clubes":
             return storage["clubes"]
         return default
 
-    def fake_save(namespace, payload):
+    def fake_save(namespace, payload, *args, **kwargs):
         if namespace == "clubes":
             storage["clubes"] = payload
 

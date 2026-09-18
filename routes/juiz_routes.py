@@ -46,14 +46,20 @@ def _is_juiz():
 def juiz_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
+        if not _is_juiz():
+            return redirect(url_for('auth.login_page'))
         user_id = session.get('user_id')
         if not user_id:
-            return redirect(url_for('auth.login_page'))
+            clube_cod = session.get('clube_codigo') or "001"
+            clube_slug = session.get('clube_slug') or "natrave"
+            session['user_id'] = f"juiz_{clube_cod}"
+            session['username'] = session.get('username') or f"juiz_{clube_slug}"
+            session['nome'] = session.get('nome') or "Juiz do Clube"
+            session.modified = True
+            user_id = session['user_id']
         from routes.auth_routes import _usuario_sem_email
-        if _usuario_sem_email(user_id):
+        if not str(user_id).startswith('juiz_') and _usuario_sem_email(user_id):
             return redirect(url_for('auth.completar_email_page'))
-        if not _is_juiz():
-            return redirect(url_for('jogador_crud.index'))
         return f(*args, **kwargs)
     return wrapper
 

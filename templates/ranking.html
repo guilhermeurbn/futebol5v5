@@ -5,16 +5,23 @@
 {% block content %}
 {% set ranking = dados.ranking or [] %}
 {% set eh_admin = auth_user and auth_user.role in ['admin'] %}
-<div class="container page-container-wide ranking-page{% if eh_admin %} judge-workspace-page admin-page admin-page--ecosystem{% elif auth_user and auth_user.role == 'usuario' %} player-workspace-page{% endif %}" style="background:#000000; min-height:100vh; width:100%;">
-    <header class="header">
-        <div class="header-content">
-            {% set brand_title = 'Ranking Histórico Geral' if tipo_ranking == 'geral' else 'Ranking da Competição' %}
-            {% set brand_subtitle = 'Média de notas acumulada na competição ativa' %}
-            {% include '_brand_header.html' %}
+<div class="container page-container-wide ranking-page edge-to-edge-page{% if eh_admin %} judge-workspace-page admin-page admin-page--ecosystem{% elif auth_user and auth_user.role == 'usuario' %} player-workspace-page{% endif %}" style="background:#000000; min-height:100vh; width:100%; padding-left: 0 !important; padding-right: 0 !important;">
+    <header class="app-topbar-header">
+        <div class="app-topbar-left"></div>
+        <div class="app-topbar-center">
+            <a href="{{ url_for('jogador.index') }}" aria-label="NaTrave 5v5" class="app-topbar-logo-link">
+                <img src="{{ url_for('static', filename='natrave.svg', v='20260708-03') }}" alt="NaTrave 5v5" class="app-topbar-logo-img">
+            </a>
+        </div>
+        <div class="app-topbar-right">
+            <div class="app-topbar-badge">
+                <span class="app-status-dot"></span>
+                <span>ranking</span>
+            </div>
         </div>
     </header>
 
-    <main class="main ranking-page__main" style="max-width: 1120px; margin: 0 auto; padding: 0 1rem 3rem 1rem;">
+    <main class="main ranking-page__main" style="max-width: 1120px; margin: 0 auto; padding: 0.75rem 1rem 3rem 1rem;">
         {% set competencia_titulo = temporada.nome if temporada else 'Competição ativa' %}
         {% set competencia_subtitulo = 'A pontuação acumula a média das notas ao longo de 2 meses.' %}
 

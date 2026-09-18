@@ -152,20 +152,6 @@
     "foto_url": null
   },
   {
-    "nome": "Atleta Editadod01d96 NovoNome",
-    "nivel": 7.0,
-    "tipo": "avulso",
-    "posicao": "linha",
-    "presente": false,
-    "id": "e52ee41e-0388-4ee0-8d7c-e8c45e58ffd4",
-    "criado_em": "2026-09-12T22:23:42.249290",
-    "owner_user_id": "c01fe048-c585-466f-bbcc-9f255f579b77",
-    "historico_nivel": [],
-    "nivel_preciso": 7.0,
-    "foto_url": "",
-    "foto": ""
-  },
-  {
     "nome": "Guilherme Goleiro 12b4b999",
     "nivel": 5.5,
     "tipo": "avulso",
@@ -243,20 +229,6 @@
     "historico_nivel": [],
     "nivel_preciso": 7.0,
     "foto_url": null
-  },
-  {
-    "nome": "Atleta Editado29fcab NovoNome",
-    "nivel": 7.0,
-    "tipo": "avulso",
-    "posicao": "linha",
-    "presente": false,
-    "id": "1adce358-e4ec-4d17-af2f-c9bd8209a489",
-    "criado_em": "2026-09-12T22:25:18.752125",
-    "owner_user_id": "bfde20bc-71cc-4c32-b741-79b631038034",
-    "historico_nivel": [],
-    "nivel_preciso": 7.0,
-    "foto_url": "",
-    "foto": ""
   },
   {
     "nome": "Guilherme Goleiro b66c51d4",

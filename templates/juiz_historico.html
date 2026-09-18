@@ -5,27 +5,22 @@
 {% block content %}
 {% set current_user = usuario if (usuario is defined and usuario and usuario.autenticado) else (auth_user if auth_user is defined and auth_user else None) %}
 <div class="container page-container-wide history-page edge-to-edge-page{% if current_user and current_user.role in ['admin'] %} judge-workspace-page admin-page admin-page--ecosystem{% elif current_user and current_user.role == 'usuario' %} player-workspace-page{% elif current_user and current_user.role == 'juiz' %} judge-workspace-page judge-history-page{% endif %}" style="background:#000000; min-height:100vh; width:100%; padding-left:0; padding-right:0;">
-    <!-- Header Fixo 100% Imóvel no Topo da Tela com Logo Centralizada -->
-    <header class="profile-topbar-sticky" style="position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; z-index: 1000 !important; background: rgba(0, 0, 0, 0.94) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; border-bottom: 1px solid rgba(34, 197, 94, 0.18) !important; padding: calc(0.55rem + max(10px, env(safe-area-inset-top, 0px))) 0.85rem 0.55rem 0.85rem !important; width: 100% !important; box-sizing: border-box !important;">
-        <div style="max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: center; position: relative; min-height: 36px;">
-            
-            <!-- Logo Centralizada no Centro Exato -->
-            <div style="display: flex; align-items: center; justify-content: center;">
-                <a href="{{ url_for('jogador.index') }}" aria-label="NaTrave 5v5" style="display: inline-flex; align-items: center;">
-                    <img src="{{ url_for('static', filename='natrave.svg', v='20260708-03') }}" alt="NaTrave 5v5" style="height: 36px; width: auto; object-fit: contain;">
-                </a>
+    <header class="app-topbar-header">
+        <div class="app-topbar-left"></div>
+        <div class="app-topbar-center">
+            <a href="{{ url_for('jogador.index') }}" aria-label="NaTrave 5v5" class="app-topbar-logo-link">
+                <img src="{{ url_for('static', filename='natrave.svg', v='20260708-03') }}" alt="NaTrave 5v5" class="app-topbar-logo-img">
+            </a>
+        </div>
+        <div class="app-topbar-right">
+            <div class="app-topbar-badge">
+                <span class="app-status-dot"></span>
+                <span>histórico</span>
             </div>
-
-            <!-- Badge da Conta Ativa do Usuário na Direita -->
-            <div style="position: absolute; right: 0; display: inline-flex; align-items: center; gap: 0.4rem; color: #94a3b8; font-size: 0.78rem; font-weight: 700; background: rgba(255,255,255,0.04); padding: 0.35rem 0.75rem; border-radius: 999px; border: 1px solid rgba(255,255,255,0.08); white-space: nowrap; flex-shrink: 0; max-width: 40%; overflow: hidden; text-overflow: ellipsis;">
-                <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #22c55e; flex-shrink: 0;"></span>
-                <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ current_user.nome or current_user.username if (current_user and (current_user.nome or current_user.username)) else 'Histórico' }}</span>
-            </div>
-
         </div>
     </header>
 
-    <main class="main" style="padding-left:0; padding-right:0; padding-top: calc(4.2rem + max(10px, env(safe-area-inset-top, 0px))) !important;">
+    <main class="main" style="padding-left:0; padding-right:0; padding-top: 0.75rem !important;">
         <h1 style="display:none;">Histórico de sorteios</h1>
         {% if erro %}
         <div class="alert alert-warning" role="alert">{{ erro }}</div>

@@ -3,62 +3,29 @@
 {% block title %}Meu Perfil{% endblock %}
 
 {% block content %}
-<div class="container profile-page profile-page--public page-container-wide player-workspace-page"
-    style="background: #000000 !important; padding-top: 0 !important;">
+<div class="container profile-page profile-page--public page-container-wide player-workspace-page edge-to-edge-page"
+    style="background: #000000 !important; min-height: 100vh; width: 100%; max-width: 100% !important; padding-left: 0 !important; padding-right: 0 !important;">
     
     {% set is_self = is_self if (is_self is defined and is_self is not none) else (target_user is not defined or not target_user or (usuario and target_user and (usuario.id if usuario.id is defined else usuario.get('id')) == (target_user.id if target_user.id is defined else target_user.get('id')))) %}
     {% set perfil_user = target_user if (target_user is defined and target_user) else (usuario if is_self else {}) %}
     {% set brand_title = 'Meu Perfil' if is_self else (jogador_proprio.nome if (jogador_proprio and jogador_proprio.nome) else ((perfil_user.nome if perfil_user.nome is defined else perfil_user.get('nome')) or (perfil_user.username if perfil_user.username is defined else perfil_user.get('username')) or 'Perfil do Jogador')) %}
 
-    {% if not is_self %}
-    <!-- Header Fixo de Navegação com Botão Voltar e Logo no Centro (Perfil de outro jogador) -->
-    <header class="profile-topbar-sticky" style="position: sticky; top: 0; z-index: 100; background: rgba(0, 0, 0, 0.92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid rgba(34, 197, 94, 0.18); padding: calc(0.55rem + max(10px, env(safe-area-inset-top, 0px))) 0.85rem 0.55rem 0.85rem; margin-left: -1rem; margin-right: -1rem; margin-bottom: 0.5rem;">
-        <div style="max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
-            
-            <!-- Botão Voltar Inteligente -->
-            <a href="javascript:void(0)" onclick="voltarParaJogadoresLista()" class="btn-back-link" title="Voltar para os Jogadores" aria-label="Voltar para os Jogadores" style="display: inline-flex; align-items: center; gap: 0.4rem; color: #22c55e; font-weight: 800; font-size: 0.8rem; text-decoration: none; background: rgba(34, 197, 94, 0.12); padding: 0.38rem 0.75rem; border-radius: 999px; border: 1px solid rgba(34, 197, 94, 0.3); box-shadow: 0 0 16px rgba(34, 197, 94, 0.15); transition: all 0.22s ease; cursor: pointer; flex-shrink: 0;">
-                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="19" y1="12" x2="5" y2="12"></line>
-                    <polyline points="12 19 5 12 12 5"></polyline>
-                </svg>
-                <span>Voltar</span>
+    <header class="app-topbar-header">
+        <div class="app-topbar-left"></div>
+        <div class="app-topbar-center">
+            <a href="{{ url_for('jogador.index') }}" aria-label="NaTrave 5v5" class="app-topbar-logo-link">
+                <img src="{{ url_for('static', filename='natrave.svg', v='20260708-03') }}" alt="NaTrave 5v5" class="app-topbar-logo-img">
             </a>
-
-            <!-- Logo Centralizada NaTrave -->
-            <div style="display: flex; align-items: center; justify-content: center; flex: 1; min-width: 0;">
-                <a href="{{ url_for('jogador.index') }}" aria-label="NaTrave 5v5" style="display: inline-flex; align-items: center;">
-                    <img src="{{ url_for('static', filename='natrave.svg', v='20260708-03') }}" alt="NaTrave 5v5" style="height: 36px; width: auto; object-fit: contain;">
-                </a>
+        </div>
+        <div class="app-topbar-right">
+            <div class="app-topbar-badge">
+                <span class="app-status-dot"></span>
+                <span>perfil</span>
             </div>
-
-            <!-- Badge do Perfil Ativo -->
-            <div style="display: inline-flex; align-items: center; gap: 0.4rem; color: #94a3b8; font-size: 0.78rem; font-weight: 700; background: rgba(255,255,255,0.04); padding: 0.35rem 0.75rem; border-radius: 999px; border: 1px solid rgba(255,255,255,0.08); white-space: nowrap; flex-shrink: 0; max-width: 35%; overflow: hidden; text-overflow: ellipsis;">
-                <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #22c55e; flex-shrink: 0;"></span>
-                <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ brand_title }}</span>
-            </div>
-
         </div>
     </header>
 
-    <script>
-    function voltarParaJogadoresLista() {
-        if (window.history.length > 1 && document.referrer && (document.referrer.includes(window.location.host) || document.referrer.includes('/jogadores') || document.referrer.endsWith('/'))) {
-            window.history.back();
-        } else {
-            window.location.href = "{{ url_for('jogador.index') }}";
-        }
-    }
-    </script>
-    {% else %}
-    <header class="header">
-        <div class="header-content">
-            {% set brand_subtitle = 'Seus dados e estatísticas' %}
-            {% include '_brand_header.html' %}
-        </div>
-    </header>
-    {% endif %}
-
-    <main class="main public-profile-dossier">
+    <main class="main public-profile-dossier" style="padding: 1.25rem 1rem 3rem 1rem !important; max-width: 1120px; margin: 0 auto; width: 100%; box-sizing: border-box;">
         {% if partida_juiz_em_andamento %}
         <div class="alert alert-warning">
             <strong>🎮 Partida em andamento:</strong>

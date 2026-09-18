@@ -183,8 +183,14 @@ class VotacaoService:
         }
 
     def _todos_participantes_votaram(self, partida: Dict) -> bool:
+        participantes = partida.get("participantes", [])
+        total_participantes = len(participantes)
         aptos = self._participantes_aptos(partida)
         if not aptos:
+            return False
+        # Se for partida coletiva (ex: 5v5 com 10 jogadores), não encerra automaticamente
+        # se houver apenas 1 apto ou menos de metade cadastrada, para não fechar com 1 único voto
+        if total_participantes >= 4 and len(aptos) < max(2, total_participantes // 2):
             return False
         votantes = {
             voto.get("user_id")

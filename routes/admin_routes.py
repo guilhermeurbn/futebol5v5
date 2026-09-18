@@ -4,7 +4,8 @@ Rotas de Administração
 """
 import os
 
-from flask import Blueprint, request, render_template, redirect, url_for, session, jsonify
+from typing import Optional, List, Dict
+from flask import Blueprint, request, render_template, redirect, url_for, session, jsonify, g
 from functools import wraps
 import logging
 
@@ -66,32 +67,105 @@ def admin_redirect():
     return redirect(url_for('jogador_crud.index'))
 
 
-def _obter_jogadores_vinculados_em_lote(usuarios, jog_service):
+def _obter_usuarios_do_clube(clube_codigo: Optional[str] = None) -> List[Dict]:
+    """
+    Retorna apenas os usuários associados ao clube atual:
+    - O organizador/admin do clube (admin_user_id ou admin_user_ids)
+    - O usuário da sessão atual se estiver administrando o clube
+    - Usuários vinculados a atletas registrados neste clube
+    - Usuários cujo perfil possui registro deste clube
+    - Para o Clube 001 (oficial legado): usuários legados que não pertençam a outro clube
+    """
+    from flask import has_request_context
+    session_user_id = None
+    if not clube_codigo and has_request_context():
+        try:
+            clube_codigo = getattr(g, 'clube_codigo', None) or session.get('clube_codigo')
+            session_user_id = session.get('user_id')
+        except Exception:
+            pass
+    elif has_request_context():
+        try:
+            session_user_id = session.get('user_id')
+        except Exception:
+            pass
+
+    from services.clube_service import ClubeService
+    cod = str(clube_codigo or '001').strip()
+    clube = ClubeService.obter_clube_por_codigo(cod) or {}
+    admin_id = clube.get('admin_user_id')
+    admin_ids = set(clube.get('admin_user_ids') or [])
+    if admin_id:
+        admin_ids.add(str(admin_id))
+
+    jogadores_clube = jogador_service.listar(clube_codigo=cod)
+    user_ids_jogadores = set()
+    for j in jogadores_clube:
+        owner = getattr(j, 'owner_user_id', None) or (j.get('owner_user_id') if isinstance(j, dict) else None)
+        if owner:
+            user_ids_jogadores.add(str(owner))
+
+    todos_usuarios = auth_service.listar_usuarios()
+    usuarios_filtrados = []
+
+    for u in todos_usuarios:
+        u_id = str(u.get('id') or '')
+        if u_id and u_id in admin_ids:
+            usuarios_filtrados.append(u)
+            continue
+        if session_user_id and u_id == str(session_user_id):
+            usuarios_filtrados.append(u)
+            continue
+        if u_id and u_id in user_ids_jogadores:
+            usuarios_filtrados.append(u)
+            continue
+        c_cods = u.get('clubes_codigos')
+        if isinstance(c_cods, list) and cod in c_cods:
+            usuarios_filtrados.append(u)
+            continue
+        if u.get('ultimo_clube_codigo') == cod:
+            usuarios_filtrados.append(u)
+            continue
+        if cod == '001':
+            if not c_cods and (not u.get('ultimo_clube_codigo') or u.get('ultimo_clube_codigo') == '001'):
+                usuarios_filtrados.append(u)
+
+    return usuarios_filtrados
+
+
+def _obter_jogadores_vinculados_em_lote(usuarios, jog_service, clube_codigo: Optional[str] = None):
     """Mapeia os jogadores vinculados a todos os usuários em uma única passada de memória (O(N+M))."""
     # Se a função individual foi sobrescrita em testes (monkeypatch)
     if globals().get('_garantir_e_obter_jogador_vinculado_original') is not None and _garantir_e_obter_jogador_vinculado != globals().get('_garantir_e_obter_jogador_vinculado_original'):
         return {u.get('id'): _garantir_e_obter_jogador_vinculado(u, jog_service) for u in usuarios}
 
-    todos = jog_service.listar()
+    from flask import has_request_context
+    if not clube_codigo and has_request_context():
+        try:
+            clube_codigo = getattr(g, 'clube_codigo', None) or session.get('clube_codigo')
+        except Exception:
+            pass
+    cod = str(clube_codigo or '001').strip()
+    todos = jog_service.listar(clube_codigo=cod)
     by_owner = {}
     by_nome = {}
     for j in todos:
         owner_id = j.owner_user_id if hasattr(j, 'owner_user_id') else (j.get('owner_user_id') if isinstance(j, dict) else None)
         nome_j = j.nome if hasattr(j, 'nome') else (j.get('nome') if isinstance(j, dict) else None)
         if owner_id:
-            by_owner[owner_id] = j
+            by_owner[str(owner_id)] = j
         if nome_j:
             by_nome[nome_j.strip().lower()] = j
 
     resultado = {}
     for u in usuarios:
-        u_id = u.get('id')
+        u_id = str(u.get('id') or '')
         if not u_id or u.get('role') != 'usuario':
-            resultado[u_id] = None
+            resultado[u.get('id')] = None
             continue
 
         if u_id in by_owner:
-            resultado[u_id] = by_owner[u_id]
+            resultado[u.get('id')] = by_owner[u_id]
             continue
 
         nome_u = (u.get('nome') or '').strip().lower()
@@ -100,25 +174,13 @@ def _obter_jogadores_vinculados_em_lote(usuarios, jog_service):
             j_id = j_existente.id if hasattr(j_existente, 'id') else (j_existente.get('id') if isinstance(j_existente, dict) else None)
             try:
                 jog_service.atualizar(j_id, owner_user_id=u_id)
-                resultado[u_id] = j_existente
+                resultado[u.get('id')] = j_existente
                 by_owner[u_id] = j_existente
             except Exception as e:
                 logger.error(f"Erro ao auto-vincular por nome {u_id}: {e}")
-                resultado[u_id] = j_existente
+                resultado[u.get('id')] = j_existente
         else:
-            try:
-                novo = jog_service.criar(
-                    nome=u['nome'],
-                    nivel=5.5,
-                    tipo='avulso',
-                    posicao='linha',
-                    owner_user_id=u_id
-                )
-                resultado[u_id] = novo
-                by_owner[u_id] = novo
-            except Exception as e:
-                logger.error(f"Erro ao auto-criar jogador para {u.get('username')}: {e}")
-                resultado[u_id] = None
+            resultado[u.get('id')] = None
 
     return resultado
 
@@ -141,17 +203,7 @@ def _garantir_e_obter_jogador_vinculado(user, jog_service):
                 logger.error(f"Erro ao vincular jogador por nome para {user.get('username')}: {e}")
                 return jogador_existente
 
-    try:
-        return jog_service.criar(
-            nome=user['nome'],
-            nivel=5.5,
-            tipo='avulso',
-            posicao='linha',
-            owner_user_id=user['id']
-        )
-    except Exception as e:
-        logger.error(f"Erro ao auto-criar jogador para {user.get('username')}: {e}")
-        return None
+    return None
 
 _garantir_e_obter_jogador_vinculado_original = _garantir_e_obter_jogador_vinculado
 
@@ -161,23 +213,24 @@ _garantir_e_obter_jogador_vinculado_original = _garantir_e_obter_jogador_vincula
 def admin_page():
     """Dashboard administrativo"""
     try:
-        usuarios = sorted(auth_service.listar_usuarios(), key=lambda u: (u.get('nome') or '').lower())
-        mapa_jogadores = _obter_jogadores_vinculados_em_lote(usuarios, jogador_service)
+        cod_clube = getattr(g, 'clube_codigo', None) or session.get('clube_codigo') or '001'
+        usuarios = sorted(_obter_usuarios_do_clube(cod_clube), key=lambda u: (u.get('nome') or '').lower())
+        mapa_jogadores = _obter_jogadores_vinculados_em_lote(usuarios, jogador_service, clube_codigo=cod_clube)
         for u in usuarios:
             u['jogador_vinculado'] = mapa_jogadores.get(u['id'])
 
-        notificacoes = notificacao_service.listar_notificacoes(apenas_nao_lidas=True, limite=15)
+        notificacoes = notificacao_service.listar_notificacoes(apenas_nao_lidas=True, limite=15, clube_codigo=cod_clube)
         sucesso = session.pop('admin_sucesso', request.args.get('sucesso', ''))
         erro = session.pop('admin_erro', request.args.get('erro', ''))
         senha_reset = session.pop('admin_senha_reset', None)
         
-        jogadores_avulsos = [j.para_dict() if hasattr(j, 'para_dict') else j for j in jogador_service.listar() if j.tipo == 'avulso' or not j.owner_user_id]
+        jogadores_avulsos = [j.para_dict() if hasattr(j, 'para_dict') else j for j in jogador_service.listar(clube_codigo=cod_clube) if j.tipo == 'avulso' or not j.owner_user_id]
         return render_template(
             'admin.html',
             usuarios=usuarios,
             jogadores_avulsos=jogadores_avulsos,
             notificacoes=notificacoes,
-            total_notificacoes=notificacao_service.contar_nao_lidas(),
+            total_notificacoes=notificacao_service.contar_nao_lidas(clube_codigo=cod_clube),
             total_usuarios=len(usuarios),
             sucesso=sucesso,
             erro=erro,
@@ -194,19 +247,20 @@ def admin_page():
 def api_admin_painel():
     """API: Resumo leve do painel admin."""
     try:
-        usuarios = sorted(auth_service.listar_usuarios(), key=lambda u: (u.get('nome') or '').lower())
-        mapa_jogadores = _obter_jogadores_vinculados_em_lote(usuarios, jogador_service)
+        cod_clube = getattr(g, 'clube_codigo', None) or session.get('clube_codigo') or '001'
+        usuarios = sorted(_obter_usuarios_do_clube(cod_clube), key=lambda u: (u.get('nome') or '').lower())
+        mapa_jogadores = _obter_jogadores_vinculados_em_lote(usuarios, jogador_service, clube_codigo=cod_clube)
         for u in usuarios:
             player = mapa_jogadores.get(u['id'])
             u['jogador_vinculado'] = player.para_dict() if (player and hasattr(player, 'para_dict')) else (player if isinstance(player, dict) else None)
-        notificacoes = notificacao_service.listar_notificacoes(apenas_nao_lidas=True, limite=15)
-        arquivadas = notificacao_service.listar_arquivadas(limite=10)
+        notificacoes = notificacao_service.listar_notificacoes(apenas_nao_lidas=True, limite=15, clube_codigo=cod_clube)
+        arquivadas = notificacao_service.listar_arquivadas(limite=10, clube_codigo=cod_clube)
 
         return jsonify({
             'sucesso': True,
             'dados': {
                 'total_usuarios': len(usuarios),
-                'total_notificacoes': notificacao_service.contar_nao_lidas(),
+                'total_notificacoes': notificacao_service.contar_nao_lidas(clube_codigo=cod_clube),
                 'usuarios': usuarios,
                 'notificacoes': notificacoes,
                 'arquivadas': arquivadas,
@@ -318,6 +372,10 @@ def admin_criar_usuario():
             posicao = 'linha'
 
         usuario = auth_service.criar_usuario(email=email, username=username, nome=nome, password=password, role=role)
+        cod_clube = getattr(g, 'clube_codigo', None) or session.get('clube_codigo') or '001'
+        from services.clube_service import ClubeService
+        clube = ClubeService.obter_clube_por_codigo(cod_clube)
+        auth_service.salvar_ultimo_clube(usuario.get('id'), cod_clube, (clube.get('slug') if clube else 'natrave'))
         if role == 'usuario':
             try:
                 jogador_service.criar(
@@ -325,7 +383,8 @@ def admin_criar_usuario():
                     nivel=5.5,
                     tipo='avulso',
                     posicao=posicao,
-                    owner_user_id=usuario.get('id')
+                    owner_user_id=usuario.get('id'),
+                    clube_codigo=cod_clube
                 )
             except Exception as e:
                 logger.warning(f"Erro ao criar perfil de jogador para usuario {username}: {e}")

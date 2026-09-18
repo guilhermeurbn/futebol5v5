@@ -1288,9 +1288,9 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    if (!senha) {
+    if (!senha || senha.length < 6) {
       if (msgBox) {
-        msgBox.textContent = 'Por favor, defina a senha do Admin.';
+        msgBox.textContent = 'A senha do Admin deve ter no mínimo 6 caracteres.';
         msgBox.style.color = '#ef4444';
       }
       return;

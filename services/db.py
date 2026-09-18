@@ -85,19 +85,39 @@ def _candidate_paths(relative_path: str):
 
 
 def _obter_contexto_clube_codigo(clube_codigo: Optional[str] = None) -> str:
-    """Extrai e normaliza o código do clube (ex: '001', '002')."""
-    if clube_codigo and str(clube_codigo).strip():
-        c = str(clube_codigo).strip()
-        return c.zfill(3) if c.isdigit() else c
+    """Extrai e normaliza o código do clube (ex: '001', '002' ou a partir de ID forte 'clb_...')."""
+    def _normalizar_valor(val: Any) -> Optional[str]:
+        if not val:
+            return None
+        s = str(val).strip()
+        if not s:
+            return None
+        if s.startswith("clb_"):
+            try:
+                from services.clube_service import ClubeService
+                clube = ClubeService.obter_clube_por_id_forte(s)
+                if clube and clube.get('codigo_formatado'):
+                    return str(clube.get('codigo_formatado')).strip()
+            except Exception:
+                pass
+            return s
+        return s.zfill(3) if s.isdigit() else s
+
+    norm = _normalizar_valor(clube_codigo)
+    if norm:
+        return norm
+
     try:
         from flask import g, session, has_request_context
         if has_request_context():
             if hasattr(g, 'clube_codigo') and g.clube_codigo:
-                c = str(g.clube_codigo).strip()
-                return c.zfill(3) if c.isdigit() else c
+                norm_g = _normalizar_valor(g.clube_codigo)
+                if norm_g:
+                    return norm_g
             if session.get('clube_codigo'):
-                c = str(session.get('clube_codigo')).strip()
-                return c.zfill(3) if c.isdigit() else c
+                norm_sess = _normalizar_valor(session.get('clube_codigo'))
+                if norm_sess:
+                    return norm_sess
     except Exception:
         pass
     return "001"
@@ -114,6 +134,7 @@ def resolver_namespace_clube(namespace: str, clube_codigo: Optional[str] = None)
     NAMESPACES_GLOBAIS = {
         "users",
         "clubes",
+        "jogadores",
         "image_assets",
         "migration_user_player_link_done",
         "admin_notificacoes",

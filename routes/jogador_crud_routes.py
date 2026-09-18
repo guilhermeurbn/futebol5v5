@@ -158,11 +158,13 @@ def index():
                 }
             })
 
+        boas_vindas = bool(request.args.get('boas_vindas') or session.pop('boas_vindas_admin', None))
         return render_template(
             'index.html',
             jogadores=jogadores_premium,
             total_jogadores=len(jogadores_premium),
-            usuario=_usuario_logado()
+            usuario=_usuario_logado(),
+            boas_vindas_admin=boas_vindas
         )
     except Exception as e:
         import logging

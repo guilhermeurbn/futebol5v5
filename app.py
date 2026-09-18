@@ -617,6 +617,19 @@ def criar_app(config_name: str = None) -> Flask:
         from services.clube_service import ClubeService
         clube_ativo = getattr(g, 'clube', None) or ClubeService.garantir_clube_natrave_001()
 
+        u_id = session.get('user_id')
+        auth_user_dict = None
+        if u_id:
+            u_role = session.get('role', 'usuario')
+            auth_user_dict = {
+                'id': u_id,
+                'username': session.get('username'),
+                'nome': session.get('user_nome') or session.get('nome'),
+                'role': u_role,
+                'autenticado': True,
+                'is_admin': u_role in ['admin', 'organizador'],
+            }
+
         return {
             'total_notificacoes': total_notificacoes,
             'notificacoes_url': notificacoes_url,
@@ -628,6 +641,8 @@ def criar_app(config_name: str = None) -> Flask:
             'clube': clube_ativo,
             'clube_slug': clube_ativo.get('slug', 'natrave'),
             'clube_codigo': clube_ativo.get('codigo_formatado', '001'),
+            'auth_user': auth_user_dict,
+            'usuario': auth_user_dict,
         }
 
     # Em desenvolvimento, garantir que mudanças em templates sejam recarregadas

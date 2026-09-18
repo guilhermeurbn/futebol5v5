@@ -317,71 +317,75 @@ def api_criar_clube_com_autenticacao():
         user_data = None
         auth_svc = AuthService()
 
-        if modo_auth == 'existente' and not user_id:
-            username = str(data.get('username', '')).strip()
-            senha = str(data.get('senha', '')).strip()
-            user_data = auth_svc.autenticar(username, senha)
-            if not user_data:
-                return jsonify({'sucesso': False, 'mensagem': 'Usuário ou senha incorretos.'}), 401
-            user_id = user_data.get('id')
-
-            nome = str(data.get('nome', '')).strip() or "Administrador"
-            username = str(data.get('username', '')).strip() or "admin"
-            senha = str(data.get('senha', '')).strip()
+        if not user_id:
             email_in = str(data.get('email', '')).strip().lower()
+            senha = str(data.get('senha', '')).strip()
+            nome_in = str(data.get('nome', '')).strip()
+            username_in = str(data.get('username', '')).strip()
 
-            if not senha or len(senha) < 4:
-                return jsonify({'sucesso': False, 'mensagem': 'Informe uma senha de Admin de no mínimo 4 caracteres.'}), 400
+            identificador = email_in or username_in
+            if not identificador:
+                return jsonify({'sucesso': False, 'mensagem': 'Por favor, informe o e-mail ou usuário do Administrador.'}), 400
 
-            # 1. Se o e-mail já existe na base do site, autentica o usuário existente
-            user_existente_email = auth_svc.obter_por_email(email_in) if email_in else None
-            if user_existente_email:
-                user_auth = auth_svc.autenticar(email_in, senha)
+            if not senha or len(senha) < 6:
+                return jsonify({'sucesso': False, 'mensagem': 'A senha do Admin deve ter no mínimo 6 caracteres.'}), 400
+
+            # 1. Se o e-mail ou username já existe na base de usuários, autentica a conta
+            user_existente = (auth_svc.obter_por_email(identificador) if ('@' in identificador) else None) or auth_svc.obter_por_username(identificador)
+            if user_existente:
+                user_auth = auth_svc.autenticar(user_existente.get('email') or user_existente.get('username') or identificador, senha)
                 if user_auth:
                     user_id = user_auth.get('id')
                     user_data = user_auth
                 else:
                     return jsonify({
                         'sucesso': False,
-                        'mensagem': 'Este e-mail já está cadastrado no NaTrave. Digite a senha correta da sua conta para continuar.'
+                        'mensagem': 'Esta conta já está cadastrada no NaTrave. Digite a senha correta para continuar.'
                     }), 401
             else:
-                user_existente = auth_svc.obter_por_username(username)
-                if user_existente:
-                    user_auth = auth_svc.autenticar(username, senha)
-                    if user_auth:
-                        user_id = user_auth.get('id')
-                        user_data = user_auth
-                    else:
-                        from services.clube_service import gerar_slug
-                        alt_username = f"admin_{gerar_slug(nome_clube)}"
-                        user_existente_alt = auth_svc.obter_por_username(alt_username)
-                        if user_existente_alt:
-                            user_id = user_existente_alt.get('id')
-                            user_data = user_existente_alt
-                        else:
-                            email = email_in if (email_in and '@' in email_in) else f"{alt_username}@natrave.pt"
-                            user_data = auth_svc.criar_usuario(
-                                email=email,
-                                username=alt_username,
-                                nome=nome,
-                                password=senha,
-                                role='organizador'
-                            )
-                            user_id = user_data.get('id')
-                else:
-                    email = email_in if (email_in and '@' in email_in) else f"{username}@natrave.pt"
-                    user_data = auth_svc.criar_usuario(
-                        email=email,
-                        username=username,
-                        nome=nome,
-                        password=senha,
-                        role='organizador'
-                    )
-                    user_id = user_data.get('id')
+                # 2. Cria a nova conta de Administrador
+                import re
+                cand_user = username_in if (username_in and username_in.lower() != 'admin' and len(username_in) >= 3) else (email_in.split('@')[0] if ('@' in email_in) else identificador)
+                cand_user = re.sub(r'[^a-zA-Z0-9_]', '', cand_user).lower()
+
+                # Garante que tenha ao menos 3 caracteres
+                if len(cand_user) < 3:
+                    cand_user = f"admin_{cand_user}" if cand_user else "admin"
+                if len(cand_user) < 3:
+                    cand_user = "admin_clube"
+
+                base_username = cand_user
+                u_cand = base_username
+                idx = 1
+                while auth_svc.obter_por_username(u_cand):
+                    u_cand = f"{base_username}_{idx}"
+                    idx += 1
+                username = u_cand
+
+                nome_base = nome_in if (nome_in and len(nome_in) >= 2 and nome_in.lower() != 'administrador') else f"Admin {nome_clube}"
+                if len(nome_base) < 2:
+                    nome_base = f"Admin {nome_clube}"
+                nome = nome_base
+                idx_n = 1
+                todos_users = auth_svc._carregar()
+                while any((u.get("nome") or "").strip().lower() == nome.strip().lower() for u in todos_users):
+                    nome = f"{nome_base} {idx_n}"
+                    idx_n += 1
+                email = email_in if (email_in and '@' in email_in) else f"{username}@natrave.pt"
+
+                user_data = auth_svc.criar_usuario(
+                    email=email,
+                    username=username,
+                    nome=nome,
+                    password=senha,
+                    role='admin'
+                )
+                user_id = user_data.get('id')
+        else:
+            user_data = auth_svc.obter_por_id(user_id)
 
         if not user_id:
-            return jsonify({'sucesso': False, 'mensagem': 'Você precisa estar autenticado para criar um clube.'}), 401
+            return jsonify({'sucesso': False, 'mensagem': 'Não foi possível autenticar a conta do administrador.'}), 401
 
         clube = ClubeService.criar_clube(
             nome=nome_clube,
@@ -389,31 +393,22 @@ def api_criar_clube_com_autenticacao():
             admin_user_id=user_id,
             senha_juiz=senha_juiz
         )
-        jog_svc = JogadorService()
-        jog_svc.associar_jogador_ao_clube(user_id, clube.get('codigo_formatado'))
 
         session['logged_in'] = True
         session['user_id'] = user_id
-        if user_data:
-            session['user_nome'] = user_data.get('nome')
-            session['username'] = user_data.get('username')
-            session['role'] = user_data.get('role', 'organizador')
-        else:
-            u_info = auth_svc.obter_por_id(user_id)
-            if u_info:
-                session['user_nome'] = u_info.get('nome')
-                session['username'] = u_info.get('username')
-                session['role'] = u_info.get('role', 'organizador')
-
+        session['user_nome'] = (user_data.get('nome') if user_data else None) or session.get('user_nome') or 'Administrador'
+        session['username'] = (user_data.get('username') if user_data else None) or session.get('username') or 'admin'
+        session['role'] = 'admin'
         session['clube_codigo'] = clube.get('codigo_formatado')
         session['clube_slug'] = clube.get('slug')
+        session['boas_vindas_admin'] = True
         session.modified = True
         auth_svc.salvar_ultimo_clube(user_id, clube.get('codigo_formatado'), clube.get('slug'))
 
         return jsonify({
             'sucesso': True,
             'clube': clube,
-            'redirect_url': f"/clube/{clube.get('slug')}"
+            'redirect_url': f"/clube/{clube.get('slug')}?boas_vindas=1"
         }), 201
     except ValueError as err:
         return jsonify({'sucesso': False, 'mensagem': str(err)}), 400
@@ -439,21 +434,18 @@ def api_entrar_como_juiz():
     if not valido or not clube:
         return jsonify({'sucesso': False, 'mensagem': 'Senha do Juiz incorreta para este clube.'}), 401
 
-    user_id = session.get('user_id') or f"juiz_{clube.get('codigo_formatado')}"
-
     session['logged_in'] = True
-    session['user_id'] = user_id
-    session['user_nome'] = session.get('user_nome') or f"Juiz ({clube.get('nome')})"
     session['role'] = 'juiz'
     session['clube_codigo'] = clube.get('codigo_formatado')
     session['clube_slug'] = clube.get('slug')
+    session['user_id'] = session.get('user_id') or f"juiz_{clube.get('codigo_formatado')}"
+    session['username'] = session.get('username') or f"juiz_{clube.get('slug')}"
+    session['nome'] = session.get('nome') or f"Juiz ({clube.get('nome')})"
     session.modified = True
-
-    AuthService().salvar_ultimo_clube(user_id, clube.get('codigo_formatado'), clube.get('slug'))
 
     return jsonify({
         'sucesso': True,
-        'mensagem': f"Acesso concedido como Juiz do clube {clube.get('nome')}!",
+        'mensagem': f"Acesso como Juiz autorizado no {clube.get('nome')}!",
         'redirect_url': '/juiz'
     }), 200
 
@@ -465,14 +457,18 @@ def clube_home(clube_slug: Optional[str] = None):
     slug_alvo = clube_slug or getattr(g, 'clube_slug', None) or session.get('clube_slug') or 'natrave'
     clube = ClubeService.obter_clube_por_slug(slug_alvo) or ClubeService.obter_clube_por_codigo(slug_alvo)
     if not clube:
-        return redirect(url_for('auth.perfil_page'))
+        return redirect(url_for('jogador.index'))
 
     session['clube_slug'] = clube.get('slug')
     session['clube_codigo'] = clube.get('codigo_formatado')
     if session.get('user_id'):
         from services.auth_service import AuthService
         AuthService().salvar_ultimo_clube(session.get('user_id'), clube.get('codigo_formatado'), clube.get('slug'))
-    return redirect(url_for('auth.perfil_page'))
+
+    boas_vindas = request.args.get('boas_vindas')
+    if boas_vindas:
+        session['boas_vindas_admin'] = True
+    return redirect(url_for('jogador.index', boas_vindas=1 if boas_vindas else None))
 
 
 @clube_bp.route('/api/clube/trocar-clube', methods=['POST'])

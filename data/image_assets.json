@@ -56,16 +56,16 @@
     "entity_id": "55"
   },
   {
-    "asset_id": "local_6b71ff8e",
+    "asset_id": "local_d5c27a42",
     "public_id": "local_card_1",
     "resource_type": "image",
     "format": "jpg",
     "width": 0,
     "height": 0,
     "bytes": 0,
-    "secure_url": "/static/uploads/cards/campeao_1_24569a.webp",
-    "url": "/static/uploads/cards/campeao_1_24569a.webp",
-    "created_at": "2026-09-06T00:32:53Z",
+    "secure_url": "/static/uploads/cards/campeao_1_9935a8.webp",
+    "url": "/static/uploads/cards/campeao_1_9935a8.webp",
+    "created_at": "2026-09-18T15:54:17Z",
     "entity_type": "card",
     "entity_id": "1"
   },
@@ -194,5 +194,19 @@
     "created_at": "2026-09-07T00:11:49Z",
     "entity_type": "card",
     "entity_id": "35"
+  },
+  {
+    "asset_id": "local_0533454e",
+    "public_id": "local_card_47",
+    "resource_type": "image",
+    "format": "jpg",
+    "width": 0,
+    "height": 0,
+    "bytes": 0,
+    "secure_url": "/static/uploads/cards/campeao_47_9a65ec.webp",
+    "url": "/static/uploads/cards/campeao_47_9a65ec.webp",
+    "created_at": "2026-09-18T15:09:19Z",
+    "entity_type": "card",
+    "entity_id": "47"
   }
 ]
