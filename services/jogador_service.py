@@ -95,9 +95,14 @@ class JogadorService:
             with open(self.arquivo, "w", encoding="utf-8") as f:
                 json.dump([], f)
     
-    def _carregar_raw(self) -> List[dict]:
-        """Carrega dados brutos do banco de dados ou arquivo local"""
-        data = load_json_data(self.namespace, None)
+    def _carregar_raw(self, clube_codigo: Optional[str] = None) -> List[dict]:
+        """Carrega dados brutos do banco de dados ou arquivo local para o clube correspondente."""
+        cod = self._obter_clube_codigo(clube_codigo)
+        try:
+            data = load_json_data(self.namespace, None, clube_codigo=cod)
+        except TypeError:
+            data = load_json_data(self.namespace, None)
+
         if data is not None:
             dados = data if isinstance(data, list) else []
             return self._enriquecer_fotos(dados)
@@ -133,44 +138,44 @@ class JogadorService:
             pass
         return dados
     
-    def _salvar(self, dados: List[dict]) -> None:
-        """Salva dados no banco de dados (Postgres ou arquivo local)"""
-        save_json_data(self.namespace, dados)
+    def _salvar(self, dados: List[dict], clube_codigo: Optional[str] = None) -> None:
+        """Salva dados no banco de dados (Postgres ou arquivo local) para o clube correspondente."""
+        cod = self._obter_clube_codigo(clube_codigo)
+        try:
+            save_json_data(self.namespace, dados, clube_codigo=cod)
+        except TypeError:
+            save_json_data(self.namespace, dados)
     
-    
-    def _obter_clube_codigo(self, clube_codigo: Optional[str] = None) -> Optional[str]:
+    def _obter_clube_codigo(self, clube_codigo: Optional[str] = None) -> str:
         if clube_codigo and str(clube_codigo).strip():
             c = str(clube_codigo).strip()
             return c.zfill(3) if c.isdigit() else c
         try:
-            from flask import g, session
-            if hasattr(g, 'clube_codigo') and g.clube_codigo:
-                c = str(g.clube_codigo).strip()
-                return c.zfill(3) if c.isdigit() else c
-            if session.get('clube_codigo'):
-                c = str(session.get('clube_codigo')).strip()
-                return c.zfill(3) if c.isdigit() else c
+            from flask import g, session, has_request_context
+            if has_request_context():
+                if hasattr(g, 'clube_codigo') and g.clube_codigo:
+                    c = str(g.clube_codigo).strip()
+                    return c.zfill(3) if c.isdigit() else c
+                if session.get('clube_codigo'):
+                    c = str(session.get('clube_codigo')).strip()
+                    return c.zfill(3) if c.isdigit() else c
         except Exception:
             pass
-        return None
+        return "001"
 
     def _preparar_item_para_clube(self, item: dict, clube_codigo: Optional[str]) -> dict:
         if not item or not isinstance(item, dict):
             return item
         item_copy = dict(item)
-        if clube_codigo:
+        cod = self._obter_clube_codigo(clube_codigo)
+        if cod:
             niveis_map = item_copy.get("niveis_por_clube")
-            if not isinstance(niveis_map, dict):
-                niveis_map = {}
-            if clube_codigo in niveis_map:
+            if isinstance(niveis_map, dict) and cod in niveis_map:
                 try:
-                    item_copy["nivel"] = round(float(niveis_map[clube_codigo]), 1)
-                    item_copy["nivel_preciso"] = round(float(niveis_map[clube_codigo]), 4)
+                    item_copy["nivel"] = round(float(niveis_map[cod]), 1)
+                    item_copy["nivel_preciso"] = round(float(niveis_map[cod]), 4)
                 except (TypeError, ValueError):
                     pass
-            elif clube_codigo != "001":
-                item_copy["nivel"] = 5.5
-                item_copy["nivel_preciso"] = 5.5
         return item_copy
 
     def _eh_usuario_admin(self, item: dict) -> bool:
@@ -192,15 +197,13 @@ class JogadorService:
     def listar(self, clube_codigo: Optional[str] = None) -> List[Jogador]:
         """Lista os jogadores filtrados pelo clube ativo ou especificado."""
         cod = self._obter_clube_codigo(clube_codigo) or "001"
-        dados = self._carregar_raw()
+        dados = self._carregar_raw(cod)
         resultado = []
         for item in dados:
             if self._eh_usuario_admin(item):
                 continue
             clubes = item.get("clubes_codigos")
-            if not isinstance(clubes, list):
-                clubes = ["001"]
-            if cod in clubes:
+            if not clubes or cod in clubes:
                 prepared = self._preparar_item_para_clube(item, cod)
                 resultado.append(Jogador.do_dict(prepared))
         return resultado
@@ -211,14 +214,12 @@ class JogadorService:
             return []
         cod = self._obter_clube_codigo(clube_codigo) or "001"
         resultado = []
-        for item in self._carregar_raw():
+        for item in self._carregar_raw(cod):
             if self._eh_usuario_admin(item):
                 continue
             if item.get("owner_user_id") == user_id:
                 clubes = item.get("clubes_codigos")
-                if not isinstance(clubes, list):
-                    clubes = ["001"]
-                if cod in clubes:
+                if not clubes or cod in clubes:
                     prepared = self._preparar_item_para_clube(item, cod)
                     resultado.append(Jogador.do_dict(prepared))
         return resultado
@@ -226,15 +227,13 @@ class JogadorService:
     def listar_para_dict(self, clube_codigo: Optional[str] = None) -> List[dict]:
         """Lista todos os jogadores como dicionários filtrados por clube."""
         cod = self._obter_clube_codigo(clube_codigo) or "001"
-        dados = self._carregar_raw()
+        dados = self._carregar_raw(cod)
         resultado = []
         for item in dados:
             if self._eh_usuario_admin(item):
                 continue
             clubes = item.get("clubes_codigos")
-            if not isinstance(clubes, list):
-                clubes = ["001"]
-            if cod in clubes:
+            if not clubes or cod in clubes:
                 resultado.append(self._preparar_item_para_clube(item, cod))
         return resultado
 
@@ -244,14 +243,12 @@ class JogadorService:
             return []
         cod = self._obter_clube_codigo(clube_codigo) or "001"
         resultado = []
-        for item in self._carregar_raw():
+        for item in self._carregar_raw(cod):
             if self._eh_usuario_admin(item):
                 continue
             if item.get("owner_user_id") == user_id:
                 clubes = item.get("clubes_codigos")
-                if not isinstance(clubes, list):
-                    clubes = ["001"]
-                if cod in clubes:
+                if not clubes or cod in clubes:
                     resultado.append(self._preparar_item_para_clube(item, cod))
         return resultado
     
@@ -261,7 +258,7 @@ class JogadorService:
         t_id = str(jogador_id or "").strip()
         if not t_id:
             return None
-        for item in self._carregar_raw():
+        for item in self._carregar_raw(cod):
             j_id = str(item.get("id") or "").strip()
             u_id = str(item.get("user_id") or "").strip()
             owner_id = str(item.get("owner_user_id") or "").strip()
@@ -270,14 +267,36 @@ class JogadorService:
                     return None
                 prepared = self._preparar_item_para_clube(item, cod)
                 return Jogador.do_dict(prepared)
+
+        # Se não especificou clube_codigo e não achou no clube padrão, busca em outros clubes
+        if not clube_codigo:
+            try:
+                from services.clube_service import ClubeService
+                clubes = ClubeService._carregar_clubes()
+                for c in clubes:
+                    c_cod = c.get("codigo_formatado")
+                    if c_cod and c_cod != cod:
+                        for item in self._carregar_raw(c_cod):
+                            j_id = str(item.get("id") or "").strip()
+                            u_id = str(item.get("user_id") or "").strip()
+                            owner_id = str(item.get("owner_user_id") or "").strip()
+                            if j_id == t_id or u_id == t_id or owner_id == t_id:
+                                if user_id and owner_id != user_id:
+                                    return None
+                                prepared = self._preparar_item_para_clube(item, c_cod)
+                                return Jogador.do_dict(prepared)
+            except Exception:
+                pass
+
         return None
 
-    def obter_por_username(self, username: str) -> Optional[dict]:
+    def obter_por_username(self, username: str, clube_codigo: Optional[str] = None) -> Optional[dict]:
         """Obtém um jogador pelo nome de usuário (@username) ou pelo usuário correspondente."""
         u_clean = str(username or "").strip().lower()
         if not u_clean:
             return None
-        for item in self._carregar_raw():
+        cod = self._obter_clube_codigo(clube_codigo)
+        for item in self._carregar_raw(cod):
             if str(item.get("username") or "").strip().lower() == u_clean:
                 return item
 
@@ -287,11 +306,26 @@ class JogadorService:
             auth_svc = AuthService()
             user = auth_svc.obter_por_username(u_clean)
             if user:
-                j = self.obter_por_id(user.get("id"))
+                j = self.obter_por_id(user.get("id"), clube_codigo=cod)
                 if j:
-                    return j.to_dict() if hasattr(j, "to_dict") else j
+                    return j.to_dict() if hasattr(j, "to_dict") else (j.para_dict() if hasattr(j, "para_dict") else j)
         except Exception:
             pass
+
+        # Se não especificou clube_codigo e não achou no clube atual, busca em outros clubes conhecidos
+        if not clube_codigo:
+            try:
+                from services.clube_service import ClubeService
+                clubes = ClubeService._carregar_clubes()
+                for c in clubes:
+                    c_cod = c.get("codigo_formatado")
+                    if c_cod and c_cod != cod:
+                        for item in self._carregar_raw(c_cod):
+                            if str(item.get("username") or "").strip().lower() == u_clean:
+                                return item
+            except Exception:
+                pass
+
         return None
     
     def criar(
@@ -316,13 +350,13 @@ class JogadorService:
         
         nome_clean = nome.strip()
         nome_lower = nome_clean.lower()
-        dados = self._carregar_raw()
+        cod = self._obter_clube_codigo(clube_codigo) or "001"
+        dados = self._carregar_raw(cod)
         for p in dados:
             if (p.get("nome") or "").strip().lower() == nome_lower:
                 nome_existente = p.get("nome") or nome_clean
                 raise ValueError(f"Já existe um jogador cadastrado com o nome '{nome_existente}'.")
 
-        cod = self._obter_clube_codigo(clube_codigo) or "001"
         jogador = Jogador(
             nome=nome_clean,
             nivel=nivel,
@@ -333,7 +367,7 @@ class JogadorService:
             niveis_por_clube={cod: nivel}
         )
         dados.append(jogador.para_dict())
-        self._salvar(dados)
+        self._salvar(dados, cod)
         return jogador
     
     def atualizar(
@@ -344,6 +378,8 @@ class JogadorService:
         tipo: Optional[str] = None,
         posicao: Optional[str] = None,
         foto_url: Optional[str] = None,
+        owner_user_id: Optional[str] = None,
+        clube_codigo: Optional[str] = None,
     ) -> Optional[Jogador]:
         """
         Atualiza um jogador com campos opcionais.
@@ -354,11 +390,15 @@ class JogadorService:
             nivel: Novo nível (opcional)
             tipo: 'fixo' ou 'avulso' (opcional)
             posicao: 'linha' ou 'goleiro' (opcional)
+            foto_url: URL da foto (opcional)
+            owner_user_id: ID do usuário proprietário (opcional)
+            clube_codigo: Código do clube (opcional)
 
         Returns:
             Jogador atualizado ou None
         """
-        dados = self._carregar_raw()
+        cod = self._obter_clube_codigo(clube_codigo)
+        dados = self._carregar_raw(cod)
         indice = next((i for i, item in enumerate(dados) if item.get("id") == jogador_id), None)
         if indice is None:
             return None
@@ -398,6 +438,8 @@ class JogadorService:
                 raise ValueError("Posição deve ser 'linha' ou 'goleiro'")
             nova_posicao = posicao
 
+        novo_owner = owner_user_id if owner_user_id is not None else jogador_existente.owner_user_id
+
         jogador_atualizado = Jogador(
             nome=novo_nome,
             nivel=novo_nivel,
@@ -406,7 +448,7 @@ class JogadorService:
             presente=jogador_existente.presente,
             id=jogador_id,
             criado_em=jogador_existente.criado_em,
-            owner_user_id=jogador_existente.owner_user_id,
+            owner_user_id=novo_owner,
             historico_nivel=jogador_existente.historico_nivel or [],
         )
         nova_foto = foto_url if foto_url is not None else (getattr(jogador_existente, 'foto_url', None) or getattr(jogador_existente, 'foto', None) or dados[indice].get('foto_url', ''))
@@ -414,14 +456,18 @@ class JogadorService:
         dict_atualizado = jogador_atualizado.para_dict()
         dict_atualizado["foto_url"] = nova_foto or ""
         dict_atualizado["foto"] = nova_foto or ""
+        if novo_owner:
+            dict_atualizado["owner_user_id"] = novo_owner
+            dict_atualizado["user_id"] = novo_owner
         dados[indice] = dict_atualizado
-        self._salvar(dados)
+        self._salvar(dados, cod)
         return jogador_atualizado
 
-    def obter_por_nome(self, nome: str) -> Optional['Jogador']:
+    def obter_por_nome(self, nome: str, clube_codigo: Optional[str] = None) -> Optional['Jogador']:
         """Busca jogador pelo nome exato (case-insensitive)."""
+        cod = self._obter_clube_codigo(clube_codigo)
         nome_clean = nome.strip().lower()
-        for item in self._carregar_raw():
+        for item in self._carregar_raw(cod):
             if item.get("nome", "").strip().lower() == nome_clean:
                 return Jogador.do_dict(item)
         return None
@@ -495,7 +541,8 @@ class JogadorService:
         Atualiza o nível de habilidade do jogador isoladamente para o clube_codigo especificado.
         Se for o clube "001", sincroniza também o nível base legado.
         """
-        dados = self._carregar_raw()
+        cod = self._obter_clube_codigo(clube_codigo)
+        dados = self._carregar_raw(cod)
         novo_nivel_clamped = round(max(1.0, min(10.0, float(novo_nivel))), 1)
 
         for item in dados:
@@ -504,14 +551,31 @@ class JogadorService:
                 niveis_map = item.get("niveis_por_clube")
                 if not isinstance(niveis_map, dict):
                     niveis_map = {}
-                niveis_map[clube_codigo] = novo_nivel_clamped
+                niveis_map[cod] = novo_nivel_clamped
                 item["niveis_por_clube"] = niveis_map
 
-                if clube_codigo == "001":
+                if cod == "001":
                     item["nivel"] = novo_nivel_clamped
 
-                self._salvar(dados)
+                self._salvar(dados, cod)
                 return item
+
+        # Se não achou na lista do clube_codigo, tenta achar no 001 ou legado e associar
+        if cod != "001":
+            dados_001 = self._carregar_raw("001")
+            for item in dados_001:
+                if str(item.get("id") or "") == str(jogador_id):
+                    item_clube = dict(item)
+                    niveis_map = item_clube.get("niveis_por_clube")
+                    if not isinstance(niveis_map, dict):
+                        niveis_map = {}
+                    niveis_map[cod] = novo_nivel_clamped
+                    item_clube["niveis_por_clube"] = niveis_map
+                    item_clube["nivel"] = novo_nivel_clamped
+                    dados.append(item_clube)
+                    self._salvar(dados, cod)
+                    return item_clube
+
         return None
 
     def associar_jogador_ao_clube(self, jogador_id: str, clube_codigo: str) -> Optional[dict]:
@@ -519,7 +583,8 @@ class JogadorService:
         Associa um jogador a um clube específico, adicionando `clube_codigo` ao array `clubes_codigos`
         e inicializando a nota de habilidade do atleta neste clube como 5.5 (se ainda não definida).
         """
-        dados = self._carregar_raw()
+        cod = self._obter_clube_codigo(clube_codigo)
+        dados = self._carregar_raw(cod)
         t_id = str(jogador_id).strip()
         for idx, item in enumerate(dados):
             j_id = str(item.get("id") or "").strip()
@@ -528,22 +593,47 @@ class JogadorService:
             if t_id and (j_id == t_id or u_id == t_id or owner_id == t_id):
                 clubes = item.get("clubes_codigos")
                 if not isinstance(clubes, list):
-                    clubes = ["001"]
-                if clube_codigo not in clubes:
-                    clubes.append(clube_codigo)
+                    clubes = [cod]
+                if cod not in clubes:
+                    clubes.append(cod)
                 item["clubes_codigos"] = clubes
 
                 # Garantir nivel inicial isolado no clube (5.5 se novo)
                 niveis_map = item.get("niveis_por_clube")
                 if not isinstance(niveis_map, dict):
                     niveis_map = {}
-                if clube_codigo not in niveis_map:
-                    niveis_map[clube_codigo] = 5.5 if clube_codigo != "001" else float(item.get("nivel", 5.5))
+                if cod not in niveis_map:
+                    niveis_map[cod] = 5.5 if cod != "001" else float(item.get("nivel", 5.5))
                 item["niveis_por_clube"] = niveis_map
 
                 dados[idx] = item
-                self._salvar(dados)
+                self._salvar(dados, cod)
                 return item
+
+        # Tenta buscar do Clube 001 para associar/migrar para o novo clube
+        if cod != "001":
+            dados_001 = self._carregar_raw("001")
+            for item in dados_001:
+                j_id = str(item.get("id") or "").strip()
+                u_id = str(item.get("user_id") or "").strip()
+                owner_id = str(item.get("owner_user_id") or "").strip()
+                if t_id and (j_id == t_id or u_id == t_id or owner_id == t_id):
+                    item_clube = dict(item)
+                    clubes = item_clube.get("clubes_codigos")
+                    if not isinstance(clubes, list):
+                        clubes = ["001"]
+                    if cod not in clubes:
+                        clubes.append(cod)
+                    item_clube["clubes_codigos"] = clubes
+                    niveis_map = item_clube.get("niveis_por_clube")
+                    if not isinstance(niveis_map, dict):
+                        niveis_map = {}
+                    if cod not in niveis_map:
+                        niveis_map[cod] = 5.5
+                    item_clube["niveis_por_clube"] = niveis_map
+                    dados.append(item_clube)
+                    self._salvar(dados, cod)
+                    return item_clube
 
         # Fallback: Se não encontrou em jogadores.json, busca em AuthService e cria o registro de Jogador
         try:
@@ -560,36 +650,34 @@ class JogadorService:
                     nivel=5.5,
                     posicao="linha",
                     owner_user_id=user.get("id"),
-                    clube_codigo=clube_codigo
+                    clube_codigo=cod
                 )
-                # Re-carregar dados e atualizar username / user_id
-                dados_reloaded = self._carregar_raw()
+                dados_reloaded = self._carregar_raw(cod)
                 for idx, item in enumerate(dados_reloaded):
                     if item.get("id") == novo_j.id or item.get("owner_user_id") == user.get("id"):
                         item["username"] = user.get("username")
                         item["user_id"] = user.get("id")
                         dados_reloaded[idx] = item
-                        self._salvar(dados_reloaded)
-                        break
-
-                # Associar o novo jogador criado ao clube
-                return self.associar_jogador_ao_clube(user.get("id"), clube_codigo)
+                        self._salvar(dados_reloaded, cod)
+                        return item
         except Exception:
             pass
 
         return None
 
-    def deletar(self, jogador_id: str) -> bool:
+    def deletar(self, jogador_id: str, clube_codigo: Optional[str] = None) -> bool:
         """
         Deleta um jogador
         
         Args:
             jogador_id: ID do jogador
+            clube_codigo: Código do clube (opcional)
             
         Returns:
             True se deletado, False se não encontrado
         """
-        dados = self._carregar_raw()
+        cod = self._obter_clube_codigo(clube_codigo)
+        dados = self._carregar_raw(cod)
         
         # Encontrar o jogador para obter o owner_user_id
         alvo = next((j for j in dados if j["id"] == jogador_id), None)
@@ -598,7 +686,7 @@ class JogadorService:
             
         owner_user_id = alvo.get("owner_user_id")
         dados_filtrados = [j for j in dados if j["id"] != jogador_id]
-        self._salvar(dados_filtrados)
+        self._salvar(dados_filtrados, cod)
         
         # Deletar o usuário associado, se houver
         if owner_user_id:
@@ -613,20 +701,22 @@ class JogadorService:
                 
         return True
     
-    def contar(self) -> int:
+    def contar(self, clube_codigo: Optional[str] = None) -> int:
         """Retorna número de jogadores"""
-        return len(self._carregar_raw())
+        cod = self._obter_clube_codigo(clube_codigo)
+        return len(self._carregar_raw(cod))
     
-    def listar_presentes(self) -> List[Jogador]:
+    def listar_presentes(self, clube_codigo: Optional[str] = None) -> List[Jogador]:
         """Lista apenas jogadores marcados como presentes"""
-        return [j for j in self.listar() if j.presente]
+        return [j for j in self.listar(clube_codigo) if j.presente]
     
-    def listar_por_tipo(self, tipo: str) -> List[Jogador]:
+    def listar_por_tipo(self, tipo: str, clube_codigo: Optional[str] = None) -> List[Jogador]:
         """
         Lista jogadores por tipo
         
         Args:
             tipo: 'fixo' ou 'avulso'
+            clube_codigo: Código do clube (opcional)
             
         Returns:
             Lista de jogadores do tipo
@@ -634,19 +724,21 @@ class JogadorService:
         if tipo not in ["fixo", "avulso"]:
             raise ValueError("Tipo deve ser 'fixo' ou 'avulso'")
         
-        return [j for j in self.listar() if j.tipo == tipo]
+        return [j for j in self.listar(clube_codigo) if j.tipo == tipo]
     
-    def marcar_presenca(self, jogador_ids: List[str]) -> bool:
+    def marcar_presenca(self, jogador_ids: List[str], clube_codigo: Optional[str] = None) -> bool:
         """
         Marca jogadores como presentes (desseleciona os demais)
         
         Args:
             jogador_ids: Lista de IDs dos jogadores presentes
+            clube_codigo: Código do clube (opcional)
             
         Returns:
             True se atualizado
         """
-        dados = self._carregar_raw()
+        cod = self._obter_clube_codigo(clube_codigo)
+        dados = self._carregar_raw(cod)
         ids_set = set(jogador_ids)
 
         if all(bool(item.get("presente")) == (item.get("id") in ids_set) for item in dados):
@@ -657,26 +749,28 @@ class JogadorService:
             for item in dados
         ]
         
-        self._salvar(dados_atualizados)
+        self._salvar(dados_atualizados, cod)
         return True
     
-    def limpar_presenca(self) -> bool:
+    def limpar_presenca(self, clube_codigo: Optional[str] = None) -> bool:
         """
         Marca todos como ausentes
         
         Returns:
             True se atualizado
         """
-        dados = self._carregar_raw()
+        cod = self._obter_clube_codigo(clube_codigo)
+        dados = self._carregar_raw(cod)
         if not any(item.get("presente") for item in dados):
             return True
 
-        self._salvar([{**item, "presente": False} for item in dados])
+        self._salvar([{**item, "presente": False} for item in dados], cod)
         return True
     
-    def contar_presentes(self) -> int:
+    def contar_presentes(self, clube_codigo: Optional[str] = None) -> int:
         """Retorna número de jogadores presentes"""
-        return sum(1 for item in self._carregar_raw() if item.get("presente"))
+        cod = self._obter_clube_codigo(clube_codigo)
+        return sum(1 for item in self._carregar_raw(cod) if item.get("presente"))
 
     def sincronizar_jogador_avulso(self, jogador_avulso_id: str, usuario_destino_id: str) -> dict:
         """

@@ -37,5 +37,17 @@
     "criado_em": "2026-09-18T15:03:51.159874+00:00",
     "ativo": true,
     "codigo_formatado": "003"
+  },
+  {
+    "id": "clb_007fbc5c-6ee5-49da-8bde-ff2dc8e4192a",
+    "id_num": 4,
+    "nome": "legendarios",
+    "slug": "legendarios",
+    "cor_tema": "neon-green",
+    "admin_user_id": "e03b8938-0fa3-4be0-92b4-cd5b0567a601",
+    "senha_juiz_hash": "scrypt:32768:8:1$h0qyPwdN61AXfyP2$8bdef8eebe2c0464887e622e3556466e187cc17982534c12bca4a09a795e4ff7ef3793cdb19c0822c9dc90cb7645b97ded2cf25d8e982ab73b1ffd817ecd1acc",
+    "criado_em": "2026-09-18T23:15:49.688282+00:00",
+    "ativo": true,
+    "codigo_formatado": "004"
   }
 ]

@@ -134,7 +134,6 @@ def resolver_namespace_clube(namespace: str, clube_codigo: Optional[str] = None)
     NAMESPACES_GLOBAIS = {
         "users",
         "clubes",
-        "jogadores",
         "image_assets",
         "migration_user_player_link_done",
         "admin_notificacoes",
@@ -142,9 +141,7 @@ def resolver_namespace_clube(namespace: str, clube_codigo: Optional[str] = None)
     if namespace in NAMESPACES_GLOBAIS:
         return namespace
 
-    cod = _obter_contexto_clube_codigo(clube_codigo)
-    if not cod or cod == "001":
-        return namespace
+    cod = _obter_contexto_clube_codigo(clube_codigo) or "001"
 
     prefix = f"clube_{cod}_"
     if namespace.startswith(prefix) or namespace.startswith(f"{cod}_"):
@@ -227,6 +224,51 @@ def load_json_data(namespace: str, default, clube_codigo: Optional[str] = None):
             except (json.JSONDecodeError, OSError) as e:
                 print(f"[DB] Error loading {ns}.json ({candidate}): {e}")
                 continue
+
+    # Fallback legado transparente para o Clube 001 (ex: ler de 'partidas' se 'clube_001_partidas' ainda não foi populado)
+    if ns.startswith("clube_001_"):
+        legado_ns = namespace
+        if legado_ns.startswith("clube_001_"):
+            legado_ns = legado_ns[len("clube_001_"):]
+
+        conn = get_conn()
+        if conn is not None:
+            try:
+                ensure_json_store_table(conn)
+                with conn.cursor() as cur:
+                    cur.execute(
+                        f"select payload from {json_store_table_name()} where namespace = %s",
+                        (legado_ns,),
+                    )
+                    row = cur.fetchone()
+                    if row:
+                        data = row[0]
+                        _set_cached(ns, data)
+                        return _copiar_dado_cache(data)
+            except Exception as e:
+                print(f"[DB] Error loading fallback from Postgres ({legado_ns}): {e}")
+            finally:
+                conn.close()
+
+        for candidate in _candidate_paths(f"{legado_ns}.json"):
+            if candidate.exists():
+                try:
+                    with candidate.open("r", encoding="utf-8") as f:
+                        data = json.load(f)
+                    _set_cached(ns, data)
+                    return _copiar_dado_cache(data)
+                except (json.JSONDecodeError, OSError) as e:
+                    continue
+
+        seed_candidate = _repo_root() / "data" / "seeds" / f"{legado_ns}.json"
+        if seed_candidate.exists():
+            try:
+                with seed_candidate.open("r", encoding="utf-8") as f:
+                    data = json.load(f)
+                _set_cached(ns, data)
+                return _copiar_dado_cache(data)
+            except Exception:
+                pass
 
     # Fallback para template padrão de novos clubes em data/schema_clube_novo_5v5/
     if ns != namespace:

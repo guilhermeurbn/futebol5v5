@@ -69,6 +69,10 @@ data/partidas.json
 data/sorteios_stack.json
 data/users.json
 data/votacoes_partidas.json
+data/clube_*.json
+data/confiabilidade_votos.json
+data/clubes.json
+data/image_assets.json
 
 # Pasta de Backups
 backups/
