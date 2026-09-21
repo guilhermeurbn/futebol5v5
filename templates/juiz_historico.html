@@ -257,8 +257,13 @@
             </div>
         {% else %}
             <div class="empty-state">
-                <div class="empty-icon">📜</div>
-                <p>Nenhum sorteio realizado ainda</p>
+                <div class="empty-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                </div>
+                <p class="empty-state__title">Nenhum sorteio realizado ainda</p>
                 <p class="empty-hint">Assim que uma rodada for criada, ela aparecerá aqui com o resumo completo.</p>
             </div>
         {% endif %}

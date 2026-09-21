@@ -22,7 +22,7 @@
     </header>
 
     <main class="main ranking-page__main" style="max-width: 1120px; margin: 0 auto; padding: 0.75rem 1rem 3rem 1rem;">
-        {% set competencia_titulo = temporada.nome if temporada else 'Competição ativa' %}
+        {% set competencia_titulo = temporada.nome if (temporada and temporada.nome) else 'Sem competição ativa' %}
         {% set competencia_subtitulo = 'A pontuação acumula a média das notas ao longo de 2 meses.' %}
 
         <section class="ranking-hero-minimal" style="background: rgba(18, 20, 26, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 0.7rem 1rem; margin-bottom: 1rem; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem;">
@@ -31,7 +31,15 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: #22c55e; flex-shrink: 0; display: inline-block; vertical-align: middle;" aria-hidden="true">
                         <path d="M8 21H16M12 17V21M17 4V9C17 11.7614 14.7614 14 12 14C9.23858 14 7 11.7614 7 9V4H17ZM17 4H20C20.5523 4 21 4.44772 21 5V7C21 8.10457 20.1046 9 19 9H17M7 4H4C3.44772 4 3 4.44772 3 5V7C3 8.10457 3.89543 9 5 9H7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                    <span style="display: inline-block; vertical-align: middle; line-height: 1.2;">{% if tipo_ranking == 'geral' %}Ranking Histórico Geral{% else %}{{ competencia_titulo | replace('🏆', '') | trim }}{% endif %}</span>
+                    <span style="display: inline-block; vertical-align: middle; line-height: 1.2;">
+                        {% if tipo_ranking == 'geral' %}
+                            Ranking Histórico Geral
+                        {% elif temporada and temporada.nome %}
+                            {{ competencia_titulo | replace('🏆', '') | trim }}
+                        {% else %}
+                            Nenhuma competição ativa
+                        {% endif %}
+                    </span>
                 </h2>
 
                 {% if temporada and tipo_ranking != 'geral' %}
@@ -43,7 +51,7 @@
                         {{ temporada.progresso_pct }}% concluído
                     </span>
                     {% if eh_admin %}
-                    <button type="button" onclick="document.getElementById('modalEditarCompeticao').showModal()" title="Editar datas da competição" aria-label="Editar datas da competição" style="background: rgba(167, 139, 250, 0.16); color: #c4b5fd; border: 1px solid rgba(167, 139, 250, 0.35); border-radius: 999px; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; margin-left: 0.15rem;" onmouseover="this.style.transform='scale(1.1)'; this.style.background='rgba(167, 139, 250, 0.3)';" onmouseout="this.style.transform='scale(1)'; this.style.background='rgba(167, 139, 250, 0.16)';">
+                    <button type="button" onclick="document.getElementById('modalEditarCompeticao').showModal()" title="Editar datas da competição" aria-label="Editar datas da competição" style="background: rgba(34, 197, 94, 0.12); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.25); border-radius: 999px; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; margin-left: 0.15rem; box-shadow: none;" onmouseover="this.style.transform='scale(1.1)'; this.style.background='rgba(34, 197, 94, 0.22)';" onmouseout="this.style.transform='scale(1)'; this.style.background='rgba(34, 197, 94, 0.12)';">
                         <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M12 20h9"/>
                             <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
@@ -55,7 +63,7 @@
             </div>
 
             {% if eh_admin %}
-            <button type="button" onclick="document.getElementById('modalAbrirCompeticao').showModal()" style="background: rgba(34, 197, 94, 0.16); color: #4ade80; font-weight: 800; border-radius: 10px; padding: 0.45rem 0.85rem; border: 1px solid rgba(34, 197, 94, 0.35); cursor: pointer; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.2s ease;">
+            <button type="button" onclick="document.getElementById('modalAbrirCompeticao').showModal()" style="background: rgba(34, 197, 94, 0.16); color: #4ade80; font-weight: 800; border-radius: 10px; padding: 0.45rem 0.85rem; border: 1px solid rgba(34, 197, 94, 0.35); cursor: pointer; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.2s ease; box-shadow: none;">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
                 Nova competição
             </button>
@@ -64,17 +72,17 @@
 
         <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem; margin-bottom: 1rem;">
             <div style="display: flex; gap: 0.45rem; background: rgba(18, 18, 23, 0.95); border: 1px solid rgba(255, 255, 255, 0.07); padding: 0.35rem; border-radius: 14px;">
-                <a href="{{ url_for('stats.pagina_ranking', tipo='temporada') }}" style="border-radius: 10px; font-size: 0.85rem; font-weight: 800; padding: 0.55rem 1rem; text-decoration: none; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 0.45rem; {% if tipo_ranking != 'geral' %}background: #22c55e; color: #000000; box-shadow: 0 0 12px rgba(34,197,94,0.22);{% else %}color: #94a3b8; background: transparent;{% endif %}">
+                <a href="{{ url_for('stats.pagina_ranking', tipo='temporada') }}" style="border-radius: 10px; font-size: 0.85rem; font-weight: 800; padding: 0.55rem 1rem; text-decoration: none; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 0.45rem; box-shadow: none; {% if tipo_ranking != 'geral' %}background: #22c55e; color: #000000;{% else %}color: #94a3b8; background: transparent;{% endif %}">
                     <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19h16"/><path d="M6 17V7l6-4 6 4v10"/><path d="M10 11h4"/></svg>
                     Competição ativa
                 </a>
-                <a href="{{ url_for('stats.pagina_ranking', tipo='geral') }}" style="border-radius: 10px; font-size: 0.85rem; font-weight: 800; padding: 0.55rem 1rem; text-decoration: none; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 0.45rem; {% if tipo_ranking == 'geral' %}background: #22c55e; color: #000000; box-shadow: 0 0 12px rgba(34,197,94,0.22);{% else %}color: #94a3b8; background: transparent;{% endif %}">
+                <a href="{{ url_for('stats.pagina_ranking', tipo='geral') }}" style="border-radius: 10px; font-size: 0.85rem; font-weight: 800; padding: 0.55rem 1rem; text-decoration: none; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 0.45rem; box-shadow: none; {% if tipo_ranking == 'geral' %}background: #22c55e; color: #000000;{% else %}color: #94a3b8; background: transparent;{% endif %}">
                     <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/></svg>
                     Histórico geral
                 </a>
             </div>
 
-            {% if eh_admin %}
+            {% if eh_admin and temporada %}
             <div style="font-size: 0.82rem; color: #94a3b8; display: inline-flex; align-items: center; gap: 0.45rem;">
                 <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 2"/></svg>
                 A temporada atual acumula a média das notas durante dois meses.
@@ -260,69 +268,138 @@
             <div style="width: 58px; height: 58px; border-radius: 50%; background: rgba(34, 197, 94, 0.12); border: 1px solid rgba(34, 197, 94, 0.25); color: #22c55e; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto;">
                 <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M5 7h14"/><path d="M7 7v10"/><path d="M17 7v10"/></svg>
             </div>
-            <h3 style="font-size: 1.25rem; font-weight: 850; color: #ffffff; margin: 0 0 0.5rem 0;">Competição zerada</h3>
+            <h3 style="font-size: 1.25rem; font-weight: 850; color: #ffffff; margin: 0 0 0.5rem 0;">
+                {% if temporada %}Competição zerada{% else %}Nenhuma competição iniciada{% endif %}
+            </h3>
             <p style="font-size: 0.92rem; color: #94a3b8; margin: 0 auto; max-width: 520px; line-height: 1.55;">
-                A nova competição foi aberta sem pontuação inicial. As médias de cada jogador vão acumular ao longo dos próximos dois meses, conforme as partidas forem encerradas.
+                {% if temporada %}
+                A nova competição foi aberta sem pontuação inicial. As médias de cada jogador vão acumular conforme as partidas forem encerradas.
+                {% elif eh_admin %}
+                Este clube ainda não possui uma competição ativa. Clique no botão abaixo para abrir a 1ª competição e inaugurar a disputa pelo ranking!
+                {% else %}
+                O organizador do clube ainda não abriu a primeira competição. Em breve as partidas e notas acumuladas aparecerão aqui!
+                {% endif %}
             </p>
+            {% if not temporada and eh_admin %}
+            <div style="margin-top: 1.25rem;">
+                <button type="button" onclick="document.getElementById('modalAbrirCompeticao').showModal()" style="background: #22c55e; color: #000000; font-weight: 800; border-radius: 12px; padding: 0.7rem 1.4rem; border: none; cursor: pointer; font-size: 0.92rem; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: none; transition: transform 0.15s ease;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                    Abrir 1ª Competição
+                </button>
+            </div>
+            {% endif %}
         </div>
         {% endif %}
     </main>
 </div>
 
 <!-- Modal: Abrir Nova Competição -->
+<!-- Modal: Abrir Nova Competição -->
 {% if eh_admin %}
-<dialog id="modalAbrirCompeticao" style="background: #121217; border: 1px solid rgba(34, 197, 94, 0.22); border-radius: 20px; color: #ffffff; padding: 1.5rem; max-width: 500px; width: 92%; box-shadow: 0 20px 50px rgba(0,0,0,0.85); outline: none;">
-    <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1.1rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.8rem;">
-        <div>
-            <div style="font-size: 0.75rem; font-weight: 800; color: #22c55e; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.2rem; display: inline-flex; align-items: center; gap: 0.35rem;">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 8v8"/><path d="M14 12H6"/><circle cx="12" cy="12" r="10"/></svg>
-                Nova competição
-            </div>
-            <h3 style="font-size: 1.25rem; font-weight: 850; margin: 0;">Abrir ciclo zerado de 2 meses</h3>
-        </div>
-        <button type="button" onclick="document.getElementById('modalAbrirCompeticao').close()" style="background: none; border: none; color: #94a3b8; font-size: 1.4rem; cursor: pointer; line-height: 1;">×</button>
+<style>
+dialog.ranking-modal-clean {
+    position: fixed;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    width: 92%;
+    max-width: 440px;
+    background: #12141a;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 22px;
+    padding: 1.35rem 1.4rem;
+    color: #ffffff;
+    box-shadow: 0 24px 55px rgba(0, 0, 0, 0.85);
+    outline: none;
+    max-height: 88vh;
+    overflow-y: auto;
+}
+dialog.ranking-modal-clean::backdrop {
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+</style>
+
+<dialog id="modalAbrirCompeticao" class="ranking-modal-clean">
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1.15rem;">
+        <h3 style="font-size: 1.15rem; font-weight: 800; margin: 0; color: #ffffff; letter-spacing: -0.01em;">Nova competição</h3>
+        <button type="button" onclick="document.getElementById('modalAbrirCompeticao').close()" aria-label="Fechar" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); border-radius: 50%; width: 30px; height: 30px; color: #94a3b8; display: flex; align-items: center; justify-content: center; cursor: pointer; outline: none; padding: 0;">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
     </div>
 
     <form id="formAbrirCompeticao" onsubmit="event.preventDefault(); submeterNovaCompeticao();">
-        <div style="margin-bottom: 1rem;">
-            <label style="display: block; font-size: 0.78rem; font-weight: 800; color: #cbd5e1; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.04em;">Nome da competição</label>
-                 <input type="text" id="compNome" placeholder="Ex: Liga das Estrelas, Torneio Verão 2026..."
-                   style="width: 100%; background: #181823; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; padding: 0.65rem 0.85rem; color: #fff; font-size: 0.9rem; outline: none;">
+        <div style="margin-bottom: 0.9rem;">
+            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #94a3b8; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.04em;">Nome da competição</label>
+            <input type="text" id="compNome" placeholder=""
+                   style="width: 100%; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.65rem 0.85rem; color: #fff; font-size: 0.9rem; outline: none; box-sizing: border-box;">
         </div>
 
-        <div style="margin-bottom: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
+        <div style="margin-bottom: 0.9rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
             <div>
-                <label style="display: block; font-size: 0.78rem; font-weight: 800; color: #cbd5e1; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.04em;">Duração</label>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #94a3b8; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.04em;">Duração</label>
                 <select id="compTipoDuracao" onchange="atualizarRotuloDuracao(this.value)"
-                        style="width: 100%; background: #181823; border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 10px; padding: 0.65rem; color: #fff; font-size: 0.88rem; font-weight: 700; outline: none; cursor: pointer;">
-                    <option value="meses" selected>2 meses</option>
+                        style="width: 100%; background: #181a20; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; height: 42px; padding: 0 0.75rem; color: #fff; font-size: 0.88rem; font-weight: 600; outline: none; cursor: pointer; box-sizing: border-box;">
                     <option value="partidas">Partidas</option>
+                    <option value="meses" selected>Meses</option>
                 </select>
             </div>
             <div>
-                <label style="display: block; font-size: 0.78rem; font-weight: 800; color: #cbd5e1; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.04em;">Quantidade (<span id="lblUnidade">meses</span>)</label>
-                  <input type="number" id="compValorDuracao" value="2" min="1" max="24"
-                       style="width: 100%; background: #181823; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; padding: 0.65rem 0.85rem; color: #fff; font-size: 0.9rem; font-weight: 700; outline: none;">
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #94a3b8; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.04em;">Quantidade</label>
+                <div style="display: flex; align-items: center; justify-content: space-between; background: #181a20; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; height: 42px; box-sizing: border-box; padding: 0 4px;">
+                    <button type="button" onclick="ajustarQuantidade(-1)" aria-label="Diminuir" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; color: #22c55e; font-size: 1.3rem; font-weight: 800; width: 34px; height: 34px; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none;">−</button>
+                    <span id="displayValorDuracao" style="font-size: 1.05rem; font-weight: 800; color: #ffffff; text-align: center; min-width: 32px;">2</span>
+                    <input type="hidden" id="compValorDuracao" value="2">
+                    <button type="button" onclick="ajustarQuantidade(1)" aria-label="Aumentar" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; color: #22c55e; font-size: 1.3rem; font-weight: 800; width: 34px; height: 34px; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none;">+</button>
+                </div>
             </div>
         </div>
 
-        <div style="background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.18); border-radius: 10px; padding: 0.75rem; margin-bottom: 1.1rem; font-size: 0.82rem; color: #a7f3d0; line-height: 1.45;">
-            <strong>Novo ciclo:</strong> ao abrir esta competição, o ranking começa zerado e passa a acumular a média das notas de cada jogador a partir das próximas partidas.
-        </div>
+        <p style="font-size: 0.78rem; color: #64748b; margin: 0.3rem 0 1.25rem 0; line-height: 1.45;">
+            O ranking começará zerado e acumulará a média das notas a partir das próximas partidas.
+        </p>
 
-        <div style="display: flex; justify-content: flex-end; gap: 0.6rem;">
-            <button type="button" class="btn btn-secondary" onclick="document.getElementById('modalAbrirCompeticao').close()" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 0.6rem 1rem; color: #cbd5e1;">Cancelar</button>
-            <button type="submit" class="btn" style="background: #22c55e; color: #000000; font-weight: 800; border-radius: 10px; padding: 0.6rem 1.15rem; border: none; cursor: pointer; box-shadow: 0 0 14px rgba(34,197,94,0.3);">Iniciar competição</button>
+        <div style="display: flex; justify-content: flex-end; align-items: center; gap: 0.6rem;">
+            <button type="button" onclick="document.getElementById('modalAbrirCompeticao').close()" style="background: transparent; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 0.6rem 1.1rem; color: #94a3b8; font-size: 0.88rem; font-weight: 600; cursor: pointer; box-shadow: none;">Cancelar</button>
+            <button type="submit" style="background: #22c55e; color: #000000; font-weight: 800; border-radius: 12px; padding: 0.65rem 1.3rem; border: none; cursor: pointer; font-size: 0.88rem; box-shadow: none;">Iniciar competição</button>
         </div>
     </form>
 </dialog>
 
 <script>
 function atualizarRotuloDuracao(tipo) {
-    const lbl = document.getElementById('lblUnidade');
-    if (lbl) {
-        lbl.innerText = tipo === 'partidas' ? 'partidas' : 'meses';
+    const valInput = document.getElementById('compValorDuracao');
+    const display = document.getElementById('displayValorDuracao');
+    if (!valInput || !display) return;
+    if (tipo === 'partidas') {
+        valInput.value = 10;
+        display.innerText = '10';
+    } else {
+        valInput.value = 2;
+        display.innerText = '2';
     }
+}
+
+function ajustarQuantidade(delta) {
+    const tipo = document.getElementById('compTipoDuracao')?.value || 'meses';
+    const valInput = document.getElementById('compValorDuracao');
+    const display = document.getElementById('displayValorDuracao');
+    if (!valInput || !display) return;
+
+    let step = tipo === 'partidas' ? 5 : 1;
+    let min = 1;
+    let max = tipo === 'partidas' ? 100 : 24;
+
+    let atual = parseInt(valInput.value, 10);
+    if (isNaN(atual)) atual = (tipo === 'partidas' ? 10 : 2);
+    let novo = atual + (delta * step);
+    if (novo < min) novo = min;
+    if (novo > max) novo = max;
+
+    valInput.value = novo;
+    display.innerText = novo;
 }
 
 async function submeterNovaCompeticao() {
@@ -359,56 +436,163 @@ async function submeterNovaCompeticao() {
 </script>
 
 <!-- Modal: Editar Datas da Competição -->
-<dialog id="modalEditarCompeticao" style="background: #121217; border: 1px solid rgba(167, 139, 250, 0.3); border-radius: 20px; color: #ffffff; padding: 1.5rem; max-width: 500px; width: 92%; box-shadow: 0 20px 50px rgba(0,0,0,0.85); outline: none;">
-    <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1.1rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.8rem;">
-        <div>
-            <div style="font-size: 0.75rem; font-weight: 800; color: #a78bfa; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.2rem; display: inline-flex; align-items: center; gap: 0.35rem;">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                Editar Período da Competição
-            </div>
-            <h3 style="font-size: 1.25rem; font-weight: 850; margin: 0;">Ajustar datas da competição</h3>
-        </div>
-        <button type="button" onclick="document.getElementById('modalEditarCompeticao').close()" style="background: none; border: none; color: #94a3b8; font-size: 1.4rem; cursor: pointer; line-height: 1;">×</button>
+<dialog id="modalEditarCompeticao" class="ranking-modal-clean">
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1.15rem;">
+        <h3 style="font-size: 1.15rem; font-weight: 800; margin: 0; color: #ffffff; letter-spacing: -0.01em;">Ajustar competição</h3>
+        <button type="button" onclick="document.getElementById('modalEditarCompeticao').close()" aria-label="Fechar" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); border-radius: 50%; width: 30px; height: 30px; color: #94a3b8; display: flex; align-items: center; justify-content: center; cursor: pointer; outline: none; padding: 0;">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
     </div>
 
     <form id="formEditarCompeticao" onsubmit="event.preventDefault(); submeterEdicaoCompeticao();">
-        <div style="margin-bottom: 1rem;">
-            <label style="display: block; font-size: 0.78rem; font-weight: 800; color: #cbd5e1; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.04em;">Nome da Competição</label>
-            <input type="text" id="editCompNome" value="{{ temporada.nome if temporada else '' }}" placeholder="Ex: Temporada #1 - Edição de Prêmios" required
-                   style="width: 100%; background: #181823; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; padding: 0.65rem 0.85rem; color: #fff; font-size: 0.9rem; font-weight: 600; outline: none;">
+        <div style="margin-bottom: 0.9rem;">
+            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #94a3b8; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.04em;">Nome da Competição</label>
+            <input type="text" id="editCompNome" value="{{ temporada.nome if temporada else '' }}" placeholder="" required
+                   style="width: 100%; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.65rem 0.85rem; color: #fff; font-size: 0.9rem; font-weight: 600; outline: none; box-sizing: border-box;">
         </div>
 
-        <div style="margin-bottom: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
+        <div style="margin-bottom: 0.9rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
             <div>
-                <label style="display: block; font-size: 0.78rem; font-weight: 800; color: #cbd5e1; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.04em;">Data de Início 📅</label>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #94a3b8; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.04em;">Data de Início</label>
                 <input type="date" id="editCompDataInicio" value="{{ temporada.data_inicio_input if temporada else '' }}" required
-                       style="width: 100%; background: #181823; border: 1px solid rgba(167, 139, 250, 0.35); border-radius: 10px; padding: 0.65rem 0.85rem; color: #fff; font-size: 0.9rem; font-weight: 700; outline: none; cursor: pointer;">
+                       style="width: 100%; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.65rem 0.85rem; color: #fff; font-size: 0.9rem; font-weight: 600; outline: none; cursor: pointer; box-sizing: border-box;">
             </div>
             <div>
-                <label style="display: block; font-size: 0.78rem; font-weight: 800; color: #cbd5e1; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.04em;">Data de Término 📅</label>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #94a3b8; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.04em;">Data de Término</label>
                 <input type="date" id="editCompDataFim" value="{{ temporada.data_fim_input if temporada else '' }}" required
-                       style="width: 100%; background: #181823; border: 1px solid rgba(167, 139, 250, 0.35); border-radius: 10px; padding: 0.65rem 0.85rem; color: #fff; font-size: 0.9rem; font-weight: 700; outline: none; cursor: pointer;">
+                       style="width: 100%; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.65rem 0.85rem; color: #fff; font-size: 0.9rem; font-weight: 600; outline: none; cursor: pointer; box-sizing: border-box;">
             </div>
         </div>
 
-        <div style="margin-bottom: 1.1rem;">
-            <label style="display: block; font-size: 0.78rem; font-weight: 800; color: #cbd5e1; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.04em;">Descrição do Prêmio / Detalhes</label>
-            <input type="text" id="editCompDescricao" value="{{ temporada.descricao_premio if temporada else '' }}" placeholder="Ex: 🏆 1º Lugar: Prêmio Especial da Temporada!"
-                   style="width: 100%; background: #181823; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; padding: 0.65rem 0.85rem; color: #fff; font-size: 0.9rem; outline: none;">
+        <div style="margin-bottom: 1.15rem;">
+            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #94a3b8; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.04em;">Descrição do Prêmio / Detalhes</label>
+            <input type="text" id="editCompDescricao" value="{{ temporada.descricao_premio if temporada else '' }}" placeholder=""
+                   style="width: 100%; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.65rem 0.85rem; color: #fff; font-size: 0.9rem; outline: none; box-sizing: border-box;">
         </div>
 
-        <div style="background: rgba(167, 139, 250, 0.08); border: 1px solid rgba(167, 139, 250, 0.2); border-radius: 10px; padding: 0.75rem; margin-bottom: 1.1rem; font-size: 0.82rem; color: #ddd6fe; line-height: 1.45;">
-            💡 <strong>Atualização em tempo real:</strong> Ao alterar a data inicial ou final, o percentual de progresso e as partidas acumuladas serão recalculados para o novo período.
-        </div>
-
-        <div style="display: flex; justify-content: flex-end; gap: 0.6rem;">
-            <button type="button" class="btn btn-secondary" onclick="document.getElementById('modalEditarCompeticao').close()" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 0.6rem 1rem; color: #cbd5e1;">Cancelar</button>
-            <button type="submit" class="btn" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: #ffffff; font-weight: 800; border-radius: 10px; padding: 0.6rem 1.15rem; border: none; cursor: pointer; box-shadow: 0 0 14px rgba(139,92,246,0.35);">Salvar alterações</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin-top: 1.15rem; padding-top: 0.85rem; border-top: 1px solid rgba(255, 255, 255, 0.06);">
+            <button type="button" onclick="iniciarExclusaoCompeticao()" style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.22); border-radius: 12px; padding: 0.6rem 0.9rem; color: #f87171; font-size: 0.84rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.2s ease; box-shadow: none;" onmouseover="this.style.background='rgba(239, 68, 68, 0.16)'; this.style.borderColor='rgba(239, 68, 68, 0.4)';" onmouseout="this.style.background='rgba(239, 68, 68, 0.08)'; this.style.borderColor='rgba(239, 68, 68, 0.22)';">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+                <span>Apagar sorteio</span>
+            </button>
+            <div style="display: flex; align-items: center; gap: 0.6rem; margin-left: auto;">
+                <button type="button" onclick="document.getElementById('modalEditarCompeticao').close()" style="background: transparent; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 0.6rem 1.1rem; color: #cbd5e1; font-size: 0.88rem; font-weight: 600; cursor: pointer; box-shadow: none;">Cancelar</button>
+                <button type="submit" style="background: #22c55e; color: #000000; font-weight: 800; border-radius: 12px; padding: 0.65rem 1.3rem; border: none; cursor: pointer; font-size: 0.88rem; box-shadow: none;">Salvar alterações</button>
+            </div>
         </div>
     </form>
 </dialog>
 
+<!-- Modal: Dupla Confirmação de Exclusão da Competição / Sorteio -->
+<dialog id="modalConfirmarExclusaoCompeticao" class="ranking-modal-clean" style="max-width: 410px; text-align: center;">
+    <!-- Etapa 1: Primeira Confirmação -->
+    <div id="etapaExclusao1">
+        <div style="width: 50px; height: 50px; border-radius: 50%; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0.85rem;">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+        </div>
+        <h3 style="font-size: 1.15rem; font-weight: 800; margin: 0 0 0.45rem 0; color: #ffffff;">Apagar sorteio / competição?</h3>
+        <p style="font-size: 0.85rem; color: #94a3b8; margin: 0 0 1.15rem 0; line-height: 1.45;">
+            Deseja realmente apagar a competição ativa? O ranking voltará a ficar <strong style="color: #f87171;">zerado</strong> para o clube.
+        </p>
+        <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 12px; padding: 0.65rem 0.85rem; margin-bottom: 1.25rem; font-size: 0.78rem; color: #fca5a5; text-align: left; display: flex; align-items: center; gap: 0.5rem;">
+            <span style="font-size: 1rem;">⚠️</span>
+            <span>Esta ação reiniciará a disputa e não poderá ser desfeita.</span>
+        </div>
+        <div style="display: flex; gap: 0.65rem; justify-content: center;">
+            <button type="button" onclick="cancelarExclusaoCompeticao()" style="flex: 1; background: transparent; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 0.65rem; color: #cbd5e1; font-size: 0.88rem; font-weight: 600; cursor: pointer; box-shadow: none;">Cancelar</button>
+            <button type="button" onclick="avancarParaSegundaConfirmacao()" style="flex: 1.2; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 12px; padding: 0.65rem; color: #f87171; font-size: 0.88rem; font-weight: 700; cursor: pointer; box-shadow: none;">Quero apagar</button>
+        </div>
+    </div>
+
+    <!-- Etapa 2: Segunda Confirmação (Dupla Confirmação) -->
+    <div id="etapaExclusao2" style="display: none;">
+        <div style="width: 50px; height: 50px; border-radius: 50%; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); color: #f87171; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0.85rem;">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                <line x1="10" y1="11" x2="10" y2="17"></line>
+                <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+        </div>
+        <h3 style="font-size: 1.15rem; font-weight: 850; margin: 0 0 0.45rem 0; color: #f87171;">Confirmação definitiva</h3>
+        <p style="font-size: 0.85rem; color: #e2e8f0; margin: 0 0 1.25rem 0; line-height: 1.45;">
+            Tem <strong>certeza absoluta</strong> de que deseja apagar mesmo agora?
+        </p>
+        <div style="display: flex; gap: 0.65rem; justify-content: center;">
+            <button type="button" onclick="cancelarExclusaoCompeticao()" style="flex: 1; background: transparent; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 0.65rem; color: #cbd5e1; font-size: 0.88rem; font-weight: 600; cursor: pointer; box-shadow: none;">Voltar</button>
+            <button type="button" id="btnConfirmarExclusaoDefinitiva" onclick="submeterExclusaoDefinitiva()" style="flex: 1.4; background: #ef4444; border: none; border-radius: 12px; padding: 0.65rem; color: #ffffff; font-size: 0.88rem; font-weight: 850; cursor: pointer; box-shadow: none;">Sim, apagar mesmo</button>
+        </div>
+    </div>
+</dialog>
+
 <script>
+function iniciarExclusaoCompeticao() {
+    const modalEditar = document.getElementById('modalEditarCompeticao');
+    if (modalEditar) modalEditar.close();
+
+    document.getElementById('etapaExclusao1').style.display = 'block';
+    document.getElementById('etapaExclusao2').style.display = 'none';
+
+    const modalConfirm = document.getElementById('modalConfirmarExclusaoCompeticao');
+    if (modalConfirm) modalConfirm.showModal();
+}
+
+function cancelarExclusaoCompeticao() {
+    const modalConfirm = document.getElementById('modalConfirmarExclusaoCompeticao');
+    if (modalConfirm) modalConfirm.close();
+}
+
+function avancarParaSegundaConfirmacao() {
+    document.getElementById('etapaExclusao1').style.display = 'none';
+    document.getElementById('etapaExclusao2').style.display = 'block';
+}
+
+async function submeterExclusaoDefinitiva() {
+    const btn = document.getElementById('btnConfirmarExclusaoDefinitiva');
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = "Apagando...";
+    }
+
+    try {
+        const token = "{{ csrf_token() }}";
+        const resp = await fetch("{{ url_for('stats.api_competicao_excluir') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': token
+            },
+            body: JSON.stringify({ csrf_token: token })
+        });
+        const data = await resp.json();
+        if (data.sucesso) {
+            window.location.reload();
+        } else {
+            alert(data.erro || "Erro ao apagar competição.");
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = "Sim, apagar mesmo";
+            }
+        }
+    } catch(e) {
+        console.error("Erro ao apagar competição:", e);
+        alert("Erro de conexão ao apagar competição.");
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = "Sim, apagar mesmo";
+        }
+    }
+}
+
 async function submeterEdicaoCompeticao() {
     const nome = document.getElementById('editCompNome').value.trim();
     const data_inicio = document.getElementById('editCompDataInicio').value;

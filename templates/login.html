@@ -15,7 +15,8 @@
 
 {% block app_onboarding_overlay %}
 <!-- MODAL DE ONBOARDING - MODO APLICATIVO (TELA CHEIA REAL & PALETA VERDE/PRETA/BRANCA) -->
-<div id="app-onboarding-modal" class="app-onboarding-modal{% if not show_onboarding %} is-hidden{% endif %}" style="{% if not show_onboarding %}display: none !important;{% else %}display: block;{% endif %}">
+<div id="app-onboarding-modal" class="app-onboarding-modal{% if not show_onboarding %} is-hidden{% endif %}"
+    style="{% if not show_onboarding %}display: none !important;{% else %}display: block;{% endif %}">
     <!-- Fundo de Iluminação do Campo -->
     <div class="onboarding-bg-glow onboarding-bg-glow--green"></div>
     <div class="onboarding-bg-glow onboarding-bg-glow--pitch"></div>
@@ -264,66 +265,84 @@
     <div class="social-modal-card">
         <div class="app-login-brand" style="margin-bottom: 0.8rem;">
             <span class="social-modal-badge" id="social-finish-badge">QUASE PRONTO!</span>
-            <h3 class="app-login-title" style="font-size: 1.35rem; font-weight: 800; color: #ffffff; margin-top: 0.4rem; margin-bottom: 0.2rem;">Finalizar Cadastro</h3>
-            <p class="app-login-subtitle" id="social-modal-user-info" style="font-size: 0.85rem; color: #94a3b8; line-height: 1.4; margin: 0 auto; max-width: 310px;">
+            <h3 class="app-login-title"
+                style="font-size: 1.35rem; font-weight: 800; color: #ffffff; margin-top: 0.4rem; margin-bottom: 0.2rem;">
+                Finalizar Cadastro</h3>
+            <p class="app-login-subtitle" id="social-modal-user-info"
+                style="font-size: 0.85rem; color: #94a3b8; line-height: 1.4; margin: 0 auto; max-width: 310px;">
                 Seus dados foram importados via Apple ID. Confirme sua posição e escolha seu username no NaTrave:
             </p>
         </div>
 
-            <input type="hidden" id="social_email_hidden" value="{{ social_email or '' }}">
-            <input type="hidden" id="social_nome_hidden" value="{{ social_nome or '' }}">
-            <input type="hidden" id="social_provider_hidden" value="{{ social_provider or '' }}">
-            <input type="hidden" id="social_id_hidden" value="{{ social_id or '' }}">
+        <input type="hidden" id="social_email_hidden" value="{{ social_email or '' }}">
+        <input type="hidden" id="social_nome_hidden" value="{{ social_nome or '' }}">
+        <input type="hidden" id="social_provider_hidden" value="{{ social_provider or '' }}">
+        <input type="hidden" id="social_id_hidden" value="{{ social_id or '' }}">
 
-            <!-- DADOS AUTO-COMPLETADOS DA APPLE/GOOGLE -->
-            <div class="social-autofill-preview" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; padding: 0.75rem 1rem; margin-bottom: 0.85rem; text-align: left;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-                    <span style="font-size: 0.75rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.5px;" id="social-provider-imported-tag">Autenticado via Apple</span>
-                    <span style="font-size: 0.72rem; background: rgba(34, 197, 94, 0.15); color: #4ade80; padding: 2px 8px; border-radius: 10px; font-weight: 700;">Rating 5.5</span>
-                </div>
-                <div style="font-size: 0.95rem; font-weight: 700; color: #f8fafc;" id="social-autofill-nome">Nome do Atleta</div>
-                <div style="font-size: 0.8rem; color: #94a3b8;" id="social-autofill-email">email@exemplo.com</div>
+        <!-- DADOS AUTO-COMPLETADOS DA APPLE/GOOGLE -->
+        <div class="social-autofill-preview"
+            style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; padding: 0.75rem 1rem; margin-bottom: 0.85rem; text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                <span
+                    style="font-size: 0.75rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.5px;"
+                    id="social-provider-imported-tag">Autenticado via Apple</span>
+                <span
+                    style="font-size: 0.72rem; background: rgba(34, 197, 94, 0.15); color: #4ade80; padding: 2px 8px; border-radius: 10px; font-weight: 700;">Rating
+                    5.5</span>
             </div>
-
-            <!-- POSIÇÃO PREFERIDA -->
-            <div class="form-group auth-field auth-field--compact" style="margin-bottom: 0.85rem;">
-                <label class="form-label" for="social_posicao_select" style="color: #94a3b8 !important; font-size: 0.8rem !important; font-weight: 600 !important; margin-bottom: 0.3rem !important; display: block; text-align: left;">Posição Preferida</label>
-                <div class="auth-input-wrap">
-                    <span class="auth-input-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" width="18" height="18">
-                            <circle cx="12" cy="12" r="10"/>
-                            <path d="m4.93 4.93 4.24 4.24"/>
-                            <path d="m14.83 9.17 4.24-4.24"/>
-                            <path d="m14.83 14.83 4.24 4.24"/>
-                            <path d="m9.17 14.83-4.24 4.24"/>
-                        </svg>
-                    </span>
-                    <select class="form-input auth-input" id="social_posicao_select" name="posicao" style="background: rgba(15, 23, 42, 0.8) !important; border: 1.5px solid rgba(255, 255, 255, 0.12) !important; color: #ffffff !important; font-size: 0.9rem !important; font-weight: 600 !important; border-radius: 14px !important; padding-left: 2.6rem !important;">
-                        <option value="linha" selected>Jogador de Linha</option>
-                        <option value="goleiro">Goleiro</option>
-                    </select>
-                </div>
+            <div style="font-size: 0.95rem; font-weight: 700; color: #f8fafc;" id="social-autofill-nome">Nome do Atleta
             </div>
+            <div style="font-size: 0.8rem; color: #94a3b8;" id="social-autofill-email">email@exemplo.com</div>
+        </div>
 
-            <!-- USERNAME -->
-            <div class="form-group auth-field auth-field--compact">
-                <label class="form-label" for="social_username_input" style="color: #94a3b8 !important; font-size: 0.8rem !important; font-weight: 600 !important; margin-bottom: 0.3rem !important; display: block; text-align: left;">
-                    Escolha seu @username no NaTrave
-                </label>
-                <div class="auth-input-wrap">
-                    <span class="auth-input-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" width="18" height="18">
-                            <circle cx="12" cy="12" r="4" />
-                            <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8" />
-                        </svg>
-                    </span>
-                    <input class="form-input auth-input" id="social_username_input" type="text"
-                        placeholder="ex: guilherme5v5" required autocomplete="username" style="background: rgba(15, 23, 42, 0.8) !important; border: 1.5px solid rgba(16, 185, 129, 0.4) !important; color: #ffffff !important; font-size: 0.95rem !important; font-weight: 600 !important; border-radius: 14px !important; padding-left: 2.6rem !important;">
-                </div>
-                <div id="social_username_status" style="font-size: 0.82rem; margin-top: 0.4rem; font-weight: 600; min-height: 1.3rem; text-align: center; transition: all 0.2s;"></div>
+        <!-- POSIÇÃO PREFERIDA -->
+        <div class="form-group auth-field auth-field--compact" style="margin-bottom: 0.85rem;">
+            <label class="form-label" for="social_posicao_select"
+                style="color: #94a3b8 !important; font-size: 0.8rem !important; font-weight: 600 !important; margin-bottom: 0.3rem !important; display: block; text-align: left;">Posição
+                Preferida</label>
+            <div class="auth-input-wrap">
+                <span class="auth-input-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" width="18" height="18">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="m4.93 4.93 4.24 4.24" />
+                        <path d="m14.83 9.17 4.24-4.24" />
+                        <path d="m14.83 14.83 4.24 4.24" />
+                        <path d="m9.17 14.83-4.24 4.24" />
+                    </svg>
+                </span>
+                <select class="form-input auth-input" id="social_posicao_select" name="posicao"
+                    style="background: rgba(15, 23, 42, 0.8) !important; border: 1.5px solid rgba(255, 255, 255, 0.12) !important; color: #ffffff !important; font-size: 0.9rem !important; font-weight: 600 !important; border-radius: 14px !important; padding-left: 2.6rem !important;">
+                    <option value="linha" selected>Jogador de Linha</option>
+                    <option value="goleiro">Goleiro</option>
+                </select>
             </div>
+        </div>
 
-            <button class="btn btn-primary auth-submit" id="social_username_btn" type="submit" disabled style="opacity: 0.5; width: 100%; padding: 0.85rem; border-radius: 14px; font-weight: 700; font-size: 0.95rem; margin-top: 0.6rem; transition: all 0.2s;">Concluir Cadastro</button>
+        <!-- USERNAME -->
+        <div class="form-group auth-field auth-field--compact">
+            <label class="form-label" for="social_username_input"
+                style="color: #94a3b8 !important; font-size: 0.8rem !important; font-weight: 600 !important; margin-bottom: 0.3rem !important; display: block; text-align: left;">
+                Escolha seu @username no NaTrave
+            </label>
+            <div class="auth-input-wrap">
+                <span class="auth-input-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" width="18" height="18">
+                        <circle cx="12" cy="12" r="4" />
+                        <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8" />
+                    </svg>
+                </span>
+                <input class="form-input auth-input" id="social_username_input" type="text"
+                    placeholder="ex: guilherme5v5" required autocomplete="username"
+                    style="background: rgba(15, 23, 42, 0.8) !important; border: 1.5px solid rgba(16, 185, 129, 0.4) !important; color: #ffffff !important; font-size: 0.95rem !important; font-weight: 600 !important; border-radius: 14px !important; padding-left: 2.6rem !important;">
+            </div>
+            <div id="social_username_status"
+                style="font-size: 0.82rem; margin-top: 0.4rem; font-weight: 600; min-height: 1.3rem; text-align: center; transition: all 0.2s;">
+            </div>
+        </div>
+
+        <button class="btn btn-primary auth-submit" id="social_username_btn" type="submit" disabled
+            style="opacity: 0.5; width: 100%; padding: 0.85rem; border-radius: 14px; font-weight: 700; font-size: 0.95rem; margin-top: 0.6rem; transition: all 0.2s;">Concluir
+            Cadastro</button>
         </form>
     </div>
 </div>
@@ -333,15 +352,18 @@
     <div class="social-modal-card">
         <div class="app-login-brand" style="margin-bottom: 1.2rem;">
             <span class="social-modal-badge" id="social-provider-badge">LOGIN SOCIAL</span>
-            <h3 class="app-login-title" id="social-provider-title" style="font-size: 1.35rem; margin-top: 0.4rem;">Autenticação Social</h3>
+            <h3 class="app-login-title" id="social-provider-title" style="font-size: 1.35rem; margin-top: 0.4rem;">
+                Autenticação Social</h3>
             <p class="app-login-subtitle" id="social-provider-subtitle">Conecte sua conta para entrar no NaTrave</p>
         </div>
 
         <form id="social-auth-direct-form" class="auth-form">
             <input type="hidden" id="social_auth_provider">
-            
+
             <div class="form-group auth-field auth-field--compact">
-                <label class="form-label" for="social_auth_email_input" style="color: #94a3b8 !important; font-size: 0.8rem !important; font-weight: 600 !important; margin-bottom: 0.4rem !important; display: block; text-align: left;">E-mail da Conta Social</label>
+                <label class="form-label" for="social_auth_email_input"
+                    style="color: #94a3b8 !important; font-size: 0.8rem !important; font-weight: 600 !important; margin-bottom: 0.4rem !important; display: block; text-align: left;">E-mail
+                    da Conta Social</label>
                 <div class="auth-input-wrap">
                     <span class="auth-input-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
@@ -349,12 +371,15 @@
                             <path d="m4 7 8 6 8-6" />
                         </svg>
                     </span>
-                    <input class="form-input auth-input" id="social_auth_email_input" type="email" placeholder="seu-email@exemplo.com" required autocomplete="email">
+                    <input class="form-input auth-input" id="social_auth_email_input" type="email"
+                        placeholder="seu-email@exemplo.com" required autocomplete="email">
                 </div>
             </div>
 
             <div class="form-group auth-field auth-field--compact">
-                <label class="form-label" for="social_auth_nome_input" style="color: #94a3b8 !important; font-size: 0.8rem !important; font-weight: 600 !important; margin-bottom: 0.4rem !important; display: block; text-align: left;">Nome Completo</label>
+                <label class="form-label" for="social_auth_nome_input"
+                    style="color: #94a3b8 !important; font-size: 0.8rem !important; font-weight: 600 !important; margin-bottom: 0.4rem !important; display: block; text-align: left;">Nome
+                    Completo</label>
                 <div class="auth-input-wrap">
                     <span class="auth-input-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
@@ -362,13 +387,16 @@
                             <circle cx="12" cy="8" r="4" />
                         </svg>
                     </span>
-                    <input class="form-input auth-input" id="social_auth_nome_input" type="text" placeholder="Seu Nome e Sobrenome" autocomplete="name">
+                    <input class="form-input auth-input" id="social_auth_nome_input" type="text"
+                        placeholder="Seu Nome e Sobrenome" autocomplete="name">
                 </div>
             </div>
 
             <div style="display: flex; gap: 0.75rem; margin-top: 1.2rem;">
-                <button type="button" id="social-auth-cancel-btn" class="btn" style="flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; font-weight: 700; border-radius: 14px;">Cancelar</button>
-                <button type="submit" class="btn btn-primary auth-submit" style="flex: 1.5; margin-top: 0; border-radius: 14px;">Continuar</button>
+                <button type="button" id="social-auth-cancel-btn" class="btn"
+                    style="flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; font-weight: 700; border-radius: 14px;">Cancelar</button>
+                <button type="submit" class="btn btn-primary auth-submit"
+                    style="flex: 1.5; margin-top: 0; border-radius: 14px;">Continuar</button>
             </div>
         </form>
     </div>
@@ -385,7 +413,7 @@
             <div id="app-login-container" class="app-login-container">
                 <div class="app-login-brand">
                     <h2 class="app-login-title">
-                        Bem vindo ao 
+                        Bem vindo ao
                         <span class="natrave-anim-wrap" aria-label="NaTrave">
                             <span class="natrave-ball-runner" aria-hidden="true">
                                 <svg viewBox="0 0 24 24" class="natrave-ball-icon">
@@ -464,7 +492,8 @@
                         <span class="auth-remember__box" aria-hidden="true"></span>
                         <span class="auth-remember__text">Lembrar de mim</span>
                     </label>
-                    <a href="{{ url_for('auth.recuperar_senha_page') }}" class="auth-forgot-link" id="btn-show-forgot">Esqueci minha
+                    <a href="{{ url_for('auth.recuperar_senha_page') }}" class="auth-forgot-link"
+                        id="btn-show-forgot">Esqueci minha
                         senha</a>
                 </div>
 
@@ -474,19 +503,23 @@
             <!-- Botões de Ação de Clube (Entrar em um clube / Criar um clube) -->
             <div class="auth-club-actions-wrapper" style="margin-top: 1rem;">
                 <div class="auth-club-actions-group">
-                    <button type="button" id="btn-show-join-club" class="auth-club-link-btn auth-club-link-btn--join" aria-label="Entrar em um clube">
-                        <svg viewBox="0 0 24 24" class="auth-club-btn-icon" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                            <circle cx="9" cy="7" r="4"/>
-                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    <button type="button" id="btn-show-join-club" class="auth-club-link-btn auth-club-link-btn--join"
+                        aria-label="Entrar em um clube">
+                        <svg viewBox="0 0 24 24" class="auth-club-btn-icon" fill="none" stroke="currentColor"
+                            stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                         </svg>
                         <span>Entrar em um clube</span>
                     </button>
-                    <button type="button" id="btn-show-create-club" class="auth-club-link-btn auth-club-link-btn--create" aria-label="Criar um clube">
-                        <svg viewBox="0 0 24 24" class="auth-club-btn-icon" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="12" y1="5" x2="12" y2="19"/>
-                            <line x1="5" y1="12" x2="19" y2="12"/>
+                    <button type="button" id="btn-show-create-club"
+                        class="auth-club-link-btn auth-club-link-btn--create" aria-label="Criar um clube">
+                        <svg viewBox="0 0 24 24" class="auth-club-btn-icon" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
                         </svg>
                         <span>Criar um clube</span>
                     </button>
@@ -526,9 +559,12 @@
 
         <!-- VERSO 1 DO CARD: RECUPERAR SENHA -->
         <div class="auth-card-face auth-card-face--back auth-card-face--forgot" id="authFaceForgot">
-            <div style="padding-bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 1.25rem;">
-                <button type="button" class="auth-back-btn" id="btn-forgot-back" aria-label="Voltar para login" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12); color: #cbd5e1; padding: 0.4rem 0.75rem; border-radius: 10px; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.2s ease;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;">
+            <div
+                style="padding-bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 1.25rem;">
+                <button type="button" class="auth-back-btn" id="btn-forgot-back" aria-label="Voltar para login"
+                    style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12); color: #cbd5e1; padding: 0.4rem 0.75rem; border-radius: 10px; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.2s ease;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round" style="width: 16px; height: 16px;">
                         <line x1="19" y1="12" x2="5" y2="12"></line>
                         <polyline points="12 19 5 12 12 5"></polyline>
                     </svg>
@@ -539,8 +575,10 @@
             <div class="reg-wizard-header" style="padding-bottom: 0.5rem;">
                 <div class="reg-wizard-title-wrap">
                     <div class="reg-wizard-header-left">
-                        <span class="reg-wizard-avatar-icon" aria-hidden="true" style="background: rgba(91, 245, 0, 0.12); border-color: rgba(91, 245, 0, 0.25);">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="#5bf500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
+                        <span class="reg-wizard-avatar-icon" aria-hidden="true"
+                            style="background: rgba(91, 245, 0, 0.12); border-color: rgba(91, 245, 0, 0.25);">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#5bf500" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
                                 <rect x="4" y="10" width="16" height="10" rx="2" />
                                 <path d="M8 10V7a4 4 0 0 1 8 0v3" />
                             </svg>
@@ -548,29 +586,34 @@
                         <h2 class="reg-wizard-title">Recuperar Senha</h2>
                     </div>
                 </div>
-                <p class="reg-field-hint" style="margin-top: 0.5rem; color: #94a3b8; font-size: 0.84rem; line-height: 1.4;">
+                <p class="reg-field-hint"
+                    style="margin-top: 0.5rem; color: #94a3b8; font-size: 0.84rem; line-height: 1.4;">
                     Informe seu e-mail cadastrado. Enviaremos um link seguro para você redefinir sua senha.
                 </p>
             </div>
 
             <div id="forgot-status-msg" class="auth-message" style="display: none; margin-top: 0.75rem;"></div>
 
-            <form id="forgot-password-form" method="post" action="{{ url_for('auth.recuperar_senha_submit') }}" class="auth-form" style="margin-top: 1rem;">
+            <form id="forgot-password-form" method="post" action="{{ url_for('auth.recuperar_senha_submit') }}"
+                class="auth-form" style="margin-top: 1rem;">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="form-group auth-field">
                     <label class="form-label" for="forgot_email">Seu E-mail</label>
                     <div class="auth-input-wrap">
                         <span class="auth-input-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
                                 <polyline points="22,6 12,13 2,6" />
                             </svg>
                         </span>
-                        <input class="form-input auth-input" id="forgot_email" name="email" type="email" placeholder="seuemail@exemplo.com" required autocomplete="email">
+                        <input class="form-input auth-input" id="forgot_email" name="email" type="email"
+                            placeholder="seuemail@exemplo.com" required autocomplete="email">
                     </div>
                 </div>
 
-                <button class="btn btn-primary auth-submit" type="submit" id="btn-forgot-submit" style="margin-top: 1.25rem;">
+                <button class="btn btn-primary auth-submit" type="submit" id="btn-forgot-submit"
+                    style="margin-top: 1.25rem;">
                     <span>Enviar Link de Recuperação</span>
                 </button>
             </form>
@@ -582,108 +625,231 @@
         <div class="auth-card-face auth-card-face--back auth-card-face--join-club" id="authFaceJoinClub">
             <div class="mc-card-header">
                 <button type="button" class="auth-back-btn" onclick="voltarFluxoClube()" aria-label="Voltar">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="mc-back-arrow">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round" class="mc-back-arrow">
                         <line x1="19" y1="12" x2="5" y2="12"></line>
                         <polyline points="12 19 5 12 12 5"></polyline>
                     </svg>
                     <span>Voltar</span>
                 </button>
-                <span class="mc-card-badge">ENTRAR NO CLUBE</span>
+                <div class="mc-card-badge mc-card-badge--search" id="joinCardHeaderBadge"
+                    onclick="ativarBuscaCabecalho(event)">
+                    <span id="joinCardHeaderBadgeText">Buscar clube</span>
+                    <input type="text" id="inputSearchClub" class="mc-header-search-input" placeholder="Buscar clube..."
+                        oninput="tratarDigitacaoBuscaCabecalho(this.value)" autocomplete="off" style="display: none;">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round" id="joinCardHeaderBadgeIcon"
+                        style="vertical-align: middle; flex-shrink: 0;">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <button type="button" id="joinHeaderSearchClearBtn" onclick="limparBuscaCabecalho(event)"
+                        style="display: none; background: none; border: none; padding: 0; margin-left: 2px; color: rgba(255, 255, 255, 0.65); cursor: pointer; line-height: 1; align-items: center; justify-content: center;"
+                        aria-label="Limpar busca">
+                        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor"
+                            stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
-            <!-- PASSO 1: Busca por Nome ou Código -->
+            <!-- PASSO 1: Lista de Resultados de Busca -->
             <div id="joinStepSearch">
-                <div class="mc-title-group">
-                    <h2 class="mc-card-title">Buscar Clube</h2>
-                </div>
-
-                <div class="mc-field-wrap">
-                    <div class="mc-input-wrap">
-                        <svg viewBox="0 0 24 24" class="mc-input-icon" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                        </svg>
-                        <input type="text" id="inputSearchClub" class="mc-input" placeholder="Nome ou código (ex: 001)" oninput="filtrarClubesBuscaCard(this.value)" autocomplete="off">
-                    </div>
-                </div>
-
                 <!-- Lista de Resultados de Busca -->
-                <div id="joinClubResultsList" class="mc-results-list">
+                <div id="joinClubResultsList" class="mc-results-list" style="margin-top: 0.25rem;">
                     <!-- JS preenche os cards de resultado -->
                 </div>
             </div>
 
             <!-- PASSO 2: Escolha para o Clube Selecionado -->
             <div id="joinStepChoice" style="display: none; text-align: center;">
-                <div class="mc-chosen-box" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 20px; padding: 1.25rem 1rem; margin-bottom: 1.25rem; text-align: center;">
-                    <!-- ESCUDO DO CLUBE -->
-                    <div style="width: 46px; height: 46px; margin: 0 auto 0.65rem auto; border-radius: 50%; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.25); display: flex; align-items: center; justify-content: center;">
-                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#22c55e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <div class="mc-chosen-box" id="chosenClubBox">
+                    <!-- ESCUDO OU FOTO DO CLUBE -->
+                    <div class="mc-chosen-shield-wrap" id="chosenClubShieldWrap">
+                        <svg viewBox="0 0 24 24" class="mc-chosen-shield-svg" id="chosenClubShieldSvg"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                         </svg>
                     </div>
 
-                    <!-- BADGE -->
-                    <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(34, 197, 94, 0.12); border: 1px solid rgba(34, 197, 94, 0.25); border-radius: 999px; padding: 0.22rem 0.75rem; font-size: 0.68rem; font-weight: 800; color: #22c55e; letter-spacing: 0.8px; text-transform: uppercase;">
-                        <span style="width: 6px; height: 6px; border-radius: 50%; background: #22c55e;"></span>
-                        <span id="chosenClubBadge">CLUBE 001</span>
+                    <!-- NOME DO CLUBE (LIVRE, SEM CARD INTERNO) -->
+                    <h3 id="chosenClubName" class="mc-chosen-name">NaTrave</h3>
+
+                    <!-- MINIS DESTAQUES: CLUBE, JOGADORES, FREQUÊNCIA -->
+                    <div class="mc-chosen-highlights-row" id="chosenClubHighlightsRow">
+                        <div class="mc-chosen-pill mc-chosen-pill-code" id="chosenClubCodePill">
+                            <span class="mc-chosen-code-dot" id="chosenClubCodeDot"></span>
+                            <span id="chosenClubBadge">CLUBE 001</span>
+                        </div>
+                        <div class="mc-chosen-pill mc-chosen-pill-players" id="chosenClubPlayersPill">
+                            <svg viewBox="0 0 24 24" class="mc-chosen-players-svg" width="13" height="13" fill="none"
+                                stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                            <span id="chosenClubPlayersCount">19 Jogadores</span>
+                        </div>
+                        <div class="mc-chosen-pill mc-chosen-pill-freq" id="chosenClubFreqPill">
+                            <svg viewBox="0 0 24 24" class="mc-chosen-freq-svg" width="13" height="13" fill="none"
+                                stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                            <span id="chosenClubFreqText">Semanal</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEÇÃO DE SENHA DO CLUBE (PIN DE 4 DÍGITOS) + ACESSO ADMIN / JUIZ -->
+                <div id="clubPinGateSection" style="display: none; margin-bottom: 1.15rem;">
+                    <div
+                        style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 1.1rem 0.9rem; text-align: center;">
+                        <div
+                            style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; background: rgba(34, 197, 94, 0.12); color: #22c55e; margin-bottom: 0.5rem;">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                        </div>
+                        <div style="font-size: 0.95rem; font-weight: 800; color: #ffffff; margin-bottom: 0.2rem;">Senha
+                            de Acesso ao Clube</div>
+                        <div style="font-size: 0.78rem; color: #94a3b8; margin-bottom: 0.85rem;">Digite o código de 4
+                            dígitos para liberar a entrada</div>
+
+                        <div class="mc-pin-inputs"
+                            style="display: flex; justify-content: center; gap: 0.55rem; margin-bottom: 0.4rem;">
+                            <input type="text" maxlength="1" class="mc-pin-digit" id="clubPinDigit0" autocomplete="off"
+                                inputmode="text"
+                                style="width: 48px; height: 52px; text-align: center; font-size: 1.45rem; font-weight: 800; text-transform: uppercase; background: rgba(255, 255, 255, 0.08); border: 1.5px solid rgba(255, 255, 255, 0.18); border-radius: 12px; color: #ffffff; outline: none; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+                            <input type="text" maxlength="1" class="mc-pin-digit" id="clubPinDigit1" autocomplete="off"
+                                inputmode="text"
+                                style="width: 48px; height: 52px; text-align: center; font-size: 1.45rem; font-weight: 800; text-transform: uppercase; background: rgba(255, 255, 255, 0.08); border: 1.5px solid rgba(255, 255, 255, 0.18); border-radius: 12px; color: #ffffff; outline: none; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+                            <input type="text" maxlength="1" class="mc-pin-digit" id="clubPinDigit2" autocomplete="off"
+                                inputmode="text"
+                                style="width: 48px; height: 52px; text-align: center; font-size: 1.45rem; font-weight: 800; text-transform: uppercase; background: rgba(255, 255, 255, 0.08); border: 1.5px solid rgba(255, 255, 255, 0.18); border-radius: 12px; color: #ffffff; outline: none; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+                            <input type="text" maxlength="1" class="mc-pin-digit" id="clubPinDigit3" autocomplete="off"
+                                inputmode="text"
+                                style="width: 48px; height: 52px; text-align: center; font-size: 1.45rem; font-weight: 800; text-transform: uppercase; background: rgba(255, 255, 255, 0.08); border: 1.5px solid rgba(255, 255, 255, 0.18); border-radius: 12px; color: #ffffff; outline: none; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+                        </div>
+
+                        <div id="clubPinStatus"
+                            style="font-size: 0.8rem; min-height: 1.3rem; margin-top: 0.4rem; font-weight: 700;"></div>
                     </div>
 
-                    <!-- NOME DO CLUBE -->
-                    <h3 id="chosenClubName" style="color: #ffffff; font-size: 1.4rem; font-weight: 900; margin-top: 0.4rem; margin-bottom: 0; letter-spacing: -0.4px;">NaTrave</h3>
+                    <!-- OU ENTRAR COMO ADMIN OU JUIZ -->
+                    <div style="display: flex; align-items: center; gap: 0.75rem; margin: 1rem 0 0.85rem 0;">
+                        <div style="flex: 1; height: 1px; background: rgba(255, 255, 255, 0.1);"></div>
+                        <span
+                            style="font-size: 0.68rem; font-weight: 800; color: #64748b; letter-spacing: 0.8px; text-transform: uppercase;">Ou
+                            entrar com Admin / Juiz</span>
+                        <div style="flex: 1; height: 1px; background: rgba(255, 255, 255, 0.1);"></div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem;">
+                        <button type="button" onclick="abrirStepGestaoLogin('admin')" class="mc-secondary-btn"
+                            style="padding: 0.75rem 0.5rem; border-radius: 12px; font-weight: 800; font-size: 0.82rem; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); color: #34d399; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.4rem; transition: all 0.2s ease;">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+                                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            </svg>
+                            <span>ADMIN</span>
+                        </button>
+
+                        <button type="button" onclick="abrirStepGestaoLogin('juiz')" class="mc-secondary-btn"
+                            style="padding: 0.75rem 0.5rem; border-radius: 12px; font-weight: 800; font-size: 0.82rem; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); color: #fbbf24; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.4rem; transition: all 0.2s ease;">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+                                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            <span>JUIZ</span>
+                        </button>
+                    </div>
                 </div>
 
-                <p class="mc-choice-subtext" style="color: #94a3b8; font-size: 0.82rem; margin-bottom: 1rem;">Como você deseja acessar este clube?</p>
-
-                <!-- OPÇÕES PRINCIPAIS DO ATLETA -->
-                <div style="display: flex; flex-direction: column; gap: 0.65rem; margin-bottom: 1.2rem;">
-                    <button type="button" onclick="abrirStepInlineLogin()" class="mc-primary-btn" style="width: 100%; padding: 0.88rem; border-radius: 14px; font-weight: 800; font-size: 0.95rem; background: #22c55e; color: #000000; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.55rem; transition: all 0.2s ease;">
-                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
-                            <polyline points="10 17 15 12 10 7"></polyline>
-                            <line x1="15" y1="12" x2="3" y2="12"></line>
+                <!-- CARD DE LOGIN NORMAL DOS CLUBES (APÓS COLOCAR A SENHA/PIN CORRETA) -->
+                <div id="clubEntryActionsWrapper">
+                    <div id="clubPinUnlockedBadge"
+                        style="display: none; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.45rem 0.8rem; background: rgba(34, 197, 94, 0.12); border: 1px solid rgba(34, 197, 94, 0.28); border-radius: 12px; margin-bottom: 0.95rem; color: #22c55e; font-size: 0.8rem; font-weight: 800;">
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
                         </svg>
-                        <span>Tenho conta</span>
-                    </button>
+                        <span>Senha confirmada · Acesso liberado</span>
+                    </div>
 
-                    <button type="button" onclick="abrirStepInlineRegister()" class="mc-secondary-btn" style="width: 100%; padding: 0.82rem; border-radius: 14px; font-weight: 700; font-size: 0.88rem; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.14); color: #f8fafc; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.2s ease;">
-                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="8.5" cy="7" r="4"></circle>
-                            <line x1="20" y1="8" x2="20" y2="14"></line>
-                            <line x1="17" y1="11" x2="23" y2="11"></line>
-                        </svg>
-                        <span>Convidado (Criar cadastro)</span>
-                    </button>
+                    <p class="mc-choice-subtext" style="color: #94a3b8; font-size: 0.82rem; margin-bottom: 1rem;">Como
+                        você deseja acessar este clube?</p>
+
+                    <!-- OPÇÕES PRINCIPAIS DO ATLETA -->
+                    <div style="display: flex; flex-direction: column; gap: 0.65rem; margin-bottom: 1.2rem;">
+                        <button type="button" onclick="abrirStepInlineLogin()" class="mc-primary-btn"
+                            style="width: 100%; padding: 0.88rem; border-radius: 14px; font-weight: 800; font-size: 0.95rem; background: #22c55e; color: #000000; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.55rem; transition: all 0.2s ease;">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                                <polyline points="10 17 15 12 10 7"></polyline>
+                                <line x1="15" y1="12" x2="3" y2="12"></line>
+                            </svg>
+                            <span>Tenho conta</span>
+                        </button>
+
+                        <button type="button" onclick="abrirStepInlineRegister()" class="mc-secondary-btn"
+                            style="width: 100%; padding: 0.82rem; border-radius: 14px; font-weight: 700; font-size: 0.88rem; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.14); color: #f8fafc; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.2s ease;">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="8.5" cy="7" r="4"></circle>
+                                <line x1="20" y1="8" x2="20" y2="14"></line>
+                                <line x1="17" y1="11" x2="23" y2="11"></line>
+                            </svg>
+                            <span>Convidado (Criar cadastro)</span>
+                        </button>
+                    </div>
+
+                    <!-- SEPARADOR GESTÃO -->
+                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.85rem;">
+                        <div style="flex: 1; height: 1px; background: rgba(255, 255, 255, 0.1);"></div>
+                        <span
+                            style="font-size: 0.68rem; font-weight: 800; color: #64748b; letter-spacing: 0.8px; text-transform: uppercase;">Gestão
+                            & Moderação</span>
+                        <div style="flex: 1; height: 1px; background: rgba(255, 255, 255, 0.1);"></div>
+                    </div>
+
+                    <!-- GRID ADMIN & JUIZ -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; margin-bottom: 1.1rem;">
+                        <button type="button" onclick="abrirStepGestaoLogin('admin')" class="mc-secondary-btn"
+                            style="padding: 0.75rem 0.5rem; border-radius: 12px; font-weight: 800; font-size: 0.82rem; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); color: #34d399; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.4rem; transition: all 0.2s ease;">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+                                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            </svg>
+                            <span>ADMIN</span>
+                        </button>
+
+                        <button type="button" onclick="abrirStepGestaoLogin('juiz')" class="mc-secondary-btn"
+                            style="padding: 0.75rem 0.5rem; border-radius: 12px; font-weight: 800; font-size: 0.82rem; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); color: #fbbf24; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.4rem; transition: all 0.2s ease;">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+                                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            <span>JUIZ</span>
+                        </button>
+                    </div>
                 </div>
 
-                <!-- SEPARADOR GESTÃO -->
-                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.85rem;">
-                    <div style="flex: 1; height: 1px; background: rgba(255, 255, 255, 0.1);"></div>
-                    <span style="font-size: 0.68rem; font-weight: 800; color: #64748b; letter-spacing: 0.8px; text-transform: uppercase;">Gestão & Moderação</span>
-                    <div style="flex: 1; height: 1px; background: rgba(255, 255, 255, 0.1);"></div>
-                </div>
-
-                <!-- GRID ADMIN & JUIZ -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; margin-bottom: 1.1rem;">
-                    <button type="button" onclick="abrirStepAdminLogin()" class="mc-secondary-btn" style="padding: 0.75rem 0.5rem; border-radius: 12px; font-weight: 800; font-size: 0.82rem; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); color: #34d399; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.4rem; transition: all 0.2s ease;">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                        </svg>
-                        <span>ADMIN</span>
-                    </button>
-
-                    <button type="button" onclick="abrirStepJudgeLogin()" class="mc-secondary-btn" style="padding: 0.75rem 0.5rem; border-radius: 12px; font-weight: 800; font-size: 0.82rem; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); color: #fbbf24; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.4rem; transition: all 0.2s ease;">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                        </svg>
-                        <span>JUIZ</span>
-                    </button>
-                </div>
-
-                <button type="button" onclick="voltarParaBuscaClube()" class="mc-link-btn" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; color: #94a3b8; font-size: 0.82rem; font-weight: 600; text-decoration: none;">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <button type="button" onclick="voltarParaBuscaClube()" class="mc-link-btn"
+                    style="display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; color: #94a3b8; font-size: 0.82rem; font-weight: 600; text-decoration: none;">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <line x1="19" y1="12" x2="5" y2="12"></line>
                         <polyline points="12 19 5 12 12 5"></polyline>
                     </svg>
@@ -692,26 +858,20 @@
             </div>
 
             <!-- PASSO 3A: Autenticação com Conta Existente para o Clube -->
-            <div id="joinStepInlineLogin" style="display: none;">
-                <div class="mc-chosen-box-mini" style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 0.6rem 0.8rem; margin-bottom: 0.8rem; text-align: center; font-size: 0.82rem; color: #94a3b8;">
-                    Entrando no: <strong id="inlineLoginClubName" style="color: #22c55e;">Clube</strong>
-                </div>
-
-                <div class="mc-title-group">
-                    <h3 class="mc-card-title" style="font-size: 1.15rem;">Sua Conta NaTrave</h3>
-                </div>
-
+            <div id="joinStepInlineLogin" style="display: none; margin-top: 0.5rem;">
                 <div class="mc-field-wrap">
                     <label class="mc-input-label">USUÁRIO OU EMAIL</label>
                     <div class="mc-input-wrap">
-                        <input type="text" id="joinUsername" class="mc-input" placeholder="@seuuser ou email" autocomplete="username">
+                        <input type="text" id="joinUsername" class="mc-input" placeholder="username ou email"
+                            autocomplete="username">
                     </div>
                 </div>
 
                 <div class="mc-field-wrap">
                     <label class="mc-input-label">SENHA</label>
                     <div class="mc-input-wrap">
-                        <input type="password" id="joinPassword" class="mc-input" placeholder="Sua senha" autocomplete="current-password">
+                        <input type="password" id="joinPassword" class="mc-input" placeholder="Sua senha"
+                            autocomplete="current-password">
                     </div>
                 </div>
 
@@ -720,17 +880,20 @@
                 <button type="button" onclick="submeterInlineLoginClube()" class="mc-primary-btn">
                     Validar Conta
                 </button>
-                <button type="button" onclick="voltarParaEscolhaClube()" class="mc-link-btn" style="display: block; margin: 0.6rem auto 0 auto;">
-                    Voltar às opções
-                </button>
             </div>
 
             <!-- PASSO 3A2: Confirmação de Vínculo com Perfil Identificado -->
             <div id="joinStepConfirmAccount" style="display: none; text-align: center;">
-                <div class="mc-confirm-card" style="background: rgba(34, 197, 94, 0.08); border: 1.5px solid rgba(34, 197, 94, 0.3); border-radius: 16px; padding: 1.2rem; margin-bottom: 1rem;">
-                    <h3 id="confirmUserTitle" style="color: #ffffff; font-size: 1.1rem; font-weight: 800; margin-bottom: 0.2rem;">Conta Encontrada!</h3>
-                    <p id="confirmUserSubtitle" style="color: #cbd5e1; font-size: 0.85rem; margin-bottom: 0.8rem;">Olá, <strong id="confirmUserNome" style="color: #22c55e;">Atleta</strong>! Identificamos sua conta.</p>
-                    <p style="color: #94a3b8; font-size: 0.78rem;">Deseja associar seu perfil ao clube <strong id="confirmClubNome" style="color: #ffffff;">Nome</strong>?</p>
+                <div class="mc-confirm-card"
+                    style="background: rgba(34, 197, 94, 0.08); border: 1.5px solid rgba(34, 197, 94, 0.3); border-radius: 16px; padding: 1.2rem; margin-bottom: 1rem;">
+                    <h3 id="confirmUserTitle"
+                        style="color: #ffffff; font-size: 1.1rem; font-weight: 800; margin-bottom: 0.2rem;">Conta
+                        Encontrada!</h3>
+                    <p id="confirmUserSubtitle" style="color: #cbd5e1; font-size: 0.85rem; margin-bottom: 0.8rem;">Olá,
+                        <strong id="confirmUserNome" style="color: #22c55e;">Atleta</strong>! Identificamos sua conta.
+                    </p>
+                    <p style="color: #94a3b8; font-size: 0.78rem;">Deseja associar seu perfil ao clube <strong
+                            id="confirmClubNome" style="color: #ffffff;">Nome</strong>?</p>
                 </div>
 
                 <div id="joinConfirmMsg" class="mc-feedback-msg" style="margin-bottom: 0.8rem;"></div>
@@ -738,7 +901,8 @@
                 <button type="button" onclick="confirmarEntradaNoClube()" class="mc-primary-btn">
                     Sim, entrar neste clube
                 </button>
-                <button type="button" onclick="abrirStepInlineLogin()" class="mc-link-btn" style="display: block; margin: 0.6rem auto 0 auto;">
+                <button type="button" onclick="abrirStepInlineLogin()" class="mc-link-btn"
+                    style="display: block; margin: 0.6rem auto 0 auto;">
                     Usar outro usuário
                 </button>
             </div>
@@ -746,237 +910,280 @@
             <!-- PASSO 3B: Cadastro Direto para o Clube em 3 Etapas Minimalistas (Wizard) -->
             <div id="joinStepInlineRegister" style="display: none;">
                 <!-- HEADER MINIMALISTA E UNIFICADO COM DOTS DE PROGRESSO -->
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.1rem; padding-bottom: 0.75rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
-                    <div>
-                        <h2 style="font-size: 1.1rem; font-weight: 800; color: #ffffff; margin: 0; letter-spacing: -0.3px;">Criar sua conta</h2>
-                        <span style="font-size: 0.8rem; color: #94a3b8; font-weight: 500; display: block; margin-top: 0.15rem;">Novo atleta no <strong id="inlineRegisterClubName" style="color: #22c55e; font-weight: 700;">Clube</strong></span>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 0.6rem;">
+                <div
+                    style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.15rem; padding-bottom: 0.65rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+                    <span
+                        style="font-size: 0.85rem; font-weight: 850; color: #ffffff; letter-spacing: 0.04em; text-transform: uppercase;">Criar
+                        conta</span>
+                    <span id="inlineRegisterClubName" style="display: none;"></span>
+                    <div style="display: flex; align-items: center; gap: 0.55rem;">
                         <div style="display: flex; gap: 4px; align-items: center;">
-                            <span id="wizardDot1" style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e; transition: all 0.2s;"></span>
-                            <span id="wizardDot2" style="width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.2); transition: all 0.2s;"></span>
-                            <span id="wizardDot3" style="width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.2); transition: all 0.2s;"></span>
+                            <span id="wizardDot1"
+                                style="width: 7px; height: 7px; border-radius: 50%; background: #22c55e; transition: all 0.2s;"></span>
+                            <span id="wizardDot2"
+                                style="width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.2); transition: all 0.2s;"></span>
+                            <span id="wizardDot3"
+                                style="width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.2); transition: all 0.2s;"></span>
                         </div>
-                        <span class="reg-wizard-badge" id="reg-wizard-counter" style="background: rgba(34, 197, 94, 0.12); border: 1px solid rgba(34, 197, 94, 0.25); color: #22c55e; padding: 0.25rem 0.6rem; border-radius: 20px; font-weight: 700; font-size: 0.78rem;"><strong style="color: #22c55e;">1</strong> de 3</span>
+                        <span class="reg-wizard-badge" id="reg-wizard-counter"
+                            style="background: rgba(34, 197, 94, 0.12); border: 1px solid rgba(34, 197, 94, 0.25); color: #22c55e; padding: 0.2rem 0.55rem; border-radius: 20px; font-weight: 800; font-size: 0.74rem;"><strong
+                                style="color: #22c55e;">1</strong> de 3</span>
                     </div>
                 </div>
 
-                <form id="reg-wizard-form" method="post" onsubmit="event.preventDefault(); submeterInlineCadastroClube();" class="auth-form auth-form--compact">
+                <form id="reg-wizard-form" method="post"
+                    onsubmit="event.preventDefault(); submeterInlineCadastroClube();"
+                    class="auth-form auth-form--compact">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
                     <!-- CARD 1/3: IDENTIFICAÇÃO PESSOAL (NOME + E-MAIL) -->
                     <div class="reg-step-pane js-reg-step active" data-step="1">
-                        <div class="form-group auth-field auth-field--compact">
-                            <h3 class="reg-step-title" style="font-size: 1.05rem; font-weight: 800; color: #ffffff; margin-bottom: 0.25rem;">Como podemos te chamar na pelada?</h3>
-                            <p class="reg-field-hint" style="color: #94a3b8; font-size: 0.8rem; margin-bottom: 0.9rem;">Informe seu nome e e-mail de contato</p>
-                            
-                            <!-- NOME COMPLETO -->
-                            <div style="margin-bottom: 0.9rem;">
-                                <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.35rem;">Nome e Sobrenome</label>
-                                <div class="auth-input-wrap">
-                                    <span class="auth-input-icon" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="#5bf500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M20 21a8 8 0 0 0-16 0" />
-                                            <circle cx="12" cy="8" r="4" />
-                                        </svg>
-                                    </span>
-                                    <input class="form-input auth-input" id="reg_nome" name="nome" type="text"
-                                        placeholder="Ex: Carlos Silva" required autocomplete="name">
-                                </div>
-                                <div id="reg-nome-status" class="reg-live-status" style="display: none; font-size: 0.75rem; margin-top: 0.3rem;"></div>
+                        <!-- NOME COMPLETO -->
+                        <div class="mc-field-wrap">
+                            <label class="mc-input-label">NOME E SOBRENOME</label>
+                            <div class="mc-input-wrap">
+                                <svg viewBox="0 0 24 24" class="mc-input-icon" fill="none" stroke="#22c55e"
+                                    stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 21a8 8 0 0 0-16 0" />
+                                    <circle cx="12" cy="8" r="4" />
+                                </svg>
+                                <input class="mc-input form-input auth-input" id="reg_nome" name="nome" type="text"
+                                    placeholder="Ex: Carlos Silva" required autocomplete="name">
                             </div>
+                            <div id="reg-nome-status" class="reg-live-status"
+                                style="display: none; font-size: 0.75rem; margin-top: 0.3rem;"></div>
+                        </div>
 
-                            <!-- E-MAIL -->
-                            <div>
-                                <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.35rem;">E-mail de Acesso</label>
-                                <div class="auth-input-wrap">
-                                    <span class="auth-input-icon" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="#5bf500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                                            <polyline points="22,6 12,13 2,6" />
-                                        </svg>
-                                    </span>
-                                    <input class="form-input auth-input" id="reg_email" name="email" type="email"
-                                        placeholder="seuemail@exemplo.com" required autocomplete="email">
-                                </div>
-                                <div id="reg-email-status" class="reg-live-status" style="display: none; font-size: 0.75rem; margin-top: 0.3rem;"></div>
+                        <!-- E-MAIL -->
+                        <div class="mc-field-wrap">
+                            <label class="mc-input-label">E-MAIL DE ACESSO</label>
+                            <div class="mc-input-wrap">
+                                <svg viewBox="0 0 24 24" class="mc-input-icon" fill="none" stroke="#22c55e"
+                                    stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path
+                                        d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                    <polyline points="22,6 12,13 2,6" />
+                                </svg>
+                                <input class="mc-input form-input auth-input" id="reg_email" name="email" type="email"
+                                    placeholder="seuemail@exemplo.com" required autocomplete="email">
                             </div>
+                            <div id="reg-email-status" class="reg-live-status"
+                                style="display: none; font-size: 0.75rem; margin-top: 0.3rem;"></div>
                         </div>
                     </div>
 
                     <!-- CARD 2/3: USERNAME & POSIÇÃO NO CAMPO -->
                     <div class="reg-step-pane js-reg-step" data-step="2" style="display: none;">
-                        <div class="form-group auth-field auth-field--compact">
-                            <h3 class="reg-step-title" style="font-size: 1.05rem; font-weight: 800; color: #ffffff; margin-bottom: 0.25rem;">Qual será o seu @ de identificação?</h3>
-                            <p class="reg-field-hint" style="color: #94a3b8; font-size: 0.8rem; margin-bottom: 0.9rem;">Escolha seu usuário único e sua posição preferida</p>
-                            
-                            <!-- USERNAME -->
-                            <div style="margin-bottom: 1rem;">
-                                <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.35rem;">Usuário (@username)</label>
-                                <div class="auth-input-wrap">
-                                    <span class="auth-input-icon" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="#5bf500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <circle cx="12" cy="12" r="4" />
-                                            <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8" />
-                                        </svg>
-                                    </span>
-                                    <input class="form-input auth-input" id="reg_username" name="username" type="text"
-                                        placeholder="ex: @carlos_silva" required autocomplete="username">
-                                </div>
-                                <div id="reg-user-status" class="reg-live-status" style="display: none; font-size: 0.75rem; margin-top: 0.3rem;"></div>
+                        <!-- USERNAME -->
+                        <div class="mc-field-wrap">
+                            <label class="mc-input-label">USUÁRIO (@USERNAME)</label>
+                            <div class="mc-input-wrap">
+                                <svg viewBox="0 0 24 24" class="mc-input-icon" fill="none" stroke="#22c55e"
+                                    stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="4" />
+                                    <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8" />
+                                </svg>
+                                <input class="mc-input form-input auth-input" id="reg_username" name="username"
+                                    type="text" placeholder="ex: @carlos_silva" required autocomplete="username">
                             </div>
+                            <div id="reg-user-status" class="reg-live-status"
+                                style="display: none; font-size: 0.75rem; margin-top: 0.3rem;"></div>
+                        </div>
 
-                            <!-- SELEÇÃO DE POSIÇÃO -->
-                            <div class="reg-posicao-wrap">
-                                <input type="hidden" id="reg_posicao" name="posicao" value="Linha">
-                                <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.45rem;">Em qual posição você joga?</label>
+                        <!-- SELEÇÃO DE POSIÇÃO -->
+                        <div class="mc-field-wrap">
+                            <input type="hidden" id="reg_posicao" name="posicao" value="Linha">
+                            <label class="mc-input-label">POSIÇÃO EM CAMPO</label>
 
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem;">
-                                    <!-- Quadrado 1: Linha -->
-                                    <button type="button" class="pos-select-card" id="posCardLinha" onclick="selecionarPosicao('Linha')" style="background: rgba(34, 197, 94, 0.14); border: 2px solid #22c55e; border-radius: 14px; padding: 0.75rem 0.5rem; cursor: pointer; text-align: center; transition: all 0.22s ease; outline: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.35rem; box-shadow: 0 4px 16px rgba(34, 197, 94, 0.18);">
-                                        <div class="pos-card-icon" style="color: #22c55e; transition: all 0.2s ease;">
-                                            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M7 3.8C8.5 5 10 5.5 12 5.5C14 5.5 15.5 5 17 3.8L22 6.5L19.8 10.5L18 9.5V20.2C18 20.9 17.3 21.5 16.5 21.5H7.5C6.7 21.5 6 20.9 6 20.2V9.5L4.2 10.5L2 6.5L7 3.8Z" />
-                                                <rect x="5.2" y="5.8" width="2.2" height="1.4" fill="currentColor" stroke="none" transform="rotate(-15 5.2 5.8)"/>
-                                                <rect x="7.5" y="17.8" width="1.8" height="1.8" fill="currentColor" stroke="none"/>
-                                                <text x="12" y="15.6" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="7.8" fill="currentColor" text-anchor="middle" stroke="none" letter-spacing="-0.5px">10</text>
-                                            </svg>
-                                        </div>
-                                        <span style="font-weight: 800; font-size: 0.85rem; color: #ffffff; display: block;">Linha</span>
-                                    </button>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem;">
+                                <!-- Quadrado 1: Linha -->
+                                <button type="button" class="pos-select-card" id="posCardLinha"
+                                    onclick="selecionarPosicao('Linha')"
+                                    style="background: rgba(34, 197, 94, 0.14); border: 2px solid #22c55e; border-radius: 14px; padding: 0.75rem 0.5rem; cursor: pointer; text-align: center; transition: all 0.22s ease; outline: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.35rem; box-shadow: 0 4px 16px rgba(34, 197, 94, 0.18);">
+                                    <div class="pos-card-icon" style="color: #22c55e; transition: all 0.2s ease;">
+                                        <svg viewBox="0 0 24 24" width="26" height="26" fill="none"
+                                            stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <path
+                                                d="M7 3.8C8.5 5 10 5.5 12 5.5C14 5.5 15.5 5 17 3.8L22 6.5L19.8 10.5L18 9.5V20.2C18 20.9 17.3 21.5 16.5 21.5H7.5C6.7 21.5 6 20.9 6 20.2V9.5L4.2 10.5L2 6.5L7 3.8Z" />
+                                            <rect x="5.2" y="5.8" width="2.2" height="1.4" fill="currentColor"
+                                                stroke="none" transform="rotate(-15 5.2 5.8)" />
+                                            <rect x="7.5" y="17.8" width="1.8" height="1.8" fill="currentColor"
+                                                stroke="none" />
+                                            <text x="12" y="15.6" font-family="system-ui, -apple-system, sans-serif"
+                                                font-weight="900" font-size="7.8" fill="currentColor"
+                                                text-anchor="middle" stroke="none" letter-spacing="-0.5px">10</text>
+                                        </svg>
+                                    </div>
+                                    <span
+                                        style="font-weight: 800; font-size: 0.85rem; color: #ffffff; display: block;">Linha</span>
+                                </button>
 
-                                    <!-- Quadrado 2: Goleiro -->
-                                    <button type="button" class="pos-select-card" id="posCardGoleiro" onclick="selecionarPosicao('Goleiro')" style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 14px; padding: 0.75rem 0.5rem; cursor: pointer; text-align: center; transition: all 0.22s ease; outline: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.35rem;">
-                                        <div class="pos-card-icon" style="color: #64748b; transition: all 0.2s ease;">
-                                            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M3 20V5a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v15"/>
-                                                <path d="M3 8h18M3 12h18M3 16h18"/>
-                                                <path d="M7 4v16M11 4v16M15 4v16M19 4v16"/>
-                                                <circle cx="12" cy="15" r="3" fill="#0f172a"/>
-                                            </svg>
-                                        </div>
-                                        <span style="font-weight: 800; font-size: 0.85rem; color: #94a3b8; display: block;">Goleiro</span>
-                                    </button>
-                                </div>
+                                <!-- Quadrado 2: Goleiro -->
+                                <button type="button" class="pos-select-card" id="posCardGoleiro"
+                                    onclick="selecionarPosicao('Goleiro')"
+                                    style="background: rgba(255, 255, 255, 0.08); border: 1.5px solid rgba(255, 255, 255, 0.22); border-radius: 14px; padding: 0.75rem 0.5rem; cursor: pointer; text-align: center; transition: all 0.22s ease; outline: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.35rem;">
+                                    <div class="pos-card-icon" style="color: #94a3b8; transition: all 0.2s ease;">
+                                        <svg viewBox="0 0 24 24" width="26" height="26" fill="none"
+                                            stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <path d="M3 20V5a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v15" />
+                                            <path d="M3 8h18M3 12h18M3 16h18" />
+                                            <path d="M7 4v16M11 4v16M15 4v16M19 4v16" />
+                                            <circle cx="12" cy="15" r="3" fill="#0f172a" />
+                                        </svg>
+                                    </div>
+                                    <span
+                                        style="font-weight: 800; font-size: 0.85rem; color: #cbd5e1; display: block;">Goleiro</span>
+                                </button>
                             </div>
                         </div>
                     </div>
 
                     <!-- CARD 3/3: SENHA & RESUMO DE CONFIRMAÇÃO -->
                     <div class="reg-step-pane js-reg-step" data-step="3" style="display: none;">
-                        <div class="form-group auth-field auth-field--compact">
-                            <h3 class="reg-step-title" style="font-size: 1.05rem; font-weight: 800; color: #ffffff; margin-bottom: 0.25rem;">Crie uma senha segura</h3>
-                            <p class="reg-field-hint" style="color: #94a3b8; font-size: 0.8rem; margin-bottom: 0.9rem;">Mínimo de 6 caracteres para sua proteção</p>
-                            
-                            <!-- CAMPO SENHA -->
-                            <div style="margin-bottom: 1rem;">
-                                <div class="auth-input-wrap">
-                                    <span class="auth-input-icon" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="#5bf500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <rect x="4" y="10" width="16" height="10" rx="2" />
-                                            <path d="M8 10V7a4 4 0 0 1 8 0v3" />
-                                        </svg>
-                                    </span>
-                                    <input class="form-input auth-input" id="reg_password" name="password" type="password"
-                                        placeholder="Sua senha de acesso" required autocomplete="new-password">
-                                </div>
-                                <div id="reg-pwd-status" class="reg-live-status" style="display: none; font-size: 0.75rem; margin-top: 0.3rem;"></div>
+                        <!-- CAMPO SENHA -->
+                        <div class="mc-field-wrap" style="margin-bottom: 1.15rem;">
+                            <label class="mc-input-label">SENHA DE ACESSO</label>
+                            <div class="mc-input-wrap">
+                                <svg viewBox="0 0 24 24" class="mc-input-icon" fill="none" stroke="#22c55e"
+                                    stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="4" y="10" width="16" height="10" rx="2" />
+                                    <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                                </svg>
+                                <input class="mc-input form-input auth-input" id="reg_password" name="password"
+                                    type="password" placeholder="Mínimo 6 caracteres" required
+                                    autocomplete="new-password">
                             </div>
-
-                            <!-- CARTÃO DE RESUMO DO JOGADOR (ESTILO PERFIL NATRAVE - FOTO 2) -->
-                            <div class="reg-summary-card" style="background: #0d131f; border: 1.5px solid rgba(255, 255, 255, 0.12); border-radius: 20px; padding: 1.1rem 1.15rem; position: relative; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45); backdrop-filter: blur(12px);">
-                                
-                                <!-- LINHA SUPERIOR: AVATAR + BOTÕES NO CANTO SUPERIOR DIREITO -->
-                                <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.85rem;">
-                                    <!-- AVATAR COM BADGE DE CÂMERA -->
-                                    <div style="position: relative; width: 52px; height: 52px;">
-                                        <div id="reg-summary-avatar-initial" style="width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border: 1.5px solid rgba(255, 255, 255, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.35rem; font-weight: 900; color: #ffffff; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);">
-                                            A
-                                        </div>
-                                        <!-- Ícone de câmera estilo perfil -->
-                                        <div style="position: absolute; bottom: -2px; right: -2px; width: 19px; height: 19px; border-radius: 50%; background: #1e293b; border: 1.5px solid rgba(255, 255, 255, 0.25); display: flex; align-items: center; justify-content: center; color: #94a3b8;">
-                                            <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                                                <circle cx="12" cy="13" r="4"/>
-                                            </svg>
-                                        </div>
-                                    </div>
-
-                                    <!-- BOTÕES DE AÇÃO NO CANTO SUPERIOR DIREITO (LÁPIS / ENGRENAGEM) -->
-                                    <div style="display: flex; align-items: center; gap: 0.45rem;">
-                                        <div style="width: 28px; height: 28px; border-radius: 9px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: center; color: #22c55e;">
-                                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M12 20h9"/>
-                                                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-                                            </svg>
-                                        </div>
-                                        <div style="width: 28px; height: 28px; border-radius: 9px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: center; color: #a78bfa;">
-                                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                                <circle cx="12" cy="12" r="3"/>
-                                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- LINHA INFERIOR: NOME + BADGES DE RATING + USERNAME + BADGES DE POSIÇÃO -->
-                                <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 0.5rem; margin-top: 0.2rem;">
-                                    <!-- NOME, RATING E @USERNAME -->
-                                    <div>
-                                        <!-- NOME + BADGE RATING + BADGE VARIAÇÃO -->
-                                        <div style="display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;">
-                                            <h3 class="reg-summary-name" id="reg-summary-name-val" style="font-size: 1.1rem; font-weight: 800; color: #ffffff; margin: 0; letter-spacing: -0.3px;">Atleta</h3>
-                                            
-                                            <!-- RATING BADGE -->
-                                            <span style="background: #22c55e; color: #052e16; font-weight: 800; font-size: 0.72rem; padding: 0.15rem 0.55rem; border-radius: 12px; display: inline-flex; align-items: center;">5.5</span>
-                                            
-                                            <!-- DELTA BADGE -->
-                                            <span style="background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.3); color: #4ade80; font-weight: 700; font-size: 0.68rem; padding: 0.12rem 0.45rem; border-radius: 12px; display: inline-flex; align-items: center; gap: 0.2rem;">
-                                                <svg viewBox="0 0 24 24" width="9" height="9" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                                                    <polyline points="18 15 12 9 6 15"></polyline>
-                                                </svg>
-                                                <span>+0.1</span>
-                                            </span>
-                                        </div>
-
-                                        <!-- USERNAME BADGE CAPSULA (ROXO/INDIGO - IGUAL FOTO 2) -->
-                                        <div style="margin-top: 0.35rem;">
-                                            <span class="reg-summary-user" id="reg-summary-user-val" style="background: rgba(139, 92, 246, 0.16); border: 1px solid rgba(139, 92, 246, 0.35); color: #c084fc; font-weight: 700; font-size: 0.78rem; padding: 0.2rem 0.65rem; border-radius: 14px; display: inline-block; letter-spacing: 0.2px;">@username</span>
-                                        </div>
-                                    </div>
-
-                                    <!-- BADGES NO CANTO INFERIOR DIREITO (FIXO E LINHA/GOLEIRO) -->
-                                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.35rem; flex-shrink: 0;">
-                                        <!-- BADGE FIXO -->
-                                        <span style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; font-weight: 600; font-size: 0.72rem; padding: 0.2rem 0.6rem; border-radius: 12px; display: inline-flex; align-items: center; gap: 0.3rem;">
-                                            <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2">
-                                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                                                <circle cx="12" cy="7" r="4"/>
-                                            </svg>
-                                            <span>Fixo</span>
-                                        </span>
-
-                                        <!-- BADGE LINHA / GOLEIRO -->
-                                        <span id="reg-summary-pos-val" style="background: rgba(34, 197, 94, 0.12); border: 1px solid rgba(34, 197, 94, 0.25); color: #4ade80; font-weight: 700; font-size: 0.72rem; padding: 0.2rem 0.6rem; border-radius: 12px; display: inline-flex; align-items: center; gap: 0.3rem;">
-                                            <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                                            </svg>
-                                            <span>Linha</span>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div id="reg-step5-status" class="reg-live-status" style="display: none; font-size: 0.78rem; margin-top: 0.5rem;"></div>
+                            <div id="reg-pwd-status" class="reg-live-status"
+                                style="display: none; font-size: 0.75rem; margin-top: 0.3rem;"></div>
                         </div>
+
+                        <!-- CARTÃO DE RESUMO DO JOGADOR (ESTILO PERFIL NATRAVE - FOTO 2) -->
+                        <div class="reg-summary-card"
+                            style="background: #0d131f; border: 1.5px solid rgba(255, 255, 255, 0.12); border-radius: 20px; padding: 1.1rem 1.15rem; position: relative; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45); backdrop-filter: blur(12px);">
+
+                            <!-- LINHA SUPERIOR: AVATAR + BOTÕES NO CANTO SUPERIOR DIREITO -->
+                            <div
+                                style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.85rem;">
+                                <!-- AVATAR COM BADGE DE CÂMERA -->
+                                <div style="position: relative; width: 52px; height: 52px;">
+                                    <div id="reg-summary-avatar-initial"
+                                        style="width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border: 1.5px solid rgba(255, 255, 255, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.35rem; font-weight: 900; color: #ffffff; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);">
+                                        A
+                                    </div>
+                                    <!-- Ícone de câmera estilo perfil -->
+                                    <div
+                                        style="position: absolute; bottom: -2px; right: -2px; width: 19px; height: 19px; border-radius: 50%; background: #1e293b; border: 1.5px solid rgba(255, 255, 255, 0.25); display: flex; align-items: center; justify-content: center; color: #94a3b8;">
+                                        <svg viewBox="0 0 24 24" width="10" height="10" fill="none"
+                                            stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <path
+                                                d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                                            <circle cx="12" cy="13" r="4" />
+                                        </svg>
+                                    </div>
+                                </div>
+
+                                <!-- BOTÕES DE AÇÃO NO CANTO SUPERIOR DIREITO (LÁPIS / ENGRENAGEM) -->
+                                <div style="display: flex; align-items: center; gap: 0.45rem;">
+                                    <div
+                                        style="width: 28px; height: 28px; border-radius: 9px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: center; color: #22c55e;">
+                                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none"
+                                            stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <path d="M12 20h9" />
+                                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                                        </svg>
+                                    </div>
+                                    <div
+                                        style="width: 28px; height: 28px; border-radius: 9px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: center; color: #a78bfa;">
+                                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none"
+                                            stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="3" />
+                                            <path
+                                                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- LINHA INFERIOR: NOME + BADGES DE RATING + USERNAME + BADGES DE POSIÇÃO -->
+                            <div
+                                style="display: flex; align-items: flex-end; justify-content: space-between; gap: 0.5rem; margin-top: 0.2rem;">
+                                <!-- NOME, RATING E @USERNAME -->
+                                <div>
+                                    <!-- NOME + BADGE RATING + BADGE VARIAÇÃO -->
+                                    <div style="display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;">
+                                        <h3 class="reg-summary-name" id="reg-summary-name-val"
+                                            style="font-size: 1.1rem; font-weight: 800; color: #ffffff; margin: 0; letter-spacing: -0.3px;">
+                                            Atleta</h3>
+
+                                        <!-- RATING BADGE -->
+                                        <span
+                                            style="background: #22c55e; color: #052e16; font-weight: 800; font-size: 0.72rem; padding: 0.15rem 0.55rem; border-radius: 12px; display: inline-flex; align-items: center;">5.5</span>
+
+                                        <!-- DELTA BADGE -->
+                                        <span
+                                            style="background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.3); color: #4ade80; font-weight: 700; font-size: 0.68rem; padding: 0.12rem 0.45rem; border-radius: 12px; display: inline-flex; align-items: center; gap: 0.2rem;">
+                                            <svg viewBox="0 0 24 24" width="9" height="9" fill="none"
+                                                stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <polyline points="18 15 12 9 6 15"></polyline>
+                                            </svg>
+                                            <span>+0.1</span>
+                                        </span>
+                                    </div>
+
+                                    <!-- USERNAME BADGE CAPSULA (ROXO/INDIGO - IGUAL FOTO 2) -->
+                                    <div style="margin-top: 0.35rem;">
+                                        <span class="reg-summary-user" id="reg-summary-user-val"
+                                            style="background: rgba(139, 92, 246, 0.16); border: 1px solid rgba(139, 92, 246, 0.35); color: #c084fc; font-weight: 700; font-size: 0.78rem; padding: 0.2rem 0.65rem; border-radius: 14px; display: inline-block; letter-spacing: 0.2px;">@username</span>
+                                    </div>
+                                </div>
+
+                                <!-- BADGES NO CANTO INFERIOR DIREITO (FIXO E LINHA/GOLEIRO) -->
+                                <div
+                                    style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.35rem; flex-shrink: 0;">
+                                    <!-- BADGE FIXO -->
+                                    <span
+                                        style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; font-weight: 600; font-size: 0.72rem; padding: 0.2rem 0.6rem; border-radius: 12px; display: inline-flex; align-items: center; gap: 0.3rem;">
+                                        <svg viewBox="0 0 24 24" width="11" height="11" fill="none"
+                                            stroke="currentColor" stroke-width="2.2">
+                                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                            <circle cx="12" cy="7" r="4" />
+                                        </svg>
+                                        <span>Fixo</span>
+                                    </span>
+
+                                    <!-- BADGE LINHA / GOLEIRO -->
+                                    <span id="reg-summary-pos-val"
+                                        style="background: rgba(34, 197, 94, 0.12); border: 1px solid rgba(34, 197, 94, 0.25); color: #4ade80; font-weight: 700; font-size: 0.72rem; padding: 0.2rem 0.6rem; border-radius: 12px; display: inline-flex; align-items: center; gap: 0.3rem;">
+                                        <svg viewBox="0 0 24 24" width="11" height="11" fill="none"
+                                            stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                                        </svg>
+                                        <span>Linha</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="reg-step5-status" class="reg-live-status"
+                            style="display: none; font-size: 0.78rem; margin-top: 0.5rem;"></div>
                     </div>
 
                     <!-- CONTROLES DE NAVEGAÇÃO DO WIZARD -->
                     <div class="reg-wizard-actions" style="margin-top: 1rem;">
-                        <button type="button" class="btn btn-secondary reg-btn-prev" id="reg-btn-prev" style="visibility: hidden;">Voltar</button>
+                        <button type="button" class="btn btn-secondary reg-btn-prev" id="reg-btn-prev"
+                            style="visibility: hidden;">Voltar</button>
                         <button type="button" class="btn btn-primary reg-btn-next" id="reg-btn-next">
                             <span>Continuar</span>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px; margin-left: 6px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                stroke-linecap="round" stroke-linejoin="round"
+                                style="width: 16px; height: 16px; margin-left: 6px;">
                                 <line x1="5" y1="12" x2="19" y2="12"></line>
                                 <polyline points="12 5 19 12 12 19"></polyline>
                             </svg>
@@ -986,45 +1193,74 @@
 
                 <div class="reg-footer-divider" style="margin-top: 1rem;">
                     <span class="reg-footer-divider-line"></span>
-                    <span class="reg-footer-divider-text">Já tem uma conta? <button type="button" onclick="irParaOpcaoEntrada('login_existente')" class="auth-flip-trigger reg-login-link">Entrar no clube</button></span>
+                    <span class="reg-footer-divider-text">Já tem uma conta? <button type="button"
+                            onclick="abrirStepInlineLogin()" class="auth-flip-trigger reg-login-link">Entrar no
+                            clube</button></span>
                     <span class="reg-footer-divider-line"></span>
                 </div>
             </div>
 
-            <!-- PASSO 3C: Entrar como Juiz do Clube -->
-            <div id="joinStepJudgeLogin" style="display: none;">
-                <div class="mc-chosen-box-mini" style="background: rgba(234, 179, 8, 0.08); border: 1px solid rgba(234, 179, 8, 0.25); border-radius: 12px; padding: 0.6rem 0.8rem; margin-bottom: 0.8rem; text-align: center; font-size: 0.82rem; color: #cbd5e1;">
-                    Acesso de Juiz no: <strong id="judgeLoginClubName" style="color: #eab308;">Clube</strong>
+            <!-- PASSO 3C: Gestão & Moderação do Clube (Admin e Juiz no mesmo card) -->
+            <div id="joinStepGestaoLogin" style="display: none; margin-top: 0.5rem;">
+                <!-- Header / Contexto do Clube -->
+                <div style="text-align: center; margin-bottom: 0.85rem;">
+                    <span
+                        style="font-size: 0.68rem; font-weight: 800; color: #64748b; letter-spacing: 0.8px; text-transform: uppercase;">Gestão
+                        & Moderação</span>
+                    <h3 id="gestaoLoginClubName"
+                        style="color: #ffffff; font-size: 1.05rem; font-weight: 800; margin: 0.2rem 0 0 0;">Nome do
+                        Clube</h3>
                 </div>
 
-                <div class="mc-title-group">
-                    <h3 class="mc-card-title" style="font-size: 1.15rem;">Entrar como Juiz</h3>
-                    <p style="color: #94a3b8; font-size: 0.78rem; margin-top: 0.3rem;">Informe a senha de Juiz configurada para este clube.</p>
+                <!-- TABS DE MODO: ADMIN | JUIZ -->
+                <div
+                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; background: rgba(255, 255, 255, 0.04); padding: 4px; border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 1.1rem;">
+                    <button type="button" id="tabModoAdmin" onclick="alternarModoGestao('admin')"
+                        style="padding: 0.65rem 0.5rem; border-radius: 10px; font-weight: 800; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.4rem; transition: all 0.2s ease; border: 1px solid rgba(16, 185, 129, 0.35); background: rgba(16, 185, 129, 0.15); color: #34d399;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                        <span>ADMIN</span>
+                    </button>
+
+                    <button type="button" id="tabModoJuiz" onclick="alternarModoGestao('juiz')"
+                        style="padding: 0.65rem 0.5rem; border-radius: 10px; font-weight: 800; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.4rem; transition: all 0.2s ease; border: 1px solid transparent; background: transparent; color: #94a3b8;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                        <span>JUIZ</span>
+                    </button>
                 </div>
 
+                <!-- CAMPO DE SENHA -->
                 <div class="mc-field-wrap">
-                    <label class="mc-input-label">SENHA DO JUIZ</label>
+                    <label class="mc-input-label" id="lblGestaoSenha">SENHA DO ADMIN</label>
                     <div class="mc-input-wrap">
-                        <input type="password" id="joinJudgeSenha" class="mc-input" placeholder="Digite a senha do juiz" autocomplete="current-password">
+                        <input type="password" id="joinGestaoSenha" class="mc-input"
+                            placeholder="Digite a senha de administrador" autocomplete="current-password">
                     </div>
                 </div>
 
-                <div id="joinJudgeLoginMsg" class="mc-feedback-msg" style="margin-bottom: 0.8rem;"></div>
+                <div id="joinGestaoLoginMsg" class="mc-feedback-msg" style="margin-bottom: 0.8rem;"></div>
 
-                <button type="button" onclick="submeterEntradaJuizClube()" class="mc-primary-btn" style="background: linear-gradient(135deg, #eab308, #ca8a04); border: none; color: #000000; font-weight: 800;">
-                    Acessar como Juiz
-                </button>
-                <button type="button" onclick="voltarParaEscolhaClube()" class="mc-link-btn" style="display: block; margin: 0.6rem auto 0 auto;">
-                    Voltar às opções
+                <button type="button" id="btnAcessarGestao" onclick="submeterEntradaGestaoClube()"
+                    class="mc-primary-btn"
+                    style="background: linear-gradient(135deg, #10b981, #059669); border: none; color: #000000; font-weight: 800;">
+                    Acessar como Admin
                 </button>
             </div>
         </div>
 
         <!-- VERSO 3 DO CARD: CRIAR UM CLUBE DO ZERO -->
         <div class="auth-card-face auth-card-face--back auth-card-face--create-club" id="authFaceCreateClub">
-            <div class="mc-card-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem;">
+            <div class="mc-card-header"
+                style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem;">
                 <button type="button" class="auth-back-btn" onclick="voltarFluxoCriarClube()" aria-label="Voltar">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="mc-back-arrow">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round" class="mc-back-arrow">
                         <line x1="19" y1="12" x2="5" y2="12"></line>
                         <polyline points="12 19 5 12 12 5"></polyline>
                     </svg>
@@ -1032,32 +1268,106 @@
                 </button>
                 <div style="display: flex; align-items: center; gap: 0.5rem;">
                     <div style="display: flex; gap: 4px; align-items: center;">
-                        <span id="createClubDot1" style="width: 7px; height: 7px; border-radius: 50%; background: #22c55e; transition: all 0.25s ease;"></span>
-                        <span id="createClubDot2" style="width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.2); transition: all 0.25s ease;"></span>
-                        <span id="createClubDot3" style="width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.2); transition: all 0.25s ease;"></span>
+                        <span id="createClubDot1"
+                            style="width: 7px; height: 7px; border-radius: 50%; background: #22c55e; transition: all 0.25s ease;"></span>
+                        <span id="createClubDot2"
+                            style="width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.2); transition: all 0.25s ease;"></span>
+                        <span id="createClubDot3"
+                            style="width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.2); transition: all 0.25s ease;"></span>
                     </div>
-                    <span class="reg-wizard-badge" id="createClubCounterBadge" style="background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12); color: #cbd5e1; padding: 0.2rem 0.55rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem;"><strong id="createClubStepNum" style="color: #ffffff;">1</strong> de 3</span>
+                    <span class="reg-wizard-badge" id="createClubCounterBadge"
+                        style="background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12); color: #cbd5e1; padding: 0.2rem 0.55rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem;"><strong
+                            id="createClubStepNum" style="color: #ffffff;">1</strong> de 3</span>
                 </div>
             </div>
 
-            <!-- CARD 1/3: Nome do Clube -->
+            <!-- CARD 1/3: Identidade do Clube -->
             <div id="createStepDetails" class="create-club-step-pane">
-                <h2 style="font-size: 1.2rem; font-weight: 800; color: #ffffff; margin: 0 0 1.25rem 0; letter-spacing: -0.3px;">Nome do Clube</h2>
-
-                <div class="mc-field-wrap" style="margin-bottom: 1.25rem;">
-                    <label class="mc-input-label" style="font-size: 0.72rem; letter-spacing: 0.6px; color: #94a3b8; font-weight: 700; display: block; margin-bottom: 0.4rem;">NOME</label>
+                <!-- NOME DO CLUBE -->
+                <div class="mc-field-wrap" style="margin-bottom: 1.05rem;">
+                    <label class="mc-input-label">NOME DO CLUBE</label>
                     <div class="mc-input-wrap" id="wrapCreateClubName">
-                        <svg viewBox="0 0 24 24" class="mc-input-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #94a3b8;">
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        <svg viewBox="0 0 24 24" class="mc-input-icon" fill="none" stroke="#22c55e" stroke-width="2.2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                         </svg>
-                        <input type="text" id="inputCreateClubNameCard" class="mc-input" placeholder="Ex: Real Resenha FC" oninput="validarNomeCardCriarClube(this.value)" autocomplete="off">
+                        <input type="text" id="inputCreateClubNameCard" class="mc-input"
+                            placeholder="Ex: Real Resenha FC" oninput="validarNomeCardCriarClube(this.value)"
+                            autocomplete="off">
                     </div>
-                    <div id="createClubCardFeedback" class="mc-feedback-msg" style="margin-top: 0.4rem; font-size: 0.78rem; font-weight: 600; display: none;"></div>
+                    <div id="createClubCardFeedback" class="mc-feedback-msg"
+                        style="margin-top: 0.35rem; font-size: 0.78rem; font-weight: 700; display: none;"></div>
                 </div>
 
-                <button type="button" id="btnContinueCreateClubCard" class="mc-primary-btn" onclick="avancarCriacaoClubeStep2()" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 800; font-size: 0.95rem; padding: 0.88rem; border-radius: 14px; background: #22c55e; color: #000000; border: none; cursor: pointer;">
+                <!-- FREQUÊNCIA DOS JOGOS -->
+                <div class="mc-field-wrap" style="margin-bottom: 1.05rem;">
+                    <label class="mc-input-label">FREQUÊNCIA DOS JOGOS</label>
+                    <div class="mc-input-wrap">
+                        <svg viewBox="0 0 24 24" class="mc-input-icon" fill="none" stroke="#fbbf24" stroke-width="2.2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        <input type="text" id="inputCreateClubFreqCard" class="mc-input" value="Semanal"
+                            placeholder="Ex: Semanal, Quintas às 20h, Sábados">
+                    </div>
+                </div>
+
+                <!-- ESCUDO DO CLUBE -->
+                <div class="mc-field-wrap" style="margin-bottom: 1.3rem;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem;">
+                        <label class="mc-input-label" style="margin: 0;">ESCUDO DO CLUBE</label>
+                        <button type="button" id="btnToggleUploadFoto" onclick="toggleModoEscudoFoto()"
+                            class="mc-shield-toggle-pill">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor"
+                                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                            </svg>
+                            <span>Foto própria</span>
+                        </button>
+                    </div>
+
+                    <!-- Grade de Escudos Vetoriais (12 Formatos Heráldicos) -->
+                    <div id="seletorEscudosWrap">
+                        <div class="mc-shields-grid" id="createClubShieldsGrid"></div>
+                        <input type="hidden" id="inputCreateClubEscudoId" value="classico">
+                    </div>
+
+                    <!-- Modo Upload Foto Customizada -->
+                    <div id="uploadFotoCustomWrap"
+                        style="display: none; align-items: center; gap: 0.85rem; background: rgba(255,255,255,0.05); border: 1.5px dashed rgba(255,255,255,0.22); border-radius: 14px; padding: 0.75rem 0.95rem;">
+                        <div id="createClubPhotoPreview"
+                            style="width: 48px; height: 48px; border-radius: 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#94a3b8"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                            </svg>
+                        </div>
+                        <div style="flex: 1;">
+                            <input type="file" id="inputCreateClubPhotoCard" accept="image/png, image/jpeg, image/webp"
+                                style="display: none;" onchange="previewFotoNovoClube(this)">
+                            <button type="button" onclick="document.getElementById('inputCreateClubPhotoCard').click()"
+                                style="width: 100%; padding: 0.6rem 0.85rem; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.18); border-radius: 10px; color: #ffffff; font-size: 0.82rem; font-weight: 750; cursor: pointer;">
+                                Escolher Imagem
+                            </button>
+                            <input type="hidden" id="inputCreateClubPhotoUrl">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" id="btnContinueCreateClubCard" class="mc-primary-btn"
+                    onclick="avancarCriacaoClubeStep2()"
+                    style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 900; font-size: 0.98rem; padding: 0.92rem; border-radius: 14px; background: #22c55e; color: #000000; border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35);">
                     <span>Continuar</span>
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                         <polyline points="12 5 19 12 12 19"></polyline>
                     </svg>
@@ -1066,7 +1376,9 @@
 
             <!-- CARD 2/3: Conta do Administrador -->
             <div id="createStepAdminAuth" class="create-club-step-pane" style="display: none;">
-                <h2 style="font-size: 1.2rem; font-weight: 800; color: #ffffff; margin: 0 0 1.25rem 0; letter-spacing: -0.3px;">Acesso do Administrador</h2>
+                <h2
+                    style="font-size: 1.2rem; font-weight: 800; color: #ffffff; margin: 0 0 1.25rem 0; letter-spacing: -0.3px;">
+                    Acesso do Administrador</h2>
 
                 <!-- Admin obrigatoriamente 'admin' -->
                 <input type="hidden" id="createRegNome" value="Administrador">
@@ -1074,38 +1386,49 @@
                 <span id="targetNewClubName" style="display: none;"></span>
 
                 <div class="mc-field-wrap" style="margin-bottom: 0.9rem;">
-                    <label class="mc-input-label" style="font-size: 0.72rem; letter-spacing: 0.6px; color: #94a3b8; font-weight: 700; display: block; margin-bottom: 0.4rem;">E-MAIL DO ADMIN</label>
+                    <label class="mc-input-label">E-MAIL DO ADMIN</label>
                     <div class="mc-input-wrap" id="wrapCreateRegEmail">
-                        <svg viewBox="0 0 24 24" class="mc-input-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #94a3b8;">
-                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <svg viewBox="0 0 24 24" class="mc-input-icon" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #94a3b8;">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z">
+                            </path>
                             <polyline points="22,6 12,13 2,6"></polyline>
                         </svg>
-                        <input type="email" id="createRegEmail" class="mc-input" placeholder="seu-email@exemplo.com" autocomplete="email" oninput="validarEmailAdminInstantaneo(this.value)">
+                        <input type="email" id="createRegEmail" class="mc-input" placeholder="seu-email@exemplo.com"
+                            autocomplete="email" oninput="validarEmailAdminInstantaneo(this.value)">
                     </div>
-                    <div id="createRegEmailFeedback" class="mc-feedback-msg" style="margin-top: 0.4rem; font-size: 0.78rem; font-weight: 600; display: none;"></div>
+                    <div id="createRegEmailFeedback" class="mc-feedback-msg"
+                        style="margin-top: 0.4rem; font-size: 0.78rem; font-weight: 600; display: none;"></div>
                 </div>
 
                 <div class="mc-field-wrap" style="margin-bottom: 1.25rem;">
-                    <label class="mc-input-label" style="font-size: 0.72rem; letter-spacing: 0.6px; color: #94a3b8; font-weight: 700; display: block; margin-bottom: 0.4rem;">SENHA DO ADMIN</label>
+                    <label class="mc-input-label">SENHA DO ADMIN</label>
                     <div class="mc-input-wrap" id="wrapCreateRegSenha">
-                        <svg viewBox="0 0 24 24" class="mc-input-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #94a3b8;">
+                        <svg viewBox="0 0 24 24" class="mc-input-icon" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #94a3b8;">
                             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                             <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                         </svg>
-                        <input type="password" id="createRegSenha" class="mc-input" placeholder="Mínimo 6 caracteres" autocomplete="new-password" oninput="validarSenhaAdminInstantaneo(this.value)">
+                        <input type="password" id="createRegSenha" class="mc-input" placeholder="Mínimo 6 caracteres"
+                            autocomplete="new-password" oninput="validarSenhaAdminInstantaneo(this.value)">
                     </div>
-                    <div id="createRegSenhaFeedback" class="mc-feedback-msg" style="margin-top: 0.4rem; font-size: 0.78rem; font-weight: 600; display: none;"></div>
+                    <div id="createRegSenhaFeedback" class="mc-feedback-msg"
+                        style="margin-top: 0.4rem; font-size: 0.78rem; font-weight: 600; display: none;"></div>
                 </div>
 
-                <div id="createStep2Msg" class="mc-feedback-msg" style="margin-bottom: 0.85rem; font-size: 0.78rem; font-weight: 600;"></div>
+                <div id="createStep2Msg" class="mc-feedback-msg"
+                    style="margin-bottom: 0.85rem; font-size: 0.78rem; font-weight: 600;"></div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1.6fr; gap: 0.65rem;">
-                    <button type="button" onclick="voltarParaPasso1CriarClube()" class="mc-secondary-btn" style="padding: 0.85rem; border-radius: 14px; font-weight: 700; font-size: 0.88rem; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.14); color: #cbd5e1; cursor: pointer;">
+                    <button type="button" onclick="voltarParaPasso1CriarClube()" class="mc-secondary-btn"
+                        style="padding: 0.85rem; border-radius: 14px; font-weight: 700; font-size: 0.88rem; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.14); color: #cbd5e1; cursor: pointer;">
                         Voltar
                     </button>
-                    <button type="button" onclick="avancarCriacaoClubeStep3()" class="mc-primary-btn" style="padding: 0.85rem; border-radius: 14px; font-weight: 800; font-size: 0.95rem; background: #22c55e; color: #000000; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.45rem;">
+                    <button type="button" onclick="avancarCriacaoClubeStep3()" class="mc-primary-btn"
+                        style="padding: 0.85rem; border-radius: 14px; font-weight: 800; font-size: 0.95rem; background: #22c55e; color: #000000; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.45rem;">
                         <span>Continuar</span>
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="5" y1="12" x2="19" y2="12"></line>
                             <polyline points="12 5 19 12 12 19"></polyline>
                         </svg>
@@ -1115,33 +1438,43 @@
 
             <!-- CARD 3/3: Senha do Juiz & Confirmação Final -->
             <div id="createStepJudgeAuth" class="create-club-step-pane" style="display: none;">
-                <h2 style="font-size: 1.2rem; font-weight: 800; color: #ffffff; margin: 0 0 1.25rem 0; letter-spacing: -0.3px;">Acesso do Juiz</h2>
+                <h2
+                    style="font-size: 1.2rem; font-weight: 800; color: #ffffff; margin: 0 0 1.25rem 0; letter-spacing: -0.3px;">
+                    Acesso do Juiz</h2>
 
                 <!-- Hidden summary spans for JS reference -->
                 <span id="summaryClubName" style="display: none;"></span>
                 <span id="summaryAdminEmail" style="display: none;"></span>
 
                 <div class="mc-field-wrap" style="margin-bottom: 1.25rem;">
-                    <label class="mc-input-label" style="font-size: 0.72rem; letter-spacing: 0.6px; color: #94a3b8; font-weight: 700; display: block; margin-bottom: 0.4rem;">SENHA DO JUIZ</label>
+                    <label class="mc-input-label">SENHA DO JUIZ</label>
                     <div class="mc-input-wrap" id="wrapCreateRegSenhaJuiz">
-                        <svg viewBox="0 0 24 24" class="mc-input-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #94a3b8;">
+                        <svg viewBox="0 0 24 24" class="mc-input-icon" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #94a3b8;">
                             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                             <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                         </svg>
-                        <input type="password" id="createRegSenhaJuiz" class="mc-input" placeholder="Senha para o Juiz" autocomplete="new-password" oninput="validarSenhaJuizInstantaneo(this.value)">
+                        <input type="password" id="createRegSenhaJuiz" class="mc-input" placeholder="Senha para o Juiz"
+                            autocomplete="new-password" oninput="validarSenhaJuizInstantaneo(this.value)">
                     </div>
-                    <div id="createRegSenhaJuizFeedback" class="mc-feedback-msg" style="margin-top: 0.4rem; font-size: 0.78rem; font-weight: 600; display: none;"></div>
+                    <div id="createRegSenhaJuizFeedback" class="mc-feedback-msg"
+                        style="margin-top: 0.4rem; font-size: 0.78rem; font-weight: 600; display: none;"></div>
                 </div>
 
-                <div id="createInlineRegMsg" class="mc-feedback-msg" style="margin-bottom: 0.85rem; font-size: 0.78rem; font-weight: 600;"></div>
+                <div id="createInlineRegMsg" class="mc-feedback-msg"
+                    style="margin-bottom: 0.85rem; font-size: 0.78rem; font-weight: 600;"></div>
 
                 <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 0.65rem;">
-                    <button type="button" onclick="voltarParaPasso2CriarClube()" class="mc-secondary-btn" style="padding: 0.88rem; border-radius: 14px; font-weight: 700; font-size: 0.88rem; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.14); color: #cbd5e1; cursor: pointer;">
+                    <button type="button" onclick="voltarParaPasso2CriarClube()" class="mc-secondary-btn"
+                        style="padding: 0.88rem; border-radius: 14px; font-weight: 700; font-size: 0.88rem; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.14); color: #cbd5e1; cursor: pointer;">
                         Voltar
                     </button>
-                    <button type="button" id="btnSubmitFinalCriarClube" onclick="processarCriacaoClubeComCadastro()" class="mc-primary-btn" style="padding: 0.88rem; border-radius: 14px; background: #22c55e; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.55rem; font-weight: 800; font-size: 0.95rem; color: #000000;">
+                    <button type="button" id="btnSubmitFinalCriarClube" onclick="processarCriacaoClubeComCadastro()"
+                        class="mc-primary-btn"
+                        style="padding: 0.88rem; border-radius: 14px; background: #22c55e; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.55rem; font-weight: 800; font-size: 0.95rem; color: #000000;">
                         <span>Criar Clube & Entrar</span>
-                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="5" y1="12" x2="19" y2="12"></line>
                             <polyline points="12 5 19 12 12 19"></polyline>
                         </svg>
@@ -1160,104 +1493,110 @@
 
 {% block auth_scripts %}
 <style>
-.auth-club-actions-group {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  width: 100%;
-}
+    .auth-club-actions-group {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        width: 100%;
+    }
 
-.auth-club-link-btn {
-  flex: 1 1 0;
-  min-width: 130px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.65rem 1rem;
-  font-size: 0.84rem;
-  font-weight: 800;
-  letter-spacing: 0.01em;
-  border-radius: 999px;
-  cursor: pointer;
-  text-decoration: none;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-  box-sizing: border-box;
-  text-align: center;
-}
+    .auth-club-link-btn {
+        flex: 1 1 0;
+        min-width: 130px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.65rem 1rem;
+        font-size: 0.84rem;
+        font-weight: 800;
+        letter-spacing: 0.01em;
+        border-radius: 999px;
+        cursor: pointer;
+        text-decoration: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+        box-sizing: border-box;
+        text-align: center;
+    }
 
-.auth-club-link-btn:active {
-  transform: scale(0.96);
-}
+    .auth-club-link-btn:active {
+        transform: scale(0.96);
+    }
 
-.auth-club-btn-icon {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-  transition: transform 0.2s ease;
-}
+    .auth-club-btn-icon {
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+        transition: transform 0.2s ease;
+    }
 
-/* Destaque 1: Entrar em um clube (Verde: fundo verde, borda verde e letra verde, sem aura) */
-.auth-club-link-btn--join {
-  background: rgba(34, 197, 94, 0.16);
-  border: 1.5px solid #22c55e;
-  color: #22c55e;
-  box-shadow: none !important;
-}
+    /* Destaque 1: Entrar em um clube (Verde: fundo verde, borda verde e letra verde, sem aura) */
+    .auth-club-link-btn--join {
+        background: rgba(34, 197, 94, 0.16);
+        border: 1.5px solid #22c55e;
+        color: #22c55e;
+        box-shadow: none !important;
+    }
 
-.auth-club-link-btn--join .auth-club-btn-icon {
-  color: #22c55e;
-}
+    .auth-club-link-btn--join .auth-club-btn-icon {
+        color: #22c55e;
+    }
 
-.auth-club-link-btn--join:hover {
-  background: rgba(34, 197, 94, 0.26);
-  border-color: #4ade80;
-  color: #4ade80;
-  box-shadow: none !important;
-  transform: translateY(-1.5px);
-}
+    .auth-club-link-btn--join:hover {
+        background: rgba(34, 197, 94, 0.26);
+        border-color: #4ade80;
+        color: #4ade80;
+        box-shadow: none !important;
+        transform: translateY(-1.5px);
+    }
 
-.auth-club-link-btn--join:hover .auth-club-btn-icon {
-  color: #4ade80;
-  transform: scale(1.12);
-}
+    .auth-club-link-btn--join:hover .auth-club-btn-icon {
+        color: #4ade80;
+        transform: scale(1.12);
+    }
 
-/* Destaque 2: Criar um clube (Vidro translúcido com borda suave) */
-.auth-club-link-btn--create {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1.5px solid rgba(255, 255, 255, 0.28);
-  color: #ffffff;
-  box-shadow: none !important;
-}
+    /* Destaque 2: Criar um clube (Vidro translúcido com borda suave) */
+    .auth-club-link-btn--create {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1.5px solid rgba(255, 255, 255, 0.28);
+        color: #ffffff;
+        box-shadow: none !important;
+    }
 
-.auth-club-link-btn--create:hover {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.55);
-  color: #ffffff;
-  box-shadow: none !important;
-  transform: translateY(-1.5px);
-}
+    .auth-club-link-btn--create:hover {
+        background: rgba(255, 255, 255, 0.14);
+        border-color: rgba(255, 255, 255, 0.55);
+        color: #ffffff;
+        box-shadow: none !important;
+        transform: translateY(-1.5px);
+    }
 
-.auth-club-link-btn--create:hover .auth-club-btn-icon {
-  transform: rotate(90deg) scale(1.12);
-}
+    .auth-club-link-btn--create:hover .auth-club-btn-icon {
+        transform: rotate(90deg) scale(1.12);
+    }
 
-@media (max-width: 360px) {
-  .auth-club-actions-group {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  .auth-club-link-btn {
-    width: 100%;
-  }
-}
+    @media (max-width: 360px) {
+        .auth-club-actions-group {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .auth-club-link-btn {
+            width: 100%;
+        }
+    }
 </style>
 {% if target_clube %}
 <script>
     window.TARGET_CLUBE_INITIAL = {{ target_clube | tojson }};
+</script>
+{% endif %}
+{% if target_pin %}
+<script>
+    window.TARGET_PIN_INITIAL = {{ target_pin | tojson }};
 </script>
 {% endif %}
 {% endblock %}

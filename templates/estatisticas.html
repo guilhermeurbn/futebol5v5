@@ -95,9 +95,15 @@
             {% else %}
                 <section class="section">
                     <div class="empty-state">
-                        <div class="empty-icon">📊</div>
-                        <p>Nenhuma estatística disponível</p>
-                        <p class="empty-hint">Realize sorteios para ver estatísticas</p>
+                        <div class="empty-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="20" x2="18" y2="10"></line>
+                                <line x1="12" y1="20" x2="12" y2="4"></line>
+                                <line x1="6" y1="20" x2="6" y2="14"></line>
+                            </svg>
+                        </div>
+                        <p class="empty-state__title">Nenhuma estatística disponível</p>
+                        <p class="empty-hint">Realize rodadas oficiais para gerar os dados de artilharia, ranking e desempenho dos atletas.</p>
                     </div>
                 </section>
             {% endif %}

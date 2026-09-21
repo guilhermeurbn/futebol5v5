@@ -3858,17 +3858,45 @@ body.app-shell #app-content .footer {
 
 /* Falsa sensação de toque (Tactile Touch Feedback) para a aba já ativa no rodapé */
 @keyframes navActiveTouchFeedback {
-  0% { transform: scale(0.9); }
-  35% { transform: scale(0.78); opacity: 0.85; }
-  70% { transform: scale(0.94); opacity: 1; }
-  100% { transform: scale(0.9); opacity: 1; }
+  0% {
+    transform: scale(0.9);
+  }
+
+  35% {
+    transform: scale(0.78);
+    opacity: 0.85;
+  }
+
+  70% {
+    transform: scale(0.94);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(0.9);
+    opacity: 1;
+  }
 }
 
 @keyframes topbarActiveTouchFeedback {
-  0% { transform: scale(1); }
-  35% { transform: scale(0.88); opacity: 0.85; }
-  70% { transform: scale(1.04); opacity: 1; }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(1);
+  }
+
+  35% {
+    transform: scale(0.88);
+    opacity: 0.85;
+  }
+
+  70% {
+    transform: scale(1.04);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .site-footer__link.is-tapped-active-nav {
@@ -6524,49 +6552,88 @@ tbody td code {
   margin-top: var(--spacing-md);
 }
 
+/* ==========================================================================
+   Modern Elite Empty State - NaTrave 2026 Dark Aesthetic
+   ========================================================================== */
 .empty-state {
-  text-align: center;
-  padding: var(--spacing-3xl) var(--spacing-lg);
-  color: var(--text-light);
-  animation: fadeIn 0.5s ease-in;
+  background: linear-gradient(180deg, rgba(16, 22, 32, 0.75) 0%, rgba(10, 14, 20, 0.9) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 20px !important;
+  padding: 2.5rem 1.5rem 2.25rem !important;
+  max-width: 440px !important;
+  margin: 2rem auto !important;
+  text-align: center !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  animation: emptyStateFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-@keyframes fadeIn {
+@keyframes emptyStateFadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(10px) scale(0.98);
   }
-
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
 .empty-icon {
-  font-size: 4rem;
-  margin-bottom: var(--spacing-md);
-  display: inline-block;
-  animation: bounce 2s ease-in-out infinite;
+  width: 58px !important;
+  height: 58px !important;
+  border-radius: 16px !important;
+  background: rgba(34, 197, 94, 0.09) !important;
+  border: 1px solid rgba(34, 197, 94, 0.25) !important;
+  color: #22c55e !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 auto 1.15rem auto !important;
+  box-shadow: 0 8px 22px rgba(34, 197, 94, 0.12) !important;
+  animation: none !important;
+  font-size: 1.5rem !important;
+  flex-shrink: 0 !important;
 }
 
-@keyframes bounce {
-
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-10px);
-  }
+.empty-icon svg {
+  width: 26px !important;
+  height: 26px !important;
+  stroke: #22c55e !important;
+  display: block !important;
 }
 
-.empty-hint {
-  font-size: 0.95rem;
-  color: var(--text-lighter);
-  margin-top: var(--spacing-sm);
-  font-weight: 500;
+.empty-state p:first-of-type,
+.empty-state__title {
+  font-size: 1.12rem !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  letter-spacing: -0.015em !important;
+  margin: 0 0 0.4rem 0 !important;
+  line-height: 1.3 !important;
+}
+
+.empty-hint,
+.empty-state__desc {
+  font-size: 0.85rem !important;
+  color: #94a3b8 !important;
+  line-height: 1.5 !important;
+  margin: 0 auto !important;
+  max-width: 320px !important;
+  font-weight: 500 !important;
+}
+
+.empty-state__action {
+  margin-top: 1.25rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.45rem !important;
 }
 
 @media (max-width: 768px) {
@@ -11769,6 +11836,7 @@ tbody td code {
     flex-direction: column;
     gap: 0.5rem;
   }
+
   .auth-club-link-btn {
     width: 100%;
   }
@@ -18497,9 +18565,9 @@ body.is-referee-layout .judge-timer-reset:hover {
   margin: 0 !important;
 }
 
-.public-profile-dossier > .premium-profile-tabs,
-.public-profile-dossier > .premium-profile-header,
-.public-profile-dossier > .premium-profile-tab-content {
+.public-profile-dossier>.premium-profile-tabs,
+.public-profile-dossier>.premium-profile-header,
+.public-profile-dossier>.premium-profile-tab-content {
   margin-top: 0 !important;
   margin-bottom: 0 !important;
 }
@@ -20987,6 +21055,7 @@ html,
 }
 
 @media (max-width: 640px) {
+
   .public-profile-hero,
   .premium-profile-header {
     padding-top: 2.75rem !important;
@@ -22061,22 +22130,26 @@ body.is-capacitor-app .app-login-title {
     transform: translateY(-50%) rotate(0deg) scale(0.9);
     opacity: 1;
   }
+
   38% {
     left: calc(100% - 0.9em);
     transform: translateY(-50%) rotate(720deg) scale(1);
     opacity: 1;
   }
+
   44% {
     left: 100%;
     transform: translateY(-50%) rotate(840deg) scale(1.2);
     opacity: 1;
     filter: drop-shadow(0 0 12px #5bf500);
   }
+
   50% {
     left: 102%;
     transform: translateY(-50%) rotate(960deg) scale(0);
     opacity: 0;
   }
+
   100% {
     left: -0.2em;
     transform: translateY(-50%) rotate(0deg) scale(0);
@@ -22090,21 +22163,25 @@ body.is-capacitor-app .app-login-title {
     opacity: 0;
     transform: translateX(-4px);
   }
+
   38% {
     clip-path: inset(0 0 0 0);
     opacity: 1;
     transform: translateX(0);
   }
+
   86% {
     clip-path: inset(0 0 0 0);
     opacity: 1;
     transform: translateX(0);
   }
+
   94% {
     clip-path: inset(0 0 0 0);
     opacity: 0;
     transform: translateX(0);
   }
+
   100% {
     clip-path: inset(0 100% 0 0);
     opacity: 0;
@@ -22120,20 +22197,25 @@ body.is-capacitor-app .app-login-subtitle {
 
 body.is-capacitor-app .auth-input-wrap,
 .auth-input-wrap {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border: 1px solid rgba(255, 255, 255, 0.14) !important;
-  border-radius: 16px !important;
+  background: rgba(255, 255, 255, 0.085) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.22) !important;
+  border-radius: 14px !important;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
   backdrop-filter: blur(14px) !important;
   -webkit-backdrop-filter: blur(14px) !important;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+}
+
+body.is-capacitor-app .auth-input-wrap:hover,
+.auth-input-wrap:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.36) !important;
 }
 
 body.is-capacitor-app .auth-input-wrap:focus-within,
 .auth-input-wrap:focus-within {
-  border-color: rgba(255, 255, 255, 0.3) !important;
-  background: rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 0 16px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  border-color: #22c55e !important;
+  background: rgba(255, 255, 255, 0.13) !important;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.24) !important;
 }
 
 body.is-capacitor-app .auth-input-icon,
@@ -22739,6 +22821,7 @@ body.is-capacitor-app .auth-label-app {
 }
 
 @media (max-width: 640px) {
+
   .editar-perfil-header,
   .configuracoes-header {
     padding-top: calc(0.75rem + max(22px, env(safe-area-inset-top, 0px))) !important;
@@ -22940,6 +23023,7 @@ body.page-index .page-container-wide {
 }
 
 @media (min-width: 768px) {
+
   body.page-index #app-content,
   body.page-index .container,
   body.page-index .main,
@@ -23161,7 +23245,8 @@ html.modal-open-lock {
   border: none !important;
   outline: none !important;
   color: #ffffff !important;
-  font-size: 16px !important; /* Previne auto-zoom indesejado do iOS Safari/WebView */
+  font-size: 16px !important;
+  /* Previne auto-zoom indesejado do iOS Safari/WebView */
   font-weight: 600 !important;
   padding: 0 0.3rem !important;
   box-shadow: none !important;
@@ -23169,6 +23254,7 @@ html.modal-open-lock {
 
 /* Previne zoom automático do iOS Safari em inputs/selects/textareas no mobile */
 @media screen and (max-width: 768px) {
+
   input,
   select,
   textarea,
@@ -23538,15 +23624,61 @@ button.auth-back-btn:active {
 }
 
 .mc-card-badge {
-  font-size: 0.7rem;
-  font-weight: 900;
+  font-size: 0.72rem;
+  font-weight: 850;
   color: #22c55e;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   background: rgba(34, 197, 94, 0.12);
-  padding: 0.28rem 0.68rem;
+  padding: 0.3rem 0.75rem;
   border-radius: 999px;
-  border: 1px solid rgba(34, 197, 94, 0.25);
+  border: 1px solid rgba(34, 197, 94, 0.28);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  max-width: 190px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
+}
+
+.mc-card-badge--search {
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.mc-card-badge--search:hover {
+  background: rgba(34, 197, 94, 0.2);
+  border-color: rgba(34, 197, 94, 0.48);
+}
+
+.mc-card-badge--active {
+  max-width: 230px !important;
+  background: rgba(34, 197, 94, 0.15) !important;
+  border-color: #22c55e !important;
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.25);
+  padding: 0.22rem 0.65rem !important;
+}
+
+.mc-header-search-input {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  color: #ffffff !important;
+  font-size: 0.76rem !important;
+  font-weight: 700 !important;
+  width: 115px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.mc-header-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 500;
+  text-transform: none;
 }
 
 /* Título Ultra Minimalista */
@@ -23569,51 +23701,57 @@ button.auth-back-btn:active {
 }
 
 .mc-input-label {
-  font-size: 0.7rem;
-  font-weight: 800;
-  color: #94a3b8;
+  font-size: 0.74rem;
+  font-weight: 850;
+  color: #ffffff !important;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.07em;
   display: block;
   margin-bottom: 0.45rem;
 }
 
-/* CAIXA DE INPUT PREMIUM (Sem borda azul, sem contorno estranho do navegador) */
+/* CAIXA DE INPUT PREMIUM (Mais claridade, fundo com definição e foco esmeralda) */
 .mc-input-wrap {
   position: relative;
   width: 100%;
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1.5px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.085);
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
   border-radius: 14px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
+}
+
+.mc-input-wrap:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.36);
 }
 
 .mc-input-wrap:focus-within {
   border-color: #22c55e !important;
-  box-shadow: 0 0 16px rgba(34, 197, 94, 0.25) !important;
-  background: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.24) !important;
+  background: rgba(255, 255, 255, 0.13) !important;
 }
 
 .mc-input-icon {
   position: absolute;
-  left: 0.85rem;
-  width: 18px;
-  height: 18px;
-  color: #64748b;
+  left: 0.95rem;
+  width: 19px;
+  height: 19px;
+  color: #94a3b8;
   pointer-events: none;
-  transition: color 0.2s ease;
+  transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .mc-input-wrap:focus-within .mc-input-icon {
-  color: #22c55e;
+  color: #22c55e !important;
+  transform: scale(1.05);
 }
 
 .mc-input {
   width: 100%;
-  padding: 0.82rem 1rem 0.82rem 2.6rem;
+  padding: 0.88rem 1.15rem;
   background: transparent !important;
   border: none !important;
   outline: none !important;
@@ -23621,13 +23759,18 @@ button.auth-back-btn:active {
   -webkit-appearance: none !important;
   -webkit-tap-highlight-color: transparent !important;
   color: #ffffff !important;
-  font-size: 0.92rem !important;
+  font-size: 0.96rem !important;
   font-weight: 700 !important;
   font-family: inherit !important;
 }
 
+.mc-input-icon+.mc-input,
+.mc-input-wrap:has(.mc-input-icon) .mc-input {
+  padding-left: 2.8rem;
+}
+
 .mc-input::placeholder {
-  color: rgba(255, 255, 255, 0.35) !important;
+  color: rgba(255, 255, 255, 0.48) !important;
   font-weight: 500 !important;
 }
 
@@ -23636,20 +23779,25 @@ button.auth-back-btn:active {
   border-color: #10b981 !important;
   box-shadow: 0 0 12px rgba(16, 185, 129, 0.22) !important;
 }
+
 .mc-input-wrap.is-valid .mc-input-icon {
   color: #10b981 !important;
 }
+
 .mc-input-wrap.is-invalid {
   border-color: #ef4444 !important;
   box-shadow: 0 0 12px rgba(239, 68, 68, 0.22) !important;
 }
+
 .mc-input-wrap.is-invalid .mc-input-icon {
   color: #ef4444 !important;
 }
+
 .mc-input-wrap.is-warning {
   border-color: #f59e0b !important;
   box-shadow: 0 0 12px rgba(245, 158, 11, 0.22) !important;
 }
+
 .mc-input-wrap.is-warning .mc-input-icon {
   color: #f59e0b !important;
 }
@@ -23702,7 +23850,7 @@ button.auth-back-btn:active {
   transform: scale(1.08);
 }
 
-.mc-color-dot input:checked + .mc-color-circle,
+.mc-color-dot input:checked+.mc-color-circle,
 .mc-color-dot.is-active .mc-color-circle {
   opacity: 1;
   transform: scale(1.15);
@@ -23808,22 +23956,53 @@ button.auth-back-btn:active {
 }
 
 .mc-club-item {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 3.5px solid var(--item-theme-color, #22c55e);
   border-radius: 14px;
-  padding: 0.75rem 1rem;
+  padding: 0.8rem 1rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: none;
+  box-shadow: none !important;
 }
 
 .mc-club-item:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(34, 197, 94, 0.4);
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(var(--item-theme-rgb, 34, 197, 94), 0.4);
   transform: translateY(-1px);
+  box-shadow: none !important;
+}
+
+.mc-club-item-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.mc-club-item-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(var(--item-theme-rgb, 34, 197, 94), 0.15);
+  border: 1px solid rgba(var(--item-theme-rgb, 34, 197, 94), 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--item-theme-color, #22c55e);
+  flex-shrink: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+.mc-club-item-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: inherit;
 }
 
 .mc-club-name {
@@ -23835,65 +24014,341 @@ button.auth-back-btn:active {
 .mc-club-code-badge {
   font-size: 0.75rem;
   color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.1rem;
 }
 
 .mc-club-code-num {
-  color: #22c55e;
-  font-weight: 700;
+  color: var(--item-theme-color, #22c55e);
+  font-weight: 800;
+  background: rgba(var(--item-theme-rgb, 34, 197, 94), 0.12);
+  padding: 0.1rem 0.45rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  letter-spacing: 0.5px;
 }
 
 .mc-club-join-pill {
   font-size: 0.78rem;
   font-weight: 800;
-  color: #22c55e;
-  background: rgba(34, 197, 94, 0.12);
-  padding: 0.3rem 0.7rem;
+  color: var(--item-theme-color, #22c55e);
+  background: rgba(var(--item-theme-rgb, 34, 197, 94), 0.12);
+  border: 1px solid rgba(var(--item-theme-rgb, 34, 197, 94), 0.25);
+  padding: 0.35rem 0.75rem;
   border-radius: 999px;
   transition: all 0.2s ease;
+  box-shadow: none !important;
 }
 
 .mc-club-item:hover .mc-club-join-pill {
-  background: #22c55e;
+  background: var(--item-theme-color, #22c55e);
   color: #000000;
 }
 
-/* Caixa do Clube Escolhido */
+/* ============================================================
+   ⚽ NOVO CARD DE PERFIL DO CLUBE (MINIMALISTA, COLORIDO, SEM ÁUREA)
+   ============================================================ */
 .mc-chosen-box {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 18px;
-  padding: 1.2rem 1rem;
+  position: relative;
+  background: linear-gradient(180deg, rgba(var(--club-rgb, 34, 197, 94), 0.08) 0%, rgba(15, 23, 42, 0.75) 45%, rgba(10, 15, 29, 0.95) 100%);
+  border: 1px solid rgba(var(--club-rgb, 34, 197, 94), 0.25);
+  border-top: 3px solid var(--club-accent, #22c55e);
+  border-radius: 12px;
+  padding: 1.25rem 1.1rem 1.15rem 1.1rem;
   margin-bottom: 1.25rem;
-  box-shadow: none;
+  text-align: center;
+  box-shadow: none !important;
+  overflow: hidden;
+  transition: all 0.25s ease;
 }
 
-.mc-chosen-badge {
-  font-size: 0.7rem;
-  font-weight: 800;
-  color: #22c55e;
-  background: rgba(34, 197, 94, 0.15);
-  padding: 0.2rem 0.6rem;
+/* Escudo ou Foto do Clube */
+.mc-chosen-shield-wrap {
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 0.65rem auto;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(var(--club-rgb, 34, 197, 94), 0.22) 0%, rgba(var(--club-rgb, 34, 197, 94), 0.06) 100%);
+  border: 1.5px solid rgba(var(--club-rgb, 34, 197, 94), 0.48);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 0;
+  box-shadow: none !important;
+  transition: all 0.25s ease;
+}
+
+.mc-chosen-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  display: block;
+}
+
+.mc-chosen-shield-svg {
+  width: 26px;
+  height: 26px;
+  fill: rgba(var(--club-rgb, 34, 197, 94), 0.2);
+  stroke: var(--club-accent, #22c55e);
+  stroke-width: 2.2;
+  transition: all 0.25s ease;
+}
+
+/* Nome do Clube (Livre no topo, sem card em volta) */
+.mc-chosen-name {
+  font-size: 1.55rem;
+  font-weight: 900;
+  color: #ffffff;
+  margin: 0 0 0.65rem 0;
+  letter-spacing: -0.4px;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Minis Destaques (CLUBE 001, Jogadores e Frequência) */
+.mc-chosen-highlights-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.15rem;
+}
+
+.mc-chosen-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   border-radius: 999px;
+  padding: 0.28rem 0.75rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: none !important;
+  transition: all 0.25s ease;
+}
+
+.mc-chosen-pill-code {
+  background: rgba(var(--club-rgb, 34, 197, 94), 0.12);
+  border: 1px solid rgba(var(--club-rgb, 34, 197, 94), 0.35);
+  color: var(--club-accent, #22c55e);
+  letter-spacing: 0.6px;
   text-transform: uppercase;
 }
 
-.mc-chosen-name {
-  font-size: 1.25rem;
-  font-weight: 900;
-  color: #ffffff;
-  margin: 0.4rem 0 0.15rem 0;
+.mc-chosen-code-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--club-accent, #22c55e);
+  flex-shrink: 0;
+  transition: background 0.25s ease;
+}
+
+.mc-chosen-pill-players {
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #7dd3fc;
+  letter-spacing: 0.2px;
+}
+
+.mc-chosen-players-svg {
+  color: #38bdf8;
+  flex-shrink: 0;
+}
+
+.mc-chosen-pill-freq {
+  background: rgba(234, 179, 8, 0.12);
+  border: 1px solid rgba(234, 179, 8, 0.32);
+  color: #fde047;
+  letter-spacing: 0.2px;
+}
+
+.mc-chosen-freq-svg {
+  color: #eab308;
+  flex-shrink: 0;
 }
 
 .mc-choice-subtext {
   font-size: 0.85rem;
   font-weight: 800;
-  color: #f8fafc;
-  margin-bottom: 0.85rem;
+  color: #cbd5e1;
+  margin-bottom: 0.95rem;
 }
 
 .mc-choice-actions {
   display: grid;
   gap: 0.65rem;
+}
+
+/* ============================================================
+   🔒 SENHA DO CLUBE (PIN DE 4 DÍGITOS ALFANUMÉRICOS)
+   ============================================================ */
+.mc-pin-inputs {
+  display: flex;
+  justify-content: center;
+  gap: 0.55rem;
+  margin-bottom: 0.5rem;
+}
+
+.mc-pin-digit {
+  width: 50px;
+  height: 56px;
+  text-align: center;
+  font-size: 1.45rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.085);
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  color: #ffffff;
+  outline: none;
+  letter-spacing: 1px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mc-pin-digit:focus {
+  border-color: #22c55e !important;
+  background: rgba(34, 197, 94, 0.08) !important;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.25) !important;
+  transform: translateY(-2px);
+}
+
+@keyframes pinShake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20%,
+  60% {
+    transform: translateX(-6px);
+  }
+
+  40%,
+  80% {
+    transform: translateX(6px);
+  }
+}
+
+.pin-shake {
+  animation: pinShake 0.4s ease-in-out !important;
+}
+
+/* ============================================================
+   🛡️ SELETOR DE ESCUDOS DO CLUBE (8 FORMATOS MINIMALISTAS)
+   ============================================================ */
+.mc-shields-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.55rem;
+  margin-top: 0.4rem;
+  margin-bottom: 0.85rem;
+}
+
+.mc-shield-opt {
+  height: 52px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: none !important;
+  padding: 4px;
+}
+
+.mc-shield-opt:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.35);
+  transform: translateY(-2px);
+}
+
+.mc-shield-opt.active {
+  background: rgba(var(--club-rgb, 34, 197, 94), 0.16) !important;
+  border: 2px solid var(--club-accent, #22c55e) !important;
+  box-shadow: 0 0 0 3px rgba(var(--club-rgb, 34, 197, 94), 0.22) !important;
+}
+
+.mc-shield-opt svg {
+  width: 28px;
+  height: 28px;
+  display: block;
+}
+
+.mc-shield-opt .shield-outer {
+  fill: #14161f;
+  stroke: #f8fafc;
+  stroke-width: 1.4;
+  transition: all 0.2s ease;
+}
+
+.mc-shield-opt .shield-inner {
+  fill: none;
+  stroke: #94a3b8;
+  stroke-width: 1;
+  opacity: 0.9;
+  transition: all 0.2s ease;
+}
+
+.mc-shield-opt:hover .shield-inner {
+  stroke: #cbd5e1;
+}
+
+.mc-shield-opt.active .shield-outer {
+  fill: rgba(var(--club-rgb, 34, 197, 94), 0.15);
+  stroke: var(--club-accent, #22c55e);
+  stroke-width: 1.6;
+}
+
+.mc-shield-opt.active .shield-inner {
+  stroke: var(--club-accent, #4ade80);
+  stroke-width: 1.2;
+  opacity: 1;
+}
+
+.mc-chosen-shield-svg .shield-outer {
+  fill: #14161f;
+  stroke: var(--club-accent, #22c55e);
+  stroke-width: 1.6;
+}
+
+.mc-chosen-shield-svg .shield-inner {
+  fill: none;
+  stroke: var(--club-accent, #22c55e);
+  stroke-width: 1.1;
+}
+
+/* Pill moderno de alternar escudo/foto */
+.mc-shield-toggle-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: #4ade80;
+  padding: 0.28rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.73rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.mc-shield-toggle-pill:hover {
+  background: rgba(34, 197, 94, 0.22);
+  border-color: #22c55e;
+  color: #ffffff;
 }
 
 /* ============================================================
@@ -23929,6 +24384,7 @@ body.page-admin .main,
 }
 
 @media (min-width: 768px) {
+
   body.admin-ajustes-page .container,
   body.admin-ajustes-page .page-container-wide,
   body.page-admin .container,
@@ -23983,6 +24439,7 @@ body.page-admin .main,
   .admin-users-section .premium-users-grid {
     grid-template-columns: 1fr !important;
   }
+
   .admin-users-section .premium-user-card {
     padding: 1.25rem 1rem !important;
     border-radius: 16px !important;
@@ -24171,6 +24628,7 @@ body.page-admin .main,
   color: #22c55e !important;
   border-color: rgba(34, 197, 94, 0.25) !important;
 }
+
 .admin-action-pill--avisos:hover {
   background: rgba(34, 197, 94, 0.18) !important;
   border-color: rgba(34, 197, 94, 0.4) !important;
@@ -24183,6 +24641,7 @@ body.page-admin .main,
   border: none !important;
   box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35) !important;
 }
+
 .admin-action-pill--add:hover {
   background: #16a34a !important;
   transform: translateY(-1px) !important;

@@ -38,17 +38,73 @@
                 
                 <!-- Campo Nome do Clube com Validação AJAX em tempo real -->
                 <div>
-                    <label for="nomeClube" style="display: block; font-size: 0.78rem; font-weight: 800; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.6rem;">Nome do Clube</label>
+                    <label for="nomeClube" style="display: block; font-size: 0.76rem; font-weight: 850; color: #ffffff; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.5rem;">Nome do Clube</label>
                     <div style="position: relative;">
-                        <input type="text" id="nomeClube" name="nome" placeholder="Ex: Pelada dos Amigos, Real Resenha FC" required minlength="2" maxlength="60" oninput="validarNomeClubeTempoReal(this.value)" style="width: 100%; padding: 0.85rem 1rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 14px; color: #ffffff; font-size: 1rem; font-weight: 700; outline: none; transition: all 0.2s ease;">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#22c55e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); pointer-events: none;">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                        <input type="text" id="nomeClube" name="nome" placeholder="Ex: Pelada dos Amigos, Real Resenha FC" required minlength="2" maxlength="60" oninput="validarNomeClubeTempoReal(this.value)" style="width: 100%; padding: 0.88rem 1rem 0.88rem 2.8rem; background: rgba(255, 255, 255, 0.055); border: 1.5px solid rgba(255, 255, 255, 0.16); border-radius: 14px; color: #ffffff; font-size: 0.98rem; font-weight: 700; outline: none; transition: all 0.2s ease;">
                         <div id="validacaoStatusIcon" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); display: none;"></div>
                     </div>
                     <div id="validacaoFeedback" style="font-size: 0.8rem; font-weight: 700; margin-top: 0.45rem; min-height: 1.2rem;"></div>
                 </div>
 
+                <!-- Campo Frequência dos Jogos -->
+                <div>
+                    <label for="frequenciaJogos" style="display: block; font-size: 0.76rem; font-weight: 850; color: #ffffff; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.5rem;">Frequência dos Jogos</label>
+                    <div style="position: relative;">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fbbf24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); pointer-events: none;">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        <input type="text" id="frequenciaJogos" name="frequencia_jogos" value="Semanal" placeholder="Ex: Semanal, Quintas às 20h, Sábados" style="width: 100%; padding: 0.88rem 1rem 0.88rem 2.8rem; background: rgba(255, 255, 255, 0.055); border: 1.5px solid rgba(255, 255, 255, 0.16); border-radius: 14px; color: #ffffff; font-size: 0.98rem; font-weight: 700; outline: none; transition: all 0.2s ease;">
+                    </div>
+                </div>
+
+                <!-- Escudo ou Imagem do Clube (Opcional) -->
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <label style="font-size: 0.76rem; font-weight: 850; color: #ffffff; text-transform: uppercase; letter-spacing: 0.06em; margin: 0;">Escudo / Logo do Clube</label>
+                        <button type="button" id="btnToggleFotoPage" onclick="toggleModoFotoPage()" class="mc-shield-toggle-pill">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                            </svg>
+                            <span>Foto própria</span>
+                        </button>
+                    </div>
+
+                    <!-- Grade de Escudos Heráldicos da Imagem 2 -->
+                    <div id="seletorEscudosPageWrap">
+                        <div class="mc-shields-grid" id="criarClubePageShieldsGrid" style="grid-template-columns: repeat(4, 1fr); gap: 0.55rem;"></div>
+                        <input type="hidden" id="escudoIdClubePage" name="escudo_id" value="classico">
+                    </div>
+
+                    <!-- Modo Upload Imagem Customizada -->
+                    <div id="uploadFotoPageWrap" style="display: none; align-items: center; gap: 0.85rem; background: rgba(255, 255, 255, 0.04); border: 1px dashed rgba(255, 255, 255, 0.2); border-radius: 14px; padding: 0.85rem;">
+                        <div id="previewFotoClubePage" style="width: 52px; height: 52px; border-radius: 12px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.2); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                            </svg>
+                        </div>
+                        <div style="flex: 1;">
+                            <input type="file" id="inputFotoClubePage" accept="image/png, image/jpeg, image/webp" style="display: none;" onchange="previewUploadFotoClubePage(this)">
+                            <button type="button" onclick="document.getElementById('inputFotoClubePage').click()" style="width: 100%; padding: 0.65rem 0.9rem; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.18); border-radius: 12px; color: #cbd5e1; font-size: 0.85rem; font-weight: 700; cursor: pointer;">
+                                Escolher Imagem
+                            </button>
+                            <input type="hidden" id="fotoUrlClubePage">
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Seletor de Tema de Cores -->
                 <div>
-                    <label style="display: block; font-size: 0.78rem; font-weight: 800; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.6rem;">Cor Tema do Clube</label>
+                    <label style="display: block; font-size: 0.78rem; font-weight: 850; color: #ffffff; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.6rem;">Cor Tema do Clube</label>
                     <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.6rem;">
                         <label class="color-option" style="cursor: pointer; text-align: center;">
                             <input type="radio" name="cor_tema" value="neon-green" checked style="display: none;" onchange="atualizarSeletorCor(this)">
@@ -150,10 +206,61 @@ function atualizarSeletorCor(radio) {
     }
 }
 
+function toggleModoFotoPage() {
+    const escudosWrap = document.getElementById('seletorEscudosPageWrap');
+    const uploadWrap = document.getElementById('uploadFotoPageWrap');
+    const btnToggle = document.getElementById('btnToggleFotoPage');
+    if (!escudosWrap || !uploadWrap) return;
+
+    if (uploadWrap.style.display === 'none' || getComputedStyle(uploadWrap).display === 'none') {
+        uploadWrap.style.display = 'flex';
+        escudosWrap.style.display = 'none';
+        if (btnToggle) btnToggle.textContent = '🛡️ Usar catálogo de escudos';
+    } else {
+        uploadWrap.style.display = 'none';
+        escudosWrap.style.display = 'block';
+        if (btnToggle) btnToggle.textContent = '+ Ou foto própria';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.renderizarSeletorEscudos) {
+        window.renderizarSeletorEscudos('criarClubePageShieldsGrid', 'escudoIdClubePage', 'classico');
+    }
+});
+
+async function previewUploadFotoClubePage(input) {
+    if (!input || !input.files || !input.files[0]) return;
+    const file = input.files[0];
+    const preview = document.getElementById('previewFotoClubePage');
+    const hiddenUrl = document.getElementById('fotoUrlClubePage');
+
+    const reader = new FileReader();
+    reader.onload = e => {
+        if (preview) preview.innerHTML = `<img src="${e.target.result}" style="width: 100%; height: 100%; object-fit: cover;">`;
+    };
+    reader.readAsDataURL(file);
+
+    const fd = new FormData();
+    fd.append('foto', file);
+    try {
+        const resp = await fetch('/api/clube/upload-foto', { method: 'POST', body: fd });
+        const data = await resp.json();
+        if (data.sucesso && data.foto_url) {
+            hiddenUrl.value = data.foto_url;
+        }
+    } catch (e) {
+        console.error('Erro upload foto:', e);
+    }
+}
+
 async function submeterCriacaoClube(event) {
     event.preventDefault();
     const nome = document.getElementById('nomeClube').value.trim();
     const corTema = document.querySelector('input[name="cor_tema"]:checked')?.value || 'neon-green';
+    const frequencia = document.getElementById('frequenciaJogos')?.value.trim() || 'Semanal';
+    const fotoUrl = document.getElementById('fotoUrlClubePage')?.value.trim() || null;
+    const escudoId = document.getElementById('escudoIdClubePage')?.value.trim() || 'classico';
     const btn = document.getElementById('btnSubmitCriarClube');
 
     if (!nomeValido && nome.length < 2) {
@@ -168,7 +275,13 @@ async function submeterCriacaoClube(event) {
         const resp = await fetch('/api/clube/criar', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nome: nome, cor_tema: corTema })
+            body: JSON.stringify({
+                nome: nome,
+                cor_tema: corTema,
+                frequencia_jogos: frequencia,
+                foto_url: fotoUrl,
+                escudo_id: escudoId
+            })
         });
         const data = await resp.json();
 
@@ -186,4 +299,5 @@ async function submeterCriacaoClube(event) {
     }
 }
 </script>
+<script src="{{ url_for('static', filename='app-onboarding.js', v='20260919-02') }}"></script>
 {% endblock %}

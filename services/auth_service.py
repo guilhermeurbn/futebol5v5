@@ -137,9 +137,38 @@ class AuthService:
             })
         return saida
 
-    def obter_por_username(self, username: str) -> Optional[Dict]:
+    def obter_por_username(self, username: str, clube_codigo: Optional[str] = None) -> Optional[Dict]:
         username = (username or "").strip().lower()
         if not username:
+            return None
+
+        cod_alvo = clube_codigo
+        if not cod_alvo:
+            try:
+                from flask import has_request_context, g, session
+                if has_request_context():
+                    cod_alvo = getattr(g, 'clube_codigo', None) or session.get('clube_codigo')
+            except Exception:
+                cod_alvo = None
+
+        usuarios = self._carregar()
+        if username in ['admin', 'juiz']:
+            if cod_alvo:
+                cod_str = str(cod_alvo).strip()
+                for u in usuarios:
+                    if u.get('role') == username and (
+                        str(u.get('clube_codigo') or '').strip() == cod_str or
+                        str(u.get('ultimo_clube_codigo') or '').strip() == cod_str
+                    ):
+                        return u
+            # Fallback para o clube oficial 001
+            for u in usuarios:
+                if u.get('role') == username and (
+                    str(u.get('clube_codigo') or '').strip() == '001' or
+                    str(u.get('ultimo_clube_codigo') or '').strip() == '001' or
+                    (u.get('username') or '').lower() == username
+                ):
+                    return u
             return None
 
         for u in self._carregar():
@@ -155,13 +184,37 @@ class AuthService:
                 return u
         return None
 
-    def autenticar(self, identificador: str, password: str) -> Optional[Dict]:
+    def autenticar(self, identificador: str, password: str, clube_codigo: Optional[str] = None) -> Optional[Dict]:
         clean_id = (identificador or "").strip().lower()
         if not clean_id:
             return None
 
+        p_raw = password or ""
+        p_strip = p_raw.strip()
+
+        # Tratamento especial para autenticação direta de Admin e Juiz por clube
+        if clean_id in ['admin', 'juiz']:
+            u = self.obter_por_username(clean_id, clube_codigo=clube_codigo)
+            if u and u.get("password_hash"):
+                hash_val = u.get("password_hash", "")
+                if check_password_hash(hash_val, p_raw) or (p_strip and check_password_hash(hash_val, p_strip)):
+                    ret_u = dict(u)
+                    ret_u['username'] = clean_id
+                    ret_u['nome'] = 'Admin' if clean_id == 'admin' else 'Juiz'
+                    return ret_u
+
+            for u in self._carregar():
+                if u.get('role') == clean_id and u.get('password_hash'):
+                    hash_val = u.get("password_hash", "")
+                    if check_password_hash(hash_val, p_raw) or (p_strip and check_password_hash(hash_val, p_strip)):
+                        ret_u = dict(u)
+                        ret_u['username'] = clean_id
+                        ret_u['nome'] = 'Admin' if clean_id == 'admin' else 'Juiz'
+                        return ret_u
+            return None
+
         # Tentar por username, email ou id
-        usuario = self.obter_por_username(clean_id) or self.obter_por_email(clean_id) or self.obter_por_id(clean_id)
+        usuario = self.obter_por_username(clean_id, clube_codigo=clube_codigo) or self.obter_por_email(clean_id) or self.obter_por_id(clean_id)
         if not usuario:
             # Tentar buscar por nome (case-insensitive)
             for u in self._carregar():
@@ -174,18 +227,25 @@ class AuthService:
         if not usuario.get("ativo", True):
             return None
 
-        p_raw = password or ""
-        p_strip = p_raw.strip()
         hash_val = usuario.get("password_hash", "")
-
         if check_password_hash(hash_val, p_raw) or (p_strip and check_password_hash(hash_val, p_strip)):
+            ret_u = dict(usuario)
+            if ret_u.get('role') == 'admin':
+                ret_u['username'] = 'admin'
+                ret_u['nome'] = 'Admin'
+            elif ret_u.get('role') == 'juiz':
+                ret_u['username'] = 'juiz'
+                ret_u['nome'] = 'Juiz'
             return {
-                "id": usuario.get("id"),
-                "email": usuario.get("email"),
-                "username": usuario.get("username"),
-                "nome": usuario.get("nome"),
-                "role": usuario.get("role", "usuario"),
-                "senha_temporaria_ativa": usuario.get("senha_temporaria_ativa", False),
+                "id": ret_u.get("id"),
+                "email": ret_u.get("email"),
+                "username": ret_u.get("username"),
+                "nome": ret_u.get("nome"),
+                "role": ret_u.get("role", "usuario"),
+                "senha_temporaria_ativa": ret_u.get("senha_temporaria_ativa", False),
+                "ultimo_clube_codigo": ret_u.get("ultimo_clube_codigo"),
+                "ultimo_clube_slug": ret_u.get("ultimo_clube_slug"),
+                "clube_codigo": ret_u.get("clube_codigo"),
             }
         return None
 
@@ -199,7 +259,7 @@ class AuthService:
                 return u
         return None
 
-    def criar_usuario(self, email: str = "", username: str = "", nome: str = "", password: str = "", role: str = "usuario") -> Dict:
+    def criar_usuario(self, email: str = "", username: str = "", nome: str = "", password: str = "", role: str = "usuario", clube_codigo: Optional[str] = None, clube_slug: Optional[str] = None) -> Dict:
         email = (email or "").strip().lower()
         username = (username or "").strip().lower()
         nome = (nome or "").strip()
@@ -207,10 +267,15 @@ class AuthService:
 
         if email and "@" not in email:
             raise ValueError("Email deve ser valido")
-        if not username or len(username) < 3:
-            raise ValueError("Username deve ter ao menos 3 caracteres")
-        if not nome or len(nome) < 2:
-            raise ValueError("Nome deve ter ao menos 2 caracteres")
+        if role not in ["admin", "juiz"]:
+            if not username or len(username) < 3:
+                raise ValueError("Username deve ter ao menos 3 caracteres")
+            if not nome or len(nome) < 2:
+                raise ValueError("Nome deve ter ao menos 2 caracteres")
+        else:
+            username = (username or ('admin' if role == 'admin' else 'juiz')).strip().lower()
+            nome = (nome or ('Admin' if role == 'admin' else 'Juiz')).strip()
+
         if not password or len(password) < 6:
             raise ValueError("Senha deve ter ao menos 6 caracteres")
         if role not in ["admin", "juiz", "usuario", "organizador"]:
@@ -219,10 +284,13 @@ class AuthService:
         usuarios = self._carregar()
         if email and any((u.get("email") or "").strip().lower() == email for u in usuarios):
             raise ValueError("Email ja existe")
-        if any((u.get("username") or "").lower() == username for u in usuarios):
-            raise ValueError("Username ja existe")
-        if nome and any((u.get("nome") or "").strip().lower() == nome.lower() for u in usuarios):
-            raise ValueError("Ja existe um usuario cadastrado com este nome")
+
+        # Apenas atletas/usuários comuns necessitam de username e nome único global
+        if role not in ["admin", "juiz"]:
+            if any((u.get("username") or "").lower() == username for u in usuarios):
+                raise ValueError("Username ja existe")
+            if nome and any((u.get("nome") or "").strip().lower() == nome.lower() for u in usuarios):
+                raise ValueError("Ja existe um usuario cadastrado com este nome")
 
         novo = {
             "id": str(uuid.uuid4()),
@@ -231,6 +299,10 @@ class AuthService:
             "nome": nome,
             "password_hash": generate_password_hash(password),
             "role": role,
+            "clube_codigo": str(clube_codigo) if clube_codigo else None,
+            "clube_slug": str(clube_slug) if clube_slug else None,
+            "ultimo_clube_codigo": str(clube_codigo) if clube_codigo else None,
+            "ultimo_clube_slug": str(clube_slug) if clube_slug else None,
             "criado_em": datetime.now().isoformat(),
             "ativo": True,
             "senha_temporaria_ativa": False,

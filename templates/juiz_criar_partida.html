@@ -13,6 +13,16 @@
     </header>
 
     <main class="main">
+        <div style="margin-bottom: 0.95rem;">
+            <a href="{{ url_for('juiz.juiz_cancelar_selecao') }}" onclick="try { limparRascunhoLocal(); } catch(e){}" id="btnVoltarPainelJuiz" style="display: inline-flex; align-items: center; gap: 0.45rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 10px; padding: 0.45rem 0.85rem; color: #cbd5e1; text-decoration: none; font-size: 0.82rem; font-weight: 750; transition: all 0.2s ease;">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                <span>Voltar ao Painel do Juiz</span>
+            </a>
+        </div>
+
         <!-- ETAPA 1: Quantidade de Jogadores -->
         <section class="judge-flow-card judge-create-panel" id="stepQuantidadeCard">
             <div class="judge-create-header">
@@ -61,7 +71,13 @@
                     <h2 style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 0.25rem 0; color: #ffffff;">Selecione os Jogadores</h2>
                     <p style="font-size: 0.85rem; opacity: 0.7; margin: 0;">Marque os atletas presentes por ordem alfabética.</p>
                 </div>
-                <span class="judge-available-count" style="font-size: 0.8rem; font-weight: 700; border-radius: 8px;">{{ total_jogadores }} disponíveis</span>
+                <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                    <button type="button" onclick="voltarParaEtapaQuantidade()" style="display: inline-flex; align-items: center; gap: 0.35rem; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 0.35rem 0.65rem; color: #cbd5e1; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                        <span>Trocar quantidade</span>
+                    </button>
+                    <span class="judge-available-count" style="font-size: 0.8rem; font-weight: 700; border-radius: 8px;">{{ total_jogadores }} disponíveis</span>
+                </div>
             </div>
 
             {% if total_confirmados_inscritos is defined and total_confirmados_inscritos > 0 %}
@@ -329,6 +345,15 @@
     function selecionarQuantidade(quantidade, bypassSave = false) {
         quantidadeSelecionada = Math.floor(quantidade);
 
+        // Se houver mais atletas marcados do que a nova quantidade permitida (ex: 15 marcados e o juiz escolheu 10),
+        // desmarca os excedentes para evitar inconsistência imediata
+        const checkedBoxes = Array.from(document.querySelectorAll('.jogador-checkbox:checked'));
+        if (checkedBoxes.length > quantidadeSelecionada) {
+            checkedBoxes.slice(quantidadeSelecionada).forEach(cb => {
+                cb.checked = false;
+            });
+        }
+
         document.querySelectorAll('.qty-btn').forEach(btn => {
             const selecionado = btn.getAttribute('data-qty') === String(quantidadeSelecionada);
             btn.classList.toggle('selected', selecionado);
@@ -355,6 +380,23 @@
         document.getElementById('mensagemErro').style.display = 'none';
         limparRascunhoLocal();
         atualizarContador(true);
+    }
+
+    function voltarParaEtapaQuantidade() {
+        const stepJogadoresCard = document.getElementById('stepJogadoresCard');
+        if (stepJogadoresCard) stepJogadoresCard.style.display = 'none';
+        const acoesSorteio = document.getElementById('acoesSorteio');
+        if (acoesSorteio) acoesSorteio.style.display = 'none';
+        quantidadeSelecionada = null;
+        document.querySelectorAll('.qty-btn').forEach(btn => {
+            btn.classList.remove('selected');
+            btn.setAttribute('aria-pressed', 'false');
+        });
+        limparSelecao();
+        const stepQuantidadeCard = document.getElementById('stepQuantidadeCard');
+        if (stepQuantidadeCard) {
+            stepQuantidadeCard.scrollIntoView({ behavior: 'smooth' });
+        }
     }
 
     function confirmarSelecao() {
@@ -430,8 +472,10 @@
             }
             atualizarContador(true);
         } else {
+            const urlParams = new URLSearchParams(window.location.search);
+            const isNovo = urlParams.get('novo') === '1' || urlParams.get('trocar') === '1';
             const marcadosIniciais = document.querySelectorAll('.jogador-checkbox:checked').length;
-            if (QUANTIDADES_VALIDAS.includes(marcadosIniciais)) {
+            if (!isNovo && QUANTIDADES_VALIDAS.includes(marcadosIniciais)) {
                 selecionarQuantidade(marcadosIniciais, true);
             } else {
                 atualizarContador(true);

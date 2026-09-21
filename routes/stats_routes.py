@@ -560,22 +560,24 @@ def _gerar_exemplos_demonstracao():
 
 @stats_bp.route('/ranking')
 def pagina_ranking():
-    """Página de ranking de jogadores com suporte a competição e geral"""
+    """Página de ranking de jogadores com suporte a competição e geral particionada por clube"""
     try:
         tipo = request.args.get('tipo', 'temporada')
-        temporada = temporada_service.obter_temporada_ativa()
+        clube_cod = session.get('clube_codigo') or getattr(g, 'clube_codigo', '001')
+        temporada = temporada_service.obter_temporada_ativa(clube_codigo=clube_cod)
 
         if tipo == 'temporada' and temporada:
             dados = votacao_service.ranking_jogadores_geral(
                 limite=50,
                 data_inicio=temporada.get('data_inicio'),
-                data_fim=temporada.get('data_fim')
+                data_fim=temporada.get('data_fim'),
+                clube_codigo=clube_cod
             )
             # Atualizar temporada com o número real de partidas disputadas neste período
             total_partidas_periodo = dados.get('total_partidas', 0)
-            temporada = temporada_service.obter_temporada_ativa(total_partidas_periodo=total_partidas_periodo)
+            temporada = temporada_service.obter_temporada_ativa(total_partidas_periodo=total_partidas_periodo, clube_codigo=clube_cod)
         else:
-            dados = votacao_service.ranking_jogadores_geral(limite=50)
+            dados = votacao_service.ranking_jogadores_geral(limite=50, clube_codigo=clube_cod)
 
         return render_template(
             'ranking.html',
@@ -591,22 +593,24 @@ def pagina_ranking():
 
 @stats_bp.route('/api/ranking/geral')
 def api_ranking_geral():
-    """API: Ranking de jogadores (temporada ou geral)"""
+    """API: Ranking de jogadores (temporada ou geral) particionada por clube"""
     try:
         limite = request.args.get('limite', 50, type=int)
         tipo = request.args.get('tipo', 'temporada')
-        temporada = temporada_service.obter_temporada_ativa()
+        clube_cod = session.get('clube_codigo') or getattr(g, 'clube_codigo', '001')
+        temporada = temporada_service.obter_temporada_ativa(clube_codigo=clube_cod)
 
         if tipo == 'temporada' and temporada:
             dados = votacao_service.ranking_jogadores_geral(
                 limite=limite,
                 data_inicio=temporada.get('data_inicio'),
-                data_fim=temporada.get('data_fim')
+                data_fim=temporada.get('data_fim'),
+                clube_codigo=clube_cod
             )
             total_partidas_periodo = dados.get('total_partidas', 0)
-            temporada = temporada_service.obter_temporada_ativa(total_partidas_periodo=total_partidas_periodo)
+            temporada = temporada_service.obter_temporada_ativa(total_partidas_periodo=total_partidas_periodo, clube_codigo=clube_cod)
         else:
-            dados = votacao_service.ranking_jogadores_geral(limite=limite)
+            dados = votacao_service.ranking_jogadores_geral(limite=limite, clube_codigo=clube_cod)
 
         return jsonify({
             'sucesso': True,
@@ -622,7 +626,7 @@ def api_ranking_geral():
 @stats_bp.route('/api/competicao/abrir', methods=['POST'])
 @login_required
 def api_competicao_abrir():
-    """API: Abre uma nova competição zerada (definida por número de partidas ou meses)"""
+    """API: Abre uma nova competição zerada para o clube ativo (definida por número de partidas ou meses)"""
     user = _usuario_logado()
     if not user or user.get('role') not in ['admin']:
         return jsonify({'sucesso': False, 'erro': 'Apenas administradores podem abrir competições'}), 403
@@ -639,11 +643,14 @@ def api_competicao_abrir():
     if not nome:
         nome = f"Competição NaTrave ({valor_duracao} meses)"
 
+    clube_cod = session.get('clube_codigo') or getattr(g, 'clube_codigo', '001')
+
     try:
         nova_comp = temporada_service.abrir_nova_competicao(
             nome=nome,
             tipo_duracao=tipo_duracao,
-            valor_duracao=valor_duracao
+            valor_duracao=valor_duracao,
+            clube_codigo=clube_cod
         )
         return jsonify({'sucesso': True, 'competicao': nova_comp})
     except Exception as e:
@@ -654,7 +661,7 @@ def api_competicao_abrir():
 @stats_bp.route('/api/competicao/editar', methods=['POST'])
 @login_required
 def api_competicao_editar():
-    """API: Edita as datas, nome e prêmios da competição ativa (apenas Admin)"""
+    """API: Edita as datas, nome e prêmios da competição ativa do clube (apenas Admin)"""
     user = _usuario_logado()
     if not user or user.get('role') not in ['admin']:
         return jsonify({'sucesso': False, 'erro': 'Apenas administradores podem editar a competição'}), 403
@@ -668,12 +675,15 @@ def api_competicao_editar():
     if not data_inicio or not data_fim:
         return jsonify({'sucesso': False, 'erro': 'As datas de início e fim da competição são obrigatórias'}), 400
 
+    clube_cod = session.get('clube_codigo') or getattr(g, 'clube_codigo', '001')
+
     try:
         temp_atualizada = temporada_service.atualizar_temporada(
             nome=nome,
             data_inicio=data_inicio,
             data_fim=data_fim,
-            descricao_premio=descricao_premio
+            descricao_premio=descricao_premio,
+            clube_codigo=clube_cod
         )
         return jsonify({
             'sucesso': True,
@@ -683,6 +693,27 @@ def api_competicao_editar():
     except Exception as e:
         logger.error(f"Erro ao editar competição: {str(e)}")
         return jsonify({'sucesso': False, 'erro': 'Erro interno ao editar competição'}), 500
+
+
+@stats_bp.route('/api/competicao/excluir', methods=['POST'])
+@login_required
+def api_competicao_excluir():
+    """API: Exclui a competição ativa do clube (apenas Admin)"""
+    user = _usuario_logado()
+    if not user or user.get('role') not in ['admin']:
+        return jsonify({'sucesso': False, 'erro': 'Apenas administradores podem apagar a competição'}), 403
+
+    clube_cod = session.get('clube_codigo') or getattr(g, 'clube_codigo', '001')
+
+    try:
+        temporada_service.excluir_competicao_ativa(clube_codigo=clube_cod)
+        return jsonify({
+            'sucesso': True,
+            'mensagem': 'Competição apagada com sucesso!'
+        })
+    except Exception as e:
+        logger.error(f"Erro ao apagar competição: {str(e)}")
+        return jsonify({'sucesso': False, 'erro': 'Erro interno ao apagar competição'}), 500
 
 
 @stats_bp.route('/api/ranking/periodo/<int:dias>')

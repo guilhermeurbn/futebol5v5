@@ -7,7 +7,7 @@ import socket
 import uuid
 from urllib.parse import quote, urlparse
 
-from flask import Flask, send_file, request, session, url_for, redirect
+from flask import Flask, send_file, request, session, url_for, redirect, jsonify
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from markupsafe import Markup, escape
@@ -235,10 +235,19 @@ def criar_app(config_name: str = None) -> Flask:
     app.register_blueprint(stats_bp)
     app.register_blueprint(clube_bp)
     app.register_blueprint(cloudinary_bp)
-    if 'clube.api_validar_nome_clube' in app.view_functions:
-        csrf.exempt(app.view_functions['clube.api_validar_nome_clube'])
-    if 'clube.api_criar_clube' in app.view_functions:
-        csrf.exempt(app.view_functions['clube.api_criar_clube'])
+    endpoints_clube_auth = [
+        'clube.api_validar_nome_clube',
+        'clube.api_criar_clube',
+        'clube.api_entrar_como_admin',
+        'clube.api_entrar_como_juiz',
+        'clube.api_validar_pin',
+        'clube.api_entrar_conta_existente',
+        'clube.api_cadastrar_entrar',
+        'clube.api_confirmar_entrada'
+    ]
+    for ep in endpoints_clube_auth:
+        if ep in app.view_functions:
+            csrf.exempt(app.view_functions[ep])
     _registrar_aliases_jogador(app)
     _registrar_role_url_prefixes(app)
 
@@ -413,6 +422,12 @@ def criar_app(config_name: str = None) -> Flask:
         def handle_csrf_error(error):
             logger.warning('CSRF validation failed on %s: %s', request.path, error.description)
 
+            if request.is_json or request.path.startswith('/api/') or 'application/json' in request.headers.get('Accept', ''):
+                return jsonify({
+                    'sucesso': False,
+                    'mensagem': 'Sua sessão expirou ou o token de segurança é inválido. Recarregue a página e tente novamente.'
+                }), 400
+
             fallback_path = url_for('votacao.votacao_admin_page')
             referrer = request.referrer or ''
             if referrer:
@@ -524,7 +539,16 @@ def criar_app(config_name: str = None) -> Flask:
         clube_001 = ClubeService.garantir_clube_natrave_001()
         clube_ativo = None
 
-        if request.view_args and 'clube_slug' in request.view_args:
+        # Administrador tem vínculo exclusivo e imutável com o seu único clube
+        if session.get('role') == 'admin':
+            clube_admin = ClubeService.obter_clube_do_admin(
+                user_id=session.get('user_id'),
+                username=session.get('username')
+            )
+            if clube_admin:
+                clube_ativo = clube_admin
+
+        if not clube_ativo and request.view_args and 'clube_slug' in request.view_args:
             slug_param = request.view_args.pop('clube_slug', None)
             if slug_param:
                 clube_ativo = (
@@ -616,6 +640,11 @@ def criar_app(config_name: str = None) -> Flask:
         from flask import g
         from services.clube_service import ClubeService
         clube_ativo = getattr(g, 'clube', None) or ClubeService.garantir_clube_natrave_001()
+        if clube_ativo and not clube_ativo.get('token_convite'):
+            clube_ativo['token_convite'] = ClubeService.gerar_token_convite(
+                clube_ativo.get('codigo_formatado'),
+                clube_ativo.get('codigo_acesso')
+            )
 
         u_id = session.get('user_id')
         auth_user_dict = None

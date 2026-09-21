@@ -317,7 +317,50 @@ class UploadService:
             except Exception as e:
                 logger.warning("Não foi possível apagar foto antiga %s: %s", caminho_arquivo, e)
                 return False
-        return False
+    def processar_foto_clube(self, file_storage, clube_id: str, foto_antiga_url: Optional[str] = None) -> str:
+        """Processa e salva o logo/foto do clube no Cloudinary (ou local com fallback)."""
+        pasta_clubes = os.path.abspath(os.path.join("static", "uploads", "clubes"))
+        os.makedirs(pasta_clubes, exist_ok=True)
+
+        if not file_storage or not file_storage.filename:
+            raise UploadError("Nenhum arquivo de imagem foi enviado")
+
+        filename = secure_filename(file_storage.filename)
+        ext = os.path.splitext(filename)[1].lower()
+        if ext not in EXTENSOES_PERMITIDAS:
+            raise UploadError("Formato inválido. Use PNG, JPG, JPEG ou WEBP")
+
+        try:
+            img = Image.open(file_storage.stream)
+            img.verify()
+            file_storage.stream.seek(0)
+            img = Image.open(file_storage.stream)
+        except Exception:
+            raise UploadError("Arquivo de imagem corrompido ou inválido")
+
+        img_quadrada = ImageOps.fit(
+            img,
+            (300, 300),
+            method=Image.Resampling.LANCZOS,
+            centering=(0.5, 0.5)
+        )
+
+        nome_publico = f"clube_{clube_id}_{uuid.uuid4().hex[:8]}"
+        url_nuvem = self._enviar_para_cloudinary(img_quadrada, "futebol5v5/clubes", nome_publico, quality=85)
+        if url_nuvem:
+            return url_nuvem
+
+        nome_unico = f"clube_{clube_id}_{uuid.uuid4().hex[:8]}.webp"
+        caminho_final = os.path.join(pasta_clubes, nome_unico)
+        try:
+            if img_quadrada.mode != "RGB":
+                img_quadrada = img_quadrada.convert("RGB")
+            img_quadrada.save(caminho_final, format="WEBP", quality=85, optimize=True)
+        except Exception as exc:
+            logger.error("Erro ao salvar foto de clube %s: %s", clube_id, exc)
+            raise UploadError("Erro ao processar imagem no servidor")
+
+        return f"/static/uploads/clubes/{nome_unico}"
 
     def processar_foto_campeao(self, file_storage=None, base64_data: Optional[str] = None, sorteio_id: Optional[str] = None, foto_antiga_url: Optional[str] = None) -> str:
         """Processa e salva a foto/card do time campeão diretamente no Cloudinary (com fallback local)."""

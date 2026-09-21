@@ -68,6 +68,522 @@
         {% set historico_recente = [] %}
         {% endif %}
 
+        {% set eh_admin_view = is_self and (session.get('role') == 'admin' or (usuario and (usuario.role == 'admin' or usuario.is_admin))) %}
+
+        {% if eh_admin_view %}
+        <!-- ============================================================ -->
+        <!-- HEADER DO PRESIDENTE / ORGANIZADOR (DESIGN MINIMALISTA ELITE) -->
+        <!-- ============================================================ -->
+        <div class="admin-president-hero-card">
+            <!-- Botões Superiores Preservados -->
+            <div class="profile-header-actions">
+                <a href="{{ url_for('auth.editar_perfil_page') }}" class="profile-guide-trigger profile-header-action-btn" id="openEditProfileBtn"
+                    title="Editar Perfil" aria-label="Editar Perfil">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#22c55e" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 20h9" />
+                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                    </svg>
+                </a>
+                <a href="{{ url_for('auth.configuracoes_page') }}" class="profile-guide-trigger profile-header-action-btn" id="openProfileGuideBtn"
+                    title="Configurações & Preferências" aria-label="Configurações & Preferências">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#a78bfa" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                        <circle cx="12" cy="12" r="3" />
+                    </svg>
+                </a>
+            </div>
+
+            <!-- Topo do Card: Avatar + Nome do Presidente -->
+            <div class="admin-president-identity">
+                <div class="admin-president-avatar-box">
+                    <a href="{{ url_for('auth.editar_perfil_page') }}#cardItemFoto" title="Adicionar ou alterar foto" style="display: block; position: relative;">
+                        {% set eff_foto = (perfil_user.foto_url if (perfil_user is defined and perfil_user and perfil_user.foto_url) else None) %}
+                        <div class="admin-president-avatar-img">
+                            {% if eff_foto %}
+                            <img src="{{ eff_foto }}" alt="Foto de perfil" loading="lazy" decoding="async">
+                            {% else %}
+                            <span>{{ avatar_text|upper }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="admin-president-cam-badge">
+                            <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="admin-president-details">
+                    <div class="admin-president-name-row">
+                        <h1 class="admin-president-title">{{ (usuario.nome if usuario and usuario.nome else 'Administrador') | formatar_nome_perfil }}</h1>
+                        <span class="admin-president-tag-pill">👑 Presidente</span>
+                    </div>
+                    <span class="admin-president-username-tag">@{{ usuario.username if usuario and usuario.username else 'admin' }}</span>
+                </div>
+            </div>
+
+            <!-- Divisor Sutil -->
+            <div class="admin-president-divider"></div>
+
+            <!-- Barra Inferior do Card: Clube + PIN + Compartilhar -->
+            <div class="admin-president-toolbar">
+                <div class="admin-president-club-info">
+                    <span class="admin-president-club-label">CLUBE ATIVO</span>
+                    <div class="admin-president-club-badge-row">
+                        <span class="admin-president-club-title" id="clubeNomeDisplay">{{ clube.nome }}</span>
+                        <span class="admin-president-club-num">#{{ clube.codigo_formatado }}</span>
+                    </div>
+                </div>
+
+                <div class="admin-president-quick-tools">
+                    <!-- Pill PIN -->
+                    <button type="button" class="admin-tool-pill admin-tool-pill--pin" id="cardPinAdmin" onclick="copiarPinAdmin('{{ clube.codigo_acesso or '' }}')" title="Copiar PIN de acesso">
+                        <span class="admin-tool-pill__label">PIN</span>
+                        <span class="admin-tool-pill__code" id="displayAdminPin">{{ clube.codigo_acesso or '••••' }}</span>
+                        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    </button>
+
+                    <!-- Pill Compartilhar -->
+                    <button type="button" class="admin-tool-pill admin-tool-pill--share" id="btnShareAdmin" onclick="compartilharLinkClubeAdmin('{{ clube.codigo_formatado }}', '{{ clube.token_convite or '' }}', '{{ clube.codigo_acesso or '' }}')" title="Compartilhar convite do clube">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                        <span id="txtBtnShareAdmin">Compartilhar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- PAINEL DO PRESIDENTE / ORGANIZADOR EXECUTIVO DO CLUBE        -->
+        <!-- ============================================================ -->
+        {% set adm_d = admin_dashboard_data if (admin_dashboard_data is defined and admin_dashboard_data) else {} %}
+        <section class="admin-president-dashboard">
+            <!-- 1. Grid de Métricas de Saúde do Clube (Minimalista & Sofisticada) -->
+            <div class="admin-kpi-grid">
+                <!-- KPI 1: Plantel do Clube -->
+                <div class="admin-kpi-card">
+                    <div class="admin-kpi-card__top">
+                        <span class="admin-kpi-card__label">Plantel</span>
+                        <svg class="admin-kpi-card__icon-svg" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </div>
+                    <div class="admin-kpi-card__val">{{ adm_d.total_jogadores or 0 }}</div>
+                    <div class="admin-kpi-card__sub">{{ adm_d.total_fixos or 0 }} fixos • {{ adm_d.total_avulsos or 0 }} avulsos</div>
+                </div>
+
+                <!-- KPI 2: Partidas sob Gestão -->
+                <div class="admin-kpi-card">
+                    <div class="admin-kpi-card__top">
+                        <span class="admin-kpi-card__label">Partidas</span>
+                        <svg class="admin-kpi-card__icon-svg" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                    <div class="admin-kpi-card__val">{{ adm_d.total_partidas or 0 }}</div>
+                    <div class="admin-kpi-card__sub">rodadas oficiais</div>
+                </div>
+
+                <!-- KPI 3: Chamada / Lista da Pelada -->
+                <div class="admin-kpi-card">
+                    <div class="admin-kpi-card__top">
+                        <span class="admin-kpi-card__label">Lista da Pelada</span>
+                        <svg class="admin-kpi-card__icon-svg" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 11l3 3L22 4"></path>
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                        </svg>
+                    </div>
+                    <div class="admin-kpi-card__val {% if adm_d.presenca_aberta %}admin-kpi-card__val--active{% endif %}">
+                        {% if adm_d.presenca_aberta %}
+                        {{ adm_d.presenca_confirmados or 0 }} Confirmados
+                        {% else %}
+                        Fechada
+                        {% endif %}
+                    </div>
+                    <div class="admin-kpi-card__sub">{% if adm_d.presenca_aberta %}chamada em andamento{% else %}próxima rodada{% endif %}</div>
+                </div>
+
+                <!-- KPI 4: Artilheiro do Clube -->
+                <div class="admin-kpi-card">
+                    <div class="admin-kpi-card__top">
+                        <span class="admin-kpi-card__label">Artilheiro</span>
+                        <svg class="admin-kpi-card__icon-svg" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 9H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2"></path>
+                            <path d="M18 9h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2"></path>
+                            <path d="M4 22h16"></path>
+                            <path d="M10 14.66V17c0 .55-.45 1-1 1H7v4h10v-4h-2c-.55 0-1-.45-1-1v-2.34"></path>
+                            <path d="M18 3H6v7a6 6 0 0 0 12 0V3z"></path>
+                        </svg>
+                    </div>
+                    <div class="admin-kpi-card__val {% if adm_d.artilheiro and adm_d.artilheiro.gols > 0 %}admin-kpi-card__val--gold{% endif %}">
+                        {% if adm_d.artilheiro and adm_d.artilheiro.gols > 0 %}
+                        {{ adm_d.artilheiro.gols }} Gols
+                        {% else %}
+                        0 Gols
+                        {% endif %}
+                    </div>
+                    <div class="admin-kpi-card__sub">
+                        {% if adm_d.artilheiro %}
+                        {{ adm_d.artilheiro.nome }}
+                        {% else %}
+                        Sem partidas
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Ações Rápidas de Gestão (MODO JUIZ & Ajustes do Clube) -->
+            <div class="admin-actions-section">
+                <!-- Ação 1: Botão MODO JUIZ Ultra Sofisticado -->
+                <button type="button" id="btnAtivarModoJuiz" onclick="alternarModoJuiz()" class="admin-judge-mode-btn" title="Alternar imediatamente para o modo árbitro da partida">
+                    <div class="admin-judge-mode-btn__left">
+                        <div class="admin-judge-mode-btn__icon">
+                            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                        </div>
+                        <div class="admin-judge-mode-btn__meta">
+                            <div class="admin-judge-mode-btn__title-row">
+                                <span class="admin-judge-mode-btn__title">MODO JUIZ</span>
+                                <span class="admin-judge-mode-btn__live-badge">
+                                    <span class="admin-judge-mode-btn__live-dot"></span>
+                                    AO VIVO
+                                </span>
+                            </div>
+                            <span class="admin-judge-mode-btn__desc">Apitar partida e controlar cronômetro</span>
+                        </div>
+                    </div>
+                    <div class="admin-judge-mode-btn__chevron">
+                        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+                </button>
+
+                <!-- Ação 2: Ajustes do Clube -->
+                <button type="button" id="btnAbrirAjustesClube" onclick="abrirModalAjustesClube()" class="admin-club-settings-btn" title="Configurar nome, PIN e acesso do clube">
+                    <div class="admin-club-settings-btn__left">
+                        <div class="admin-club-settings-btn__icon">
+                            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            </svg>
+                        </div>
+                        <div class="admin-club-settings-btn__meta">
+                            <span class="admin-club-settings-btn__title">Ajustes do Clube</span>
+                            <span class="admin-club-settings-btn__desc">Nome, PIN de acesso e configurações</span>
+                        </div>
+                    </div>
+                    <div class="admin-club-settings-btn__chevron">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+                </button>
+            </div>
+        </section>
+
+        <!-- MODAL AJUSTES DO CLUBE (COM DESFOQUE DE FUNDO / BACKDROP BLUR) -->
+        <div id="modalAjustesClube" class="admin-modal-backdrop" onclick="fecharModalAjustesClubeBackdrop(event)">
+            <div class="admin-modal-card" onclick="event.stopPropagation()">
+                <div class="admin-modal-card__header">
+                    <div class="admin-modal-card__header-left">
+                        <div class="admin-modal-card__header-icon">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="admin-modal-card__title">Ajustes do Clube</h3>
+                            <span class="admin-modal-card__subtitle">Identificação e credenciais de acesso</span>
+                        </div>
+                    </div>
+                    <button type="button" class="admin-modal-card__close-btn" onclick="fecharModalAjustesClube()" title="Fechar">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+                
+                <form id="formAjustesClube" onsubmit="salvarAjustesClube(event)" class="admin-modal-card__body">
+                    <input type="hidden" id="clubeRefInput" value="{{ clube.codigo_formatado }}">
+
+                    <!-- Campo 1: Nome do Clube -->
+                    <div class="admin-form-group">
+                        <label for="clubeNomeInput" class="admin-form-label">Nome do Clube</label>
+                        <input type="text" id="clubeNomeInput" class="admin-form-input" value="{{ clube.nome }}" required minlength="2" placeholder="Nome oficial do clube">
+                    </div>
+
+                    <!-- Campo 2: Código e PIN de Acesso -->
+                    <div style="display: grid; grid-template-columns: 1fr 1.3fr; gap: 0.75rem;">
+                        <div class="admin-form-group">
+                            <label class="admin-form-label">Código Oficial</label>
+                            <div class="admin-form-input admin-form-input--readonly">
+                                #{{ clube.codigo_formatado }}
+                            </div>
+                        </div>
+                        <div class="admin-form-group">
+                            <label for="clubePinInput" class="admin-form-label">PIN (4 dígitos)</label>
+                            <input type="text" id="clubePinInput" class="admin-form-input" value="{{ clube.codigo_acesso or '' }}" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="Ex: 1234">
+                            <small class="admin-form-help">Usado pelos atletas para entrar</small>
+                        </div>
+                    </div>
+
+                    <!-- Campo 3: Senha do Juiz -->
+                    <div class="admin-form-group">
+                        <label for="clubeSenhaJuizInput" class="admin-form-label">Senha de Acesso do Juiz</label>
+                        <div style="position: relative;">
+                            <input type="password" id="clubeSenhaJuizInput" class="admin-form-input" value="{{ clube.senha_juiz or '' }}" placeholder="Mínimo 4 caracteres" minlength="4">
+                            <button type="button" class="admin-toggle-pwd-btn" onclick="toggleVisibilidadeSenha('clubeSenhaJuizInput', this)" title="Ver senha">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="7" r="3"></circle></svg>
+                            </button>
+                        </div>
+                        <small class="admin-form-help">Permite o login direto de quem for apitar</small>
+                    </div>
+
+                    <!-- Campo 4: Frequência dos Jogos -->
+                    <div class="admin-form-group">
+                        <label for="clubeFreqInput" class="admin-form-label">Frequência dos Jogos</label>
+                        <select id="clubeFreqInput" class="admin-form-input admin-form-select">
+                            <option value="Semanal" {% if (clube.frequencia_jogos or 'Semanal') == 'Semanal' %}selected{% endif %}>Semanal (Padrão)</option>
+                            <option value="Quinzenal" {% if clube.frequencia_jogos == 'Quinzenal' %}selected{% endif %}>Quinzenal</option>
+                            <option value="Mensal" {% if clube.frequencia_jogos == 'Mensal' %}selected{% endif %}>Mensal</option>
+                            <option value="Sob Demanda" {% if clube.frequencia_jogos == 'Sob Demanda' %}selected{% endif %}>Sob Demanda</option>
+                        </select>
+                    </div>
+
+                    <div id="msgFeedbackAjustesClube" class="admin-modal-feedback" style="display: none;"></div>
+
+                    <div class="admin-modal-card__footer">
+                        <button type="button" class="btn btn-secondary" onclick="fecharModalAjustesClube()">Cancelar</button>
+                        <button type="submit" id="btnSalvarAjustesClube" class="btn btn-primary" style="min-width: 130px;">
+                            <span id="txtBtnSalvarClube">Salvar</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+        function copiarPinAdmin(pin) {
+            if (!pin) return;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(pin).then(function() {
+                    mostrarFeedbackPin('PIN Copiado! ✓');
+                }).catch(function() {
+                    prompt('Copie o PIN abaixo:', pin);
+                });
+            } else {
+                prompt('Copie o PIN abaixo:', pin);
+            }
+        }
+
+        function mostrarFeedbackPin(texto) {
+            const card = document.getElementById('cardPinAdmin');
+            const codeEl = document.getElementById('displayAdminPin');
+            if (!card || !codeEl) return;
+            const original = codeEl.textContent;
+            codeEl.textContent = texto;
+            card.style.borderColor = 'rgba(34, 197, 94, 0.6)';
+            setTimeout(function() {
+                codeEl.textContent = original;
+                card.style.borderColor = '';
+            }, 2000);
+        }
+
+        function compartilharLinkClubeAdmin(codigo, token, pin) {
+            let url = 'https://natrave.pt/join/' + encodeURIComponent(codigo);
+            if (token) {
+                url += '?convite=' + encodeURIComponent(token);
+            } else if (pin) {
+                url += '?pin=' + encodeURIComponent(pin);
+            }
+
+            const shareData = {
+                title: 'Convite NaTrave',
+                text: 'Entre no nosso clube de futebol no NaTrave pelo link:',
+                url: url
+            };
+
+            if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+                navigator.share(shareData).catch(function(e) {
+                    if (e.name !== 'AbortError') {
+                        copiarFallbackLink(url);
+                    }
+                });
+            } else {
+                copiarFallbackLink(url);
+            }
+        }
+
+        function copiarFallbackLink(url) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(function() {
+                    const txtSpan = document.getElementById('txtBtnShareAdmin');
+                    const btn = document.getElementById('btnShareAdmin');
+                    if (txtSpan) {
+                        const original = txtSpan.textContent;
+                        txtSpan.textContent = 'Link Copiado! ✓';
+                        if (btn) btn.style.background = 'rgba(34, 197, 94, 0.25)';
+                        setTimeout(function() {
+                            txtSpan.textContent = original;
+                            if (btn) btn.style.background = '';
+                        }, 2200);
+                    }
+                }).catch(function() {
+                    prompt('Copie o link abaixo:', url);
+                });
+            } else {
+                prompt('Copie o link abaixo:', url);
+            }
+        }
+
+        /* Troca dinâmica de altíssimo desempenho para o MODO JUIZ */
+        function alternarModoJuiz() {
+            const btn = document.getElementById('btnAtivarModoJuiz');
+            if (btn) {
+                btn.style.opacity = '0.7';
+                btn.style.pointerEvents = 'none';
+            }
+            fetch('/admin/modo-juiz', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                }
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.sucesso && data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                } else {
+                    window.location.href = '/juiz';
+                }
+            })
+            .catch(function() {
+                window.location.href = '/admin/modo-juiz';
+            });
+        }
+
+        /* Modal Ajustes do Clube */
+        function abrirModalAjustesClube() {
+            const modal = document.getElementById('modalAjustesClube');
+            if (modal) {
+                modal.classList.add('is-open');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function fecharModalAjustesClube() {
+            const modal = document.getElementById('modalAjustesClube');
+            if (modal) {
+                modal.classList.remove('is-open');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function fecharModalAjustesClubeBackdrop(e) {
+            if (e.target.id === 'modalAjustesClube') {
+                fecharModalAjustesClube();
+            }
+        }
+
+        function toggleVisibilidadeSenha(inputId, btn) {
+            const inp = document.getElementById(inputId);
+            if (!inp) return;
+            if (inp.type === 'password') {
+                inp.type = 'text';
+                btn.style.color = '#22c55e';
+            } else {
+                inp.type = 'password';
+                btn.style.color = '#64748b';
+            }
+        }
+
+        function salvarAjustesClube(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSalvarAjustesClube');
+            const txt = document.getElementById('txtBtnSalvarClube');
+            const feedback = document.getElementById('msgFeedbackAjustesClube');
+            const nome = document.getElementById('clubeNomeInput').value.trim();
+            const pin = document.getElementById('clubePinInput').value.trim();
+            const senhaJuiz = document.getElementById('clubeSenhaJuizInput').value.trim();
+            const freq = document.getElementById('clubeFreqInput').value;
+            const ref = document.getElementById('clubeRefInput').value;
+
+            if (pin && (pin.length !== 4 || isNaN(pin))) {
+                feedback.className = 'admin-modal-feedback admin-modal-feedback--erro';
+                feedback.textContent = 'O PIN deve conter exatamente 4 dígitos numéricos.';
+                feedback.style.display = 'block';
+                return;
+            }
+
+            if (btn) btn.disabled = true;
+            if (txt) txt.textContent = 'Salvando...';
+            feedback.style.display = 'none';
+
+            fetch('/api/clube/atualizar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    clube_ref: ref,
+                    nome: nome,
+                    codigo_acesso: pin,
+                    senha_juiz: senhaJuiz,
+                    frequencia_jogos: freq
+                })
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (btn) btn.disabled = false;
+                if (txt) txt.textContent = 'Salvar';
+
+                if (data.sucesso) {
+                    feedback.className = 'admin-modal-feedback admin-modal-feedback--sucesso';
+                    feedback.textContent = 'Ajustes do clube salvos com sucesso!';
+                    feedback.style.display = 'block';
+
+                    // Atualizar UI instantaneamente
+                    const nomeDisplay = document.getElementById('clubeNomeDisplay');
+                    if (nomeDisplay && data.clube && data.clube.nome) {
+                        nomeDisplay.textContent = data.clube.nome;
+                    }
+                    const pinDisplay = document.getElementById('displayAdminPin');
+                    if (pinDisplay && data.clube && data.clube.codigo_acesso) {
+                        pinDisplay.textContent = data.clube.codigo_acesso;
+                    }
+                    const cardPin = document.getElementById('cardPinAdmin');
+                    if (cardPin && data.clube && data.clube.codigo_acesso) {
+                        cardPin.setAttribute('onclick', "copiarPinAdmin('" + data.clube.codigo_acesso + "')");
+                    }
+
+                    setTimeout(function() {
+                        fecharModalAjustesClube();
+                        feedback.style.display = 'none';
+                    }, 1200);
+                } else {
+                    feedback.className = 'admin-modal-feedback admin-modal-feedback--erro';
+                    feedback.textContent = data.mensagem || 'Erro ao salvar alterações.';
+                    feedback.style.display = 'block';
+                }
+            })
+            .catch(function(err) {
+                if (btn) btn.disabled = false;
+                if (txt) txt.textContent = 'Salvar';
+                feedback.className = 'admin-modal-feedback admin-modal-feedback--erro';
+                feedback.textContent = 'Falha de comunicação com o servidor.';
+                feedback.style.display = 'block';
+            });
+        }
+        </script>
+        {% else %}
+        <!-- Header do Jogador Comum -->
         <div class="premium-profile-header public-profile-hero" style="position: relative;">
             {% if is_self %}
             <div class="profile-header-actions">
@@ -144,7 +660,14 @@
                         {% endif %}
                     {% endif %}
 
-                    {% set nome_completo_exibicao = (jogador.nome if tem_jogador else ((perfil_user.nome if perfil_user.nome is defined else perfil_user.get('nome')) or (perfil_user.username if perfil_user.username is defined else perfil_user.get('username')))) %}
+                    {% set p_role = perfil_user.role if perfil_user.role is defined else perfil_user.get('role') %}
+                    {% if p_role == 'admin' %}
+                        {% set nome_completo_exibicao = 'Admin' %}
+                    {% elif p_role == 'juiz' or (session.get('role') == 'juiz' and is_self) %}
+                        {% set nome_completo_exibicao = 'Juiz' %}
+                    {% else %}
+                        {% set nome_completo_exibicao = (jogador.nome if tem_jogador else ((perfil_user.nome if perfil_user.nome is defined else perfil_user.get('nome')) or (perfil_user.username if perfil_user.username is defined else perfil_user.get('username')))) %}
+                    {% endif %}
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                         <h1 class="premium-profile-name" title="{{ nome_completo_exibicao }}">{{ nome_completo_exibicao | formatar_nome_perfil }}</h1>
                         {% if tem_jogador %}
@@ -168,14 +691,18 @@
                         </div>
                         {% endif %}
                     </div>
-                    {% set p_uname = (perfil_user.username if (perfil_user and perfil_user.username is defined) else (perfil_user.get('username') if (perfil_user and perfil_user.get is defined) else None)) if is_self else (target_user.username if (target_user and target_user.username is defined) else (target_user.get('username') if (target_user and target_user.get is defined) else None)) %}
+                    {% if p_role == 'juiz' or (session.get('role') == 'juiz' and is_self) %}
+                        {% set p_uname = 'juiz' %}
+                    {% else %}
+                        {% set p_uname = (perfil_user.username if (perfil_user and perfil_user.username is defined) else (perfil_user.get('username') if (perfil_user and perfil_user.get is defined) else None)) if is_self else (target_user.username if (target_user and target_user.username is defined) else (target_user.get('username') if (target_user and target_user.get is defined) else None)) %}
+                    {% endif %}
                     {% if p_uname %}
                     <span class="premium-profile-username-tag"
                         style="font-size: 0.9rem; color: #a78bfa; font-weight: 500; font-family: monospace;">@{{ p_uname
                         }}</span>
                     {% endif %}
                 </div>
-                <div class="premium-profile-meta-row">
+                <div class="premium-profile-meta-row" style="flex-wrap: wrap; gap: 0.5rem; align-items: center;">
                     <div class="premium-profile-meta-item">
                         <svg class="premium-profile-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2.5">
@@ -183,10 +710,7 @@
                             <circle cx="12" cy="7" r="4" />
                         </svg>
                         <span>
-                            {% set p_role = perfil_user.role if perfil_user.role is defined else perfil_user.get('role')
-                            %}
                             {% if p_role == 'admin' %}Admin
-                            {% elif p_role == 'admin' %}Admin
                             {% elif p_role == 'juiz' %}Juiz
                             {% else %}{% if tem_jogador %}{% if jogador.tipo == 'fixo' %}Fixo{% else %}Avulso{% endif
                             %}{% else %}Jogador{% endif %}{% endif %}
@@ -889,7 +1413,7 @@
                 <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 14px; padding: 0.85rem 1.15rem; margin-bottom: 1.25rem;">
                     <div class="premium-profile-cred-row" style="padding: 0.5rem 0;">
                         <span class="premium-profile-cred-label">Nome de Usuário</span>
-                        <span class="premium-profile-cred-value">@{{ usuario.username }}</span>
+                        <span class="premium-profile-cred-value">@{{ 'admin' if usuario.role == 'admin' else ('juiz' if usuario.role == 'juiz' else usuario.username) }}</span>
                     </div>
                     <div class="premium-profile-cred-row" style="padding: 0.5rem 0;">
                         <span class="premium-profile-cred-label">Nível de Acesso</span>
@@ -1000,6 +1524,7 @@
             </div>
             {% endif %}
         </div>
+        {% endif %}
 
     </main>
 </div>

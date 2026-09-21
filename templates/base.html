@@ -68,7 +68,15 @@
     <script src="capacitor.js"></script>
     <script src="{{ url_for('static', filename='local-datetime.js', v='20260616-06') }}" defer></script>
     {% if config.get('ENABLE_APP_SHELL') %}
-    <script src="{{ url_for('static', filename='app-shell.js', v='20260717-01') }}" defer></script>
+    <script src="{{ url_for('static', filename='app-shell.js', v='20260921-02') }}" defer></script>
+    {% endif %}
+    {% if session.get('role') == 'admin' %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin-tour.css', v='20260921-21') }}">
+    <script src="{{ url_for('static', filename='admin-tour.js', v='20260921-10') }}" defer></script>
+    {% endif %}
+    {% if session.get('role') in ['juiz', 'admin'] %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='juiz-tour.css', v='20260921-01') }}">
+    <script src="{{ url_for('static', filename='juiz-tour.js', v='20260921-01') }}" defer></script>
     {% endif %}
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
@@ -76,7 +84,8 @@
 
 <body
     class="app-shell{% if show_site_footer %} has-site-footer{% endif %}{% if session.get('role') == 'juiz' %} is-referee-layout{% endif %} {% block body_class %}{% endblock %}"
-    data-app-shell="{{ 1 if config.get('ENABLE_APP_SHELL') else 0 }}">
+    data-app-shell="{{ 1 if config.get('ENABLE_APP_SHELL') else 0 }}"
+    data-clube-codigo="{{ g.clube_codigo or session.get('clube_codigo') or '' }}">
     <script src="{{ url_for('static', filename='offline-judge.js') }}"></script>
     <script>
         // Inject CSRF token into all POST forms automatically (works with Flask-WTF CSRFProtect)
@@ -299,6 +308,7 @@
         <nav class="site-footer__nav" aria-label="Navegação principal">
             {% if is_judge_role %}
             <a href="{{ url_for('juiz.jogar_page') }}"
+                id="tourJuizTabCriar"
                 class="site-footer__link{% if current_path.startswith('/jogar') and not current_path.startswith('/jogar/times') and not current_path.startswith('/jogar/compartilhar') and not current_path.startswith('/jogar/historico') and not current_path.startswith('/jogar/cronometro') %} is-active{% endif %}"
                 aria-label="Criar" title="Criar">
                 <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
@@ -310,6 +320,7 @@
             </a>
 
             <a href="{{ url_for('juiz.juiz_times_page') }}"
+                id="tourJuizTabTimes"
                 class="site-footer__link{% if current_path.startswith('/jogar/times') %} is-active{% endif %}"
                 aria-label="Times" title="Times">
                 <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
@@ -323,6 +334,7 @@
             </a>
 
             <a href="{{ url_for('votacao.votacao_admin_page') }}"
+                id="tourJuizTabVotacoes"
                 class="site-footer__link{% if current_path.startswith('/admin/votacao') or current_path.startswith('/votacao') %} is-active{% endif %}"
                 aria-label="Votações" title="Votações">
                 <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
@@ -336,6 +348,7 @@
             </a>
 
             <a href="{{ url_for('juiz.juiz_historico') }}"
+                id="tourJuizTabHistorico"
                 class="site-footer__link{% if current_path.startswith('/jogar/historico') %} is-active{% endif %}"
                 aria-label="Histórico" title="Histórico">
                 <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
@@ -348,6 +361,7 @@
             </a>
 
             <a href="{{ url_for('juiz.juiz_cronometro') }}"
+                id="tourJuizTabCronometro"
                 class="site-footer__link{% if current_path.startswith('/jogar/cronometro') %} is-active{% endif %}"
                 aria-label="Cronômetro" title="Cronômetro">
                 <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
@@ -361,7 +375,7 @@
 
             <form method="post" action="{{ url_for('auth.logout') }}" style="display: contents;">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="site-footer__link" aria-label="Sair da conta" title="Sair da conta">
+                <button type="submit" id="tourJuizTabSair" class="site-footer__link" aria-label="Sair da conta" title="Sair da conta">
                     <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                         <polyline points="16 17 21 12 16 7" />
@@ -375,7 +389,7 @@
             {% else %}
             {% if is_admin_role %}
             <!-- 1. Jogadores -->
-            <a href="{{ url_for('jogador.index') }}" class="site-footer__link{% if is_jogadores %} is-active{% endif %}"
+            <a href="{{ url_for('jogador.index') }}" id="tourTabJogadores" class="site-footer__link{% if is_jogadores %} is-active{% endif %}"
                 aria-label="Jogadores" title="Jogadores" {% if is_jogadores %} aria-current="page" {% endif %}>
                 <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
@@ -388,7 +402,7 @@
             </a>
 
             <!-- 2. Histórico -->
-            <a href="{{ url_for('jogador.historico') }}"
+            <a href="{{ url_for('jogador.historico') }}" id="tourTabHistorico"
                 class="site-footer__link{% if is_historico %} is-active{% endif %}" aria-label="Histórico"
                 title="Histórico" {% if is_historico %} aria-current="page" {% endif %}>
                 <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
@@ -401,7 +415,7 @@
             </a>
 
             <!-- 3. Ranking -->
-            <a href="{{ url_for('jogador.pagina_ranking') }}"
+            <a href="{{ url_for('jogador.pagina_ranking') }}" id="tourTabRanking"
                 class="site-footer__link{% if is_ranking %} is-active{% endif %}" aria-label="Ranking" title="Ranking"
                 {% if is_ranking %} aria-current="page" {% endif %}>
                 <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
@@ -416,7 +430,7 @@
             </a>
 
             <!-- 4. Meu Perfil -->
-            <a href="{{ url_for('auth.perfil_page') }}" class="site-footer__link{% if is_perfil %} is-active{% endif %}"
+            <a href="{{ url_for('auth.perfil_page') }}" id="tourTabPerfil" class="site-footer__link{% if is_perfil %} is-active{% endif %}"
                 aria-label="Meu perfil" title="Meu perfil" {% if is_perfil %} aria-current="page" {% endif %}>
                 <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
@@ -427,15 +441,13 @@
             </a>
 
             <!-- 5. Ajustes -->
-            <a href="{{ url_for('admin.admin_page') }}"
+            <a href="{{ url_for('admin.admin_page') }}" id="tourTabAjustes"
                 class="site-footer__link{% if is_admin_page %} is-active{% endif %}" aria-label="Ajustes"
                 title="Ajustes" {% if is_admin_page %} aria-current="page" {% endif %}>
                 <svg class="site-footer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
                     <circle cx="12" cy="12" r="3"></circle>
-                    <path
-                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z">
-                    </path>
                 </svg>
                 <span class="site-footer__label">Ajustes</span>
             </a>

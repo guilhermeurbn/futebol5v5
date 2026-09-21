@@ -94,3 +94,4 @@ client_secret*.json
 
 # Uploads locais de teste
 static/uploads/cards/
+static/uploads/clubes/

@@ -470,7 +470,8 @@
                 </div>
             </div>
 
-            <!-- Item 5: Meus Clubes & Troca de Ambiente -->
+            <!-- Item 5: Meus Clubes & Troca de Ambiente (Disponível apenas para atletas/usuários, nunca administradores) -->
+            {% if not is_admin and session.get('role') != 'admin' and (usuario.role if usuario else '') != 'admin' %}
             <div class="edit-accordion-card" id="cardItemClubes" style="background: #121215; border: 1px solid #27272a; border-radius: 18px; overflow: hidden; transition: all 0.2s ease; box-shadow: 0 8px 24px rgba(0,0,0,0.35);">
                 <button type="button" onclick="toggleEditAccordion(this)" style="width: 100%; background: none; border: none; padding: 1.4rem 1.7rem; color: #ffffff; display: flex; align-items: center; justify-content: space-between; gap: 1.2rem; cursor: pointer; text-align: left;">
                     <div style="display: flex; align-items: center; gap: 1.1rem;">
@@ -538,6 +539,7 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
 
 
         </div>

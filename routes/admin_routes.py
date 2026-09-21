@@ -222,8 +222,10 @@ def admin_page():
         notificacoes = notificacao_service.listar_notificacoes(apenas_nao_lidas=True, limite=15, clube_codigo=cod_clube)
         sucesso = session.pop('admin_sucesso', request.args.get('sucesso', ''))
         erro = session.pop('admin_erro', request.args.get('erro', ''))
-        senha_reset = session.pop('admin_senha_reset', None)
-        
+        senha_reset = session.pop('admin_senha_reset', session.pop('senha_reset', None))
+        from services.clube_service import ClubeService
+        clube_atual = ClubeService.obter_clube_por_codigo(cod_clube) or {}
+
         jogadores_avulsos = [j.para_dict() if hasattr(j, 'para_dict') else j for j in jogador_service.listar(clube_codigo=cod_clube) if j.tipo == 'avulso' or not j.owner_user_id]
         return render_template(
             'admin.html',
@@ -235,6 +237,7 @@ def admin_page():
             sucesso=sucesso,
             erro=erro,
             senha_reset=senha_reset,
+            clube_atual=clube_atual,
             usuario=_usuario_logado()
         )
     except Exception as e:

@@ -1,0 +1,1523 @@
+/* ==========================================================================
+   Admin Onboarding Tour - Guided Overlay (Paleta Oficial Verde & Dark Clean)
+   Sem auras, sem luzes de canto e alinhado 100% à identidade do NaTrave
+   ========================================================================== */
+
+#adminTourOverlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(4, 7, 12, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 99990;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+}
+
+#adminTourOverlay.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Eleva a barra inferior quando o tour está ativo */
+body.admin-tour-active .site-footer {
+  z-index: 99995 !important;
+  background: #0b0f17 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.6) !important;
+  pointer-events: auto !important;
+}
+
+body.admin-tour-active .site-footer__link {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Todas as abas não focadas no momento ficam com opacidade reduzida mas clicáveis */
+body.admin-tour-active .site-footer__link:not(.tour-highlight-tab) {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+  opacity: 0.5 !important;
+}
+
+body.admin-tour-active .site-footer__link:not(.tour-highlight-tab):hover,
+body.admin-tour-active .site-footer__link:not(.tour-highlight-tab):active {
+  opacity: 0.85 !important;
+}
+
+body.admin-tour-active .site-footer__link:not(.tour-highlight-tab) .site-footer__icon {
+  stroke: #94a3b8 !important;
+  color: #94a3b8 !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+body.admin-tour-active .site-footer__link:not(.tour-highlight-tab) .site-footer__label {
+  color: #94a3b8 !important;
+  font-weight: 600 !important;
+}
+
+/* Destaque limpo e nítido na aba ativa da apresentação (SEMPRE VERDE, mesmo em hover/active/focus/touch) */
+.tour-highlight-tab,
+.tour-highlight-tab:hover,
+.tour-highlight-tab:active,
+.tour-highlight-tab:focus,
+.tour-highlight-tab:focus-visible,
+body.admin-tour-active .site-footer__link.tour-highlight-tab,
+body.admin-tour-active .site-footer__link.tour-highlight-tab:hover,
+body.admin-tour-active .site-footer__link.tour-highlight-tab:active,
+body.admin-tour-active .site-footer__link.tour-highlight-tab:focus,
+body.admin-tour-active .site-footer__link.tour-highlight-tab:focus-visible {
+  position: relative !important;
+  z-index: 99999 !important;
+  background: rgba(34, 197, 94, 0.16) !important;
+  border: 1.8px solid #22c55e !important;
+  border-color: #22c55e !important;
+  border-radius: 999px !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.25) !important;
+  transform: scale(1.02) translateY(-1px) !important;
+}
+
+.tour-highlight-tab .site-footer__icon,
+.tour-highlight-tab:hover .site-footer__icon,
+.tour-highlight-tab:active .site-footer__icon,
+.tour-highlight-tab:focus .site-footer__icon,
+body.admin-tour-active .site-footer__link.tour-highlight-tab .site-footer__icon,
+body.admin-tour-active .site-footer__link.tour-highlight-tab:hover .site-footer__icon,
+body.admin-tour-active .site-footer__link.tour-highlight-tab:active .site-footer__icon {
+  stroke: #22c55e !important;
+  color: #22c55e !important;
+  filter: none !important;
+}
+
+.tour-highlight-tab .site-footer__label,
+.tour-highlight-tab:hover .site-footer__label,
+.tour-highlight-tab:active .site-footer__label,
+.tour-highlight-tab:focus .site-footer__label,
+body.admin-tour-active .site-footer__link.tour-highlight-tab .site-footer__label,
+body.admin-tour-active .site-footer__link.tour-highlight-tab:hover .site-footer__label,
+body.admin-tour-active .site-footer__link.tour-highlight-tab:active .site-footer__label {
+  color: #ffffff !important;
+  font-weight: 850 !important;
+}
+
+/* Card Central de Explicação - Paleta idêntica ao site (Verde + Dark, sem luzes nem auras) */
+#adminTourCard {
+  width: 100%;
+  max-width: 485px;
+  margin-top: -5vh;
+  background: linear-gradient(145deg, #111827 0%, #0b0f17 100%);
+  border: 1.5px solid rgba(34, 197, 94, 0.35);
+  border-radius: 20px;
+  padding: 1.65rem 1.65rem 1.45rem;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.75);
+  position: relative;
+  overflow: hidden;
+  animation: tourCardPopCenter 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes tourCardPopCenter {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Cabeçalho do Card */
+.tour-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.05rem;
+}
+
+.tour-step-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  padding: 0.24rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #22c55e;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.tour-btn-skip {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #94a3b8;
+  border-radius: 10px;
+  padding: 0.38rem 0.8rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.tour-btn-skip:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Título e Ícone SVG */
+.tour-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 0.85rem;
+}
+
+.tour-icon-box {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: rgba(34, 197, 94, 0.14);
+  border: 1px solid rgba(34, 197, 94, 0.32);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #22c55e;
+  flex-shrink: 0;
+  box-shadow: none;
+}
+
+.tour-icon-box svg {
+  width: 24px;
+  height: 24px;
+  stroke: #22c55e;
+}
+
+.tour-title {
+  margin: 0;
+  font-size: 1.42rem;
+  font-weight: 850;
+  color: #ffffff;
+  letter-spacing: -0.3px;
+  line-height: 1.2;
+}
+
+/* Descrição Principal */
+.tour-desc {
+  margin: 0 0 1.05rem 0;
+  font-size: 1.08rem;
+  color: #f1f5f9;
+  font-weight: 550;
+  line-height: 1.5;
+}
+
+/* Box de Exemplo Prático */
+.tour-example-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(34, 197, 94, 0.22);
+  border-radius: 14px;
+  padding: 0.9rem 1.05rem;
+  margin-bottom: 1.3rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.tour-example-icon {
+  width: 21px;
+  height: 21px;
+  color: #22c55e;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.tour-example-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.tour-example-text {
+  margin: 0;
+  font-size: 0.93rem;
+  color: #cbd5e1;
+  line-height: 1.48;
+}
+
+.tour-example-text strong {
+  color: #22c55e;
+  font-weight: 800;
+}
+
+/* Rodapé do Card com Progresso e Botões */
+.tour-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tour-dots-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.tour-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  transition: all 0.25s ease;
+}
+
+.tour-dot.is-active {
+  width: 23px;
+  background: #22c55e;
+  box-shadow: none;
+}
+
+.tour-actions-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.tour-btn-prev {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #cbd5e1;
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.tour-btn-prev svg {
+  width: 19px;
+  height: 19px;
+  stroke: #cbd5e1;
+  transition: stroke 0.2s ease;
+}
+
+.tour-btn-prev:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.tour-btn-prev:hover svg {
+  stroke: #ffffff;
+}
+
+.tour-btn-next {
+  background: #22c55e;
+  border: none;
+  color: #000000;
+  padding: 0.72rem 1.38rem;
+  border-radius: 13px;
+  font-size: 0.97rem;
+  font-weight: 850;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.48rem;
+}
+
+.tour-btn-next:hover {
+  background: #16a34a;
+  transform: translateY(-1px);
+}
+
+.tour-btn-next:active {
+  transform: translateY(0);
+}
+
+/* ==========================================================================
+   Admin Welcome Hub - Minimalista e Objetivo
+   ========================================================================== */
+
+/* ==========================================================================
+   Admin Welcome Hub - Refinado, Elegante & Interessante (Estilo Clube VIP)
+   ========================================================================== */
+
+.admin-welcome-elite {
+  background: linear-gradient(150deg, #111a2e 0%, #090e17 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-top: 2px solid #22c55e !important;
+  border-radius: 20px !important;
+  padding: 1.35rem 1.25rem 1.15rem !important;
+  margin-bottom: 1.4rem !important;
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.welcome-elite__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.95rem;
+}
+
+.welcome-elite__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.24);
+  border-radius: 999px;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.68rem;
+  font-weight: 850;
+  color: #22c55e;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+
+.welcome-elite__pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+  animation: elitePulse 2.2s infinite cubic-bezier(0.45, 0, 0.55, 1);
+}
+
+@keyframes elitePulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+  }
+}
+
+.welcome-elite__top-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.welcome-elite__tour-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  padding: 0.22rem 0.68rem;
+  font-size: 0.72rem;
+  font-weight: 750;
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.welcome-elite__tour-pill:hover {
+  background: rgba(34, 197, 94, 0.12);
+  color: #ffffff;
+  border-color: rgba(34, 197, 94, 0.32);
+  transform: translateY(-1px);
+}
+
+.welcome-elite__close-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #94a3b8;
+  border-radius: 8px;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.welcome-elite__close-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.welcome-elite__header {
+  display: flex;
+  align-items: center;
+  gap: 0.95rem;
+  margin-bottom: 1.15rem;
+}
+
+.welcome-elite__icon-shield {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.16) 0%, rgba(34, 197, 94, 0.04) 100%);
+  border: 1px solid rgba(34, 197, 94, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #22c55e;
+  flex-shrink: 0;
+}
+
+.welcome-elite__title {
+  font-size: 1.6rem !important;
+  font-weight: 900 !important;
+  color: #ffffff !important;
+  margin: 0 !important;
+  letter-spacing: -0.4px !important;
+  line-height: 1.15 !important;
+  word-break: break-word;
+}
+
+/* Bloco de Convite VIP */
+.welcome-elite__share-box {
+  background: rgba(4, 7, 13, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  padding: 0.75rem 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.welcome-elite__share-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 140px;
+}
+
+.welcome-elite__share-header-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.welcome-elite__share-label {
+  font-size: 0.64rem;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.welcome-elite__pin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  padding: 0.08rem 0.4rem;
+  border-radius: 6px;
+  letter-spacing: 0.4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.welcome-elite__pin-badge strong {
+  color: #bae6fd;
+  letter-spacing: 0.8px;
+}
+
+.welcome-elite__share-url {
+  font-size: 0.84rem;
+  color: #94a3b8;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  word-break: break-all;
+}
+
+.welcome-elite__share-url strong {
+  color: #22c55e;
+  font-weight: 800;
+}
+
+.welcome-elite__share-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-shrink: 0;
+}
+
+.welcome-elite__btn-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  color: #ffffff;
+  border-radius: 9px;
+  padding: 0.44rem 0.78rem;
+  font-size: 0.78rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.welcome-elite__btn-copy:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.welcome-elite__btn-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(37, 211, 102, 0.12);
+  border: 1px solid rgba(37, 211, 102, 0.28);
+  color: #25d366;
+  border-radius: 9px;
+  padding: 0.44rem 0.78rem;
+  font-size: 0.78rem;
+  font-weight: 750;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.welcome-elite__btn-whatsapp:hover {
+  background: rgba(37, 211, 102, 0.22);
+  border-color: rgba(37, 211, 102, 0.4);
+}
+
+/* Botão Primário Cadastrar Jogador */
+.welcome-elite__primary-btn {
+  width: 100%;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
+  border: none !important;
+  border-radius: 13px !important;
+  padding: 0.75rem 1rem !important;
+  color: #051a0e !important;
+  font-size: 0.94rem !important;
+  font-weight: 850 !important;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(34, 197, 94, 0.28) !important;
+  transition: all 0.2s ease !important;
+}
+
+.welcome-elite__primary-btn:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
+.welcome-elite__primary-btn:active {
+  transform: scale(0.99);
+}
+
+.welcome-elite__btn-plus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.16);
+  color: #051a0e;
+  font-size: 1.1rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+/* ============================================================
+   PAINEL DO PRESIDENTE / ORGANIZADOR (DESIGN MINIMALISTA ELITE)
+   ============================================================ */
+
+/* Hero Card do Presidente */
+.admin-president-hero-card {
+  position: relative !important;
+  background: linear-gradient(180deg, #11151e 0%, #090c12 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 20px !important;
+  padding: 1.25rem 1.25rem 1.15rem !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.85rem !important;
+  margin-bottom: 0.85rem !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Ações Superiores (Editar / Configurações) */
+.admin-president-hero-card .profile-header-actions {
+  position: absolute !important;
+  top: 1.1rem !important;
+  right: 1.1rem !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.45rem !important;
+  z-index: 10 !important;
+}
+
+.admin-president-hero-card .profile-header-action-btn {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 10px !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  text-decoration: none !important;
+  color: #94a3b8 !important;
+  user-select: none !important;
+}
+
+.admin-president-hero-card .profile-header-action-btn:hover {
+  background: rgba(255, 255, 255, 0.09) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Identidade do Presidente (Avatar + Nome) */
+.admin-president-identity {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.95rem !important;
+  width: 100% !important;
+  padding-right: 5rem !important; /* Respiro para os 2 botões de ação */
+  box-sizing: border-box !important;
+}
+
+.admin-president-avatar-box {
+  position: relative !important;
+  width: 58px !important;
+  height: 58px !important;
+  flex-shrink: 0 !important;
+}
+
+.admin-president-avatar-img {
+  width: 58px !important;
+  height: 58px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #181f2a 0%, #0d121a 100%) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.12) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 1.25rem !important;
+  font-weight: 800 !important;
+  color: #f8fafc !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4) !important;
+}
+
+.admin-president-avatar-img img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+.admin-president-cam-badge {
+  position: absolute !important;
+  bottom: -1px !important;
+  right: -1px !important;
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 50% !important;
+  background: #181b22 !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  color: #94a3b8 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5) !important;
+}
+
+.admin-president-details {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.15rem !important;
+  min-width: 0 !important;
+}
+
+.admin-president-name-row {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 0.45rem !important;
+}
+
+.admin-president-title {
+  margin: 0 !important;
+  font-size: 1.25rem !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  letter-spacing: -0.02em !important;
+  line-height: 1.2 !important;
+}
+
+.admin-president-tag-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.25rem !important;
+  background: rgba(34, 197, 94, 0.08) !important;
+  border: 1px solid rgba(34, 197, 94, 0.22) !important;
+  color: #22c55e !important;
+  font-size: 0.65rem !important;
+  font-weight: 750 !important;
+  padding: 0.15rem 0.5rem !important;
+  border-radius: 999px !important;
+  letter-spacing: 0.3px !important;
+  white-space: nowrap !important;
+}
+
+.admin-president-username-tag {
+  font-size: 0.78rem !important;
+  font-family: ui-monospace, SFMono-Regular, monospace !important;
+  color: #71717a !important;
+  font-weight: 600 !important;
+}
+
+/* Divisor sutil */
+.admin-president-divider {
+  width: 100% !important;
+  height: 1px !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  margin: 0.1rem 0 !important;
+}
+
+/* Barra inferior do card: Clube + Ações */
+.admin-president-toolbar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  gap: 0.65rem !important;
+  width: 100% !important;
+}
+
+.admin-president-club-info {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.15rem !important;
+}
+
+.admin-president-club-label {
+  font-size: 0.6rem !important;
+  font-weight: 750 !important;
+  letter-spacing: 0.7px !important;
+  color: #71717a !important;
+  text-transform: uppercase !important;
+}
+
+.admin-president-club-badge-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.4rem !important;
+}
+
+.admin-president-club-title {
+  font-size: 0.95rem !important;
+  font-weight: 750 !important;
+  color: #f4f4f5 !important;
+}
+
+.admin-president-club-num {
+  font-size: 0.72rem !important;
+  font-weight: 750 !important;
+  color: #22c55e !important;
+  background: rgba(34, 197, 94, 0.1) !important;
+  padding: 0.1rem 0.45rem !important;
+  border-radius: 6px !important;
+  border: 1px solid rgba(34, 197, 94, 0.2) !important;
+}
+
+.admin-president-quick-tools {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.45rem !important;
+  flex-wrap: wrap !important;
+}
+
+.admin-tool-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+  border-radius: 9px !important;
+  padding: 0.35rem 0.7rem !important;
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  user-select: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+.admin-tool-pill--pin {
+  background: rgba(255, 255, 255, 0.035) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #f4f4f5 !important;
+}
+
+.admin-tool-pill--pin:hover {
+  background: rgba(255, 255, 255, 0.07) !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  transform: translateY(-1px) !important;
+}
+
+.admin-tool-pill__label {
+  font-size: 0.62rem !important;
+  color: #71717a !important;
+  font-weight: 750 !important;
+  text-transform: uppercase !important;
+}
+
+.admin-tool-pill__code {
+  font-family: ui-monospace, SFMono-Regular, monospace !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.5px !important;
+}
+
+.admin-tool-pill--pin svg {
+  color: #71717a !important;
+  transition: color 0.2s ease !important;
+}
+
+.admin-tool-pill--share {
+  background: rgba(34, 197, 94, 0.09) !important;
+  border: 1px solid rgba(34, 197, 94, 0.25) !important;
+  color: #22c55e !important;
+}
+
+.admin-tool-pill--share:hover {
+  background: rgba(34, 197, 94, 0.18) !important;
+  border-color: #22c55e !important;
+  transform: translateY(-1px) !important;
+}
+
+/* ============================================================ */
+/* DASHBOARD DO PRESIDENTE                                      */
+/* ============================================================ */
+.admin-president-dashboard {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.85rem !important;
+  width: 100% !important;
+}
+
+/* KPIs - CARDS MINIMALISTAS DE LUXO */
+.admin-kpi-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 0.6rem !important;
+  width: 100% !important;
+}
+
+@media (min-width: 768px) {
+  .admin-kpi-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+
+.admin-kpi-card {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  background: rgba(14, 18, 26, 0.55) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-radius: 14px !important;
+  padding: 0.85rem 0.95rem !important;
+  min-height: 82px !important;
+  box-sizing: border-box !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  touch-action: pan-y !important;
+}
+
+.admin-kpi-card:hover,
+.admin-kpi-card:active,
+.admin-kpi-card:focus {
+  background: rgba(14, 18, 26, 0.55) !important;
+  border-color: rgba(255, 255, 255, 0.05) !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.admin-kpi-card__top {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.admin-kpi-card__label {
+  font-size: 0.64rem !important;
+  font-weight: 700 !important;
+  color: #71717a !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.7px !important;
+}
+
+.admin-kpi-card__icon-svg {
+  color: #52525b !important;
+  opacity: 0.85 !important;
+}
+
+.admin-kpi-card:hover .admin-kpi-card__icon-svg,
+.admin-kpi-card:active .admin-kpi-card__icon-svg,
+.admin-kpi-card:focus .admin-kpi-card__icon-svg {
+  color: #52525b !important;
+  opacity: 0.85 !important;
+}
+
+.admin-kpi-card__val {
+  font-size: 1.35rem !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  line-height: 1.15 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.admin-kpi-card__val--active {
+  color: #22c55e !important;
+}
+
+.admin-kpi-card__val--gold {
+  color: #fbbf24 !important;
+}
+
+.admin-kpi-card__sub {
+  font-size: 0.67rem !important;
+  color: #71717a !important;
+  line-height: 1.25 !important;
+  margin-top: 0.2rem !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* ============================================================ */
+/* AÇÕES DE GESTÃO - MODO JUIZ E AJUSTES DO CLUBE               */
+/* ============================================================ */
+.admin-actions-section {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.6rem !important;
+  width: 100% !important;
+}
+
+.admin-judge-mode-btn {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(13, 18, 24, 0.9) 100%) !important;
+  border: 1px solid rgba(34, 197, 94, 0.22) !important;
+  border-radius: 16px !important;
+  padding: 0.85rem 1.15rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  cursor: pointer !important;
+  text-align: left !important;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+  box-sizing: border-box !important;
+}
+
+.admin-judge-mode-btn:hover {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.14) 0%, rgba(16, 24, 32, 0.95) 100%) !important;
+  border-color: rgba(34, 197, 94, 0.45) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.12) !important;
+}
+
+.admin-judge-mode-btn__left {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.85rem !important;
+}
+
+.admin-judge-mode-btn__icon {
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 11px !important;
+  background: rgba(34, 197, 94, 0.12) !important;
+  border: 1px solid rgba(34, 197, 94, 0.28) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #22c55e !important;
+  flex-shrink: 0 !important;
+}
+
+.admin-judge-mode-btn__icon svg {
+  margin-left: 2px !important;
+}
+
+.admin-judge-mode-btn__meta {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.1rem !important;
+}
+
+.admin-judge-mode-btn__title-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.45rem !important;
+}
+
+.admin-judge-mode-btn__title {
+  font-size: 0.92rem !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.4px !important;
+}
+
+.admin-judge-mode-btn__live-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.25rem !important;
+  background: rgba(34, 197, 94, 0.12) !important;
+  border: 1px solid rgba(34, 197, 94, 0.3) !important;
+  color: #22c55e !important;
+  font-size: 0.58rem !important;
+  font-weight: 850 !important;
+  padding: 0.12rem 0.45rem !important;
+  border-radius: 999px !important;
+  letter-spacing: 0.4px !important;
+}
+
+.admin-judge-mode-btn__live-dot {
+  width: 5px !important;
+  height: 5px !important;
+  border-radius: 50% !important;
+  background: #22c55e !important;
+  box-shadow: 0 0 6px #22c55e !important;
+  animation: pulseLiveDot 2s infinite ease-in-out !important;
+}
+
+@keyframes pulseLiveDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.admin-judge-mode-btn__desc {
+  font-size: 0.72rem !important;
+  color: #94a3b8 !important;
+}
+
+.admin-judge-mode-btn__chevron {
+  color: #22c55e !important;
+  opacity: 0.7 !important;
+  transition: all 0.2s ease !important;
+}
+
+.admin-judge-mode-btn:hover .admin-judge-mode-btn__chevron {
+  transform: translateX(3px) !important;
+  opacity: 1 !important;
+}
+
+.admin-club-settings-btn {
+  background: rgba(255, 255, 255, 0.02) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 16px !important;
+  padding: 0.85rem 1.15rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  cursor: pointer !important;
+  text-align: left !important;
+  transition: all 0.2s ease !important;
+  box-sizing: border-box !important;
+}
+
+.admin-club-settings-btn:hover {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  transform: translateY(-1px) !important;
+}
+
+.admin-club-settings-btn__left {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.85rem !important;
+}
+
+.admin-club-settings-btn__icon {
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 11px !important;
+  background: rgba(255, 255, 255, 0.035) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #94a3b8 !important;
+  flex-shrink: 0 !important;
+}
+
+.admin-club-settings-btn__meta {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.1rem !important;
+}
+
+.admin-club-settings-btn__title {
+  font-size: 0.88rem !important;
+  font-weight: 800 !important;
+  color: #f1f5f9 !important;
+}
+
+.admin-club-settings-btn__desc {
+  font-size: 0.71rem !important;
+  color: #71717a !important;
+}
+
+.admin-club-settings-btn__chevron {
+  color: #64748b !important;
+  opacity: 0.6 !important;
+  transition: all 0.2s ease !important;
+}
+
+.admin-club-settings-btn:hover .admin-club-settings-btn__chevron {
+  transform: translateX(3px) !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+/* ============================================================ */
+/* MODAL AJUSTES DO CLUBE - BACKDROP BLUR DE ALTO PADRÃO        */
+/* ============================================================ */
+.admin-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(4, 7, 12, 0.78);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.admin-modal-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.admin-modal-card {
+  background: #0d1117;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.85), 0 0 35px rgba(34, 197, 94, 0.05);
+  overflow: hidden;
+  transform: scale(0.96) translateY(8px);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.admin-modal-backdrop.is-open .admin-modal-card {
+  transform: scale(1) translateY(0);
+}
+
+.admin-modal-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.15rem 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.admin-modal-card__header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.admin-modal-card__header-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: #22c55e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-modal-card__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 850;
+  color: #ffffff;
+}
+
+.admin-modal-card__subtitle {
+  font-size: 0.72rem;
+  color: #64748b;
+  display: block;
+}
+
+.admin-modal-card__close-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  color: #94a3b8;
+  border-radius: 9px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-modal-card__close-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.admin-modal-card__body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.admin-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.admin-form-label {
+  font-size: 0.76rem;
+  font-weight: 750;
+  color: #cbd5e1;
+}
+
+.admin-form-input {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 0.65rem 0.85rem;
+  color: #ffffff;
+  font-size: 0.88rem;
+  outline: none;
+  transition: border-color 0.2s ease;
+  width: 100%;
+}
+
+.admin-form-input:focus {
+  border-color: #22c55e;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.admin-form-input--readonly {
+  background: rgba(255, 255, 255, 0.02);
+  color: #94a3b8;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+}
+
+.admin-form-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  padding-right: 2.2rem;
+}
+
+.admin-form-select option {
+  background: #0d1117;
+  color: #ffffff;
+}
+
+.admin-form-help {
+  font-size: 0.68rem;
+  color: #64748b;
+  margin-top: 0.15rem;
+}
+
+.admin-toggle-pwd-btn {
+  position: absolute;
+  right: 0.65rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-toggle-pwd-btn:hover {
+  color: #ffffff;
+}
+
+.admin-modal-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  margin-top: 0.5rem;
+}
+
+.admin-modal-feedback {
+  padding: 0.65rem 0.85rem;
+  border-radius: 9px;
+  font-size: 0.78rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.admin-modal-feedback--sucesso {
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: #22c55e;
+}
+
+.admin-modal-feedback--erro {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+
+/* ==========================================================================
+   Modern Elite Empty State - NaTrave 2026 Dark Aesthetic
+   ========================================================================== */
+.empty-state {
+  background: linear-gradient(180deg, rgba(16, 22, 32, 0.75) 0%, rgba(10, 14, 20, 0.9) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 20px !important;
+  padding: 2.5rem 1.5rem 2.25rem !important;
+  max-width: 440px !important;
+  margin: 2rem auto !important;
+  text-align: center !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  animation: emptyStateFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+@keyframes emptyStateFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.empty-icon {
+  width: 58px !important;
+  height: 58px !important;
+  border-radius: 16px !important;
+  background: rgba(34, 197, 94, 0.09) !important;
+  border: 1px solid rgba(34, 197, 94, 0.25) !important;
+  color: #22c55e !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 auto 1.15rem auto !important;
+  box-shadow: 0 8px 22px rgba(34, 197, 94, 0.12) !important;
+  animation: none !important;
+  font-size: 1.5rem !important;
+  flex-shrink: 0 !important;
+}
+
+.empty-icon svg {
+  width: 26px !important;
+  height: 26px !important;
+  stroke: #22c55e !important;
+  display: block !important;
+}
+
+.empty-state p:first-of-type,
+.empty-state__title {
+  font-size: 1.12rem !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  letter-spacing: -0.015em !important;
+  margin: 0 0 0.4rem 0 !important;
+  line-height: 1.3 !important;
+}
+
+.empty-hint,
+.empty-state__desc {
+  font-size: 0.85rem !important;
+  color: #94a3b8 !important;
+  line-height: 1.5 !important;
+  margin: 0 auto !important;
+  max-width: 320px !important;
+  font-weight: 500 !important;
+}
+
+.empty-state__action {
+  margin-top: 1.25rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.45rem !important;
+}
+

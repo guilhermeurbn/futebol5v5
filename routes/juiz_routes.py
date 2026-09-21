@@ -594,9 +594,12 @@ def juiz_cronometro():
 def jogar_page():
     """Hub principal do fluxo do juiz"""
     try:
+        # Se veio explicitamente pelo botão de voltar ou cancelar seleção
+        if request.args.get('voltar') or request.args.get('cancelar'):
+            juiz_partida_service.cancelar_selecao()
+            juiz_partida_service.limpar_rascunho()
+
         estado_fluxo = _sincronizar_fluxo_juiz()
-        if estado_fluxo and estado_fluxo.get('status') == 'selecionando':
-            return redirect(url_for('juiz.juiz_criar_partida'))
         destino_aberto = _destino_partida_oficial_aberta(estado_fluxo)
         if destino_aberto:
             return redirect(destino_aberto)
@@ -618,6 +621,15 @@ def jogar_page():
     except Exception as e:
         logger.error(f"Erro ao carregar página do juiz: {str(e)}")
         return render_template('juiz_home.html', erro='Erro ao carregar página'), 500
+
+
+@juiz_bp.route('/jogar/cancelar-selecao', methods=['GET', 'POST'])
+@juiz_required
+def juiz_cancelar_selecao():
+    """Cancela a seleção de jogadores e retorna à tela inicial do juiz"""
+    juiz_partida_service.cancelar_selecao()
+    juiz_partida_service.limpar_rascunho()
+    return redirect(url_for('juiz.jogar_page'))
 
 
 @juiz_bp.route('/api/jogar/resumo', methods=['GET'])

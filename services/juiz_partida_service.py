@@ -282,6 +282,14 @@ class JuizPartidaService:
         self._salvar(dados)
         return dados
 
+    def cancelar_selecao(self) -> Dict:
+        dados = self._carregar()
+        if dados.get("status") == "selecionando":
+            dados["status"] = "idle"
+            dados["partida_atual"] = None
+            self._salvar(dados)
+        return dados
+
     def resetar(self) -> Dict:
         dados = self._estado_vazio()
         self._salvar(dados)

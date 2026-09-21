@@ -333,6 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
         triggerHaptic();
         cardFlipInner.classList.remove('is-flipped', 'is-flipped-register', 'is-flipped-forgot', 'is-flipped-create-club');
         cardFlipInner.classList.add('is-flipped', 'is-flipped-join-club');
+        if (window.voltarParaBuscaClube) window.voltarParaBuscaClube();
         if (window.filtrarClubesBuscaCard) window.filtrarClubesBuscaCard('');
       });
     }
@@ -343,8 +344,17 @@ document.addEventListener('DOMContentLoaded', () => {
         triggerHaptic();
         cardFlipInner.classList.remove('is-flipped', 'is-flipped-register', 'is-flipped-forgot', 'is-flipped-join-club');
         cardFlipInner.classList.add('is-flipped', 'is-flipped-create-club');
+        if (window.renderizarSeletorEscudos) {
+          window.renderizarSeletorEscudos('createClubShieldsGrid', 'inputCreateClubEscudoId', 'classico');
+        }
       });
     }
+
+    setTimeout(() => {
+      if (window.renderizarSeletorEscudos) {
+        window.renderizarSeletorEscudos('createClubShieldsGrid', 'inputCreateClubEscudoId', 'classico');
+      }
+    }, 300);
 
     document.querySelectorAll('.js-back-to-login').forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -353,12 +363,234 @@ document.addEventListener('DOMContentLoaded', () => {
         cardFlipInner.classList.remove('is-flipped', 'is-flipped-register', 'is-flipped-forgot', 'is-flipped-join-club', 'is-flipped-create-club');
       });
     });
+
+    // Se a página foi carregada com um clube alvo específico (ex: link direto /join/002)
+    if (window.TARGET_CLUBE_INITIAL) {
+      setTimeout(() => {
+        cardFlipInner.classList.remove('is-flipped', 'is-flipped-register', 'is-flipped-forgot', 'is-flipped-create-club');
+        cardFlipInner.classList.add('is-flipped', 'is-flipped-join-club');
+        if (window.selecionarClubeNoCard) {
+          window.selecionarClubeNoCard(window.TARGET_CLUBE_INITIAL);
+        }
+      }, 100);
+    }
   }
 
   // Funções Globais de Busca e Seleção de Clube no Card
   let clubeSelecionadoCard = null;
 
-  window.filtrarClubesBuscaCard = async function(query) {
+  const CLUB_THEMES = {
+    'neon-green': { rgb: '34, 197, 94', accent: '#22c55e', text: '#4ade80' },
+    'electric-blue': { rgb: '59, 130, 246', accent: '#3b82f6', text: '#60a5fa' },
+    'sunset-purple': { rgb: '168, 85, 247', accent: '#a855f7', text: '#c084fc' },
+    'gold-ember': { rgb: '234, 179, 8', accent: '#eab308', text: '#fde047' },
+    'crimson-red': { rgb: '239, 68, 68', accent: '#ef4444', text: '#f87171' }
+  };
+
+  window.CLUB_SHIELDS = {
+    'classico': {
+      name: 'Espanhol Clássico',
+      outer: 'M12 2L4 4v7c0 5.5 3.5 10 8 11 4.5-1 8-5.5 8-11V4l-8-2z',
+      inner: 'M12 4.2L6 5.7v5.3c0 4.2 2.7 7.7 6 8.5 3.3-.8 6-4.3 6-8.5V5.7l-6-1.5z'
+    },
+    'ogival': {
+      name: 'Ogival Reto',
+      outer: 'M4 3h16v9c0 5.5-4 8.5-8 10-4-1.5-8-4.5-8-10V3z',
+      inner: 'M6 5h12v7c0 4.2-3 6.5-6 7.7-3-1.2-6-3.5-6-7.7V5z'
+    },
+    'coroa': {
+      name: 'Três Pontas / Coroa',
+      outer: 'M12 2l3.5 2.5L20 3v8c0 6-4.5 9.5-8 11-3.5-1.5-8-5-8-11V3l4.5 1.5L12 2z',
+      inner: 'M12 4.2l2.6 1.8 3.4-.8v5.8c0 4.5-3.4 7.2-6 8.4-2.6-1.2-6-3.9-6-8.4V6l3.4.8L12 4.2z'
+    },
+    'suico': {
+      name: 'Suíço Côncavo',
+      outer: 'M12 2.5C7 2.5 4 4 4 4v7c0 6 4 9.5 8 11 4-1.5 8-5 8-11V4s-3-1.5-8-1.5z',
+      inner: 'M12 4.5c-3.8 0-6 1.1-6 1.1v5.4c0 4.5 3 7.2 6 8.4 3-1.2 6-3.9 6-8.4V5.6s-2.2-1.1-6-1.1z'
+    },
+    'barroco': {
+      name: 'Barroco / Curvas',
+      outer: 'M12 2.5c3-1 6 0 8 1.5-.8 2.5-.2 4.5 1 6-1 5.5-4.5 9-9 11.5-4.5-2.5-8-6-9-11.5 1.2-1.5 1.8-3.5 1-6 2-1.5 5-2.5 8-1.5z',
+      inner: 'M12 4.5c2.2-.7 4.5 0 6 1.1-.6 2-.2 3.5.7 4.6-.8 4.1-3.4 6.8-6.7 8.8-3.3-2-5.9-4.7-6.7-8.8.9-1.1 1.3-2.6.7-4.6 1.5-1.1 3.8-1.8 6-1.1z'
+    },
+    'triangular': {
+      name: 'Heater Triangular',
+      outer: 'M3 3h18v6c0 7-5 11.5-9 13-4-1.5-9-6-9-13V3z',
+      inner: 'M5 5h14v4c0 5.4-3.8 8.8-7 10-3.2-1.2-7-4.6-7-10V5z'
+    },
+    'gotico': {
+      name: 'Gótico Entalhe',
+      outer: 'M12 4.5C8 2.5 5 2.5 3 3.5v7.5c0 6 5 9.5 9 11.5 4-2 9-5.5 9-11.5V3.5c-2-1-5-1-9 1z',
+      inner: 'M12 6.5C8.8 4.9 6.4 4.9 4.8 5.7v5.3c0 4.5 3.8 7.2 7.2 8.7 3.4-1.5 7.2-4.2 7.2-8.7V5.7c-1.6-.8-4-.8-7.2.8z'
+    },
+    'pentagonal': {
+      name: 'Pentagonal V',
+      outer: 'M4 3h16l-2 10-6 8.5-6-8.5L4 3z',
+      inner: 'M6 4.8h12l-1.5 7.5-4.5 6.4-4.5-6.4L6 4.8z'
+    },
+    'italiano': {
+      name: 'Testa di Cavallo',
+      outer: 'M12 2.5c2 1 5 .5 6.5 2-1 2.5-.5 4.5.5 6.5-1 4.5-3.5 8-7 10.5-3.5-2.5-6-6-7-10.5 1-2 1.5-4 .5-6.5C7 3 10 3.5 12 2.5z',
+      inner: 'M12 4.5c1.5.7 3.8.3 5 1.5-.7 2-.4 3.5.4 5-1 3.4-2.7 6-5.4 7.9-2.7-1.9-4.4-4.5-5.4-7.9.8-1.5 1.1-3 .4-5 1.2-1.2 3.5-.8 5-1.5z'
+    },
+    'bispado': {
+      name: 'Entalhe Central',
+      outer: 'M12 5.5L4 2.5v9c0 6 4.5 9.5 8 11 3.5-1.5 8-5 8-11v-9l-8 3z',
+      inner: 'M12 7.5L5.8 5.2v6.3c0 4.5 3.4 7.2 6.2 8.4 2.8-1.2 6.2-3.9 6.2-8.4V5.2L12 7.5z'
+    },
+    'oval': {
+      name: 'Arredondado Oval',
+      outer: 'M12 2.5c5.5 0 8.5 2.5 8.5 6.5v4c0 5.5-4 8.5-8.5 9.5-4.5-1-8.5-4-8.5-9.5v-4c0-4 3-6.5 8.5-6.5z',
+      inner: 'M12 4.5c4.2 0 6.5 1.9 6.5 5v3.5c0 4.2-3 6.5-6.5 7.3-3.5-.8-6.5-3.1-6.5-7.3V9.5c0-3.1 2.3-5 6.5-5z'
+    },
+    'bastiao': {
+      name: 'Bastião Inglês',
+      outer: 'M4 3h16v2h-1v7c0 5.5-3.5 9-7 10.5-3.5-1.5-7-5-7-10.5V5H4V3z',
+      inner: 'M6 4.8h12v7.2c0 4.2-2.7 6.8-5.4 8-2.7-1.2-5.4-3.8-5.4-8V4.8H6z'
+    }
+  };
+
+  window.obterPathEscudo = function (escudoId) {
+    const shield = window.CLUB_SHIELDS[escudoId] || window.CLUB_SHIELDS['classico'];
+    return shield.outer || shield.path || '';
+  };
+
+  window.obterSvgEscudoHtml = function (escudoId, extraClass = '') {
+    const shield = window.CLUB_SHIELDS[escudoId] || window.CLUB_SHIELDS['classico'];
+    const outer = shield.outer || shield.path || '';
+    const inner = shield.inner || '';
+    return `
+      <svg viewBox="0 0 24 24" class="${extraClass}" stroke-linecap="round" stroke-linejoin="round">
+        <path d="${outer}" class="shield-outer" />
+        ${inner ? `<path d="${inner}" class="shield-inner" fill="none" />` : ''}
+      </svg>
+    `;
+  };
+
+  window.renderizarSeletorEscudos = function (containerId, inputHiddenId, valorInicial, onSelectCallback) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const hidden = document.getElementById(inputHiddenId);
+    let selected = valorInicial || (hidden ? hidden.value : 'classico') || 'classico';
+
+    container.innerHTML = Object.keys(window.CLUB_SHIELDS).map(id => {
+      const shield = window.CLUB_SHIELDS[id];
+      const isActive = id === selected;
+      return `
+        <div class="mc-shield-opt ${isActive ? 'active' : ''}" data-shield-id="${id}" onclick="selecionarEscudoOpcao('${id}', '${containerId}', '${inputHiddenId}')" title="${shield.name}">
+          <svg viewBox="0 0 24 24">
+            <path d="${shield.outer}" class="shield-outer"/>
+            <path d="${shield.inner}" class="shield-inner" fill="none"/>
+          </svg>
+        </div>
+      `;
+    }).join('');
+
+    if (hidden) hidden.value = selected;
+  };
+
+  window.selecionarEscudoOpcao = function (escudoId, containerId, inputHiddenId) {
+    const hidden = document.getElementById(inputHiddenId);
+    if (hidden) hidden.value = escudoId;
+    const container = document.getElementById(containerId);
+    if (container) {
+      container.querySelectorAll('.mc-shield-opt').forEach(el => {
+        el.classList.toggle('active', el.getAttribute('data-shield-id') === escudoId);
+      });
+    }
+
+    // Se houver preview na tela, atualiza imediatamente
+    const previewEl = document.getElementById('createClubPhotoPreview') || document.getElementById('previewFotoClubePage') || document.getElementById('editClubModalPhotoWrap');
+    if (previewEl) {
+      previewEl.innerHTML = window.obterSvgEscudoHtml(escudoId, 'mc-chosen-shield-svg');
+    }
+  };
+
+  window.toggleModoEscudoFoto = function () {
+    const escudosWrap = document.getElementById('seletorEscudosWrap');
+    const uploadWrap = document.getElementById('uploadFotoCustomWrap');
+    const btnToggle = document.getElementById('btnToggleUploadFoto');
+    if (!escudosWrap || !uploadWrap) return;
+
+    if (uploadWrap.style.display === 'none' || getComputedStyle(uploadWrap).display === 'none') {
+      uploadWrap.style.display = 'flex';
+      escudosWrap.style.display = 'none';
+      if (btnToggle) btnToggle.textContent = '🛡️ Usar catálogo de escudos';
+    } else {
+      uploadWrap.style.display = 'none';
+      escudosWrap.style.display = 'block';
+      if (btnToggle) btnToggle.textContent = '+ Ou foto própria';
+    }
+  };
+
+  function obterTemaClube(corTema) {
+    return CLUB_THEMES[corTema] || CLUB_THEMES['neon-green'];
+  }
+
+  window.ativarBuscaCabecalho = function (e) {
+    if (clubeSelecionadoCard) return;
+
+    const badge = document.getElementById('joinCardHeaderBadge');
+    const badgeText = document.getElementById('joinCardHeaderBadgeText');
+    const input = document.getElementById('inputSearchClub');
+    const clearBtn = document.getElementById('joinHeaderSearchClearBtn');
+
+    if (!badge || !input) return;
+
+    badge.classList.add('mc-card-badge--active');
+    if (badgeText) badgeText.style.display = 'none';
+    input.style.display = 'inline-block';
+    input.focus();
+
+    if (clearBtn) {
+      clearBtn.style.display = input.value.trim() ? 'inline-flex' : 'none';
+    }
+  };
+
+  window.tratarDigitacaoBuscaCabecalho = function (val) {
+    const clearBtn = document.getElementById('joinHeaderSearchClearBtn');
+    if (clearBtn) {
+      clearBtn.style.display = (val || '').trim() ? 'inline-flex' : 'none';
+    }
+    if (window.filtrarClubesBuscaCard) {
+      window.filtrarClubesBuscaCard(val);
+    }
+  };
+
+  window.limparBuscaCabecalho = function (e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    const input = document.getElementById('inputSearchClub');
+    const clearBtn = document.getElementById('joinHeaderSearchClearBtn');
+    if (input) {
+      input.value = '';
+      if (window.filtrarClubesBuscaCard) {
+        window.filtrarClubesBuscaCard('');
+      }
+      input.focus();
+    }
+    if (clearBtn) {
+      clearBtn.style.display = 'none';
+    }
+  };
+
+  window.desativarBuscaCabecalhoSeVazio = function () {
+    if (clubeSelecionadoCard) return;
+    const input = document.getElementById('inputSearchClub');
+    if (input && !input.value.trim()) {
+      const badge = document.getElementById('joinCardHeaderBadge');
+      const badgeText = document.getElementById('joinCardHeaderBadgeText');
+      const clearBtn = document.getElementById('joinHeaderSearchClearBtn');
+      if (badge) badge.classList.remove('mc-card-badge--active');
+      if (badgeText) badgeText.style.display = 'inline';
+      input.style.display = 'none';
+      if (clearBtn) clearBtn.style.display = 'none';
+    }
+  };
+
+  window.filtrarClubesBuscaCard = async function (query) {
     const listWrap = document.getElementById('joinClubResultsList');
     if (!listWrap) return;
 
@@ -376,15 +608,34 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      listWrap.innerHTML = clubes.map(c => `
-        <div class="mc-club-item" onclick='selecionarClubeNoCard(${JSON.stringify(c)})'>
-          <div>
-            <div class="mc-club-name">${c.nome}</div>
-            <div class="mc-club-code-badge">Código: <span class="mc-club-code-num">${c.codigo_formatado}</span></div>
+      listWrap.innerHTML = clubes.map(c => {
+        const theme = obterTemaClube(c.cor_tema);
+        const totalJog = (c.total_jogadores !== undefined && c.total_jogadores !== null) ? c.total_jogadores : (c.codigo_formatado === '001' ? 19 : 0);
+        const jogText = totalJog === 1 ? '1 jogador' : `${totalJog} jogadores`;
+        const pathD = window.obterPathEscudo(c.escudo_id || 'classico');
+        const iconHtml = c.foto_url
+          ? `<img src="${c.foto_url}" style="width: 100%; height: 100%; object-fit: cover; display: block;" alt="${c.nome}">`
+          : `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="${pathD}"/></svg>`;
+        const safeJson = JSON.stringify(c).replace(/"/g, '&quot;');
+        return `
+          <div class="mc-club-item" style="--item-theme-color: ${theme.accent}; --item-theme-rgb: ${theme.rgb};" onclick="selecionarClubeNoCard(${safeJson})">
+            <div class="mc-club-item-left">
+              <div class="mc-club-item-icon">
+                ${iconHtml}
+              </div>
+              <div>
+                <div class="mc-club-name">${c.nome}</div>
+                <div class="mc-club-code-badge">
+                  <span class="mc-club-code-num">#${c.codigo_formatado}</span>
+                  <span style="opacity: 0.5;">·</span>
+                  <span>${jogText}</span>
+                </div>
+              </div>
+            </div>
+            <span class="mc-club-join-pill">Acessar</span>
           </div>
-          <span class="mc-club-join-pill">Entrar</span>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     } catch (e) {
       console.error('Erro ao buscar clubes:', e);
     }
@@ -392,7 +643,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let usuarioAutenticadoClube = null;
 
-  window.selecionarClubeNoCard = function(clube) {
+  window.selecionarClubeNoCard = function (clube) {
     clubeSelecionadoCard = clube;
     document.getElementById('joinStepSearch').style.display = 'none';
     document.getElementById('joinStepChoice').style.display = 'block';
@@ -401,19 +652,418 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('joinStepInlineRegister').style.display = 'none';
 
     document.getElementById('chosenClubName').textContent = clube.nome;
-    document.getElementById('chosenClubBadge').textContent = 'Clube ' + clube.codigo_formatado;
+    document.getElementById('chosenClubBadge').textContent = 'CLUBE ' + clube.codigo_formatado;
+
+    const totalJog = (clube.total_jogadores !== undefined && clube.total_jogadores !== null) ? clube.total_jogadores : (clube.codigo_formatado === '001' ? 19 : 0);
+    const playersCountEl = document.getElementById('chosenClubPlayersCount');
+    if (playersCountEl) {
+      playersCountEl.textContent = totalJog === 1 ? '1 Jogador' : `${totalJog} Jogadores`;
+    }
+
+    // Frequência de jogos
+    const freqEl = document.getElementById('chosenClubFreqText');
+    if (freqEl) {
+      freqEl.textContent = clube.frequencia_jogos || 'Semanal';
+    }
+
+    // Escudo SVG ou Foto personalizada
+    const shieldWrap = document.getElementById('chosenClubShieldWrap');
+    if (shieldWrap) {
+      if (clube.foto_url) {
+        shieldWrap.innerHTML = `<img src="${clube.foto_url}" class="mc-chosen-photo" alt="${clube.nome}">`;
+      } else {
+        const pathD = window.obterPathEscudo(clube.escudo_id || 'classico');
+        shieldWrap.innerHTML = `
+          <svg viewBox="0 0 24 24" class="mc-chosen-shield-svg" id="chosenClubShieldSvg" stroke-linecap="round" stroke-linejoin="round">
+            <path d="${pathD}"/>
+          </svg>
+        `;
+      }
+    }
+
+    // Aplicar Cores Temáticas Minimalistas no Card (sem áurea)
+    const theme = obterTemaClube(clube.cor_tema);
+    const box = document.getElementById('chosenClubBox');
+    if (box) {
+      box.style.setProperty('--club-rgb', theme.rgb);
+      box.style.setProperty('--club-accent', theme.accent);
+    }
 
     const lbl1 = document.getElementById('inlineLoginClubName');
     if (lbl1) lbl1.textContent = clube.nome;
     const lbl2 = document.getElementById('inlineRegisterClubName');
     if (lbl2) lbl2.textContent = clube.nome;
+
+    // Atualiza o header do card com o nome do clube selecionado
+    const badge = document.getElementById('joinCardHeaderBadge');
+    const badgeText = document.getElementById('joinCardHeaderBadgeText');
+    const badgeIcon = document.getElementById('joinCardHeaderBadgeIcon');
+    const inputSearch = document.getElementById('inputSearchClub');
+    const clearBtn = document.getElementById('joinHeaderSearchClearBtn');
+
+    if (badge) badge.classList.remove('mc-card-badge--active');
+    if (inputSearch) inputSearch.style.display = 'none';
+    if (clearBtn) clearBtn.style.display = 'none';
+    if (badgeText) {
+      badgeText.textContent = clube.nome;
+      badgeText.style.display = 'inline';
+    }
+    if (badgeIcon) badgeIcon.style.display = 'none';
+
+    // Gerenciamento de Senha do Clube (PIN de 4 dígitos)
+    configurarInputsPinClube();
+
+    const gateEl = document.getElementById('clubPinGateSection');
+    const actionsEl = document.getElementById('clubEntryActionsWrapper');
+    const unlockedBadge = document.getElementById('clubPinUnlockedBadge');
+    const statusEl = document.getElementById('clubPinStatus');
+
+    const ehClubeOficial001 = (clube.codigo_formatado === '001' || clube.slug === 'natrave' || clube.id_num === 1);
+    const jaValidado = ehClubeOficial001 || !!clubePinValidadoMap[clube.codigo_formatado];
+
+    if (jaValidado) {
+      if (gateEl) gateEl.style.display = 'none';
+      if (unlockedBadge) unlockedBadge.style.display = 'none';
+      if (actionsEl) {
+        actionsEl.style.display = 'block';
+        actionsEl.style.opacity = '1';
+      }
+    } else {
+      if (gateEl) gateEl.style.display = 'block';
+      if (unlockedBadge) unlockedBadge.style.display = 'none';
+      if (actionsEl) actionsEl.style.display = 'none';
+
+      const inputs = [
+        document.getElementById('clubPinDigit0'),
+        document.getElementById('clubPinDigit1'),
+        document.getElementById('clubPinDigit2'),
+        document.getElementById('clubPinDigit3')
+      ];
+      inputs.forEach(inp => {
+        if (inp) {
+          inp.value = '';
+          inp.style.borderColor = 'rgba(255, 255, 255, 0.18)';
+          inp.style.boxShadow = 'none';
+          inp.classList.remove('pin-shake');
+        }
+      });
+      if (statusEl) {
+        statusEl.textContent = '';
+        statusEl.style.color = '';
+      }
+
+      setTimeout(() => {
+        if (inputs[0]) inputs[0].focus();
+      }, 150);
+
+      // Suporte a link com PIN direto (?pin=XXXX ou window.TARGET_PIN_INITIAL)
+      const urlPin = (new URLSearchParams(window.location.search).get('pin') || window.TARGET_PIN_INITIAL || '').trim().toUpperCase();
+      if (urlPin && urlPin.length === 4) {
+        for (let i = 0; i < 4; i++) {
+          if (inputs[i]) inputs[i].value = urlPin[i];
+        }
+        verificarEValidarPinCompleto();
+      }
+    }
   };
 
-  window.abrirStepInlineLogin = function() {
+  // Funções de Validação de PIN de 4 Dígitos do Clube
+  let clubePinValidadoMap = {};
+  let validandoPinEmAndamento = false;
+
+  function configurarInputsPinClube() {
+    const inputs = [
+      document.getElementById('clubPinDigit0'),
+      document.getElementById('clubPinDigit1'),
+      document.getElementById('clubPinDigit2'),
+      document.getElementById('clubPinDigit3')
+    ];
+
+    if (!inputs[0]) return;
+
+    inputs.forEach((input, index) => {
+      if (!input || input._pinConfigurado) return;
+      input._pinConfigurado = true;
+
+      // Evento de Digitação (input)
+      input.addEventListener('input', () => {
+        let val = (input.value || '').trim().toUpperCase();
+        val = val.replace(/[^A-Z0-9]/g, '');
+        input.value = val ? val.slice(-1) : '';
+
+        resetarEstiloInputsPin(inputs);
+
+        if (input.value && index < inputs.length - 1) {
+          if (inputs[index + 1]) {
+            inputs[index + 1].focus();
+            inputs[index + 1].select();
+          }
+        }
+
+        verificarEValidarPinCompleto();
+      });
+
+      // Evento de Teclado (keydown) para Backspace
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace') {
+          if (!input.value && index > 0) {
+            if (inputs[index - 1]) {
+              inputs[index - 1].focus();
+              inputs[index - 1].value = '';
+            }
+          }
+        }
+      });
+
+      // Evento de Colar (paste)
+      input.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const textoColado = (e.clipboardData || window.clipboardData).getData('text');
+        if (!textoColado) return;
+        const limpo = textoColado.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+        if (limpo.length >= 4) {
+          for (let i = 0; i < 4; i++) {
+            if (inputs[i]) inputs[i].value = limpo[i];
+          }
+          if (inputs[3]) inputs[3].focus();
+          verificarEValidarPinCompleto();
+        } else if (limpo.length > 0) {
+          for (let i = 0; i < limpo.length && i < 4; i++) {
+            if (inputs[i]) inputs[i].value = limpo[i];
+          }
+          const proximo = Math.min(limpo.length, 3);
+          if (inputs[proximo]) inputs[proximo].focus();
+          verificarEValidarPinCompleto();
+        }
+      });
+    });
+  }
+
+  function resetarEstiloInputsPin(inputs) {
+    const statusEl = document.getElementById('clubPinStatus');
+    if (statusEl) {
+      statusEl.textContent = '';
+      statusEl.style.color = '';
+    }
+    inputs.forEach(inp => {
+      if (inp) {
+        inp.style.borderColor = 'rgba(255, 255, 255, 0.18)';
+        inp.style.boxShadow = 'none';
+        inp.classList.remove('pin-shake');
+      }
+    });
+  }
+
+  function obterPinDigitado() {
+    const inputs = [
+      document.getElementById('clubPinDigit0'),
+      document.getElementById('clubPinDigit1'),
+      document.getElementById('clubPinDigit2'),
+      document.getElementById('clubPinDigit3')
+    ];
+    return inputs.map(inp => (inp ? inp.value.trim().toUpperCase() : '')).join('');
+  }
+
+  async function verificarEValidarPinCompleto() {
+    const pin = obterPinDigitado();
+    if (pin.length !== 4 || validandoPinEmAndamento) return;
+
+    const codClube = (clubeSelecionadoCard && (clubeSelecionadoCard.codigo_formatado || clubeSelecionadoCard.codigo)) || obterCodigoClubeContexto();
+    if (!codClube) return;
+
+    validandoPinEmAndamento = true;
+    const statusEl = document.getElementById('clubPinStatus');
+    const inputs = [
+      document.getElementById('clubPinDigit0'),
+      document.getElementById('clubPinDigit1'),
+      document.getElementById('clubPinDigit2'),
+      document.getElementById('clubPinDigit3')
+    ];
+
+    if (statusEl) {
+      statusEl.textContent = 'Verificando senha...';
+      statusEl.style.color = '#94a3b8';
+    }
+
+    try {
+      const resp = await fetch('/api/clube/validar-pin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCsrfToken()
+        },
+        body: JSON.stringify({
+          clube_ref: codClube,
+          pin: pin
+        })
+      });
+      const data = await resp.json();
+
+      if (data.sucesso) {
+        clubePinValidadoMap[codClube] = true;
+        inputs.forEach(inp => {
+          if (inp) {
+            inp.style.borderColor = '#22c55e';
+            inp.style.boxShadow = '0 0 10px rgba(34, 197, 94, 0.35)';
+          }
+        });
+        if (statusEl) {
+          statusEl.textContent = '✓ Senha correta!';
+          statusEl.style.color = '#22c55e';
+        }
+
+        setTimeout(() => {
+          const gateEl = document.getElementById('clubPinGateSection');
+          const actionsEl = document.getElementById('clubEntryActionsWrapper');
+          const unlockedBadge = document.getElementById('clubPinUnlockedBadge');
+
+          if (gateEl) gateEl.style.display = 'none';
+
+          // Exibe o badge e faz desaparecer suavemente em 1 segundo
+          if (unlockedBadge) {
+            unlockedBadge.style.display = 'flex';
+            unlockedBadge.style.opacity = '1';
+            unlockedBadge.style.transform = 'translateY(0)';
+            unlockedBadge.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+
+            setTimeout(() => {
+              unlockedBadge.style.opacity = '0';
+              unlockedBadge.style.transform = 'translateY(-6px)';
+              setTimeout(() => {
+                unlockedBadge.style.display = 'none';
+              }, 400);
+            }, 1000);
+          }
+
+          if (actionsEl) {
+            actionsEl.style.display = 'block';
+            actionsEl.style.opacity = '0';
+            actionsEl.style.transition = 'opacity 0.3s ease';
+            requestAnimationFrame(() => {
+              actionsEl.style.opacity = '1';
+            });
+          }
+        }, 320);
+      } else {
+        inputs.forEach(inp => {
+          if (inp) {
+            inp.style.borderColor = '#ef4444';
+            inp.style.boxShadow = '0 0 10px rgba(239, 68, 68, 0.35)';
+            inp.classList.add('pin-shake');
+          }
+        });
+        if (statusEl) {
+          statusEl.textContent = data.mensagem || 'Senha incorreta para este clube.';
+          statusEl.style.color = '#ef4444';
+        }
+        setTimeout(() => {
+          inputs.forEach(inp => {
+            if (inp) {
+              inp.value = '';
+              inp.classList.remove('pin-shake');
+              inp.style.borderColor = 'rgba(255, 255, 255, 0.18)';
+              inp.style.boxShadow = 'none';
+            }
+          });
+          if (inputs[0]) inputs[0].focus();
+        }, 700);
+      }
+    } catch (e) {
+      if (statusEl) {
+        statusEl.textContent = 'Erro de conexão ao validar senha.';
+        statusEl.style.color = '#ef4444';
+      }
+    } finally {
+      validandoPinEmAndamento = false;
+    }
+  }
+
+  let modoGestaoAtivo = 'admin';
+
+  window.alternarModoGestao = function (modo) {
+    modoGestaoAtivo = modo === 'juiz' ? 'juiz' : 'admin';
+    const tabAdmin = document.getElementById('tabModoAdmin');
+    const tabJuiz = document.getElementById('tabModoJuiz');
+    const lbl = document.getElementById('lblGestaoSenha');
+    const input = document.getElementById('joinGestaoSenha');
+    const btn = document.getElementById('btnAcessarGestao');
+    const msg = document.getElementById('joinGestaoLoginMsg');
+
+    if (msg) msg.textContent = '';
+
+    if (modoGestaoAtivo === 'admin') {
+      if (tabAdmin) {
+        tabAdmin.style.background = 'rgba(16, 185, 129, 0.15)';
+        tabAdmin.style.borderColor = 'rgba(16, 185, 129, 0.35)';
+        tabAdmin.style.color = '#34d399';
+      }
+      if (tabJuiz) {
+        tabJuiz.style.background = 'transparent';
+        tabJuiz.style.borderColor = 'transparent';
+        tabJuiz.style.color = '#94a3b8';
+      }
+      if (lbl) lbl.textContent = 'SENHA DO ADMIN';
+      if (input) {
+        input.placeholder = 'Digite a senha de administrador';
+        input.focus();
+      }
+      if (btn) {
+        btn.textContent = 'Acessar como Admin';
+        btn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+        btn.style.color = '#000000';
+      }
+    } else {
+      if (tabJuiz) {
+        tabJuiz.style.background = 'rgba(245, 158, 11, 0.15)';
+        tabJuiz.style.borderColor = 'rgba(245, 158, 11, 0.35)';
+        tabJuiz.style.color = '#fbbf24';
+      }
+      if (tabAdmin) {
+        tabAdmin.style.background = 'transparent';
+        tabAdmin.style.borderColor = 'transparent';
+        tabAdmin.style.color = '#94a3b8';
+      }
+      if (lbl) lbl.textContent = 'SENHA DO JUIZ';
+      if (input) {
+        input.placeholder = 'Digite a senha do juiz';
+        input.focus();
+      }
+      if (btn) {
+        btn.textContent = 'Acessar como Juiz';
+        btn.style.background = 'linear-gradient(135deg, #eab308, #ca8a04)';
+        btn.style.color = '#000000';
+      }
+    }
+  };
+
+  window.abrirStepGestaoLogin = function (modoInicial) {
     document.getElementById('joinStepChoice').style.display = 'none';
     document.getElementById('joinStepConfirmAccount').style.display = 'none';
     document.getElementById('joinStepInlineRegister').style.display = 'none';
+    document.getElementById('joinStepInlineLogin').style.display = 'none';
     if (document.getElementById('joinStepJudgeLogin')) document.getElementById('joinStepJudgeLogin').style.display = 'none';
+    if (document.getElementById('joinStepAdminLogin')) document.getElementById('joinStepAdminLogin').style.display = 'none';
+
+    const gestaoPane = document.getElementById('joinStepGestaoLogin');
+    if (gestaoPane) {
+      gestaoPane.style.display = 'block';
+      const lblClub = document.getElementById('gestaoLoginClubName');
+      if (lblClub && clubeSelecionadoCard) lblClub.textContent = clubeSelecionadoCard.nome;
+      const pwdInput = document.getElementById('joinGestaoSenha');
+      if (pwdInput) {
+        pwdInput.value = '';
+      }
+      alternarModoGestao(modoInicial || 'admin');
+    }
+  };
+
+  window.abrirStepInlineLogin = function () {
+    document.getElementById('joinStepChoice').style.display = 'none';
+    document.getElementById('joinStepConfirmAccount').style.display = 'none';
+    document.getElementById('joinStepInlineRegister').style.display = 'none';
+    if (document.getElementById('joinStepGestaoLogin')) document.getElementById('joinStepGestaoLogin').style.display = 'none';
+    if (document.getElementById('joinStepJudgeLogin')) document.getElementById('joinStepJudgeLogin').style.display = 'none';
+    if (document.getElementById('joinStepAdminLogin')) document.getElementById('joinStepAdminLogin').style.display = 'none';
     const inlinePane = document.getElementById('joinStepInlineLogin');
     if (inlinePane) {
       inlinePane.style.display = 'block';
@@ -424,30 +1074,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  window.abrirStepAdminLogin = function() {
-    document.getElementById('joinStepChoice').style.display = 'none';
-    document.getElementById('joinStepConfirmAccount').style.display = 'none';
-    document.getElementById('joinStepInlineRegister').style.display = 'none';
-    if (document.getElementById('joinStepJudgeLogin')) document.getElementById('joinStepJudgeLogin').style.display = 'none';
-    const inlinePane = document.getElementById('joinStepInlineLogin');
-    if (inlinePane) {
-      inlinePane.style.display = 'block';
-      const userInput = document.getElementById('joinUsername');
-      if (userInput) {
-        userInput.value = 'admin';
-      }
-      const pwdInput = document.getElementById('joinPassword');
-      if (pwdInput) {
-        pwdInput.focus();
-      }
+  window.irParaOpcaoEntrada = function (opcao) {
+    if (opcao === 'login_existente') {
+      window.abrirStepInlineLogin();
+    } else {
+      window.voltarParaEscolhaClube();
     }
   };
 
-  window.abrirStepInlineRegister = function() {
+  window.abrirStepAdminLogin = function () {
+    window.abrirStepGestaoLogin('admin');
+  };
+
+  window.abrirStepJudgeLogin = function () {
+    window.abrirStepGestaoLogin('juiz');
+  };
+
+  window.abrirStepInlineRegister = function () {
     document.getElementById('joinStepChoice').style.display = 'none';
     document.getElementById('joinStepInlineLogin').style.display = 'none';
     document.getElementById('joinStepConfirmAccount').style.display = 'none';
+    if (document.getElementById('joinStepGestaoLogin')) document.getElementById('joinStepGestaoLogin').style.display = 'none';
     if (document.getElementById('joinStepJudgeLogin')) document.getElementById('joinStepJudgeLogin').style.display = 'none';
+    if (document.getElementById('joinStepAdminLogin')) document.getElementById('joinStepAdminLogin').style.display = 'none';
     document.getElementById('joinStepInlineRegister').style.display = 'block';
 
     const lbl = document.getElementById('inlineRegisterClubName');
@@ -458,42 +1107,59 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  window.abrirStepJudgeLogin = function() {
-    document.getElementById('joinStepChoice').style.display = 'none';
+  window.voltarParaEscolhaClube = function () {
     document.getElementById('joinStepInlineLogin').style.display = 'none';
     document.getElementById('joinStepConfirmAccount').style.display = 'none';
     document.getElementById('joinStepInlineRegister').style.display = 'none';
-    const judgePane = document.getElementById('joinStepJudgeLogin');
-    if (judgePane) {
-      judgePane.style.display = 'block';
-      const lbl = document.getElementById('judgeLoginClubName');
-      if (lbl && clubeSelecionadoCard) lbl.textContent = clubeSelecionadoCard.nome;
-    }
-  };
-
-  window.voltarParaEscolhaClube = function() {
-    document.getElementById('joinStepInlineLogin').style.display = 'none';
-    document.getElementById('joinStepConfirmAccount').style.display = 'none';
-    document.getElementById('joinStepInlineRegister').style.display = 'none';
+    if (document.getElementById('joinStepGestaoLogin')) document.getElementById('joinStepGestaoLogin').style.display = 'none';
     if (document.getElementById('joinStepJudgeLogin')) document.getElementById('joinStepJudgeLogin').style.display = 'none';
+    if (document.getElementById('joinStepAdminLogin')) document.getElementById('joinStepAdminLogin').style.display = 'none';
     document.getElementById('joinStepChoice').style.display = 'block';
   };
 
-  window.voltarParaBuscaClube = function() {
+  window.voltarParaBuscaClube = function () {
     clubeSelecionadoCard = null;
+
+    // Restaura o header badge para 'Buscar clube' com ícone de lupa
+    const badge = document.getElementById('joinCardHeaderBadge');
+    const badgeText = document.getElementById('joinCardHeaderBadgeText');
+    const badgeIcon = document.getElementById('joinCardHeaderBadgeIcon');
+    const inputSearch = document.getElementById('inputSearchClub');
+    const clearBtn = document.getElementById('joinHeaderSearchClearBtn');
+
+    if (badge) badge.classList.remove('mc-card-badge--active');
+    if (inputSearch) {
+      inputSearch.value = '';
+      inputSearch.style.display = 'none';
+    }
+    if (clearBtn) clearBtn.style.display = 'none';
+    if (badgeText) {
+      badgeText.textContent = 'Buscar clube';
+      badgeText.style.display = 'inline';
+    }
+    if (badgeIcon) badgeIcon.style.display = 'inline-block';
+
+    if (window.filtrarClubesBuscaCard) {
+      window.filtrarClubesBuscaCard('');
+    }
+
     document.getElementById('joinStepChoice').style.display = 'none';
     document.getElementById('joinStepInlineLogin').style.display = 'none';
     document.getElementById('joinStepConfirmAccount').style.display = 'none';
     document.getElementById('joinStepInlineRegister').style.display = 'none';
+    if (document.getElementById('joinStepGestaoLogin')) document.getElementById('joinStepGestaoLogin').style.display = 'none';
     if (document.getElementById('joinStepJudgeLogin')) document.getElementById('joinStepJudgeLogin').style.display = 'none';
+    if (document.getElementById('joinStepAdminLogin')) document.getElementById('joinStepAdminLogin').style.display = 'none';
     document.getElementById('joinStepSearch').style.display = 'block';
   };
 
-  window.voltarFluxoClube = function() {
+  window.voltarFluxoClube = function () {
     const confirmAccountPane = document.getElementById('joinStepConfirmAccount');
     const inlineLoginPane = document.getElementById('joinStepInlineLogin');
     const inlineRegisterPane = document.getElementById('joinStepInlineRegister');
+    const gestaoPane = document.getElementById('joinStepGestaoLogin');
     const judgePane = document.getElementById('joinStepJudgeLogin');
+    const adminPane = document.getElementById('joinStepAdminLogin');
     const choicePane = document.getElementById('joinStepChoice');
     const searchPane = document.getElementById('joinStepSearch');
 
@@ -514,9 +1180,11 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // 3. Se estiver em outro formulário interno (Login ou Juiz) -> volta para a escolha de acesso do clube
+    // 3. Se estiver em outro formulário interno (Login, Gestão Admin/Juiz) -> volta para a escolha de acesso do clube
     if ((inlineLoginPane && inlineLoginPane.style.display !== 'none') ||
-        (judgePane && judgePane.style.display !== 'none')) {
+      (gestaoPane && gestaoPane.style.display !== 'none') ||
+      (judgePane && judgePane.style.display !== 'none') ||
+      (adminPane && adminPane.style.display !== 'none')) {
       window.voltarParaEscolhaClube();
       return;
     }
@@ -548,7 +1216,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return '001';
   }
 
-  window.submeterInlineLoginClube = async function() {
+  window.submeterInlineLoginClube = async function () {
     const userIn = document.getElementById('joinUsername');
     const passIn = document.getElementById('joinPassword');
     const msgBox = document.getElementById('joinInlineLoginMsg');
@@ -567,7 +1235,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const resp = await fetch('/api/clube/entrar-com-conta-existente', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'X-CSRFToken': getCsrfToken()
         },
@@ -579,18 +1247,24 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       const data = await resp.json();
 
-      if (data.sucesso && data.requer_confirmacao) {
-        usuarioAutenticadoClube = data.user;
-        document.getElementById('confirmUserNome').textContent = data.user.nome;
-        document.getElementById('confirmClubNome').textContent = data.clube.nome;
-
-        document.getElementById('joinStepInlineLogin').style.display = 'none';
-        document.getElementById('joinStepConfirmAccount').style.display = 'block';
-      } else {
-        if (msgBox) {
-          msgBox.textContent = data.mensagem || 'Usuário ou senha incorretos.';
-          msgBox.style.color = '#ef4444';
+      if (data.sucesso) {
+        if (data.redirect_url) {
+          window.location.href = data.redirect_url;
+          return;
         }
+        if (data.requer_confirmacao) {
+          usuarioAutenticadoClube = data.user;
+          document.getElementById('confirmUserNome').textContent = data.user.nome;
+          document.getElementById('confirmClubNome').textContent = data.clube.nome;
+
+          document.getElementById('joinStepInlineLogin').style.display = 'none';
+          document.getElementById('joinStepConfirmAccount').style.display = 'block';
+          return;
+        }
+      }
+      if (msgBox) {
+        msgBox.textContent = data.mensagem || 'Usuário ou senha incorretos.';
+        msgBox.style.color = '#ef4444';
       }
     } catch (e) {
       if (msgBox) {
@@ -600,7 +1274,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  window.confirmarEntradaNoClube = async function() {
+  window.confirmarEntradaNoClube = async function () {
     const msgBox = document.getElementById('joinConfirmMsg');
     const cod = (clubeSelecionadoCard && (clubeSelecionadoCard.codigo_formatado || clubeSelecionadoCard.codigo)) || obterCodigoClubeContexto();
     if (!usuarioAutenticadoClube) return;
@@ -608,7 +1282,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const resp = await fetch('/api/clube/confirmar-entrada', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'X-CSRFToken': getCsrfToken()
         },
@@ -648,7 +1322,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (d3) d3.style.background = step >= 3 ? '#22c55e' : 'rgba(255, 255, 255, 0.2)';
   }
 
-  window.validarNomeInstantaneo = function(val) {
+  window.validarNomeInstantaneo = function (val) {
     const statusEl = document.getElementById('regNomeStatus');
     const wrapEl = document.getElementById('regNomeWrap');
     const nome = (val || '').trim();
@@ -678,7 +1352,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return true;
   };
 
-  window.validarUsernameInstantaneo = function(val) {
+  window.validarUsernameInstantaneo = function (val) {
     const statusEl = document.getElementById('regUsernameStatus');
     const wrapEl = document.getElementById('regUsernameWrap');
     const username = (val || '').trim().toLowerCase();
@@ -739,7 +1413,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 250);
   };
 
-  window.validarSenhaInstantanea = function(val) {
+  window.validarSenhaInstantanea = function (val) {
     const statusEl = document.getElementById('regSenhaStatus');
     const wrapEl = document.getElementById('regSenhaWrap');
     const senha = (val || '').trim();
@@ -768,7 +1442,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return true;
   };
 
-  window.avancarWizardPasso2 = function() {
+  window.avancarWizardPasso2 = function () {
     const elNome = document.getElementById('regNome');
     const val = elNome ? elNome.value : '';
     if (!window.validarNomeInstantaneo(val)) {
@@ -782,7 +1456,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateWizardDots(2);
   };
 
-  window.avancarWizardPasso3 = function() {
+  window.avancarWizardPasso3 = function () {
     const elUser = document.getElementById('regUsername');
     const username = elUser ? elUser.value.trim().toLowerCase() : '';
     const statusEl = document.getElementById('regUsernameStatus');
@@ -814,7 +1488,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateWizardDots(3);
   };
 
-  window.voltarWizardPasso1 = function() {
+  window.voltarWizardPasso1 = function () {
     const s1 = document.getElementById('joinRegStep1');
     const s2 = document.getElementById('joinRegStep2');
     if (s2) s2.style.display = 'none';
@@ -822,7 +1496,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateWizardDots(1);
   };
 
-  window.voltarWizardPasso2 = function() {
+  window.voltarWizardPasso2 = function () {
     const s2 = document.getElementById('joinRegStep2');
     const s3 = document.getElementById('joinRegStep3');
     if (s3) s3.style.display = 'none';
@@ -830,7 +1504,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateWizardDots(2);
   };
 
-  window.selecionarPosicao = function(pos) {
+  window.selecionarPosicao = function (pos) {
     const inputPos = document.getElementById('reg_posicao');
     if (inputPos) inputPos.value = pos;
 
@@ -846,11 +1520,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (icon) icon.style.color = '#22c55e';
       }
       if (cardGoleiro) {
-        cardGoleiro.style.background = 'rgba(255, 255, 255, 0.04)';
-        cardGoleiro.style.border = '1px solid rgba(255, 255, 255, 0.12)';
+        cardGoleiro.style.background = 'rgba(255, 255, 255, 0.085)';
+        cardGoleiro.style.border = '1.5px solid rgba(255, 255, 255, 0.22)';
         cardGoleiro.style.boxShadow = 'none';
         const icon = cardGoleiro.querySelector('.pos-card-icon');
-        if (icon) icon.style.color = '#64748b';
+        if (icon) icon.style.color = '#94a3b8';
       }
     } else {
       if (cardGoleiro) {
@@ -861,16 +1535,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (icon) icon.style.color = '#22c55e';
       }
       if (cardLinha) {
-        cardLinha.style.background = 'rgba(255, 255, 255, 0.04)';
-        cardLinha.style.border = '1px solid rgba(255, 255, 255, 0.12)';
+        cardLinha.style.background = 'rgba(255, 255, 255, 0.085)';
+        cardLinha.style.border = '1.5px solid rgba(255, 255, 255, 0.22)';
         cardLinha.style.boxShadow = 'none';
         const icon = cardLinha.querySelector('.pos-card-icon');
-        if (icon) icon.style.color = '#64748b';
+        if (icon) icon.style.color = '#94a3b8';
       }
     }
   };
 
-  window.submeterInlineCadastroClube = async function() {
+  window.submeterInlineCadastroClube = async function () {
     const elNome = document.getElementById('reg_nome') || document.getElementById('regNome');
     const elEmail = document.getElementById('reg_email');
     const elUser = document.getElementById('reg_username') || document.getElementById('regUsername');
@@ -898,7 +1572,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const resp = await fetch('/api/clube/cadastrar-e-entrar', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'X-CSRFToken': getCsrfToken()
         },
@@ -939,53 +1613,98 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  window.submeterEntradaJuizClube = async function() {
-    const passIn = document.getElementById('joinJudgeSenha');
-    const msgBox = document.getElementById('joinJudgeLoginMsg');
+  window.submeterEntradaGestaoClube = async function () {
+    const passIn = document.getElementById('joinGestaoSenha') ||
+      (modoGestaoAtivo === 'admin' ? document.getElementById('joinAdminSenha') : document.getElementById('joinJudgeSenha'));
+    const msgBox = document.getElementById('joinGestaoLoginMsg') ||
+      (modoGestaoAtivo === 'admin' ? document.getElementById('joinAdminLoginMsg') : document.getElementById('joinJudgeLoginMsg'));
 
-    const senhaJuiz = passIn ? passIn.value.trim() : '';
+    const senha = passIn ? passIn.value.trim() : '';
 
-    if (!senhaJuiz) {
+    if (!senha) {
       if (msgBox) {
-        msgBox.textContent = 'Por favor, informe a senha do juiz.';
+        msgBox.textContent = modoGestaoAtivo === 'admin'
+          ? 'Por favor, informe a senha do administrador.'
+          : 'Por favor, informe a senha do juiz.';
         msgBox.style.color = '#ef4444';
       }
       return;
     }
 
+    const cod = obterCodigoClubeContexto();
+    const endpointPrimario = modoGestaoAtivo === 'admin' ? '/api/clube/entrar-como-admin' : '/api/clube/entrar-como-juiz';
+    const payloadPrimario = modoGestaoAtivo === 'admin' ? { clube_codigo: cod, senha_admin: senha } : { clube_codigo: cod, senha_juiz: senha };
+
     try {
-      const resp = await fetch('/api/clube/entrar-como-juiz', {
+      const resp = await fetch(endpointPrimario, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'X-CSRFToken': getCsrfToken()
         },
-        body: JSON.stringify({
-          clube_codigo: obterCodigoClubeContexto(),
-          senha_juiz: senhaJuiz
-        })
+        body: JSON.stringify(payloadPrimario)
       });
-      const data = await resp.json();
+      let data = {};
+      try {
+        data = await resp.json();
+      } catch (jsonErr) {
+        data = {};
+      }
 
       if (data.sucesso && data.redirect_url) {
         window.location.href = data.redirect_url;
-      } else {
-        if (msgBox) {
-          msgBox.textContent = data.mensagem || 'Senha do Juiz incorreta.';
-          msgBox.style.color = '#ef4444';
-        }
+        return;
+      }
+
+      // Se a senha falhou no modo primário, checamos inteligentemente se é válida no modo alternativo
+      const endpointSecundario = modoGestaoAtivo === 'admin' ? '/api/clube/entrar-como-juiz' : '/api/clube/entrar-como-admin';
+      const payloadSecundario = modoGestaoAtivo === 'admin' ? { clube_codigo: cod, senha_juiz: senha } : { clube_codigo: cod, senha_admin: senha };
+
+      const respSec = await fetch(endpointSecundario, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCsrfToken()
+        },
+        body: JSON.stringify(payloadSecundario)
+      });
+      let dataSec = {};
+      try {
+        dataSec = await respSec.json();
+      } catch (jsonErrSec) {
+        dataSec = {};
+      }
+
+      if (dataSec.sucesso && dataSec.redirect_url) {
+        window.location.href = dataSec.redirect_url;
+        return;
+      }
+
+      if (msgBox) {
+        msgBox.textContent = data.mensagem || dataSec.mensagem || (modoGestaoAtivo === 'admin' ? 'Senha do Admin incorreta.' : 'Senha do Juiz incorreta.');
+        msgBox.style.color = '#ef4444';
       }
     } catch (e) {
       if (msgBox) {
-        msgBox.textContent = 'Erro ao conectar ao servidor.';
+        msgBox.textContent = 'Erro ao conectar ao servidor. Verifique sua conexão e tente novamente.';
         msgBox.style.color = '#ef4444';
       }
     }
   };
 
+  window.submeterEntradaJuizClube = function () {
+    modoGestaoAtivo = 'juiz';
+    return window.submeterEntradaGestaoClube();
+  };
+
+  window.submeterEntradaAdminClube = function () {
+    modoGestaoAtivo = 'admin';
+    return window.submeterEntradaGestaoClube();
+  };
+
   /* FLUXO CRIAR CLUBE DO ZERO */
   let corTemaClubeSelecionadoCard = 'neon-green';
-  window.selecionarCorCard = function(radioInput, hexColor) {
+  window.selecionarCorCard = function (radioInput, hexColor) {
     document.querySelectorAll('.mc-color-dot').forEach(dot => {
       dot.classList.remove('is-active');
     });
@@ -1020,7 +1739,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // 1. VALIDAÇÃO INSTANTÂNEA: NOME DO CLUBE
-  window.validarNomeCardCriarClube = function(val) {
+  window.validarNomeCardCriarClube = function (val) {
     clearTimeout(timerCardCreate);
     const feedback = document.getElementById('createClubCardFeedback');
     const wrap = document.getElementById('wrapCreateClubName');
@@ -1041,7 +1760,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         const resp = await fetch('/api/clube/validar-nome', {
           method: 'POST',
-          headers: { 
+          headers: {
             'Content-Type': 'application/json',
             'X-CSRFToken': getCsrfToken()
           },
@@ -1060,7 +1779,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // 2. VALIDAÇÃO INSTANTÂNEA: E-MAIL DO ADMIN (VERIFICAÇÃO NA BASE COMPLETA)
-  window.validarEmailAdminInstantaneo = function(val) {
+  window.validarEmailAdminInstantaneo = function (val) {
     clearTimeout(timerAdminEmail);
     const feedback = document.getElementById('createRegEmailFeedback');
     const wrap = document.getElementById('wrapCreateRegEmail');
@@ -1094,7 +1813,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // 3. VALIDAÇÃO INSTANTÂNEA: SENHA DO ADMIN
-  window.validarSenhaAdminInstantaneo = function(val) {
+  window.validarSenhaAdminInstantaneo = function (val) {
     const feedback = document.getElementById('createRegSenhaFeedback');
     const wrap = document.getElementById('wrapCreateRegSenha');
     const senha = (val || '').trim();
@@ -1112,7 +1831,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // 4. VALIDAÇÃO INSTANTÂNEA: SENHA DO JUIZ
-  window.validarSenhaJuizInstantaneo = function(val) {
+  window.validarSenhaJuizInstantaneo = function (val) {
     const feedback = document.getElementById('createRegSenhaJuizFeedback');
     const wrap = document.getElementById('wrapCreateRegSenhaJuiz');
     const senha = (val || '').trim();
@@ -1154,7 +1873,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  window.avancarCriacaoClubeStep2 = function() {
+  window.avancarCriacaoClubeStep2 = function () {
     const input = document.getElementById('inputCreateClubNameCard');
     const val = input ? input.value.trim() : '';
     const feedback = document.getElementById('createClubCardFeedback');
@@ -1184,7 +1903,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 100);
   };
 
-  window.avancarCriacaoClubeStep3 = function() {
+  window.avancarCriacaoClubeStep3 = function () {
     const emailIn = document.getElementById('createRegEmail');
     const email = emailIn ? emailIn.value.trim() : '';
     const senhaIn = document.getElementById('createRegSenha');
@@ -1224,7 +1943,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 100);
   };
 
-  window.voltarParaPasso1CriarClube = function() {
+  window.voltarParaPasso1CriarClube = function () {
     atualizarHeaderCriacaoClube(1);
     const step2 = document.getElementById('createStepAdminAuth');
     if (step2) step2.style.display = 'none';
@@ -1233,7 +1952,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('createStepDetails').style.display = 'block';
   };
 
-  window.voltarParaPasso2CriarClube = function() {
+  window.voltarParaPasso2CriarClube = function () {
     atualizarHeaderCriacaoClube(2);
     const step3 = document.getElementById('createStepJudgeAuth');
     if (step3) step3.style.display = 'none';
@@ -1241,7 +1960,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (step2) step2.style.display = 'block';
   };
 
-  window.voltarFluxoCriarClube = function() {
+  window.voltarFluxoCriarClube = function () {
     const step3 = document.getElementById('createStepJudgeAuth');
     if (step3 && step3.style.display !== 'none') {
       window.voltarParaPasso2CriarClube();
@@ -1260,7 +1979,38 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  window.processarCriacaoClubeComCadastro = async function() {
+  window.previewFotoNovoClube = async function (input) {
+    if (!input || !input.files || !input.files[0]) return;
+    const file = input.files[0];
+    const previewWrap = document.getElementById('createClubPhotoPreview');
+    const hiddenUrl = document.getElementById('inputCreateClubPhotoUrl');
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      if (previewWrap) {
+        previewWrap.innerHTML = `<img src="${e.target.result}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">`;
+      }
+    };
+    reader.readAsDataURL(file);
+
+    const formData = new FormData();
+    formData.append('foto', file);
+    try {
+      const resp = await fetch('/api/clube/upload-foto', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCsrfToken() },
+        body: formData
+      });
+      const data = await resp.json();
+      if (data.sucesso && data.foto_url) {
+        if (hiddenUrl) hiddenUrl.value = data.foto_url;
+      }
+    } catch (err) {
+      console.error('Erro no upload da foto do clube:', err);
+    }
+  };
+
+  window.processarCriacaoClubeComCadastro = async function () {
     const input = document.getElementById('inputCreateClubNameCard');
     const nomeClube = input ? input.value.trim() : '';
     const nome = document.getElementById('createRegNome') ? document.getElementById('createRegNome').value.trim() : 'Administrador';
@@ -1304,16 +2054,26 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    const freqIn = document.getElementById('inputCreateClubFreqCard');
+    const frequenciaJogos = freqIn ? freqIn.value.trim() : 'Semanal';
+    const fotoUrlIn = document.getElementById('inputCreateClubPhotoUrl');
+    const fotoUrl = fotoUrlIn ? fotoUrlIn.value.trim() : null;
+    const escudoIdIn = document.getElementById('inputCreateClubEscudoId');
+    const escudoId = escudoIdIn ? escudoIdIn.value.trim() : 'classico';
+
     try {
       const resp = await fetch('/api/clube/criar-com-autenticacao', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'X-CSRFToken': getCsrfToken()
         },
         body: JSON.stringify({
           nome_clube: nomeClube,
           cor_tema: corTemaClubeSelecionadoCard,
+          frequencia_jogos: frequenciaJogos,
+          foto_url: fotoUrl,
+          escudo_id: escudoId,
           modo_auth: 'novo',
           nome: nome,
           email: email,
@@ -1493,7 +2253,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (regCounter) regCounter.innerHTML = `<strong style="color: #22c55e;">${currentRegStep}</strong> de 3`;
-    
+
     // Atualizar dots de progresso
     const d1 = document.getElementById('wizardDot1');
     const d2 = document.getElementById('wizardDot2');
@@ -1770,14 +2530,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
-    return meta ? meta.getAttribute('content') : '';
+    if (meta && meta.getAttribute('content')) return meta.getAttribute('content');
+    const input = document.querySelector('input[name="csrf_token"]');
+    if (input && input.value) return input.value;
+    return '';
   }
 
   async function submitSocialAuth(provider, email, nome, social_id) {
     try {
       const resp = await fetch('/social-login', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'X-CSRFToken': getCsrfToken()
         },
@@ -1906,7 +2669,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // 1. Fluxo de Autenticação Oficial com Apple ID
       if (provider === 'apple') {
         // 1a. Tenta Sign-In nativo do iOS (Xcode / Capacitor App Sheet Oficial da Apple)
-        const applePlugin = (window.Capacitor && window.Capacitor.Plugins) ? 
+        const applePlugin = (window.Capacitor && window.Capacitor.Plugins) ?
           (window.Capacitor.Plugins.SignInWithApple || window.Capacitor.Plugins.AppleSignIn) : null;
 
         if (applePlugin) {
@@ -2105,7 +2868,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         const resp = await fetch('/social-complete-username', {
           method: 'POST',
-          headers: { 
+          headers: {
             'Content-Type': 'application/json',
             'X-CSRFToken': getCsrfToken()
           },
@@ -2128,8 +2891,69 @@ document.addEventListener('DOMContentLoaded', () => {
   const initProvider = (document.getElementById('social_provider_hidden')?.value || 'apple').trim();
   const initSocialId = (document.getElementById('social_id_hidden')?.value || '').trim();
 
-  if (initEmail) {
-    submitSocialAuth(initProvider, initEmail, initNome, initSocialId);
+  const joinGestaoSenhaInput = document.getElementById('joinGestaoSenha');
+  if (joinGestaoSenhaInput) {
+    joinGestaoSenhaInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        window.submeterEntradaGestaoClube();
+      }
+    });
+  }
+
+  const joinAdminSenhaInput = document.getElementById('joinAdminSenha');
+  if (joinAdminSenhaInput) {
+    joinAdminSenhaInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        window.submeterEntradaAdminClube();
+      }
+    });
+  }
+
+  const joinJudgeSenhaInput = document.getElementById('joinJudgeSenha');
+  if (joinJudgeSenhaInput) {
+    joinJudgeSenhaInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        window.submeterEntradaJuizClube();
+      }
+    });
+  }
+
+  const joinPasswordInput = document.getElementById('joinPassword');
+  if (joinPasswordInput) {
+    joinPasswordInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        window.submeterInlineLoginClube();
+      }
+    });
+  }
+
+  const joinUsernameInput = document.getElementById('joinUsername');
+  if (joinUsernameInput) {
+    joinUsernameInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (joinPasswordInput) {
+          joinPasswordInput.focus();
+        } else {
+          window.submeterInlineLoginClube();
+        }
+      }
+    });
+  }
+
+  const inputSearchClub = document.getElementById('inputSearchClub');
+  if (inputSearchClub) {
+    inputSearchClub.addEventListener('blur', () => {
+      setTimeout(() => {
+        if (window.desativarBuscaCabecalhoSeVazio) {
+          window.desativarBuscaCabecalhoSeVazio();
+        }
+      }, 180);
+    });
   }
 
   updateCard(0);

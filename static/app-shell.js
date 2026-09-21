@@ -126,6 +126,7 @@
 
   function shouldHandleLink(link, event) {
     if (!link || link.tagName !== 'A') return false;
+    if (document.body && (document.body.classList.contains('admin-tour-active') || document.body.classList.contains('juiz-tour-active'))) return false;
     if (link.closest('[data-no-soft-nav]')) return false;
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return false;
 

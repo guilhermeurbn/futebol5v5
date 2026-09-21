@@ -149,8 +149,15 @@
                                 </div>
                             {% endfor %}
                         {% else %}
-                            <div class="empty-state">
-                                <p>Nenhum jogador fixo cadastrado</p>
+                            <div class="empty-state" style="padding: 1.75rem 1rem; margin: 1rem auto; max-width: 360px;">
+                                <div class="empty-icon" style="width: 46px; height: 46px; margin-bottom: 0.75rem;">
+                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="9" cy="7" r="4"></circle>
+                                    </svg>
+                                </div>
+                                <p class="empty-state__title" style="font-size: 0.95rem;">Nenhum jogador fixo cadastrado</p>
+                                <p class="empty-hint" style="font-size: 0.78rem;">Cadastre atletas fixos para organizar a presença com rapidez.</p>
                             </div>
                         {% endif %}
                     </div>
@@ -183,8 +190,17 @@
                                 </div>
                             {% endfor %}
                         {% else %}
-                            <div class="empty-state">
-                                <p>Nenhum jogador avulso cadastrado</p>
+                            <div class="empty-state" style="padding: 1.75rem 1rem; margin: 1rem auto; max-width: 360px;">
+                                <div class="empty-icon" style="width: 46px; height: 46px; margin-bottom: 0.75rem;">
+                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="9" cy="7" r="4"></circle>
+                                        <line x1="19" y1="8" x2="19" y2="14"></line>
+                                        <line x1="16" y1="11" x2="22" y2="11"></line>
+                                    </svg>
+                                </div>
+                                <p class="empty-state__title" style="font-size: 0.95rem;">Nenhum jogador avulso cadastrado</p>
+                                <p class="empty-hint" style="font-size: 0.78rem;">Cadastre atletas avulsos para completar a rodada.</p>
                             </div>
                         {% endif %}
                     </div>

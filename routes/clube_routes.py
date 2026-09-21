@@ -5,7 +5,7 @@ Oferece endpoints para onboarding, verificação de nome único e gerenciamento 
 
 from typing import Dict, Any, Optional
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, session, g
-from services.clube_service import ClubeService, ClubeSchema
+from services.clube_service import ClubeService, ClubeSchema, formatar_id_clube, gerar_slug
 from services.auth_service import AuthService
 
 clube_bp = Blueprint('clube', __name__)
@@ -26,23 +26,31 @@ def api_buscar_clubes():
     query = str(request.args.get('q', '')).strip()
     todos = ClubeService.obter_todos_clubes()
 
-    if not query:
-        return jsonify({'clubes': todos[:10]}), 200
+    if query:
+        q_norm = normalizar_texto(query)
+        q_code = query.lstrip('0')
+        lista_retorno = []
+        for c in todos:
+            nome_norm = normalizar_texto(c.get('nome', ''))
+            cod_fmt = c.get('codigo_formatado', '')
+            cod_clean = cod_fmt.lstrip('0')
+            slug = c.get('slug', '').lower()
 
-    q_norm = normalizar_texto(query)
-    q_code = query.lstrip('0')
+            if (q_norm in nome_norm) or (q_norm in slug) or (query == cod_fmt) or (q_code and q_code == cod_clean):
+                lista_retorno.append(c)
+    else:
+        lista_retorno = todos[:10]
 
-    resultados = []
-    for c in todos:
-        nome_norm = normalizar_texto(c.get('nome', ''))
-        cod_fmt = c.get('codigo_formatado', '')
-        cod_clean = cod_fmt.lstrip('0')
-        slug = c.get('slug', '').lower()
+    from services.jogador_service import JogadorService
+    jog_svc = JogadorService()
+    for c in lista_retorno:
+        cod_fmt = c.get('codigo_formatado', '001')
+        try:
+            c['total_jogadores'] = len(jog_svc.listar(clube_codigo=cod_fmt))
+        except Exception:
+            c['total_jogadores'] = 0
 
-        if (q_norm in nome_norm) or (q_norm in slug) or (query == cod_fmt) or (q_code and q_code == cod_clean):
-            resultados.append(c)
-
-    return jsonify({'clubes': resultados}), 200
+    return jsonify({'clubes': lista_retorno}), 200
 
 
 @clube_bp.route('/api/clube/validar-nome', methods=['POST'])
@@ -84,8 +92,18 @@ def api_criar_clube():
     nome = str(data.get('nome', '')).strip()
     cor_tema = str(data.get('cor_tema', 'neon-green')).strip()
 
+    frequencia_jogos = str(data.get('frequencia_jogos') or 'Semanal').strip()
+    foto_url = data.get('foto_url')
+    escudo_id = str(data.get('escudo_id') or 'classico').strip()
+
     try:
-        clube = ClubeService.criar_clube(nome=nome, cor_tema=cor_tema)
+        clube = ClubeService.criar_clube(
+            nome=nome,
+            cor_tema=cor_tema,
+            frequencia_jogos=frequencia_jogos,
+            foto_url=foto_url,
+            escudo_id=escudo_id
+        )
         session['clube_slug'] = clube.get('slug')
         session['clube_codigo'] = clube.get('codigo_formatado')
 
@@ -100,6 +118,68 @@ def api_criar_clube():
         return jsonify({'sucesso': False, 'mensagem': f"Erro ao criar clube: {str(err)}"}), 500
 
 
+@clube_bp.route('/api/clube/upload-foto', methods=['POST'])
+def api_upload_foto_clube():
+    """Endpoint para upload de foto/logo de clube."""
+    from services.upload_service import UploadService, UploadError
+    foto_file = request.files.get('foto')
+    clube_id = request.form.get('clube_id') or 'temp'
+    if not foto_file or not foto_file.filename:
+        return jsonify({'sucesso': False, 'mensagem': 'Nenhum arquivo enviado.'}), 400
+
+    try:
+        us = UploadService()
+        url = us.processar_foto_clube(foto_file, clube_id=clube_id)
+        return jsonify({'sucesso': True, 'foto_url': url}), 200
+    except UploadError as err:
+        return jsonify({'sucesso': False, 'mensagem': str(err)}), 400
+    except Exception as err:
+        logger.error(f"Erro no upload da foto do clube: {err}")
+        return jsonify({'sucesso': False, 'mensagem': 'Erro ao processar imagem.'}), 500
+
+
+@clube_bp.route('/api/clube/atualizar', methods=['POST'])
+def api_atualizar_clube():
+    """Endpoint para atualizar dados do clube (foto, frequência de jogos, tema) pelo admin."""
+    user_id = session.get('user_id')
+    user_role = session.get('role')
+    clube_cod = session.get('clube_codigo', '001')
+
+    if not user_id or user_role != 'admin':
+        return jsonify({'sucesso': False, 'mensagem': 'Acesso negado. Requer conta de Administrador.'}), 403
+
+    data: Dict[str, Any] = request.get_json() or {}
+    target_clube_ref = data.get('clube_ref') or clube_cod
+    nome = data.get('nome')
+    frequencia_jogos = data.get('frequencia_jogos')
+    foto_url = data.get('foto_url')
+    escudo_id = data.get('escudo_id')
+    cor_tema = data.get('cor_tema')
+    codigo_acesso = data.get('codigo_acesso')
+    senha_juiz = data.get('senha_juiz')
+
+    clube = ClubeService.atualizar_clube(
+        identificador=target_clube_ref,
+        nome=nome,
+        frequencia_jogos=frequencia_jogos,
+        foto_url=foto_url,
+        escudo_id=escudo_id,
+        cor_tema=cor_tema,
+        codigo_acesso=codigo_acesso,
+        senha_juiz=senha_juiz
+    )
+
+    if not clube:
+        return jsonify({'sucesso': False, 'mensagem': 'Clube não encontrado.'}), 404
+
+    # Sincronizar nome na sessão caso seja o clube ativo
+    if clube.get('codigo_formatado') == session.get('clube_codigo'):
+        session['clube_nome'] = clube.get('nome')
+        session.modified = True
+
+    return jsonify({'sucesso': True, 'clube': clube, 'mensagem': 'Dados do clube atualizados com sucesso!'}), 200
+
+
 @clube_bp.route('/buscar-clube', methods=['GET'])
 def buscar_clube_page():
     """Página de busca e onboarding em um clube existente."""
@@ -108,11 +188,110 @@ def buscar_clube_page():
 
 @clube_bp.route('/join/<clube_ref>', methods=['GET'])
 def join_clube_direct(clube_ref: str):
-    """Link direto para entrar em um clube especifico via codigo ou slug (ex: natrave.pt/join/002)."""
+    """
+    Link direto para entrar em um clube específico via código ou slug.
+    Aceita token criptografado (?convite=XXXX, ?k=XXXX, ?token=XXXX) ou pin direto (?pin=XXXX).
+    """
     clube = ClubeService.obter_clube_por_codigo(clube_ref) or ClubeService.obter_clube_por_slug(clube_ref)
     if not clube:
         return redirect(url_for('clube.buscar_clube_page'))
-    return render_template('login.html', start_tab='join-club', target_clube=clube)
+
+    clube_cod = clube.get('codigo_formatado', '')
+    token_convite = (
+        request.args.get('convite')
+        or request.args.get('k')
+        or request.args.get('token')
+        or ''
+    ).strip()
+
+    target_pin = ''
+    if token_convite:
+        target_pin = ClubeService.decodificar_token_convite(clube_cod, token_convite) or ''
+
+    if not target_pin:
+        target_pin = request.args.get('pin', '').strip().upper()
+
+    user_id = session.get('user_id')
+    if user_id and target_pin and ClubeService.validar_pin_clube(clube_cod, target_pin):
+        from services.jogador_service import JogadorService
+        jog_svc = JogadorService()
+        jog_svc.associar_jogador_ao_clube(user_id, clube_cod)
+        session['clube_codigo'] = clube_cod
+        session['clube_slug'] = clube.get('slug')
+        session.modified = True
+        from services.auth_service import AuthService
+        AuthService().salvar_ultimo_clube(user_id, clube_cod, clube.get('slug'))
+        return redirect(f"/clube/{clube.get('slug')}")
+
+    return render_template('login.html', start_tab='join-club', target_clube=clube, target_pin=target_pin)
+
+
+@clube_bp.route('/api/clube/validar-pin', methods=['POST'])
+def api_validar_pin():
+    """
+    Endpoint para validar o PIN de 4 dígitos alfanuméricos de um clube.
+    """
+    data: Dict[str, Any] = request.get_json() or {}
+    clube_ref = str(data.get('clube_ref') or data.get('clube_codigo') or '').strip()
+    pin = str(data.get('pin') or '').strip().upper()
+
+    if not clube_ref:
+        return jsonify({'sucesso': False, 'mensagem': 'Clube não especificado.'}), 400
+
+    clube = ClubeService.obter_clube_por_codigo(clube_ref) or ClubeService.obter_clube_por_slug(clube_ref)
+    if not clube:
+        return jsonify({'sucesso': False, 'mensagem': 'Clube não encontrado.'}), 404
+
+    valido = ClubeService.validar_pin_clube(clube_ref, pin)
+    if not valido:
+        return jsonify({'sucesso': False, 'mensagem': 'Senha incorreta para este clube.'}), 403
+
+    return jsonify({
+        'sucesso': True,
+        'mensagem': 'Senha correta!',
+        'clube_codigo': clube.get('codigo_formatado'),
+        'clube_slug': clube.get('slug')
+    }), 200
+
+
+@clube_bp.route('/api/clube/regenerar-pin', methods=['POST'])
+def api_regenerar_pin():
+    """
+    Regenera a senha de 4 dígitos do clube. Apenas administradores do clube podem regenerar.
+    """
+    user_id = session.get('user_id')
+    user_role = session.get('role')
+    clube_cod = session.get('clube_codigo', '001')
+
+    if not user_id or user_role != 'admin':
+        return jsonify({'sucesso': False, 'mensagem': 'Acesso negado. Requer conta de Administrador.'}), 403
+
+    data: Dict[str, Any] = request.get_json() or {}
+    target_clube_ref = str(data.get('clube_ref') or clube_cod).strip()
+
+    admin_clubes = ClubeService.obter_clubes_onde_usuario_e_admin(user_id, session.get('username'))
+    clube = ClubeService.obter_clube_por_codigo(target_clube_ref) or ClubeService.obter_clube_por_slug(target_clube_ref)
+    if not clube:
+        return jsonify({'sucesso': False, 'mensagem': 'Clube não encontrado.'}), 404
+
+    clube_cod_fmt = clube.get('codigo_formatado')
+    eh_admin_deste_clube = any(c.get('codigo_formatado') == clube_cod_fmt for c in admin_clubes) or (session.get('username') == 'admin' and clube_cod_fmt == '001')
+
+    if not eh_admin_deste_clube:
+        return jsonify({'sucesso': False, 'mensagem': 'Você não tem permissão para alterar a senha deste clube.'}), 403
+
+    novo_pin = ClubeService.regenerar_pin_clube(clube_cod_fmt)
+    if not novo_pin:
+        return jsonify({'sucesso': False, 'mensagem': 'Erro ao regenerar senha do clube.'}), 500
+
+    novo_token = ClubeService.gerar_token_convite(clube_cod_fmt, novo_pin)
+
+    return jsonify({
+        'sucesso': True,
+        'novo_pin': novo_pin,
+        'novo_token_convite': novo_token,
+        'mensagem': f'Nova senha gerada com sucesso: {novo_pin}'
+    }), 200
 
 
 @clube_bp.route('/api/clube/entrar-com-conta-existente', methods=['POST'])
@@ -131,17 +310,106 @@ def api_entrar_conta_existente():
     if not username or not senha:
         return jsonify({'sucesso': False, 'mensagem': 'Por favor, informe seu usuário e senha.'}), 400
 
-    auth_svc = AuthService()
-    user = auth_svc.autenticar(username, senha)
-
-    if not user:
-        return jsonify({'sucesso': False, 'mensagem': 'Usuário ou senha incorretos.'}), 401
-
     clube = ClubeService.obter_clube_por_codigo(clube_codigo) or ClubeService.obter_clube_por_slug(clube_codigo)
     if not clube:
         return jsonify({'sucesso': False, 'mensagem': 'Clube não encontrado.'}), 404
 
-    # Retorna dados do usuario para confirmacao ("Identificamos sua conta Guilherme...")
+    # 1. Suporte inteligente para Juiz direto no campo de "Tenho conta"
+    if username.lower() in ['juiz', 'juiz_clube', 'arbitro', 'árbitro']:
+        valido, clube_juiz = ClubeService.validar_senha_juiz(clube_codigo, senha)
+        if not valido or not clube_juiz:
+            return jsonify({'sucesso': False, 'mensagem': 'Senha do Juiz incorreta para este clube.'}), 401
+        session['logged_in'] = True
+        session['role'] = 'juiz'
+        session['clube_codigo'] = clube_juiz.get('codigo_formatado')
+        session['clube_slug'] = clube_juiz.get('slug')
+        session['user_id'] = f"juiz_{clube_juiz.get('codigo_formatado')}"
+        session['username'] = 'juiz'
+        session['user_nome'] = 'Juiz'
+        session['nome'] = 'Juiz'
+        session.modified = True
+        return jsonify({
+            'sucesso': True,
+            'requer_confirmacao': False,
+            'redirect_url': '/juiz'
+        }), 200
+
+    # 2. Suporte inteligente para Admin direto no campo de "Tenho conta"
+    if username.lower() == 'admin':
+        valido, clube_adm, adm_user = ClubeService.validar_senha_admin(clube_codigo, senha)
+        if not valido or not clube_adm:
+            return jsonify({'sucesso': False, 'mensagem': 'Senha de Administrador incorreta para este clube.'}), 401
+        session['logged_in'] = True
+        session['role'] = 'admin'
+        session['clube_codigo'] = clube_adm.get('codigo_formatado')
+        session['clube_slug'] = clube_adm.get('slug')
+        session['user_id'] = (adm_user and adm_user.get('id')) or f"admin_{clube_adm.get('codigo_formatado')}"
+        session['username'] = 'admin'
+        session['user_nome'] = 'Admin'
+        session['nome'] = 'Admin'
+        session.modified = True
+        AuthService().salvar_ultimo_clube(session['user_id'], clube_adm.get('codigo_formatado'), clube_adm.get('slug'))
+        return jsonify({
+            'sucesso': True,
+            'requer_confirmacao': False,
+            'redirect_url': f"/clube/{clube_adm.get('slug')}"
+        }), 200
+
+    auth_svc = AuthService()
+    user = auth_svc.autenticar(username, senha, clube_codigo=clube_codigo)
+
+    if not user:
+        return jsonify({'sucesso': False, 'mensagem': 'Usuário ou senha incorretos.'}), 401
+
+    user_id = user.get('id')
+    u_role = user.get('role') or 'usuario'
+    u_username = user.get('username')
+
+    # 3. Se a conta for de Administrador/Organizador:
+    # Direciona para o clube onde é admin (ou para o clube selecionado se for admin dele)
+    admin_clubes = ClubeService.obter_clubes_onde_usuario_e_admin(user_id, u_username)
+    if admin_clubes or u_role in ['admin', 'organizador']:
+        clubes_codigos_admin = {c.get('codigo_formatado') for c in admin_clubes if c.get('codigo_formatado')}
+        if not clubes_codigos_admin and u_username == 'admin':
+            clubes_codigos_admin.add('001')
+
+        clube_destino = clube
+        if clube.get('codigo_formatado') not in clubes_codigos_admin and admin_clubes:
+            clube_destino = admin_clubes[0]
+
+        session['logged_in'] = True
+        session['user_id'] = user.get('id')
+        session['user_nome'] = 'Admin'
+        session['nome'] = 'Admin'
+        session['username'] = 'admin'
+        session['role'] = 'admin'
+        session['clube_codigo'] = clube_destino.get('codigo_formatado')
+        session['clube_slug'] = clube_destino.get('slug')
+        auth_svc.salvar_ultimo_clube(user.get('id'), clube_destino.get('codigo_formatado'), clube_destino.get('slug'))
+
+        return jsonify({
+            'sucesso': True,
+            'requer_confirmacao': False,
+            'redirect_url': f"/clube/{clube_destino.get('slug')}"
+        }), 200
+
+    # 4. Se a conta tiver role de Juiz:
+    if u_role == 'juiz':
+        session['logged_in'] = True
+        session['role'] = 'juiz'
+        session['clube_codigo'] = clube.get('codigo_formatado')
+        session['clube_slug'] = clube.get('slug')
+        session['user_id'] = user.get('id')
+        session['username'] = user.get('username')
+        session['user_nome'] = user.get('nome') or 'Juiz'
+        session.modified = True
+        return jsonify({
+            'sucesso': True,
+            'requer_confirmacao': False,
+            'redirect_url': '/juiz'
+        }), 200
+
+    # 4. Retorna dados do usuario para confirmacao ("Identificamos sua conta...")
     return jsonify({
         'sucesso': True,
         'requer_confirmacao': True,
@@ -179,22 +447,37 @@ def api_confirmar_entrada_clube():
     auth_svc = AuthService()
     user = auth_svc.obter_por_id(user_id) or auth_svc.obter_por_username(user_id)
 
-    # Se for uma conta administrativa (Admin/Organizador), estabelece a sessão do clube e conclui com sucesso
-    if user and (user.get('role') in ['admin', 'organizador'] or user.get('username') == 'admin'):
+    if not user:
+        return jsonify({'sucesso': False, 'mensagem': 'Usuário não encontrado.'}), 404
+
+    # Se for admin, vincula e direciona para o seu clube correspondente
+    admin_clubes = ClubeService.obter_clubes_onde_usuario_e_admin(user.get('id'), user.get('username'))
+    clube_cod_fmt = clube.get('codigo_formatado')
+
+    if admin_clubes or user.get('role') in ['admin', 'organizador'] or user.get('username') == 'admin':
+        clubes_codigos_admin = {c.get('codigo_formatado') for c in admin_clubes if c.get('codigo_formatado')}
+        if not clubes_codigos_admin and user.get('username') == 'admin':
+            clubes_codigos_admin.add('001')
+
+        clube_destino = clube
+        if clube_cod_fmt not in clubes_codigos_admin:
+            clube_destino = admin_clubes[0] if admin_clubes else clube
+
         session['logged_in'] = True
         session['user_id'] = user.get('id')
         session['user_nome'] = user.get('nome') or 'Administrador'
         session['username'] = user.get('username') or 'admin'
         session['role'] = user.get('role', 'admin')
-        session['clube_codigo'] = clube.get('codigo_formatado')
-        session['clube_slug'] = clube.get('slug')
-        auth_svc.salvar_ultimo_clube(user.get('id'), clube.get('codigo_formatado'), clube.get('slug'))
+        session['clube_codigo'] = clube_destino.get('codigo_formatado')
+        session['clube_slug'] = clube_destino.get('slug')
+        auth_svc.salvar_ultimo_clube(user.get('id'), clube_destino.get('codigo_formatado'), clube_destino.get('slug'))
 
         return jsonify({
             'sucesso': True,
-            'mensagem': f"Bem-vindo ao clube {clube.get('nome')}!",
-            'redirect_url': f"/clube/{clube.get('slug')}"
+            'mensagem': f"Bem-vindo ao clube {clube_destino.get('nome')}!",
+            'redirect_url': f"/clube/{clube_destino.get('slug')}"
         }), 200
+
 
     jog_svc = JogadorService()
     jogador = jog_svc.associar_jogador_ao_clube(user_id, clube.get('codigo_formatado'))
@@ -313,6 +596,10 @@ def api_criar_clube_com_autenticacao():
         return jsonify({'sucesso': False, 'mensagem': 'Defina uma senha de Juiz de pelo menos 4 caracteres para o clube.'}), 400
 
     try:
+        clube_id_num = ClubeService.proximo_id_disponivel()
+        clube_codigo_futuro = formatar_id_clube(clube_id_num)
+        slug_clube = gerar_slug(nome_clube)
+
         user_id = session.get('user_id')
         user_data = None
         auth_svc = AuthService()
@@ -343,42 +630,20 @@ def api_criar_clube_com_autenticacao():
                         'mensagem': 'Esta conta já está cadastrada no NaTrave. Digite a senha correta para continuar.'
                     }), 401
             else:
-                # 2. Cria a nova conta de Administrador
-                import re
-                cand_user = username_in if (username_in and username_in.lower() != 'admin' and len(username_in) >= 3) else (email_in.split('@')[0] if ('@' in email_in) else identificador)
-                cand_user = re.sub(r'[^a-zA-Z0-9_]', '', cand_user).lower()
-
-                # Garante que tenha ao menos 3 caracteres
-                if len(cand_user) < 3:
-                    cand_user = f"admin_{cand_user}" if cand_user else "admin"
-                if len(cand_user) < 3:
-                    cand_user = "admin_clube"
-
-                base_username = cand_user
-                u_cand = base_username
-                idx = 1
-                while auth_svc.obter_por_username(u_cand):
-                    u_cand = f"{base_username}_{idx}"
-                    idx += 1
-                username = u_cand
-
-                nome_base = nome_in if (nome_in and len(nome_in) >= 2 and nome_in.lower() != 'administrador') else f"Admin {nome_clube}"
-                if len(nome_base) < 2:
-                    nome_base = f"Admin {nome_clube}"
-                nome = nome_base
-                idx_n = 1
-                todos_users = auth_svc._carregar()
-                while any((u.get("nome") or "").strip().lower() == nome.strip().lower() for u in todos_users):
-                    nome = f"{nome_base} {idx_n}"
-                    idx_n += 1
-                email = email_in if (email_in and '@' in email_in) else f"{username}@natrave.pt"
+                # 2. Cria a nova conta de Administrador exclusiva deste clube
+                # Admins assumem apenas 'admin' como username e 'Admin' como nome (nunca derivado do e-mail)
+                email = email_in if (email_in and '@' in email_in) else f"admin_{clube_codigo_futuro}@natrave.pt"
+                username = username_in if (username_in and username_in.strip().lower() != 'admin') else "admin"
+                nome = "Admin"
 
                 user_data = auth_svc.criar_usuario(
                     email=email,
                     username=username,
                     nome=nome,
                     password=senha,
-                    role='admin'
+                    role='admin',
+                    clube_codigo=clube_codigo_futuro,
+                    clube_slug=slug_clube
                 )
                 user_id = user_data.get('id')
         else:
@@ -387,17 +652,25 @@ def api_criar_clube_com_autenticacao():
         if not user_id:
             return jsonify({'sucesso': False, 'mensagem': 'Não foi possível autenticar a conta do administrador.'}), 401
 
+        frequencia_jogos = str(data.get('frequencia_jogos') or 'Semanal').strip()
+        foto_url = data.get('foto_url')
+        escudo_id = str(data.get('escudo_id') or 'classico').strip()
+
         clube = ClubeService.criar_clube(
             nome=nome_clube,
             cor_tema=cor_tema,
             admin_user_id=user_id,
-            senha_juiz=senha_juiz
+            senha_juiz=senha_juiz,
+            frequencia_jogos=frequencia_jogos,
+            foto_url=foto_url,
+            escudo_id=escudo_id
         )
 
         session['logged_in'] = True
         session['user_id'] = user_id
-        session['user_nome'] = (user_data.get('nome') if user_data else None) or session.get('user_nome') or 'Administrador'
-        session['username'] = (user_data.get('username') if user_data else None) or session.get('username') or 'admin'
+        session['user_nome'] = 'Admin'
+        session['nome'] = 'Admin'
+        session['username'] = 'admin'
         session['role'] = 'admin'
         session['clube_codigo'] = clube.get('codigo_formatado')
         session['clube_slug'] = clube.get('slug')
@@ -438,9 +711,10 @@ def api_entrar_como_juiz():
     session['role'] = 'juiz'
     session['clube_codigo'] = clube.get('codigo_formatado')
     session['clube_slug'] = clube.get('slug')
-    session['user_id'] = session.get('user_id') or f"juiz_{clube.get('codigo_formatado')}"
-    session['username'] = session.get('username') or f"juiz_{clube.get('slug')}"
-    session['nome'] = session.get('nome') or f"Juiz ({clube.get('nome')})"
+    session['user_id'] = f"juiz_{clube.get('codigo_formatado')}"
+    session['username'] = 'juiz'
+    session['user_nome'] = 'Juiz'
+    session['nome'] = 'Juiz'
     session.modified = True
 
     return jsonify({
@@ -450,14 +724,66 @@ def api_entrar_como_juiz():
     }), 200
 
 
+@clube_bp.route('/api/clube/entrar-como-admin', methods=['POST'])
+def api_entrar_como_admin():
+    """
+    Autentica o usuário como Administrador de um clube específico após validar a senha do admin.
+    """
+    from services.auth_service import AuthService
+
+    data: Dict[str, Any] = request.get_json() or {}
+    clube_codigo = str(data.get('clube_codigo', '')).strip()
+    senha_admin = str(data.get('senha_admin', '')).strip()
+
+    if not clube_codigo or not senha_admin:
+        return jsonify({'sucesso': False, 'mensagem': 'Por favor, informe a senha do administrador.'}), 400
+
+    valido, clube, admin_user = ClubeService.validar_senha_admin(clube_codigo, senha_admin)
+    if not valido or not clube:
+        return jsonify({'sucesso': False, 'mensagem': 'Senha de Admin incorreta para este clube.'}), 401
+
+    user_id = (admin_user and admin_user.get('id')) or f"admin_{clube.get('codigo_formatado')}"
+
+    session['logged_in'] = True
+    session['role'] = 'admin'
+    session['clube_codigo'] = clube.get('codigo_formatado')
+    session['clube_slug'] = clube.get('slug')
+    session['user_id'] = user_id
+    session['username'] = 'admin'
+    session['user_nome'] = 'Admin'
+    session['nome'] = 'Admin'
+    session.modified = True
+
+    AuthService().salvar_ultimo_clube(user_id, clube.get('codigo_formatado'), clube.get('slug'))
+
+    return jsonify({
+        'sucesso': True,
+        'mensagem': f"Acesso como Administrador autorizado no {clube.get('nome')}!",
+        'redirect_url': f"/clube/{clube.get('slug')}"
+    }), 200
+
+
 @clube_bp.route('/clube/<clube_slug>')
 @clube_bp.route('/clube/<clube_slug>/')
 def clube_home(clube_slug: Optional[str] = None):
     """Direciona para a home do clube específico pelo slug."""
-    slug_alvo = clube_slug or getattr(g, 'clube_slug', None) or session.get('clube_slug') or 'natrave'
-    clube = ClubeService.obter_clube_por_slug(slug_alvo) or ClubeService.obter_clube_por_codigo(slug_alvo)
-    if not clube:
-        return redirect(url_for('jogador.index'))
+    if session.get('role') == 'admin':
+        clube_admin = ClubeService.obter_clube_do_admin(
+            user_id=session.get('user_id'),
+            username=session.get('username')
+        )
+        if clube_admin:
+            admin_slug = clube_admin.get('slug')
+            if clube_slug and clube_slug.strip().lower() != admin_slug.lower():
+                return redirect(f"/clube/{admin_slug}")
+            clube = clube_admin
+        else:
+            clube = ClubeService.garantir_clube_natrave_001()
+    else:
+        slug_alvo = clube_slug or getattr(g, 'clube_slug', None) or session.get('clube_slug') or 'natrave'
+        clube = ClubeService.obter_clube_por_slug(slug_alvo) or ClubeService.obter_clube_por_codigo(slug_alvo)
+        if not clube:
+            return redirect(url_for('jogador.index'))
 
     session['clube_slug'] = clube.get('slug')
     session['clube_codigo'] = clube.get('codigo_formatado')
@@ -480,6 +806,15 @@ def api_trocar_clube():
     user_id = session.get('user_id')
     if not user_id:
         return jsonify({'sucesso': False, 'mensagem': 'Você precisa estar autenticado.'}), 401
+
+    if session.get('role') == 'admin':
+        clube_admin = ClubeService.obter_clube_do_admin(user_id=user_id, username=session.get('username'))
+        slug = (clube_admin or {}).get('slug', 'natrave')
+        return jsonify({
+            'sucesso': False,
+            'mensagem': 'Administradores possuem acesso exclusivo ao seu respectivo clube.',
+            'redirect_url': f"/clube/{slug}"
+        }), 403
 
     data: Dict[str, Any] = request.get_json() or {}
     clube_ref = str(data.get('clube_ref') or data.get('clube_codigo') or '').strip()
@@ -518,6 +853,11 @@ def trocar_clube_direto(clube_ref: str):
     if not user_id:
         return redirect(url_for('clube.buscar_clube_page'))
 
+    if session.get('role') == 'admin':
+        clube_admin = ClubeService.obter_clube_do_admin(user_id=user_id, username=session.get('username'))
+        slug = (clube_admin or {}).get('slug', 'natrave')
+        return redirect(f"/clube/{slug}")
+
     clube = ClubeService.obter_clube_por_codigo(clube_ref) or ClubeService.obter_clube_por_slug(clube_ref)
     if not clube:
         return redirect(url_for('auth.editar_perfil_page'))
@@ -533,3 +873,68 @@ def trocar_clube_direto(clube_ref: str):
     AuthService().salvar_ultimo_clube(user_id, clube.get('codigo_formatado'), clube.get('slug'))
 
     return redirect(f"/clube/{clube.get('slug')}")
+ 
+ 
+@clube_bp.route('/admin/modo-juiz', methods=['GET', 'POST'])
+def alternar_para_modo_juiz():
+    """
+    Alterna instantaneamente o Administrador para o Modo Juiz do clube ativo.
+    Guarda a origem do Admin na sessão para retorno com altíssimo desempenho.
+    """
+    user_id = session.get('user_id')
+    user_role = session.get('role')
+
+    if not user_id or user_role != 'admin':
+        if user_role == 'juiz':
+            if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({'sucesso': True, 'redirect_url': url_for('juiz.jogar_page')})
+            return redirect(url_for('juiz.jogar_page'))
+        return jsonify({'sucesso': False, 'mensagem': 'Acesso negado. Requer conta de Administrador.'}), 403
+
+    clube_cod = session.get('clube_codigo', '001')
+    clube_slug = session.get('clube_slug', 'natrave')
+
+    # Salvar origem para permitir voltar em 1 clique
+    session['admin_origem_id'] = user_id
+    session['admin_origem_username'] = session.get('username')
+    session['admin_origem_nome'] = session.get('nome')
+    session['admin_origem_role'] = 'admin'
+
+    # Ativar Juiz na sessão
+    session['role'] = 'juiz'
+    session['user_id'] = f"juiz_{clube_cod}"
+    session['username'] = f"juiz_{clube_slug}"
+    session['user_nome'] = 'Juiz do Clube'
+    session['nome'] = 'Juiz do Clube'
+    session.modified = True
+
+    if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({'sucesso': True, 'redirect_url': url_for('juiz.jogar_page')})
+
+    return redirect(url_for('juiz.jogar_page'))
+
+
+@clube_bp.route('/juiz/voltar-admin', methods=['GET', 'POST'])
+def voltar_para_modo_admin():
+    """
+    Restaura instantaneamente o Administrador original que alternou para o Modo Juiz.
+    """
+    admin_id = session.get('admin_origem_id')
+    if not admin_id:
+        if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'sucesso': True, 'redirect_url': url_for('juiz.jogar_page')})
+        return redirect(url_for('juiz.jogar_page'))
+
+    session['role'] = 'admin'
+    session['user_id'] = admin_id
+    session['username'] = session.pop('admin_origem_username', 'admin')
+    session['nome'] = session.pop('admin_origem_nome', 'Administrador')
+    session['user_nome'] = session['nome']
+    session.pop('admin_origem_id', None)
+    session.pop('admin_origem_role', None)
+    session.modified = True
+
+    if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({'sucesso': True, 'redirect_url': url_for('auth.perfil_page')})
+
+    return redirect(url_for('auth.perfil_page'))

@@ -120,3 +120,62 @@ def test_api_trocar_clube(app_client):
     with client.session_transaction() as sess:
         assert sess.get("clube_codigo") == c["codigo_formatado"]
         assert sess.get("clube_slug") == c["slug"]
+
+
+def test_admin_bloqueado_de_trocar_clube(app_client):
+    """Garante que um admin NÃO consegue alternar para outro clube via API ou GET direto"""
+    client, app = app_client
+    c_outro = ClubeService.criar_clube("Outro Clube Teste", slug="outro-clube-teste")
+
+    with client.session_transaction() as sess:
+        sess["user_id"] = "admin_user_001"
+        sess["username"] = "admin"
+        sess["role"] = "admin"
+        sess["clube_codigo"] = "001"
+        sess["clube_slug"] = "natrave"
+
+    # 1. Tentativa via api/clube/trocar-clube deve retornar 403
+    res_api = client.post("/api/clube/trocar-clube", json={"clube_ref": c_outro["codigo_formatado"]})
+    assert res_api.status_code == 403
+    data = res_api.get_json()
+    assert data["sucesso"] is False
+
+    # 2. Tentativa via trocar_clube_direto deve redirecionar de volta para o clube do admin
+    res_get = client.get(f"/clube/trocar/{c_outro['codigo_formatado']}")
+    assert res_get.status_code == 302
+    assert "/clube/natrave" in res_get.headers.get("Location", "")
+
+    # 3. Tentativa via /clube/<outro-slug> deve forçar retorno para /clube/natrave
+    res_url = client.get(f"/clube/{c_outro['slug']}")
+    assert res_url.status_code == 302
+    assert "/clube/natrave" in res_url.headers.get("Location", "")
+
+
+def test_admin_nao_ve_meus_clubes_em_editar_perfil(app_client):
+    """Garante que a área 'Meus Clubes' e 'Buscar outro clube' não é renderizada para administradores"""
+    client, app = app_client
+
+    with client.session_transaction() as sess:
+        sess["user_id"] = "admin_user_001"
+        sess["username"] = "admin"
+        sess["role"] = "admin"
+        sess["clube_codigo"] = "001"
+        sess["clube_slug"] = "natrave"
+
+    res = client.get("/editar-perfil")
+    assert res.status_code == 200
+    html = res.get_data(as_text=True)
+    assert "cardItemClubes" not in html
+    assert "+ Buscar outro clube" not in html
+
+    # Usuário comum (atleta) deve continuar vendo a seção
+    with client.session_transaction() as sess:
+        sess["user_id"] = "user_comum_123"
+        sess["username"] = "atleta"
+        sess["role"] = "usuario"
+
+    res_user = client.get("/editar-perfil")
+    assert res_user.status_code == 200
+    html_user = res_user.get_data(as_text=True)
+    assert "cardItemClubes" in html_user
+    assert "+ Buscar outro clube" in html_user

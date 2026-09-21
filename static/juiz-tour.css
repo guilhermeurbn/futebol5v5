@@ -1,0 +1,1001 @@
+/* ==========================================================================
+   Juiz Workspace Tour - Simulador Interativo Passo a Passo
+   Paleta Oficial Verde (#22c55e) & Dark Clean (#111827 a #0b0f17)
+   Zero auras ou sombras difusas nos botões (box-shadow: none !important)
+   ========================================================================== */
+
+#juizTourOverlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(4, 7, 12, 0.86);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 99990;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+#juizTourOverlay.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Eleva a barra inferior do juiz quando o tour está ativo */
+body.juiz-tour-active .site-footer {
+  z-index: 99995 !important;
+  background: #0b0f17 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.7) !important;
+  pointer-events: auto !important;
+}
+
+body.juiz-tour-active .site-footer__link,
+body.is-referee-layout.juiz-tour-active .site-footer__link {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Todas as abas não ativas no momento do tour perdem background/borda/aura e ficam suaves */
+body.juiz-tour-active .site-footer__link:not(.tour-highlight-tab),
+body.is-referee-layout.juiz-tour-active .site-footer__link:not(.tour-highlight-tab),
+body.juiz-tour-active .site-footer__link.is-active:not(.tour-highlight-tab),
+body.is-referee-layout.juiz-tour-active .site-footer__link.is-active:not(.tour-highlight-tab) {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  border-color: transparent !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+  transform: none !important;
+  opacity: 0.45 !important;
+}
+
+body.juiz-tour-active .site-footer__link:not(.tour-highlight-tab):hover,
+body.juiz-tour-active .site-footer__link:not(.tour-highlight-tab):active {
+  opacity: 0.8 !important;
+}
+
+body.juiz-tour-active .site-footer__link:not(.tour-highlight-tab) .site-footer__icon {
+  stroke: #94a3b8 !important;
+  color: #94a3b8 !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+body.juiz-tour-active .site-footer__link:not(.tour-highlight-tab) .site-footer__label {
+  color: #94a3b8 !important;
+  font-weight: 600 !important;
+}
+
+/* Destaque limpo e nítido na aba ativa do tour (sem sombras/auras, borda verde refinada) */
+body.juiz-tour-active .site-footer__link.tour-highlight-tab,
+body.is-referee-layout.juiz-tour-active .site-footer__link.tour-highlight-tab,
+body.juiz-tour-active .site-footer__link.tour-highlight-tab:hover,
+body.juiz-tour-active .site-footer__link.tour-highlight-tab:active,
+body.juiz-tour-active .site-footer__link.tour-highlight-tab:focus {
+  position: relative !important;
+  z-index: 99999 !important;
+  background: rgba(34, 197, 94, 0.16) !important;
+  border: 1.8px solid #22c55e !important;
+  border-color: #22c55e !important;
+  border-radius: 999px !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
+  box-shadow: none !important;
+  transform: scale(1.02) translateY(-1px) !important;
+}
+
+body.juiz-tour-active .site-footer__link.tour-highlight-tab .site-footer__icon {
+  stroke: #22c55e !important;
+  color: #22c55e !important;
+  filter: none !important;
+}
+
+body.juiz-tour-active .site-footer__link.tour-highlight-tab .site-footer__label {
+  color: #ffffff !important;
+  font-weight: 850 !important;
+}
+
+/* Card Central do Simulador */
+#juizTourCard {
+  width: 100%;
+  max-width: 540px;
+  background: linear-gradient(150deg, #111827 0%, #0b0f17 100%);
+  border: 1.5px solid rgba(34, 197, 94, 0.35);
+  border-radius: 20px;
+  padding: 1.35rem 1.35rem 1.25rem;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.85);
+  position: relative;
+  max-height: 88vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  animation: juizCardIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes juizCardIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Cabeçalho do Card */
+.juiz-tour-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+  flex-shrink: 0;
+}
+
+.juiz-tour-step-mini {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  letter-spacing: 0.2px;
+}
+
+.juiz-tour-step-mini strong {
+  color: #22c55e;
+  font-weight: 850;
+  font-size: 0.9rem;
+}
+
+.juiz-tour-btn-skip {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  padding: 0.2rem 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: color 0.18s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  box-shadow: none !important;
+}
+
+.juiz-tour-btn-skip:hover {
+  color: #ffffff;
+}
+
+/* Banner de Instrução Ativa do Passo */
+.juiz-tour-prompt-box {
+  background: rgba(34, 197, 94, 0.1);
+  border: 1.5px solid rgba(34, 197, 94, 0.35);
+  border-radius: 14px;
+  padding: 0.75rem 0.95rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  flex-shrink: 0;
+}
+
+.juiz-tour-prompt-icon {
+  width: 20px;
+  height: 20px;
+  color: #22c55e;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.juiz-tour-prompt-text {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #f1f5f9;
+  line-height: 1.45;
+  font-weight: 600;
+}
+
+.juiz-tour-prompt-text strong {
+  color: #22c55e;
+  font-weight: 800;
+}
+
+/* Caixa de Alerta Fictício */
+.juiz-fictive-warning {
+  background: rgba(234, 179, 8, 0.08);
+  border: 1px solid rgba(234, 179, 8, 0.3);
+  border-radius: 10px;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.74rem;
+  color: #fde047;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+/* Conteúdo Interativo Dinâmico */
+.juiz-sim-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+/* Etapa 1: Início Simulado */
+.sim-start-card {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 14px;
+  padding: 1.25rem 1.1rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.sim-start-card h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 850;
+  color: #ffffff;
+}
+
+.sim-start-card p {
+  margin: 0;
+  font-size: 0.86rem;
+  color: #94a3b8;
+  max-width: 380px;
+  line-height: 1.45;
+}
+
+.sim-btn-action-primary {
+  background: #22c55e;
+  color: #000000;
+  border: none;
+  border-radius: 12px;
+  padding: 0.65rem 1.4rem;
+  font-size: 0.92rem;
+  font-weight: 850;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.18s ease;
+  box-shadow: none !important;
+}
+
+.sim-btn-action-primary:hover {
+  background: #16a34a;
+}
+
+.sim-btn-action-primary.is-dimmed {
+  background: rgba(34, 197, 94, 0.12) !important;
+  color: #64748b !important;
+  border: 1px solid rgba(34, 197, 94, 0.2) !important;
+  opacity: 0.55 !important;
+  cursor: pointer;
+}
+
+.sim-btn-action-primary.is-dimmed:hover {
+  opacity: 0.8 !important;
+  color: #94a3b8 !important;
+}
+
+.sim-btn-action-primary.is-lit {
+  background: #22c55e !important;
+  color: #000000 !important;
+  border: none !important;
+  font-weight: 850 !important;
+  opacity: 1 !important;
+}
+
+.sim-btn-action-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  color: #cbd5e1;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 750;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all 0.18s ease;
+  box-shadow: none !important;
+}
+
+.sim-btn-action-secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.sim-btn-action-primary svg,
+.sim-btn-sortear svg {
+  width: 18px !important;
+  height: 18px !important;
+  max-width: 18px !important;
+  max-height: 18px !important;
+  flex-shrink: 0 !important;
+}
+
+.sim-sort-action-container {
+  margin-top: 0.85rem;
+  display: flex;
+  justify-content: center;
+  animation: simSortActionPop 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes simSortActionPop {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.sim-btn-sortear {
+  background: #22c55e;
+  color: #000000;
+  border: none;
+  border-radius: 999px;
+  padding: 0.65rem 1.8rem;
+  font-size: 0.95rem;
+  font-weight: 850;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: none !important;
+  transition: all 0.18s ease;
+}
+
+.sim-btn-sortear:hover {
+  background: #16a34a;
+}
+
+.sim-btn-action-primary:disabled {
+  background: rgba(255, 255, 255, 0.1);
+  color: #64748b;
+  cursor: not-allowed;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Etapa 2: Escolha de Quantidade (10, 15, 20) */
+.sim-qty-picker {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.65rem;
+}
+
+.sim-qty-btn {
+  background: rgba(18, 24, 38, 0.9);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0.9rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  box-shadow: none !important;
+}
+
+.sim-qty-btn:hover {
+  border-color: rgba(34, 197, 94, 0.5);
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.sim-qty-btn.is-selected {
+  border-color: #22c55e;
+  background: rgba(34, 197, 94, 0.16);
+}
+
+.sim-qty-number {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #ffffff;
+}
+
+.sim-qty-label {
+  font-size: 0.74rem;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+/* Etapa 3: Grade com 20 Jogadores Fictícios */
+.sim-players-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.sim-selection-counter {
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.sim-selection-counter strong {
+  color: #22c55e;
+}
+
+.sim-quick-select-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  border-radius: 8px;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.74rem;
+  font-weight: 750;
+  cursor: pointer;
+  box-shadow: none !important;
+  transition: all 0.18s ease;
+}
+
+.sim-quick-select-btn:hover {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: #22c55e;
+  color: #22c55e;
+}
+
+.sim-players-scroll {
+  max-height: 240px;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem;
+  padding-right: 0.35rem;
+}
+
+.sim-player-card {
+  background: rgba(18, 24, 38, 0.75);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 0.42rem 0.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s ease;
+}
+
+.sim-player-card:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.sim-player-card.is-selected {
+  border-color: #22c55e;
+  background: rgba(34, 197, 94, 0.12);
+}
+
+.sim-player-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sim-player-name {
+  font-size: 0.78rem;
+  font-weight: 750;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sim-player-role {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.sim-player-badge {
+  font-size: 0.7rem;
+  font-weight: 850;
+  background: rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+  padding: 0.1rem 0.35rem;
+  border-radius: 6px;
+  margin-left: 0.35rem;
+}
+
+/* Etapa 4: Tela de Times Gerados */
+.sim-teams-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.sim-team-box {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0.65rem;
+}
+
+.sim-team-box.team-verde {
+  border-top: 3px solid #22c55e;
+}
+
+.sim-team-box.team-azul {
+  border-top: 3px solid #38bdf8;
+}
+
+.sim-team-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.sim-team-player-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.74rem;
+  padding: 0.25rem 0.3rem;
+  border-radius: 6px;
+  color: #cbd5e1;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sim-team-player-row:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.sim-team-player-row.is-swapping {
+  background: rgba(234, 179, 8, 0.2);
+  border-color: #eab308;
+  color: #ffffff;
+}
+
+.sim-btn-edit-teams {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #cbd5e1;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 0.28rem 0.6rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: none !important;
+}
+
+.sim-btn-edit-teams:hover,
+.sim-btn-edit-teams.is-active {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: #22c55e;
+  color: #4ade80;
+}
+
+.sim-team-actions-compact-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.sim-btn-compact-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  padding: 0.55rem 0.9rem;
+  color: #f1f5f9;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  box-shadow: none !important;
+  white-space: nowrap;
+}
+
+.sim-btn-compact-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+.sim-team-actions-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.sim-team-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 0.5rem 0.85rem;
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 750;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  box-shadow: none !important;
+  transition: all 0.18s ease;
+}
+
+.sim-team-btn:hover {
+  background: rgba(255, 255, 255, 0.09);
+}
+
+/* Cabeçalho Interno dos Cards */
+.sim-step-intro-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.4rem;
+}
+
+/* Etapa 5: Resultados */
+.sim-score-panel {
+  background: rgba(18, 24, 38, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sim-score-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 0.55rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.sim-score-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.sim-score-value {
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: #22c55e;
+  min-width: 24px;
+  text-align: center;
+}
+
+/* Etapa 6: Card de Votação Dedicado */
+.sim-voting-preview-box {
+  background: rgba(18, 24, 38, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0.95rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Etapa 7: Exemplo Realista de Histórico */
+.sim-history-demo-card {
+  background: rgba(18, 24, 38, 0.9);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 14px;
+  padding: 0.95rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.sim-history-demo-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding-bottom: 0.55rem;
+}
+
+.sim-history-demo-kicker {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+.sim-history-status-badge {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.sim-history-scoreboard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 0.55rem 0.85rem;
+}
+
+.sim-history-team {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.sim-history-team.text-right {
+  flex-direction: row;
+}
+
+.sim-history-score {
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: #ffffff;
+  min-width: 20px;
+  text-align: center;
+}
+
+.sim-history-divider {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #64748b;
+}
+
+.sim-history-highlights {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.sim-history-champion-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.sim-history-champion-players {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.sim-champion-player-tag {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 0.28rem 0.55rem;
+  font-size: 0.76rem;
+  color: #f1f5f9;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.sim-history-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  padding: 0.28rem 0.5rem;
+  font-size: 0.76rem;
+  color: #cbd5e1;
+}
+
+.sim-history-pill strong {
+  color: #ffffff;
+  font-weight: 750;
+}
+
+/* Etapa 8: Cronômetro Oficial Testável */
+.sim-timer-box {
+  background: rgba(18, 24, 38, 0.9);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 14px;
+  padding: 1.1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.85rem;
+}
+
+.sim-timer-display {
+  font-size: 2.75rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 1.5px;
+  color: #22c55e;
+  line-height: 1;
+  text-shadow: 0 0 20px rgba(34, 197, 94, 0.25);
+  transition: color 0.2s ease;
+}
+
+.sim-timer-display.is-finished {
+  color: #ef4444;
+  text-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+}
+
+.sim-timer-presets {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.sim-timer-preset-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.76rem;
+  font-weight: 750;
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: none !important;
+}
+
+.sim-timer-preset-btn:hover,
+.sim-timer-preset-btn.is-active {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: #22c55e;
+  color: #4ade80;
+}
+
+.sim-timer-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Etapas Informativas (ex: Sair) */
+.sim-tab-feature-card {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1.5px solid rgba(34, 197, 94, 0.35);
+  border-radius: 14px;
+  padding: 1.15rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  text-align: center;
+  align-items: center;
+}
+
+.sim-tab-feature-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: rgba(34, 197, 94, 0.14);
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #22c55e;
+}
+
+.sim-tab-feature-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.sim-tab-feature-card h4 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 850;
+  color: #ffffff;
+}
+
+.sim-tab-feature-card p {
+  margin: 0;
+  font-size: 0.86rem;
+  color: #cbd5e1;
+  line-height: 1.45;
+}
+
+/* Rodapé do Simulador */
+.juiz-tour-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: 1rem;
+  flex-shrink: 0;
+}
+
+.juiz-tour-dots-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.juiz-tour-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.juiz-tour-dot.is-active {
+  width: 18px;
+  background: #22c55e;
+}
+
+.juiz-tour-actions-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Botão de disparo do Tour na página inicial do juiz */
+.judge-tour-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.28);
+  border-radius: 999px;
+  padding: 0.4rem 0.85rem;
+  color: #22c55e;
+  font-size: 0.82rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: none !important;
+}
+
+.judge-tour-pill-btn:hover {
+  background: rgba(34, 197, 94, 0.18);
+  border-color: rgba(34, 197, 94, 0.45);
+  color: #4ade80;
+}

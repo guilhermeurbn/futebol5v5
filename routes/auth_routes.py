@@ -32,11 +32,23 @@ juiz_partida_service = JuizPartidaService()
 def _usuario_logado():
     user_id = session.get('user_id')
     u = auth_service.obter_por_id(user_id) if user_id else {}
+    role = session.get('role') or (u.get('role') if isinstance(u, dict) else 'usuario')
+    uname = session.get('username') or (u.get('username') if isinstance(u, dict) else None)
+    nome = session.get('nome') or session.get('user_nome') or (u.get('nome') if isinstance(u, dict) else None)
+
+    # Admins e Juízes assumem sempre nome e username canônicos no seu clube
+    if role == 'admin':
+        uname = 'admin'
+        nome = 'Admin'
+    elif role == 'juiz':
+        uname = 'juiz'
+        nome = 'Juiz'
+
     return {
         'id': user_id,
-        'username': session.get('username'),
-        'nome': session.get('nome'),
-        'role': session.get('role', 'usuario'),
+        'username': uname,
+        'nome': nome,
+        'role': role,
         'senha_temporaria_ativa': bool(session.get('senha_temporaria_ativa')),
         'autenticado': bool(user_id),
         'email': (u.get('email') if isinstance(u, dict) else None),
@@ -289,18 +301,34 @@ def login_submit():
         session['nome'] = usuario['nome']
         session['role'] = usuario['role']
         session['senha_temporaria_ativa'] = bool(usuario.get('senha_temporaria_ativa'))
-        if usuario.get('ultimo_clube_slug'):
+
+        if usuario.get('role') == 'admin':
+            from services.clube_service import ClubeService
+            clube_admin = ClubeService.obter_clube_do_admin(user_id=usuario.get('id'), username=usuario.get('username'))
+            if clube_admin:
+                session['clube_slug'] = clube_admin.get('slug')
+                session['clube_codigo'] = clube_admin.get('codigo_formatado')
+                auth_service.salvar_ultimo_clube(usuario['id'], clube_admin.get('codigo_formatado'), clube_admin.get('slug'))
+        elif usuario.get('ultimo_clube_slug'):
             session['clube_slug'] = usuario.get('ultimo_clube_slug')
             session['clube_codigo'] = usuario.get('ultimo_clube_codigo')
+
         session.modified = True
         if session['senha_temporaria_ativa']:
             return redirect(url_for('auth.perfil_page'))
         if _usuario_sem_email(usuario['id']):
             return redirect(url_for('auth.completar_email_page'))
         if session.get('role') == 'juiz':
+            session['username'] = 'juiz'
+            session['user_nome'] = 'Juiz'
+            session['nome'] = 'Juiz'
             return redirect(url_for('juiz.jogar_page'))
         if session.get('role') in ['admin']:
-            return redirect(url_for('jogador.index'))
+            session['username'] = 'admin'
+            session['user_nome'] = 'Admin'
+            session['nome'] = 'Admin'
+            slug = session.get('clube_slug') or 'natrave'
+            return redirect(f"/clube/{slug}")
         return redirect(url_for('auth.perfil_page'))
     except ValueError as e:
         return render_template('login.html', erro=str(e)), 400
@@ -1093,6 +1121,52 @@ def perfil_page():
 
     variacao_rodada = _obter_variacao_rodada(jogador_proprio, stats=stats_jogador)
 
+    admin_dashboard_data = None
+    if session.get('role') == 'admin':
+        try:
+            from services.partida_service import PartidaService
+            part_svc = PartidaService()
+            clube_cod = session.get('clube_codigo', '001')
+
+            jogadores_clube = todos_jogadores_duelo or []
+            total_jog = len(jogadores_clube)
+            total_fixos = len([j for j in jogadores_clube if (j.get('categoria') or '').lower() == 'fixo'])
+            total_avulsos = len([j for j in jogadores_clube if (j.get('categoria') or '').lower() == 'avulso'])
+            total_goleiros = len([j for j in jogadores_clube if (j.get('posicao') or '').lower() == 'goleiro'])
+
+            partidas_clube = part_svc.listar_partidas(limite=100, clube_codigo=clube_cod) or []
+            total_partidas = len(partidas_clube)
+
+            top_artilheiros = jogador_stats_service.obter_ranking_artilheiros(limite=1, clube_codigo=clube_cod) or []
+            artilheiro = top_artilheiros[0] if top_artilheiros else None
+
+            top_assistencias = jogador_stats_service.obter_ranking_assistencias(limite=1, clube_codigo=clube_cod) or []
+            garcom = top_assistencias[0] if top_assistencias else None
+
+            presenca_aberta = False
+            presenca_confirmados = 0
+            if presenca_resumo:
+                presenca_aberta = presenca_resumo.get('status_lista') == 'aberta' or bool(presenca_resumo.get('aberta', False))
+                conf_val = presenca_resumo.get('total_confirmados')
+                if conf_val is None:
+                    conf_val = len(presenca_resumo.get('confirmados', [])) if isinstance(presenca_resumo.get('confirmados'), list) else 0
+                presenca_confirmados = int(conf_val or 0)
+
+            admin_dashboard_data = {
+                'total_jogadores': total_jog,
+                'total_fixos': total_fixos,
+                'total_avulsos': total_avulsos,
+                'total_goleiros': total_goleiros,
+                'total_partidas': total_partidas,
+                'artilheiro': artilheiro,
+                'garcom': garcom,
+                'presenca_aberta': presenca_aberta,
+                'presenca_confirmados': presenca_confirmados
+            }
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning(f"Erro ao montar admin_dashboard_data: {e}")
+
     return render_template(
         'perfil.html',
         usuario=_usuario_logado(),
@@ -1108,6 +1182,7 @@ def perfil_page():
         mensagens_lidas=mensagens_lidas,
         tem_mensagens_nao_lidas=tem_mensagens_nao_lidas,
         variacao_rodada=variacao_rodada,
+        admin_dashboard_data=admin_dashboard_data,
         is_self=True
     )
 
@@ -1384,14 +1459,17 @@ def editar_perfil_page():
     """Página dedicada de edição de perfil, dados pessoais e gestão de clubes"""
     from services.clube_service import ClubeService
     user_id = session.get('user_id')
-    meus_clubes = ClubeService.obter_clubes_do_usuario(user_id)
+    user = _usuario_logado()
+    is_admin = (session.get('role') == 'admin') or (user and user.get('role') == 'admin')
+    meus_clubes = [] if is_admin else ClubeService.obter_clubes_do_usuario(user_id)
     clube_atual_codigo = session.get('clube_codigo') or '001'
 
     return render_template(
         'editar_perfil.html',
-        usuario=_usuario_logado(),
+        usuario=user,
         meus_clubes=meus_clubes,
-        clube_atual_codigo=clube_atual_codigo
+        clube_atual_codigo=clube_atual_codigo,
+        is_admin=is_admin
     )
 
 
