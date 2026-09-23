@@ -256,7 +256,7 @@
                     </div>
 
                     <script id="ranking-data-{{ sorteio.id }}" type="application/json">{{ sorteio.ranking_top10 | tojson }}</script>
-                    <script id="sorteio-meta-{{ sorteio.id }}" type="application/json">{"id": {{ sorteio.id | tojson }}, "resultado_resumo": {{ (sorteio.resultado_resumo or []) | tojson }}, "times": {{ (sorteio.times or []) | tojson }}, "resultado_partida": {{ (sorteio.resultado_partida or {}) | tojson }}}</script>
+                    <script id="sorteio-meta-{{ sorteio.id }}" type="application/json">{"id": {{ sorteio.id | tojson }}, "num_times": {{ (sorteio.num_times or (sorteio.times|length) or 2) | tojson }}, "resultado_resumo": {{ (sorteio.resultado_resumo or []) | tojson }}, "times": {{ (sorteio.times or []) | tojson }}, "resultado_partida": {{ (sorteio.resultado_partida or {}) | tojson }}}</script>
                 </details>
                 {% endfor %}
 
@@ -655,7 +655,7 @@
         </div>
 
         <!-- Lista de Times Dinâmica -->
-        <div id="listaTimesEdicao" style="display: flex; flex-direction: column; gap: 0.65rem; max-height: 320px; overflow-y: auto; padding-right: 0.25rem; margin-bottom: 1.5rem;">
+        <div id="listaTimesEdicao" style="display: flex; flex-direction: column; gap: 0.65rem; max-height: 320px; overflow-y: auto; padding-right: 0.25rem; margin-bottom: 1.25rem;">
             <!-- Renderizado via JavaScript -->
         </div>
 
@@ -676,10 +676,9 @@ function abrirModalEditarResultado(sorteioId) {
     currentEdicaoSorteioId = sorteioId;
     const modal = document.getElementById('modalEditarResultadoPartida');
     const title = document.getElementById('modalEditarResultadoTitle');
-    const container = document.getElementById('listaTimesEdicao');
     const metaScript = document.getElementById('sorteio-meta-' + sorteioId);
 
-    if (!modal || !container) return;
+    if (!modal) return;
 
     let meta = null;
     if (metaScript) {
@@ -696,23 +695,87 @@ function abrirModalEditarResultado(sorteioId) {
 
     let resumo = (meta && meta.resultado_resumo) ? meta.resultado_resumo : [];
     let timesList = (meta && meta.times) ? meta.times : [];
-    let numTimes = Math.max(resumo.length, timesList.length, 2);
+    let resPartida = (meta && meta.resultado_partida) ? meta.resultado_partida : {};
+    let desemp = (resPartida && resPartida.times_desempenho) ? resPartida.times_desempenho : [];
+    let golsList = (resPartida && resPartida.gols_times) ? resPartida.gols_times : [];
+    let metaNumTimes = meta && meta.num_times ? Number(meta.num_times) : 0;
+
+    // Inspecionar os elementos do placar da rodada no DOM para garantir detecção fiel de 2, 3 ou 4 times
+    const sorteioCard = document.getElementById('sorteio-' + sorteioId);
+    let domTeams = [];
+    if (sorteioCard) {
+        const gridItems = sorteioCard.querySelectorAll('.scoreboard-grid-item');
+        if (gridItems && gridItems.length > 0) {
+            gridItems.forEach(item => {
+                const teamNameEl = item.querySelector('.grid-item-team');
+                const scoreEl = item.querySelector('.grid-item-score');
+                const recordEl = item.querySelector('.grid-item-record');
+                let tNum = null;
+                if (teamNameEl) {
+                    const match = teamNameEl.textContent.match(/\d+/);
+                    if (match) tNum = parseInt(match[0], 10);
+                }
+                let vits = 0;
+                if (scoreEl) {
+                    const matchV = scoreEl.textContent.match(/\d+/);
+                    if (matchV) vits = parseInt(matchV[0], 10);
+                }
+                let gols = 0, derrotas = 0, empates = 0;
+                if (recordEl) {
+                    const m = recordEl.textContent.match(/(\d+)G\s*-\s*(\d+)D\s*-\s*(\d+)E/);
+                    if (m) {
+                        gols = parseInt(m[1], 10);
+                        derrotas = parseInt(m[2], 10);
+                        empates = parseInt(m[3], 10);
+                    }
+                }
+                if (tNum) {
+                    domTeams.push({
+                        time_numero: tNum,
+                        vitorias: vits,
+                        gols: gols,
+                        derrotas: derrotas,
+                        empates: empates
+                    });
+                }
+            });
+        }
+    }
+
+    let numTimes = Math.max(
+        resumo.length,
+        timesList.length,
+        desemp.length,
+        golsList.length,
+        metaNumTimes,
+        domTeams.length,
+        2
+    );
+    resumo.forEach(r => { if (Number(r.time_numero) > numTimes) numTimes = Number(r.time_numero); });
+    desemp.forEach(d => { if (Number(d.time_numero) > numTimes) numTimes = Number(d.time_numero); });
+    timesList.forEach(t => { if (Number(t.numero) > numTimes) numTimes = Number(t.numero); });
+    domTeams.forEach(dt => { if (Number(dt.time_numero) > numTimes) numTimes = Number(dt.time_numero); });
+    numTimes = Math.min(Math.max(numTimes, 2), 4);
 
     currentEdicaoTimes = [];
 
     for (let i = 1; i <= numTimes; i++) {
         let itemResumo = resumo.find(r => Number(r.time_numero) === i);
-        let vitorias = itemResumo && itemResumo.desempenho ? (itemResumo.desempenho.vitorias || 0) : 0;
-        let empates = itemResumo && itemResumo.desempenho ? (itemResumo.desempenho.empates || 0) : 0;
-        let derrotas = itemResumo && itemResumo.desempenho ? (itemResumo.desempenho.derrotas || 0) : 0;
-        let gols = itemResumo ? (itemResumo.gols || 0) : 0;
+        let itemDesemp = desemp.find(d => Number(d.time_numero) === i);
+        let itemDom = domTeams.find(dt => Number(dt.time_numero) === i);
+        let desData = (itemResumo && itemResumo.desempenho) ? itemResumo.desempenho : (itemDesemp || (itemDom ? { vitorias: itemDom.vitorias, empates: itemDom.empates, derrotas: itemDom.derrotas } : {}));
+
+        let vitorias = Number(desData.vitorias !== undefined ? desData.vitorias : (itemDom ? itemDom.vitorias : 0));
+        let empates = Number(desData.empates !== undefined ? desData.empates : (itemDom ? itemDom.empates : 0));
+        let derrotas = Number(desData.derrotas !== undefined ? desData.derrotas : (itemDom ? itemDom.derrotas : 0));
+        let gols = Number(itemResumo ? itemResumo.gols : (golsList[i - 1] !== undefined ? golsList[i - 1] : (itemDom ? itemDom.gols : 0)));
 
         currentEdicaoTimes.push({
             time_numero: i,
-            vitorias: Number(vitorias),
-            empates: Number(empates),
-            derrotas: Number(derrotas),
-            gols: Number(gols)
+            vitorias: vitorias,
+            empates: empates,
+            derrotas: derrotas,
+            gols: gols
         });
     }
 

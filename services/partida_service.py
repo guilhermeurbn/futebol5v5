@@ -104,7 +104,15 @@ class PartidaService:
     def obter_partidas_sorteio(self, sorteio_id: int) -> List[Dict]:
         """Obtém todas as partidas de um sorteio"""
         partidas = self._carregar_raw()
-        return [p for p in partidas if p.get('sorteio_id') == sorteio_id]
+        try:
+            s_id_int = int(sorteio_id)
+        except (ValueError, TypeError):
+            s_id_int = None
+        return [
+            p for p in partidas
+            if (s_id_int is not None and int(p.get('sorteio_id', 0) or 0) == s_id_int)
+            or str(p.get('sorteio_id')) == str(sorteio_id)
+        ]
 
     def atualizar_foto_campeao(self, sorteio_id: int, card_campeao_url: str) -> Dict:
         """Atualiza a foto/card do time campeão de um sorteio existente ou cria registro."""
@@ -154,17 +162,23 @@ class PartidaService:
     def editar_resultado_partida(self, sorteio_id: int, times_desempenho: List[Dict]) -> Dict:
         """
         Edita os resultados de desempenho (vitórias, empates, derrotas, gols) dos times
-        de um sorteio existente e recalcula o time vencedor.
+        de um sorteio existente e recalcula o time vencedor. Suporta dinamicamente de 2 a 4 times.
         """
         partidas = self._carregar_raw()
-        sorteio_id_int = int(sorteio_id)
+        try:
+            sorteio_id_int = int(sorteio_id)
+        except (ValueError, TypeError):
+            sorteio_id_int = None
+
         existente = next(
-            (p for p in partidas if int(p.get("sorteio_id", 0) or 0) == sorteio_id_int or int(p.get("id", 0) or 0) == sorteio_id_int),
+            (
+                p for p in partidas
+                if (sorteio_id_int is not None and int(p.get("sorteio_id", 0) or 0) == sorteio_id_int)
+                or (sorteio_id_int is not None and int(p.get("id", 0) or 0) == sorteio_id_int)
+                or str(p.get("sorteio_id")) == str(sorteio_id)
+            ),
             None
         )
-
-        if not existente:
-            raise ValueError(f"Partida para sorteio {sorteio_id} não encontrada.")
 
         desempenho_formatado = []
         for item in times_desempenho:
@@ -175,6 +189,7 @@ class PartidaService:
                 "derrotas": int(item.get("derrotas", 0) or 0),
                 "gols": int(item.get("gols", 0) or 0),
             })
+        desempenho_formatado.sort(key=lambda x: x["time_numero"])
 
         maiores_vitorias = max((item["vitorias"] for item in desempenho_formatado), default=0)
         lideres = [
@@ -185,10 +200,24 @@ class PartidaService:
         time_vencedor = lideres[0] if len(lideres) == 1 else None
         gols_times = [item["gols"] for item in desempenho_formatado]
 
-        existente["times_desempenho"] = desempenho_formatado
-        existente["time_vencedor"] = time_vencedor
-        existente["gols_times"] = gols_times
-        existente["atualizado_em"] = datetime.now().isoformat()
+        if not existente:
+            novo_id = max([int(p.get("id", 0) or 0) for p in partidas], default=0) + 1
+            existente = {
+                "id": novo_id,
+                "sorteio_id": sorteio_id_int if sorteio_id_int is not None else sorteio_id,
+                "data": datetime.now().isoformat(),
+                "time_vencedor": time_vencedor,
+                "gols_times": gols_times,
+                "notas": "",
+                "times_desempenho": desempenho_formatado,
+                "jogadores_detalhes": []
+            }
+            partidas.append(existente)
+        else:
+            existente["times_desempenho"] = desempenho_formatado
+            existente["time_vencedor"] = time_vencedor
+            existente["gols_times"] = gols_times
+            existente["atualizado_em"] = datetime.now().isoformat()
 
         self._salvar(partidas)
         return existente

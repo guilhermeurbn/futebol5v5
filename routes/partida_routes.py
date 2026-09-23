@@ -344,9 +344,49 @@ def _enriquecer_sorteio_historico(sorteio):
                 media_geral = round(sum(todas_notas) / len(todas_notas), 2)
 
     resultado_resumo = []
-    if resultado_partida:
-        desempenho_times = resultado_partida.get('times_desempenho') or []
-        for idx, gols in enumerate(resultado_partida.get('gols_times', []) or [], start=1):
+    times_sorteio = item.get('times') or []
+    desempenho_times = (resultado_partida or {}).get('times_desempenho') or []
+    gols_times_list = (resultado_partida or {}).get('gols_times') or []
+
+    numeros_encontrados = set()
+    for t in times_sorteio:
+        if isinstance(t, dict) and t.get('numero'):
+            try:
+                numeros_encontrados.add(int(t['numero']))
+            except (ValueError, TypeError):
+                pass
+    for d in desempenho_times:
+        if isinstance(d, dict) and d.get('time_numero'):
+            try:
+                numeros_encontrados.add(int(d['time_numero']))
+            except (ValueError, TypeError):
+                pass
+    for part in (partida_votacao or {}).get('participantes', []) or []:
+        if isinstance(part, dict) and part.get('time_numero'):
+            try:
+                numeros_encontrados.add(int(part['time_numero']))
+            except (ValueError, TypeError):
+                pass
+    for det in (resultado_partida or {}).get('jogadores_detalhes', []) or []:
+        if isinstance(det, dict) and det.get('time_numero'):
+            try:
+                numeros_encontrados.add(int(det['time_numero']))
+            except (ValueError, TypeError):
+                pass
+
+    total_times = max(
+        len(times_sorteio),
+        len(desempenho_times),
+        len(gols_times_list),
+        max(numeros_encontrados, default=0),
+        int(item.get('num_times', 0) or 0),
+        2
+    )
+    total_times = min(max(total_times, 2), 4)
+
+    if resultado_partida or times_sorteio:
+        for idx in range(1, total_times + 1):
+            gols = gols_times_list[idx - 1] if idx - 1 < len(gols_times_list) else 0
             desempenho = next(
                 (item_desempenho for item_desempenho in desempenho_times if int(item_desempenho.get('time_numero', 0) or 0) == idx),
                 None,
@@ -528,6 +568,27 @@ def editar_resultado_sorteio(sorteio_id):
             return redirect(url_for('partida.historico', erro='Dados dos times inválidos.'))
 
         partida = partida_service.editar_resultado_partida(sorteio_id, times_data)
+
+        # Sincronizar sorteio no historico_service para adaptar a 2, 3 ou 4 times
+        try:
+            sorteio_existente = historico_service.obter_sorteio(sorteio_id)
+            if sorteio_existente:
+                sorteio_times = sorteio_existente.get('times') or []
+                times_atualizados = []
+                for item in times_data:
+                    t_num = int(item.get('time_numero', 0))
+                    time_existente = next((t for t in sorteio_times if int(t.get('numero', 0) or 0) == t_num), None)
+                    if time_existente:
+                        times_atualizados.append(time_existente)
+                    else:
+                        times_atualizados.append({
+                            "numero": t_num,
+                            "jogadores": [],
+                            "soma": 0
+                        })
+                historico_service.atualizar_times_sorteio(sorteio_id, times_atualizados)
+        except Exception as err_sync:
+            logger.warning(f"Erro ao sincronizar times no sorteio #{sorteio_id}: {err_sync}")
 
         # Atualizar no VotacaoService se houver rodada de votação associada
         votacao_svc = VotacaoService()

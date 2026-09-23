@@ -177,3 +177,73 @@ def test_endpoint_editar_resultado_admin(monkeypatch):
         assert data['sucesso'] is True
         assert data['time_vencedor'] == 2
 
+
+def test_editar_resultado_adicionar_3_ou_4_times(monkeypatch):
+    """
+    Testa a transição de um sorteio com 2 times para 3 ou 4 times ao editar o resultado.
+    """
+    from services.partida_service import PartidaService
+    from services.historico_service import HistoricoService
+
+    sorteio_mock = {
+        "id": 9,
+        "num_times": 2,
+        "times": [
+            {"numero": 1, "jogadores": [{"nome": "J1", "nivel": 7.0}]},
+            {"numero": 2, "jogadores": [{"nome": "J2", "nivel": 7.0}]}
+        ]
+    }
+    partida_mock = {
+        "id": 5,
+        "sorteio_id": 9,
+        "time_vencedor": 1,
+        "gols_times": [2, 1],
+        "times_desempenho": [
+            {"time_numero": 1, "vitorias": 2, "empates": 0, "derrotas": 1, "gols": 2},
+            {"time_numero": 2, "vitorias": 1, "empates": 0, "derrotas": 2, "gols": 1}
+        ]
+    }
+
+    salvo_partidas = []
+    salvo_historico = []
+
+    monkeypatch.setattr(PartidaService, "_carregar_raw", lambda self: [dict(partida_mock)])
+    monkeypatch.setattr(PartidaService, "_salvar", lambda self, dados: salvo_partidas.append(dados))
+
+    monkeypatch.setattr(HistoricoService, "_carregar_raw", lambda self: [dict(sorteio_mock)])
+    monkeypatch.setattr(HistoricoService, "_salvar", lambda self, dados: salvo_historico.append(dados))
+
+    partida_svc = PartidaService()
+    hist_svc = HistoricoService()
+
+    # Admin adiciona Time 3 com 4 vitórias e Time 4 com 1 vitória
+    novos_desempenhos = [
+        {"time_numero": 1, "vitorias": 2, "empates": 0, "derrotas": 2, "gols": 2},
+        {"time_numero": 2, "vitorias": 3, "empates": 0, "derrotas": 1, "gols": 3},
+        {"time_numero": 3, "vitorias": 4, "empates": 0, "derrotas": 0, "gols": 5},
+        {"time_numero": 4, "vitorias": 1, "empates": 0, "derrotas": 3, "gols": 1},
+    ]
+
+    resultado = partida_svc.editar_resultado_partida(9, novos_desempenhos)
+
+    assert resultado["time_vencedor"] == 3
+    assert len(resultado["times_desempenho"]) == 4
+    assert len(resultado["gols_times"]) == 4
+
+    # Sincronização com o sorteio no historico
+    sorteio_atual = hist_svc.obter_sorteio(9)
+    sorteio_times = sorteio_atual.get('times') or []
+    times_atualizados = []
+    for item in novos_desempenhos:
+        t_num = int(item.get('time_numero', 0))
+        time_existente = next((t for t in sorteio_times if int(t.get('numero', 0) or 0) == t_num), None)
+        if time_existente:
+            times_atualizados.append(time_existente)
+        else:
+            times_atualizados.append({"numero": t_num, "jogadores": [], "soma": 0})
+
+    sorteio_sync = hist_svc.atualizar_times_sorteio(9, times_atualizados)
+    assert sorteio_sync["num_times"] == 4
+    assert len(sorteio_sync["times"]) == 4
+
+
