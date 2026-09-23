@@ -336,7 +336,15 @@ class JogadorStatsService:
         if not time_numero:
             return "empate"
 
-        # 1. Checar gols_times (placar real da partida)
+        # 1. Checar time_vencedor explícito (definido no sorteio/partida pelo juiz ou admin)
+        time_vencedor = partida.get("time_vencedor") or (partida.get("resultado_partida") or {}).get("time_vencedor")
+        if time_vencedor is not None and int(time_vencedor) != 0:
+            if int(time_numero) == int(time_vencedor):
+                return "vitória"
+            else:
+                return "derrota"
+
+        # 2. Checar gols_times (placar real da partida)
         gols_times = partida.get("gols_times") or (partida.get("resultado_partida") or {}).get("gols_times", []) or []
         indice = int(time_numero) - 1
         if 0 <= indice < len(gols_times):
@@ -348,21 +356,7 @@ class JogadorStatsService:
                     return "vitória"
                 elif meu_placar < maior_outro:
                     return "derrota"
-                elif meu_placar == maior_outro and len(set(gols_times)) > 1:
-                    time_vencedor = partida.get("time_vencedor") or (partida.get("resultado_partida") or {}).get("time_vencedor")
-                    if time_vencedor is not None:
-                        if int(time_numero) == int(time_vencedor):
-                            return "vitória"
-                        else:
-                            return "derrota"
 
-        # 2. Checar time_vencedor explícito
-        time_vencedor = partida.get("time_vencedor") or (partida.get("resultado_partida") or {}).get("time_vencedor")
-        if time_vencedor is not None and int(time_vencedor) != 0:
-            if int(time_numero) == int(time_vencedor):
-                return "vitória"
-            else:
-                return "derrota"
 
         # 3. Checar times_desempenho
         for item in partida.get("times_desempenho", []) or []:

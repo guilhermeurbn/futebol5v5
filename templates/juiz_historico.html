@@ -114,6 +114,18 @@
 
                         {% if sorteio.resultado_resumo %}
                         <div class="history-match-scoreboard">
+                            <div class="scoreboard-admin-toolbar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; width: 100%;">
+                                <span style="font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255, 255, 255, 0.4); display: inline-flex; align-items: center; gap: 0.35rem;">
+                                    <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 12px; height: 12px;"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                                    <span>Placar da Rodada</span>
+                                </span>
+                                {% if current_user and current_user.role == 'admin' %}
+                                <button type="button" class="btn-editar-resultado-partida" onclick="abrirModalEditarResultado('{{ sorteio.id }}')" title="Editar vitórias da rodada" style="background: rgba(34, 197, 94, 0.12); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); font-size: 0.72rem; font-weight: 700; padding: 0.22rem 0.55rem; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem; transition: all 0.2s ease;">
+                                    <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width: 13px; height: 13px;"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                                    <span>Editar Vitórias</span>
+                                </button>
+                                {% endif %}
+                            </div>
                             {% if sorteio.resultado_resumo|length == 2 %}
                                 <div class="scoreboard-vs">
                                     <div class="scoreboard-team">
@@ -615,6 +627,215 @@
 })();
 </script>
 
+<!-- Modal Editar Vitórias da Rodada (Admin) -->
+<div id="modalEditarResultadoPartida" class="modal-overlay" style="display: none; position: fixed; inset: 0; z-index: 10000; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 1rem; overflow-y: auto;">
+    <div class="modal-card" style="background: #0f1015; border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 20px; max-width: 480px; width: 100%; padding: 1.5rem; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8); color: #ffffff; margin: auto;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+            <h3 id="modalEditarResultadoTitle" style="font-size: 1.1rem; font-weight: 850; margin: 0; color: #ffffff; display: flex; align-items: center; gap: 0.5rem;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                <span>Editar Vitórias da Rodada</span>
+            </h3>
+            <button type="button" onclick="fecharModalEditarResultado()" style="background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; line-height: 1;">&times;</button>
+        </div>
+
+        <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 0; margin-bottom: 1.15rem; line-height: 1.4;">
+            Ajuste o número de vitórias de cada time. O time com maior número de vitórias será definido automaticamente como o <strong>Campeão da Rodada</strong> e as vitórias/derrotas serão atualizadas nos perfis de cada jogador.
+        </p>
+
+        <!-- Indicador de Campeão em Tempo Real -->
+        <div id="previewCampeaoContainer" style="background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.25); border-radius: 12px; padding: 0.65rem 1rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="font-size: 1.2rem;">🏆</span>
+                <div>
+                    <div style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; color: #86efac; font-weight: 700;">Campeão da Rodada</div>
+                    <div id="previewNomeCampeao" style="font-size: 0.92rem; font-weight: 850; color: #ffffff;">Time 1</div>
+                </div>
+            </div>
+            <span id="previewVitoriasCampeao" style="font-size: 0.8rem; color: #4ade80; font-weight: 700; background: rgba(34,197,94,0.15); padding: 0.2rem 0.6rem; border-radius: 999px;">0 vitórias</span>
+        </div>
+
+        <!-- Lista de Times Dinâmica -->
+        <div id="listaTimesEdicao" style="display: flex; flex-direction: column; gap: 0.65rem; max-height: 320px; overflow-y: auto; padding-right: 0.25rem; margin-bottom: 1.5rem;">
+            <!-- Renderizado via JavaScript -->
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+            <button type="button" onclick="fecharModalEditarResultado()" class="btn" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12); color: #cbd5e1; font-weight: 700; padding: 0.6rem 1.2rem; border-radius: 10px; cursor: pointer;">Cancelar</button>
+            <button type="button" id="btnSalvarResultadoEdicao" onclick="salvarEdicaoResultado()" class="btn btn-success" style="background: #22c55e; border: none; color: #000000; font-weight: 850; padding: 0.6rem 1.4rem; border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;">
+                <span>Salvar Alterações</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentEdicaoSorteioId = null;
+let currentEdicaoTimes = [];
+
+function abrirModalEditarResultado(sorteioId) {
+    currentEdicaoSorteioId = sorteioId;
+    const modal = document.getElementById('modalEditarResultadoPartida');
+    const title = document.getElementById('modalEditarResultadoTitle');
+    const container = document.getElementById('listaTimesEdicao');
+    const metaScript = document.getElementById('sorteio-meta-' + sorteioId);
+
+    if (!modal || !container) return;
+
+    let meta = null;
+    if (metaScript) {
+        try {
+            meta = JSON.parse(metaScript.textContent);
+        } catch(e) {
+            meta = null;
+        }
+    }
+
+    if (title) {
+        title.querySelector('span').textContent = 'Editar Vitórias - Sorteio #' + sorteioId;
+    }
+
+    let resumo = (meta && meta.resultado_resumo) ? meta.resultado_resumo : [];
+    let timesList = (meta && meta.times) ? meta.times : [];
+    let numTimes = Math.max(resumo.length, timesList.length, 2);
+
+    currentEdicaoTimes = [];
+
+    for (let i = 1; i <= numTimes; i++) {
+        let itemResumo = resumo.find(r => Number(r.time_numero) === i);
+        let vitorias = itemResumo && itemResumo.desempenho ? (itemResumo.desempenho.vitorias || 0) : 0;
+        let empates = itemResumo && itemResumo.desempenho ? (itemResumo.desempenho.empates || 0) : 0;
+        let derrotas = itemResumo && itemResumo.desempenho ? (itemResumo.desempenho.derrotas || 0) : 0;
+        let gols = itemResumo ? (itemResumo.gols || 0) : 0;
+
+        currentEdicaoTimes.push({
+            time_numero: i,
+            vitorias: Number(vitorias),
+            empates: Number(empates),
+            derrotas: Number(derrotas),
+            gols: Number(gols)
+        });
+    }
+
+    renderizarCardsEdicaoTimes();
+    atualizarPreviewCampeao();
+
+    modal.style.display = 'flex';
+}
+
+function fecharModalEditarResultado() {
+    const modal = document.getElementById('modalEditarResultadoPartida');
+    if (modal) modal.style.display = 'none';
+    currentEdicaoSorteioId = null;
+    currentEdicaoTimes = [];
+}
+
+function renderizarCardsEdicaoTimes() {
+    const container = document.getElementById('listaTimesEdicao');
+    if (!container) return;
+
+    container.innerHTML = currentEdicaoTimes.map((t, idx) => `
+        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.75rem 1rem; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;">
+            <div>
+                <div style="font-weight: 800; font-size: 0.95rem; color: #ffffff;">Time ${t.time_numero}</div>
+                <div style="font-size: 0.72rem; color: rgba(255,255,255,0.4); margin-top: 2px;">
+                    ${t.gols}G • ${t.derrotas}D • ${t.empates}E
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="font-size: 0.75rem; color: #94a3b8; font-weight: 700;">Vitórias:</span>
+                <button type="button" onclick="alterarVitoriasTime(${idx}, -1)" style="width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #ffffff; font-weight: 800; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none;">-</button>
+                <input type="number" min="0" max="30" value="${t.vitorias}" onchange="definirVitoriasTime(${idx}, this.value)" style="width: 46px; text-align: center; font-size: 1.05rem; font-weight: 850; background: rgba(0,0,0,0.6); border: 1px solid rgba(34, 197, 94, 0.4); border-radius: 8px; color: #22c55e; padding: 0.25rem 0.1rem;">
+                <button type="button" onclick="alterarVitoriasTime(${idx}, 1)" style="width: 32px; height: 32px; border-radius: 8px; background: rgba(34,197,94,0.18); border: 1px solid rgba(34,197,94,0.35); color: #4ade80; font-weight: 800; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none;">+</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function alterarVitoriasTime(idx, delta) {
+    if (currentEdicaoTimes[idx]) {
+        currentEdicaoTimes[idx].vitorias = Math.max(0, currentEdicaoTimes[idx].vitorias + delta);
+        renderizarCardsEdicaoTimes();
+        atualizarPreviewCampeao();
+    }
+}
+
+function definirVitoriasTime(idx, val) {
+    if (currentEdicaoTimes[idx]) {
+        currentEdicaoTimes[idx].vitorias = Math.max(0, parseInt(val, 10) || 0);
+        renderizarCardsEdicaoTimes();
+        atualizarPreviewCampeao();
+    }
+}
+
+function atualizarPreviewCampeao() {
+    const nomeEl = document.getElementById('previewNomeCampeao');
+    const vitEl = document.getElementById('previewVitoriasCampeao');
+    if (!nomeEl || !vitEl || !currentEdicaoTimes.length) return;
+
+    let maxVit = Math.max(...currentEdicaoTimes.map(t => t.vitorias));
+    let lideres = currentEdicaoTimes.filter(t => maxVit > 0 && t.vitorias === maxVit);
+
+    if (lideres.length === 1) {
+        nomeEl.textContent = 'Time ' + lideres[0].time_numero;
+        nomeEl.style.color = '#22c55e';
+        vitEl.textContent = maxVit + (maxVit === 1 ? ' vitória' : ' vitórias');
+    } else if (lideres.length > 1) {
+        nomeEl.textContent = 'Empate: ' + lideres.map(l => 'Time ' + l.time_numero).join(' e ');
+        nomeEl.style.color = '#fbbf24';
+        vitEl.textContent = maxVit + ' vitórias cada';
+    } else {
+        nomeEl.textContent = 'Sem vitórias registradas';
+        nomeEl.style.color = '#94a3b8';
+        vitEl.textContent = '0 vitórias';
+    }
+}
+
+async function salvarEdicaoResultado() {
+    if (!currentEdicaoSorteioId) return;
+
+    const btnSalvar = document.getElementById('btnSalvarResultadoEdicao');
+    if (btnSalvar) {
+        btnSalvar.disabled = true;
+        btnSalvar.innerHTML = '<span>Salvando...</span>';
+    }
+
+    try {
+        const csrfTokenInput = document.querySelector('input[name="csrf_token"]');
+        const csrfToken = csrfTokenInput ? csrfTokenInput.value : '';
+        const response = await fetch('/sorteio/' + currentEdicaoSorteioId + '/editar-resultado', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                csrf_token: csrfToken,
+                times: currentEdicaoTimes
+            })
+        });
+
+        const data = await response.json();
+        if (data.sucesso) {
+            fecharModalEditarResultado();
+            window.location.reload();
+        } else {
+            alert('Erro ao salvar resultado: ' + (data.erro || 'Falha desconhecida.'));
+            if (btnSalvar) {
+                btnSalvar.disabled = false;
+                btnSalvar.innerHTML = '<span>Salvar Alterações</span>';
+            }
+        }
+    } catch(err) {
+        alert('Erro de conexão ao salvar: ' + err.message);
+        if (btnSalvar) {
+            btnSalvar.disabled = false;
+            btnSalvar.innerHTML = '<span>Salvar Alterações</span>';
+        }
+    }
+}
+</script>
+
 <!-- Modal Trocar Foto (Admin) -->
 <div id="modalTrocarFoto" class="modal-overlay" style="display: none; position: fixed; inset: 0; z-index: 10000; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 1rem; overflow-y: auto;">
     <div class="modal-card" style="background: #0f1015; border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 20px; max-width: 480px; width: 100%; padding: 1.5rem; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8); color: #ffffff; margin: auto;">
@@ -1107,14 +1328,14 @@ function gerarCardCampeaoComFrame(userImg, sorteioMeta) {
             }
 
         } else {
-            // --- CASO COM VENCEDOR (CAMPEÃO • TIME X) ---
+            // --- CASO COM VENCEDOR (TIME CAMPEÃO) ---
             ctx.save();
             ctx.textAlign = 'center';
             ctx.font = '900 32px system-ui, -apple-system, sans-serif';
             ctx.fillStyle = '#ffffff';
             ctx.shadowColor = 'rgba(0,0,0,0.9)';
             ctx.shadowBlur = 10;
-            ctx.fillText(`CAMPEÃO  •  TIME ${winTeamNum}`, width / 2, infoY + 44);
+            ctx.fillText('TIME CAMPEÃO', width / 2, infoY + 44);
             ctx.restore();
 
             // Linha Divisória

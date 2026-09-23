@@ -150,3 +150,46 @@ class PartidaService:
             self._salvar(filtradas)
             return True
         return False
+
+    def editar_resultado_partida(self, sorteio_id: int, times_desempenho: List[Dict]) -> Dict:
+        """
+        Edita os resultados de desempenho (vitórias, empates, derrotas, gols) dos times
+        de um sorteio existente e recalcula o time vencedor.
+        """
+        partidas = self._carregar_raw()
+        sorteio_id_int = int(sorteio_id)
+        existente = next(
+            (p for p in partidas if int(p.get("sorteio_id", 0) or 0) == sorteio_id_int or int(p.get("id", 0) or 0) == sorteio_id_int),
+            None
+        )
+
+        if not existente:
+            raise ValueError(f"Partida para sorteio {sorteio_id} não encontrada.")
+
+        desempenho_formatado = []
+        for item in times_desempenho:
+            desempenho_formatado.append({
+                "time_numero": int(item.get("time_numero", 0)),
+                "vitorias": int(item.get("vitorias", 0) or 0),
+                "empates": int(item.get("empates", 0) or 0),
+                "derrotas": int(item.get("derrotas", 0) or 0),
+                "gols": int(item.get("gols", 0) or 0),
+            })
+
+        maiores_vitorias = max((item["vitorias"] for item in desempenho_formatado), default=0)
+        lideres = [
+            item["time_numero"]
+            for item in desempenho_formatado
+            if maiores_vitorias > 0 and item["vitorias"] == maiores_vitorias
+        ]
+        time_vencedor = lideres[0] if len(lideres) == 1 else None
+        gols_times = [item["gols"] for item in desempenho_formatado]
+
+        existente["times_desempenho"] = desempenho_formatado
+        existente["time_vencedor"] = time_vencedor
+        existente["gols_times"] = gols_times
+        existente["atualizado_em"] = datetime.now().isoformat()
+
+        self._salvar(partidas)
+        return existente
+

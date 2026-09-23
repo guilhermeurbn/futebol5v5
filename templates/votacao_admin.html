@@ -1299,14 +1299,14 @@
                     ctx.stroke();
                     ctx.restore();
                 } else {
-                    // --- CASO COM VENCEDOR (CAMPEÃO • TIME X) ---
+                    // --- CASO COM VENCEDOR (TIME CAMPEÃO) ---
                     ctx.save();
                     ctx.textAlign = 'center';
                     ctx.font = '900 32px system-ui, -apple-system, sans-serif';
                     ctx.fillStyle = '#ffffff';
                     ctx.shadowColor = 'rgba(0,0,0,0.9)';
                     ctx.shadowBlur = 10;
-                    ctx.fillText(`CAMPEÃO  •  TIME ${winInfo.numero}`, width / 2, infoY + 44);
+                    ctx.fillText('TIME CAMPEÃO', width / 2, infoY + 44);
                     ctx.restore();
 
                     // Linha Divisória

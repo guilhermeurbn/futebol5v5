@@ -496,6 +496,76 @@ def deletar_sorteio_historico(sorteio_id):
         return redirect(url_for('partida.historico', erro='Erro ao excluir sorteio'))
 
 
+@partida_bp.route('/sorteio/<int:sorteio_id>/editar-resultado', methods=['POST'])
+@admin_required
+def editar_resultado_sorteio(sorteio_id):
+    """
+    Permite que o Administrador edite os números de vitórias, empates, derrotas e gols
+    de cada time de uma partida encerrada. Recalcula automaticamente o time vencedor,
+    atualiza o histórico e sincroniza as estatísticas de vitórias/derrotas nos perfis dos jogadores.
+    """
+    try:
+        from services.votacao_service import VotacaoService
+        from services.jogador_stats_service import JogadorStatsService
+        from services.db import clear_db_cache
+        from services.jogador_service import sincronizar_dados_e_partidas
+
+        payload = request.get_json(silent=True) or {}
+        times_data = payload.get('times')
+
+        if not times_data and request.form:
+            times_raw = request.form.get('times_json')
+            if times_raw:
+                import json
+                try:
+                    times_data = json.loads(times_raw)
+                except Exception:
+                    times_data = None
+
+        if not times_data or not isinstance(times_data, list):
+            if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({'sucesso': False, 'erro': 'Dados dos times inválidos ou ausentes.'}), 400
+            return redirect(url_for('partida.historico', erro='Dados dos times inválidos.'))
+
+        partida = partida_service.editar_resultado_partida(sorteio_id, times_data)
+
+        # Atualizar no VotacaoService se houver rodada de votação associada
+        votacao_svc = VotacaoService()
+        partida_votacao = votacao_svc.obter_por_sorteio(sorteio_id)
+        if partida_votacao:
+            dados = votacao_svc._carregar()
+            alvo = votacao_svc._find_partida_em_dados(dados, partida_votacao['id'])
+            if alvo:
+                alvo['resultado_partida'] = partida
+                votacao_svc._salvar(dados)
+
+        clear_db_cache()
+        JogadorStatsService.invalidar_cache_stats()
+
+        try:
+            sincronizar_dados_e_partidas()
+        except Exception:
+            pass
+
+        time_vencedor = partida.get('time_vencedor')
+        msg = f"Resultado atualizado com sucesso! Novo campeão: Time {time_vencedor if time_vencedor else 'Empate'}."
+
+        if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({
+                'sucesso': True,
+                'mensagem': msg,
+                'time_vencedor': time_vencedor,
+                'times_desempenho': partida.get('times_desempenho', [])
+            })
+
+        return redirect(url_for('partida.historico', sucesso=msg))
+    except Exception as exc:
+        logger.error(f"Erro ao editar resultado do sorteio #{sorteio_id}: {str(exc)}", exc_info=True)
+        if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'sucesso': False, 'erro': f'Erro ao editar resultado: {str(exc)}'}), 500
+        return redirect(url_for('partida.historico', erro=f'Erro ao editar resultado: {str(exc)}'))
+
+
 @partida_bp.route('/sorteio/<int:sorteio_id>/trocar-foto', methods=['POST'])
 @admin_or_juiz_required
 def trocar_foto_sorteio(sorteio_id):
