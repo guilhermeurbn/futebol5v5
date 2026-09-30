@@ -384,7 +384,8 @@ def api_export_sorteio_data():
         data = request.get_json(silent=True) or {}
         if not data:
             return jsonify({'sucesso': False, 'erro': 'Corpo JSON invalido'}), 400
-        session['ultimo_sorteio'] = data
+        from routes.partida_routes import _compactar_sorteio_para_sessao
+        session['ultimo_sorteio'] = _compactar_sorteio_para_sessao(data)
         session.modified = True
         return jsonify({'sucesso': True, 'mensagem': 'Sorteio armazenado para exportação'})
     except Exception as e:

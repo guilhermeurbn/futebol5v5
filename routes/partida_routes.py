@@ -198,8 +198,40 @@ def _montar_sorteio_exportacao(sorteio_id, times, somas, diferenca, melhor_time,
     }
 
 
+def _compactar_sorteio_para_sessao(payload):
+    if not isinstance(payload, dict):
+        return payload
+    times_compactos = []
+    for t in payload.get('times', []):
+        jogs = []
+        for j in t.get('jogadores', []):
+            if isinstance(j, dict):
+                jogs.append({
+                    'id': j.get('id'),
+                    'nome': j.get('nome'),
+                    'posicao': j.get('posicao'),
+                    'nivel': j.get('nivel')
+                })
+            else:
+                jogs.append(j)
+        times_compactos.append({
+            'jogadores': jogs,
+            'media': t.get('media', 0),
+            'soma': t.get('soma', 0)
+        })
+    return {
+        'sorteio_id': payload.get('sorteio_id'),
+        'total_jogadores': payload.get('total_jogadores'),
+        'somas': payload.get('somas', []),
+        'diferenca': payload.get('diferenca', 0),
+        'qualidade': payload.get('qualidade', 0),
+        'melhor_time': payload.get('melhor_time'),
+        'times': times_compactos
+    }
+
+
 def _salvar_ultimo_sorteio_sessao(payload):
-    session['ultimo_sorteio'] = payload
+    session['ultimo_sorteio'] = _compactar_sorteio_para_sessao(payload)
     session.modified = True
 
 
